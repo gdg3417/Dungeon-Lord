@@ -127,3 +127,11 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .content-card { min-width: 180px; max-width: 260px; flex-direction: column; align-items: flex-start; white-space: normal; }
 .content-card-icon { width: 48px; height: 48px; -unity-background-scale-mode: scale-to-fit; }
 .content-card Label { white-space: normal; }
+.placing-content .bottom-chrome { height: 50%; max-height: 54%; }
+.landscape.placing-content .bottom-chrome { height: 58%; max-height: 58%; }
+.placing-content .context-details { flex-grow: 1; flex-shrink: 1; min-height: 0; }
+#contentPlacementActions { flex-shrink: 0; flex-wrap: nowrap; }
+#contentPlacementActions > Button { flex-grow: 1; min-width: 0; }
+#contentBrowserSelector { flex-shrink: 0; }
+#contentBrowserSelector > Button { flex-grow: 1; }
+.content-card { flex-shrink: 0; }

@@ -47,6 +47,15 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator RoomContentReassignmentAndConstruction()
         { yield return Invoke("RoomContentExplicitReassignmentWithConstructionAndInspectionReuse"); }
         [UnityTest]
+        public IEnumerator RoomContentUatBrowserAndTargets()
+        { yield return Invoke("RoomContentUatBrowserIdentityAndDirectTargetSwitch"); }
+        [UnityTest]
+        public IEnumerator RoomContentUatGridAndInvalidFootprints()
+        { yield return Invoke("RoomContentUatGridAndMulticellInvalidTransitions"); }
+        [UnityTest]
+        public IEnumerator RoomContentUatMeasuredPlacementLayout()
+        { yield return Invoke("RoomContentUatPlacementGeometryAndLocalizedFeedback"); }
+        [UnityTest]
         public IEnumerator CompositionNormalInspectionFocusRailCollapse()
         { yield return Invoke("CompositionNormalInspectionFocusRailAndCollapseAreReadOnly"); }
         [UnityTest]

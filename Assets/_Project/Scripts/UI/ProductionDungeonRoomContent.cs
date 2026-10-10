@@ -13,10 +13,16 @@ namespace DungeonBuilder.M0
         private string reassigning;
         private DungeonDraftRoomContent contentIntent;
         private DungeonDraftContentPreview contentPreview;
+        private bool contentBrowserOwned;
+        public bool ContentBrowserOwned => contentBrowserOwned;
         public DungeonDraftContentPreview ContentPreview => contentPreview;
         public bool IsPlacingContent => IsEditing && contentIntent != null;
         public string ContentCategory => contentCategory;
         private string ContextRoomId => selectedRoomId ?? selected?.RoomInstanceId;
+        private string ContentHeadingKey => reassigning != null || contentIntent?.Operation == DungeonDraftContentOperation.Reassign ?
+            "ui.dungeon.content.reassign" : contentIntent?.Operation == DungeonDraftContentOperation.Reposition ? "ui.dungeon.move" :
+            contentCategory == MvpDungeonPlacementIds.MonsterCategoryId ? "ui.dungeon.content.add_monster" :
+            contentCategory == MvpDungeonPlacementIds.TrapCategoryId ? "ui.dungeon.content.add_trap" : "ui.dungeon.content.add_loot";
 
         private void InitializeRoomContent()
         {
@@ -27,9 +33,24 @@ namespace DungeonBuilder.M0
             Button("cancelContent", CancelContentPlacement);
             Button("unassignContent", () => UnassignSelectedContent());
             Button("reassignContent", BeginContentReassignment);
+            Button("newContent", () => SelectContentBrowser(false));
+            Button("ownedContent", () => SelectContentBrowser(true));
         }
         private void ClearContentSelection()
-        { contentCategory = null; reassigning = null; contentIntent = null; contentPreview = null; }
+        { contentCategory = null; reassigning = null; contentIntent = null; contentPreview = null; contentBrowserOwned = false; world?.ClearRoomPlacementGrid(); }
+
+        public bool SelectContentBrowser(bool owned)
+        {
+            if (!IsEditing || contentCategory == null || ContextRoomId == null) return false;
+            contentBrowserOwned = owned; contentIntent = null; contentPreview = null; reassigning = null;
+            world.ClearPreview(); world.SelectRoomFootprint(ContextRoomId);
+            feedback = null; Present(); return true;
+        }
+        private void PrepareContentPositioning()
+        {
+            contentPreview = null; world.ClearPreview(); world.SelectRoomFootprint(ContextRoomId);
+            world.PresentRoomPlacementGrid(ContextRoomId);
+        }
 
         public bool OpenContentCategory(string category)
         {
@@ -48,20 +69,21 @@ namespace DungeonBuilder.M0
             if (!IsEditing || contentCategory == null || ContextRoomId == null || !root.SaveService.TryContentAcquisitionCost(contentCategory, option, out _)) return false;
             contentIntent = draftContext.ContentIntent(DungeonDraftContentOperation.Acquire, selectedFloor, ContextRoomId,
                 categoryId: contentCategory, optionId: option);
-            contentPreview = null; feedback = "ui.dungeon.content.position_hint"; Present(); return true;
+            contentBrowserOwned = false; PrepareContentPositioning(); feedback = "ui.dungeon.content.position_hint"; Present(); return true;
         }
         public bool SelectReturnedContent(string id)
         {
             if (!IsEditing || contentCategory == null || ContextRoomId == null ||
                 !draft.ReadModel.LifecycleAndOwnership.ReturnedContents.Any(a => a.AssignmentId == id && a.CategoryId == contentCategory)) return false;
             contentIntent = draftContext.ContentIntent(DungeonDraftContentOperation.Redeploy, selectedFloor, ContextRoomId, id);
-            contentPreview = null; feedback = "ui.dungeon.content.position_hint"; Present(); return true;
+            contentBrowserOwned = true; PrepareContentPositioning(); feedback = "ui.dungeon.content.position_hint"; Present(); return true;
         }
         private void BeginContentReposition()
         {
             string room = selected.RoomInstanceId, category = selected.CategoryId, id = selected.AssignmentId;
             OpenContentCategory(category);
             contentIntent = draftContext.ContentIntent(DungeonDraftContentOperation.Reposition, selectedFloor, room, id);
+            PrepareContentPositioning();
             feedback = "ui.dungeon.content.position_hint"; Present();
         }
         public void BeginContentReassignment()
@@ -79,14 +101,27 @@ namespace DungeonBuilder.M0
             if (selectedFloor != floorId) SelectFloor(floorId);
             selectedRoomId = roomId; selected = null; selectedEdgeId = null; contentCategory = category; reassigning = null;
             contentIntent = draftContext.ContentIntent(DungeonDraftContentOperation.Reassign, floorId, roomId, id);
-            contentPreview = null; detailsCollapsed = false; OpenSheet(); world.SelectRoomFootprint(roomId);
+            detailsCollapsed = false; OpenSheet(); PrepareContentPositioning();
             feedback = "ui.dungeon.content.position_hint"; Present(); return true;
         }
         private void PreviewRoomContent(TileCoordinate cell)
         {
+            // New/returned choices may retarget freely; existing assignments require explicit Reassign.
+            if (contentIntent.Operation == DungeonDraftContentOperation.Acquire || contentIntent.Operation == DungeonDraftContentOperation.Redeploy)
+            {
+                string target = world.SelectContentRoom(cell);
+                if (target != null && target != contentIntent.RoomInstanceId)
+                {
+                    selectedRoomId = target; contentIntent.RoomInstanceId = target;
+                    PrepareContentPositioning(); OpenSheet();
+                }
+            }
             if (!world.TryRoomLocal(contentIntent.RoomInstanceId, cell, out var local))
             {
                 contentPreview = new DungeonDraftContentPreview { Reason = DetachedCanonicalSpatialMutation.PositionInvalidReason };
+                world.ClearPreview();
+                world.SelectRoomFootprint(contentIntent.RoomInstanceId);
+                world.PresentRoomPlacementGrid(contentIntent.RoomInstanceId);
                 world.Preview(cell, false);
             }
             else
@@ -128,6 +163,7 @@ namespace DungeonBuilder.M0
             var intent = draftContext.ContentIntent(DungeonDraftContentOperation.Unassign, selectedFloor, assignmentId: selected.AssignmentId);
             if (!draft.ChangeContent(intent)) { feedback = draft.Reason; Present(); return false; }
             RebuildFloor(false); selected = null; selectedRoomId = room; OpenContentCategory(category);
+            contentBrowserOwned = true;
             feedback = "ui.dungeon.content.returned"; Present(); return true;
         }
         private string ContentName(string option) => MvpDungeonPlacementPresenter.ResolveOptionName(option, (key, fallback) => root.Content.GetString(key, fallback));
@@ -135,11 +171,17 @@ namespace DungeonBuilder.M0
         {
             var ui = document.rootVisualElement;
             bool managing = IsEditing && contentCategory != null && ContextRoomId != null;
-            ui.Q<Button>("roomsCategory").EnableInClassList("selected-floor", contentCategory == null);
-            ui.Q<Button>("monstersCategory").EnableInClassList("selected-floor", contentCategory == MvpDungeonPlacementIds.MonsterCategoryId);
-            ui.Q<Button>("trapsCategory").EnableInClassList("selected-floor", contentCategory == MvpDungeonPlacementIds.TrapCategoryId);
-            ui.Q<Button>("lootCategory").EnableInClassList("selected-floor", contentCategory == MvpDungeonPlacementIds.LootNodeCategoryId);
+            string activeCategory = contentCategory ?? selected?.CategoryId;
+            ui.Q<Button>("roomsCategory").EnableInClassList("selected-floor", activeCategory == null);
+            ui.Q<Button>("monstersCategory").EnableInClassList("selected-floor", activeCategory == MvpDungeonPlacementIds.MonsterCategoryId);
+            ui.Q<Button>("trapsCategory").EnableInClassList("selected-floor", activeCategory == MvpDungeonPlacementIds.TrapCategoryId);
+            ui.Q<Button>("lootCategory").EnableInClassList("selected-floor", activeCategory == MvpDungeonPlacementIds.LootNodeCategoryId);
             ui.Q("roomContentPanel").style.display = managing ? DisplayStyle.Flex : DisplayStyle.None;
+            if (managing) sheet.style.display = DisplayStyle.None;
+            safe.EnableInClassList("placing-content", IsPlacingContent || reassigning != null);
+            if (managing && draft.Durability == DraftDurability.Acknowledged && draft.StructuralReason == null)
+                status.style.display = DisplayStyle.None;
+            if (managing) ui.Q<Button>("move").style.display = DisplayStyle.None;
             if (managing || selected != null && draft?.HasContentIntent == true) ui.Q("economics").style.display = DisplayStyle.None;
             ui.Q("contentPlacementActions").style.display = IsPlacingContent || reassigning != null ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("confirmContent").SetEnabled(contentPreview?.IsValid == true && draft?.Durability != DraftDurability.Unknown);
@@ -152,7 +194,15 @@ namespace DungeonBuilder.M0
             CanonicalRoomCapacityResolver.TryResolve(draftContext.Production, room.RoomDefinitionId, out var capacity, out _);
             int maximum = contentCategory == MvpDungeonPlacementIds.MonsterCategoryId ? capacity.MonsterCapacity : contentCategory == MvpDungeonPlacementIds.TrapCategoryId ? capacity.TrapCapacity : capacity.LootCapacity;
             var assignments = floor.RoomContents.Assignments.Where(a => a.RoomInstanceId == room.RoomInstanceId && a.CategoryId == contentCategory).ToArray();
-            ui.Q<Label>("contentCapacity").text = Format("ui.dungeon.content.capacity", RoomName(definition), assignments.Length, maximum);
+            string roomLabel = Format("ui.dungeon.room_selected", RoomName(definition), Array.FindIndex(floor.Layout.Rooms, r => r.RoomInstanceId == room.RoomInstanceId) + 1);
+            ui.Q<Label>("contentCapacity").text = Format("ui.dungeon.content.capacity", roomLabel, assignments.Length, maximum);
+            var returnedChoices = renderState.LifecycleAndOwnership.ReturnedContents.Where(a => a.CategoryId == contentCategory)
+                .OrderBy(a => a.Sequence).ThenBy(a => a.AssignmentId, StringComparer.Ordinal).ToArray();
+            ui.Q<Button>("newContent").text = Text("ui.dungeon.content.browser_new");
+            ui.Q<Button>("ownedContent").text = Format("ui.dungeon.content.browser_owned", returnedChoices.Length);
+            ui.Q<Button>("newContent").EnableInClassList("selected-floor", !contentBrowserOwned);
+            ui.Q<Button>("ownedContent").EnableInClassList("selected-floor", contentBrowserOwned);
+            ui.Q("contentBrowserSelector").style.display = reassigning == null && contentIntent == null ? DisplayStyle.Flex : DisplayStyle.None;
             var choices = ui.Q("contentChoices"); choices.Clear();
             void Choice(string name, string badge, string identity, string category, string option, Action action)
             {
@@ -175,18 +225,12 @@ namespace DungeonBuilder.M0
             }
             else if (contentIntent == null)
             {
-                foreach (var assignment in assignments.OrderBy(a => a.Sequence).ThenBy(a => a.AssignmentId, StringComparer.Ordinal))
-                {
-                    string id = assignment.AssignmentId;
-                    Choice(ContentName(assignment.OptionId), Format("ui.dungeon.content.assigned", assignment.RoomLocalPosition.X, assignment.RoomLocalPosition.Y), id,
-                        assignment.CategoryId, assignment.OptionId, () => { ClearContentSelection(); selectedRoomId = null; selected = assignment; OpenSheet(); world.SelectContent(selected); Present(); });
-                }
-                foreach (var returned in renderState.LifecycleAndOwnership.ReturnedContents.Where(a => a.CategoryId == contentCategory).OrderBy(a => a.Sequence).ThenBy(a => a.AssignmentId, StringComparer.Ordinal))
+                if (contentBrowserOwned) foreach (var returned in returnedChoices)
                 {
                     string id = returned.AssignmentId;
                     Choice(ContentName(returned.OptionId), Text("ui.dungeon.content.owned"), id, returned.CategoryId, returned.OptionId, () => SelectReturnedContent(id));
                 }
-                foreach (var effect in (draftContext.Configuration.MvpPlacementEffects ?? Array.Empty<MvpPlacementEffectConfig>()).Where(e => e.CategoryId == contentCategory).OrderBy(e => e.OptionId, StringComparer.Ordinal))
+                if (!contentBrowserOwned) foreach (var effect in (draftContext.Configuration.MvpPlacementEffects ?? Array.Empty<MvpPlacementEffectConfig>()).Where(e => e.CategoryId == contentCategory).OrderBy(e => e.OptionId, StringComparer.Ordinal))
                 {
                     string option = effect.OptionId;
                     if (!root.SaveService.TryContentAcquisitionCost(contentCategory, option, out double cost) || !RoomContentSpatialOccupancyAuthority.TryResolve(draftContext.Occupancy, contentCategory, option, out _)) continue;
@@ -196,13 +240,22 @@ namespace DungeonBuilder.M0
             }
             var info = ui.Q<Label>("contentPlacementInfo");
             var gate = root.DungeonDraftPurchaseEligibility();
-            info.text = contentIntent == null ? Text("ui.dungeon.content.choose") : Text(contentPreview?.Reason ?? (contentPreview == null ? "ui.dungeon.content.position_hint" : "ui.dungeon.content.preview"));
+            info.text = contentIntent == null ? Text(reassigning != null ? "ui.dungeon.content.destination_hint" :
+                contentBrowserOwned ? returnedChoices.Length == 0 ? "ui.dungeon.content.owned_empty" : "ui.dungeon.content.owned_hint" : "ui.dungeon.content.new_hint") :
+                Text(contentPreview?.Reason ?? (contentPreview == null ? "ui.dungeon.content.position_hint" : "ui.dungeon.content.preview"));
+            if (contentIntent != null)
+            {
+                string option = contentIntent.OptionId ?? contentPreview?.Assignment?.OptionId ??
+                    renderState.Floors.SelectMany(f => f.RoomContents.Assignments).FirstOrDefault(a => a.AssignmentId == contentIntent.AssignmentId)?.OptionId ??
+                    returnedChoices.FirstOrDefault(a => a.AssignmentId == contentIntent.AssignmentId)?.OptionId;
+                info.text += "\n" + Format("ui.dungeon.content.target", ContentName(option), roomLabel);
+                if (contentIntent.Operation == DungeonDraftContentOperation.Redeploy) info.text += "\n" + Text("ui.dungeon.content.owned");
+            }
             if (contentIntent?.Operation == DungeonDraftContentOperation.Acquire)
             {
                 info.text += "\n" + root.SaveService.PresentContentAcquisition(contentIntent.CategoryId, contentIntent.OptionId, root.Save, Text);
                 if (!gate.Allowed) info.text += "\n" + Text(gate.MessageKey);
             }
-            if (contentPreview?.IsValid == true) info.text += "\n" + Format("ui.dungeon.content.coordinates", contentIntent.RoomLocalPosition.X, contentIntent.RoomLocalPosition.Y);
         }
     }
 }

@@ -12,6 +12,201 @@ namespace DungeonBuilder.M0.Tests
 {
     public abstract partial class PhaseSevenA4ProductionSceneTests
     {
+        private TileCoordinate ContentCell(RoomSpatialInstance room, int x, int y)
+        {
+            var definition = GameRoot.Instance.ProductionSpatialContent.Catalog.Rooms.Single(r => r.RoomDefinitionId == room.RoomDefinitionId);
+            Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(x,y), definition.GrossFootprint, room.Anchor, room.Orientation, out var cell), Is.True);
+            return cell;
+        }
+        [UnityTest]
+        public IEnumerator RoomContentUatBrowserIdentityAndDirectTargetSwitch()
+        {
+            var root = GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess, Is.True);
+            var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
+            var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var source = floor.Layout.Rooms[0];
+            var original = floor.RoomContents.Assignments.Single();
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            controller.EnterEdit(); controller.SelectConstructionRoom("spatial.room.basic");
+            controller.TapWorld(controller.World.MoveGuidanceAnchors.First()); Assert.That(controller.ConfirmConstructionPlacement(), Is.True);
+            yield return null; yield return null;
+            var destination = controller.Draft.ReadModel.Floors[0].Layout.Rooms.Single(r => r.RoomInstanceId != source.RoomInstanceId);
+            controller.TapWorld(ContentCell(source,0,0));
+            Assert.That(ui.Q<Button>("roomsCategory").ClassListContains("selected-floor"), Is.False);
+            Assert.That(ui.Q<Button>("monstersCategory").ClassListContains("selected-floor"), Is.True);
+            var definition = root.ProductionSpatialContent.Catalog.Rooms.Single(r=>r.RoomDefinitionId==source.RoomDefinitionId);
+            var roomName = root.ProductionSpatialContent.Languages.Single(t=>t.language=="en").entries.Single(e=>e.key==definition.LocalizationKey).text;
+            Assert.That(ui.Q<Label>("inspectionInfo").text, Is.EqualTo(string.Format(root.Content.GetString("ui.dungeon.content.info",null),
+                string.Format(root.Content.GetString("ui.dungeon.room_selected",null),roomName,1))));
+            Assert.That(ui.Q<Label>("inspectionInfo").text, Does.Not.Contain("Room-local").And.Not.Contain("0, 0"));
+            Assert.That(controller.UnassignSelectedContent(), Is.True);
+            Assert.That(controller.ContentBrowserOwned, Is.True); Assert.That(controller.ContentPreview, Is.Null);
+            CollectionAssert.AreEqual(new[] {original.AssignmentId}, ui.Q("contentChoices").Query<Button>().ToList().Select(b => (string)b.userData));
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720,1280);
+            yield return RoomContentCapture("room-content-uat-owned.png");
+            Click(ui.Q<Button>("newContent"));
+            Assert.That(controller.ContentBrowserOwned, Is.False); Assert.That(controller.IsPlacingContent, Is.False);
+            Assert.That(ui.Q("contentChoices").Query<Button>().ToList().Any(b => (string)b.userData == original.AssignmentId), Is.False);
+            Assert.That(ui.Q("contentChoices").Query<Button>().ToList().Count(b => (string)b.userData == original.OptionId), Is.EqualTo(1));
+            Assert.That(ui.Q<Button>("move").style.display.value, Is.EqualTo(DisplayStyle.None));
+            yield return RoomContentCapture("room-content-uat-new.png");
+            var newIds = new System.Collections.Generic.List<string>();
+            for (int x=1;x<=2;x++)
+            {
+                controller.OpenContentCategory(original.CategoryId); Assert.That(controller.SelectNewContent(original.OptionId), Is.True);
+                controller.TapWorld(ContentCell(source,x,1)); Assert.That(controller.ContentPreview.IsValid, Is.True);
+                Assert.That(controller.ConfirmContentPlacement(), Is.True); newIds.Add(controller.SelectedContent.AssignmentId);
+            }
+            Assert.That(newIds.Distinct().Count(), Is.EqualTo(2)); Assert.That(newIds, Does.Not.Contain(original.AssignmentId));
+            controller.OpenContentCategory(original.CategoryId); Click(ui.Q<Button>("ownedContent"));
+            CollectionAssert.AreEqual(new[] {original.AssignmentId}, ui.Q("contentChoices").Query<Button>().ToList().Select(b => (string)b.userData));
+            Assert.That(controller.SelectReturnedContent(original.AssignmentId), Is.True);
+            int commands = controller.Draft.CommandCount; var quote = root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft);
+            controller.TapWorld(ContentCell(source,3,1)); Assert.That(controller.ContentPreview.IsValid, Is.False, "Full target room");
+            controller.TapWorld(ContentCell(destination,1,1));
+            Assert.That(controller.SelectedRoomInstanceId, Is.EqualTo(destination.RoomInstanceId));
+            Assert.That(controller.ContentPreview.IsValid, Is.True, controller.ContentPreview.Reason);
+            Assert.That(controller.ContentPreview.Assignment.AssignmentId, Is.EqualTo(original.AssignmentId));
+            Assert.That(ui.Q<Label>("contentCapacity").text, Does.Contain("0 / 2"));
+            Assert.That(controller.World.RoomPlacementGridTarget, Is.EqualTo(destination.RoomInstanceId));
+            Assert.That(controller.Draft.CommandCount, Is.EqualTo(commands)); AssertCanonicalUnchanged(before,mana);
+            controller.FocusRoom(); yield return RoomContentCapture("room-content-uat-target-room.png");
+            Assert.That(controller.ConfirmContentPlacement(), Is.True);
+            Assert.That(controller.SelectedContent.AssignmentId, Is.EqualTo(original.AssignmentId));
+            Assert.That(controller.SelectedContent.Sequence, Is.EqualTo(original.Sequence));
+            Assert.That(controller.Draft.ReadModel.LifecycleAndOwnership.ReturnedContents, Is.Empty);
+            var after = root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft);
+            Assert.That(after.ContentAcquisitionCost, Is.EqualTo(quote.ContentAcquisitionCost)); Assert.That(after.ContentAcquisitions, Is.EqualTo(2));
+            AssertCanonicalUnchanged(before,mana);
+            controller.TapWorld(ContentCell(source,3,2)); controller.OpenContentCategory(original.CategoryId); controller.SelectNewContent("placement.option.monster.goblin");
+            controller.TapWorld(ContentCell(destination,2,1)); Assert.That(controller.SelectedRoomInstanceId, Is.EqualTo(destination.RoomInstanceId));
+            Assert.That(controller.ContentPreview.Assignment.OptionId, Is.EqualTo("placement.option.monster.goblin"));
+            controller.TapWorld(ContentCell(source,3,2)); Assert.That(controller.SelectedRoomInstanceId, Is.EqualTo(source.RoomInstanceId));
+            Assert.That(controller.ContentPreview.IsValid, Is.False); Assert.That(controller.Draft.CommandCount, Is.EqualTo(commands+1));
+            controller.CancelContentPlacement(); controller.TapWorld(ContentCell(destination,1,1)); controller.BeginMove();
+            controller.TapWorld(ContentCell(source,3,2)); Assert.That(controller.ContentPreview.IsValid, Is.False);
+            Assert.That(controller.SelectedRoomInstanceId, Is.EqualTo(destination.RoomInstanceId), "Move cannot become implicit reassignment");
+            controller.CancelContentPlacement(); controller.TapWorld(ContentCell(destination,1,1));
+            yield return RoomContentCapture("room-content-uat-inspector.png");
+            Assert.That(controller.Discard(), Is.True); AssertCanonicalUnchanged(before,mana);
+        }
+        [UnityTest]
+        public IEnumerator RoomContentUatGridAndMulticellInvalidTransitions()
+        {
+            var root = GameRoot.Instance;
+            root.Save.completedResearch = new CompletedResearchState { ProjectIds = new[] {"ac_100"} };
+            var construction = root.SaveService.PreviewFloorConstruction(root.Save);
+            root.Save.structureRuntime.ManaReserve += construction.Profile.ConstructionMana;
+            construction = root.SaveService.PreviewFloorConstruction(root.Save);
+            Assert.That(root.SaveService.CommitFloorConstruction(root.Save,construction).IsSuccess, Is.True);
+            Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess, Is.True);
+            for(int i=0;i<12;i++) yield return null;
+            var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
+            var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var room = floor.Layout.Rooms[0];
+            var context = root.SaveService.DungeonDraftContext;
+            Assert.That(RoomContentSpatialOccupancyAuthority.TryResolve(context.Occupancy,"placement.category.trap","placement.option.trap.spike",out var rule), Is.True);
+            var offsets = rule.OccupiedTileOffsets;
+            // Inject a test-only two-cell footprint; production occupancy is untouched.
+            rule.OccupiedTileOffsets = new[] {new TileCoordinate(0,0),new TileCoordinate(1,0)};
+            try
+            {
+                controller.EnterEdit(); controller.SelectConstructionRoom("spatial.room.basic");
+                controller.TapWorld(controller.World.MoveGuidanceAnchors.First()); Assert.That(controller.ConfirmConstructionPlacement(), Is.True);
+                var otherRoom = controller.Draft.ReadModel.Floors[0].Layout.Rooms.Single(r=>r.RoomInstanceId!=room.RoomInstanceId);
+                int commands = controller.Draft.CommandCount;
+                controller.TapWorld(ContentCell(room,1,1)); controller.OpenContentCategory("placement.category.trap");
+                controller.SelectNewContent("placement.option.trap.spike"); controller.TapWorld(ContentCell(room,1,1));
+                Assert.That(controller.ContentPreview.IsValid, Is.True); Assert.That(controller.World.ConstructionPreviewTileCount, Is.EqualTo(2));
+                var grid = controller.World.transform.Find("RoomPlacementGrid").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+                var gridTile=grid.GetTile<UnityEngine.Tilemaps.Tile>(new Vector3Int(ContentCell(room,1,1).X,ContentCell(room,1,1).Y,0));
+                Assert.That(gridTile.sprite.texture.GetPixel(0,16).a,Is.EqualTo(1));
+                Assert.That(gridTile.sprite.texture.GetPixel(16,16).a,Is.Zero,"Transparent interior cannot hide content or masonry");
+                Assert.That(gridTile.color,Is.EqualTo(controller.presentationPolicy.FloorBoundaryColor));
+                int order = grid.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder;
+                int gridBudget = controller.World.GridTileCount;
+                Assert.That(order, Is.GreaterThan(controller.World.transform.Find("Rooms").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder));
+                Assert.That(order, Is.LessThan(controller.World.transform.Find("StonePerimeter").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder));
+                Assert.That(controller.World.GetComponentsInChildren<SpriteRenderer>().Where(r => r.name=="Content" || r.name=="SavedConnectionThreshold").All(r=>r.sortingOrder>order), Is.True);
+                controller.TapWorld(ContentCell(otherRoom,1,1));
+                Assert.That(controller.ContentPreview.IsValid, Is.True); Assert.That(controller.World.ConstructionPreviewTileCount, Is.EqualTo(2));
+                Assert.That(controller.World.RoomPlacementGridTarget, Is.EqualTo(otherRoom.RoomInstanceId));
+                var previousCell=ContentCell(room,1,1);
+                Assert.That(grid.HasTile(new Vector3Int(previousCell.X,previousCell.Y,0)), Is.False);
+                Assert.That(controller.World.transform.Find("ConstructionPreview").GetComponent<UnityEngine.Tilemaps.Tilemap>().HasTile(new Vector3Int(previousCell.X,previousCell.Y,0)), Is.False);
+                controller.TapWorld(previousCell); Assert.That(controller.ContentPreview.IsValid, Is.True);
+                controller.FocusRoom(); yield return RoomContentCapture("room-content-uat-grid-portrait.png");
+                var outsideDefinition=context.Production.Catalog.Rooms.Single(r=>r.RoomDefinitionId==room.RoomDefinitionId);
+                var outside=new TileCoordinate(room.Anchor.X+outsideDefinition.GrossFootprint.Width,room.Anchor.Y+1);
+                Assert.That(controller.World.SelectContentRoom(outside),Is.Null);
+                controller.TapWorld(outside);
+                Assert.That(controller.ContentPreview.IsValid, Is.False); Assert.That(controller.World.ConstructionPreviewTileCount, Is.Zero);
+                Assert.That(controller.SelectedRoomInstanceId, Is.EqualTo(room.RoomInstanceId));
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(commands)); AssertCanonicalUnchanged(before,mana);
+                yield return RoomContentCapture("room-content-uat-invalid-multicell.png");
+                controller.TapWorld(ContentCell(room,1,1)); Assert.That(controller.ContentPreview.IsValid, Is.True);
+                Assert.That(controller.World.ConstructionPreviewTileCount, Is.EqualTo(2));
+                controller.CancelContentPlacement(); Assert.That(controller.World.RoomPlacementGridTileCount, Is.Zero);
+                Assert.That(controller.World.ConstructionPreviewTileCount, Is.Zero);
+                controller.SelectNewContent("placement.option.trap.spike"); controller.TapWorld(ContentCell(room,1,1));
+                controller.SelectFloor(root.Save.validatedCanonicalSpatialState.Floors[1].FloorInstanceId);
+                Assert.That(controller.World.RoomPlacementGridTileCount, Is.Zero); Assert.That(controller.World.ConstructionPreviewTileCount, Is.Zero);
+                Assert.That(controller.IsPlacingContent, Is.False); Assert.That(controller.World.PreviewVisible, Is.False);
+                Assert.That(controller.Discard(), Is.True); AssertCanonicalUnchanged(before,mana);
+                foreach (CardinalOrientation orientation in System.Enum.GetValues(typeof(CardinalOrientation)))
+                {
+                    var projection = JsonUtility.FromJson<SavedSpatialFloor>(JsonUtility.ToJson(floor));
+                    projection.Layout.Rooms[0].RoomDefinitionId="spatial.room.rectangle"; projection.Layout.Rooms[0].Orientation=orientation;
+                    var world = controller.World;
+                    world.Render(projection,context.Production,context.Occupancy,context.Limits.Canonical.Spatial.MaximumMaterializedTiles,gridBudget,true);
+                    world.PresentRoomPlacementGrid(room.RoomInstanceId);
+                    var definition = context.Production.Catalog.Rooms.Single(r=>r.RoomDefinitionId==projection.Layout.Rooms[0].RoomDefinitionId);
+                    Assert.That(world.RoomPlacementGridTileCount, Is.EqualTo(definition.GrossFootprint.Width*definition.GrossFootprint.Height));
+                    for(int x=0;x<definition.GrossFootprint.Width;x++) for(int y=0;y<definition.GrossFootprint.Height;y++)
+                    {
+                        Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(x,y),definition.GrossFootprint,room.Anchor,orientation,out var cell), Is.True);
+                        Assert.That(grid.HasTile(new Vector3Int(cell.X,cell.Y,0)), Is.True);
+                        Assert.That((Vector2)grid.GetCellCenterWorld(new Vector3Int(cell.X,cell.Y,0)), Is.EqualTo(new Vector2(cell.X+.5f,cell.Y+.5f)));
+                    }
+                    world.ClearPreview(); Assert.That(world.RoomPlacementGridTileCount, Is.Zero);
+                }
+            }
+            finally { rule.OccupiedTileOffsets = offsets; }
+        }
+        [UnityTest]
+        public IEnumerator RoomContentUatPlacementGeometryAndLocalizedFeedback()
+        {
+            var root = GameRoot.Instance; var room = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];
+            Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess, Is.True);
+            var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            controller.EnterEdit(); controller.TapWorld(ContentCell(room,1,1));
+            foreach(var size in new[] {new Vector2Int(720,1280),new Vector2Int(1920,1080),new Vector2Int(1024,600)})
+            foreach(var text in new[] {DungeonTextSize.Small,DungeonTextSize.Default,DungeonTextSize.Large})
+            {
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x,size.y); controller.SetTextSize(text);
+                controller.OpenContentCategory("placement.category.trap"); controller.SelectNewContent("placement.option.trap.spike");
+                controller.TapWorld(ContentCell(room,1,1));
+                for(int i=0;i<12;i++) yield return null;
+                var viewport = ui.Q<ScrollView>("contextDetails").contentViewport.worldBound;
+                var actions = ui.Q("contentPlacementActions").worldBound;
+                Assert.That(viewport.height, Is.GreaterThan(0));
+                Assert.That(viewport.yMax, Is.LessThanOrEqualTo(actions.yMin+.5f), size+" "+text+" information/action separation");
+                Assert.That(actions.yMax, Is.LessThanOrEqualTo(ui.Q("sessionActions").worldBound.yMin+.5f));
+                Assert.That(ui.Q<Button>("cancelContent").worldBound.xMax, Is.LessThanOrEqualTo(ui.Q<Button>("confirmContent").worldBound.xMin+.5f));
+                AssertReachable(ui.Q<Button>("cancelContent")); AssertReachable(ui.Q<Button>("confirmContent"));
+                AssertReachable(ui.Q<Button>("save")); AssertReachable(ui.Q<Button>("discard"));
+                Assert.That(ui.Q<Label>("status").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                Assert.That(ui.Q<Label>("sheetTitle").text, Is.EqualTo(root.Content.GetString("ui.dungeon.content.add_trap",null)));
+                var info = ui.Q<Label>("contentPlacementInfo").text;
+                Assert.That(info.Split(new[] {root.Content.GetString("ui.dungeon.content.preview",null)},System.StringSplitOptions.None).Length, Is.EqualTo(2));
+                Assert.That(info, Does.Not.Contain("Room position").And.Not.Contain("1, 1"));
+                if(size.x==1920 && text==DungeonTextSize.Large) { controller.FocusRoom(); yield return RoomContentCapture("room-content-uat-landscape-placement.png"); }
+                TestContext.WriteLine(size+" "+text+" viewport="+viewport+" actions="+actions+" session="+ui.Q("sessionActions").worldBound);
+                controller.CancelContentPlacement();
+            }
+            Assert.That(controller.Draft.CommandCount, Is.Zero); AssertCanonicalUnchanged(before,mana);
+            Assert.That(controller.Discard(), Is.True); controller.TapWorld(ContentCell(room,0,0));
+            Assert.That(ui.Q<Label>("inspectionInfo").text, Does.Not.Contain("Room-local").And.Not.Contain("0, 0"));
+        }
         [UnityTest]
         public IEnumerator RoomContentProductionPreviewCustodySaveDiscardAndLayouts()
         {
@@ -39,6 +234,7 @@ namespace DungeonBuilder.M0.Tests
                 new { Category="placement.category.loot_node",Option="placement.option.loot_node.basic",X=3 } })
             {
                 Assert.That(controller.OpenContentCategory(choice.Category),Is.True);
+                Assert.That(ui.Q("contentChoices").Query<Button>().ToList().All(b=>((string)b.userData).StartsWith("placement.option.")),Is.True,"Browser contains definitions, never assigned identities");
                 Assert.That(controller.SelectNewContent(choice.Option),Is.True); int count=controller.Draft.CommandCount;
                 controller.TapWorld(Cell(choice.X,1)); Assert.That(controller.ContentPreview.IsValid,Is.True,controller.ContentPreview.Reason);
                 Assert.That(controller.Draft.CommandCount,Is.EqualTo(count)); AssertCanonicalUnchanged(before,mana);

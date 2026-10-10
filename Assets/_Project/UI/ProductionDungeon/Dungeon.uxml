@@ -53,6 +53,7 @@
             <ui:Label name="economics" />
             <ui:VisualElement name="roomContentPanel">
                 <ui:Label name="contentCapacity" />
+                <ui:VisualElement name="contentBrowserSelector" class="row"><ui:Button name="newContent" /><ui:Button name="ownedContent" /></ui:VisualElement>
                 <ui:ScrollView mode="Horizontal" class="content-choices"><ui:VisualElement name="contentChoices" class="category-row" /></ui:ScrollView>
                 <ui:Label name="contentPlacementInfo" />
             </ui:VisualElement>

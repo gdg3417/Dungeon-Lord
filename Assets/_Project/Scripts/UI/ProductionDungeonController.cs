@@ -239,6 +239,7 @@ namespace DungeonBuilder.M0
             }
             world.ClearPreview();
             ClearContentSelection();
+            feedback = null;
             selected = world.Select(cell); selectedRoomId = selected == null ? world.SelectRoom(cell, IsEditing) : null;
             selectedEdgeId=selected==null && selectedRoomId==null ? world.SelectCorridor(cell) : null;
             world.ClearMoveGuidance();

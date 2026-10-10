@@ -72,11 +72,12 @@ namespace DungeonBuilder.M0
             safe.EnableInClassList("normal-mode",!IsEditing);
             safe.EnableInClassList("details-collapsed",detailsCollapsed);
             safe.EnableInClassList("blocked-state",IsEditing && (!draft.IsStructurallyValid || draft.Durability!=DraftDurability.Acknowledged));
-            ui.Q<Label>("sheetTitle").text=Text(IsConstructing ? "ui.dungeon.sheet.placement" : inspecting ? "ui.dungeon.sheet.inspection" :
+            ui.Q<Label>("sheetTitle").text=Text(IsEditing && contentCategory != null && ContextRoomId != null ? ContentHeadingKey :
+                IsConstructing ? "ui.dungeon.sheet.placement" : inspecting ? "ui.dungeon.sheet.inspection" :
                 IsEditing ? "ui.dungeon.sheet.edit" : "ui.dungeon.floor_summary");
             ui.Q("floorSummary").style.display=!IsEditing && !inspecting ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q("inspectionActions").style.display=inspecting && !moveMode && !IsPlacingContent && reassigning == null ? DisplayStyle.Flex : DisplayStyle.None;
-            ui.Q<Button>("move").style.display=IsEditing && selectedEdgeId==null ? DisplayStyle.Flex : DisplayStyle.None;
+            ui.Q<Button>("move").style.display=IsEditing && selectedEdgeId==null && contentCategory==null ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("focusRoom").SetEnabled(world.TryRoomBounds(selectedRoomId ?? selected?.RoomInstanceId,out _));
             foreach(string id in new[] {"monstersCategory","trapsCategory","lootCategory"})
             {
@@ -115,7 +116,8 @@ namespace DungeonBuilder.M0
                 contents.Count(a=>a.CategoryId==CanonicalSpatialSaveContracts.MonsterCategoryId),roomDefinition.MonsterCapacity,
                 contents.Count(a=>a.CategoryId==CanonicalSpatialSaveContracts.TrapCategoryId),roomDefinition.TrapCapacity,
                 contents.Count(a=>a.CategoryId==CanonicalSpatialSaveContracts.LootNodeCategoryId),roomDefinition.LootCapacity) :
-                Format("ui.dungeon.content.info",RoomName(roomDefinition),selected.RoomLocalPosition.X,selected.RoomLocalPosition.Y);
+                Format("ui.dungeon.content.info",Format("ui.dungeon.room_selected", RoomName(roomDefinition),
+                    Array.FindIndex(floor.Layout.Rooms, r => r.RoomInstanceId == room.RoomInstanceId) + 1));
         }
     }
 }
