@@ -169,7 +169,8 @@ namespace DungeonBuilder.M0
                     {
                         string floorId = destinationFloor.FloorInstanceId, roomId = destination.RoomInstanceId;
                         var name = RoomName(draftContext.Production.Catalog.Rooms.Single(r => r.RoomDefinitionId == destination.RoomDefinitionId));
-                        choices.Add(new Button(() => SelectContentDestination(floorId, roomId)) { text = Format("ui.dungeon.content.destination", destinationFloor.FloorIndex + 1, name), userData = roomId });
+                        choices.Add(new Button(() => SelectContentDestination(floorId, roomId)) { text = Format("ui.dungeon.content.destination", destinationFloor.FloorIndex + 1,
+                            Format("ui.dungeon.room_selected", name, Array.IndexOf(destinationFloor.Layout.Rooms, destination) + 1)), userData = roomId });
                     }
             }
             else if (contentIntent == null)

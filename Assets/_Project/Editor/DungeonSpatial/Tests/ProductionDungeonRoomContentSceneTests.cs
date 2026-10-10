@@ -118,7 +118,11 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.World.ReconstructionCount,Is.EqualTo(rebuilds));
             Assert.That(controller.SelectedContent.AssignmentId,Is.EqualTo(original.AssignmentId));
             controller.BeginContentReassignment(); var ui=controller.GetComponent<UIDocument>().rootVisualElement;
-            Assert.That(ui.Q("contentChoices").Query<Button>().ToList().Any(b=>(string)b.userData==destination.RoomInstanceId),Is.True);
+            var destinationButton=ui.Q("contentChoices").Query<Button>().ToList().Single(b=>(string)b.userData==destination.RoomInstanceId);
+            string roomLabel=string.Format(root.Content.GetString("ui.dungeon.room_selected",null),
+                root.ProductionSpatialContent.Languages.Single(t=>t.language=="en").entries.Single(e=>e.key==definition.LocalizationKey).text,
+                System.Array.FindIndex(controller.Draft.ReadModel.Floors[0].Layout.Rooms,r=>r.RoomInstanceId==destination.RoomInstanceId)+1);
+            Assert.That(destinationButton.text,Does.Contain(roomLabel));
             Assert.That(controller.SelectContentDestination(floor.FloorInstanceId,destination.RoomInstanceId),Is.True);
             definition=root.ProductionSpatialContent.Catalog.Rooms.Single(r=>r.RoomDefinitionId==destination.RoomDefinitionId);
             Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(1,1),definition.GrossFootprint,destination.Anchor,destination.Orientation,out var target),Is.True);
