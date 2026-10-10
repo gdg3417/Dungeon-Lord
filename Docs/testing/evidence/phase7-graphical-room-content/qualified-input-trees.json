@@ -1,0 +1,53 @@
+{
+  "baseline": "5932a9fe0b7cec87c81f09e8e7d619df62c53101",
+  "qualified_implementation": "916fc1625c17344b895613e62c597059a01f4cc1",
+  "branch": "codex/phase7-graphical-room-content-management",
+  "input_trees": {
+    "Assets": "757eb67bec2e84b64697cdcc162eb475a27b1936",
+    "Packages": "e3fec9b0c4018adde155b4d8cd05cac3217df206",
+    "ProjectSettings": "c55e5632c33401052e04e4c9172dfadc312686f3",
+    "ContentAuthoring": "41a73986b5c781df4f2ad2ab83a6cd792d31a70c"
+  },
+  "changed_implementation_files": [
+    "Assets/_Project/Data/Bootstrap/string_table_en.json",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs.meta",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/TransactionalRoomContentFixtures.cs",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/TransactionalRoomContentFixtures.cs.meta",
+    "Assets/_Project/Scripts/Core/GameRoot.cs",
+    "Assets/_Project/Scripts/Economy/StructuralEconomyService.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftFormat.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftHistoricalFormat4.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftHistoricalFormat4.cs.meta",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftRuleIdentity.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FileDungeonDraftStore.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraft.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftCommit.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftContent.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftContent.cs.meta",
+    "Assets/_Project/Scripts/Services/SaveService.cs",
+    "Assets/_Project/Scripts/Services/StructuralEconomyPresenter.cs",
+    "Assets/_Project/Scripts/UI/DungeonFloorWorldView.cs",
+    "Assets/_Project/Scripts/UI/ProductionDungeonComposition.cs",
+    "Assets/_Project/Scripts/UI/ProductionDungeonController.cs",
+    "Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs",
+    "Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs.meta",
+    "Assets/_Project/Tests/EditMode/TransactionalRoomConstructionTests.cs",
+    "Assets/_Project/Tests/EditMode/TransactionalRoomContentTests.cs",
+    "Assets/_Project/Tests/EditMode/TransactionalRoomContentTests.cs.meta",
+    "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs",
+    "Assets/_Project/UI/ProductionDungeon/Dungeon.uss",
+    "Assets/_Project/UI/ProductionDungeon/Dungeon.uxml",
+    "Docs/testing/evidence/phase7-graphical-room-content/qualification.md",
+    "Docs/testing/evidence/phase7-graphical-room-content/validation-inventory.md",
+    "docs/planning/post-gd60-mvp-execution-plan.md"
+  ],
+  "branch_correction": {
+    "original_base_tree": "a8301e29ddd8450a9ca6bbbf55fbd8138ee697ba",
+    "main_tree": "a8301e29ddd8450a9ca6bbbf55fbd8138ee697ba",
+    "original_implementation_tree": "40a3d5b41b51a8644359757c1c097f3a73c11aaf",
+    "corrected_initial_implementation_tree": "40a3d5b41b51a8644359757c1c097f3a73c11aaf",
+    "qualified_tree": "53ad28550a2c6e8165b6d2964d8f0db22d7863b0"
+  }
+}

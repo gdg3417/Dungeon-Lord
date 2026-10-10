@@ -1,0 +1,27 @@
+[
+  {
+    "path": "screenshots/room-content-invalid-placement.png",
+    "sha256": "c08ff7acece8f9a2d7840ed05613c1cca5e98d59d379a1145d466087ced05fc4",
+    "bytes": 480434
+  },
+  {
+    "path": "screenshots/room-content-normal-room.png",
+    "sha256": "72111f3da447078cea261dd4b184657ef309eba5443652eec0eb019af954d80e",
+    "bytes": 538320
+  },
+  {
+    "path": "screenshots/room-content-save-discard-review.png",
+    "sha256": "51b7134ded21c6bcc2df6a5281a0059dcde7c0acfdecd8dd010f8574fcefe083",
+    "bytes": 318497
+  },
+  {
+    "path": "screenshots/room-content-selection.png",
+    "sha256": "07fde310852a53ea5d9f61fc7e956a837c104b0c71723ebe5a319832da63f19d",
+    "bytes": 532485
+  },
+  {
+    "path": "screenshots/room-content-valid-placement.png",
+    "sha256": "0656dd24364b89432ab26f8c9f48bf642fe59055be51dc4d09218a3cc42b967c",
+    "bytes": 493407
+  }
+]

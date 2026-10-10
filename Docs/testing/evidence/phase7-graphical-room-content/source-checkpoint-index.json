@@ -1,0 +1,322 @@
+[
+  {
+    "path": "TestResults/room-content-before-final-preparation-source.json",
+    "sha256": "ae35bbddb8582a356ee3c6135c2ed3ce7cb22a22bcfd2fc95f34eb1c7cb8834c",
+    "source_head": "7f2b1c6fefae559b36be9291399dcbd12b90c7cb",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-before-full-edit-preparation-source.json",
+    "sha256": "c16677769df6c699ad1c376e0c38c0f45072bd4995ebb1b5828e0c7ea9702af1",
+    "source_head": "66ca6ee3ae20b46def35e26aabc9e0cd1c293d5d",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-final-source.json",
+    "sha256": "516edeaeb4977368f52e4e43c2c840b6c942f82f955b8403ce43aca2c0afaceb",
+    "source_head": "916fc1625c17344b895613e62c597059a01f4cc1",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-initial-post-full-edit-source.json",
+    "sha256": "4650ba90416700fee6af4e8875babff442d2d4477e71471646b24bd8bd134069",
+    "source_head": "62eb3cdd1c2f828ea7a2d331fce9851844e23d95",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-initial-post-full-play-source.json",
+    "sha256": "066d122b3865ae8bbca0e828175de10aa63b251b6986b04d217fb7a9dbc9426b",
+    "source_head": "62eb3cdd1c2f828ea7a2d331fce9851844e23d95",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-initial-pre-full-edit-source.json",
+    "sha256": "b5ba3fc12205fecd48b1ab862852ffda3110cdabf6edc4d9453709e69b81628f",
+    "source_head": "0c27767001e14d2e21e2de37acd490402bf2b93a",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-initial-pre-full-play-source.json",
+    "sha256": "4650ba90416700fee6af4e8875babff442d2d4477e71471646b24bd8bd134069",
+    "source_head": "62eb3cdd1c2f828ea7a2d331fce9851844e23d95",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-label-post-full-edit-source.json",
+    "sha256": "f120b1bb67ea93b65058346fbe75b2f26c08bb3286631d5558379c15156eff4e",
+    "source_head": "7f2b1c6fefae559b36be9291399dcbd12b90c7cb",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-label-post-full-play-source.json",
+    "sha256": "376aa70d47ad7e2dbdf80e517801e79a636656e3cd3efb8e4b8053bb5d188bac",
+    "source_head": "7f2b1c6fefae559b36be9291399dcbd12b90c7cb",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftContent.cs: mismatch",
+      "Assets/_Project/Tests/EditMode/TransactionalRoomContentTests.cs: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-label-pre-full-edit-source.json",
+    "sha256": "f120b1bb67ea93b65058346fbe75b2f26c08bb3286631d5558379c15156eff4e",
+    "source_head": "7f2b1c6fefae559b36be9291399dcbd12b90c7cb",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-label-pre-full-play-source.json",
+    "sha256": "f120b1bb67ea93b65058346fbe75b2f26c08bb3286631d5558379c15156eff4e",
+    "source_head": "7f2b1c6fefae559b36be9291399dcbd12b90c7cb",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-post-domain-04-source.json",
+    "sha256": "0d22f954e8616f9b2e8ae6fe7a9f0d3bebe45b9bbf7ad9920d2cd70e5c7ce562",
+    "source_head": "66ca6ee3ae20b46def35e26aabc9e0cd1c293d5d",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [
+      "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftHistoricalFormat4.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonComposition.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonController.cs: mismatch",
+      "Assets/_Project/Tests/EditMode/TransactionalRoomConstructionTests.cs: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-post-focused-03-source.json",
+    "sha256": "f6c18a55cdfb697263d036d014dd9071e5d334697f81753771fa6f3cf54370ff",
+    "source_head": "66ca6ee3ae20b46def35e26aabc9e0cd1c293d5d",
+    "expected_count": 1208,
+    "actual_count": 1206,
+    "unexpected": [],
+    "failures": [
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs: missing",
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs.meta: missing",
+      "Assets/_Project/Tests/EditMode/TransactionalRoomContentTests.cs: mismatch",
+      "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-post-full-edit-source.json",
+    "sha256": "516edeaeb4977368f52e4e43c2c840b6c942f82f955b8403ce43aca2c0afaceb",
+    "source_head": "916fc1625c17344b895613e62c597059a01f4cc1",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-post-full-play-source.json",
+    "sha256": "3dee928d5a597dcb7c1a661f98e80e057877636c9b1cfbe20321d1e7f4ec74e8",
+    "source_head": "916fc1625c17344b895613e62c597059a01f4cc1",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-post-ui-06-source.json",
+    "sha256": "f428f61b0bccb83641e1cbc1d920a7cdf948ea1742f7899d84028b0f73b9d483",
+    "source_head": "66ca6ee3ae20b46def35e26aabc9e0cd1c293d5d",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-post-windows-build-source.json",
+    "sha256": "53dc0c133562fa0449bcd49f1da9017377b9e58ffcbdec2fcec0233f80aac986",
+    "source_head": "916fc1625c17344b895613e62c597059a01f4cc1",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [
+      "Assets/Settings/UniversalRP.asset: mismatch",
+      "Assets/UniversalRenderPipelineGlobalSettings.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch",
+      "ProjectSettings/UnityConnectSettings.asset: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-pre-full-edit-source.json",
+    "sha256": "516edeaeb4977368f52e4e43c2c840b6c942f82f955b8403ce43aca2c0afaceb",
+    "source_head": "916fc1625c17344b895613e62c597059a01f4cc1",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-pre-full-play-source.json",
+    "sha256": "516edeaeb4977368f52e4e43c2c840b6c942f82f955b8403ce43aca2c0afaceb",
+    "source_head": "916fc1625c17344b895613e62c597059a01f4cc1",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-pre-windows-build-source.json",
+    "sha256": "516edeaeb4977368f52e4e43c2c840b6c942f82f955b8403ce43aca2c0afaceb",
+    "source_head": "916fc1625c17344b895613e62c597059a01f4cc1",
+    "expected_count": 1208,
+    "actual_count": 1208,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/room-content-reuse-preflight.json",
+    "sha256": "24ea32fca21727b86f89ea940bcc889a105b7af72ea1d87b90db3d150eca76d5",
+    "source_head": "66ca6ee3ae20b46def35e26aabc9e0cd1c293d5d",
+    "expected_count": 1198,
+    "actual_count": 1196,
+    "unexpected": [],
+    "failures": [
+      "Assets/_Project/Scripts/Core/GameRoot.cs: mismatch",
+      "Assets/_Project/Scripts/Economy/StructuralEconomyService.cs: mismatch",
+      "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftFormat.cs: mismatch",
+      "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftHistoricalFormat4.cs: missing",
+      "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftRuleIdentity.cs: mismatch",
+      "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FileDungeonDraftStore.cs: mismatch",
+      "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraft.cs: mismatch",
+      "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftCommit.cs: mismatch",
+      "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftContent.cs: missing",
+      "Assets/_Project/Scripts/Services/SaveService.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonController.cs: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  }
+]

@@ -1,0 +1,476 @@
+[
+  {
+    "mode": "editmode",
+    "previous_count": 1621,
+    "current_count": 1659,
+    "removed": [],
+    "added": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentExplicitReassignmentWithConstructionAndInspectionReuse",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentProductionPreviewCustodySaveDiscardAndLayouts",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.AcquireUnassignRedeployChargesOnceAndDiscardNeverCreatesOwnership",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.AcquisitionChangesLaterKnowledgeAndRunsButCannotRewriteExistingRunSnapshot",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.CollisionCategorySharingAndMultiCellBoundaryUseInjectedOccupancy",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.CombinedConstructionAndContentCommitHasOneWalletChargeAndNoContentInvestment",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ConfiguredCommandBudgetAndInvalidSourceCannotMutateDraft",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ContentAtomicPersistenceFailurePublishesNothing(Flush,1)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ContentAtomicPersistenceFailurePublishesNothing(Replace,1)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ContentAtomicPersistenceFailurePublishesNothing(Write,2)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ContentJournalUnknownDurabilityBlocksCommitAndRecoversOnlyProvenPrefix",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ContentRecoveryRejectsStaleBaselineAndChangedCustodyPolicy",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.CrossRoomReassignIsOneCommandAndPreservesIdentityAfterRecovery",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingReturnedIdentityRedeploysOfflineWithoutCharge",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.FormatFourEvidenceRemainsImmutableWhenUpgradedToContentVocabulary",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.InvalidCoordinatesNeverAllocateOrJournal(-1,0)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.InvalidCoordinatesNeverAllocateOrJournal(0,4)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.InvalidCoordinatesNeverAllocateOrJournal(4,0)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.InvalidCoordinatesNeverAllocateOrJournal(int.MaxValue,int.MinValue)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.InvalidIdsFailClosed(\"category\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.InvalidIdsFailClosed(\"floor\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.InvalidIdsFailClosed(\"identity\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.InvalidIdsFailClosed(\"option\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.InvalidIdsFailClosed(\"room\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.monster\",\"placement.option.monster.skeleton\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.RepeatedMonstersHaveDistinctIdentitiesAndFullCategoryRejectsWithoutAllocation",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.RestrictedFinalPurchaseRetainsCanonicalAndDraft(False,False,\"gate.error.offline_required\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.RestrictedFinalPurchaseRetainsCanonicalAndDraft(True,True,\"gate.error.verification_pending\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionTrapAndLootCannotDuplicate(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionTrapAndLootCannotDuplicate(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.UnaffordableFinalCombinedQuotePublishesNothing",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.UnassignmentPreviewDoesNotExposeMutableDraftOwnership",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.UnknownContentAcknowledgementRecoversOnlyIndependentCommittedEvidence(\"commit-after\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.UnknownContentAcknowledgementRecoversOnlyIndependentCommittedEvidence(\"commit-barrier\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.UnknownContentAcknowledgementRecoversOnlyIndependentCommittedEvidence(\"commit-readback\")",
+        "result": [
+          "Passed"
+        ]
+      }
+    ],
+    "changed": []
+  },
+  {
+    "mode": "playmode",
+    "previous_count": 3057,
+    "current_count": 3095,
+    "removed": [],
+    "added": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.AcquireUnassignRedeployChargesOnceAndDiscardNeverCreatesOwnership",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.AcquisitionChangesLaterKnowledgeAndRunsButCannotRewriteExistingRunSnapshot",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.CollisionCategorySharingAndMultiCellBoundaryUseInjectedOccupancy",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.CombinedConstructionAndContentCommitHasOneWalletChargeAndNoContentInvestment",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ConfiguredCommandBudgetAndInvalidSourceCannotMutateDraft",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ContentAtomicPersistenceFailurePublishesNothing(Flush,1)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ContentAtomicPersistenceFailurePublishesNothing(Replace,1)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ContentAtomicPersistenceFailurePublishesNothing(Write,2)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ContentJournalUnknownDurabilityBlocksCommitAndRecoversOnlyProvenPrefix",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ContentRecoveryRejectsStaleBaselineAndChangedCustodyPolicy",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.CrossRoomReassignIsOneCommandAndPreservesIdentityAfterRecovery",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingReturnedIdentityRedeploysOfflineWithoutCharge",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.FormatFourEvidenceRemainsImmutableWhenUpgradedToContentVocabulary",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.InvalidCoordinatesNeverAllocateOrJournal(-1,0)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.InvalidCoordinatesNeverAllocateOrJournal(0,4)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.InvalidCoordinatesNeverAllocateOrJournal(4,0)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.InvalidCoordinatesNeverAllocateOrJournal(int.MaxValue,int.MinValue)",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.InvalidIdsFailClosed(\"category\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.InvalidIdsFailClosed(\"floor\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.InvalidIdsFailClosed(\"identity\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.InvalidIdsFailClosed(\"option\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.InvalidIdsFailClosed(\"room\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.monster\",\"placement.option.monster.skeleton\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.RepeatedMonstersHaveDistinctIdentitiesAndFullCategoryRejectsWithoutAllocation",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.RestrictedFinalPurchaseRetainsCanonicalAndDraft(False,False,\"gate.error.offline_required\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.RestrictedFinalPurchaseRetainsCanonicalAndDraft(True,True,\"gate.error.verification_pending\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionTrapAndLootCannotDuplicate(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionTrapAndLootCannotDuplicate(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.UnaffordableFinalCombinedQuotePublishesNothing",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.UnassignmentPreviewDoesNotExposeMutableDraftOwnership",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.UnknownContentAcknowledgementRecoversOnlyIndependentCommittedEvidence(\"commit-after\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.UnknownContentAcknowledgementRecoversOnlyIndependentCommittedEvidence(\"commit-barrier\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.UnknownContentAcknowledgementRecoversOnlyIndependentCommittedEvidence(\"commit-readback\")",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentInputAndResume",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentProductionParity",
+        "result": [
+          "Passed"
+        ]
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentReassignmentAndConstruction",
+        "result": [
+          "Passed"
+        ]
+      }
+    ],
+    "changed": []
+  }
+]
