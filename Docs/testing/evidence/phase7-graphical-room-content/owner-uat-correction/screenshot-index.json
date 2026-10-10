@@ -1,0 +1,37 @@
+[
+  {
+    "path": "screenshots/room-content-uat-grid-portrait.png",
+    "sha256": "a01e692591c41080f67740d407101322538d2dccf4eb07b644ff03133f96d7ff",
+    "bytes": 557818
+  },
+  {
+    "path": "screenshots/room-content-uat-inspector.png",
+    "sha256": "56e801efe33c160cb45b96aadeb72c111c870b27cae01b7fd903645081909a8a",
+    "bytes": 719079
+  },
+  {
+    "path": "screenshots/room-content-uat-invalid-multicell.png",
+    "sha256": "0b2855bcfd2f9cf82d8b95ab28008bc0c30debed18b2c4a4c5cf5798f96f48d7",
+    "bytes": 557406
+  },
+  {
+    "path": "screenshots/room-content-uat-landscape-placement.png",
+    "sha256": "08e9e985c41b26c0e2b645b672b3f871155ee0c8c4618d99a581595481e23a34",
+    "bytes": 585698
+  },
+  {
+    "path": "screenshots/room-content-uat-new.png",
+    "sha256": "3009bde0f0f4b4ad29705bedcaa73e3e0fac23bf35d68a5c790e6de05863ed6f",
+    "bytes": 502921
+  },
+  {
+    "path": "screenshots/room-content-uat-owned.png",
+    "sha256": "0cec64758460a93b2e69b31d2a27b94eb7cb9f80b527a61d46ee86f082860ea4",
+    "bytes": 496131
+  },
+  {
+    "path": "screenshots/room-content-uat-target-room.png",
+    "sha256": "8a11e2e802393fe7d748e837afaf84e1bc1304c21f59cdc97ffcf89cb493424d",
+    "bytes": 571961
+  }
+]

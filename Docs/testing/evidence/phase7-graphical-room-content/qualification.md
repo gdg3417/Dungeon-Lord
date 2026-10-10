@@ -1,5 +1,7 @@
 # Graphical room-content management qualification
 
+Owner UAT on this original packet confirmed placement, Move/Unassign/Reassign, Save/reopen and Discard/recovery. The subsequent [PR #231 owner-UAT correction qualification](owner-uat-correction/qualification.md) records presentation fixes, fresh complete suites/build and preservation audits. Historical evidence below is retained.
+
 Baseline: merged PR #230, `5932a9fe0b7cec87c81f09e8e7d619df62c53101`. Branch: `codex/phase7-graphical-room-content-management`. Selected configuration: GPT-6.1 Sol, High; Complex. The approved packet extends established authorities across draft identity, custody, economics, persistence and UI. GPT-6 Sol High is the availability fallback; no substitution or new ownership policy was needed.
 
 ## Reconciliation and authority

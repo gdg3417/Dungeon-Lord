@@ -1,0 +1,50 @@
+[
+  {
+    "Path": "C:\\Dev\\Dungeon-Lord\\Temp\\room-construction-validation",
+    "GiB": 2.332,
+    "Library": true,
+    "Lock": true
+  },
+  {
+    "Path": "C:\\Dev\\Dungeon-Lord\\Temp\\room-construction-validation-bounds-186ba37",
+    "GiB": 2.289,
+    "Library": true,
+    "Lock": false
+  },
+  {
+    "Path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-final-validation",
+    "GiB": 2.471,
+    "Library": true,
+    "Lock": false
+  },
+  {
+    "Path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation",
+    "GiB": 2.506,
+    "Library": true,
+    "Lock": false
+  },
+  {
+    "Path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-overlay-validation",
+    "GiB": 2.495,
+    "Library": true,
+    "Lock": false
+  },
+  {
+    "Path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-review-validation",
+    "GiB": 2.443,
+    "Library": true,
+    "Lock": false
+  },
+  {
+    "Path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-uat-validation",
+    "GiB": 2.454,
+    "Library": true,
+    "Lock": false
+  },
+  {
+    "Path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-validation",
+    "GiB": 2.031,
+    "Library": true,
+    "Lock": false
+  }
+]

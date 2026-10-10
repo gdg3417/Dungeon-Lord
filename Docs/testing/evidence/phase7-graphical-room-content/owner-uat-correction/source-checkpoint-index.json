@@ -1,0 +1,152 @@
+[
+  {
+    "path": "room-content-uat-final-source.json",
+    "sha256": "d7dead149120c306bc90f063299eec494e82eae16af0d1261d29ed2a0abd281b",
+    "head": "344a5edcf540ee6c0ed81c63be723a5f6a0a784e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-post-focused-01-source.json",
+    "sha256": "83bebffe31ec72926b598d4a772904f19a4927be5333e327ce9ed24844bb9dd6",
+    "head": "6afca9caa672f02eee03a2c0ec5fc09f43af1928",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-post-focused-03-source.json",
+    "sha256": "a6a7bed83724a29b0e593165ac18bca3592bb8ce5bf66f253285e15ea746e9e3",
+    "head": "6afca9caa672f02eee03a2c0ec5fc09f43af1928",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-post-focused-04-source.json",
+    "sha256": "bdd126d3d9ac05043e7b383f1e5c077563e50dc85d8bb7c8c492af0727e8d72c",
+    "head": "6afca9caa672f02eee03a2c0ec5fc09f43af1928",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-post-full-edit-source.json",
+    "sha256": "d7dead149120c306bc90f063299eec494e82eae16af0d1261d29ed2a0abd281b",
+    "head": "344a5edcf540ee6c0ed81c63be723a5f6a0a784e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-post-full-play-source.json",
+    "sha256": "28c59f44357cc835f78497f5cba2de8eea2801da04e2e003dc46f9e81681c4ad",
+    "head": "344a5edcf540ee6c0ed81c63be723a5f6a0a784e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-post-windows-build-source.json",
+    "sha256": "f1d6a1b283e87b3c70f935ead4f8c5a576ff21a59929d25f071b7f6aa935c5c0",
+    "head": "344a5edcf540ee6c0ed81c63be723a5f6a0a784e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/Settings/UniversalRP.asset: mismatch",
+      "Assets/UniversalRenderPipelineGlobalSettings.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch",
+      "ProjectSettings/UnityConnectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-pre-focused-01-source.json",
+    "sha256": "83bebffe31ec72926b598d4a772904f19a4927be5333e327ce9ed24844bb9dd6",
+    "head": "6afca9caa672f02eee03a2c0ec5fc09f43af1928",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-pre-focused-02-source.json",
+    "sha256": "4c8fd159d3653fbd5e7ff85caf385b28bf00249e9b18c1ad5f59621730d61bf7",
+    "head": "6afca9caa672f02eee03a2c0ec5fc09f43af1928",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-pre-focused-03-source.json",
+    "sha256": "5e64e35ff48e24c2f8c779966efcf776c13f7feea78e54d0fe51cf5d0b1f0fbf",
+    "head": "6afca9caa672f02eee03a2c0ec5fc09f43af1928",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-pre-focused-04-source.json",
+    "sha256": "de6f377ea6f8bbc5c5834df03faa2a1a47b56a90639e6ba93f43d473eca8279a",
+    "head": "6afca9caa672f02eee03a2c0ec5fc09f43af1928",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-pre-full-edit-source.json",
+    "sha256": "d7dead149120c306bc90f063299eec494e82eae16af0d1261d29ed2a0abd281b",
+    "head": "344a5edcf540ee6c0ed81c63be723a5f6a0a784e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-pre-full-play-source.json",
+    "sha256": "d7dead149120c306bc90f063299eec494e82eae16af0d1261d29ed2a0abd281b",
+    "head": "344a5edcf540ee6c0ed81c63be723a5f6a0a784e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-pre-windows-build-source.json",
+    "sha256": "d7dead149120c306bc90f063299eec494e82eae16af0d1261d29ed2a0abd281b",
+    "head": "344a5edcf540ee6c0ed81c63be723a5f6a0a784e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "room-content-uat-reuse-source.json",
+    "sha256": "81cc5c4e438ed6aebda3936d7b693329111ab6618ccb02f3d1d0839f7cc76b91",
+    "head": "6afca9caa672f02eee03a2c0ec5fc09f43af1928",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  }
+]

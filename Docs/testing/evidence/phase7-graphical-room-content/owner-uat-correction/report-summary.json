@@ -1,0 +1,233 @@
+[
+  {
+    "path": "room-content-uat-focused-01.xml",
+    "sha256": "b65d95fc42b791cc04d43fd9d7ddbaabd83e3e9bd39f372847c0cca7a1c36e11",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "50",
+      "result": "Failed(Child)",
+      "total": "50",
+      "passed": "48",
+      "failed": "2",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 20:50:31Z",
+      "end-time": "2026-10-10 20:50:35Z",
+      "duration": "3.9709916"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatGridAndMulticellInvalidTransitions",
+        "message": "System.InvalidOperationException : structural.edit.workload_exceeded",
+        "stack": "  at DungeonBuilder.M0.DungeonFloorWorldView.Render (DungeonBuilder.M0.Gameplay.DungeonSpatial.SavedSpatialFloor selected, DungeonBuilder.M0.Gameplay.DungeonSpatial.ProductionSpatialContentSnapshot production, DungeonBuilder.M0.Gameplay.DungeonSpatial.RoomContentSpatialOccupancySnapshot occupancy, System.Int32 maximumTiles, System.Int32 maximumGridTiles, System.Boolean edit) [0x00f2f] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\UI\\DungeonFloorWorldView.cs:242 \n  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentUatGridAndMulticellInvalidTransitions>d__68.MoveNext () [0x006cf] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:138 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 "
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatPlacementGeometryAndLocalizedFeedback",
+        "message": "  Expected string length 8 but was 15. Strings differ at index 0.\n  Expected: \"Add Trap\"\n  But was:  \"Selected Object\"\n  -----------^\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentUatPlacementGeometryAndLocalizedFeedback>d__69.MoveNext () [0x003e4] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:176\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatPlacementGeometryAndLocalizedFeedback",
+        "output": "Isolated scene boot 1: phase7a4-scene-c95366bd04ea4628ab630659357322d3.json\n[2026-10-10 20:50:31 UTC] [INFO] Entered BootState.\n[2026-10-10 20:50:32 UTC] [INFO] Offline passive mana grant persisted.\n[2026-10-10 20:50:32 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-10 20:50:32 UTC] [INFO] M0 init complete.\n[2026-10-10 20:50:32 UTC] [INFO] Entered HomeStubState.\n[2026-10-10 20:50:32 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n(720, 1280) Small viewport=(x:8.00, y:754.00, width:704.00, height:373.00) actions=(x:8.00, y:1127.00, width:704.00, height:52.00) session=(x:8.00, y:1179.00, width:704.00, height:93.00)\n(720, 1280) Default viewport=(x:8.00, y:754.00, width:704.00, height:368.00) actions=(x:8.00, y:1122.00, width:704.00, height:52.00) session=(x:8.00, y:1174.00, width:704.00, height:98.00)\n(720, 1280) Large viewport=(x:8.00, y:756.00, width:704.00, height:359.00) actions=(x:8.00, y:1115.00, width:704.00, height:52.00) session=(x:8.00, y:1167.00, width:704.00, height:105.00)\n"
+      }
+    ]
+  },
+  {
+    "path": "room-content-uat-focused-02.xml",
+    "sha256": "d302130399225a813c8996a75ae21d72f3085215d68bccc763458af269f9d01b",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "50",
+      "result": "Passed",
+      "total": "50",
+      "passed": "50",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 20:53:18Z",
+      "end-time": "2026-10-10 20:53:22Z",
+      "duration": "4.2828176"
+    },
+    "failures": [],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatPlacementGeometryAndLocalizedFeedback",
+        "output": "Isolated scene boot 1: phase7a4-scene-bab960511fcd4c1d952d38a51bf1780c.json\n[2026-10-10 20:53:18 UTC] [INFO] Entered BootState.\n[2026-10-10 20:53:18 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-10 20:53:18 UTC] [INFO] M0 init complete.\n[2026-10-10 20:53:18 UTC] [INFO] Entered HomeStubState.\n[2026-10-10 20:53:18 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n(720, 1280) Small viewport=(x:8.00, y:754.00, width:704.00, height:373.00) actions=(x:8.00, y:1127.00, width:704.00, height:52.00) session=(x:8.00, y:1179.00, width:704.00, height:93.00)\n(720, 1280) Default viewport=(x:8.00, y:754.00, width:704.00, height:368.00) actions=(x:8.00, y:1122.00, width:704.00, height:52.00) session=(x:8.00, y:1174.00, width:704.00, height:98.00)\n(720, 1280) Large viewport=(x:8.00, y:756.00, width:704.00, height:359.00) actions=(x:8.00, y:1115.00, width:704.00, height:52.00) session=(x:8.00, y:1167.00, width:704.00, height:105.00)\n(1920, 1080) Small viewport=(x:4.00, y:344.67, width:1272.00, height:292.00) actions=(x:4.00, y:636.67, width:1272.00, height:36.00) session=(x:4.00, y:672.67, width:1272.00, height:43.33)\n(1920, 1080) Default viewport=(x:4.00, y:347.33, width:1272.00, height:262.67) actions=(x:4.00, y:610.00, width:1272.00, height:36.00) session=(x:4.00, y:646.00, width:1272.00, height:70.00)\n(1920, 1080) Large viewport=(x:4.00, y:354.67, width:1272.00, height:238.00) actions=(x:4.00, y:592.67, width:1272.00, height:38.67) session=(x:4.00, y:631.33, width:1272.00, height:84.67)\n(1024, 600) Small viewport=(x:4.00, y:310.00, width:1016.00, height:174.00) actions=(x:4.00, y:484.00, width:1016.00, height:52.00) session=(x:4.00, y:536.00, width:1016.00, height:60.00)\n(1024, 600) Default viewport=(x:4.00, y:310.00, width:1016.00, height:164.00) actions=(x:4.00, y:474.00, width:1016.00, height:52.00) session=(x:4.00, y:526.00, width:1016.00, height:70.00)\n(1024, 600) Large viewport=(x:4.00, y:318.00, width:1016.00, height:142.00) actions=(x:4.00, y:460.00, width:1016.00, height:52.00) session=(x:4.00, y:512.00, width:1016.00, height:84.00)\n"
+      }
+    ]
+  },
+  {
+    "path": "room-content-uat-focused-03.xml",
+    "sha256": "edcbca2a69094a762ee5a1234b4560bfb624651eebdfbdb392965e67943db915",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "41",
+      "result": "Failed(Child)",
+      "total": "41",
+      "passed": "40",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 20:56:49Z",
+      "end-time": "2026-10-10 20:57:45Z",
+      "duration": "56.2138655"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.TransactionalRoomConstructionLocalizationLayoutsAndResume",
+        "message": "  Expected: greater than 290.0f\n  But was:  273.0f\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionLayoutsLocalizationAndResume>d__13.MoveNext () [0x00820] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:337\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentUatMeasuredPlacementLayout",
+        "output": "Isolated scene boot 1: phase7a4-scene-56502645b1bf4e08a44931149469a492.json\n[2026-10-10 20:57:31 UTC] [INFO] Entered BootState.\n[2026-10-10 20:57:31 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-10 20:57:31 UTC] [INFO] M0 init complete.\n[2026-10-10 20:57:31 UTC] [INFO] Entered HomeStubState.\n[2026-10-10 20:57:31 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n(720, 1280) Small viewport=(x:8.00, y:754.00, width:704.00, height:373.00) actions=(x:8.00, y:1127.00, width:704.00, height:52.00) session=(x:8.00, y:1179.00, width:704.00, height:93.00)\n(720, 1280) Default viewport=(x:8.00, y:754.00, width:704.00, height:368.00) actions=(x:8.00, y:1122.00, width:704.00, height:52.00) session=(x:8.00, y:1174.00, width:704.00, height:98.00)\n(720, 1280) Large viewport=(x:8.00, y:756.00, width:704.00, height:359.00) actions=(x:8.00, y:1115.00, width:704.00, height:52.00) session=(x:8.00, y:1167.00, width:704.00, height:105.00)\n(1920, 1080) Small viewport=(x:4.00, y:344.67, width:1272.00, height:292.00) actions=(x:4.00, y:636.67, width:1272.00, height:36.00) session=(x:4.00, y:672.67, width:1272.00, height:43.33)\n(1920, 1080) Default viewport=(x:4.00, y:347.33, width:1272.00, height:262.67) actions=(x:4.00, y:610.00, width:1272.00, height:36.00) session=(x:4.00, y:646.00, width:1272.00, height:70.00)\n(1920, 1080) Large viewport=(x:4.00, y:354.67, width:1272.00, height:238.00) actions=(x:4.00, y:592.67, width:1272.00, height:38.67) session=(x:4.00, y:631.33, width:1272.00, height:84.67)\n(1024, 600) Small viewport=(x:4.00, y:310.00, width:1016.00, height:174.00) actions=(x:4.00, y:484.00, width:1016.00, height:52.00) session=(x:4.00, y:536.00, width:1016.00, height:60.00)\n(1024, 600) Default viewport=(x:4.00, y:310.00, width:1016.00, height:164.00) actions=(x:4.00, y:474.00, width:1016.00, height:52.00) session=(x:4.00, y:526.00, width:1016.00, height:70.00)\n(1024, 600) Large viewport=(x:4.00, y:318.00, width:1016.00, height:142.00) actions=(x:4.00, y:460.00, width:1016.00, height:52.00) session=(x:4.00, y:512.00, width:1016.00, height:84.00)\n"
+      }
+    ]
+  },
+  {
+    "path": "room-content-uat-focused-04.xml",
+    "sha256": "0ef5b0ce5ef64797a14b7b199f397126004d0db2848c5cbb96738ab145829e96",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "41",
+      "result": "Passed",
+      "total": "41",
+      "passed": "41",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 20:59:57Z",
+      "end-time": "2026-10-10 21:00:56Z",
+      "duration": "59.7883069"
+    },
+    "failures": [],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentUatMeasuredPlacementLayout",
+        "output": "Isolated scene boot 1: phase7a4-scene-abf83eacb3134785aefd9105fe8ef7e4.json\n[2026-10-10 21:00:40 UTC] [INFO] Entered BootState.\n[2026-10-10 21:00:40 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-10 21:00:40 UTC] [INFO] M0 init complete.\n[2026-10-10 21:00:40 UTC] [INFO] Entered HomeStubState.\n[2026-10-10 21:00:40 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n(720, 1280) Small viewport=(x:8.00, y:754.00, width:704.00, height:373.00) actions=(x:8.00, y:1127.00, width:704.00, height:52.00) session=(x:8.00, y:1179.00, width:704.00, height:93.00)\n(720, 1280) Default viewport=(x:8.00, y:754.00, width:704.00, height:368.00) actions=(x:8.00, y:1122.00, width:704.00, height:52.00) session=(x:8.00, y:1174.00, width:704.00, height:98.00)\n(720, 1280) Large viewport=(x:8.00, y:756.00, width:704.00, height:359.00) actions=(x:8.00, y:1115.00, width:704.00, height:52.00) session=(x:8.00, y:1167.00, width:704.00, height:105.00)\n(1920, 1080) Small viewport=(x:4.00, y:344.67, width:1272.00, height:292.00) actions=(x:4.00, y:636.67, width:1272.00, height:36.00) session=(x:4.00, y:672.67, width:1272.00, height:43.33)\n(1920, 1080) Default viewport=(x:4.00, y:347.33, width:1272.00, height:262.67) actions=(x:4.00, y:610.00, width:1272.00, height:36.00) session=(x:4.00, y:646.00, width:1272.00, height:70.00)\n(1920, 1080) Large viewport=(x:4.00, y:354.67, width:1272.00, height:238.00) actions=(x:4.00, y:592.67, width:1272.00, height:38.67) session=(x:4.00, y:631.33, width:1272.00, height:84.67)\n(1024, 600) Small viewport=(x:4.00, y:310.00, width:1016.00, height:174.00) actions=(x:4.00, y:484.00, width:1016.00, height:52.00) session=(x:4.00, y:536.00, width:1016.00, height:60.00)\n(1024, 600) Default viewport=(x:4.00, y:310.00, width:1016.00, height:164.00) actions=(x:4.00, y:474.00, width:1016.00, height:52.00) session=(x:4.00, y:526.00, width:1016.00, height:70.00)\n(1024, 600) Large viewport=(x:4.00, y:318.00, width:1016.00, height:142.00) actions=(x:4.00, y:460.00, width:1016.00, height:52.00) session=(x:4.00, y:512.00, width:1016.00, height:84.00)\n"
+      }
+    ]
+  },
+  {
+    "path": "room-content-uat-full-editmode.xml",
+    "sha256": "954bd953d61f774a838da40a9a94a7e3dca1da7582a22d1134edd9f9432ee660",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1667",
+      "result": "Skipped:Ignored",
+      "total": "1667",
+      "passed": "1666",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 21:18:42Z",
+      "end-time": "2026-10-10 21:19:01Z",
+      "duration": "19.5395584"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatPlacementGeometryAndLocalizedFeedback",
+        "output": "Isolated scene boot 1: phase7a4-scene-dc956fc5567a4c758281f0b1203718a3.json\n[2026-10-10 21:17:28 UTC] [INFO] Entered BootState.\n[2026-10-10 21:17:28 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-10 21:17:28 UTC] [INFO] M0 init complete.\n[2026-10-10 21:17:28 UTC] [INFO] Entered HomeStubState.\n[2026-10-10 21:17:28 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n(720, 1280) Small viewport=(x:8.00, y:754.00, width:704.00, height:373.00) actions=(x:8.00, y:1127.00, width:704.00, height:52.00) session=(x:8.00, y:1179.00, width:704.00, height:93.00)\n(720, 1280) Default viewport=(x:8.00, y:754.00, width:704.00, height:368.00) actions=(x:8.00, y:1122.00, width:704.00, height:52.00) session=(x:8.00, y:1174.00, width:704.00, height:98.00)\n(720, 1280) Large viewport=(x:8.00, y:756.00, width:704.00, height:359.00) actions=(x:8.00, y:1115.00, width:704.00, height:52.00) session=(x:8.00, y:1167.00, width:704.00, height:105.00)\n(1920, 1080) Small viewport=(x:4.00, y:344.67, width:1272.00, height:292.00) actions=(x:4.00, y:636.67, width:1272.00, height:36.00) session=(x:4.00, y:672.67, width:1272.00, height:43.33)\n(1920, 1080) Default viewport=(x:4.00, y:347.33, width:1272.00, height:262.67) actions=(x:4.00, y:610.00, width:1272.00, height:36.00) session=(x:4.00, y:646.00, width:1272.00, height:70.00)\n(1920, 1080) Large viewport=(x:4.00, y:354.67, width:1272.00, height:238.00) actions=(x:4.00, y:592.67, width:1272.00, height:38.67) session=(x:4.00, y:631.33, width:1272.00, height:84.67)\n(1024, 600) Small viewport=(x:4.00, y:310.00, width:1016.00, height:174.00) actions=(x:4.00, y:484.00, width:1016.00, height:52.00) session=(x:4.00, y:536.00, width:1016.00, height:60.00)\n(1024, 600) Default viewport=(x:4.00, y:310.00, width:1016.00, height:164.00) actions=(x:4.00, y:474.00, width:1016.00, height:52.00) session=(x:4.00, y:526.00, width:1016.00, height:70.00)\n(1024, 600) Large viewport=(x:4.00, y:318.00, width:1016.00, height:142.00) actions=(x:4.00, y:460.00, width:1016.00, height:52.00) session=(x:4.00, y:512.00, width:1016.00, height:84.00)\n"
+      }
+    ]
+  },
+  {
+    "path": "room-content-uat-full-playmode.xml",
+    "sha256": "a86b76ff9fe6bd44593f67e0f3d927dea84eab7c7f2ad18a2b6fc0ab0a06edf7",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3098",
+      "result": "Skipped:Ignored",
+      "total": "3098",
+      "passed": "3088",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 21:21:13Z",
+      "end-time": "2026-10-10 21:25:33Z",
+      "duration": "259.7589237"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentUatMeasuredPlacementLayout",
+        "output": "Isolated scene boot 1: phase7a4-scene-c2e4b26384c64358bf1289d8fd561de0.json\n[2026-10-10 21:25:17 UTC] [INFO] Entered BootState.\n[2026-10-10 21:25:17 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-10 21:25:17 UTC] [INFO] M0 init complete.\n[2026-10-10 21:25:17 UTC] [INFO] Entered HomeStubState.\n[2026-10-10 21:25:17 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n(720, 1280) Small viewport=(x:8.00, y:754.00, width:704.00, height:373.00) actions=(x:8.00, y:1127.00, width:704.00, height:52.00) session=(x:8.00, y:1179.00, width:704.00, height:93.00)\n(720, 1280) Default viewport=(x:8.00, y:754.00, width:704.00, height:368.00) actions=(x:8.00, y:1122.00, width:704.00, height:52.00) session=(x:8.00, y:1174.00, width:704.00, height:98.00)\n(720, 1280) Large viewport=(x:8.00, y:756.00, width:704.00, height:359.00) actions=(x:8.00, y:1115.00, width:704.00, height:52.00) session=(x:8.00, y:1167.00, width:704.00, height:105.00)\n(1920, 1080) Small viewport=(x:4.00, y:344.67, width:1272.00, height:292.00) actions=(x:4.00, y:636.67, width:1272.00, height:36.00) session=(x:4.00, y:672.67, width:1272.00, height:43.33)\n(1920, 1080) Default viewport=(x:4.00, y:347.33, width:1272.00, height:262.67) actions=(x:4.00, y:610.00, width:1272.00, height:36.00) session=(x:4.00, y:646.00, width:1272.00, height:70.00)\n(1920, 1080) Large viewport=(x:4.00, y:354.67, width:1272.00, height:238.00) actions=(x:4.00, y:592.67, width:1272.00, height:38.67) session=(x:4.00, y:631.33, width:1272.00, height:84.67)\n(1024, 600) Small viewport=(x:4.00, y:310.00, width:1016.00, height:174.00) actions=(x:4.00, y:484.00, width:1016.00, height:52.00) session=(x:4.00, y:536.00, width:1016.00, height:60.00)\n(1024, 600) Default viewport=(x:4.00, y:310.00, width:1016.00, height:164.00) actions=(x:4.00, y:474.00, width:1016.00, height:52.00) session=(x:4.00, y:526.00, width:1016.00, height:70.00)\n(1024, 600) Large viewport=(x:4.00, y:318.00, width:1016.00, height:142.00) actions=(x:4.00, y:460.00, width:1016.00, height:52.00) session=(x:4.00, y:512.00, width:1016.00, height:84.00)\n"
+      }
+    ]
+  }
+]
