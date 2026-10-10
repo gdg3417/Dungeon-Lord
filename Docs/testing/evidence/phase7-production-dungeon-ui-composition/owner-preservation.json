@@ -1,0 +1,32 @@
+[
+  {
+    "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\save_primary.json",
+    "before_sha256": "39224B12446EC30990D043385E77634E45CC7DA1DC5E50E75237B33F25C79DF2",
+    "after_sha256": "39224B12446EC30990D043385E77634E45CC7DA1DC5E50E75237B33F25C79DF2",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\save_primary.json.editor-draft.draft-015ea1a185c449cbab458f36c6884b0c.000000.candidate",
+    "before_sha256": "D0EDE45449E86AC8136D7668FB51296B7F470AE7369308F5507848046514276F",
+    "after_sha256": "D0EDE45449E86AC8136D7668FB51296B7F470AE7369308F5507848046514276F",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\save_primary.json.editor-draft.draft-015ea1a185c449cbab458f36c6884b0c.000000.commit",
+    "before_sha256": "90DF3992FDF38C0785F8F7D8B6FE6415E30DAAE7F8CA766FB74D9A48170F1063",
+    "after_sha256": "90DF3992FDF38C0785F8F7D8B6FE6415E30DAAE7F8CA766FB74D9A48170F1063",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Dev\\Dungeon-Lord\\ProjectSettings\\ProjectSettings.asset",
+    "before_sha256": "34DA6D701E4C4629CA7B1CECB638F801D9C5EA4F40D33B09FECA46777073B993",
+    "after_sha256": "34DA6D701E4C4629CA7B1CECB638F801D9C5EA4F40D33B09FECA46777073B993",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Dev\\Dungeon-Lord\\Assets\\TextMesh Pro\\Resources\\TMP Settings.asset",
+    "before_sha256": "DAFD957B416FDAD34F611C30EE60D5F603497099F847B83FD688F883A56A3E72",
+    "after_sha256": "DAFD957B416FDAD34F611C30EE60D5F603497099F847B83FD688F883A56A3E72",
+    "unchanged": true
+  }
+]

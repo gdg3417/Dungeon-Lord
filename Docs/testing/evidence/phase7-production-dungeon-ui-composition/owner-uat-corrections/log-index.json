@@ -1,0 +1,93 @@
+[
+  {
+    "path": "Temp/ui-uat-author.log",
+    "redactions": 1,
+    "shared_sha256": "d135c3aacb232e1257c4ea5c8238ce9e075fe7583df92978201eed1a52fd895f",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-baseline-captures.log",
+    "redactions": 1,
+    "shared_sha256": "8744aa677579e7d93c6d0c5441a941e24dd4fa721eae1eb73515d7955f9dc0cd",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-focused-01.log",
+    "redactions": 1,
+    "shared_sha256": "a6290bd5c59e42345c829dd2c74b0d3cdc1c6bf80e367ac0741513e0380ef47f",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-focused-02.log",
+    "redactions": 1,
+    "shared_sha256": "779056d2cb9cae14c7c193d8ea436eef6d3fdf678fa72e4c2b8f014c7b70802c",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-focused-03.log",
+    "redactions": 1,
+    "shared_sha256": "153aa8eb9adce770862f4aa2375843f9dbf7836d1b3f66c53de6fb905950086f",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-focused-04-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "44bf6c32ab6fc24312f299100423614838866eb0d313600a54b9d4e064d96708",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-focused-05-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "747930106e71e21ecf2c571cce8302f219a18bf2cc5bde5e41e4496fc5115daf",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-focused-06-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "9ff9ec71cafb5760a0ebbc64a0128b3736cfdbf0054003c5e8ac2e89e88c8425",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-focused-final-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "f12ff222f1ac46968d561ddb86ac5bb784f3979f8c9af29ca1fc39fbab7bd414",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-full-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "6cbb8e9ca4d5a80dc4aa508bc0caf432047b304e4a048b731dad83adc83cb920",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-full-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "c4593e48411339ea6f78d368707b1bce0b07cd31c5dac531048e6992a08da3b5",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-helper-tests.log",
+    "redactions": 0,
+    "shared_sha256": "12834cf8eccc6b0ab80273c3cb3c8974decf7cd3b231cbd97fadf22e7c99cc9d",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-uat-windows-build.log",
+    "redactions": 0,
+    "shared_sha256": "49a0053f96fd1ce716fb3db06b91a832f9126c980f624a19974a2c405b2d2759",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  }
+]

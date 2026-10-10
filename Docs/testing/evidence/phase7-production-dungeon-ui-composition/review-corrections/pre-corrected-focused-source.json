@@ -1,0 +1,26 @@
+{
+  "validation_directory": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-review-validation",
+  "input_roots": [
+    "Assets",
+    "Packages",
+    "ProjectSettings",
+    "ContentAuthoring"
+  ],
+  "files": [],
+  "expected_count": 1188,
+  "actual_count": 1188,
+  "unexpected": [],
+  "failures": [],
+  "permitted_transformations": [
+    "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+    "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+  ],
+  "branch": "codex/phase7-dungeon-ui-visual-composition",
+  "source_head": "eb552892122abf95b2c55360c1ef75328aff6e4c",
+  "full_inventory": {
+    "archive": "source-inventories.zip",
+    "entry": "pre-corrected-focused-source.json",
+    "sha256": "1d569a2fc457968899e1272fd27672474f1a3ffd929a80e8dd4b82a2862e3eec",
+    "rows": "All rows retained in verified archive; only mismatch rows shown here"
+  }
+}

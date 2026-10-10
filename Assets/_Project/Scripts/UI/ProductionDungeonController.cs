@@ -23,6 +23,7 @@ namespace DungeonBuilder.M0
         private Camera worldCamera;
         private Camera bootstrapCamera;
         private int bootstrapCameraMask;
+        private Color bootstrapCameraColor;
         private DungeonViewport viewport;
         private readonly DungeonViewportGesture gesture = new DungeonViewportGesture();
         private IDungeonDraftStore store;
@@ -103,12 +104,19 @@ namespace DungeonBuilder.M0
             if (!floorLimits.Success) throw new InvalidOperationException(StructuralEditService.WorkloadReason);
             floorPresentationLimits = floorLimits.Limits;
             document = GetComponent<UIDocument>();
-            if (presentationPolicy == null || document.visualTreeAsset == null || document.panelSettings == null)
+            if (presentationPolicy == null || presentationPolicy.Visuals?.IsComplete!=true || document.visualTreeAsset == null || document.panelSettings == null)
                 throw new InvalidOperationException("production.dungeon.assets_missing");
             var ui = document.rootVisualElement;
             ui.pickingMode = PickingMode.Ignore;
             safe = ui.Q("safeRoot"); top = ui.Q("topChrome"); bottom = ui.Q("bottomChrome");
             viewportElement = ui.Q("viewport"); sheet = ui.Q("contextSheet"); modal = ui.Q("modal"); status = ui.Q<Label>("status");
+            // Overlay containers and empty ScrollView space are transparent to world input.
+            // Individual floor buttons (and a visible scroll bar) retain normal UI picking.
+            var rail = ui.Q("floorRail");
+            foreach (var element in rail.Query<VisualElement>().ToList()) element.pickingMode = PickingMode.Ignore;
+            ui.Q<Button>("collapseFloors").pickingMode = PickingMode.Position;
+            foreach (var scroller in rail.Query<Scroller>().ToList())
+                foreach (var element in scroller.Query<VisualElement>().ToList()) element.pickingMode = PickingMode.Position;
             draftContext = root.SaveService.DungeonDraftContext; store = root.SaveService.CreateDungeonDraftStore();
             viewport = new DungeonViewport(presentationPolicy);
             var worldObject = new GameObject("ProductionDungeonWorld"); worldObject.transform.SetParent(transform, false);
@@ -119,14 +127,20 @@ namespace DungeonBuilder.M0
             worldCamera.cullingMask = 1 << presentationPolicy.WorldLayer;
             bootstrapCamera = Camera.main;
             if (bootstrapCamera != null)
-            { bootstrapCameraMask = bootstrapCamera.cullingMask; bootstrapCamera.cullingMask &= ~worldCamera.cullingMask; }
+            { bootstrapCameraMask = bootstrapCamera.cullingMask; bootstrapCameraColor=bootstrapCamera.backgroundColor;
+              bootstrapCamera.cullingMask &= ~worldCamera.cullingMask; bootstrapCamera.backgroundColor=presentationPolicy.GridColor; }
             worldCamera.clearFlags = CameraClearFlags.SolidColor; worldCamera.backgroundColor = presentationPolicy.GridColor;
             worldCamera.depth = 1;
             root.SaveService.CanonicalRuntimePublished += CanonicalPublished;
             initialized = true;
             pixelsPerPhysicalUnit = DungeonPhysicalUnits.PixelsPerUnit();
             Button("edit", EnterEdit); Button("save", ReviewSave); Button("discard", ReviewDiscard);
-            Button("move", BeginMove); Button("closeSheet", CloseSheet); Button("reset", () => { autoFit = true; viewport.Reset(); ApplyCamera(); });
+            Button("move", BeginMove); Button("closeSheet", () => { CloseSheet(); Present(); }); Button("reset", FitFloor);
+            Button("focusRoom", FocusRoom);
+            Button("collapseFloors", ToggleFloorRail);
+            Button("displaySettings", () => ui.Q("displayPopover").style.display =
+                ui.Q("displayPopover").resolvedStyle.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None);
+            Button("closeDisplay", () => ui.Q("displayPopover").style.display = DisplayStyle.None);
             InitializeConstruction();
             Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
@@ -138,6 +152,8 @@ namespace DungeonBuilder.M0
             foreach (var label in ui.Query<Label>().ToList())
                 if (!string.IsNullOrEmpty(label.tooltip)) { label.text = Text(label.tooltip); label.tooltip = label.text; }
             foreach (var button in ui.Query<Button>().ToList()) { button.text = Text(button.tooltip); button.tooltip = button.text; }
+            foreach(var scroll in ui.Query<ScrollView>().ToList())
+            { scroll.verticalScrollerVisibility=ScrollerVisibility.Hidden; scroll.horizontalScrollerVisibility=ScrollerVisibility.Hidden; }
             ui.Q<Button>("legacy").style.display = DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(
                 DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), root.DevPanelEnabled) ? DisplayStyle.Flex : DisplayStyle.None;
             SetLegacy(false);
@@ -183,7 +199,7 @@ namespace DungeonBuilder.M0
             else feedback = "ui.dungeon.move_hint";
             Present();
         }
-        private void CloseSheet() { ClearConstructionSelection(); selected = null; selectedRoomId = null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
+        private void CloseSheet() { ClearConstructionSelection(); selected = null; selectedRoomId = null; selectedEdgeId=null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
         public void TapWorld(TileCoordinate cell)
         {
             if (!initialized || !HasCanonicalRuntime() || legacy || modal.style.display == DisplayStyle.Flex) return;
@@ -216,16 +232,24 @@ namespace DungeonBuilder.M0
                 world.Preview(cell, valid); Present();
                 return;
             }
-            selected = world.Select(cell); selectedRoomId = selected == null && IsEditing ? world.SelectRoom(cell) : null;
+            world.ClearPreview();
+            selected = world.Select(cell); selectedRoomId = selected == null ? world.SelectRoom(cell, IsEditing) : null;
+            selectedEdgeId=selected==null && selectedRoomId==null ? world.SelectCorridor(cell) : null;
             world.ClearMoveGuidance();
-            if (selected == null && selectedRoomId == null) CloseSheet();
-            else { OpenSheet(); if (selectedRoomId != null) world.SelectRoomFootprint(selectedRoomId); else world.Preview(cell, true); }
+            if (selected == null && selectedRoomId == null && selectedEdgeId==null) CloseSheet();
+            else { OpenSheet(); if (selectedRoomId != null) world.SelectRoomFootprint(selectedRoomId); else if(selected!=null) world.SelectContent(selected); else world.SelectCorridorFootprint(selectedEdgeId); }
             Present();
         }
         private void OpenSheet()
         {
             detailsCollapsed = false;
             sheet.style.display = DisplayStyle.Flex;
+            if(selectedEdgeId!=null)
+            {
+                var edge=renderState.Floors.Single(f=>f.FloorInstanceId==selectedFloor).Layout.Edges.Single(e=>e.EdgeId==selectedEdgeId);
+                document.rootVisualElement.Q<Label>("selectedName").text=SpatialName(draftContext.Production.Catalog.Corridors.Single(d=>d.CorridorDefinitionId==edge.CorridorDefinitionId).LocalizationKey);
+                return;
+            }
             if (selectedRoomId != null)
             {
                 var floor = renderState.Floors.Single(f => f.FloorInstanceId == selectedFloor);
@@ -254,7 +278,7 @@ namespace DungeonBuilder.M0
             if (!HasCanonicalRuntime()) return false;
             var result = root.SaveService.CommitDungeonDraft(root.Save, draft);
             if (!result.IsSuccess) { feedback = result.Reason; Present(); return false; }
-            feedback = draft.Reason ?? "ui.dungeon.committed"; draft = null; CloseSheet();
+            feedback = draft.Reason ?? "ui.dungeon.committed"; draft = null; CloseSheet(); detailsCollapsed=false;
             renderState = draftContext.Copy(root.Save.validatedCanonicalSpatialState); RebuildFloor(false); Present(); return true;
         }
         private void ReviewDiscard()
@@ -263,7 +287,7 @@ namespace DungeonBuilder.M0
         {
             if (!HasCanonicalRuntime()) return false;
             if (draft == null || !draft.Discard()) { feedback = draft?.Reason; Present(); return false; }
-            draft = null; feedback = "ui.dungeon.discarded"; CloseSheet();
+            draft = null; feedback = "ui.dungeon.discarded"; CloseSheet(); detailsCollapsed=false;
             renderState = draftContext.Copy(root.Save.validatedCanonicalSpatialState); RebuildFloor(false); Present(); return true;
         }
         private void OfferRecovery()
@@ -316,7 +340,20 @@ namespace DungeonBuilder.M0
         {
             if (!HasCanonicalRuntime()) return;
             if (!IsEditing && draftContext.Fingerprint(renderState) != draftContext.Fingerprint(save.validatedCanonicalSpatialState))
-            { renderState = draftContext.Copy(save.validatedCanonicalSpatialState); RebuildFloor(false); }
+            {
+                renderState = draftContext.Copy(save.validatedCanonicalSpatialState);
+                var floor=renderState.Floors.SingleOrDefault(f=>f.FloorInstanceId==selectedFloor);
+                if ((selected!=null && floor?.RoomContents.Assignments.Any(a=>a.AssignmentId==selected.AssignmentId)!=true) ||
+                    (selectedRoomId!=null && floor?.Layout.Rooms.Any(r=>r.RoomInstanceId==selectedRoomId)!=true) ||
+                    (selectedEdgeId!=null && floor?.Layout.Edges.Any(e=>e.EdgeId==selectedEdgeId)!=true)) CloseSheet();
+                else if(selected!=null) selected=floor.RoomContents.Assignments.Single(a=>a.AssignmentId==selected.AssignmentId);
+                // An overview follows newly published geometry, including Bootstrap starter
+                // construction after an empty boot. Deliberate pan/zoom/focus remains retained.
+                RebuildFloor(autoFit);
+                if(selectedRoomId!=null) world.SelectRoomFootprint(selectedRoomId);
+                else if(selected!=null) world.SelectContent(selected);
+                else if(selectedEdgeId!=null) world.SelectCorridorFootprint(selectedEdgeId);
+            }
             if (IsEditing && draftContext.Fingerprint(save.validatedCanonicalSpatialState) != draft.BaselineFingerprint)
                 feedback = TransactionalDungeonDraft.StaleReason;
             Present();
@@ -336,14 +373,7 @@ namespace DungeonBuilder.M0
             RefreshEconomy();
             viewport.Configure(world.Bounds, worldCamera.pixelRect.width > 0 ? worldCamera.pixelRect : new Rect(0, 0, Screen.width, Screen.height), reset);
             ApplyCamera();
-            var floors = document.rootVisualElement.Q("floors"); floors.Clear();
-            foreach (var floor in renderState.Floors.OrderBy(f => f.FloorIndex).ThenBy(f => f.FloorInstanceId, StringComparer.Ordinal))
-            {
-                string id = floor.FloorInstanceId;
-                var button = new Button(() => SelectFloor(id)) { text = Format("ui.dungeon.floor", floor.FloorIndex + 1) +
-                    (draft?.FloorChanged(id) == true ? Text("ui.dungeon.floor_changed") : string.Empty) };
-                if (id == selectedFloor) button.AddToClassList("selected-floor"); floors.Add(button);
-            }
+            PresentFloorRail();
             SetTextSize(textSize);
         }
         public void SelectFloor(string id)
@@ -382,6 +412,7 @@ namespace DungeonBuilder.M0
             }
             world.SetEdit(IsEditing);
             PresentConstruction();
+            PresentComposition();
         }
         private void PresentHud()
         {
@@ -427,6 +458,7 @@ namespace DungeonBuilder.M0
         {
             textSize = size;
             if (!initialized) return;
+            safe.EnableInClassList("large-text",size==DungeonTextSize.Large);
             float font = presentationPolicy.Text(size);
             foreach (var text in document.rootVisualElement.Query<TextElement>().ToList()) text.style.fontSize = font;
             var platform = Application.platform == RuntimePlatform.Android ? DungeonTargetPlatform.Android :
@@ -445,8 +477,11 @@ namespace DungeonBuilder.M0
         private void Layout()
         {
             lastSafe = Screen.safeArea; lastResolution = new Vector2(Screen.width, Screen.height);
+            // Keep the existing pixel/panel transform explicit at every viewport boundary.
+            document.panelSettings.scale = Mathf.Max(1, Mathf.Min(Screen.width,Screen.height) / presentationPolicy.ReferenceShortSide);
             ApplySafeArea(lastSafe, lastResolution); SetTextSize(textSize);
             safe.EnableInClassList("landscape", Screen.width > Screen.height);
+            PresentComposition();
             viewportElement.UnregisterCallback<GeometryChangedEvent>(ViewportGeometry);
             viewportElement.RegisterCallback<GeometryChangedEvent>(ViewportGeometry);
         }
@@ -501,7 +536,11 @@ namespace DungeonBuilder.M0
                 point = Mouse.current.position.ReadValue(); pressed = Mouse.current.leftButton.isPressed; id = Mouse.current.deviceId;
                 float wheel = Mouse.current.scroll.ReadValue().y;
                 if (wheel != 0 && !IsChrome(point, id) && viewport.ScreenRect.Contains(point))
-                { autoFit = false; viewport.Zoom(Mathf.Exp(wheel / presentationPolicy.AndroidBaselineDpi), point); ApplyCamera(); }
+                {
+                    bool nativeWindowsRange = InputSystem.settings.scrollDeltaBehavior == InputSettings.ScrollDeltaBehavior.KeepPlatformSpecificInputRange &&
+                        (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor);
+                    autoFit = false; viewport.Zoom(presentationPolicy.WheelZoomRatio(wheel, nativeWindowsRange), point); ApplyCamera();
+                }
             }
             if (pressed && !pointerDown)
             { primaryTouchId = id; gesture.Begin(point, IsChrome(point, id) || !viewport.ScreenRect.Contains(point)); pointerDown = true; }
@@ -524,10 +563,15 @@ namespace DungeonBuilder.M0
         private void SetLegacy(bool value)
         {
             legacy = value;
+            var legacyButton=document.rootVisualElement.Q<Button>("legacy");
+            if(value) safe.Add(legacyButton);
+            else document.rootVisualElement.Q("sessionActions").Add(legacyButton);
+            legacyButton.EnableInClassList("legacy-overlay",value);
             if (root.overlay != null)
             { root.overlay.enabled = value; if (root.overlay.overlayText != null) root.overlay.overlayText.gameObject.SetActive(value); }
             top.style.display = bottom.style.display = value ? DisplayStyle.None : DisplayStyle.Flex;
-            document.rootVisualElement.Q<Button>("legacy").text = Text(value ? "ui.dungeon.return" : "ui.dungeon.legacy");
+            document.rootVisualElement.Q("floorRail").style.display = value ? DisplayStyle.None : DisplayStyle.Flex;
+            legacyButton.text = Text(value ? "ui.dungeon.return" : "ui.dungeon.legacy");
         }
         private void OnApplicationPause(bool paused) { if (paused) Flush(); }
         private void OnApplicationQuit() { Flush(); }
@@ -536,7 +580,7 @@ namespace DungeonBuilder.M0
           while (draft != null && draft.Durability == DraftDurability.Pending) if (!draft.FlushNext()) break; }
         private void OnDestroy()
         {
-            if (bootstrapCamera != null) bootstrapCamera.cullingMask = bootstrapCameraMask;
+            if (bootstrapCamera != null) { bootstrapCamera.cullingMask = bootstrapCameraMask; bootstrapCamera.backgroundColor=bootstrapCameraColor; }
             if (root?.SaveService != null) root.SaveService.CanonicalRuntimePublished -= CanonicalPublished;
         }
     }

@@ -9,12 +9,21 @@ namespace DungeonBuilder.M0
     [CreateAssetMenu(menuName = "Dungeon Lord/Production Dungeon Presentation")]
     public sealed class DungeonPresentationPolicy : ScriptableObject
     {
+        public DungeonVisualCatalog Visuals;
+        public float ReferenceShortSide = 720;
+        public Color SelectionColor = new Color(.96f,.76f,.37f);
         public float SmallText = 16, DefaultText = 20, LargeText = 26;
         public float AndroidMinimumDp = 48, IOSMinimumPoints = 44, DesktopMinimumPixels = 48;
         public float AndroidBaselineDpi = 160, IOSPointsPerInch = 163;
         public float FallbackDpi = 160;
         public float Padding = 12, TapSlopPhysicalUnits = 8;
-        public float FitMargin = 1.15f, MinimumViewSize = 2, MaximumZoomFactor = 4;
+        public float FitMargin = 1.15f, MinimumViewSize = 2, MaximumZoomFactor = 8;
+        // Input System uniform wheel units are one per notch, independent of physical DPI.
+        public float WheelZoomExponentPerUnit = .22314355f;
+        public float NativeWindowsWheelUnitsPerNotch = 120;
+        public float WheelZoomRatio(float delta, bool nativeWindowsRange) =>
+            Mathf.Exp(Mathf.Clamp(delta / (nativeWindowsRange ? NativeWindowsWheelUnitsPerNotch : 1) *
+                WheelZoomExponentPerUnit, -Mathf.Log(MaximumZoomFactor), Mathf.Log(MaximumZoomFactor)));
         public float EntitySize = 0.65f, TileSize = 0.92f, PreviewSize = 0.98f;
         public float GridTileSize = 0.96f, FloorBoundaryWidth = 0.04f, MoveAnchorSize = 0.45f;
         public float CameraDepth = -10;
@@ -84,6 +93,13 @@ namespace DungeonBuilder.M0
             Center += before - ScreenToWorld(anchor); Clamp();
         }
         public void Reset() { Center = bounds.center; Size = FitSize; Clamp(); }
+        public void Focus(Rect geometry)
+        {
+            float aspect = ScreenRect.width / Mathf.Max(ScreenRect.height, 1);
+            Center = geometry.center;
+            Size = Mathf.Max(geometry.height, geometry.width / aspect) * 0.5f * policy.FitMargin;
+            Clamp();
+        }
         private void Clamp()
         {
             Size = Mathf.Clamp(Size, Mathf.Max(policy.MinimumViewSize, FitSize / policy.MaximumZoomFactor), FitSize);

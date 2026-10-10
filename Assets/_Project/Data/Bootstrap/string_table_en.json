@@ -3,6 +3,32 @@
   "schemaVersion": 1,
   "language": "en",
   "entries": [
+    {"key": "ui.dungeon.corridor.info", "text": "Corridor tiles: {0} · {1}"},
+    {"key": "ui.dungeon.route.required", "text": "Required route"},
+    {"key": "ui.dungeon.route.optional", "text": "Optional route"},
+    {"key": "ui.dungeon.focus_room", "text": "Focus Room"},
+    {"key": "ui.dungeon.floor_summary", "text": "Floor Summary"},
+    {"key": "ui.dungeon.floors.collapse", "text": "Hide floors"},
+    {"key": "ui.dungeon.floors.expand", "text": "Show floors"},
+    {"key": "ui.dungeon.floors.compact", "text": "Show"},
+    {"key": "ui.dungeon.layout.ready", "text": "Valid"},
+    {"key": "ui.dungeon.layout.blocked", "text": "Blocked"},
+    {"key": "ui.dungeon.floor.active", "text": "Active"},
+    {"key": "ui.dungeon.floor.inactive", "text": "Inactive"},
+    {"key": "ui.dungeon.floor.blocked", "text": " · Blocked"},
+    {"key": "ui.dungeon.floor.info", "text": "{0} · Rooms: {1}\nFloor layout: {2}\nFloor space: {3} used · {4} remaining"},
+    {"key": "ui.dungeon.route.ready", "text": "Ready"},
+    {"key": "ui.dungeon.route.incomplete", "text": "Incomplete"},
+    {"key": "ui.dungeon.room.info", "text": "Monsters: {0} / {1}\nTraps: {2} / {3}\nLoot: {4} / {5}"},
+    {"key": "ui.dungeon.content.info", "text": "Room: {0}\nRoom-local tile: {1}, {2}"},
+    {"key": "ui.dungeon.sheet.inspection", "text": "Selected Object"},
+    {"key": "ui.dungeon.sheet.edit", "text": "Edit · Choose a Category"},
+    {"key": "ui.dungeon.sheet.placement", "text": "Edit · Place Room"},
+    {"key": "ui.dungeon.category.monsters", "text": "Monsters"},
+    {"key": "ui.dungeon.category.traps", "text": "Traps"},
+    {"key": "ui.dungeon.category.loot", "text": "Loot"},
+    {"key": "ui.dungeon.category.deferred", "text": "Room content assignment editing is coming in a later update. Existing objects can be inspected and repositioned."},
+    {"key": "ui.dungeon.empty.title", "text": "Your dungeon awaits"},
     {"key": "ui.dungeon.capacity", "text": "Floor space: {0} used · {1} remaining"},
     {"key": "ui.dungeon.close", "text": "Close"},
     {"key": "ui.dungeon.commit_review", "text": "Save all dungeon changes? Structural costs are recalculated using your current mana. Content repositioning is free. Current runs keep their original dungeon."},
@@ -25,10 +51,10 @@
     {"key": "ui.dungeon.edit_mode", "text": "Edit Mode · Local draft"},
     {"key": "ui.dungeon.floor", "text": "Floor {0}"},
     {"key": "ui.dungeon.floor_changed", "text": " · Edited"},
-    {"key": "ui.dungeon.hud.heat", "text": "Heat\n{0}"},
-    {"key": "ui.dungeon.hud.rate", "text": "Mana/hour\n{0}"},
-    {"key": "ui.dungeon.hud.total", "text": "Total Mana\n{0}"},
-    {"key": "ui.dungeon.hud.usable", "text": "Usable Mana\n{0}"},
+    {"key": "ui.dungeon.hud.heat", "text": "Heat\n<b>{0}</b>"},
+    {"key": "ui.dungeon.hud.rate", "text": "Mana/hour\n<b>{0}</b>"},
+    {"key": "ui.dungeon.hud.total", "text": "Total Mana\n<b>{0}</b>"},
+    {"key": "ui.dungeon.hud.usable", "text": "Usable Mana\n<b>{0}</b>"},
     {"key": "ui.dungeon.legacy", "text": "Development tools"},
     {"key": "ui.dungeon.move", "text": "Move"},
     {"key": "ui.dungeon.move_hint", "text": "Tap a target tile in this room."},
@@ -40,7 +66,7 @@
     {"key": "ui.dungeon.draft.context_stale", "text": "The room movement rules have changed. Discard this draft and start editing again."},
     {"key": "ui.dungeon.normal", "text": "Dungeon"},
     {"key": "ui.dungeon.recovery", "text": "A protected local draft was recovered. Resume Editing or discard it. Your committed dungeon has not changed."},
-    {"key": "ui.dungeon.reset", "text": "Focus floor"},
+    {"key": "ui.dungeon.reset", "text": "Fit Floor"},
     {"key": "ui.dungeon.resume", "text": "Resume Editing"},
     {"key": "ui.dungeon.retry", "text": "Retry protection"},
     {"key": "ui.dungeon.return", "text": "Return to Dungeon"},
@@ -3230,7 +3256,7 @@
     },
     {
       "key": "structural.edit.connection_unavailable",
-      "text": "This anchor cannot connect the room to the required route. Choose a highlighted diamond anchor or another terminal side."
+      "text": "No aligned doorway or straight corridor connects this anchor to the required route. Choose a highlighted diamond, rotate the room or change its terminal side. Bent corridors are not available yet."
     },
     {
       "key": "structural.edit.connection_ambiguous",
@@ -3238,7 +3264,7 @@
     },
     {
       "key": "structural.edit.socket_incompatible",
-      "text": "The selected connection sockets are incompatible."
+      "text": "These connection socket types are incompatible. Choose another terminal side or room."
     },
     {
       "key": "structural.edit.connection_point_invalid",
@@ -3266,7 +3292,7 @@
     },
     {
       "key": "structural.edit.corridor_length_invalid",
-      "text": "The straight corridor length is not supported."
+      "text": "This aligned straight corridor is outside the authored length limits. Move closer or farther along a highlighted anchor. Bent corridors are not available yet."
     },
     {
       "key": "ui.structural.heading",
@@ -3326,7 +3352,7 @@
     },
     {
       "key": "ui.structural.preview.valid.format",
-      "text": "Valid preview: {0}. Footprint {1} tiles; {2}; floor space {3} used, {4} remaining."
+      "text": "Valid preview: {0}. Footprint {1}; {2}; floor space {3} used, {4} remaining."
     },
     {
       "key": "ui.structural.preview.invalid.format",
@@ -3498,7 +3524,7 @@
     },
     {
       "key": "ui.structural.renovation.corridor.format",
-      "text": "{0}: {1} tiles {2}"
+      "text": "{0}: {1} {2}"
     },
     {
       "key": "ui.structural.renovation.contents.format",
@@ -3683,7 +3709,14 @@
     {"key": "ui.dungeon.construction.draft_empty", "text": "Current draft: no confirmed changes."},
     {"key": "ui.dungeon.construction.draft_quote", "text": "Current draft: {0} mana cost · {1} mana after Save"},
     {"key": "ui.dungeon.construction.rooms", "text": "Rooms"},
-    {"key": "ui.dungeon.construction.choose_room", "text": "Choose a room to extend the end of this floor's required route."},
+    {"key": "ui.dungeon.display", "text": "Display"},
+    {"key": "ui.dungeon.floor.info_landscape", "text": "{0} · Rooms: {1} · Floor layout: {2} · Floor space: {3} used · {4} remaining"},
+    {"key": "ui.dungeon.display.close", "text": "Close display settings"},
+    {"key": "ui.dungeon.construction.browse", "text": "More rooms: swipe or scroll →"},
+    {"key": "ui.dungeon.construction.card_size", "text": "{0} × {1}"},
+    {"key": "ui.dungeon.construction.card_cost", "text": "Base {0} mana"},
+    {"key": "ui.dungeon.construction.selected_room", "text": "✓ Selected: {0}"},
+    {"key": "ui.dungeon.construction.choose_room", "text": "Choose a room. Diamonds mark supported anchors for aligned doorways or straight corridors."},
     {"key": "ui.dungeon.construction.card", "text": "{0}\n{1} × {2} tiles\nRoom base: {3} mana"},
     {"key": "ui.dungeon.construction.properties", "text": "{0} · {1} × {2} tiles\nCapacity: {3} monsters · {4} traps · {5} loot nodes"},
     {"key": "ui.dungeon.construction.hint", "text": "Tap a diamond to preview placement."},

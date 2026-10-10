@@ -1,0 +1,126 @@
+{
+  "reviewed_head": "4d3ed8b1efaf4b9613eaf68e32f6e359645c3ea2",
+  "note": "Reviewed runtime/USS plus capture-only fixture; no production change",
+  "screenshots": [
+    {
+      "path": "before/composition-floorhud-blocked-Default-1920x1080.png",
+      "sha256": "c93fc27a606e01689620a58cea617a1786e098b3472225ed2fdcb0fc138f43ec"
+    },
+    {
+      "path": "before/composition-floorhud-blocked-Default-720x1280.png",
+      "sha256": "d4c6dc139ebdb0e975996487e1c7747ec703441af7d744fd7e88b6be6c499a2c"
+    },
+    {
+      "path": "before/composition-floorhud-blocked-Large-1920x1080.png",
+      "sha256": "22e9175dd4056e55043fc2ec187d93c10d92f643966820d44a81c45a55aa4475"
+    },
+    {
+      "path": "before/composition-floorhud-blocked-Large-720x1280.png",
+      "sha256": "22f974bf950a3e3eea50d706c3b515a6fd721f672b2e8052ed596bedf319e145"
+    },
+    {
+      "path": "before/composition-floorhud-blocked-Small-1920x1080.png",
+      "sha256": "e08a3c54642be02d73717a58cf43b2ff36bd14f6eb4e98496ac18646dba48ec5"
+    },
+    {
+      "path": "before/composition-floorhud-blocked-Small-720x1280.png",
+      "sha256": "6f2ef50b2b652fdd53905073652c12a68c2cb973b9b428b5f06a7349d47a57fa"
+    },
+    {
+      "path": "before/composition-floorhud-collapsed-Default-1920x1080.png",
+      "sha256": "345a5b452077972bc2c2efa4b88b1c8b234cbff906a7cee15e4bb5e6ce337f3f"
+    },
+    {
+      "path": "before/composition-floorhud-collapsed-Default-720x1280.png",
+      "sha256": "644214dedd6f7128597508210711d989b5fceb11b0c9fec2386bcd056ab34c13"
+    },
+    {
+      "path": "before/composition-floorhud-collapsed-Large-1920x1080.png",
+      "sha256": "e3c781845262ee827160adb99c4b5d7d0624475f7d205e9b0e7e747177b39c0f"
+    },
+    {
+      "path": "before/composition-floorhud-collapsed-Large-720x1280.png",
+      "sha256": "0f499ac85e4d6a03d10f71558410bfcb73c12cf9603d188a18924cd744cb011d"
+    },
+    {
+      "path": "before/composition-floorhud-collapsed-Small-1920x1080.png",
+      "sha256": "f8e5508e43c3c4f56842a6553f4716ae93b2abd9ada61d8b3d9d861f461f6662"
+    },
+    {
+      "path": "before/composition-floorhud-collapsed-Small-720x1280.png",
+      "sha256": "4b6c2fc5c1586433153f226e5e171d49df73a874b59c648eefa088a5f444f6b7"
+    },
+    {
+      "path": "before/composition-floorhud-focused-Default-1920x1080.png",
+      "sha256": "fe8257992215c81c85a54632a4a723693f0b184af83855ed12fee8291f49d2ec"
+    },
+    {
+      "path": "before/composition-floorhud-focused-Default-720x1280.png",
+      "sha256": "977b88b94bf0e5a99a5a95b9c8a91db6260eabc40228a0957b86af8f3db52f55"
+    },
+    {
+      "path": "before/composition-floorhud-focused-Large-1920x1080.png",
+      "sha256": "1f396f9b63bc966e9f41d8262b7b5ffbe2d2cf091e89fb5b3d93e0e897bdb420"
+    },
+    {
+      "path": "before/composition-floorhud-focused-Large-720x1280.png",
+      "sha256": "0b361aede8c3aeb28776e4ebf65a63739d327154876ff2c2eddd8ebfe18a8058"
+    },
+    {
+      "path": "before/composition-floorhud-focused-Small-1920x1080.png",
+      "sha256": "08d454f5052bcfd59a1efa3e30aecc698a2e36f3b66b426c69926c4f195c424b"
+    },
+    {
+      "path": "before/composition-floorhud-focused-Small-720x1280.png",
+      "sha256": "159cfcaff562460baa55132d396fa70fbb727ed9a64fc4d133ed7ae3091175eb"
+    },
+    {
+      "path": "before/composition-floorhud-inactive-Default-1920x1080.png",
+      "sha256": "d73d96f1b0b6c34db34cd5020e54afc1c76e652eae261fc5a9e314f82d5e1496"
+    },
+    {
+      "path": "before/composition-floorhud-inactive-Default-720x1280.png",
+      "sha256": "ba23e463d1d6f629b570776d709fdc43f85535f6e6ec4e33b637c4cf4e8e4b30"
+    },
+    {
+      "path": "before/composition-floorhud-inactive-Large-1920x1080.png",
+      "sha256": "3a637986384a60730d94eba49d7d88b449e3ba00379230e8bdd280c9acfe1709"
+    },
+    {
+      "path": "before/composition-floorhud-inactive-Large-720x1280.png",
+      "sha256": "4cc43bdf1d1694337123ea2f0578bb84a29639a81f979130a84f6a4be2d0e7be"
+    },
+    {
+      "path": "before/composition-floorhud-inactive-Small-1920x1080.png",
+      "sha256": "d563899e5fd10e289cb0eec88915706dc2162b5ec6968b6b623dd34e5bac922c"
+    },
+    {
+      "path": "before/composition-floorhud-inactive-Small-720x1280.png",
+      "sha256": "af36ce913755df7dfb453b333fa1087422031ec211079e2a3f119bd1f3267055"
+    },
+    {
+      "path": "before/composition-floorhud-normal-Default-1920x1080.png",
+      "sha256": "fd66014377298197ab5a3d36f3ed05121010d5e8ecb85e27c1ac95eb8595422c"
+    },
+    {
+      "path": "before/composition-floorhud-normal-Default-720x1280.png",
+      "sha256": "636735fddeedf22f7662a28a4ec0fb72d8c85d4b1371e26c8dcfa56ccfb74c63"
+    },
+    {
+      "path": "before/composition-floorhud-normal-Large-1920x1080.png",
+      "sha256": "8181476aea565ec9d0b85a7ec549fee49cd5839924201502263716d16f1fea9d"
+    },
+    {
+      "path": "before/composition-floorhud-normal-Large-720x1280.png",
+      "sha256": "c43b88e21a74645f5aaf1e9fe85ba42744d8dee5065dfb559731cc449890947b"
+    },
+    {
+      "path": "before/composition-floorhud-normal-Small-1920x1080.png",
+      "sha256": "58404508d0e96aad44e3c3f642b6927a66a736ead18f892b72370dd540530d5e"
+    },
+    {
+      "path": "before/composition-floorhud-normal-Small-720x1280.png",
+      "sha256": "7d4dff654429e4223e145667bb5a59bfddf958678c67e55822148aff42f999e2"
+    }
+  ]
+}

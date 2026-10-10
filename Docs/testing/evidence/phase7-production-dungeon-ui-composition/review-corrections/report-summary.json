@@ -1,0 +1,216 @@
+[
+  {
+    "path": "TestResults/ui-review-corrected-focused-editmode.xml",
+    "sha256": "7b25ee0fb8e2c21a2264dde4b5adf8a7b33b9b808d08367783c135bcc908a2f0",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "3",
+      "result": "Passed",
+      "total": "3",
+      "passed": "3",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-08 23:12:06Z",
+      "end-time": "2026-10-08 23:12:08Z",
+      "duration": "1.808639"
+    },
+    "observed_cases": 3,
+    "failures": [],
+    "skips": [],
+    "observations": [
+      "Isolated scene boot 1: phase7a4-scene-70a766281fd14fc0949e7607452f6499.json\n[2026-10-08 23:12:00 UTC] [INFO] Entered BootState.\n[2026-10-08 23:12:00 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-08 23:12:00 UTC] [INFO] M0 init complete.\n[2026-10-08 23:12:00 UTC] [INFO] Entered HomeStubState.\n[2026-10-08 23:12:00 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nRail (720, 1280) Small: viewport 592 -> 648, hit width=60\nRail (720, 1280) Default: viewport 592 -> 648, hit width=60\nRail (720, 1280) Large: viewport 564 -> 632, hit width=76\nRail (1080, 1920) Small: viewport 888 -> 972, hit width=60\nRail (1080, 1920) Default: viewport 888 -> 972, hit width=60\nRail (1080, 1920) Large: viewport 846 -> 948, hit width=76\nRail (1920, 1080) Small: viewport 1728 -> 1812, hit width=60\nRail (1920, 1080) Default: viewport 1728 -> 1812, hit width=60\nRail (1920, 1080) Large: viewport 1686 -> 1788, hit width=76\n12 focus/fit/sheet/tick cycles: reconstruction=4, pooled renderers=3, draft commands=0\n"
+    ]
+  },
+  {
+    "path": "TestResults/ui-review-focused-editmode.xml",
+    "sha256": "62f34fc50e65d1560388fcfcfd853b99db6683de510a16082e9b8f20d8b5422d",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "33",
+      "result": "Failed(Child)",
+      "total": "33",
+      "passed": "32",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-08 23:02:38Z",
+      "end-time": "2026-10-08 23:02:40Z",
+      "duration": "1.666349"
+    },
+    "observed_cases": 33,
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CompositionFloorLayoutSummaryDoesNotMisreportRequiredRoute",
+        "message": "  Expected: String containing \"Floor layout: Blocked\" and not containing \"Required route:\"\n  But was:  \"Active \u00b7 Rooms: 1\nFloor layout: Valid\nFloor space: 26 used \u00b7 34 remaining\"\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CompositionFloorLayoutSummaryDoesNotMisreportRequiredRoute>d__49.MoveNext () [0x001e3] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-review-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonCompositionSceneTests.cs:167\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": [],
+    "observations": [
+      "Isolated scene boot 1: phase7a4-scene-4024387aa3044476bf7c7ea0a4d77709.json\n[2026-10-08 23:00:29 UTC] [INFO] Entered BootState.\n[2026-10-08 23:00:30 UTC] [INFO] Offline passive mana grant persisted.\n[2026-10-08 23:00:30 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-08 23:00:30 UTC] [INFO] M0 init complete.\n[2026-10-08 23:00:30 UTC] [INFO] Entered HomeStubState.\n[2026-10-08 23:00:30 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nRail (720, 1280) Small: viewport 592 -> 656, hit width=52\nRail (720, 1280) Default: viewport 592 -> 656, hit width=52\nRail (720, 1280) Large: viewport 564 -> 656, hit width=52\nRail (1080, 1920) Small: viewport 888 -> 984, hit width=52\nRail (1080, 1920) Default: viewport 888 -> 984, hit width=52\nRail (1080, 1920) Large: viewport 846 -> 984, hit width=52\nRail (1920, 1080) Small: viewport 1728 -> 1824, hit width=52\nRail (1920, 1080) Default: viewport 1728 -> 1824, hit width=52\nRail (1920, 1080) Large: viewport 1686 -> 1824, hit width=52\n12 focus/fit/sheet/tick cycles: reconstruction=4, pooled renderers=3, draft commands=0\n"
+    ]
+  },
+  {
+    "path": "TestResults/ui-review-focused-final-editmode.xml",
+    "sha256": "0f3e430dbdb63399d4478e4b0cfe9b3c0b63bc5db4e9faee0c28f0e415cfaf34",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "33",
+      "result": "Failed(Child)",
+      "total": "33",
+      "passed": "32",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-08 23:08:53Z",
+      "end-time": "2026-10-08 23:08:55Z",
+      "duration": "1.5359677"
+    },
+    "observed_cases": 33,
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CompositionFloorLayoutSummaryDoesNotMisreportRequiredRoute",
+        "message": "  Expected: String containing \"Floor layout: Blocked\" and not containing \"Required route:\"\n  But was:  \"Active \u00b7 Rooms: 1\nFloor layout: Valid\nFloor space: 26 used \u00b7 34 remaining\"\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CompositionFloorLayoutSummaryDoesNotMisreportRequiredRoute>d__49.MoveNext () [0x00203] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-review-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonCompositionSceneTests.cs:170\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": [],
+    "observations": [
+      "Isolated scene boot 1: phase7a4-scene-e81ec52c922a4e4b90c7fbf37925ff9b.json\n[2026-10-08 23:06:49 UTC] [INFO] Entered BootState.\n[2026-10-08 23:06:50 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-08 23:06:50 UTC] [INFO] M0 init complete.\n[2026-10-08 23:06:50 UTC] [INFO] Entered HomeStubState.\n[2026-10-08 23:06:50 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nRail (720, 1280) Small: viewport 592 -> 656, hit width=52\nRail (720, 1280) Default: viewport 592 -> 656, hit width=52\nRail (720, 1280) Large: viewport 564 -> 656, hit width=52\nRail (1080, 1920) Small: viewport 888 -> 984, hit width=52\nRail (1080, 1920) Default: viewport 888 -> 984, hit width=52\nRail (1080, 1920) Large: viewport 846 -> 984, hit width=52\nRail (1920, 1080) Small: viewport 1728 -> 1824, hit width=52\nRail (1920, 1080) Default: viewport 1728 -> 1824, hit width=52\nRail (1920, 1080) Large: viewport 1686 -> 1824, hit width=52\n12 focus/fit/sheet/tick cycles: reconstruction=4, pooled renderers=3, draft commands=0\n"
+    ]
+  },
+  {
+    "path": "TestResults/ui-review-focused-playmode.xml",
+    "sha256": "82bebb3228fb2d9ea480d789b8bb02b15086dfd02c1b41e45a9b7a074efecfe0",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "29",
+      "result": "Passed",
+      "total": "29",
+      "passed": "29",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-08 23:13:50Z",
+      "end-time": "2026-10-08 23:14:19Z",
+      "duration": "28.781909"
+    },
+    "observed_cases": 29,
+    "failures": [],
+    "skips": [],
+    "observations": [
+      "Isolated scene boot 1: phase7a4-scene-49191cbce7664066aed3182f42203935.json\n[2026-10-08 23:13:55 UTC] [INFO] Entered BootState.\n[2026-10-08 23:13:55 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-08 23:13:55 UTC] [INFO] M0 init complete.\n[2026-10-08 23:13:55 UTC] [INFO] Entered HomeStubState.\n[2026-10-08 23:13:55 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nRail (720, 1280) Small: viewport 592 -> 648, hit width=60\nRail (720, 1280) Default: viewport 592 -> 648, hit width=60\nRail (720, 1280) Large: viewport 564 -> 632, hit width=76\nRail (1080, 1920) Small: viewport 888 -> 972, hit width=60\nRail (1080, 1920) Default: viewport 888 -> 972, hit width=60\nRail (1080, 1920) Large: viewport 846 -> 948, hit width=76\nRail (1920, 1080) Small: viewport 1728 -> 1812, hit width=60\nRail (1920, 1080) Default: viewport 1728 -> 1812, hit width=60\nRail (1920, 1080) Large: viewport 1686 -> 1788, hit width=76\n12 focus/fit/sheet/tick cycles: reconstruction=4, pooled renderers=3, draft commands=0\n"
+    ]
+  },
+  {
+    "path": "TestResults/ui-review-full-editmode.xml",
+    "sha256": "50dba3ba641fe43900ac145d483419f46f236d20b7c02aaa1f98aa74134aafab",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "1613",
+      "result": "Skipped:Ignored",
+      "total": "1613",
+      "passed": "1612",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-08 23:22:50Z",
+      "end-time": "2026-10-08 23:23:08Z",
+      "duration": "17.6898454"
+    },
+    "observed_cases": 1613,
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "observations": [
+      "Isolated scene boot 1: phase7a4-scene-0defdc55be5341589bf31f93525d516c.json\n[2026-10-08 23:20:45 UTC] [INFO] Entered BootState.\n[2026-10-08 23:20:45 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-08 23:20:45 UTC] [INFO] M0 init complete.\n[2026-10-08 23:20:45 UTC] [INFO] Entered HomeStubState.\n[2026-10-08 23:20:45 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nRail (720, 1280) Small: viewport 592 -> 648, hit width=60\nRail (720, 1280) Default: viewport 592 -> 648, hit width=60\nRail (720, 1280) Large: viewport 564 -> 632, hit width=76\nRail (1080, 1920) Small: viewport 888 -> 972, hit width=60\nRail (1080, 1920) Default: viewport 888 -> 972, hit width=60\nRail (1080, 1920) Large: viewport 846 -> 948, hit width=76\nRail (1920, 1080) Small: viewport 1728 -> 1812, hit width=60\nRail (1920, 1080) Default: viewport 1728 -> 1812, hit width=60\nRail (1920, 1080) Large: viewport 1686 -> 1788, hit width=76\n12 focus/fit/sheet/tick cycles: reconstruction=4, pooled renderers=3, draft commands=0\n"
+    ]
+  },
+  {
+    "path": "TestResults/ui-review-full-playmode.xml",
+    "sha256": "cafed90b7d812d749544afd0c3bc7102491a0cb3a15a0f161714ad98a70560c6",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "3051",
+      "result": "Skipped:Ignored",
+      "total": "3051",
+      "passed": "3041",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-08 23:31:23Z",
+      "end-time": "2026-10-08 23:35:14Z",
+      "duration": "230.9288664"
+    },
+    "observed_cases": 3051,
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "observations": [
+      "Isolated scene boot 1: phase7a4-scene-d9da92334fe649609e6aa0cb2bc289bb.json\n[2026-10-08 23:34:50 UTC] [INFO] Entered BootState.\n[2026-10-08 23:34:50 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-08 23:34:50 UTC] [INFO] M0 init complete.\n[2026-10-08 23:34:50 UTC] [INFO] Entered HomeStubState.\n[2026-10-08 23:34:50 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nRail (720, 1280) Small: viewport 592 -> 648, hit width=60\nRail (720, 1280) Default: viewport 592 -> 648, hit width=60\nRail (720, 1280) Large: viewport 564 -> 632, hit width=76\nRail (1080, 1920) Small: viewport 888 -> 972, hit width=60\nRail (1080, 1920) Default: viewport 888 -> 972, hit width=60\nRail (1080, 1920) Large: viewport 846 -> 948, hit width=76\nRail (1920, 1080) Small: viewport 1728 -> 1812, hit width=60\nRail (1920, 1080) Default: viewport 1728 -> 1812, hit width=60\nRail (1920, 1080) Large: viewport 1686 -> 1788, hit width=76\n12 focus/fit/sheet/tick cycles: reconstruction=4, pooled renderers=3, draft commands=0\n"
+    ]
+  }
+]

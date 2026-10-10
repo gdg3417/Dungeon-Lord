@@ -1,0 +1,217 @@
+[
+  {
+    "path": "Temp/ui-composition-art-final-import.log",
+    "redactions": 1,
+    "shared_sha256": "ebdffdce0f73d9c4fc02bac94fec0dbffb6f23aded39793c970c877333f87328",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-art-import.log",
+    "redactions": 1,
+    "shared_sha256": "46ee528c0cc4759c47d28d5b922bcec69b62b570b9b0fb4b045c0552dce4470a",
+    "compiler_warnings": [
+      "Assets\\_Project\\Editor\\DungeonVisualAssetAuthoring.cs(30,21): warning CS0618: 'TextureImporter.spritesheet' is obsolete: 'Support for accessing sprite meta data through spritesheet has been removed. Please use the UnityEditor.U2D.Sprites.ISpriteEditorDataProvider interface instead.'"
+    ],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-baseline-approved.log",
+    "redactions": 0,
+    "shared_sha256": "f918ea6c81a9dbd2da36ee041726e18bcf1d1f4c94227c30b70145407106ad3a",
+    "compiler_warnings": [],
+    "compiler_errors": [
+      "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonCompositionSceneTests.cs(17,10): error CS0246: The type or namespace name 'UnityTest' could not be found (are you missing a using directive or an assembly reference?)",
+      "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonCompositionSceneTests.cs(17,10): error CS0246: The type or namespace name 'UnityTestAttribute' could not be found (are you missing a using directive or an assembly reference?)"
+    ]
+  },
+  {
+    "path": "Temp/ui-composition-baseline-capture.log",
+    "redactions": 0,
+    "shared_sha256": "d1ed261ac0de9f924da624e5ef46667a6295a2c2e09cf6a8611eefe8a48ad47c",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-baseline.log",
+    "redactions": 0,
+    "shared_sha256": "291d4d94efe0e37f4ed38691907bc9e5e1bb9420324d6c6b727ab2fe808f42dc",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-bounded-full-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "85758ea481202e43a4a90a54e5151f645090d16ced578e5ad4743860f18b7779",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-clean-focused-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "2150d0a98b35946a5e090d933759124f907c2aaa72e824e54a6f723424d4b8da",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-final-full-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "cab60d9bdf5003eda520597c4847008b5c0f01087458e2749750299b4561c2f9",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-final-full-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "07837c67567510ba102192b4afe3e693d887e92f99bf6545830808db428812f3",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-final-scene-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "0f166d4a3b74dc8a888e7edc2727c383c7cf5cc2cfd948b6d6f886aafe4ff678",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-final-scene-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "943410ea9bd6696b8281efc0215ebde2e3af751e92dc65eab82a41b912d86697",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-focused-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "136b29749df1054049c0efc4b66b2f2ee3c536e0fba108c0819138422cd0ecb5",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-focused-final-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "09b5a83a871bcb23d85d8e54b96d9f00f4915c591ba65a84a8e42a58643ace56",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-full-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "61f3a365490fbda11b799912d1d5d03f6929f796f3a1deaf04b7daab7ab7a405",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-full-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "da36bd23673ff6f5cee544de2f8d24e7097d00e698cb20de3209f1d846d91241",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-header-correction-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "54503f16dd7aab0faf973bb1414e82dc31a63ac552b02db078baff7b0fcf529d",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-input-diagnostic.log",
+    "redactions": 1,
+    "shared_sha256": "b9a460809b447dcba4f8b251f3210d9da26a80f9a3b0a4040b52135e52a2d6cf",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-input-order-diagnostic.log",
+    "redactions": 1,
+    "shared_sha256": "c109bb1176bd2ad5e7d51097aa046dfe151cdff3da04976e90634052fb0a2800",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-layout-correction.log",
+    "redactions": 1,
+    "shared_sha256": "214f3d8fe51080e48140f9b283f846bfddccc2b6cac56b69fc4c327ad3a6fe8d",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-layout-diagnostic.log",
+    "redactions": 1,
+    "shared_sha256": "cebd3af8fd1b7fce7de517ed208c01b0b5ed15f738133a7cb899044f09091d7b",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-layout-final.log",
+    "redactions": 1,
+    "shared_sha256": "d5895cc38284f8c227f48fa2b4c52d3ad92c0e57fb53e06bac3024de9020d6da",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-qualified-input-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "4cce590beea8366ea51549bc75e3243ee567ddc906a392e2cd482ff2fdd0d754",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-qualified-scene-playmode.log",
+    "redactions": 1,
+    "shared_sha256": "fe666e8b122669e489427c9674ae9d280dd655c4a0568e22a89180ca270fd7b7",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-qualified-visual-assets.log",
+    "redactions": 1,
+    "shared_sha256": "755b3977f038e890ad132fa3c6a76ca5f8a06249d30ddefde91d04887695dbfd",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-visual-checkpoint.log",
+    "redactions": 1,
+    "shared_sha256": "93fb8887f672dfe542060ae9cc9e31da81c989c5db5a2629cd3cbea5a84f64ee",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-visual-first.log",
+    "redactions": 1,
+    "shared_sha256": "9d273e6a3f76100af88c24d4a24fa887328bf65ab96cf6547ea0a97b69180d63",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-visual-review.log",
+    "redactions": 1,
+    "shared_sha256": "1b300202a91c4cc9f06dc831569c996bf9119891b80cb9f386728d40b499eb6d",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-visual-second.log",
+    "redactions": 1,
+    "shared_sha256": "3cbec538bcab9704ae28be4d146cf4e05b5caf68ddcdb38675163e1f0d8bc300",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-visual-third.log",
+    "redactions": 1,
+    "shared_sha256": "cae8aaf810ec02037ad040a0d39273909272537843e106b5ee8be6e6d55d52e7",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-composition-windows-build.log",
+    "redactions": 0,
+    "shared_sha256": "5589c253eb81988ede7701dc07bf67a573012f4ad5c7bab17e6e290a135bff41",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  }
+]

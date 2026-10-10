@@ -1,0 +1,7 @@
+Log: 1 URP assets included in build
+- UniversalRP - Assets/Settings/UniversalRP.asset
+	 - Renderer2D - Assets/Settings/Renderer2D.asset - UnityEngine.Rendering.Universal.Renderer2DData
+
+Log: Including Unity Splash Screen logo because 'Show Unity Logo' is enabled.
+Warning: Access token is empty. Native symbols will not be uploaded for this build. Please make sure you are signed in to the Unity Cloud.
+Log: Stripping Runtime Debug Shader Variants, you won't be able to use some features of Rendering Debugger in the Player Build.

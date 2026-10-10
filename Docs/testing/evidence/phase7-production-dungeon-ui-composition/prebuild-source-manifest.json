@@ -1,0 +1,16 @@
+{
+  "branch": "codex/phase7-dungeon-ui-visual-composition",
+  "source_head": "5d850dfe3f2befb4e708c02b6829fcdf1c7bf9b6",
+  "validation_directory": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-final-validation",
+  "failures": [],
+  "permitted_transformations": [
+    "validation save filename only",
+    "text CRLF/LF and UTF-8 BOM normalization"
+  ],
+  "compared_file_count": 1188,
+  "matching_file_count": 1188,
+  "changed_files": [],
+  "full_manifest_sha256": "cffb1a54b7eb20246344bf5f935aeafa7ee7b38992d8aa5982326e2ace977227",
+  "full_manifest_archive": "validation-source-history.zip",
+  "full_manifest_entry": "prebuild-source-manifest.json"
+}

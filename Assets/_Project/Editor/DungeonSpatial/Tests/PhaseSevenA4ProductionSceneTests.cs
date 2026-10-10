@@ -16,7 +16,7 @@ using InputTouchPhase = UnityEngine.InputSystem.TouchPhase;
 namespace DungeonBuilder.M0.Tests
 {
 
-    public abstract class PhaseSevenA4ProductionSceneTests
+    public abstract partial class PhaseSevenA4ProductionSceneTests
     {
         private string filename;
         private TextAsset disposableConfig;
@@ -311,6 +311,15 @@ namespace DungeonBuilder.M0.Tests
                 foreach (var textSize in new[] { DungeonTextSize.Small, DungeonTextSize.Default, DungeonTextSize.Large })
                 {
                     controller.SetTextSize(textSize); for (int i = 0; i < 8; i++) yield return null;
+                    TestContext.WriteLine("Construction layout " + size + " " + textSize + ": " + string.Join("; ", new[] {
+                        "topChrome", "bottomChrome", "viewport", "constructionCategories", "placementContext", "constructionSummary",
+                        "constructionAffordability", "constructionOptions", "placementActions", "contextDetails", "draftSummary", "editActions", "legacy" }
+                        .Select(id => id + "=" + ui.Q(id).worldBound)));
+                    if (size.x == 1280 && textSize == DungeonTextSize.Large)
+                    {
+                        DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("construction-layout-diagnostic-large.png");
+                        yield return null; yield return null;
+                    }
                     foreach (string id in new[] { "roomsCategory", "collapseDetails", "save", "discard", "confirmPlacement", "cancelPlacement" })
                     {
                         var rect = ui.Q(id).worldBound;
@@ -385,6 +394,8 @@ namespace DungeonBuilder.M0.Tests
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1080, 1920);
             controller.ApplySafeArea(new Rect(0, 0, 1080, 1920), new Vector2(1080, 1920));
             for (int i = 0; i < 8; i++) yield return null;
+            Click(document.rootVisualElement.Q<Button>("displaySettings"));
+            for (int i = 0; i < 8; i++) yield return null;
             foreach (var pair in expected)
             {
                 var text = document.rootVisualElement.Q<TextElement>(pair.Key);
@@ -404,6 +415,7 @@ namespace DungeonBuilder.M0.Tests
                 }
             }
             Assert.That(missingThemeWarning, Is.False);
+            Click(document.rootVisualElement.Q<Button>("closeDisplay"));
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("phase7a4-theme-normal-1080x1920.png");
             yield return null;
             LogAssert.NoUnexpectedReceived();
@@ -685,7 +697,7 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(rect.yMax, Is.LessThanOrEqualTo(rootBounds.yMax + 1), id);
                 }
                 var point = ui.Q<Button>("discard").worldBound.center;
-                Assert.That(controller.IsChrome(new Vector2(point.x, Screen.height - point.y)), Is.True);
+                Assert.That(controller.IsChrome(ScreenPoint(point)), Is.True);
                 DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("phase7a4-edit-large-" + size.x + "x" + size.y + ".png");
                 yield return null; yield return null;
             }
@@ -713,6 +725,9 @@ namespace DungeonBuilder.M0.Tests
             }
             foreach (string id in new[] { "save", "discard", "reset" })
                 Assert.That(ui.Q<Button>(id).worldBound.yMax, Is.LessThanOrEqualTo(controller.SafeRoot.worldBound.yMax));
+            Assert.That(ui.Q("constructionCategories").worldBound.yMax,
+                Is.LessThanOrEqualTo(ui.Q("status").worldBound.yMin + 1),
+                "Wrapped HUD must not shrink the sheet header over its status line");
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("phase7a4-long-localization-1080x1920.png");
             yield return null; yield return null;
             Assert.That(controller.Discard(), Is.True);
@@ -781,7 +796,11 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.Discard(), Is.True);
         }
 
-        private static Vector2 ScreenPoint(Vector2 panelPoint) => new Vector2(panelPoint.x, Screen.height - panelPoint.y);
+        private Vector2 ScreenPoint(Vector2 panelPoint)
+        {
+            float scale=controller.GetComponent<UIDocument>().panelSettings.scale;
+            return new Vector2(panelPoint.x*scale,Screen.height-panelPoint.y*scale);
+        }
         [UnityTest]
         public IEnumerator ExplicitDeleteQuiescesProductionShellAndFreshBootHasNoDraft()
         { yield return ExplicitDeleteShell(false); }
@@ -868,6 +887,15 @@ namespace DungeonBuilder.M0.Tests
                 var ui = controller.GetComponent<UIDocument>().rootVisualElement;
                 Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
                 Assert.That(ui.Q<Button>("edit").enabledSelf, Is.True);
+                Assert.That(controller.IsEditing, Is.False);
+                Assert.That(controller.World.GridVisible, Is.False);
+                Assert.That(controller.World.ActiveEntityCount, Is.Zero);
+                Assert.That(ui.Q("floorSummary").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                Assert.That(ui.Q<Label>("floorInfo").text, Does.Contain(GameRoot.Instance.Content.GetString("ui.dungeon.construction.starter_required", null)));
+                controller.EnterEdit(); controller.OpenRooms();
+                Assert.That(ui.Q("roomChoices").childCount, Is.Zero, "Graphical first-room domain work remains deferred");
+                Assert.That(controller.World.MoveGuidanceAnchors, Is.Empty);
+                Assert.That(controller.Discard(), Is.True);
             }
         }
         private void InvokeController(string method, params object[] args) => typeof(ProductionDungeonController).GetMethod(method,

@@ -1,0 +1,9 @@
+{
+  "qualified_implementation": "c88c076064f045fef464a45ab63bf86b79c7f496",
+  "input_trees": {
+    "Assets": "e5b9235781e11735f5b759da98ee62938e608f7e",
+    "Packages": "e3fec9b0c4018adde155b4d8cd05cac3217df206",
+    "ProjectSettings": "c55e5632c33401052e04e4c9172dfadc312686f3",
+    "ContentAuthoring": "41a73986b5c781df4f2ad2ab83a6cd792d31a70c"
+  }
+}

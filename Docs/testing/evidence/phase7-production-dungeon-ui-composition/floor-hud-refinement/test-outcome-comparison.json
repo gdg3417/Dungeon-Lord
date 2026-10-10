@@ -1,0 +1,44 @@
+[
+  {
+    "mode": "editmode",
+    "previous_count": 1620,
+    "current_count": 1621,
+    "duplicate_names": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourEconomy.StructuralEconomyPresentationTransactionAmountsUseAtMostOneDecimal(5.0d,\"5\")",
+        "count": 2
+      }
+    ],
+    "removed": [],
+    "added": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.FloorHudStatesAndInputCapture",
+        "result": [
+          "Passed"
+        ]
+      }
+    ],
+    "changed": []
+  },
+  {
+    "mode": "playmode",
+    "previous_count": 3056,
+    "current_count": 3057,
+    "duplicate_names": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.StructuralEconomyTests.StructuralEconomyPresentationTransactionAmountsUseAtMostOneDecimal(5.0d,\"5\")",
+        "count": 2
+      }
+    ],
+    "removed": [],
+    "added": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.FloorHudStatesAndInput",
+        "result": [
+          "Passed"
+        ]
+      }
+    ],
+    "changed": []
+  }
+]

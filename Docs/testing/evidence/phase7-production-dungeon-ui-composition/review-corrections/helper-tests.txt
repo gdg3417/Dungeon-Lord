@@ -1,0 +1,17 @@
+test_allowed_transforms_and_wrong_namespace (__main__.QualificationInputsTests.test_allowed_transforms_and_wrong_namespace) ... ok
+test_changed_required_target_fails (__main__.QualificationInputsTests.test_changed_required_target_fails) ... ok
+test_clean_and_untracked_inputs_accepted (__main__.QualificationInputsTests.test_clean_and_untracked_inputs_accepted) ... ok
+test_missing_required_target_fails (__main__.QualificationInputsTests.test_missing_required_target_fails) ... ok
+test_missing_tracked_source_fails_closed (__main__.QualificationInputsTests.test_missing_tracked_source_fails_closed) ... ok
+test_redirected_input_descendant_rejected (__main__.QualificationInputsTests.test_redirected_input_descendant_rejected) ... ok
+test_redirected_target_rejected (__main__.QualificationInputsTests.test_redirected_target_rejected) ... ok
+test_repeat_is_idempotent_and_leaves_generated_library_alone (__main__.QualificationInputsTests.test_repeat_is_idempotent_and_leaves_generated_library_alone) ... ok
+test_stale_removed_art_and_metadata_rejected (__main__.QualificationInputsTests.test_stale_removed_art_and_metadata_rejected) ... ok
+test_stale_removed_script_rejected_before_copy (__main__.QualificationInputsTests.test_stale_removed_script_rejected_before_copy) ... ok
+test_target_only_in_each_input_root_fails_even_generated_meta (__main__.QualificationInputsTests.test_target_only_in_each_input_root_fails_even_generated_meta) ... ok
+test_unsafe_paths_rejected_and_unrelated_unchanged (__main__.QualificationInputsTests.test_unsafe_paths_rejected_and_unrelated_unchanged) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 4.027s
+
+OK

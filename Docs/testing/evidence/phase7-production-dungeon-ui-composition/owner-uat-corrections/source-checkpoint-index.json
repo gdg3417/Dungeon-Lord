@@ -1,0 +1,270 @@
+[
+  {
+    "path": "TestResults/ui-uat-author-source.json",
+    "sha256": "7d4fa50d983adf1dcfb0da28eda2afd524fd09c001093d21ac5999554d1d44f0",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-baseline-post-source.json",
+    "sha256": "a364dfe266069d48bb3e95324be57a1232e7f081dde6ce1728a0ca0626da0772",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [
+      "Assets/_Project/Data/Bootstrap/string_table_en.json: mismatch",
+      "Assets/_Project/Editor/ProductionDungeonAssetAuthoring.cs: mismatch",
+      "Assets/_Project/Scripts/UI/DungeonFloorWorldView.cs: mismatch",
+      "Assets/_Project/Scripts/UI/DungeonPresentationPolicy.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonController.cs: mismatch",
+      "Assets/_Project/UI/ProductionDungeon/Dungeon.uss: mismatch",
+      "Assets/_Project/UI/ProductionDungeon/Dungeon.uxml: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-baseline-source.json",
+    "sha256": "be006062a979afcf44f1fa972aba1b5517fd3ff4332c0b3bd7499157bba4f3b8",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-final-evidence-source.json",
+    "sha256": "a1174342966ed7b608f718b7e666badeb2e6b3bd1b05834e1426c4142525be1b",
+    "source_head": "691720b20e8226da0f110e5b44442a9d41be8407",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-focused-02-source.json",
+    "sha256": "8cd56587f2022b0b31527e87f352ea6700039289c6ee4760d7f4d82502f311ac",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-focused-03-source.json",
+    "sha256": "f61e01c087129f5bf38e4cb6c4241e0e2f870cab24eb77e2dfc9cf1ced054c79",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-focused-04-source.json",
+    "sha256": "8cc242e3b7f542a60614af04173cabc8cef372ea187c1fbbc3e0b5b7b05840eb",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-focused-05-source.json",
+    "sha256": "f57e408bedaedd2f0e16e0bf66421533d649795feaf703b4f521490154eb4a7e",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-focused-06-source.json",
+    "sha256": "e1df76bc907c30b4c595e264b3ffb93683c19d806c386203ff8386b1028bcc7c",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-focused-final-edit-source.json",
+    "sha256": "06486f7b0a393c802954232847b3a292add59adf4d0c101edaa0cca20291026b",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-focused-source.json",
+    "sha256": "1f8a3b2924fcfc55abf9a87a07609f9a1fe1f163239dbf9b9e4adcd12b3aa92c",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-post-build-source.json",
+    "sha256": "2d96cbd2625b2cc096959f32981b43cd4ffc401131f31ed1537c459e57ca7f40",
+    "source_head": "691720b20e8226da0f110e5b44442a9d41be8407",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [
+      "Assets/Settings/UniversalRP.asset: mismatch",
+      "Assets/UniversalRenderPipelineGlobalSettings.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch",
+      "ProjectSettings/UnityConnectSettings.asset: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-post-focused-edit-source.json",
+    "sha256": "a1174342966ed7b608f718b7e666badeb2e6b3bd1b05834e1426c4142525be1b",
+    "source_head": "691720b20e8226da0f110e5b44442a9d41be8407",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-post-focused-play-source.json",
+    "sha256": "b10d22d7afb42a98c783233bd4998ee08a502a8533bc63b624af5fbd46225133",
+    "source_head": "b273901aada22819e4933c66d162cccd1f268877",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonCompositionSceneTests.cs: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-post-full-edit-source.json",
+    "sha256": "a1174342966ed7b608f718b7e666badeb2e6b3bd1b05834e1426c4142525be1b",
+    "source_head": "691720b20e8226da0f110e5b44442a9d41be8407",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-post-full-play-source.json",
+    "sha256": "ea965a2ff6b04e5b058d477457ae97b128e0e82d70c4a983479dbaa5e5842d3b",
+    "source_head": "691720b20e8226da0f110e5b44442a9d41be8407",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-pre-build-source.json",
+    "sha256": "a1174342966ed7b608f718b7e666badeb2e6b3bd1b05834e1426c4142525be1b",
+    "source_head": "691720b20e8226da0f110e5b44442a9d41be8407",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-pre-full-edit-source.json",
+    "sha256": "a1174342966ed7b608f718b7e666badeb2e6b3bd1b05834e1426c4142525be1b",
+    "source_head": "691720b20e8226da0f110e5b44442a9d41be8407",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  },
+  {
+    "path": "TestResults/ui-uat-pre-full-play-source.json",
+    "sha256": "a1174342966ed7b608f718b7e666badeb2e6b3bd1b05834e1426c4142525be1b",
+    "source_head": "691720b20e8226da0f110e5b44442a9d41be8407",
+    "expected_count": 1188,
+    "actual_count": 1188,
+    "unexpected": [],
+    "failures": [],
+    "permitted_transformations": [
+      "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+      "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+    ]
+  }
+]

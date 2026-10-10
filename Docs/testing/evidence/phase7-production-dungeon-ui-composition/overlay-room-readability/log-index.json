@@ -1,0 +1,103 @@
+[
+  {
+    "path": "Temp/ui-overlay-author.log",
+    "redactions": 0,
+    "shared_sha256": "c90654bc649268a78fc30a7b5fbdc136b46528035f817d4141559e6aa8f4d973",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-baseline.log",
+    "redactions": 0,
+    "shared_sha256": "44b03e6eafbf890d2c0c5f36324c24eaac23e4629492a4fc998a9921e7e067e5",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-focused-01-playmode.log",
+    "redactions": 0,
+    "shared_sha256": "c3e495473ce5a8df1fdadf4b989b1b2f15b8557e8962013c30b64c3ca4db1290",
+    "compiler_warnings": [],
+    "compiler_errors": [
+      "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonOverlaySceneTests.cs(56,108): error CS0104: 'MouseButton' is an ambiguous reference between 'UnityEngine.InputSystem.LowLevel.MouseButton' and 'UnityEngine.UIElements.MouseButton'",
+      "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonOverlaySceneTests.cs(57,128): error CS0104: 'MouseButton' is an ambiguous reference between 'UnityEngine.InputSystem.LowLevel.MouseButton' and 'UnityEngine.UIElements.MouseButton'"
+    ]
+  },
+  {
+    "path": "Temp/ui-overlay-focused-02-playmode.log",
+    "redactions": 0,
+    "shared_sha256": "16311a67df6be962039effb5c48fbd92aa12c91589ed611afbd1b00e723ea48d",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-focused-03-playmode.log",
+    "redactions": 0,
+    "shared_sha256": "11bab6d6a195d6b11f2acc1213a363867d3f7b65fc7559fdc1828ceb545e1614",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-focused-04-playmode.log",
+    "redactions": 0,
+    "shared_sha256": "0c05d52f55fb314e98fb83d82401d0ef643cac0e4250e2785c52d3095ec44eeb",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-focused-05-playmode.log",
+    "redactions": 0,
+    "shared_sha256": "a36d8ba0e717d782c12d2c2f38bd92dc7da58bde534ac78cad001e004aa506c4",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-focused-06-playmode.log",
+    "redactions": 0,
+    "shared_sha256": "c7b3c828ad5ac65494b64da6d78c853168eb563ab421bda125b277f378bced0f",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-focused-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "812b34e25a8ed10d5bffb956ccf41a242fcb2e06126f7c5ceb2ac891e54e7952",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-full-editmode.log",
+    "redactions": 1,
+    "shared_sha256": "ac3638740b08e7c4dc788de562e715950cfc0e005dc47296206a6d27ac18a881",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-full-playmode.log",
+    "redactions": 0,
+    "shared_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-helper-tests.log",
+    "redactions": 0,
+    "shared_sha256": "01a4c9bcabaeac730ab33c4156baba6d12573f3e2312171166f4056e6cd8dd34",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-windows-build-cli.log",
+    "redactions": 0,
+    "shared_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  },
+  {
+    "path": "Temp/ui-overlay-windows-build.log",
+    "redactions": 1,
+    "shared_sha256": "5aa1ef9bd06ba4a02734e6f446c5e0021578790b88fcb2608313bbabf734b4a6",
+    "compiler_warnings": [],
+    "compiler_errors": []
+  }
+]

@@ -1,0 +1,50 @@
+{
+  "branch": "codex/phase7-dungeon-ui-visual-composition",
+  "source_head": "5d850dfe3f2befb4e708c02b6829fcdf1c7bf9b6",
+  "validation_directory": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-final-validation",
+  "failures": [
+    "Assets/Settings/UniversalRP.asset: mismatch",
+    "Assets/UniversalRenderPipelineGlobalSettings.asset: mismatch",
+    "ProjectSettings/ProjectSettings.asset: mismatch",
+    "ProjectSettings/UnityConnectSettings.asset: mismatch"
+  ],
+  "permitted_transformations": [
+    "validation save filename only",
+    "text CRLF/LF and UTF-8 BOM normalization"
+  ],
+  "compared_file_count": 1188,
+  "matching_file_count": 1184,
+  "changed_files": [
+    {
+      "path": "Assets/Settings/UniversalRP.asset",
+      "sha256": "7cdcc79dedadbde17803800f44ecb6ffd08b71e83ae56ebbf6db4adb555613e7",
+      "qualified_sha256": "167d20e3285f9071dc9bcb0a4fee7cdf8bb335dd849ec96e4b3fa39bd401f266",
+      "equal": false,
+      "isolated_save_namespace": false
+    },
+    {
+      "path": "Assets/UniversalRenderPipelineGlobalSettings.asset",
+      "sha256": "ab5861e8b5e1c2a938147797d95ee7e191a4032d4e0759b3964a731d18090847",
+      "qualified_sha256": "70f849cdf658ea3aa7f5bae46c210089df49242a2f8e453cae7e40721e480c3f",
+      "equal": false,
+      "isolated_save_namespace": false
+    },
+    {
+      "path": "ProjectSettings/ProjectSettings.asset",
+      "sha256": "01689966f17db0d0fed6029474d15a1f72ae503973cea93065cd5f76473e5e89",
+      "qualified_sha256": "6fbb50d9e7846102473615ac20f7ef2aee13e49bbb391b7661b62f395c758fb7",
+      "equal": false,
+      "isolated_save_namespace": false
+    },
+    {
+      "path": "ProjectSettings/UnityConnectSettings.asset",
+      "sha256": "b7dd1e8290598f5ce86919ba1c98b42b766c8c42191a30fa2c4d12195c4ecd00",
+      "qualified_sha256": "98f142992d8a623501c99648e1b7363adca08b67bb50390b566df368d00bc9a0",
+      "equal": false,
+      "isolated_save_namespace": false
+    }
+  ],
+  "full_manifest_sha256": "3c8adf08e282fccba5698334bed9d678b388c42080d61d7c0f8f33283ae9130c",
+  "full_manifest_archive": "validation-source-history.zip",
+  "full_manifest_entry": "postbuild-source-manifest.json"
+}

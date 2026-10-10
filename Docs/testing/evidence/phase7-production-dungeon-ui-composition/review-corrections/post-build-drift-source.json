@@ -1,0 +1,60 @@
+{
+  "validation_directory": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-review-validation",
+  "input_roots": [
+    "Assets",
+    "Packages",
+    "ProjectSettings",
+    "ContentAuthoring"
+  ],
+  "files": [
+    {
+      "path": "Assets/Settings/UniversalRP.asset",
+      "source_sha256": "8115a6a750c739dcbcbf71737d1733eafe068ad9fbdc3d4ca0def2723f47311f",
+      "expected_qualified_sha256": "7cdcc79dedadbde17803800f44ecb6ffd08b71e83ae56ebbf6db4adb555613e7",
+      "qualified_sha256": "167d20e3285f9071dc9bcb0a4fee7cdf8bb335dd849ec96e4b3fa39bd401f266",
+      "equal": false
+    },
+    {
+      "path": "Assets/UniversalRenderPipelineGlobalSettings.asset",
+      "source_sha256": "c0c660ca9f592748753b6a409b174936f003930bd32c1bd0b07ac1c2dfca0642",
+      "expected_qualified_sha256": "ab5861e8b5e1c2a938147797d95ee7e191a4032d4e0759b3964a731d18090847",
+      "qualified_sha256": "70f849cdf658ea3aa7f5bae46c210089df49242a2f8e453cae7e40721e480c3f",
+      "equal": false
+    },
+    {
+      "path": "ProjectSettings/ProjectSettings.asset",
+      "source_sha256": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "expected_qualified_sha256": "01689966f17db0d0fed6029474d15a1f72ae503973cea93065cd5f76473e5e89",
+      "qualified_sha256": "6fbb50d9e7846102473615ac20f7ef2aee13e49bbb391b7661b62f395c758fb7",
+      "equal": false
+    },
+    {
+      "path": "ProjectSettings/UnityConnectSettings.asset",
+      "source_sha256": "edbc2c8b4e180ca0734f320b51d6f560342563862923509d94d15492b200ad27",
+      "expected_qualified_sha256": "b7dd1e8290598f5ce86919ba1c98b42b766c8c42191a30fa2c4d12195c4ecd00",
+      "qualified_sha256": "98f142992d8a623501c99648e1b7363adca08b67bb50390b566df368d00bc9a0",
+      "equal": false
+    }
+  ],
+  "expected_count": 1188,
+  "actual_count": 1188,
+  "unexpected": [],
+  "failures": [
+    "Assets/Settings/UniversalRP.asset: mismatch",
+    "Assets/UniversalRenderPipelineGlobalSettings.asset: mismatch",
+    "ProjectSettings/ProjectSettings.asset: mismatch",
+    "ProjectSettings/UnityConnectSettings.asset: mismatch"
+  ],
+  "permitted_transformations": [
+    "exact config and SaveService save filename substitution: phase7-ui-composition-validation-01a11d08.json",
+    "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+  ],
+  "branch": "codex/phase7-dungeon-ui-visual-composition",
+  "source_head": "6438af229ffc67f805827535e013317293af1560",
+  "full_inventory": {
+    "archive": "source-inventories.zip",
+    "entry": "post-build-drift-source.json",
+    "sha256": "5b9007024d43ea81d16025d2d8a9c494cc39fed6f288d66c0c06dd140338eaa8",
+    "rows": "All rows retained in verified archive; only mismatch rows shown here"
+  }
+}
