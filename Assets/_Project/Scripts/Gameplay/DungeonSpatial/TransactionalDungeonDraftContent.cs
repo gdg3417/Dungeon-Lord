@@ -99,10 +99,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             if (!Validate(candidate)) return result;
             result.Candidate = Copy(candidate); result.Reason = null;
-            result.Assignment = intent.Operation == DungeonDraftContentOperation.Unassign ? prior :
+            var assignment = intent.Operation == DungeonDraftContentOperation.Unassign ? prior :
                 candidate.Floors.SelectMany(f => f.RoomContents.Assignments).Single(a => intent.Operation == DungeonDraftContentOperation.Acquire
                     ? !state.Floors.SelectMany(f => f.RoomContents.Assignments).Any(old => old.AssignmentId == a.AssignmentId)
                     : a.AssignmentId == intent.AssignmentId);
+            result.Assignment = JsonUtility.FromJson<RoomContentAssignment>(JsonUtility.ToJson(assignment));
             return result;
         }
         private DetachedCanonicalMutationResult PrepareContent(DetachedCanonicalSpatialSaveState state, DetachedCanonicalMutationRequest request) =>

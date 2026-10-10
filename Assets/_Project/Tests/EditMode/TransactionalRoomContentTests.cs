@@ -239,6 +239,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(context.PreviewContent(invalid,Add(f)).IsValid,Is.False);
             CollectionAssert.AreEqual(f.Session.GetCurrentBytes(),f.FileSystem.ReadAllBytes(f.ActivePath));
         }
+        [Test]
+        public void UnassignmentPreviewDoesNotExposeMutableDraftOwnership()
+        {
+            var f=PhaseSevenA4TransactionalEditorTests.Content(); var context=Context(f);
+            var d=TransactionalDungeonDraft.Create(f.State,context,new Store());
+            var a=f.State.Floors[0].RoomContents.Assignments.Single(); var fingerprint=context.Fingerprint(d.ReadModel);
+            var preview=d.PreviewContent(context.ContentIntent(DungeonDraftContentOperation.Unassign,f.State.Floors[0].FloorInstanceId,assignmentId:a.AssignmentId));
+            Assert.That(preview.IsValid,Is.True,preview.Reason);
+            preview.Assignment.RoomLocalPosition=new TileCoordinate(2,2); preview.Assignment.AssignmentId="mutated preview";
+            Assert.That(context.Fingerprint(d.ReadModel),Is.EqualTo(fingerprint)); Assert.That(d.CommandCount,Is.Zero);
+            Assert.That(d.HasChanges,Is.False); Assert.That(f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId,Is.EqualTo(a.AssignmentId));
+        }
         [TestCase("commit-after")][TestCase("commit-barrier")][TestCase("commit-readback")]
         public void UnknownContentAcknowledgementRecoversOnlyIndependentCommittedEvidence(string fault)
         {
