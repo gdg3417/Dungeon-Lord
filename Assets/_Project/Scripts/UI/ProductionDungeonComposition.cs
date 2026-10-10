@@ -75,13 +75,13 @@ namespace DungeonBuilder.M0
             ui.Q<Label>("sheetTitle").text=Text(IsConstructing ? "ui.dungeon.sheet.placement" : inspecting ? "ui.dungeon.sheet.inspection" :
                 IsEditing ? "ui.dungeon.sheet.edit" : "ui.dungeon.floor_summary");
             ui.Q("floorSummary").style.display=!IsEditing && !inspecting ? DisplayStyle.Flex : DisplayStyle.None;
-            ui.Q("inspectionActions").style.display=inspecting && !moveMode ? DisplayStyle.Flex : DisplayStyle.None;
+            ui.Q("inspectionActions").style.display=inspecting && !moveMode && !IsPlacingContent && reassigning == null ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("move").style.display=IsEditing && selectedEdgeId==null ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("focusRoom").SetEnabled(world.TryRoomBounds(selectedRoomId ?? selected?.RoomInstanceId,out _));
             foreach(string id in new[] {"monstersCategory","trapsCategory","lootCategory"})
             {
-                ui.Q<Button>(id).SetEnabled(false);
-                ui.Q<Button>(id).tooltip=Text("ui.dungeon.category.deferred");
+                ui.Q<Button>(id).SetEnabled(IsEditing && ContextRoomId != null && draft.Durability != DraftDurability.Unknown);
+                ui.Q<Button>(id).tooltip=Text(ContextRoomId == null ? "ui.dungeon.content.room_required" : "ui.dungeon.content.choose");
             }
             if(!IsEditing) status.style.display=feedback==null ? DisplayStyle.None : DisplayStyle.Flex;
             PresentFloorRail();

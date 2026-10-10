@@ -147,10 +147,12 @@ namespace DungeonBuilder.M0
         public string SavePath { get; private set; }
         public DetachedCanonicalSaveSession CanonicalSession => _canonicalSession;
         public DungeonDraftContext DungeonDraftContext => _canonicalConfigured && _limits != null
-            ? new DungeonDraftContext(_production, _legacyGameplayConfiguration, _roomContentOccupancy, _limits, _compatibility)
+            ? new DungeonDraftContext(_production, _legacyGameplayConfiguration, _roomContentOccupancy, _limits, _compatibility, _removalPolicy)
             : null;
         public bool TryRoomConstructionBaseCost(string definitionId, out double cost)
         { cost = 0; return _economy != null && _economy.TryRoom(definitionId, out cost); }
+        public bool TryContentAcquisitionCost(string categoryId, string optionId, out double cost)
+        { cost = double.NaN; return _acquisition != null && _acquisition.TryPrice(categoryId, optionId, out cost); }
 
         public void RefreshDraftPreviewBalance(StructuralEconomyPreview preview, double balance)
             => StructuralEconomyService.RefreshBalance(preview, balance, _economy);
@@ -158,24 +160,24 @@ namespace DungeonBuilder.M0
         public StructuralEconomyPreview PreviewDungeonDraft(SaveData current, TransactionalDungeonDraft draft,
             DetachedCanonicalSpatialSaveState proposed = null)
         {
-            if (draft == null || proposed == null && !draft.HasStructuralIntent || !draft.IsStructurallyValid || _canonicalSession == null ||
+            if (draft == null || proposed == null && !draft.HasStructuralIntent && !draft.HasContentIntent || !draft.IsStructurallyValid || _canonicalSession == null ||
                 !draft.MatchesRuleContext(DungeonDraftContext) ||
                 draft.BaselineFingerprint != DungeonDraftContext?.Fingerprint(current?.validatedCanonicalSpatialState)) return null;
             if (proposed != null && !DungeonDraftContext.Validate(proposed)) return null;
             var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(_canonicalSession.GetCurrentBytes(), _validationContext);
             if (!owned.IsValid) return null;
-            return StructuralEconomyService.PreviewFinalDraft(owned.State, proposed ?? draft.ReadModel, owned.Investment,
-                draft.NormalizedMovementTargets(proposed), current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _economyModifiers);
+            return StructuralEconomyService.PreviewFinalContentDraft(owned.State, proposed ?? draft.ReadModel, owned.Investment,
+                draft.NormalizedMovementTargets(proposed), current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _acquisition, _economyModifiers);
         }
         public IDungeonDraftStore CreateDungeonDraftStore() => _canonicalConfigured && _canonicalFileSystem != null
             ? new FileDungeonDraftStore(SavePath + ".editor-draft", _canonicalFileSystem, _limits) : null;
-        public DetachedCanonicalWriteResult CommitDungeonDraft(SaveData current, TransactionalDungeonDraft draft)
+        public DetachedCanonicalWriteResult CommitDungeonDraft(SaveData current, TransactionalDungeonDraft draft, GateEvaluationInput? purchaseInput = null)
         {
             if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
                 return new DetachedCanonicalWriteResult(false, TransactionalDungeonDraft.InvalidReason,
                     false, false, null, null, null, null);
             var result = CreateWriteAuthority().CommitDungeonDraft(SavePath, _canonicalFileSystem,
-                _canonicalSession, current, draft);
+                _canonicalSession, current, draft, purchaseInput);
             if (result.IsSuccess)
             { _undo = null; _canonicalSession = result.Session; CanonicalRuntimePublished?.Invoke(result.RuntimeProjection); }
             return result;

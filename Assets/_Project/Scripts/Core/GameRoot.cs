@@ -932,6 +932,11 @@ namespace DungeonBuilder.M0
         public void InvalidateOptionalBranchPreview()
         { OptionalBranchPreview = null; StructuralConstructionReasonKey = string.Empty; }
 
+        public GateEvaluationResult DungeonDraftPurchaseEligibility() => _restrictedActionGate.Evaluate(
+            new GateEvaluationInput(RestrictedActionType.Purchase, IsOnline, VerificationPending));
+        public DetachedCanonicalWriteResult CommitProductionDungeonDraft(TransactionalDungeonDraft draft) =>
+            SaveService.CommitDungeonDraft(Save, draft, new GateEvaluationInput(RestrictedActionType.Purchase, IsOnline, VerificationPending));
+
         public DetachedCanonicalWriteResult AcquireCorridorContent(string categoryId, string optionId,
             string floorInstanceId, string optionalBranchId, TileCoordinate tile)
         {

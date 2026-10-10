@@ -46,7 +46,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             ContentRepositions = ContentRepositions, RoomMovements = RoomMovements };
         internal static DungeonDraftV3Command From(DungeonDraftCommand command)
         {
-            if (command == null || !command.HasExactPayload || command.Kind == DungeonDraftCommandKind.RoomConstruction)
+            if (command == null || !command.HasExactPayload || (int)command.Kind > (int)DungeonDraftCommandKind.RoomMovement)
                 throw new ArgumentException();
             return new DungeonDraftV3Command { Sequence = command.Sequence, Kind = command.Kind,
                 ContentRepositions = command.ContentRepositions, RoomMovements = command.RoomMovements };
@@ -71,7 +71,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 : journal.FormatVersion == 3 ? Bytes(new DungeonDraftV3Journal { FormatVersion = 3,
                     DraftId = journal.DraftId, BaselineFingerprint = journal.BaselineFingerprint,
                     RuleIdentity = journal.RuleIdentity, PrefixSequence = journal.PrefixSequence,
-                    Commands = journal.Commands.Select(DungeonDraftV3Command.From).ToArray() }) : Bytes(journal);
+                    Commands = journal.Commands.Select(DungeonDraftV3Command.From).ToArray() })
+                : journal.FormatVersion == 4 ? Bytes(DungeonDraftV4Journal.From(journal)) : Bytes(journal);
         internal static byte[] Bytes(object value) => Encoding.UTF8.GetBytes(JsonUtility.ToJson(value));
         internal static T Exact<T>(byte[] bytes) where T : class
         {
@@ -96,6 +97,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     BaselineFingerprint = old.BaselineFingerprint, RuleIdentity = old.RuleIdentity,
                     PrefixSequence = old.PrefixSequence, Commands = old.Commands?.Select(value => value?.Expand()).ToArray() };
             }
+            if (version?.FormatVersion == 4) return Exact<DungeonDraftV4Journal>(bytes).Expand();
             if (version?.FormatVersion != TransactionalDungeonDraft.CurrentFormatVersion) throw new ArgumentException();
             return Exact<DungeonDraftJournal>(bytes);
         }

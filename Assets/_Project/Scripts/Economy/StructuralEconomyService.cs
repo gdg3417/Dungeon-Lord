@@ -13,6 +13,8 @@ namespace DungeonBuilder.M0.Economy
         public double CurrentMana { get; internal set; }
         public double BaseCost { get; internal set; }
         public double Cost { get; internal set; }
+        public double ContentAcquisitionCost { get; internal set; }
+        public int ContentAcquisitions { get; internal set; }
         public double RefundBasis { get; internal set; }
         public double Refund { get; internal set; }
         public double CreditedRefund { get; internal set; }
@@ -27,6 +29,31 @@ namespace DungeonBuilder.M0.Economy
         public const string InvalidReason = "structural.economy.invalid";
         public const string InsufficientReason = "structural.economy.insufficient_mana";
         public const string UndoUnavailableReason = "structural.economy.undo_unavailable";
+
+        internal static StructuralEconomyPreview PreviewFinalContentDraft(DetachedCanonicalSpatialSaveState current,
+            DetachedCanonicalSpatialSaveState candidate, StructuralInvestmentRecord[] investment,
+            string[] normalizedTargets, double balance, StructuralEconomySnapshot config,
+            ContentAcquisitionEconomySnapshot acquisition, IReadOnlyList<FormulaModifier> modifiers = null)
+        {
+            var result = PreviewFinalDraft(current, candidate, investment, normalizedTargets, balance, config, modifiers);
+            if (result.Reason != null && result.Reason != InsufficientReason) return result;
+            var owned = new HashSet<string>(current.Floors.SelectMany(f => f.RoomContents.Assignments).Select(a => a.AssignmentId)
+                .Concat(current.LifecycleAndOwnership.ReturnedContents.Select(a => a.AssignmentId)), StringComparer.Ordinal);
+            var additions = candidate.Floors.SelectMany(f => f.RoomContents.Assignments)
+                .Select(a => new { a.AssignmentId, a.CategoryId, a.OptionId })
+                .Concat(candidate.LifecycleAndOwnership.ReturnedContents.Select(a => new { a.AssignmentId, a.CategoryId, a.OptionId }))
+                .Where(a => !owned.Contains(a.AssignmentId)).OrderBy(a => a.AssignmentId, StringComparer.Ordinal).ToArray();
+            foreach (var item in additions)
+            {
+                if (acquisition == null || !acquisition.TryPrice(item.CategoryId, item.OptionId, out double cost))
+                { result.Reason = ContentAcquisitionEconomySnapshot.InvalidReason; return result; }
+                result.ContentAcquisitionCost += cost; result.ContentAcquisitions++;
+            }
+            if (!StructuralEconomySnapshot.Nonnegative(result.ContentAcquisitionCost)) { result.Reason = InvalidReason; return result; }
+            // Content never enters historical structural investment or its refund basis.
+            result.Cost += result.ContentAcquisitionCost; result.Reason = null;
+            RefreshBalance(result, balance, config); return result;
+        }
 
         internal static void RefreshBalance(StructuralEconomyPreview preview, double balance, StructuralEconomySnapshot config)
         {

@@ -51,6 +51,11 @@
             <ui:ScrollView name="contextDetails" mode="Vertical" class="context-details">
             <ui:VisualElement name="floorSummary" class="summary-card"><ui:Label name="floorName" class="mode" /><ui:Label name="floorInfo" /></ui:VisualElement>
             <ui:Label name="economics" />
+            <ui:VisualElement name="roomContentPanel">
+                <ui:Label name="contentCapacity" />
+                <ui:ScrollView mode="Horizontal" class="content-choices"><ui:VisualElement name="contentChoices" class="category-row" /></ui:ScrollView>
+                <ui:Label name="contentPlacementInfo" />
+            </ui:VisualElement>
             <ui:VisualElement name="constructionSheet">
                 <ui:ScrollView name="roomChoicesScroll" mode="Horizontal"><ui:VisualElement name="roomChoices" class="category-row" /></ui:ScrollView>
                 <ui:Label name="roomChoicesHint" class="browse-hint" tooltip="ui.dungeon.construction.browse" picking-mode="Ignore" />
@@ -62,7 +67,8 @@
                 <ui:Label name="inspectionInfo" />
             </ui:VisualElement>
             </ui:ScrollView>
-            <ui:VisualElement name="inspectionActions" class="row"><ui:Button name="focusRoom" tooltip="ui.dungeon.focus_room" /><ui:Button name="move" tooltip="ui.dungeon.move" /><ui:Button name="closeSheet" tooltip="ui.dungeon.floor_summary" /></ui:VisualElement>
+            <ui:VisualElement name="contentPlacementActions" class="row"><ui:Button name="cancelContent" tooltip="ui.dungeon.construction.cancel" /><ui:Button name="confirmContent" tooltip="ui.dungeon.construction.confirm" /></ui:VisualElement>
+            <ui:VisualElement name="inspectionActions" class="row"><ui:Button name="focusRoom" tooltip="ui.dungeon.focus_room" /><ui:Button name="move" tooltip="ui.dungeon.move" /><ui:Button name="reassignContent" tooltip="ui.dungeon.content.reassign" /><ui:Button name="unassignContent" tooltip="ui.dungeon.content.unassign" /><ui:Button name="closeSheet" tooltip="ui.dungeon.floor_summary" /></ui:VisualElement>
             <ui:VisualElement name="sessionActions" class="row session-actions">
                 <ui:Button name="edit" tooltip="ui.dungeon.edit" />
                 <ui:Label name="draftSummary" />

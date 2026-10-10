@@ -38,6 +38,15 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator TransactionalRoomConstructionProductionParity()
         { yield return Invoke("TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery"); }
         [UnityTest]
+        public IEnumerator RoomContentProductionParity()
+        { yield return Invoke("RoomContentProductionPreviewCustodySaveDiscardAndLayouts"); }
+        [UnityTest]
+        public IEnumerator RoomContentInputAndResume()
+        { yield return Invoke("RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated"); }
+        [UnityTest]
+        public IEnumerator RoomContentReassignmentAndConstruction()
+        { yield return Invoke("RoomContentExplicitReassignmentWithConstructionAndInspectionReuse"); }
+        [UnityTest]
         public IEnumerator CompositionNormalInspectionFocusRailCollapse()
         { yield return Invoke("CompositionNormalInspectionFocusRailAndCollapseAreReadOnly"); }
         [UnityTest]

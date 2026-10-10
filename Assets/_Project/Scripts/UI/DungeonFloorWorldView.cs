@@ -419,9 +419,12 @@ namespace DungeonBuilder.M0
             Preview(cell,true); highlight.color=policy.SelectionColor;
         }
         public bool TryRoomLocal(RoomContentAssignment assignment, TileCoordinate cell, out TileCoordinate local)
+            => TryRoomLocal(assignment.RoomInstanceId, cell, out local);
+        public bool TryRoomLocal(string roomId, TileCoordinate cell, out TileCoordinate local)
         {
             local = default;
-            var room = floor.Layout.Rooms.Single(r => r.RoomInstanceId == assignment.RoomInstanceId);
+            var room = floor?.Layout.Rooms.SingleOrDefault(r => r.RoomInstanceId == roomId);
+            if (room == null) return false;
             var definition = production.Catalog.Rooms.Single(d => d.RoomDefinitionId == room.RoomDefinitionId);
             var shape = definition.GrossFootprint;
             bool rotated = room.Orientation == CardinalOrientation.Ninety || room.Orientation == CardinalOrientation.TwoSeventy;
@@ -436,6 +439,20 @@ namespace DungeonBuilder.M0
             highlight.transform.localScale = new Vector3(policy.PreviewSize, policy.PreviewSize, 1);
         }
         public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); selectedRoom?.ClearAllTiles(); constructionPreview?.ClearAllTiles(); ConstructionPreviewTileCount = 0; }
+
+        public void PresentContentPreview(string roomId, string category, string option, TileCoordinate local, bool valid)
+        {
+            constructionPreview.ClearAllTiles(); ConstructionPreviewTileCount = 0;
+            var assignment = new RoomContentAssignment { RoomInstanceId = roomId };
+            if (!RoomContentSpatialOccupancyAuthority.TryResolve(occupancy, category, option, out var rule)) return;
+            foreach (var offset in rule.OccupiedTileOffsets)
+                if (Position(assignment, new TileCoordinate(local.X + offset.X, local.Y + offset.Y), out var cell))
+                {
+                    constructionPreview.SetTile(new Vector3Int(cell.X, cell.Y, 0), valid ? roomSelectionTile : invalidIntentTile);
+                    ConstructionPreviewTileCount++;
+                }
+            if (Position(assignment, local, out var anchor)) Preview(anchor, valid);
+        }
 
         public void PresentConstructionPreview(StructuralEditPreview preview)
         {

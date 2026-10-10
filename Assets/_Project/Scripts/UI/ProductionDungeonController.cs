@@ -52,7 +52,7 @@ namespace DungeonBuilder.M0
         private bool quiesced;
         public bool IsQuiesced => quiesced;
         public bool IsEditing => draft != null && !draft.IsClosed;
-        public bool IsMoving => moveMode;
+        public bool IsMoving => moveMode || contentIntent?.Operation == DungeonDraftContentOperation.Reposition;
         public TransactionalDungeonDraft Draft => draft;
         public DungeonFloorWorldView World => world;
         public VisualElement SafeRoot => safe;
@@ -142,6 +142,7 @@ namespace DungeonBuilder.M0
                 ui.Q("displayPopover").resolvedStyle.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None);
             Button("closeDisplay", () => ui.Q("displayPopover").style.display = DisplayStyle.None);
             InitializeConstruction();
+            InitializeRoomContent();
             Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
             Button("default", () => SetTextSize(DungeonTextSize.Default));
@@ -178,14 +179,17 @@ namespace DungeonBuilder.M0
         {
             if (!HasCanonicalRuntime()) return;
             if (IsEditing || recoveryBytes != null || recoveryReason != null) return;
+            string roomToRetain = ContextRoomId;
             draft = TransactionalDungeonDraft.Create(root.Save.validatedCanonicalSpatialState, draftContext, store);
             feedback = null; selected = null; moveMode = false; CloseSheet();
             RebuildFloor(true); Present();
+            if (roomToRetain != null) { selectedRoomId = roomToRetain; OpenSheet(); world.SelectRoomFootprint(roomToRetain); Present(); }
         }
         public void BeginMove()
         {
             if (!HasCanonicalRuntime()) return;
             if (!IsEditing || selected == null && selectedRoomId == null) return;
+            if (selected != null) { BeginContentReposition(); return; }
             moveMode = true; sheet.style.display = DisplayStyle.None;
             ClearConstructionSelection();
             world.ClearMoveGuidance();
@@ -199,10 +203,11 @@ namespace DungeonBuilder.M0
             else feedback = "ui.dungeon.move_hint";
             Present();
         }
-        private void CloseSheet() { ClearConstructionSelection(); selected = null; selectedRoomId = null; selectedEdgeId=null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
+        private void CloseSheet() { ClearContentSelection(); ClearConstructionSelection(); selected = null; selectedRoomId = null; selectedEdgeId=null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
         public void TapWorld(TileCoordinate cell)
         {
             if (!initialized || !HasCanonicalRuntime() || legacy || modal.style.display == DisplayStyle.Flex) return;
+            if (IsPlacingContent) { PreviewRoomContent(cell); return; }
             if (constructionRequest != null && IsEditing) { PreviewConstruction(cell); return; }
             if (IsEditing && TrySelectInvalidConstruction(cell)) return;
             if (moveMode && selectedRoomId != null && IsEditing)
@@ -233,6 +238,7 @@ namespace DungeonBuilder.M0
                 return;
             }
             world.ClearPreview();
+            ClearContentSelection();
             selected = world.Select(cell); selectedRoomId = selected == null ? world.SelectRoom(cell, IsEditing) : null;
             selectedEdgeId=selected==null && selectedRoomId==null ? world.SelectCorridor(cell) : null;
             world.ClearMoveGuidance();
@@ -272,11 +278,17 @@ namespace DungeonBuilder.M0
             ShowModal("ui.dungeon.commit_review", () => Commit(), "ui.dungeon.save");
             if (economicPreview != null) document.rootVisualElement.Q<Label>("modalText").text += "\n" +
                 StructuralEconomyPresenter.Present(economicPreview, Text, root.PassiveManaPerHourForPresentation);
+            if (movementConsequences != null) document.rootVisualElement.Q<Label>("modalText").text += "\n" + movementConsequences;
+            if (economicPreview?.ContentAcquisitions > 0)
+            {
+                var eligibility = root.DungeonDraftPurchaseEligibility();
+                if (!eligibility.Allowed) document.rootVisualElement.Q<Label>("modalText").text += "\n" + Text(eligibility.MessageKey);
+            }
         }
         public bool Commit()
         {
             if (!HasCanonicalRuntime()) return false;
-            var result = root.SaveService.CommitDungeonDraft(root.Save, draft);
+            var result = root.CommitProductionDungeonDraft(draft);
             if (!result.IsSuccess) { feedback = result.Reason; Present(); return false; }
             feedback = draft.Reason ?? "ui.dungeon.committed"; draft = null; CloseSheet(); detailsCollapsed=false;
             renderState = draftContext.Copy(root.Save.validatedCanonicalSpatialState); RebuildFloor(false); Present(); return true;
@@ -413,6 +425,8 @@ namespace DungeonBuilder.M0
             world.SetEdit(IsEditing);
             PresentConstruction();
             PresentComposition();
+            PresentRoomContent();
+            SetTextSize(textSize);
         }
         private void PresentHud()
         {
@@ -434,18 +448,21 @@ namespace DungeonBuilder.M0
             var edges = before.Floors.SelectMany(f => f.Layout.Edges).ToDictionary(e => e.EdgeId, StringComparer.Ordinal);
             var terminals = before.Floors.SelectMany(f => f.FixedStructures).Where(s => s.Kind == FixedSpatialStructureKind.CompletionTerminal)
                 .ToDictionary(s => s.FixedStructureInstanceId, StringComparer.Ordinal);
-            movementConsequences = Format("ui.dungeon.room_movement_consequences",
+            movementConsequences = draft.HasStructuralIntent ? Format("ui.dungeon.room_movement_consequences",
                 after.Floors.SelectMany(f => f.Layout.Rooms).Count(r => rooms.TryGetValue(r.RoomInstanceId, out var old) && !r.Anchor.Equals(old.Anchor)),
                 after.Floors.SelectMany(f => f.Layout.Edges).Count(e => !edges.TryGetValue(e.EdgeId, out var old) || JsonUtility.ToJson(e) != JsonUtility.ToJson(old)),
-                after.Floors.SelectMany(f => f.FixedStructures).Count(s => terminals.TryGetValue(s.FixedStructureInstanceId, out var old) && !s.Anchor.Equals(old.Anchor)));
+                after.Floors.SelectMany(f => f.FixedStructures).Count(s => terminals.TryGetValue(s.FixedStructureInstanceId, out var old) && !s.Anchor.Equals(old.Anchor))) : null;
             int constructed = after.Floors.SelectMany(f => f.Layout.Rooms).Count(r => !rooms.ContainsKey(r.RoomInstanceId));
             if (constructed != 0) movementConsequences = Format("ui.dungeon.construction.review", constructed) + "\n" + movementConsequences;
+            if (economicPreview.ContentAcquisitions > 0) movementConsequences += "\n" + Format("ui.dungeon.content.review",
+                economicPreview.ContentAcquisitions, PlayerManaPresentationFormatter.FormatDiscreteAmount(economicPreview.ContentAcquisitionCost, Culture));
         }
         private void PresentEconomy()
         {
             root.SaveService.RefreshDraftPreviewBalance(economicPreview, root.Save.structureRuntime.ManaReserve);
             var economics = document.rootVisualElement.Q<Label>("economics");
-            economics.style.display = IsEditing && economicPreview != null && draft.IsStructurallyValid ? DisplayStyle.Flex : DisplayStyle.None;
+            economics.style.display = IsEditing && economicPreview != null && draft.IsStructurallyValid &&
+                contentCategory == null && !(selected != null && draft.HasContentIntent) ? DisplayStyle.Flex : DisplayStyle.None;
             economics.text = economicPreview == null ? string.Empty : Text("ui.dungeon.construction.current_draft") + "\n" + StructuralEconomyPresenter.Present(economicPreview, Text, root.PassiveManaPerHourForPresentation);
             if (movementConsequences != null) economics.text += "\n" + movementConsequences;
             var summary = document.rootVisualElement.Q<Label>("draftSummary");

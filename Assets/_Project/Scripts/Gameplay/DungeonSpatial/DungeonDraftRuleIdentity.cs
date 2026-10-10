@@ -14,7 +14,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         // Production semantic validation reads only MvpPlacementEffects.OptionId from RunSimulationConfig.
         internal string RuleIdentity(int formatVersion = 3)
         {
-            if ((formatVersion != 3 && formatVersion != 4) || Production == null || Configuration == null || Occupancy == null || Limits == null) return null;
+            if ((formatVersion != 3 && formatVersion != 4 && formatVersion != 5) || Production == null || Configuration == null || Occupancy == null || Limits == null) return null;
             using (var stream = new MemoryStream())
             using (var writer = new BinaryWriter(stream))
             {

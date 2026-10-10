@@ -124,3 +124,6 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .session-actions #edit { flex-grow: 1; }
 .modal { display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(6,11,17,0.97); justify-content: center; padding: 24px; }
 .modal-content { background-color: var(--panel); padding: 18px; max-height: 100%; border-width: 2px; border-color: var(--gold); }
+.content-card { min-width: 180px; max-width: 260px; flex-direction: column; align-items: flex-start; white-space: normal; }
+.content-card-icon { width: 48px; height: 48px; -unity-background-scale-mode: scale-to-fit; }
+.content-card Label { white-space: normal; }
