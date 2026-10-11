@@ -18,6 +18,12 @@ namespace DungeonBuilder.M0
         public DungeonDraftContentPreview ContentPreview => contentPreview;
         public bool IsPlacingContent => IsEditing && contentIntent != null;
         public string ContentCategory => contentCategory;
+        private string ContentPreviewMessageKey => contentPreview?.Reason == DetachedCanonicalSpatialMutation.NoOpReason
+            ? contentCategory == MvpDungeonPlacementIds.LootNodeCategoryId ? "ui.dungeon.content.same_loot"
+                : contentCategory == MvpDungeonPlacementIds.TrapCategoryId ? "ui.dungeon.content.same_trap" : contentPreview.Reason
+            : contentPreview?.Reason == DetachedSpatialMigrationPreparer.CapacityReason ? "ui.dungeon.content.category_full"
+            : contentPreview?.Reason == DetachedCanonicalSpatialMutation.PositionInvalidReason ? "ui.dungeon.content.position_blocked"
+            : contentPreview?.Reason;
         private string ContextRoomId => selectedRoomId ?? selected?.RoomInstanceId;
         private string ContentHeadingKey => reassigning != null || contentIntent?.Operation == DungeonDraftContentOperation.Reassign ?
             "ui.dungeon.content.reassign" : contentIntent?.Operation == DungeonDraftContentOperation.Reposition ? "ui.dungeon.move" :
@@ -148,7 +154,7 @@ namespace DungeonBuilder.M0
                 }
                 world.PresentContentPreview(contentIntent.RoomInstanceId, category, option, local, contentPreview.IsValid);
             }
-            feedback = contentPreview.Reason ?? "ui.dungeon.content.preview"; Present();
+            feedback = ContentPreviewMessageKey ?? "ui.dungeon.content.preview"; Present();
         }
         public bool ConfirmContentPlacement()
         {
@@ -252,7 +258,7 @@ namespace DungeonBuilder.M0
             var gate = root.DungeonDraftPurchaseEligibility();
             info.text = contentIntent == null ? Text(reassigning != null ? feedback ?? "ui.dungeon.content.destination_hint" :
                 contentBrowserOwned ? returnedChoices.Length == 0 ? "ui.dungeon.content.owned_empty" : "ui.dungeon.content.owned_hint" : "ui.dungeon.content.new_hint") :
-                Text(contentPreview?.Reason ?? (contentPreview == null ? "ui.dungeon.content.position_hint" : "ui.dungeon.content.preview"));
+                Text(ContentPreviewMessageKey ?? (contentPreview == null ? "ui.dungeon.content.position_hint" : "ui.dungeon.content.preview"));
             if (contentIntent != null)
             {
                 string option = contentIntent.OptionId ?? contentPreview?.Assignment?.OptionId ??

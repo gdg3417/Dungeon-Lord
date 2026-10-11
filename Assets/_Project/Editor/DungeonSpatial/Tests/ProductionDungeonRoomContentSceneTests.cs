@@ -48,6 +48,109 @@ namespace DungeonBuilder.M0.Tests
             }
             Assert.That(ui.Q("viewport").worldBound.height,Is.GreaterThanOrEqualTo(controller.SafeRoot.worldBound.height*.25f),state+" at least one quarter remains usable map");
         }
+        private void AssertLootRoomCount(RoomSpatialInstance room, int expected)
+        {
+            controller.TapWorld(ContentCell(room,3,3)); Assert.That(controller.OpenContentCategory("placement.category.loot_node"),Is.True);
+            var state=controller.Draft.ReadModel; var floor=state.Floors.Single(f=>f.Layout.Rooms.Any(r=>r.RoomInstanceId==room.RoomInstanceId));
+            Assert.That(floor.RoomContents.Assignments.Count(a=>a.RoomInstanceId==room.RoomInstanceId && a.CategoryId=="placement.category.loot_node"),Is.EqualTo(expected));
+            var label=controller.GetComponent<UIDocument>().rootVisualElement.Q<Label>("contentCapacity").text;
+            Assert.That(label,Does.Contain(expected+" / 2"));
+            TestContext.WriteLine("LOOT COUNT "+room.RoomInstanceId+"="+expected+"/2 UI="+label);
+        }
+        private IEnumerator PrepareCanonicalLootRooms()
+        {
+            var root=GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
+            yield return ConstructReassignmentDestination(); Assert.That(controller.Commit(),Is.True); yield return SettleContentPanel();
+        }
+        private void PlaceLootFixture(RoomSpatialInstance room, string option, int x)
+        {
+            var root=GameRoot.Instance; var floor=root.Save.validatedCanonicalSpatialState.Floors.Single(f=>f.Layout.Rooms.Any(r=>r.RoomInstanceId==room.RoomInstanceId));
+            Assert.That(root.SaveService.ExecuteCanonicalMutation(root.Save,DetachedCanonicalMutationRequest.Place("placement.category.loot_node",option,
+                room.RoomInstanceId,floor.FloorInstanceId,new TileCoordinate(x,1))).IsSuccess,Is.True);
+        }
+        private IEnumerator SequentialLootReassignment(bool saveBetween)
+        {
+            yield return PrepareCanonicalLootRooms(); var root=GameRoot.Instance;
+            var rooms=root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms; var a=rooms[0]; var b=rooms[1];
+            PlaceLootFixture(a,"placement.option.loot_node.basic",1); PlaceLootFixture(a,"placement.option.loot_node.hidden_cache",2);
+            PlaceLootFixture(b,"placement.option.loot_node.glittering_hoard",1); yield return SettleContentPanel();
+            var original=root.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.Where(x=>x.CategoryId=="placement.category.loot_node").ToArray();
+            var hidden=original.Single(x=>x.OptionId=="placement.option.loot_node.hidden_cache"); var glitter=original.Single(x=>x.OptionId=="placement.option.loot_node.glittering_hoard");
+            var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            controller.EnterEdit(); AssertLootRoomCount(a,2); AssertLootRoomCount(b,1);
+            controller.TapWorld(ContentCell(a,2,1)); controller.BeginContentReassignment(); controller.TapWorld(ContentCell(b,2,1));
+            Assert.That(controller.ContentPreview.IsValid,Is.True,controller.ContentPreview.Reason); Assert.That(controller.Draft.CommandCount,Is.Zero);
+            Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel();
+            AssertLootRoomCount(a,1); AssertLootRoomCount(b,2); AssertCanonicalUnchanged(before,mana);
+            AssertReassignedIdentity(controller.Draft.ReadModel.Floors[0].RoomContents.Assignments.Single(x=>x.AssignmentId==hidden.AssignmentId),hidden,b.RoomInstanceId,new TileCoordinate(2,1));
+            if(saveBetween)
+            {
+                Assert.That(controller.Commit(),Is.True); yield return SettleContentPanel(); controller.EnterEdit();
+                AssertLootRoomCount(a,1); AssertLootRoomCount(b,2); Assert.That(controller.Discard(),Is.True);
+                yield return RestartShell(); root=GameRoot.Instance; controller.EnterEdit(); AssertLootRoomCount(a,1); AssertLootRoomCount(b,2);
+                before=File.ReadAllBytes(root.SaveService.SavePath); Assert.That(root.Save.structureRuntime.ManaReserve,Is.EqualTo(mana));
+            }
+            int commands=controller.Draft.CommandCount;
+            controller.TapWorld(ContentCell(b,1,1)); controller.BeginContentReassignment(); controller.TapWorld(ContentCell(a,2,1));
+            Assert.That(controller.SelectedRoomInstanceId,Is.EqualTo(a.RoomInstanceId)); Assert.That(controller.ContentPreview.IsValid,Is.True,controller.ContentPreview.Reason);
+            Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands)); AssertCanonicalUnchanged(before,mana);
+            Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel();
+            AssertLootRoomCount(a,2); AssertLootRoomCount(b,1);
+            var quote=root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft); Assert.That(quote.ContentAcquisitions,Is.Zero); Assert.That(quote.ContentAcquisitionCost,Is.Zero);
+            AssertReassignedIdentity(controller.Draft.ReadModel.Floors[0].RoomContents.Assignments.Single(x=>x.AssignmentId==glitter.AssignmentId),glitter,a.RoomInstanceId,new TileCoordinate(2,1));
+            Assert.That(controller.Draft.ReadModel.LifecycleAndOwnership.ReturnedContents,Is.Empty); AssertCanonicalUnchanged(before,mana);
+            if(!saveBetween) yield return RoomContentCapture("loot-reassignment-sequential.png");
+            yield return RestartShell(); root=GameRoot.Instance; var ui=controller.GetComponent<UIDocument>().rootVisualElement;
+            Click(ui.Q<Button>("confirm")); yield return SettleContentPanel(); AssertLootRoomCount(a,2); AssertLootRoomCount(b,1);
+            Assert.That(controller.Commit(),Is.True); yield return SettleContentPanel(); controller.EnterEdit();
+            AssertLootRoomCount(a,2); AssertLootRoomCount(b,1); Assert.That(controller.Discard(),Is.True);
+            yield return RestartShell(); root=GameRoot.Instance; controller.EnterEdit(); AssertLootRoomCount(a,2); AssertLootRoomCount(b,1);
+            var saved=root.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments;
+            AssertReassignedIdentity(saved.Single(x=>x.AssignmentId==hidden.AssignmentId),hidden,b.RoomInstanceId,new TileCoordinate(2,1));
+            AssertReassignedIdentity(saved.Single(x=>x.AssignmentId==glitter.AssignmentId),glitter,a.RoomInstanceId,new TileCoordinate(2,1));
+            Assert.That(root.Save.structureRuntime.ManaReserve,Is.EqualTo(mana)); Assert.That(controller.Discard(),Is.True);
+            TestContext.WriteLine("SEQUENTIAL LOOT saveBetween="+saveBetween+" A2/B1 -> A1/B2 -> A2/B1; identities, wallet, recovery and reopening preserved");
+        }
+        [UnityTest] public IEnumerator RoomContentSequentialLootDraft() { yield return SequentialLootReassignment(false); }
+        [UnityTest] public IEnumerator RoomContentSequentialLootSaveBetween() { yield return SequentialLootReassignment(true); }
+        [UnityTest] public IEnumerator RoomContentLootRejectionReasons()
+        {
+            yield return PrepareCanonicalLootRooms(); var root=GameRoot.Instance; var rooms=root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms;
+            var a=rooms[0]; var b=rooms[1]; PlaceLootFixture(a,"placement.option.loot_node.glittering_hoard",1);
+            PlaceLootFixture(b,"placement.option.loot_node.glittering_hoard",1);
+            yield return SettleContentPanel(); var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            controller.EnterEdit(); AssertLootRoomCount(a,1); AssertLootRoomCount(b,1);
+            controller.TapWorld(ContentCell(a,1,1)); controller.BeginContentReassignment(); controller.TapWorld(ContentCell(b,2,1));
+            Assert.That(controller.ContentPreview.IsValid,Is.False); Assert.That(controller.ContentPreview.Reason,Is.EqualTo(DetachedCanonicalSpatialMutation.NoOpReason));
+            Assert.That(controller.Draft.CommandCount,Is.Zero); Assert.That(controller.ConfirmContentPlacement(),Is.False); AssertCanonicalUnchanged(before,mana);
+            var info=controller.GetComponent<UIDocument>().rootVisualElement.Q<Label>("contentPlacementInfo").text;
+            TestContext.WriteLine("DUPLICATE LOOT authority="+controller.ContentPreview.Reason+" UI="+info);
+            string duplicateInfo=info;
+            yield return RoomContentCapture("loot-reassignment-duplicate.png"); controller.CancelContentPlacement();
+            Assert.That(controller.Discard(),Is.True); AssertCanonicalUnchanged(before,mana);
+            // Prepare the separate full-room/collision fixture outside Edit Mode.
+            PlaceLootFixture(a,"placement.option.loot_node.hidden_cache",2); yield return SettleContentPanel();
+            before=File.ReadAllBytes(root.SaveService.SavePath); mana=root.Save.structureRuntime.ManaReserve;
+            controller.EnterEdit(); AssertLootRoomCount(a,2); AssertLootRoomCount(b,1);
+            controller.TapWorld(ContentCell(b,3,3)); controller.OpenContentCategory("placement.category.loot_node"); controller.SelectNewContent("placement.option.loot_node.basic");
+            controller.TapWorld(ContentCell(b,2,1)); Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel(); AssertLootRoomCount(b,2);
+            int commands=controller.Draft.CommandCount;
+            controller.TapWorld(ContentCell(a,2,1)); controller.BeginContentReassignment(); controller.TapWorld(ContentCell(b,3,2));
+            Assert.That(controller.ContentPreview.IsValid,Is.False); Assert.That(controller.ContentPreview.Reason,Is.EqualTo(DetachedSpatialMigrationPreparer.CapacityReason));
+            info=controller.GetComponent<UIDocument>().rootVisualElement.Q<Label>("contentPlacementInfo").text;
+            string capacityInfo=info; TestContext.WriteLine("FULL LOOT authority="+controller.ContentPreview.Reason+" UI="+info); Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands));
+            controller.CancelContentPlacement(); controller.TapWorld(ContentCell(b,2,1)); Assert.That(controller.UnassignSelectedContent(),Is.True); yield return SettleContentPanel();
+            AssertLootRoomCount(b,1); commands=controller.Draft.CommandCount;
+            controller.TapWorld(ContentCell(a,2,1)); controller.BeginContentReassignment(); controller.TapWorld(ContentCell(b,1,1));
+            Assert.That(controller.ContentPreview.IsValid,Is.False); Assert.That(controller.ContentPreview.Reason,Is.EqualTo(DetachedCanonicalSpatialMutation.PositionInvalidReason));
+            info=controller.GetComponent<UIDocument>().rootVisualElement.Q<Label>("contentPlacementInfo").text;
+            string collisionInfo=info; TestContext.WriteLine("COLLISION LOOT authority="+controller.ContentPreview.Reason+" UI="+info); Assert.That(controller.ConfirmContentPlacement(),Is.False);
+            Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands)); AssertCanonicalUnchanged(before,mana); controller.CancelContentPlacement();
+            Assert.That(controller.Discard(),Is.True); AssertCanonicalUnchanged(before,mana);
+            Assert.That(duplicateInfo,Does.StartWith(root.Content.GetString("ui.dungeon.content.same_loot","ui.dungeon.content.same_loot")));
+            Assert.That(capacityInfo,Does.StartWith(root.Content.GetString("ui.dungeon.content.category_full","ui.dungeon.content.category_full")));
+            Assert.That(collisionInfo,Does.StartWith(root.Content.GetString("ui.dungeon.content.position_blocked","ui.dungeon.content.position_blocked")));
+        }
         private static void AssertReassignedIdentity(RoomContentAssignment actual, RoomContentAssignment original, string room, TileCoordinate local)
         {
             Assert.That(actual.AssignmentId,Is.EqualTo(original.AssignmentId));
