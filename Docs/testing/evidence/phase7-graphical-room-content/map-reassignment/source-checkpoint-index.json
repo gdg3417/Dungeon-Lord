@@ -1,0 +1,200 @@
+[
+  {
+    "path": "map-reassignment-final-source.json",
+    "sha256": "7d71901b80f1f93d57d09e9e5f5e9eff8e43f746d654c9022605aadf068372e5",
+    "head": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-focused-after-restored-source.json",
+    "sha256": "596ae9f890e20d15ae3e6197e576d0db690b12103426b605229620ef115a511b",
+    "head": "ed06ad9e6f7fd8693b5ff9867b45d469e4ac395e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-focused-after-source.json",
+    "sha256": "9d9d36d1fe14ce83dca0a5879a032663b156eb38adbbe4af90db9b9fb47026d3",
+    "head": "ed06ad9e6f7fd8693b5ff9867b45d469e4ac395e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-focused-before-restored-source.json",
+    "sha256": "596ae9f890e20d15ae3e6197e576d0db690b12103426b605229620ef115a511b",
+    "head": "ed06ad9e6f7fd8693b5ff9867b45d469e4ac395e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-focused-before-source.json",
+    "sha256": "8fba7eaad7020f04a7535b3dbedb93760ce96ea8d4eabbdb12a9c92f6f9928c2",
+    "head": "ed06ad9e6f7fd8693b5ff9867b45d469e4ac395e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Data/Bootstrap/string_table_en.json: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonController.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-full-editmode-after-restored-source.json",
+    "sha256": "7d71901b80f1f93d57d09e9e5f5e9eff8e43f746d654c9022605aadf068372e5",
+    "head": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-full-editmode-after-source.json",
+    "sha256": "7d71901b80f1f93d57d09e9e5f5e9eff8e43f746d654c9022605aadf068372e5",
+    "head": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-full-editmode-before-source.json",
+    "sha256": "7d71901b80f1f93d57d09e9e5f5e9eff8e43f746d654c9022605aadf068372e5",
+    "head": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-full-playmode-after-restored-source.json",
+    "sha256": "7d71901b80f1f93d57d09e9e5f5e9eff8e43f746d654c9022605aadf068372e5",
+    "head": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-full-playmode-after-source.json",
+    "sha256": "88956437fcbbf34c023f49f79028c98fa1a19af99a6149a253b5309cef9850d0",
+    "head": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-full-playmode-before-source.json",
+    "sha256": "7d71901b80f1f93d57d09e9e5f5e9eff8e43f746d654c9022605aadf068372e5",
+    "head": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-initial-source.json",
+    "sha256": "e9defcf6e7794b0851b9872c0fbb07ea33edfc3492e9dce59dc478672485ec4d",
+    "head": "ed06ad9e6f7fd8693b5ff9867b45d469e4ac395e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Data/Bootstrap/string_table_en.json: mismatch",
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs: mismatch",
+      "Assets/_Project/Editor/DungeonVisualBuildQualification.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonController.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs: mismatch",
+      "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-red-after-restored-source.json",
+    "sha256": "b349b6fd2ec5aac976b584f0908f8993634d32c57efa3f1e354d757ff42231f5",
+    "head": "ed06ad9e6f7fd8693b5ff9867b45d469e4ac395e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-red-after-source.json",
+    "sha256": "bd6fdc511666482153e9d526a7f812a2220fb6be078e15ce7ef3ef205446208e",
+    "head": "ed06ad9e6f7fd8693b5ff9867b45d469e4ac395e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-red-before-restored-source.json",
+    "sha256": "b349b6fd2ec5aac976b584f0908f8993634d32c57efa3f1e354d757ff42231f5",
+    "head": "ed06ad9e6f7fd8693b5ff9867b45d469e4ac395e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-red-before-source.json",
+    "sha256": "c58b754cc453d08e9a308c3c5f8e83290c8a94cc731685a1e33b86456adcc0b7",
+    "head": "ed06ad9e6f7fd8693b5ff9867b45d469e4ac395e",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs: mismatch",
+      "Assets/_Project/Editor/DungeonVisualBuildQualification.cs: mismatch",
+      "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-windows-after-restored-source.json",
+    "sha256": "7d71901b80f1f93d57d09e9e5f5e9eff8e43f746d654c9022605aadf068372e5",
+    "head": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-windows-after-source.json",
+    "sha256": "650683b7944dfeef234d6fe7875ba757ff3c51abb4b0e87fe8fc42b222393a87",
+    "head": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/Settings/UniversalRP.asset: mismatch",
+      "Assets/UniversalRenderPipelineGlobalSettings.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch",
+      "ProjectSettings/UnityConnectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "map-reassignment-windows-before-source.json",
+    "sha256": "7d71901b80f1f93d57d09e9e5f5e9eff8e43f746d654c9022605aadf068372e5",
+    "head": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  }
+]
