@@ -207,6 +207,7 @@ namespace DungeonBuilder.M0
         public void TapWorld(TileCoordinate cell)
         {
             if (!initialized || !HasCanonicalRuntime() || legacy || modal.style.display == DisplayStyle.Flex) return;
+            if (IsEditing && reassigning != null) { SelectContentDestinationAt(cell); return; }
             if (IsPlacingContent) { PreviewRoomContent(cell); return; }
             if (constructionRequest != null && IsEditing) { PreviewConstruction(cell); return; }
             if (IsEditing && TrySelectInvalidConstruction(cell)) return;

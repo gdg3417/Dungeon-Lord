@@ -48,6 +48,176 @@ namespace DungeonBuilder.M0.Tests
             }
             Assert.That(ui.Q("viewport").worldBound.height,Is.GreaterThanOrEqualTo(controller.SafeRoot.worldBound.height*.25f),state+" at least one quarter remains usable map");
         }
+        private static void AssertReassignedIdentity(RoomContentAssignment actual, RoomContentAssignment original, string room, TileCoordinate local)
+        {
+            Assert.That(actual.AssignmentId,Is.EqualTo(original.AssignmentId));
+            Assert.That(actual.CategoryId,Is.EqualTo(original.CategoryId)); Assert.That(actual.OptionId,Is.EqualTo(original.OptionId));
+            Assert.That(actual.Sequence,Is.EqualTo(original.Sequence)); Assert.That(actual.RoomInstanceId,Is.EqualTo(room));
+            Assert.That(actual.RoomLocalPosition,Is.EqualTo(local));
+        }
+        private void AssertContentOverlaysCleared()
+        {
+            Assert.That(controller.World.RoomPlacementGridTileCount,Is.Zero);
+            Assert.That(controller.World.ConstructionPreviewTileCount,Is.Zero);
+            Assert.That(controller.World.transform.Find("Selection").gameObject.activeSelf,Is.False);
+            Assert.That(controller.ContentPreview,Is.Null);
+        }
+        private IEnumerator ConstructReassignmentDestination()
+        {
+            controller.EnterEdit(); Assert.That(controller.SelectConstructionRoom("spatial.room.basic"),Is.True);
+            controller.TapWorld(controller.World.MoveGuidanceAnchors.First()); Assert.That(controller.ConfirmConstructionPlacement(),Is.True);
+            yield return SettleContentPanel();
+        }
+        [UnityTest]
+        public IEnumerator RoomContentMapReassignmentCategoriesInvalidRetryAndSave()
+        {
+            var root=GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
+            var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var source=floor.Layout.Rooms[0];
+            foreach(var item in new[] {new {Category="placement.category.trap",Option="placement.option.trap.spike",X=1},
+                new {Category="placement.category.loot_node",Option="placement.option.loot_node.basic",X=2}})
+                Assert.That(root.SaveService.ExecuteCanonicalMutation(root.Save,DetachedCanonicalMutationRequest.Place(item.Category,item.Option,
+                    source.RoomInstanceId,floor.FloorInstanceId,new TileCoordinate(item.X,0))).IsSuccess,Is.True);
+            yield return SettleContentPanel();
+            var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            var originals=root.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.OrderBy(a=>a.Sequence).ToArray();
+            int custody=root.Save.validatedCanonicalSpatialState.LifecycleAndOwnership.ReturnedContents.Length;
+            yield return ConstructReassignmentDestination();
+            var destination=controller.Draft.ReadModel.Floors[0].Layout.Rooms.Single(r=>r.RoomInstanceId!=source.RoomInstanceId);
+            var ui=controller.GetComponent<UIDocument>().rootVisualElement;
+            foreach(var original in originals)
+            {
+                controller.TapWorld(ContentCell(source,original.RoomLocalPosition.X,original.RoomLocalPosition.Y));
+                Click(ui.Q<Button>("reassignContent")); int commands=controller.Draft.CommandCount;
+                Assert.That(ui.Q<Label>("contentPlacementInfo").text,Is.EqualTo(root.Content.GetString("ui.dungeon.content.destination_hint",null)));
+                foreach(var invalid in new[] {new TileCoordinate(-100,-100),ContentCell(source,original.RoomLocalPosition.X,original.RoomLocalPosition.Y)})
+                {
+                    controller.TapWorld(invalid);
+                    Assert.That(controller.ContentCategory,Is.EqualTo(original.CategoryId),"Invalid map tap must preserve pending reassignment");
+                    Assert.That(controller.IsPlacingContent,Is.False); Assert.That(controller.ConfirmContentPlacement(),Is.False);
+                    Assert.That(ui.Q<Label>("contentPlacementInfo").text,Is.EqualTo(root.Content.GetString("ui.dungeon.content.destination_invalid",null)));
+                    Assert.That(ui.Q("contentChoices").Query<Button>().ToList().Any(b=>(string)b.userData==destination.RoomInstanceId),Is.True);
+                    Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands)); AssertContentOverlaysCleared();
+                }
+                Assert.That(controller.SelectContentDestination("missing-floor",destination.RoomInstanceId),Is.False);
+                var local=new TileCoordinate(original.RoomLocalPosition.X,1); var target=ContentCell(destination,local.X,local.Y);
+                // Hit detection must take precedence even when the tap hits an assigned object.
+                if(original.CategoryId!="placement.category.monster")
+                {
+                    controller.TapWorld(ContentCell(destination,0,1));
+                    Assert.That(controller.IsPlacingContent,Is.True); Assert.That(controller.ContentPreview.IsValid,Is.False);
+                    Assert.That(controller.ConfirmContentPlacement(),Is.False); Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands));
+                    controller.CancelContentPlacement(); AssertContentOverlaysCleared();
+                    controller.TapWorld(ContentCell(source,original.RoomLocalPosition.X,original.RoomLocalPosition.Y)); controller.BeginContentReassignment();
+                }
+                controller.TapWorld(target); Assert.That(controller.IsPlacingContent,Is.True,"Room map click must choose a reassignment destination");
+                Assert.That(controller.ContentPreview.IsValid,Is.True,controller.ContentPreview.Reason);
+                AssertReassignedIdentity(controller.ContentPreview.Assignment,original,destination.RoomInstanceId,local);
+                Assert.That(controller.World.RoomPlacementGridTarget,Is.EqualTo(destination.RoomInstanceId));
+                Assert.That(controller.Draft.ReadModel.Floors[0].RoomContents.Assignments.Single(a=>a.AssignmentId==original.AssignmentId).RoomInstanceId,Is.EqualTo(source.RoomInstanceId));
+                Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands)); AssertCanonicalUnchanged(before,mana);
+                controller.TapWorld(new TileCoordinate(-100,-100)); Assert.That(controller.ContentPreview.IsValid,Is.False);
+                Assert.That(controller.World.ConstructionPreviewTileCount,Is.Zero); Assert.That(controller.ConfirmContentPlacement(),Is.False);
+                controller.TapWorld(target); Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel();
+                Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands+1)); Assert.That(controller.Draft.Durability,Is.EqualTo(DraftDurability.Acknowledged));
+                AssertReassignedIdentity(controller.SelectedContent,original,destination.RoomInstanceId,local);
+                Assert.That(controller.Draft.ReadModel.LifecycleAndOwnership.ReturnedContents.Length,Is.EqualTo(custody));
+                Assert.That(root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft).ContentAcquisitions,Is.Zero);
+                AssertCanonicalUnchanged(before,mana);
+                TestContext.WriteLine("MAP REASSIGN "+original.CategoryId+" identity/sequence preserved; one acknowledged command; no reacquisition");
+            }
+            yield return RestartShell(); root=GameRoot.Instance; ui=controller.GetComponent<UIDocument>().rootVisualElement; Click(ui.Q<Button>("confirm")); yield return SettleContentPanel();
+            foreach(var original in originals) AssertReassignedIdentity(controller.Draft.ReadModel.Floors[0].RoomContents.Assignments.Single(a=>a.AssignmentId==original.AssignmentId),
+                original,destination.RoomInstanceId,new TileCoordinate(original.RoomLocalPosition.X,1));
+            AssertCanonicalUnchanged(before,mana); var quote=root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft);
+            Assert.That(quote.ContentAcquisitions,Is.Zero); Assert.That(quote.ContentAcquisitionCost,Is.Zero);
+            Click(ui.Q<Button>("save")); Click(ui.Q<Button>("confirm")); yield return SettleContentPanel();
+            Assert.That(controller.IsEditing,Is.False); Assert.That(root.Save.structureRuntime.ManaReserve,Is.EqualTo(mana-quote.Cost));
+            yield return RestartShell(); root=GameRoot.Instance;
+            foreach(var original in originals) AssertReassignedIdentity(root.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.Single(a=>a.AssignmentId==original.AssignmentId),
+                original,destination.RoomInstanceId,new TileCoordinate(original.RoomLocalPosition.X,1));
+            Assert.That(root.Save.validatedCanonicalSpatialState.LifecycleAndOwnership.ReturnedContents.Length,Is.EqualTo(custody));
+        }
+        [UnityTest]
+        public IEnumerator RoomContentMapReassignmentCapacityMoveOwnedAndDiscard()
+        {
+            var root=GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
+            var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var source=floor.Layout.Rooms[0]; var original=floor.RoomContents.Assignments.Single();
+            yield return ConstructReassignmentDestination();
+            var destination=controller.Draft.ReadModel.Floors[0].Layout.Rooms.Single(r=>r.RoomInstanceId!=source.RoomInstanceId);
+            Assert.That(CanonicalRoomCapacityResolver.TryResolve(root.ProductionSpatialContent,destination.RoomDefinitionId,out var capacity,out _),Is.True);
+            for(int i=0;i<capacity.MonsterCapacity;i++)
+            {
+                controller.TapWorld(ContentCell(destination,i,0)); controller.OpenContentCategory(original.CategoryId);
+                Assert.That(controller.SelectNewContent("placement.option.monster.goblin"),Is.True);
+                controller.TapWorld(ContentCell(destination,i,0)); Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel();
+            }
+            int commands=controller.Draft.CommandCount;
+            controller.TapWorld(ContentCell(source,0,0)); controller.BeginContentReassignment(); controller.TapWorld(ContentCell(destination,0,2));
+            Assert.That(controller.IsPlacingContent,Is.True); Assert.That(controller.ContentPreview.IsValid,Is.False,"Destination category capacity is authoritative");
+            Assert.That(controller.ContentPreview.Reason,Is.Not.Null.And.Not.Empty); Assert.That(controller.ConfirmContentPlacement(),Is.False);
+            Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands)); Assert.That(controller.World.RoomPlacementGridTarget,Is.EqualTo(destination.RoomInstanceId));
+            controller.CancelContentPlacement(); AssertContentOverlaysCleared();
+            controller.TapWorld(ContentCell(source,0,0)); controller.BeginContentReassignment(); controller.CancelContentPlacement(); AssertContentOverlaysCleared();
+            controller.TapWorld(ContentCell(source,0,0)); controller.BeginMove(); controller.TapWorld(ContentCell(destination,0,2));
+            Assert.That(controller.ContentPreview.IsValid,Is.False,"Move must never become Reassign");
+            Assert.That(controller.World.RoomPlacementGridTarget,Is.EqualTo(source.RoomInstanceId));
+            controller.TapWorld(ContentCell(source,1,1)); Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel();
+            AssertReassignedIdentity(controller.SelectedContent,original,source.RoomInstanceId,new TileCoordinate(1,1));
+            var cost=root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft).ContentAcquisitionCost;
+            Assert.That(controller.UnassignSelectedContent(),Is.True); Assert.That(controller.SelectReturnedContent(original.AssignmentId),Is.True);
+            controller.TapWorld(ContentCell(destination,0,2)); Assert.That(controller.ContentPreview.IsValid,Is.False);
+            controller.TapWorld(ContentCell(source,1,1)); Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel();
+            AssertReassignedIdentity(controller.SelectedContent,original,source.RoomInstanceId,new TileCoordinate(1,1));
+            Assert.That(root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft).ContentAcquisitionCost,Is.EqualTo(cost));
+            AssertCanonicalUnchanged(before,mana); Assert.That(controller.Discard(),Is.True); AssertCanonicalUnchanged(before,mana);
+        }
+        [UnityTest]
+        public IEnumerator RoomContentMapReassignmentProductionMouseTouchRecovery()
+        {
+            var root=GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
+            var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var source=floor.Layout.Rooms[0]; var original=floor.RoomContents.Assignments.Single();
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1920,1080); yield return SettleContentPanel();
+            yield return ConstructReassignmentDestination();
+            var destination=controller.Draft.ReadModel.Floors[0].Layout.Rooms.Single(r=>r.RoomInstanceId!=source.RoomInstanceId);
+            controller.TapWorld(ContentCell(source,0,0)); controller.BeginContentReassignment(); yield return SettleContentPanel(); controller.FitFloor();
+            var camera=controller.GetComponentInChildren<Camera>(); var target=ContentCell(destination,1,1);
+            Vector2 screen=camera.WorldToScreenPoint(new Vector3(target.X+.5f,target.Y+.5f,0));
+            Assert.That(camera.pixelRect.Contains(screen),Is.True); Assert.That(controller.IsChrome(screen,1),Is.False);
+            int commands=controller.Draft.CommandCount;
+            var mouse=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
+            try
+            {
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse,new UnityEngine.InputSystem.LowLevel.MouseState {position=screen}.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                yield return null; yield return null;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse,new UnityEngine.InputSystem.LowLevel.MouseState {position=screen}); yield return SettleContentPanel();
+                Assert.That(controller.IsPlacingContent,Is.True,"Actual production mouse destination tap");
+                Assert.That(controller.ContentPreview.IsValid,Is.True); AssertReassignedIdentity(controller.ContentPreview.Assignment,original,destination.RoomInstanceId,new TileCoordinate(1,1));
+                Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands)); AssertCanonicalUnchanged(before,mana);
+                yield return RoomContentCapture("map-reassignment-destination.png");
+            }
+            finally { UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse); }
+            controller.CancelContentPlacement(); AssertContentOverlaysCleared();
+            controller.TapWorld(ContentCell(source,0,0)); controller.BeginContentReassignment(); yield return SettleContentPanel(); controller.FitFloor();
+            screen=camera.WorldToScreenPoint(new Vector3(target.X+.5f,target.Y+.5f,0));
+            simulatedTouch=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Touchscreen>();
+            Touch(1,screen,UnityEngine.InputSystem.TouchPhase.Began); yield return null; yield return null;
+            Touch(1,screen,UnityEngine.InputSystem.TouchPhase.Ended); yield return SettleContentPanel();
+            Assert.That(controller.IsPlacingContent,Is.True,"Actual production touch destination tap");
+            Assert.That(controller.ContentPreview.IsValid,Is.True); AssertReassignedIdentity(controller.ContentPreview.Assignment,original,destination.RoomInstanceId,new TileCoordinate(1,1));
+            Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands)); AssertCanonicalUnchanged(before,mana);
+            var ui=controller.GetComponent<UIDocument>().rootVisualElement;
+            screen=CompositionButtonScreen(ui.Q<Button>("confirmContent"));
+            Touch(1,screen,UnityEngine.InputSystem.TouchPhase.Began); yield return null; yield return null;
+            Touch(1,screen,UnityEngine.InputSystem.TouchPhase.Ended); yield return SettleContentPanel();
+            Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands+1)); Assert.That(controller.Draft.Durability,Is.EqualTo(DraftDurability.Acknowledged));
+            AssertReassignedIdentity(controller.SelectedContent,original,destination.RoomInstanceId,new TileCoordinate(1,1)); AssertCanonicalUnchanged(before,mana);
+            yield return RestartShell(); ui=controller.GetComponent<UIDocument>().rootVisualElement; Click(ui.Q<Button>("confirm")); yield return SettleContentPanel();
+            AssertReassignedIdentity(controller.Draft.ReadModel.Floors[0].RoomContents.Assignments.Single(a=>a.AssignmentId==original.AssignmentId),original,destination.RoomInstanceId,new TileCoordinate(1,1));
+            Assert.That(controller.Discard(),Is.True); AssertCanonicalUnchanged(before,mana);
+            TestContext.WriteLine("MAP REASSIGN production mouse/touch, preview-only destination tap, touch Confirm, restart recovery and Discard passed");
+        }
         [UnityTest]
         public IEnumerator RoomContentCompactMoveAllCategoriesAndDraftCosts()
         {
@@ -507,7 +677,7 @@ namespace DungeonBuilder.M0.Tests
                 root.ProductionSpatialContent.Languages.Single(t=>t.language=="en").entries.Single(e=>e.key==definition.LocalizationKey).text,
                 System.Array.FindIndex(controller.Draft.ReadModel.Floors[0].Layout.Rooms,r=>r.RoomInstanceId==destination.RoomInstanceId)+1);
             Assert.That(destinationButton.text,Does.Contain(roomLabel));
-            Assert.That(controller.SelectContentDestination(floor.FloorInstanceId,destination.RoomInstanceId),Is.True);
+            Click(destinationButton); Assert.That(controller.IsPlacingContent,Is.True,"Existing destination button remains a supported alternative");
             definition=root.ProductionSpatialContent.Catalog.Rooms.Single(r=>r.RoomDefinitionId==destination.RoomDefinitionId);
             Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(1,1),definition.GrossFootprint,destination.Anchor,destination.Orientation,out var target),Is.True);
             controller.TapWorld(target); Assert.That(controller.ContentPreview.IsValid,Is.True,controller.ContentPreview.Reason);

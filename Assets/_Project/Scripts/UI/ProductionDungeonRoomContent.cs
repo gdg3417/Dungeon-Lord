@@ -97,12 +97,22 @@ namespace DungeonBuilder.M0
             if (!IsEditing || reassigning == null) return false;
             string id = reassigning, category = contentCategory;
             var state = draft.ReadModel;
-            if (!state.Floors.Any(f => f.FloorInstanceId == floorId && f.Layout.Rooms.Any(r => r.RoomInstanceId == roomId))) return false;
+            var source = state.Floors.SelectMany(f => f.RoomContents.Assignments).FirstOrDefault(a => a.AssignmentId == id);
+            if (source == null || source.RoomInstanceId == roomId ||
+                !state.Floors.Any(f => f.FloorInstanceId == floorId && f.Layout.Rooms.Any(r => r.RoomInstanceId == roomId)))
+            {
+                world.ClearPreview(); world.SelectRoomFootprint(ContextRoomId);
+                feedback = "ui.dungeon.content.destination_invalid"; Present(); return false;
+            }
             if (selectedFloor != floorId) SelectFloor(floorId);
             selectedRoomId = roomId; selected = null; selectedEdgeId = null; contentCategory = category; reassigning = null;
             contentIntent = draftContext.ContentIntent(DungeonDraftContentOperation.Reassign, floorId, roomId, id);
             detailsCollapsed = false; OpenSheet(); PrepareContentPositioning();
             feedback = "ui.dungeon.content.position_hint"; Present(); return true;
+        }
+        private void SelectContentDestinationAt(TileCoordinate cell)
+        {
+            if (SelectContentDestination(selectedFloor, world.SelectContentRoom(cell))) PreviewRoomContent(cell);
         }
         private void PreviewRoomContent(TileCoordinate cell)
         {
@@ -240,7 +250,7 @@ namespace DungeonBuilder.M0
             }
             var info = ui.Q<Label>("contentPlacementInfo");
             var gate = root.DungeonDraftPurchaseEligibility();
-            info.text = contentIntent == null ? Text(reassigning != null ? "ui.dungeon.content.destination_hint" :
+            info.text = contentIntent == null ? Text(reassigning != null ? feedback ?? "ui.dungeon.content.destination_hint" :
                 contentBrowserOwned ? returnedChoices.Length == 0 ? "ui.dungeon.content.owned_empty" : "ui.dungeon.content.owned_hint" : "ui.dungeon.content.new_hint") :
                 Text(contentPreview?.Reason ?? (contentPreview == null ? "ui.dungeon.content.position_hint" : "ui.dungeon.content.preview"));
             if (contentIntent != null)
