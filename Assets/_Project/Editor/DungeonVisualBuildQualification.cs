@@ -15,6 +15,8 @@ namespace DungeonBuilder.M0.EditorTools
         // Retain the owner's earlier qualified player while producing one correction build.
         public static void BuildRoomContentUatWindows()
             => BuildWindowsAt("Builds/Development/Windows-room-content-uat/Dungeon Lord.exe");
+        public static void BuildCompactPlacementWindows()
+            => BuildWindowsAt("Builds/Development/Windows-placement-compact/Dungeon Lord.exe");
         private static void BuildWindowsAt(string outputPath)
         {
             DevelopmentBuildUtility.BuildDevelopment(BuildTarget.StandaloneWindows64, outputPath);

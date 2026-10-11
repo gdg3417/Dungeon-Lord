@@ -56,6 +56,12 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator RoomContentUatMeasuredPlacementLayout()
         { yield return Invoke("RoomContentUatPlacementGeometryAndLocalizedFeedback"); }
         [UnityTest]
+        public IEnumerator RoomContentCompactMove()
+        { yield return Invoke("RoomContentCompactMoveAllCategoriesAndDraftCosts"); }
+        [UnityTest]
+        public IEnumerator RoomContentCompactPlacementAndOverflow()
+        { yield return Invoke("RoomContentCompactAcquisitionOwnedReassignAndOverflow"); }
+        [UnityTest]
         public IEnumerator CompositionNormalInspectionFocusRailCollapse()
         { yield return Invoke("CompositionNormalInspectionFocusRailAndCollapseAreReadOnly"); }
         [UnityTest]

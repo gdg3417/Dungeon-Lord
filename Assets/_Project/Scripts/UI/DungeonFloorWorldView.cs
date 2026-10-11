@@ -469,7 +469,7 @@ namespace DungeonBuilder.M0
             if (room == null || !GridVisible) return;
             var cells = Footprint(room.RoomDefinitionId, room.Anchor, room.Orientation);
             if (cells.Length > maximumGridTiles) return;
-            var tile = Tile(policy.FloorBoundaryColor, policy.GridTileSize, placementGridSprite);
+            var tile = Tile(policy.RoomPlacementGridColor, policy.GridTileSize, placementGridSprite);
             foreach (var cell in cells) roomPlacementGrid.SetTile(new Vector3Int(cell.X, cell.Y, 0), tile);
             RoomPlacementGridTileCount = cells.Length; RoomPlacementGridTarget = roomId;
         }
