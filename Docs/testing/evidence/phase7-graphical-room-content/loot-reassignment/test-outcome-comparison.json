@@ -1,0 +1,22 @@
+[
+  {
+    "mode": "editmode",
+    "removed": [],
+    "added": [
+      "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentLootRejectionReasons",
+      "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentSequentialLootDraft",
+      "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentSequentialLootSaveBetween"
+    ],
+    "changed": []
+  },
+  {
+    "mode": "playmode",
+    "removed": [],
+    "added": [
+      "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentLootRejectionReasons",
+      "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentSequentialLootDraft",
+      "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentSequentialLootSaveBetween"
+    ],
+    "changed": []
+  }
+]

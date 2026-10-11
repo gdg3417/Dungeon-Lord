@@ -1,0 +1,283 @@
+[
+  {
+    "path": "loot-reassignment-exact-after-restored-source.json",
+    "sha256": "1b9f81344f652104d396ab3a4d1f7f665fe22d57c71c9d35011f660f075f6622",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-exact-after-source.json",
+    "sha256": "fbc62e3c4a9652205dee5289bb6a9194d5c3cf88358bf31c44806fad19197912",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-exact-before-restored-source.json",
+    "sha256": "1b9f81344f652104d396ab3a4d1f7f665fe22d57c71c9d35011f660f075f6622",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-exact-before-source.json",
+    "sha256": "cad6ab439b43c486b5e68724221dbac802b5f858196138962fd08b948d137def",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-exact02-after-restored-source.json",
+    "sha256": "504e4851aeb80b100a9a29fd063ef7af4d0cb63ce5f99a21ed732cdda77ae84a",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-exact02-after-source.json",
+    "sha256": "32fca45c945cf21ca8bdda8782bb327ede0a226efc16a94bf497a434f45d2341",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-exact02-before-restored-source.json",
+    "sha256": "504e4851aeb80b100a9a29fd063ef7af4d0cb63ce5f99a21ed732cdda77ae84a",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-exact02-before-source.json",
+    "sha256": "08b8186a695d5eca328aa89dbc047577952b45d989b95912574837ce2519b320",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-final-source.json",
+    "sha256": "77b8f97c1daf31a9753e6548a3a616ca94e9394db3c345cbad31b0fde3cad935",
+    "head": "89a60250e8cf06eedb2decdb0c703525eb06f6b9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-focused-after-restored-source.json",
+    "sha256": "cbab0912e7287ac1c6dad0e04fb112a933d13fc2d2877ad19c2d1cac5549c1fb",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-focused-after-source.json",
+    "sha256": "bdcfc06bc87ec46f88eef60b9a06f5f2013d3eeea90bff41a6fd4096f15fb11b",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-focused-before-restored-source.json",
+    "sha256": "cbab0912e7287ac1c6dad0e04fb112a933d13fc2d2877ad19c2d1cac5549c1fb",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-focused-before-source.json",
+    "sha256": "a23467d96da974572d4f4ed6958581b2fa7ec8803651afb6d08a2ca12be8494d",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Data/Bootstrap/string_table_en.json: mismatch",
+      "Assets/_Project/Editor/DungeonVisualBuildQualification.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-full-editmode-after-restored-source.json",
+    "sha256": "77b8f97c1daf31a9753e6548a3a616ca94e9394db3c345cbad31b0fde3cad935",
+    "head": "89a60250e8cf06eedb2decdb0c703525eb06f6b9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-full-editmode-after-source.json",
+    "sha256": "77b8f97c1daf31a9753e6548a3a616ca94e9394db3c345cbad31b0fde3cad935",
+    "head": "89a60250e8cf06eedb2decdb0c703525eb06f6b9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-full-editmode-before-source.json",
+    "sha256": "77b8f97c1daf31a9753e6548a3a616ca94e9394db3c345cbad31b0fde3cad935",
+    "head": "89a60250e8cf06eedb2decdb0c703525eb06f6b9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-full-playmode-after-restored-source.json",
+    "sha256": "77b8f97c1daf31a9753e6548a3a616ca94e9394db3c345cbad31b0fde3cad935",
+    "head": "89a60250e8cf06eedb2decdb0c703525eb06f6b9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-full-playmode-after-source.json",
+    "sha256": "60995b0be1ddafdfb2f54da96ea6fcda572215df9f1e10126b8a7d8567fda71a",
+    "head": "89a60250e8cf06eedb2decdb0c703525eb06f6b9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-full-playmode-before-source.json",
+    "sha256": "77b8f97c1daf31a9753e6548a3a616ca94e9394db3c345cbad31b0fde3cad935",
+    "head": "89a60250e8cf06eedb2decdb0c703525eb06f6b9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-red-after-restored-source.json",
+    "sha256": "b255296538b75e4fc3df119f9972b291b1e0c103a6f743194b893b1f681e94a7",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-red-after-source.json",
+    "sha256": "9436449a0a7f900baf91d3bd6828c546fba7fb600ea307ac7d85c503572a8573",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-red-before-restored-source.json",
+    "sha256": "96f8a40e655649a111fc199fbb695d79015a4e1a98991075901eec7ee8fdddfc",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-red-before-source.json",
+    "sha256": "41be8992d385f5e6784ff8185ebc8ed4c968ba17cf6ce247da95536cb231a68f",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs: mismatch",
+      "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-red-ready-restored-source.json",
+    "sha256": "b255296538b75e4fc3df119f9972b291b1e0c103a6f743194b893b1f681e94a7",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-red-ready-source.json",
+    "sha256": "4622e1bd3fce0f1c2eef17986a6ab17a10e34877b22df369715d53c61567cbbe",
+    "head": "ee1ff9a5d72ed1e46e5c6e61e744d77d1bd7c976",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-windows-after-restored-source.json",
+    "sha256": "77b8f97c1daf31a9753e6548a3a616ca94e9394db3c345cbad31b0fde3cad935",
+    "head": "89a60250e8cf06eedb2decdb0c703525eb06f6b9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-windows-after-source.json",
+    "sha256": "51248af004712294f7c96f835773f90f3c197b6caa3500bec29a6974e16076bb",
+    "head": "89a60250e8cf06eedb2decdb0c703525eb06f6b9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/Settings/UniversalRP.asset: mismatch",
+      "Assets/UniversalRenderPipelineGlobalSettings.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch",
+      "ProjectSettings/UnityConnectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "loot-reassignment-windows-before-source.json",
+    "sha256": "77b8f97c1daf31a9753e6548a3a616ca94e9394db3c345cbad31b0fde3cad935",
+    "head": "89a60250e8cf06eedb2decdb0c703525eb06f6b9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  }
+]
