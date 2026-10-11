@@ -1,0 +1,32 @@
+{
+  "project": {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation",
+    "bytes": 3069556729,
+    "gib": 2.8587474757805467
+  },
+  "library": {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Library",
+    "bytes": 2387371241,
+    "gib": 2.22341273073107
+  },
+  "corrected_player": {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Builds\\Development\\Windows-placement-compact",
+    "bytes": 181826735,
+    "gib": 0.16933934297412634
+  },
+  "earlier_player": {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Builds\\Development\\Windows",
+    "bytes": 181816061,
+    "gib": 0.1693294020369649
+  },
+  "earlier_uat_player": {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Builds\\Development\\Windows-room-content-uat",
+    "bytes": 181826080,
+    "gib": 0.16933873295783997
+  },
+  "unity_lockfile": false,
+  "editor_processes": 0,
+  "qualification_invocations": 0,
+  "remaining_cli_process": "internal-auth-broker-serve (PID 27528); no project checkout",
+  "cleanup_performed": false
+}

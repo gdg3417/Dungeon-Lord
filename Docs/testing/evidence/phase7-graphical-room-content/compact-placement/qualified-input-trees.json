@@ -1,0 +1,24 @@
+{
+  "reviewed": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+  "qualified_implementation": "834bf3b7031caa8f17bd99d17516ffde3692cc45",
+  "branch": "codex/phase7-graphical-room-content-management",
+  "trees": {
+    "Assets": "4e4b7135356ad9b5e59107d5b4412b90d5ff22ea",
+    "Packages": "e3fec9b0c4018adde155b4d8cd05cac3217df206",
+    "ProjectSettings": "c55e5632c33401052e04e4c9172dfadc312686f3",
+    "ContentAuthoring": "41a73986b5c781df4f2ad2ab83a6cd792d31a70c"
+  },
+  "changed_files": [
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs",
+    "Assets/_Project/Editor/DungeonVisualBuildQualification.cs",
+    "Assets/_Project/Scripts/UI/DungeonFloorWorldView.cs",
+    "Assets/_Project/Scripts/UI/DungeonPresentationPolicy.cs",
+    "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs",
+    "Assets/_Project/UI/ProductionDungeon/Dungeon.uss",
+    "Assets/_Project/UI/ProductionDungeon/Presentation.asset",
+    "Tools/Presentation/collect_compact_placement_evidence.py"
+  ],
+  "save_schema": 13,
+  "draft_format": 5,
+  "draft_record_version": 4
+}

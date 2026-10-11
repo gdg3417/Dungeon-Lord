@@ -1,0 +1,7289 @@
+{
+  "measurements": [
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.monster costs=False",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.trap costs=False",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.monster costs=False",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.trap costs=False",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.monster costs=False",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 388.0,
+        "natural": 107.0,
+        "details": 107.0,
+        "blank": 0.0,
+        "map": 631.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 388.0,
+      "map_pixels": 631.0,
+      "map_fraction": 0.49296875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.trap costs=False",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 388.0,
+        "natural": 107.0,
+        "details": 107.0,
+        "blank": 0.0,
+        "map": 631.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 388.0,
+      "map_pixels": 631.0,
+      "map_fraction": 0.49296875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 388.0,
+        "natural": 107.0,
+        "details": 107.0,
+        "blank": 0.0,
+        "map": 631.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 388.0,
+      "map_pixels": 631.0,
+      "map_fraction": 0.49296875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.monster costs=False",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.trap costs=False",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.monster costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.trap costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.monster costs=False",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.trap costs=False",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.monster costs=False",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.trap costs=False",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.monster costs=False",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.trap costs=False",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.monster costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.monster costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.trap costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.trap costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.monster costs=True",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.trap costs=True",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.monster costs=True",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.trap costs=True",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.monster costs=True",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 388.0,
+        "natural": 107.0,
+        "details": 107.0,
+        "blank": 0.0,
+        "map": 631.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 388.0,
+      "map_pixels": 631.0,
+      "map_fraction": 0.49296875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.trap costs=True",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 388.0,
+        "natural": 107.0,
+        "details": 107.0,
+        "blank": 0.0,
+        "map": 631.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 388.0,
+      "map_pixels": 631.0,
+      "map_fraction": 0.49296875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 388.0,
+        "natural": 107.0,
+        "details": 107.0,
+        "blank": 0.0,
+        "map": 631.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 388.0,
+      "map_pixels": 631.0,
+      "map_fraction": 0.49296875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.monster costs=True",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.trap costs=True",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.monster costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.trap costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.monster costs=True",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.trap costs=True",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.monster costs=True",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.trap costs=True",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Move instruction placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Valid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Invalid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.monster costs=True",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.trap costs=True",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Move instruction placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Valid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Invalid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.monster costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.monster costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.trap costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.trap costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Move instruction placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Valid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Invalid Move placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New placement.category.monster costs=False",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New placement.category.trap costs=False",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Owned costs=False",
+      "logical": {
+        "panel": 358.0,
+        "natural": 91.0,
+        "details": 91.0,
+        "blank": 0.0,
+        "map": 747.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 747.0,
+      "map_fraction": 0.58359375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 358.0,
+        "natural": 91.0,
+        "details": 91.0,
+        "blank": 0.0,
+        "map": 747.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 747.0,
+      "map_fraction": 0.58359375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Reassign instruction costs=False",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 691.0,
+        "natural": 826.0,
+        "details": 424.0,
+        "blank": -402.0,
+        "map": 414.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 691.0,
+      "map_pixels": 414.0,
+      "map_fraction": 0.3234375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New placement.category.monster costs=False",
+      "logical": {
+        "panel": 431.0,
+        "natural": 159.0,
+        "details": 159.0,
+        "blank": 0.0,
+        "map": 635.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 431.0,
+      "map_pixels": 635.0,
+      "map_fraction": 0.49609375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 406.0,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 660.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 406.0,
+      "map_pixels": 660.0,
+      "map_fraction": 0.515625
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New placement.category.trap costs=False",
+      "logical": {
+        "panel": 431.0,
+        "natural": 159.0,
+        "details": 159.0,
+        "blank": 0.0,
+        "map": 635.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 431.0,
+      "map_pixels": 635.0,
+      "map_fraction": 0.49609375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 406.0,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 660.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 406.0,
+      "map_pixels": 660.0,
+      "map_fraction": 0.515625
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 431.0,
+        "natural": 159.0,
+        "details": 159.0,
+        "blank": 0.0,
+        "map": 635.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 431.0,
+      "map_pixels": 635.0,
+      "map_fraction": 0.49609375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 406.0,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 660.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 406.0,
+      "map_pixels": 660.0,
+      "map_fraction": 0.515625
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Owned costs=False",
+      "logical": {
+        "panel": 406.0,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 660.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 406.0,
+      "map_pixels": 660.0,
+      "map_fraction": 0.515625
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Reassign instruction costs=False",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 691.0,
+        "natural": 1030.0,
+        "details": 419.0,
+        "blank": -611.0,
+        "map": 375.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 691.0,
+      "map_pixels": 375.0,
+      "map_fraction": 0.29296875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New placement.category.monster costs=False",
+      "logical": {
+        "panel": 483.0,
+        "natural": 202.0,
+        "details": 202.0,
+        "blank": 0.0,
+        "map": 536.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 483.0,
+      "map_pixels": 536.0,
+      "map_fraction": 0.41875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 451.0,
+        "natural": 170.0,
+        "details": 170.0,
+        "blank": 0.0,
+        "map": 568.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 451.0,
+      "map_pixels": 568.0,
+      "map_fraction": 0.44375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New placement.category.trap costs=False",
+      "logical": {
+        "panel": 483.0,
+        "natural": 202.0,
+        "details": 202.0,
+        "blank": 0.0,
+        "map": 536.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 483.0,
+      "map_pixels": 536.0,
+      "map_fraction": 0.41875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 451.0,
+        "natural": 170.0,
+        "details": 170.0,
+        "blank": 0.0,
+        "map": 568.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 451.0,
+      "map_pixels": 568.0,
+      "map_fraction": 0.44375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 483.0,
+        "natural": 202.0,
+        "details": 202.0,
+        "blank": 0.0,
+        "map": 536.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 483.0,
+      "map_pixels": 536.0,
+      "map_fraction": 0.41875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 451.0,
+        "natural": 170.0,
+        "details": 170.0,
+        "blank": 0.0,
+        "map": 568.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 451.0,
+      "map_pixels": 568.0,
+      "map_fraction": 0.44375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Owned costs=False",
+      "logical": {
+        "panel": 451.0,
+        "natural": 170.0,
+        "details": 170.0,
+        "blank": 0.0,
+        "map": 568.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 451.0,
+      "map_pixels": 568.0,
+      "map_fraction": 0.44375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Reassign instruction costs=False",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 388.0,
+        "natural": 107.0,
+        "details": 107.0,
+        "blank": 0.0,
+        "map": 631.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 388.0,
+      "map_pixels": 631.0,
+      "map_fraction": 0.49296875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 691.0,
+        "natural": 1964.0,
+        "details": 410.0,
+        "blank": -1554.0,
+        "map": 328.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 691.0,
+      "map_pixels": 328.0,
+      "map_fraction": 0.25625
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New placement.category.monster costs=False",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New placement.category.trap costs=False",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Owned costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 90.66669,
+        "details": 90.66669,
+        "blank": 0.0,
+        "map": 384.0,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 576.0,
+      "map_fraction": 0.5333333333333333
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 216.0,
+        "natural": 90.66669,
+        "details": 90.66669,
+        "blank": 0.0,
+        "map": 384.0,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 576.0,
+      "map_fraction": 0.5333333333333333
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Reassign instruction costs=False",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 438.6667,
+        "details": 206.0,
+        "blank": -232.6666,
+        "map": 268.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 403.00005,
+      "map_fraction": 0.3731481944444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New placement.category.monster costs=False",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New placement.category.trap costs=False",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Owned costs=False",
+      "logical": {
+        "panel": 240.0,
+        "natural": 109.3333,
+        "details": 109.3333,
+        "blank": 0.0,
+        "map": 346.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 360.0,
+      "map_pixels": 519.0,
+      "map_fraction": 0.48055555555555557
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 240.0,
+        "natural": 109.3333,
+        "details": 109.3333,
+        "blank": 0.0,
+        "map": 346.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 360.0,
+      "map_pixels": 519.0,
+      "map_fraction": 0.48055555555555557
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Reassign instruction costs=False",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 545.3334,
+        "details": 200.6667,
+        "blank": -344.6667,
+        "map": 254.6667,
+        "safe": 720.0,
+        "line": 24.66666,
+        "top": 95.33334
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 382.00005,
+      "map_fraction": 0.35370375
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New placement.category.monster costs=False",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New placement.category.trap costs=False",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Owned costs=False",
+      "logical": {
+        "panel": 318.0,
+        "natural": 138.6667,
+        "details": 138.6667,
+        "blank": 0.0,
+        "map": 243.3333,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 477.0,
+      "map_pixels": 364.99995,
+      "map_fraction": 0.33796291666666667
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 318.0,
+        "natural": 138.6667,
+        "details": 138.6667,
+        "blank": 0.0,
+        "map": 243.3333,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 477.0,
+      "map_pixels": 364.99995,
+      "map_fraction": 0.33796291666666667
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Reassign instruction costs=False",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 1334.667,
+        "details": 152.0,
+        "blank": -1182.667,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New placement.category.monster costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New placement.category.trap costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Owned costs=False",
+      "logical": {
+        "panel": 264.0,
+        "natural": 91.0,
+        "details": 91.0,
+        "blank": 0.0,
+        "map": 201.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 264.0,
+      "map_pixels": 201.0,
+      "map_fraction": 0.335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 264.0,
+        "natural": 91.0,
+        "details": 91.0,
+        "blank": 0.0,
+        "map": 201.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 264.0,
+      "map_pixels": 201.0,
+      "map_fraction": 0.335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Reassign instruction costs=False",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 276.0,
+        "natural": 439.0,
+        "details": 103.0,
+        "blank": -336.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New placement.category.monster costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New placement.category.trap costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Owned costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 92.0,
+        "blank": -18.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 92.0,
+        "blank": -18.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Reassign instruction costs=False",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 276.0,
+        "natural": 1030.0,
+        "details": 92.0,
+        "blank": -938.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New placement.category.monster costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New placement.category.trap costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New placement.category.loot_node costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Owned costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 139.0,
+        "details": 78.0,
+        "blank": -61.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 276.0,
+        "natural": 139.0,
+        "details": 78.0,
+        "blank": -61.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Reassign instruction costs=False",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 276.0,
+        "natural": 1335.0,
+        "details": 78.0,
+        "blank": -1257.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New placement.category.monster costs=True",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New placement.category.trap costs=True",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 377.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 728.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 377.0,
+      "map_pixels": 728.0,
+      "map_fraction": 0.56875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Owned costs=True",
+      "logical": {
+        "panel": 358.0,
+        "natural": 91.0,
+        "details": 91.0,
+        "blank": 0.0,
+        "map": 747.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 747.0,
+      "map_fraction": 0.58359375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 358.0,
+        "natural": 91.0,
+        "details": 91.0,
+        "blank": 0.0,
+        "map": 747.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 747.0,
+      "map_fraction": 0.58359375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Reassign instruction costs=True",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 691.0,
+        "natural": 826.0,
+        "details": 424.0,
+        "blank": -402.0,
+        "map": 414.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 691.0,
+      "map_pixels": 414.0,
+      "map_fraction": 0.3234375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 338.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 767.0,
+        "safe": 1280.0,
+        "line": 20.0,
+        "top": 141.0
+      },
+      "panel_pixels": 338.0,
+      "map_pixels": 767.0,
+      "map_fraction": 0.59921875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New placement.category.monster costs=True",
+      "logical": {
+        "panel": 431.0,
+        "natural": 159.0,
+        "details": 159.0,
+        "blank": 0.0,
+        "map": 635.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 431.0,
+      "map_pixels": 635.0,
+      "map_fraction": 0.49609375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 406.0,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 660.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 406.0,
+      "map_pixels": 660.0,
+      "map_fraction": 0.515625
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New placement.category.trap costs=True",
+      "logical": {
+        "panel": 431.0,
+        "natural": 159.0,
+        "details": 159.0,
+        "blank": 0.0,
+        "map": 635.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 431.0,
+      "map_pixels": 635.0,
+      "map_fraction": 0.49609375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 406.0,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 660.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 406.0,
+      "map_pixels": 660.0,
+      "map_fraction": 0.515625
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 431.0,
+        "natural": 159.0,
+        "details": 159.0,
+        "blank": 0.0,
+        "map": 635.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 431.0,
+      "map_pixels": 635.0,
+      "map_fraction": 0.49609375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 406.0,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 660.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 406.0,
+      "map_pixels": 660.0,
+      "map_fraction": 0.515625
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Owned costs=True",
+      "logical": {
+        "panel": 406.0,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 660.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 406.0,
+      "map_pixels": 660.0,
+      "map_fraction": 0.515625
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Reassign instruction costs=True",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 358.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 708.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 358.0,
+      "map_pixels": 708.0,
+      "map_fraction": 0.553125
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 691.0,
+        "natural": 1030.0,
+        "details": 419.0,
+        "blank": -611.0,
+        "map": 375.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 691.0,
+      "map_pixels": 375.0,
+      "map_fraction": 0.29296875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 382.0,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 684.0,
+        "safe": 1280.0,
+        "line": 25.0,
+        "top": 175.0
+      },
+      "panel_pixels": 382.0,
+      "map_pixels": 684.0,
+      "map_fraction": 0.534375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New placement.category.monster costs=True",
+      "logical": {
+        "panel": 483.0,
+        "natural": 202.0,
+        "details": 202.0,
+        "blank": 0.0,
+        "map": 536.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 483.0,
+      "map_pixels": 536.0,
+      "map_fraction": 0.41875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 451.0,
+        "natural": 170.0,
+        "details": 170.0,
+        "blank": 0.0,
+        "map": 568.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 451.0,
+      "map_pixels": 568.0,
+      "map_fraction": 0.44375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New placement.category.trap costs=True",
+      "logical": {
+        "panel": 483.0,
+        "natural": 202.0,
+        "details": 202.0,
+        "blank": 0.0,
+        "map": 536.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 483.0,
+      "map_pixels": 536.0,
+      "map_fraction": 0.41875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 451.0,
+        "natural": 170.0,
+        "details": 170.0,
+        "blank": 0.0,
+        "map": 568.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 451.0,
+      "map_pixels": 568.0,
+      "map_fraction": 0.44375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 483.0,
+        "natural": 202.0,
+        "details": 202.0,
+        "blank": 0.0,
+        "map": 536.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 483.0,
+      "map_pixels": 536.0,
+      "map_fraction": 0.41875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 451.0,
+        "natural": 170.0,
+        "details": 170.0,
+        "blank": 0.0,
+        "map": 568.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 451.0,
+      "map_pixels": 568.0,
+      "map_fraction": 0.44375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Owned costs=True",
+      "logical": {
+        "panel": 451.0,
+        "natural": 170.0,
+        "details": 170.0,
+        "blank": 0.0,
+        "map": 568.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 451.0,
+      "map_pixels": 568.0,
+      "map_fraction": 0.44375
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Reassign instruction costs=True",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 388.0,
+        "natural": 107.0,
+        "details": 107.0,
+        "blank": 0.0,
+        "map": 631.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 388.0,
+      "map_pixels": 631.0,
+      "map_fraction": 0.49296875
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 691.0,
+        "natural": 1964.0,
+        "details": 410.0,
+        "blank": -1554.0,
+        "map": 328.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 691.0,
+      "map_pixels": 328.0,
+      "map_fraction": 0.25625
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 420.0,
+        "natural": 139.0,
+        "details": 139.0,
+        "blank": 0.0,
+        "map": 599.0,
+        "safe": 1280.0,
+        "line": 32.0,
+        "top": 215.0
+      },
+      "panel_pixels": 420.0,
+      "map_pixels": 599.0,
+      "map_fraction": 0.46796875
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New placement.category.monster costs=True",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New placement.category.trap costs=True",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 235.3333,
+        "natural": 110.0,
+        "details": 110.0,
+        "blank": 0.0,
+        "map": 364.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 352.99995,
+      "map_pixels": 547.00005,
+      "map_fraction": 0.5064815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Owned costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 90.66669,
+        "details": 90.66669,
+        "blank": 0.0,
+        "map": 384.0,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 576.0,
+      "map_fraction": 0.5333333333333333
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 216.0,
+        "natural": 90.66669,
+        "details": 90.66669,
+        "blank": 0.0,
+        "map": 384.0,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 576.0,
+      "map_fraction": 0.5333333333333333
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Reassign instruction costs=True",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 438.6667,
+        "details": 206.0,
+        "blank": -232.6666,
+        "map": 268.6667,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 403.00005,
+      "map_fraction": 0.3731481944444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 196.6667,
+        "natural": 71.33337,
+        "details": 71.33337,
+        "blank": 0.0,
+        "map": 403.3333,
+        "safe": 720.0,
+        "line": 20.0,
+        "top": 86.0
+      },
+      "panel_pixels": 295.00005,
+      "map_pixels": 604.99995,
+      "map_fraction": 0.5601851388888889
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New placement.category.monster costs=True",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New placement.category.trap costs=True",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 264.6667,
+        "natural": 134.0,
+        "details": 134.0,
+        "blank": 0.0,
+        "map": 321.3333,
+        "safe": 720.0,
+        "line": 24.66669,
+        "top": 95.33334
+      },
+      "panel_pixels": 397.00005,
+      "map_pixels": 481.99995,
+      "map_fraction": 0.44629625
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Owned costs=True",
+      "logical": {
+        "panel": 240.0,
+        "natural": 109.3333,
+        "details": 109.3333,
+        "blank": 0.0,
+        "map": 346.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 360.0,
+      "map_pixels": 519.0,
+      "map_fraction": 0.48055555555555557
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 240.0,
+        "natural": 109.3333,
+        "details": 109.3333,
+        "blank": 0.0,
+        "map": 346.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 360.0,
+      "map_pixels": 519.0,
+      "map_fraction": 0.48055555555555557
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Reassign instruction costs=True",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 545.3334,
+        "details": 200.6667,
+        "blank": -344.6667,
+        "map": 254.6667,
+        "safe": 720.0,
+        "line": 24.66666,
+        "top": 95.33334
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 382.00005,
+      "map_fraction": 0.35370375
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 216.0,
+        "natural": 85.33331,
+        "details": 85.33331,
+        "blank": 0.0,
+        "map": 370.0,
+        "safe": 720.0,
+        "line": 24.66663,
+        "top": 95.33334
+      },
+      "panel_pixels": 324.0,
+      "map_pixels": 555.0,
+      "map_fraction": 0.5138888888888888
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New placement.category.monster costs=True",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New placement.category.trap costs=True",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 170.0,
+        "details": 152.0,
+        "blank": -18.0,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Owned costs=True",
+      "logical": {
+        "panel": 318.0,
+        "natural": 138.6667,
+        "details": 138.6667,
+        "blank": 0.0,
+        "map": 243.3333,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 477.0,
+      "map_pixels": 364.99995,
+      "map_fraction": 0.33796291666666667
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 318.0,
+        "natural": 138.6667,
+        "details": 138.6667,
+        "blank": 0.0,
+        "map": 243.3333,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 477.0,
+      "map_pixels": 364.99995,
+      "map_fraction": 0.33796291666666667
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Reassign instruction costs=True",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 331.3333,
+        "natural": 1334.667,
+        "details": 152.0,
+        "blank": -1182.667,
+        "map": 230.0,
+        "safe": 720.0,
+        "line": 32.0,
+        "top": 112.6667
+      },
+      "panel_pixels": 496.99995,
+      "map_pixels": 345.0,
+      "map_fraction": 0.3194444444444444
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 286.6667,
+        "natural": 107.3333,
+        "details": 107.3333,
+        "blank": 0.0,
+        "map": 274.6667,
+        "safe": 720.0,
+        "line": 31.99997,
+        "top": 112.6667
+      },
+      "panel_pixels": 430.00005,
+      "map_pixels": 412.00005,
+      "map_fraction": 0.3814815277777778
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New placement.category.monster costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New placement.category.trap costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 103.0,
+        "blank": -7.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Owned costs=True",
+      "logical": {
+        "panel": 264.0,
+        "natural": 91.0,
+        "details": 91.0,
+        "blank": 0.0,
+        "map": 201.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 264.0,
+      "map_pixels": 201.0,
+      "map_fraction": 0.335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 264.0,
+        "natural": 91.0,
+        "details": 91.0,
+        "blank": 0.0,
+        "map": 201.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 264.0,
+      "map_pixels": 201.0,
+      "map_fraction": 0.335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Reassign instruction costs=True",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 276.0,
+        "natural": 439.0,
+        "details": 103.0,
+        "blank": -336.0,
+        "map": 189.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 189.0,
+      "map_fraction": 0.315
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 244.0,
+        "natural": 71.0,
+        "details": 71.0,
+        "blank": 0.0,
+        "map": 221.0,
+        "safe": 600.0,
+        "line": 20.0,
+        "top": 101.0
+      },
+      "panel_pixels": 244.0,
+      "map_pixels": 221.0,
+      "map_fraction": 0.36833333333333335
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New placement.category.monster costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New placement.category.trap costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 276.0,
+        "natural": 134.0,
+        "details": 92.0,
+        "blank": -42.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Owned costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 92.0,
+        "blank": -18.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 276.0,
+        "natural": 110.0,
+        "details": 92.0,
+        "blank": -18.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Reassign instruction costs=True",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 276.0,
+        "natural": 1030.0,
+        "details": 92.0,
+        "blank": -938.0,
+        "map": 174.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 174.0,
+      "map_fraction": 0.29
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 270.0,
+        "natural": 86.0,
+        "details": 86.0,
+        "blank": 0.0,
+        "map": 180.0,
+        "safe": 600.0,
+        "line": 25.0,
+        "top": 111.0
+      },
+      "panel_pixels": 270.0,
+      "map_pixels": 180.0,
+      "map_fraction": 0.3
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New placement.category.monster costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New valid placement.category.monster",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New placement.category.trap costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New valid placement.category.trap",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New placement.category.loot_node costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "New valid placement.category.loot_node",
+      "logical": {
+        "panel": 276.0,
+        "natural": 170.0,
+        "details": 78.0,
+        "blank": -92.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Owned costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 139.0,
+        "details": 78.0,
+        "blank": -61.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Owned valid",
+      "logical": {
+        "panel": 276.0,
+        "natural": 139.0,
+        "details": 78.0,
+        "blank": -61.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Reassign instruction costs=True",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Reassign valid",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Long localized Move",
+      "logical": {
+        "panel": 276.0,
+        "natural": 1335.0,
+        "details": 78.0,
+        "blank": -1257.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "state": "Short after overflow",
+      "logical": {
+        "panel": 276.0,
+        "natural": 107.0,
+        "details": 78.0,
+        "blank": -29.0,
+        "map": 153.0,
+        "safe": 600.0,
+        "line": 32.0,
+        "top": 125.0
+      },
+      "panel_pixels": 276.0,
+      "map_pixels": 153.0,
+      "map_fraction": 0.255
+    }
+  ],
+  "short_move_summary": [
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Small",
+      "panel_pixels": [
+        338.0,
+        338.0
+      ],
+      "minimum_map_pixels": 767.0,
+      "maximum_blank": 0.0
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Default",
+      "panel_pixels": [
+        382.0,
+        382.0
+      ],
+      "minimum_map_pixels": 684.0,
+      "maximum_blank": 0.0
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "text_size": "Large",
+      "panel_pixels": [
+        420.0,
+        420.0
+      ],
+      "minimum_map_pixels": 599.0,
+      "maximum_blank": 0.0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Small",
+      "panel_pixels": [
+        295.00005,
+        295.00005
+      ],
+      "minimum_map_pixels": 604.99995,
+      "maximum_blank": 0.0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Default",
+      "panel_pixels": [
+        324.0,
+        324.0
+      ],
+      "minimum_map_pixels": 555.0,
+      "maximum_blank": 0.0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "text_size": "Large",
+      "panel_pixels": [
+        430.00005,
+        430.00005
+      ],
+      "minimum_map_pixels": 412.00005,
+      "maximum_blank": 0.0
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Small",
+      "panel_pixels": [
+        244.0,
+        244.0
+      ],
+      "minimum_map_pixels": 221.0,
+      "maximum_blank": 0.0
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Default",
+      "panel_pixels": [
+        270.0,
+        270.0
+      ],
+      "minimum_map_pixels": 180.0,
+      "maximum_blank": 0.0
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "text_size": "Large",
+      "panel_pixels": [
+        276.0,
+        276.0
+      ],
+      "minimum_map_pixels": 153.0,
+      "maximum_blank": -29.0
+    }
+  ],
+  "minimum_map_fraction": 0.255,
+  "maximum_blank": 0.0
+}

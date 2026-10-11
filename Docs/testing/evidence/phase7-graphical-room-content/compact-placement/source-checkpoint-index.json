@@ -1,0 +1,295 @@
+[
+  {
+    "path": "placement-compact-final-source.json",
+    "sha256": "083ae7a17e6b52089da33e3c2cf0c462fd5874cb5f88fd33d7bcee78661fc185",
+    "head": "834bf3b7031caa8f17bd99d17516ffde3692cc45",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-01-source.json",
+    "sha256": "09c84b4a281dcb658599d48bbd0ea0220a4eb926e96f1b5d96f79c661c74d0ed",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Editor/DungeonVisualBuildQualification.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-02-source.json",
+    "sha256": "6722883848a3a8ef991b19d7ec8501d6cded05cd032b4ff1e46780c07d3df553",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-03-source.json",
+    "sha256": "2abcdf5ae7cb1778a052872fca10fa0ebbf4888140a65381d762da0c9883a0a8",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-04-source.json",
+    "sha256": "8fd4d8a2c6731d8760493209116b835de9c592ceb314b027caad9a5b1cbfd5a7",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-05-source.json",
+    "sha256": "d35788a36f1dd280e1e49f582bac89b44f9a1c8834a57b1ebb4ea55aa7b3a785",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-06-source.json",
+    "sha256": "c01887b1ca2a2538839b2bcbdefdf1c0f45efe99575b4d6c8e6941525da696c2",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-07-source.json",
+    "sha256": "7d716104fd726a856f45fea70122bb8182f6eb599ca2781457923d78a9260ca0",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-08-source.json",
+    "sha256": "09c00ac4ab7090fd2a293845667714a87a2e8ceb26b4e5e6fcff872466983924",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-09-source.json",
+    "sha256": "1e63c44d0a36c7c7944c8535459baf56583458c252461129286b8ff743916b65",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-10-source.json",
+    "sha256": "442e2b7ab0f57d333f8ef94c46161df52ee16ffcec5efebcda09bd8b8b2e448b",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-focused-11-source.json",
+    "sha256": "6ec54ea06830b4175f4fd6a61b03ed4738d5a194b4efc71b36f26c2ce57ffbee",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-full-editmode-source.json",
+    "sha256": "083ae7a17e6b52089da33e3c2cf0c462fd5874cb5f88fd33d7bcee78661fc185",
+    "head": "834bf3b7031caa8f17bd99d17516ffde3692cc45",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-full-playmode-source.json",
+    "sha256": "df3f457d7cac827bf13e799c2c2ea70c32959e97936d57b40fa25a4d47869959",
+    "head": "834bf3b7031caa8f17bd99d17516ffde3692cc45",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-post-windows-build-source.json",
+    "sha256": "a1204b32028125bfb2b21e0fe9ef1e337ffdbf504fda068ee676ad79e7f3cc0a",
+    "head": "834bf3b7031caa8f17bd99d17516ffde3692cc45",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/Settings/UniversalRP.asset: mismatch",
+      "Assets/UniversalRenderPipelineGlobalSettings.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch",
+      "ProjectSettings/UnityConnectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-01-source.json",
+    "sha256": "26a49b10086ce32c23ae6d880c2672a8a5567987426bf9cf2fc67eb21b72f6d3",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-02-source.json",
+    "sha256": "6722883848a3a8ef991b19d7ec8501d6cded05cd032b4ff1e46780c07d3df553",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-03-source.json",
+    "sha256": "2abcdf5ae7cb1778a052872fca10fa0ebbf4888140a65381d762da0c9883a0a8",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-04-source.json",
+    "sha256": "8fd4d8a2c6731d8760493209116b835de9c592ceb314b027caad9a5b1cbfd5a7",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-05-source.json",
+    "sha256": "d35788a36f1dd280e1e49f582bac89b44f9a1c8834a57b1ebb4ea55aa7b3a785",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-06-source.json",
+    "sha256": "006b9fdd0a5ec85a4f7ce2b5ba4a53891f79836ddefb50ca9274e933916b10d3",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-07-source.json",
+    "sha256": "4c8d58548733d864df32fd6876a3cb9042afbcda4b404aa22fb28da3ccd0373c",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-08-source.json",
+    "sha256": "d9ca312ff16aca53299240482f15e8bd06c4ebb799850a180f09938f945cc546",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-09-source.json",
+    "sha256": "6c42f078e23fd0b346838bb4b340a5d1584f9c55c58fdb60a88124c920dde1b0",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-10-source.json",
+    "sha256": "18a2c28aaf1ed1261d5a0d2957ca81f176c62b01e9902a5eea66d8be714d8eed",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-focused-11-source.json",
+    "sha256": "56e4161f90d256624d13eba1d0640582c5c6c5d99e3d8d39c4206951c4357566",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-full-editmode-source.json",
+    "sha256": "083ae7a17e6b52089da33e3c2cf0c462fd5874cb5f88fd33d7bcee78661fc185",
+    "head": "834bf3b7031caa8f17bd99d17516ffde3692cc45",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-full-playmode-source.json",
+    "sha256": "083ae7a17e6b52089da33e3c2cf0c462fd5874cb5f88fd33d7bcee78661fc185",
+    "head": "834bf3b7031caa8f17bd99d17516ffde3692cc45",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-pre-windows-build-source.json",
+    "sha256": "083ae7a17e6b52089da33e3c2cf0c462fd5874cb5f88fd33d7bcee78661fc185",
+    "head": "834bf3b7031caa8f17bd99d17516ffde3692cc45",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "placement-compact-reuse-source.json",
+    "sha256": "71e6a6666a95f241b5a6abf2bb918fce518dc96e4599a325473bf094886d2a5c",
+    "head": "163c32fdbfc7aad9b844a0997fef0b2b83f1c307",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  }
+]

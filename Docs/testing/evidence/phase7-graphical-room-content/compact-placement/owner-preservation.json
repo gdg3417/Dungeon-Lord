@@ -1,0 +1,61 @@
+{
+  "files": [
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\phase7-ui-composition-validation-01a11d08.json",
+      "before": "d1541566d52610a34c4147a4c892e70d14dd7e36278cf46f7aa3fd6848fc5677",
+      "after": "d1541566d52610a34c4147a4c892e70d14dd7e36278cf46f7aa3fd6848fc5677"
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\phase7-ui-composition-validation-01a11d08.json.editor-draft.draft-77ed4d7425e0409bbd4ee88a52fe0ad7.000000.candidate",
+      "before": "8db021b7ed3b71298f1957baf09e857d833a068d04600ccd19eacd76bed22d3f",
+      "after": "8db021b7ed3b71298f1957baf09e857d833a068d04600ccd19eacd76bed22d3f"
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\phase7-ui-composition-validation-01a11d08.json.editor-draft.draft-77ed4d7425e0409bbd4ee88a52fe0ad7.000000.commit",
+      "before": "66daec93897176e318d69ae171ec2f53491bfea7139ce377ea67a8a31d50e707",
+      "after": "66daec93897176e318d69ae171ec2f53491bfea7139ce377ea67a8a31d50e707"
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\save_primary.json",
+      "before": "39224b12446ec30990d043385e77634e45cc7da1dc5e50e75237b33f25c79df2",
+      "after": "39224b12446ec30990d043385e77634e45cc7da1dc5e50e75237b33f25c79df2"
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\save_primary.json.editor-draft.draft-015ea1a185c449cbab458f36c6884b0c.000000.candidate",
+      "before": "d0ede45449e86ac8136d7668fb51296b7f470ae7369308f5507848046514276f",
+      "after": "d0ede45449e86ac8136d7668fb51296b7f470ae7369308f5507848046514276f"
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\save_primary.json.editor-draft.draft-015ea1a185c449cbab458f36c6884b0c.000000.commit",
+      "before": "90df3992fdf38c0785f8f7d8b6fe6415e30daae7f8ca766fb74d9a48170f1063",
+      "after": "90df3992fdf38c0785f8f7d8b6fe6415e30daae7f8ca766fb74d9a48170f1063"
+    },
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\ProjectSettings\\ProjectSettings.asset",
+      "before": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "after": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993"
+    },
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\Assets\\TextMesh Pro\\Resources\\TMP Settings.asset",
+      "before": "dafd957b416fdad34f611c30ee60d5f603497099f847b83fd688f883a56a3e72",
+      "after": "dafd957b416fdad34f611c30ee60d5f603497099f847b83fd688f883a56a3e72"
+    }
+  ],
+  "prefix_before": [
+    "phase7-ui-composition-validation-01a11d08.json",
+    "phase7-ui-composition-validation-01a11d08.json.editor-draft.draft-77ed4d7425e0409bbd4ee88a52fe0ad7.000000.candidate",
+    "phase7-ui-composition-validation-01a11d08.json.editor-draft.draft-77ed4d7425e0409bbd4ee88a52fe0ad7.000000.commit",
+    "save_primary.json",
+    "save_primary.json.editor-draft.draft-015ea1a185c449cbab458f36c6884b0c.000000.candidate",
+    "save_primary.json.editor-draft.draft-015ea1a185c449cbab458f36c6884b0c.000000.commit"
+  ],
+  "prefix_after": [
+    "phase7-ui-composition-validation-01a11d08.json",
+    "phase7-ui-composition-validation-01a11d08.json.editor-draft.draft-77ed4d7425e0409bbd4ee88a52fe0ad7.000000.candidate",
+    "phase7-ui-composition-validation-01a11d08.json.editor-draft.draft-77ed4d7425e0409bbd4ee88a52fe0ad7.000000.commit",
+    "save_primary.json",
+    "save_primary.json.editor-draft.draft-015ea1a185c449cbab458f36c6884b0c.000000.candidate",
+    "save_primary.json.editor-draft.draft-015ea1a185c449cbab458f36c6884b0c.000000.commit"
+  ],
+  "unchanged": true
+}

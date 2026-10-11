@@ -1,0 +1,32 @@
+[
+  {
+    "path": "screenshots/placement-compact-grid-floor.png",
+    "sha256": "168f540a1e7fb62c7236b295a808d21f6e329fb2f800ea8ddb9844c7ccb6490b",
+    "bytes": 612125
+  },
+  {
+    "path": "screenshots/placement-compact-grid-focus.png",
+    "sha256": "9eb2332f9a05640810f45595591c522c8b5871a7adcdc274dd7b6d81929eb35b",
+    "bytes": 740896
+  },
+  {
+    "path": "screenshots/placement-compact-landscape-move.png",
+    "sha256": "48ab49475a01eac6712d1dcd434729a3e7d196b089e5a33a8c68c2166bbb5cba",
+    "bytes": 583780
+  },
+  {
+    "path": "screenshots/placement-compact-long-scroll.png",
+    "sha256": "342832e8314b59abb33016715d49626a10f011c4b065fd96157283ed3a9823e7",
+    "bytes": 240934
+  },
+  {
+    "path": "screenshots/placement-compact-narrow-large.png",
+    "sha256": "5bfa8b33e02726891fa2b1f3744fa5bad14a1f23c42d3afc5c8e5d48a1cd5e4f",
+    "bytes": 290588
+  },
+  {
+    "path": "screenshots/placement-compact-portrait-move.png",
+    "sha256": "f86bad4e9651b783b00df2bfa797d3a903d90f6d614920c07aeeba31dd29968e",
+    "bytes": 564729
+  }
+]
