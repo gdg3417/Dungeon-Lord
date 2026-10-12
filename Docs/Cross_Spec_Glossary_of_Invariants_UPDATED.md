@@ -165,6 +165,8 @@ Tier is continuous numeric membership: lower bound inclusive, next tier's lower 
 - A single eventual canonical save authority owns active parties, scheduling and catch-up. Schema 14 is provisional only pending schema/migration review. Persistence failure recovers a proven committed prefix without duplicate settlement, fabricated events or a competing journal.
 - Offline outcomes and objectives are individually eligibility-classified. Applicable survivor knowledge and abstract loot extraction are eligible subject to existing restrictions; restricted rewards/research/gated actions retain verification requirements.
 - Draft editing remains available during catch-up; commits cannot retroactively change an earlier run. No run-derived login rebound overlays offline-run Heat.
+- Spec 17's prohibition on offline raids and permanent losses to the player's dungeon remains in force. Only approved ordinary adventurer-party activity and individually eligible outcomes may advance offline; no new destructive player-dungeon consequence or raid mechanic is authorized.
+- Spec 29's classification remains: foreground play is active without internet; background and closed-app intervals are offline and use the approved offline policy. The superseded freeze applies to party simulation and offline numeric Heat, not to this time classification.
 - Spec 16 regional population/cohort lifecycle is deferred for MVP. A stable run ID or admission queue is not a regional cohort implementation.
 
 See the design lock's approved decision list and open implementation contracts for details. The roadmap's A/B/C sequence is recommended dependency order, not a fixed PR count.

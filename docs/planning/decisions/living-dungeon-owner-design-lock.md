@@ -27,6 +27,8 @@ This lock records approved gameplay direction and reconciles older specification
 6. The player can edit during incomplete offline catch-up. Draft edits remain noncanonical. Canonical commits are ordered against completed earlier intervals so no edit retroactively changes a run that already started.
 7. Normal foreground play remains available without internet. Existing verification requirements continue to govern restricted actions.
 
+Spec 29's time classification remains: foreground activity remains foreground when internet is unavailable; background and closed-app intervals are offline and follow the approved offline simulation policy.
+
 ### Presentation and snapshots
 
 8. A run receives immutable start inputs: dungeon/layout, applicable rules and compatible executable behavior. Later edits affect later runs only. Historical runs retain sufficient inputs and executable compatibility; a version string or hash alone is insufficient.
@@ -43,7 +45,7 @@ This lock records approved gameplay direction and reconciles older specification
 ### Mana, outcomes, and restricted actions
 
 15. An offline-created party captures the mana reserve logically available at its admission timestamp, evaluated using the established canonical offline mana formula. Historical evaluation must not issue extra grants, replay normal online ticks, add a wallet, or change the configured 15% base offline efficiency and capacity-clamped one-time grant.
-16. Offline runs produce real eligible outcomes, including applicable survivor knowledge and abstract loot extraction. Restricted rewards, research completion and gated actions retain their verification requirements. Each objective is individually classified for offline eligibility; an unrestricted settlement helper cannot automatically complete every objective.
+16. Valid offline intervals may advance ordinary adventurer parties and individually eligible ordinary run outcomes, including adventurer combat casualties, applicable survivor knowledge and eligible abstract loot extraction. The prohibition on offline raids and permanent losses to the player's dungeon remains in force; no new destructive player-dungeon consequence or raid mechanic is approved. Restricted rewards, research completion and gated actions retain their verification requirements. Each objective is individually classified for offline eligibility; an unrestricted settlement helper cannot automatically complete every objective.
 
 ### Persistence and catch-up
 
