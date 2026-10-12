@@ -111,7 +111,7 @@ Referenced by: Spec 25, 28, 35
 
 INV-11 Heat Model Definitions
 
-Heat Tier is the configured continuous numeric interval. The lower threshold is inclusive; the next tier's lower threshold is exclusive. Heat State is the numeric Heat value, including fractional values. Do not quantize, round, or introduce epsilon to assign a tier.
+Heat Tier is the configured continuous numeric interval over the valid configured Heat domain. The lower threshold is inclusive; the next tier's lower threshold is exclusive, and the final tier is bounded by the configured valid maximum. Heat State is the numeric Heat value, including fractional values. Do not quantize, round, or introduce epsilon to assign a tier. The current active configuration begins at `HeatPeaceMinimum = 0`; the v3 spec's -15 minimum is historical, not active. Negative-Heat support and its tier mapping require a separate future design/configuration decision and are not activated or silently clamped/discarded.
 
 **Living-dungeon amendment (2026-10-12):** The older “one Heat State step” login rebound rule is superseded for offline adventurer outcomes. Their numeric effects are applied subject to the tier fixed at the accepted offline interval boundary; prevented excess is discarded and never banked. A separate rebound requires independent approval. Existing foreground Heat behavior and the retained two-stage run Heat/cooling composition remain unchanged.
 
@@ -155,7 +155,7 @@ The existing canonical offline mana rate, 15% base efficiency, fractional precis
 
 ### INV-11 — Heat tier continuity and foreground/offline attribution
 
-Tier is continuous numeric membership: lower bound inclusive, next tier's lower bound exclusive. Preserve fractional values; no arbitrary epsilon or rounding. The accepted offline interval's tier boundary constrains offline contributions. Excess is discarded. For mixed-period runs, attribute effects to their causal periods; foreground-eligible effects can cross tiers, offline effects cannot. Mapping aggregate bonuses and both cooling stages remains an implementation contract; retain M6-FU0's two-stage foreground composition and do not invent coefficients or formulas.
+Tier is continuous numeric membership over finite values valid under the applicable configured Heat range: lower bound inclusive, next tier's lower bound exclusive, final tier bounded by the configured valid maximum. Preserve fractional values; no arbitrary epsilon or rounding. The current active range begins at `HeatPeaceMinimum = 0`; the old -15 minimum is historical design text. Negative-Heat support and its tier mapping are a separate future design/configuration decision, not currently active. The accepted offline interval's tier boundary constrains offline contributions. Excess is discarded. For mixed-period runs, attribute effects to their causal periods; foreground-eligible effects can cross tiers, offline effects cannot. Mapping aggregate bonuses and both cooling stages remains an implementation contract; retain M6-FU0's two-stage foreground composition and do not invent coefficients or formulas.
 
 ### Living-dungeon simulation, persistence and scope invariants
 
