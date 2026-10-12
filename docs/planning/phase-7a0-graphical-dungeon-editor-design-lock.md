@@ -1207,3 +1207,15 @@ Room movement carries room-local content; supported room rotation transforms it 
 Lifecycle presentation consumes the final Phase 6 authority: blocked Activate remains visible but disabled with a localized authoritative reason; deepest-only deactivation may complete directly; shallower deactivation confirms its future-run/Active-floor passive-mana consequences without claiming loss or current-run mutation; Activate All Eligible is contextual and unnecessary in the current two-floor UI when redundant; successful lifecycle changes update in place on the selected floor and do not start a run, switch floors, or enter Edit Mode.
 
 No later implementation may introduce duplicate writable state, embedded tuning, player-facing hardcoded text, or a parallel Bootstrap gameplay authority.
+
+## Living-dungeon owner-approved scope addendum (2026-10-12)
+
+See the [Living Dungeon Owner Design Lock](decisions/living-dungeon-owner-design-lock.md) and [Cross-Spec Glossary amendment](../../Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md#living-dungeon-owner-approved-amendments-2026-10-12). This addendum extends Phase 7's simulation/presentation intent to ongoing parties, automatic arrivals, valid offline progression, and aggregate inspection; it does not change the verified implementation status above or claim these capabilities are shipped.
+
+Future movement duration is derived from actual traversable geometry and interactions use configuration-owned duration. Gameplay consequences advance at deterministic logical event boundaries even if a path was planned. Event ordering is independent of frame rate, device and selected floor. Runs use immutable run-start dungeon/rule inputs and compatible historical executable behavior; edits affect later runs. Draft editing remains available during catch-up and canonical commits cannot retroactively modify earlier runs.
+
+Multiple parties eventually progress concurrently. Only the selected floor needs graphical presentation; other parties continue simulation independently. Historical route/geometry overlays may represent a selected party whose run-start dungeon differs from current content. Completed-run playback does not substitute for ongoing simulation.
+
+The MVP offline baseline is exact deterministic event processing with bounded resumable batches and proven equivalent acceleration only. Arbitrary time-window sampling/extrapolation is not approved. A future coarse model requires performance evidence, owner approval and exact-reference comparison. Active parties, scheduler and catch-up eventually use a single reviewed versioned canonical save authority; schema 14 remains provisional. Regional cohorts from Spec 16 remain deferred for MVP.
+
+For Heat, mana, restricted outcomes, security, workload and persistence constraints, the design lock and glossary amendment are authoritative. M6-FU0's two-stage foreground composition is retained; mixed foreground/offline causal attribution remains an implementation contract. The sequence in the active roadmap is provisional and may split based on dependency or migration evidence.

@@ -4,6 +4,16 @@
 
 **Current Phase 7 status (2026-10-08):** PR #226 / A4, PR #227 / A5, PR #228 / production mobile UI vision and PR #229 / transactional graphical room construction are merged. Verified `main` baseline: `7b5911e5482aa20851e8329c0bb311f9aa6e7206`. Production Dungeon composition and first visual treatment are the current capability packet, with [implementation and qualification evidence](../../Docs/testing/evidence/phase7-production-dungeon-ui-composition/implementation.md); external review and owner manual UAT remain pending. Schema remains 13. Graphical first-room onboarding remains a high-priority successor with retained Bootstrap starter controls. Graphical room-context monster/trap/loot editing, floor lifecycle controls and visual run presentation remain subsequent work; Research, Analysis and More production destinations remain deferred.
 
+**Living-dungeon owner design lock (2026-10-12):** Documentation approved at verified clean `main` baseline `39ed8aa160aef65f874cc8cc5609002c8fb5e9a4`. The [owner design lock](decisions/living-dungeon-owner-design-lock.md) supersedes only the conflicting future offline/simulation clauses called out there; it does not claim active parties or offline run simulation are implemented. The current Phase 7 presentation packet/status above remains its historical capability status.
+
+**Recommended living-dungeon dependency sequence (provisional):**
+
+A. Resumable deterministic simulation engine and pure boundary calculations.
+B. Canonical durable active parties, automatic arrivals and bounded offline catch-up.
+C. Production living-dungeon presentation and aggregate inspection.
+
+This is a dependency recommendation, not a fixed three-PR plan. Split or qualify packets when actual implementation or migration review evidence demonstrates a need. The immediate next implementation objective is A; no gameplay implementation is part of the design-lock documentation change.
+
 **Phase 6 final status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete. Knowledge-backed transitions, localized aggregate explanation, and the contextual schema-12 knowledge-validation correction are implemented. Automated qualification and owner Editor/Windows standalone UAT passed. Schema remains 12.
 
 

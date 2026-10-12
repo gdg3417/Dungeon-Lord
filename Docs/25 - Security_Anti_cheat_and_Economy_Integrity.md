@@ -99,3 +99,9 @@ If two devices produce conflicting saves, the most recent timestamp wins, subjec
 9\. Server Requirements Summary
 
 The server must support: purchase validation, premium currency authority, research start and completion endpoints, leaderboard submission validation, cheat flag storage, and basic account management.
+
+## Owner-approved living-dungeon offline addendum (2026-10-12)
+
+See the [Living Dungeon Owner Design Lock](../docs/planning/decisions/living-dungeon-owner-design-lock.md). Section 3.2's restrictions remain unchanged: purchases, events, leaderboards, research start and research completion remain unavailable without their required online verification. Normal foreground gameplay remains active without internet.
+
+Sections 5.1–5.3 are superseded for future offline adventurer outcomes: offline runs may produce real eligible outcomes and numeric Heat changes, constrained to the Heat Tier at the accepted offline interval boundary. The existing one-step login rebound does not separately apply atop Heat caused by those runs. Research completion, restricted rewards and gated objectives remain individually classified and verification-gated. This documentation does not invent server time, verification, monitoring, sanctions or other backend capabilities; existing security gaps remain open work.

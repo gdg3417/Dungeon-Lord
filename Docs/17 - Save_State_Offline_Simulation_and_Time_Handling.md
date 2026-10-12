@@ -26,3 +26,11 @@ Protections exist against clock manipulation and offline farming abuse.
 ## 6. MVP Boundary
 
 Time handling is simulation-light with generous but capped progression.
+
+## Owner-approved living-dungeon amendment (2026-10-12)
+
+See the [Living Dungeon Owner Design Lock](../docs/planning/decisions/living-dungeon-owner-design-lock.md) and [Cross-Spec Glossary amendment](Cross_Spec_Glossary_of_Invariants_UPDATED.md#living-dungeon-owner-approved-amendments-2026-10-12). For future party simulation, the clauses “offline uses summarized approximations,” “raids and permanent losses never occur offline,” “Heat is frozen offline,” and “generous but capped progression” are superseded: valid offline periods advance deterministic parties and eligible outcomes using exact event processing and bounded resumable batches. The old model remains historical for existing implemented offline systems; passive mana remains the canonical one-time formula grant and research completion still requires online confirmation.
+
+Automatic arrivals are allowed during valid offline periods. Party outcomes and objectives must be individually classified for offline eligibility; restricted rewards, research completion and gated actions retain verification. Applicable survivor knowledge and abstract loot extraction can result from eligible offline outcomes. No unrestricted settlement helper is authorized.
+
+Draft edits remain possible during incomplete catch-up, with ordered canonical commits that cannot affect an earlier run. Active parties, scheduler and catch-up progress eventually use one versioned canonical save authority; schema 14 is provisional, not a selected schema or field plan. Catch-up resumes from its proven committed prefix. Exact deterministic processing is the reference; sampling/extrapolation is not gameplay authority.

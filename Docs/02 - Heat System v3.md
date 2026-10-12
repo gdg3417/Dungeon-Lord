@@ -127,3 +127,11 @@ Higher states are intentionally excluded from MVP.
 - Poor reputation slows progression
 
 - Heat mismanagement forces reactive play
+
+## Owner-approved living-dungeon amendment (2026-10-12)
+
+See the [Living Dungeon Owner Design Lock](../docs/planning/decisions/living-dungeon-owner-design-lock.md) and [Cross-Spec Glossary amendment](Cross_Spec_Glossary_of_Invariants_UPDATED.md#living-dungeon-owner-approved-amendments-2026-10-12). This amendment governs future living-dungeon implementation and preserves this specification's historical Heat inputs, outcome composition and fully foreground behavior.
+
+Offline adventurer outcomes may change numeric Heat but must remain in the Heat Tier held at the accepted offline interval boundary. Excess is discarded, not banked; login does not add a rebound for Heat already caused by offline runs. For mixed foreground/offline runs, causal attribution for aggregate bonuses and both existing cooling stages is unresolved implementation work. Retain the M6-FU0 two-stage foreground composition; do not infer new coefficients, cooling rules or tier crossing behavior.
+
+Heat retains fractional precision. Tier membership uses continuous thresholds: a tier lower threshold is inclusive and the next tier's lower threshold is exclusive. Do not round or use arbitrary epsilon. Existing numeric examples and fully foreground consequences are not otherwise amended. All tuning and workload limits remain config-owned.

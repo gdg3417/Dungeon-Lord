@@ -41,7 +41,7 @@ Referenced by: Spec 19, 25, 29, 33, 34, 35, 37
 
 ## INV-02
 
-Heat is frozen while offline. On login, heat may rebound within the current tier but cannot cross tiers due to offline alone.
+**Historical wording, amended for living-dungeon implementation by the 2026-10-12 owner design lock:** Offline adventurer outcomes may change numeric Heat, but cannot move Heat out of the tier established at the accepted offline interval boundary. Login must not apply a second run-derived rebound. Foreground-eligible contributions may cross tiers. Heat remains continuous and fractional; tier lower bounds are inclusive and the next tier's lower bound is exclusive, with no arbitrary epsilon or rounding.
 
 Referenced by: Spec 7, 18, 25, 29, 35
 
@@ -70,6 +70,8 @@ Modifier stacking uses layered buckets with a single global order: base, heat, r
 Canonical passive online mana resolves and rounds an authoritative mana/hour rate in that order, then converts it to a fractional configured-tick award. The current Research and Event/Season stages are neutral because no canonical effect authorities exist. Mana soft-cap support is configuration-owned and explicitly disabled without sentinel values until start/slope tuning is approved. The temporary configured `MvpBaselineCoreLevel` of 1 is not persisted progression. Active floors come from validated canonical spatial state, heat from `StructureRuntimeState.Heat`, the wallet from `StructureRuntimeState.ManaReserve`, and capacity from structural economy configuration. Future offline mana must consume this canonical applicable mana/hour result rather than reimplement its formula.
 
 Canonical offline passive mana consumes that same applicable online mana/hour result at the validated configured base efficiency of 15%, preserves fractional wallet precision, and applies one capacity-clamped grant for exact valid forward elapsed time. Offline mana has no duration cap; the existing 86,400-second scaffold is diagnostic-only. Invalid/backward timestamps fail closed. Heat and active simulation remain frozen. The wallet and consumed save timestamp publish only after one detached current-schema candidate—schema 10 at the PR #210 baseline—is atomically persisted and durably read back. Structured result evidence is available for future security monitoring without becoming gameplay authority or a claim of reliable clock-cheat detection.
+
+**Living-dungeon amendment (2026-10-12):** The mana paragraph above remains the authority for passive offline mana. Its statement that active simulation is frozen is superseded for future party simulation: parties progress and may produce individually eligible outcomes during valid offline time. Offline-created parties use the canonical formula to evaluate mana logically available at admission; historical evaluation issues no grant, replays no online ticks and creates no wallet. No change to the existing 15% base efficiency or one-time capacity-clamped grant is approved.
 
 Referenced by: Spec 30, 18, 21, 32
 
@@ -109,11 +111,9 @@ Referenced by: Spec 25, 28, 35
 
 INV-11 Heat Model Definitions
 
-Heat Tier is the coarse band (Peace, Notice, Concern, etc.).
+Heat Tier is the configured continuous numeric interval. The lower threshold is inclusive; the next tier's lower threshold is exclusive. Heat State is the numeric Heat value, including fractional values. Do not quantize, round, or introduce epsilon to assign a tier.
 
-Heat State is a numeric value within a tier.
-
-Offline rebound may move at most one Heat State step and may not cross Heat Tiers.
+**Living-dungeon amendment (2026-10-12):** The older “one Heat State step” login rebound rule is superseded for offline adventurer outcomes. Their numeric effects are applied subject to the tier fixed at the accepted offline interval boundary; prevented excess is discarded and never banked. A separate rebound requires independent approval. Existing foreground Heat behavior and the retained two-stage run Heat/cooling composition remain unchanged.
 
 INV-12 Dungeon Editing Save Safety
 
@@ -140,3 +140,31 @@ Physical tile footprints are the geometry, fit, occupancy, overlap, and used-flo
 Numbering convention: post-audit invariants continue the glossary sequence; therefore the spatial invariant following INV-14 is INV-15, independent of its owning specification number.
 
 Referenced by: Spec 38, 19, 28, 30, 36, 37
+
+## Living-dungeon owner-approved amendments (2026-10-12)
+
+**Authority:** [Living Dungeon Owner Design Lock](../docs/planning/decisions/living-dungeon-owner-design-lock.md), approved 2026-10-12 against verified baseline `39ed8aa160aef65f874cc8cc5609002c8fb5e9a4`. Its decisions govern future living-dungeon implementation where older wording conflicts. Historical wording/evidence is preserved; only the clauses named below are superseded. Existing foreground behavior and unrelated online requirements remain unchanged.
+
+### INV-02 — Offline Heat
+
+Supersedes “Heat is frozen while offline” and “on login, heat may rebound” for future party outcomes. Offline adventurer outcomes may change numeric Heat while remaining inside the tier held at the accepted offline interval boundary. No second run-derived login rebound is applied. Foreground-eligible effects retain foreground tier-crossing eligibility. Fractional Heat and continuous inclusive-lower/exclusive-next-lower tier membership must be preserved without epsilon or rounding. Spec 25's normal online-restriction list is unaffected.
+
+### INV-06 — Modifiers and passive mana
+
+The existing canonical offline mana rate, 15% base efficiency, fractional precision, single capacity-clamped grant, and atomic persistence remain unchanged. Historical mana at an offline party's admission timestamp is a read-only logical evaluation; it must not create another grant, replay online ticks, or create another wallet. The statement that active simulation is frozen is superseded only for future party simulation. It does not authorize a change to passive mana.
+
+### INV-11 — Heat tier continuity and foreground/offline attribution
+
+Tier is continuous numeric membership: lower bound inclusive, next tier's lower bound exclusive. Preserve fractional values; no arbitrary epsilon or rounding. The accepted offline interval's tier boundary constrains offline contributions. Excess is discarded. For mixed-period runs, attribute effects to their causal periods; foreground-eligible effects can cross tiers, offline effects cannot. Mapping aggregate bonuses and both cooling stages remains an implementation contract; retain M6-FU0's two-stage foreground composition and do not invent coefficients or formulas.
+
+### Living-dungeon simulation, persistence and scope invariants
+
+- Deterministic configured automatic arrivals; actual-geometry movement duration; configured interaction duration; deterministic logical event ordering independent of frame/floor selection; incremental authoritative consequences even if paths are planned ahead.
+- Immutable run-start dungeon/rule inputs and compatible historical executable behavior; edits affect later runs. Selected-floor presentation is optional to simulation and may use historical route/geometry overlays.
+- Exact deterministic offline event processing with bounded resumable batches and only mathematically equivalent acceleration. Arbitrary hourly sampling/extrapolation is not approved authority. A measured coarse model needs explicit owner approval and exact-reference comparisons.
+- A single eventual canonical save authority owns active parties, scheduling and catch-up. Schema 14 is provisional only pending schema/migration review. Persistence failure recovers a proven committed prefix without duplicate settlement, fabricated events or a competing journal.
+- Offline outcomes and objectives are individually eligibility-classified. Applicable survivor knowledge and abstract loot extraction are eligible subject to existing restrictions; restricted rewards/research/gated actions retain verification requirements.
+- Draft editing remains available during catch-up; commits cannot retroactively change an earlier run. No run-derived login rebound overlays offline-run Heat.
+- Spec 16 regional population/cohort lifecycle is deferred for MVP. A stable run ID or admission queue is not a regional cohort implementation.
+
+See the design lock's approved decision list and open implementation contracts for details. The roadmap's A/B/C sequence is recommended dependency order, not a fixed PR count.

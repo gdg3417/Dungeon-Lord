@@ -38,3 +38,9 @@ The first stage belongs to run heat delta composition and persisted run diagnost
 ## Follow-up trigger conditions
 
 Open a separately scoped behavior PR before changing the active-run cooling composition, cooling ownership, heat math, or diagnostic behavior. A future balance pass or heat-model refactor may trigger that work.
+
+## Owner-approved living-dungeon addendum (2026-10-12)
+
+See the [Living Dungeon Owner Design Lock](living-dungeon-owner-design-lock.md) and [Cross-Spec Glossary amendment](../../../Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md#living-dungeon-owner-approved-amendments-2026-10-12). The original M6-FU0 decision remains authoritative for fully foreground outcomes: both stages are retained, and this addendum does not alter their tuning or behavior.
+
+The historical “does not authorize offline heat processing” limitation is superseded for future living-dungeon implementation only. Offline outcomes may affect numeric Heat within the tier established at the accepted offline interval boundary; prevented excess is discarded and not banked, and no second login rebound applies to that run-derived Heat. For mixed foreground/offline runs, effects are attributed to their causal activity periods. The exact allocation of aggregate bonuses and both cooling stages is an open implementation contract requiring validation against existing authorities. This addendum authorizes no new coefficient, formula, tuning, or change to fully foreground outcomes.
