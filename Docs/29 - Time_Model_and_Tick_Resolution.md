@@ -118,3 +118,9 @@ Define a unified time model for simulation and progression. This spec sets tick 
 # 10. Open questions
 
 None.
+
+## Owner-approved living-dungeon time amendment (2026-10-12)
+
+See the [Living Dungeon Owner Design Lock](../docs/planning/decisions/living-dungeon-owner-design-lock.md) and [Cross-Spec Glossary amendment](Cross_Spec_Glossary_of_Invariants_UPDATED.md#living-dungeon-owner-approved-amendments-2026-10-12). The classification of app background as offline is preserved: foreground gameplay remains active without internet, while background and closed-app intervals use the approved offline simulation policy. During valid offline intervals, deterministic party events and configured arrivals continue to advance. The old freeze on party simulation and offline-attributed numeric Heat is superseded; offline Heat remains constrained to the interval's captured Heat Tier, with no extra run-derived login rebound.
+
+This does not alter the existing 10-second online mana/upkeep tick, canonical offline mana formula, online research start/completion verification, or other existing online behavior. Party movement duration comes from traversable geometry; interaction durations are config-owned. Paths may be planned, but consequences occur incrementally at logical event boundaries. Simultaneous events have an explicit deterministic order independent of frame rate, device and selected floor. Exact event processing with bounded resumable batches is the MVP catch-up baseline. Arbitrary hourly samples/extrapolation are not authority; mathematically equivalent acceleration requires proof against exact processing. Any coarse historical model needs measured benefit, owner approval and exact-reference comparison.

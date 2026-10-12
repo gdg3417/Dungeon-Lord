@@ -28,3 +28,7 @@ Dungeons do not compete for a single global pool. Competition is indirect throug
 ## 6. MVP Boundary
 
 The world economy is a background approximation with visible effects only.
+
+## Owner-approved living-dungeon scope addendum (2026-10-12)
+
+See the [Living Dungeon Owner Design Lock](../docs/planning/decisions/living-dungeon-owner-design-lock.md). Spec 16's pooled/cohort lifecycle is explicitly **deferred for MVP**. Its locked v1 language about persisted ordinary-adventurer regional counts, progression, gear distribution, retirement, death/circulation and cooldown does not authorize implementing regional cohorts as part of the MVP living-dungeon work. A bounded waiting queue, deterministic party scheduler, or stable run identities are not cohorts and do not satisfy those lifecycle requirements. The future living dungeon may create independent dungeon parties from configured conditions; region-wide cohort simulation requires separate scope approval. Historical Spec 16 language remains traceability and is superseded only for MVP implementation scope as stated here.

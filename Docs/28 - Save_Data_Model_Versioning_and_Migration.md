@@ -132,6 +132,12 @@ Autosave status is invisible in MVP. Errors use clear messaging only when requir
 
 - Mapping applies on load, before simulation begins.
 
+## Owner-approved living-dungeon persistence addendum (2026-10-12)
+
+See the [Living Dungeon Owner Design Lock](../docs/planning/decisions/living-dungeon-owner-design-lock.md). Future active parties retain immutable run-start inputs and compatible historical executable rule behavior; a version string/hash alone is insufficient to settle an old run.
+
+Unfinished parties, automatic arrival/scheduling state and catch-up progress eventually use one versioned canonical save authority, preserving the existing atomic publication and proven-prefix recovery principles. Schema 14 is provisional only. No save fields, schema number, migration mapping, parallel journal or writable authority is selected by this addendum. A concrete schema and migration design must be reviewed before implementation. Failure recovers the last proven committed prefix without duplicate settlement or fabricated events. Draft commits must not retroactively alter earlier run snapshots.
+
 ## 9.2 Removed content handling
 
 - Rooms or tiles: replace with a fallback tile or empty tile, then mark for player review if the replacement changes function.
