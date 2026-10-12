@@ -1,0 +1,12 @@
+{
+  "input_checker_unittests": {
+    "tests": 12,
+    "passed": 12,
+    "sandbox_attempt": "blocked temporary Git fixture initialization/cleanup",
+    "rerun": "executed outside sandbox; passed"
+  },
+  "baseline_sha256": "53045ad58ab1dbebf8ea07f83480db02604eb79ae3b243f1169df2ae2e950198",
+  "diff_check": "passed",
+  "exact_case_new_document_links": "passed",
+  "fixture_git_attribute": "text eol=lf"
+}

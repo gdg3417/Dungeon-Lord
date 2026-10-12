@@ -1,0 +1,364 @@
+[
+  {
+    "file": "phase-a-baseline-registered.xml",
+    "sha256": "bce1714a70a3a635ba9f612510b6a13ce217dd3e28c1e20f1af3e118fb4d9620",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Passed",
+      "total": "1",
+      "passed": "1",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 20:34:25Z",
+      "end-time": "2026-10-12 20:34:26Z",
+      "duration": "0.9178465"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": []
+  },
+  {
+    "file": "phase-a-baseline.xml",
+    "sha256": "3620b85ded09e538105e719d070c643cbba420ba31794334f963ff129779b0aa",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "0",
+      "result": "Passed",
+      "total": "0",
+      "passed": "0",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 20:32:26Z",
+      "end-time": "2026-10-12 20:32:26Z",
+      "duration": "0.0122487"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": []
+  },
+  {
+    "file": "phase-a-differential.xml",
+    "sha256": "9671b2ccf208053fea6b0123d4f3fe1e94cc810284ac78525a56ad63928216fa",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Failed(Child)",
+      "total": "1",
+      "passed": "0",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 21:37:34Z",
+      "end-time": "2026-10-12 21:37:34Z",
+      "duration": "0.0894626"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseABaseline.QualifiedPreRefactorStructuredFixturesRemainEquivalent",
+        "message": "System.ArgumentException : run.spatial.invalid_geometry",
+        "stack": "  at DungeonBuilder.M0.Gameplay.RunSimulation.DeterministicRoomPaths..ctor (System.Collections.Generic.IEnumerable`1[T] cells, System.Int32 maximumTiles) [0x0000d] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\IntraroomSnapshot.cs:109 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.IntraroomTraversal.Plan (DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpOrderedRouteRoom room) [0x0002c] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\IntraroomTraversal.cs:53 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService.CreateExecution (DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState runtime, System.Int64 tickStarted, System.Int32 sequence, System.String postureId, DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpOrderedRouteRoom[] route, DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService+BranchTraversal traversal, DungeonBuilder.M0.Gameplay.RunSimulation.ActiveFloorRunSnapshot snapshot, DungeonBuilder.M0.Gameplay.RunSimulation.TransientDepthObjective objective, DungeonBuilder.M0.Gameplay.RunSimulation.RunLogicalTiming timing, System.Nullable`1[T] eventLimit) [0x00210] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunSimulationService.Execution.cs:56 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService.SimulateRoute (DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState runtime, System.Int64 tickStarted, System.Int32 runSequence, System.String postureId, DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpOrderedRouteRoom[] route, DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService+BranchTraversal traversal, DungeonBuilder.M0.Gameplay.RunSimulation.ActiveFloorRunSnapshot snapshot, DungeonBuilder.M0.Gameplay.RunSimulation.TransientDepthObjective selectedObjective) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunSimulationService.cs:38 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService.SimulateRoute (DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState runtime, System.Int64 tickStarted, System.Int32 runSequence, System.String postureId, DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpOrderedRouteRoom[] route) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunSimulationService.cs:34 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseABaselineTests.QualifiedPreRefactorStructuredFixturesRemainEquivalent () [0x00105] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseABaselineTests.cs:83 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+      }
+    ],
+    "skips": [],
+    "measurements": []
+  },
+  {
+    "file": "phase-a-final-focused.xml",
+    "sha256": "7676b5a5024859cc9b70a5e984bf582632ae64e0b692abe7f071bd6de47e7da0",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "37",
+      "result": "Passed",
+      "total": "37",
+      "passed": "37",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 22:14:00Z",
+      "end-time": "2026-10-12 22:14:01Z",
+      "duration": "1.5977178"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.SmallWorkBudgetDoesNotExecuteLargeFutureRoute",
+        "output": "100-room captured route; one-event advancement executes zero encounters/rewards. Capture bytes=0, ms=7.5467; first advancement bytes=0, ms=1.3772\nDrain of remaining 100-room workload: events=1601, bytes=0, ms=7.308\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-a-final-full-editmode.xml",
+    "sha256": "3a330cd2f9ac482a6f98283245536f8fb7b5b1928c52e3e54b3a9ebf3e179c60",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1742",
+      "result": "Skipped:Ignored",
+      "total": "1742",
+      "passed": "1741",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 22:28:11Z",
+      "end-time": "2026-10-12 22:28:33Z",
+      "duration": "21.8678308"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.SmallWorkBudgetDoesNotExecuteLargeFutureRoute",
+        "output": "100-room captured route; one-event advancement executes zero encounters/rewards. Capture bytes=0, ms=8.1176; first advancement bytes=0, ms=1.4129\nDrain of remaining 100-room workload: events=1601, bytes=0, ms=7.5597\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-a-final-full-playmode.xml",
+    "sha256": "661c4580f3304553d7f911a6911c12a1850814676630da6a8ddb6a8cfaa0d7d9",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3174",
+      "result": "Skipped:Ignored",
+      "total": "3174",
+      "passed": "3164",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 22:35:33Z",
+      "end-time": "2026-10-12 22:40:39Z",
+      "duration": "305.2547174"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseAExecutionTests.SmallWorkBudgetDoesNotExecuteLargeFutureRoute",
+        "output": "100-room captured route; one-event advancement executes zero encounters/rewards. Capture bytes=0, ms=8.2183; first advancement bytes=0, ms=1.473\nDrain of remaining 100-room workload: events=1601, bytes=0, ms=7.6956\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-a-floor-diagnostic.xml",
+    "sha256": "1f7c3fb5d26fb85dcf20bad63154b133d4f81c5f5a2223a1e1b3a9e5d4f73600",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Failed(Child)",
+      "total": "1",
+      "passed": "0",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 21:44:38Z",
+      "end-time": "2026-10-12 21:44:39Z",
+      "duration": "0.5237935"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.FloorTransferKeepsExactPartyHpAndNoFutureFloorEncounter",
+        "message": "System.ArgumentException : run.spatial.invalid_geometry",
+        "stack": "  at DungeonBuilder.M0.Gameplay.RunSimulation.RunConnectionSnapshot.Capture (DungeonBuilder.M0.Gameplay.DungeonSpatial.SavedSpatialFloor floor, DungeonBuilder.M0.Gameplay.RunSimulation.PhaseFiveBRoutePlan plan, DungeonBuilder.M0.Gameplay.DungeonSpatial.SpatialContentCatalog catalog, System.Int32 maximumTiles) [0x00109] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunConnectionSnapshot.cs:30 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseAExecutionTests.FloorTransferKeepsExactPartyHpAndNoFutureFloorEncounter () [0x000dd] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseAExecutionTests.cs:162 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+      }
+    ],
+    "skips": [],
+    "measurements": []
+  },
+  {
+    "file": "phase-a-focused-1.xml",
+    "sha256": "91dcdc89fd78edc36afede05a553d52f1d97a6bd42f3d8c30d91abed5bbd9d3d",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "34",
+      "result": "Failed(Child)",
+      "total": "34",
+      "passed": "31",
+      "failed": "3",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 21:41:56Z",
+      "end-time": "2026-10-12 21:41:57Z",
+      "duration": "1.3256781"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseABaseline.QualifiedPreRefactorStructuredFixturesRemainEquivalent",
+        "message": "  floor.lifecycle.invalid_state\n  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1544\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseABaselineTests.QualifiedPreRefactorStructuredFixturesRemainEquivalent () [0x0023b] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseABaselineTests.cs:92\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.FloorTransferKeepsExactPartyHpAndNoFutureFloorEncounter",
+        "message": "  floor.lifecycle.invalid_state\n  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1544\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseAExecutionTests.FloorTransferKeepsExactPartyHpAndNoFutureFloorEncounter () [0x00034] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseAExecutionTests.cs:151\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.WipeLeavesFutureTrapsLootAndSecondRoomUnresolved",
+        "message": "  Expected: False\n  But was:  True\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseAExecutionTests.WipeLeavesFutureTrapsLootAndSecondRoomUnresolved () [0x0009c] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseAExecutionTests.cs:73\n"
+      }
+    ],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.SmallWorkBudgetDoesNotExecuteLargeFutureRoute",
+        "output": "100-room captured route; one-event advancement executes zero encounters/rewards.\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-a-focused-2.xml",
+    "sha256": "d09cb5c2be8e04d8b0abf1fb8e9ea19062bd840e2a345aa199fb2847577bc79a",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "34",
+      "result": "Passed",
+      "total": "34",
+      "passed": "34",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 21:52:03Z",
+      "end-time": "2026-10-12 21:52:04Z",
+      "duration": "1.4269738"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.SmallWorkBudgetDoesNotExecuteLargeFutureRoute",
+        "output": "100-room captured route; one-event advancement executes zero encounters/rewards. Capture bytes=0, ms=8.0906; first advancement bytes=0, ms=1.4361\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-a-focused-playmode.xml",
+    "sha256": "6ee12b5b5ca8923a2bc41ed0720170df1a6eab285f109c9e09f81e5217cfc065",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Passed",
+      "total": "1",
+      "passed": "1",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 21:55:47Z",
+      "end-time": "2026-10-12 21:55:47Z",
+      "duration": "0.1423085"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": []
+  },
+  {
+    "file": "phase-a-full-editmode.xml",
+    "sha256": "b0b6d66d5b98247e2ee489163288fb195ecf0ec33edeb71f5291f3cc6901d1a1",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1739",
+      "result": "Skipped:Ignored",
+      "total": "1739",
+      "passed": "1738",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 22:06:50Z",
+      "end-time": "2026-10-12 22:07:12Z",
+      "duration": "21.7450202"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.SmallWorkBudgetDoesNotExecuteLargeFutureRoute",
+        "output": "100-room captured route; one-event advancement executes zero encounters/rewards. Capture bytes=0, ms=8.0015; first advancement bytes=0, ms=1.367\n"
+      }
+    ]
+  }
+]

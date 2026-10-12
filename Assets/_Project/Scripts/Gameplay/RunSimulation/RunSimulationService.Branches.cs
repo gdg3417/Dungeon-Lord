@@ -14,8 +14,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (!PhaseFiveBConfigValidation.IsValid(_config.PhaseFiveB)) throw new ArgumentException(BranchDecisionResolver.InvalidConfiguration);
             var snapshot = ActiveFloorRunSnapshot.Create(owned, production, _config, limits, _lootConfig, _lootTableId, candidate, postureId);
             int sequence = Math.Max(1, candidate.runHistory.NextRunSequence);
-            var outcome = SimulateSnapshotCore(sequence,
-                snapshot, out BranchTraversal traversal);
+            var execution = StartSnapshot(sequence, snapshot);
+            var outcome = execution.DrainToCompletion();
+            BranchTraversal traversal = execution.Traversal;
             if (outcome.RunHeatApplicationSummary?.RuleResolved == true)
                 candidate.structureRuntime.Heat = outcome.RunHeatApplicationSummary.HeatAfter;
             var workload = traversal.Workload;
@@ -51,21 +52,35 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             internal readonly MvpPlacementEffectsSummary Reward = EmptyPlacementEffects();
         }
 
-        private void VisitFork(BranchTraversal state, MvpOrderedRouteRoom room, RunParty party, bool stopped,
+        private IEnumerable<RunStep> VisitFork(RunExecution execution, BranchTraversal state, MvpOrderedRouteRoom room, RunParty party, bool stopped,
             List<RunEncounterEvent> events, RunPostureConfig posture, double mana)
         {
             var fork = state.Forks.SingleOrDefault(f => f.FloorIndex == room.FloorIndex && f.RoomIndex == room.RoomIndex);
-            if (fork == null) return;
+            if (fork == null) yield break;
             var e = new BranchOutcomeEvidence { Fork = fork, Reason = "branch.outcome.stopped" };
             state.Evidence.Add(e);
             if (stopped || party.IsWiped)
-            { e.PrecedenceReason = "branch.decision.retreat_precedence"; return; }
+            { e.PrecedenceReason = "branch.decision.retreat_precedence"; yield break; }
+            if (execution.Snapshot != null)
+                foreach (var step in execution.Snapshot.Floors.Single(f => f.FloorIndex == room.FloorIndex)
+                    .TraverseBranchApproach(fork.OptionalBranchId, false)) yield return step;
             state.Workload.Decision(fork.FloorInstanceId);
             e.Decision = BranchDecisionResolver.Resolve(_config.PhaseFiveB.BranchDecision, new BranchDecisionInput {
                 Party = party, FloorInstanceId = fork.FloorInstanceId, OptionalBranchId = fork.OptionalBranchId,
                 Applicable = fork.Applicable, Knowledge = fork.Knowledge, RemainingRequiredDanger = fork.RemainingRequiredDanger });
             if (e.Decision.Reason == BranchDecisionResolver.InvalidConfiguration) throw new ArgumentException(e.Decision.Reason);
-            if (!e.Decision.Enter) { e.Reason = "branch.outcome.skipped"; return; }
+            yield return new RunStep(RunStepKind.BranchDecision, room.FloorIndex, room.RoomInstanceId, fork.OptionalBranchId,
+                position: execution.Snapshot == null ? default : execution.Snapshot.Floors.Single(f => f.FloorIndex == room.FloorIndex)
+                    .BranchSocket(fork.OptionalBranchId), space: execution.Snapshot == null ? RunPositionSpace.None : RunPositionSpace.RoomLocal,
+                continueChosen: e.Decision.Enter);
+            if (!e.Decision.Enter)
+            {
+                e.Reason = "branch.outcome.skipped";
+                if (execution.Snapshot != null)
+                    foreach (var step in execution.Snapshot.Floors.Single(f => f.FloorIndex == room.FloorIndex)
+                        .TraverseBranchApproach(fork.OptionalBranchId, true)) yield return step;
+                yield break;
+            }
             e.Traversed = true; state.Workload.BeginBranch();
             var reached = new List<string>(); var encounters = new List<RunEncounterEvent>();
             var observed = EmptyPlacementEffects();
@@ -73,9 +88,17 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 new MvpDungeonPlacementEntry(a.CategoryId, a.OptionId, i)).ToArray(), _config);
             double pressure = ResolveCasualtyPressure(BuildCompositionOutcomeSummary(allEffects, mana), posture);
             state.MaximumPressure = Math.Max(state.MaximumPressure, pressure);
+            int pathCursor = -1;
             foreach (var a in fork.Assignments)
             {
                 if (party.IsWiped) break;
+                int target = fork.Tiles == null ? -1 : Array.IndexOf(fork.Tiles, a.Tile);
+                if (fork.Tiles != null && target < 0) throw new ArgumentException(PhaseFiveBRouteProjection.InvalidRoute);
+                while (pathCursor < target)
+                {
+                    yield return new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
+                        fork.OptionalBranchId, fork.Tiles[++pathCursor], 1, space: RunPositionSpace.Floor);
+                }
                 state.Workload.Assignment();
                 if (a.CategoryId != MvpDungeonPlacementIds.TrapCategoryId && a.CategoryId != MvpDungeonPlacementIds.LootNodeCategoryId)
                     throw new ArgumentException(PhaseFiveBRouteProjection.InvalidRoute);
@@ -92,6 +115,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     var casualty = party.DeriveSurvival(true); casualty.DeathCount = before - party.ActiveCount;
                     ApplyCasualtyEvidence(casualty, pressure);
                     state.CasualtyHeat += casualty.CasualtyHeatDelta; state.CasualtyPenalty += casualty.CasualtyLootExtractionPenalty;
+                    yield return new RunStep(RunStepKind.TrapTrigger, room.FloorIndex, room.RoomInstanceId,
+                        a.AssignmentId, a.Tile, encounter: encounter, space: RunPositionSpace.Floor);
                 }
                 else
                 {
@@ -108,13 +133,33 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                         state.Rolls += loot.RollCount; e.GeneratedLootValue += loot.TotalGeneratedWorldValue;
                     }
                     AddPlacementEffects(state.Reward, effects);
+                    execution.CarriedLootValue += loot.TotalGeneratedWorldValue;
+                    yield return new RunStep(RunStepKind.LootInteraction, room.FloorIndex, room.RoomInstanceId, a.AssignmentId, a.Tile,
+                        space: RunPositionSpace.Floor);
                 }
+            }
+            if (!party.IsWiped && fork.Tiles != null)
+            {
+                while (pathCursor < fork.Tiles.Length - 1)
+                    yield return new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
+                        fork.OptionalBranchId, fork.Tiles[++pathCursor], 1, space: RunPositionSpace.Floor);
+                for (int index = fork.Tiles.Length - 2; index >= 0; index--)
+                    yield return new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
+                        fork.OptionalBranchId, fork.Tiles[index], 1, space: RunPositionSpace.Floor);
+                // Final corridor-to-room socket edge, then reverse the legal room approach.
+                yield return new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
+                    fork.OptionalBranchId, execution.Snapshot == null ? default : execution.Snapshot.Floors
+                        .Single(f => f.FloorIndex == room.FloorIndex).BranchSocket(fork.OptionalBranchId), 1, space: RunPositionSpace.RoomLocal);
+                if (execution.Snapshot != null)
+                    foreach (var step in execution.Snapshot.Floors.Single(f => f.FloorIndex == room.FloorIndex)
+                        .TraverseBranchApproach(fork.OptionalBranchId, true)) yield return step;
             }
             e.ReachedAssignments = reached.ToArray(); e.Encounters = encounters.ToArray();
             e.Reason = party.IsWiped ? "branch.outcome.wiped" : "branch.outcome.completed";
             e.Returned = !party.IsWiped;
             e.ActualIncentive = BranchDecisionResolver.Clamp(observed.LootBonus / _config.PhaseFiveB.BranchDecision.IncentiveReferenceLootBonus);
             e.ActualDanger = BranchDecisionResolver.Clamp(observed.Danger / _config.PhaseFiveB.BranchDecision.DangerReferenceValue);
+            if (!party.IsWiped) yield return new RunStep(RunStepKind.BranchReturn, room.FloorIndex, room.RoomInstanceId, fork.OptionalBranchId);
             // Automatic return is a control-flow transition only; no content, roll or workload repeats.
         }
 

@@ -1,0 +1,14 @@
+{
+  "ProductionSpatialContentBuildGate": {
+    "total": 65,
+    "passed": 65,
+    "failed": 0,
+    "skipped": 0
+  },
+  "BuildReadiness": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0
+  }
+}

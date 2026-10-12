@@ -1,0 +1,178 @@
+[
+  {
+    "path": ".gitattributes",
+    "reason": "Preserve frozen structured fixture LF text on Windows checkouts"
+  },
+  {
+    "path": "Assets/_Project/Editor/DungeonSpatial/Tests/LivingDungeonPhaseAEditModeFixtures.cs",
+    "reason": "Register new runtime fixtures in the repository Editor runner"
+  },
+  {
+    "path": "Assets/_Project/Editor/DungeonSpatial/Tests/LivingDungeonPhaseAEditModeFixtures.cs.meta",
+    "reason": "Stable Unity import identity for the paired new asset"
+  },
+  {
+    "path": "Assets/_Project/Editor/DungeonVisualBuildQualification.cs",
+    "reason": "New Windows build output slot preserves historical players"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Economy/CanonicalOfflinePassiveManaService.cs",
+    "reason": "Reuse the canonical calculation for immutable historical queries"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/ActiveFloorRunSnapshot.cs",
+    "reason": "Retain immutable connection geometry and derived work ceiling"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunConnectionSnapshot.cs",
+    "reason": "Capture validated physical connections and branch socket approach paths"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunConnectionSnapshot.cs.meta",
+    "reason": "Stable Unity import identity for the paired new asset"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunExecution.cs",
+    "reason": "Opaque authoritative in-memory continuation, timing, bounded advancement and inspection"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunExecution.cs.meta",
+    "reason": "Stable Unity import identity for the paired new asset"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Branches.cs",
+    "reason": "Suspend existing gameplay loops and route completed callers through explicit draining"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Execution.cs",
+    "reason": "Opaque authoritative in-memory continuation, timing, bounded advancement and inspection"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Execution.cs.meta",
+    "reason": "Stable Unity import identity for the paired new asset"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Floors.cs",
+    "reason": "Suspend existing gameplay loops and route completed callers through explicit draining"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Spatial.cs",
+    "reason": "Suspend existing gameplay loops and route completed callers through explicit draining"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.cs",
+    "reason": "Suspend existing gameplay loops and route completed callers through explicit draining"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Services/RunHeatBoundaryCalculation.cs",
+    "reason": "Pure continuous Heat boundary/stage application with representable ceilings"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Services/RunHeatBoundaryCalculation.cs.meta",
+    "reason": "Stable Unity import identity for the paired new asset"
+  },
+  {
+    "path": "Assets/_Project/Tests/EditMode/LivingDungeonPhaseABaselineTests.cs",
+    "reason": "Frozen differential fixtures and incremental, boundary, frame and integration qualification"
+  },
+  {
+    "path": "Assets/_Project/Tests/EditMode/LivingDungeonPhaseABaselineTests.cs.meta",
+    "reason": "Stable Unity import identity for the paired new asset"
+  },
+  {
+    "path": "Assets/_Project/Tests/EditMode/LivingDungeonPhaseABoundaryTests.cs",
+    "reason": "Frozen differential fixtures and incremental, boundary, frame and integration qualification"
+  },
+  {
+    "path": "Assets/_Project/Tests/EditMode/LivingDungeonPhaseABoundaryTests.cs.meta",
+    "reason": "Stable Unity import identity for the paired new asset"
+  },
+  {
+    "path": "Assets/_Project/Tests/EditMode/LivingDungeonPhaseAExecutionTests.cs",
+    "reason": "Frozen differential fixtures and incremental, boundary, frame and integration qualification"
+  },
+  {
+    "path": "Assets/_Project/Tests/EditMode/LivingDungeonPhaseAExecutionTests.cs.meta",
+    "reason": "Stable Unity import identity for the paired new asset"
+  },
+  {
+    "path": "Assets/_Project/Tests/EditMode/phase-a-baseline.txt",
+    "reason": "Frozen differential fixtures and incremental, boundary, frame and integration qualification"
+  },
+  {
+    "path": "Assets/_Project/Tests/EditMode/phase-a-baseline.txt.meta",
+    "reason": "Stable Unity import identity for the paired new asset"
+  },
+  {
+    "path": "Assets/_Project/Tests/PlayMode/LivingDungeonPhaseAPlayModeTests.cs",
+    "reason": "Frozen differential fixtures and incremental, boundary, frame and integration qualification"
+  },
+  {
+    "path": "Assets/_Project/Tests/PlayMode/LivingDungeonPhaseAPlayModeTests.cs.meta",
+    "reason": "Stable Unity import identity for the paired new asset"
+  },
+  {
+    "path": "Docs/planning/living-dungeon-phase-a-implementation-contract.md",
+    "reason": "Pre-refactor contract, implemented API and deferred ownership requirements"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/baseline.json",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/changed-files.json",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/input-checkpoints.zip",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/log-index.json",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/owner-preservation.json",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/production-gates.json",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/qualification-reports.zip",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/qualification.md",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/report-summary.json",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/static-checks.json",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/test-outcome-comparison.json",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/unity-logs-redacted.zip",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-a/windows-build.json",
+    "reason": "Phase A implementation, validation and preservation evidence"
+  },
+  {
+    "path": "Tools/Simulation/phase_a_qualification.py",
+    "reason": "Strict source comparison and preserved qualification evidence collection"
+  },
+  {
+    "path": "docs/planning/post-gd60-mvp-execution-plan.md",
+    "reason": "Record only implemented/qualified Phase A scope and pending review"
+  }
+]

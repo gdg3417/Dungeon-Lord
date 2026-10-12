@@ -35,6 +35,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
         internal RunOutcomeRecord SimulateRoute(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpOrderedRouteRoom[] route, BranchTraversal traversal, ActiveFloorRunSnapshot snapshot = null, TransientDepthObjective selectedObjective = null)
         {
+            var execution = CreateExecution(runtime, tickStarted, runSequence, postureId, route, traversal, snapshot, selectedObjective, null, null);
+            var outcome = execution.DrainToCompletion();
+            if (outcome.RunHeatApplicationSummary?.RuleResolved == true) runtime.Heat = outcome.RunHeatApplicationSummary.HeatAfter;
+            return outcome;
+        }
+
+        private IEnumerable<RunStep> ExecuteRoute(RunExecution state, StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpOrderedRouteRoom[] route, BranchTraversal traversal, ActiveFloorRunSnapshot snapshot, TransientDepthObjective selectedObjective)
+        {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
             route = (route ?? Array.Empty<MvpOrderedRouteRoom>()).OrderBy(r => r.FloorIndex).ThenBy(r => r.RoomIndex).ToArray();
             ValidateAssignments(route);
@@ -50,7 +58,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 MvpPlacementEffectsSummary effects = route.Length == 1
                     ? MvpPlacementEffectsResolver.ResolvePlacements(route[0].ToOrderedPlacements(), _config)
                     : null;
-                RunOutcomeRecord compatible = SimulateOnce(runtime, tickStarted, runSequence, postureId, effects);
+                foreach (var step in ExecuteOnce(state, runtime, tickStarted, runSequence, postureId, effects)) yield return step;
+                RunOutcomeRecord compatible = state.Outcome;
                 compatible.ConfiguredRoutePlacementEffects = ClonePlacementEffects(effects);
                 compatible.ReachedRoutePlacementEffects = ClonePlacementEffects(effects);
                 compatible.ClearedRewardPlacementEffects = compatible.Success
@@ -58,10 +67,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     : EmptyPlacementEffects();
                 compatible.ConfiguredRoomCount = route.Length;
                 AddCompatibleRoomMetadata(compatible, route);
-                return compatible;
+                state.Outcome = compatible; yield break;
             }
 
-            RunParty party = RunPartyGenerator.Create(_config.PhaseFiveB, RunId(runSequence));
+            RunParty party = state.Party;
             var events = new List<RunEncounterEvent>();
             var spatialEvents = new List<RunSpatialEvent>();
             var transitions = new List<FloorTransitionEvidence>();
@@ -110,6 +119,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             for (int i = 0; i < route.Length; i++)
             {
                 MvpOrderedRouteRoom routeRoom = route[i];
+                if (snapshot != null)
+                    foreach (var step in snapshot.Floors[floorOrdinal].TraverseConnection(i)) yield return step;
+                if (routeRoom.Spatial == null) yield return new RunStep(RunStepKind.RoomEntry, routeRoom.FloorIndex, routeRoom.RoomInstanceId);
                 MvpPlacementEffectsSummary localEffects = MvpPlacementEffectsResolver.ResolvePlacements(routeRoom.ToOrderedPlacements(), _config);
                 int entrants = currentSurvivors;
                 // Preserve the pre-Phase-5B one-room loot identity; multi-room identity is unchanged.
@@ -118,13 +130,17 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (assignments.Length == 0 && (routeRoom.Spatial != null || !(traversal != null && route.Length == 1)))
                 {
                     if (routeRoom.Spatial != null)
-                        localEffects = ResolveSpatialRoom(routeRoom, party, events, spatialEvents,
-                            posture, manaAtStart, out _);
+                    {
+                        var spatial = new SpatialRoomResolution();
+                        foreach (var step in ResolveSpatialRoom(routeRoom, party, events, spatialEvents, posture, manaAtStart, spatial)) yield return step;
+                        localEffects = spatial.Effects;
+                    }
                     AddPlacementEffects(reachedEffects, localEffects);
                     rooms.Add(BuildEmptyRoomSummary(routeRoom, entrants, localEffects, roomSeed, generatedValue + (traversal?.Value ?? 0)));
+                    yield return new RunStep(RunStepKind.RoomComplete, routeRoom.FloorIndex, routeRoom.RoomInstanceId);
                     if (traversal != null)
                     {
-                        VisitFork(traversal, routeRoom, party, false, events, posture, manaAtStart);
+                        foreach (var step in VisitFork(state, traversal, routeRoom, party, false, events, posture, manaAtStart)) yield return step;
                         currentSurvivors = party.ActiveCount;
                         if (party.IsWiped) break;
                     }
@@ -144,8 +160,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     executed.Add(new MvpDungeonPlacementEntry(MvpDungeonPlacementIds.RoomCategoryId, routeRoom.RoomOptionId, 0));
                 if (routeRoom.Spatial != null)
                 {
-                    localEffects = ResolveSpatialRoom(routeRoom, party, events, spatialEvents,
-                        posture, manaAtStart, out pressure);
+                    var spatial = new SpatialRoomResolution();
+                    foreach (var step in ResolveSpatialRoom(routeRoom, party, events, spatialEvents, posture, manaAtStart, spatial)) yield return step;
+                    localEffects = spatial.Effects; pressure = spatial.MaximumPressure;
                     composition = BuildCompositionOutcomeSummary(localEffects, manaAtStart);
                     localActiveEncounter = localEffects.ContributingOptionIds.Any(id =>
                         MvpDungeonPlacementIds.TryGetCategoryForOption(id, out string category) &&
@@ -160,8 +177,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     if (party.IsWiped) break;
                     if (assignment.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId) continue;
                     executed.Add(new MvpDungeonPlacementEntry(assignment.CategoryId, assignment.OptionId, executed.Count));
-                    events.Add(RunEncounterResolver.Resolve(party, _config.PhaseFiveB, assignment,
-                        routeRoom.FloorIndex, routeRoom.RoomIndex, pressure));
+                    var encounter = RunEncounterResolver.Resolve(party, _config.PhaseFiveB, assignment,
+                        routeRoom.FloorIndex, routeRoom.RoomIndex, pressure);
+                    events.Add(encounter);
+                    yield return InteractionStep(routeRoom, assignment, encounter);
                 }
                 if (party.IsWiped && routeRoom.Spatial == null)
                 {
@@ -201,6 +220,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     }
                 }
 
+                state.CarriedLootValue = generatedValue + (traversal?.Value ?? 0);
                 bool stopped = !cleared || currentSurvivors <= 0;
                 rooms.Add(new RunRoomResolutionSummary {
                     FloorIndex = routeRoom.FloorIndex, RoomIndex = routeRoom.RoomIndex, RoomOptionId = routeRoom.RoomOptionId,
@@ -214,15 +234,18 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 });
                 finalComposition = composition;
                 finalSuccess = cleared;
+                yield return new RunStep(RunStepKind.RoomComplete, routeRoom.FloorIndex, routeRoom.RoomInstanceId);
                 if (traversal != null)
                 {
-                    VisitFork(traversal, routeRoom, party, stopped, events, posture, manaAtStart);
+                    foreach (var step in VisitFork(state, traversal, routeRoom, party, stopped, events, posture, manaAtStart)) yield return step;
                     currentSurvivors = party.ActiveCount;
                     stopped |= party.IsWiped;
                 }
                 if (stopped) break;
             }
 
+                if (snapshot != null && !party.IsWiped && rooms.LastOrDefault()?.StoppedRoute != true)
+                    foreach (var step in snapshot.Floors[floorOrdinal].TraverseConnection(route.Length)) yield return step;
                 // One-floor execution historically has no Phase 6 transition event; the snapshot
                 // is now also required there for spatial inputs, without changing that contract.
                 if (snapshot == null || snapshot.Floors.Count == 1 || party.IsWiped || rooms.LastOrDefault()?.StoppedRoute == true) break;
@@ -233,7 +256,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                         snapshot.Floors[snapshot.Floors.Count - 1].FloorIndex),
                     FloorTransitionPerceptionResolver.Resolve(snapshot, floorOrdinal + 1, party));
                 transitions.Add(transition);
+                yield return new RunStep(RunStepKind.FloorDecision, snapshot.Floors[floorOrdinal].FloorIndex, null,
+                    continueChosen: transition.Descend);
                 if (!transition.Descend) { deliberateExit = next != null; break; }
+                yield return new RunStep(RunStepKind.FloorTransfer, snapshot.Floors[floorOrdinal + 1].FloorIndex, null);
             }
 
             if (traversal != null)
@@ -260,7 +286,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     empty.FeedbackTagKeys = BuildFeedbackTagKeys(runtime, true, finalComposition);
                 }
                 empty.ConfiguredRoomCount = configuredRoomCount;
-                return empty;
+                state.Outcome = empty; yield break;
             }
 
             var loot = new RunLootSummary { LootTableId = _lootTableId, ResolverSeed = seed, ResolverSuccess = lootResolverSuccess, ResolverErrorCode = lootResolverErrorCode, RollCount = rollCount,
@@ -292,7 +318,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             string routeKey = partyWiped ? RouteWipedKey : deliberateExit ? "run.route.floor_exit" : fullClear ? RouteClearedKey :
                 rooms[rooms.Count - 1].RoomIndex == 0 ? RouteStoppedRoomOneKey :
                 rooms[rooms.Count - 1].RoomIndex == 1 ? RouteStoppedRoomTwoKey : RouteRetreatedKey;
-            return new RunOutcomeRecord {
+            state.Outcome = new RunOutcomeRecord {
                 Party = party, EncounterEvents = events.ToArray(), SpatialEvents = spatialEvents.ToArray(),
                 FloorTransitions = transitions.ToArray(), DepthObjective = objective,
                 RunId = RunId(runSequence), TickStarted = tickStarted, Success = fullClear,
@@ -409,7 +435,30 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public RunOutcomeRecord SimulateOnce(StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpPlacementEffectsSummary placementEffects)
         {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
-            RunParty party = RunPartyGenerator.Create(_config.PhaseFiveB, RunId(runSequence));
+            var config = UnityEngine.JsonUtility.FromJson<RunSimulationConfig>(UnityEngine.JsonUtility.ToJson(_config));
+            if (_config.MvpCompositionOutcomeTuning == null) config.MvpCompositionOutcomeTuning = null;
+            if (_config.PhaseSix == null) config.PhaseSix = null;
+            var engine = new RunSimulationService(config, _lootConfig == null ? null : UnityEngine.JsonUtility.FromJson<LootConfig>(UnityEngine.JsonUtility.ToJson(_lootConfig)), _lootTableId);
+            var captured = UnityEngine.JsonUtility.FromJson<StructureRuntimeState>(UnityEngine.JsonUtility.ToJson(runtime));
+            var effects = ClonePlacementEffects(placementEffects);
+            var state = new RunExecution(RunPartyGenerator.Create(config.PhaseFiveB, RunId(runSequence)), null,
+                checked((effects.ContributingOptionIds?.LongLength ?? 0) + 2));
+            state.Initialize(engine.ExecuteOnceAndFinish(state, captured, tickStarted, runSequence, postureId, placementEffects == null ? null : effects));
+            var result = state.DrainToCompletion();
+            if (result.RunHeatApplicationSummary?.RuleResolved == true) runtime.Heat = result.RunHeatApplicationSummary.HeatAfter;
+            return result;
+        }
+
+        private IEnumerable<RunStep> ExecuteOnceAndFinish(RunExecution state, StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpPlacementEffectsSummary effects)
+        {
+            foreach (var step in ExecuteOnce(state, runtime, tickStarted, runSequence, postureId, effects)) yield return step;
+            yield return new RunStep(RunStepKind.Terminal, 0, null);
+        }
+
+        private IEnumerable<RunStep> ExecuteOnce(RunExecution state, StructureRuntimeState runtime, long tickStarted, int runSequence, string postureId, MvpPlacementEffectsSummary placementEffects)
+        {
+            if (runtime == null) throw new ArgumentNullException(nameof(runtime));
+            RunParty party = state.Party;
             var events = new List<RunEncounterEvent>();
 
             RunPostureConfig posture = RunPostureResolver.Resolve(_config, postureId);
@@ -446,7 +495,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             foreach (RunRoomAssignment assignment in compatibilityRoom.OrderedAssignments())
             {
                 if (party.IsWiped) break;
-                events.Add(RunEncounterResolver.Resolve(party, _config.PhaseFiveB, assignment, 0, 0, pressure));
+                var encounter = RunEncounterResolver.Resolve(party, _config.PhaseFiveB, assignment, 0, 0, pressure);
+                events.Add(encounter);
+                yield return InteractionStep(compatibilityRoom, assignment, encounter);
             }
             if (party.IsWiped) { success = false; score = 0; reasonKey = PartyWipedReasonKey; }
             string[] feedbackTagKeys = BuildFeedbackTagKeys(runtime, success, compositionOutcome);
@@ -497,7 +548,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 runtime.Heat = heatApplicationSummary.HeatAfter;
             }
 
-            return new RunOutcomeRecord
+            state.Outcome = new RunOutcomeRecord
             {
                 Party = party, EncounterEvents = events.ToArray(),
                 RunId = RunId(runSequence),
