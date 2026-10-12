@@ -1,0 +1,51 @@
+[
+  {
+    "path": "content-multiplicity-focused-editmode.log",
+    "sha256": "1542331c89975ed61d2aa089d82cfaa2b63e3ea7aca61569ab74d8dae4ac7fc5",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "content-multiplicity-focused-editmode02.log",
+    "sha256": "c5b8a7fca1d7070fea26607a80b8b268a8be4940c74169d8b66f90cf6d749242",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "content-multiplicity-focused-playmode.log",
+    "sha256": "d0c9384f11f27c84d88715d005f80dd67ae8cdf1170ba9b86baa8683b641b100",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "content-multiplicity-focused-snapshot.log",
+    "sha256": "f4f00198851886f3df9db76973af9f2be7d9c6743bc68ab337f6a010e1427476",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "content-multiplicity-full-editmode.log",
+    "sha256": "d2476de779092edd8b8942938eb20be3a11178d7545133d6d72622eb567fdb24",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "content-multiplicity-full-playmode.log",
+    "sha256": "4622bab1814dae19780488f6a8c83bddb4affd9e87f17fcdbf8dbbcb486be08f",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "content-multiplicity-windows-build.log",
+    "sha256": "4aaf0d6add37a499af40f5892f804c2aba8f075ab5c2e15287d440eb852192cd",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  }
+]

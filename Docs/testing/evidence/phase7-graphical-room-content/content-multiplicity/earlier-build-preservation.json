@@ -1,0 +1,12 @@
+{
+  "paths": [
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows",
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows-room-content-uat",
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows-placement-compact",
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows-map-reassignment",
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows-loot-reassignment"
+  ],
+  "files": 1515,
+  "before_inventory_sha256": "329604c90bcfa25eae0bc481cff0b9d9f767b2ceae3fcf50378d52a7c44efdcd",
+  "unchanged": true
+}

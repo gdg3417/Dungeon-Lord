@@ -1,0 +1,12 @@
+[
+  {
+    "path": "screenshots/content-multiplicity-loot.png",
+    "sha256": "4013a67f6b4699119a32904d3d1842ce871ebf720c60456f6352c132c7b96726",
+    "bytes": 504116
+  },
+  {
+    "path": "screenshots/content-multiplicity-traps.png",
+    "sha256": "d9d7d47c45ca43272f8536ff01b92c63e33f5c5b214cc8aef276cd23d440f74c",
+    "bytes": 575474
+  }
+]

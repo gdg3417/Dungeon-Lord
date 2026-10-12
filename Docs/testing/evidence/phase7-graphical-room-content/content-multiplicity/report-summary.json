@@ -1,0 +1,1042 @@
+[
+  {
+    "path": "content-multiplicity-focused-editmode.xml",
+    "sha256": "f101e1c4170ea3d82d34faf20b8975bed50ea6e1ecda681b644e82426cb6cda8",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "56",
+      "result": "Failed(Child)",
+      "total": "56",
+      "passed": "55",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 14:59:38Z",
+      "end-time": "2026-10-12 14:59:43Z",
+      "duration": "5.3621675"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "message": "  Expected: 2\n  But was:  1\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot (System.String category, System.String option) [0x0012f] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\PhaseSevenA3IntraroomTests.cs:282\n"
+      }
+    ],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Editor.DungeonSpatial.Tests.ProductionSpatialContentRecoveryTests.RepeatedCrossVersionRecoveryReturnsSameStatusVersionAndBytes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.DungeonSpatial.Tests.ProductionSpatialContentRecoveryTests.RepeatedEquivalentJournalTransitionRecovery_SelectsIdenticalStateAndBytes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourBootstrap.BootstrapRepeatedMonsterAcquisitionShowsBothOwnedInstancesAndFullCapacity(\"placement.option.monster.skeleton\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourBootstrap.BootstrapRepeatedMonsterAcquisitionShowsBothOwnedInstancesAndFullCapacity(\"placement.option.monster.goblin\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourCompatibility.RepeatedSemanticReasonsCountOccurrencesAtExactBoundary",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourContent.RepeatedDiagnosticAttemptsConsumeExactCumulativeIssueCapacity",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.PauseResumeAppliesOnceAndRepeatedResumeDoesNotReplay",
+        "output": "[WARN] Time delta looks large: 90000 seconds.\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourPassiveOnlineMana.DeterministicRepeatedTimelineProducesSameFractionalResult",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourRedeployment.FullMonsterCapacityRejectsSameOptionRedeploymentAndRetainsExactCustodyWalletAndBytes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_RepeatedPreviewIsByteAndConsequenceDeterministic",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSixA3FloorActivationEligibility.RepeatedCallsAndEquivalentPermissionOrderReturnEquivalentResults",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.EquivalentArrangementsAndRepeatedRunIdentitiesHaveIdenticalEvidenceAndOutcomes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.MonsterDistanceTiesChooseEarliestPathStepAcrossRepeatedTiles",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.MultiTileTrapTriggersOnceOnAnyOccupiedTileEvenAcrossRepeatedTraversal",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.basic\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.hidden_cache\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.glittering_hoard\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.basic\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.hidden_cache\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.glittering_hoard\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.spike\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.snare\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.chilling_sigil\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.spike\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.snare\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.chilling_sigil\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentRepeatedLootInstances",
+        "output": "Isolated scene boot 1: phase7a4-scene-2f0d316f8eba417f9c6f28949e611f2d.json\n[2026-10-12 14:59:31 UTC] [INFO] Entered BootState.\n[2026-10-12 14:59:31 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 14:59:31 UTC] [INFO] M0 init complete.\n[2026-10-12 14:59:31 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 14:59:31 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMULTIPLICITY placement.category.loot_node paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentRepeatedTrapInstances",
+        "output": "Isolated scene boot 1: phase7a4-scene-cfa0dc2ae30f4e8e8e059f61fb8d3924.json\n[2026-10-12 14:59:38 UTC] [INFO] Entered BootState.\n[2026-10-12 14:59:38 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 14:59:38 UTC] [INFO] M0 init complete.\n[2026-10-12 14:59:38 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 14:59:38 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMULTIPLICITY placement.category.trap paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.snare\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.chilling_sigil\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.hidden_cache\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.RepeatedMonstersHaveDistinctIdentitiesAndFullCategoryRejectsWithoutAllocation",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.snare\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.chilling_sigil\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.hidden_cache\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"unaffordable\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"offline\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"pending\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"persistence\")",
+        "output": "Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  },
+  {
+    "path": "content-multiplicity-focused-editmode02.xml",
+    "sha256": "01c9ee023098806a8254b79a87b342778ad2dbf86e1941e0a5512f8c25f7156e",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "52",
+      "result": "Passed",
+      "total": "52",
+      "passed": "52",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 15:02:41Z",
+      "end-time": "2026-10-12 15:02:44Z",
+      "duration": "3.5177148"
+    },
+    "failures": [],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.EquivalentArrangementsAndRepeatedRunIdentitiesHaveIdenticalEvidenceAndOutcomes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.MonsterDistanceTiesChooseEarliestPathStepAcrossRepeatedTiles",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.MultiTileTrapTriggersOnceOnAnyOccupiedTileEvenAcrossRepeatedTraversal",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.basic\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.hidden_cache\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.glittering_hoard\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.basic\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.hidden_cache\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.glittering_hoard\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.spike\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.snare\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.chilling_sigil\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.spike\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.snare\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.chilling_sigil\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentRepeatedLootInstances",
+        "output": "Isolated scene boot 1: phase7a4-scene-b408726df57d4fa4920bf568b033d959.json\n[2026-10-12 15:02:34 UTC] [INFO] Entered BootState.\n[2026-10-12 15:02:35 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:02:35 UTC] [INFO] M0 init complete.\n[2026-10-12 15:02:35 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:02:35 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMULTIPLICITY placement.category.loot_node paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentRepeatedTrapInstances",
+        "output": "Isolated scene boot 1: phase7a4-scene-8787d5d511c44e49bd4811f7b0d8620e.json\n[2026-10-12 15:02:41 UTC] [INFO] Entered BootState.\n[2026-10-12 15:02:41 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:02:41 UTC] [INFO] M0 init complete.\n[2026-10-12 15:02:41 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:02:41 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMULTIPLICITY placement.category.trap paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard\nSaving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  },
+  {
+    "path": "content-multiplicity-focused-playmode.xml",
+    "sha256": "9b3ce614bd788638a3297f1494d3e9ee35ed31f4819117f7c2cc461e67781783",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "197",
+      "result": "Passed",
+      "total": "197",
+      "passed": "197",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 15:04:10Z",
+      "end-time": "2026-10-12 15:05:15Z",
+      "duration": "65.7953219"
+    },
+    "failures": [],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.EquivalentArrangementsAndRepeatedRunIdentitiesHaveIdenticalEvidenceAndOutcomes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.MonsterDistanceTiesChooseEarliestPathStepAcrossRepeatedTiles",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.MultiTileTrapTriggersOnceOnAnyOccupiedTileEvenAcrossRepeatedTraversal",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.basic\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.hidden_cache\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.glittering_hoard\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.basic\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.hidden_cache\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.glittering_hoard\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.spike\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.snare\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.chilling_sigil\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.spike\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.snare\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.chilling_sigil\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.ReturnedContentRedeploymentTests.FullMonsterCapacityRejectsSameOptionRedeploymentAndRetainsExactCustodyWalletAndBytes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.snare\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.chilling_sigil\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.hidden_cache\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.RepeatedMonstersHaveDistinctIdentitiesAndFullCategoryRejectsWithoutAllocation",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.snare\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.chilling_sigil\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.hidden_cache\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"unaffordable\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"offline\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"pending\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"persistence\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentLootRejectionReasons",
+        "output": "Isolated scene boot 1: phase7a4-scene-118b37ea95ad43958867ed48c26734a9.json\n[2026-10-12 15:04:56 UTC] [INFO] Entered BootState.\n[2026-10-12 15:04:56 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:04:56 UTC] [INFO] M0 init complete.\n[2026-10-12 15:04:56 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:04:56 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=0/2 UI=Basic Room \u00b7 Room 1: 0 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nFULL LOOT authority=gd66.content.room_capacity_exceeded UI=This room is full for this category. Choose another room or unassign content.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nCOLLISION LOOT authority=content.position.invalid UI=That cell cannot hold this content. Choose an unoccupied valid cell.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentRepeatedLootInstances",
+        "output": "Isolated scene boot 1: phase7a4-scene-577b32e71aa2433a99d6a4a642bced96.json\n[2026-10-12 15:05:04 UTC] [INFO] Entered BootState.\n[2026-10-12 15:05:04 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:05:04 UTC] [INFO] M0 init complete.\n[2026-10-12 15:05:04 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:05:04 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMULTIPLICITY placement.category.loot_node paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentRepeatedTrapInstances",
+        "output": "Isolated scene boot 1: phase7a4-scene-5206f32a23c047f689c858462cce26ad.json\n[2026-10-12 15:05:06 UTC] [INFO] Entered BootState.\n[2026-10-12 15:05:06 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:05:06 UTC] [INFO] M0 init complete.\n[2026-10-12 15:05:06 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:05:06 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMULTIPLICITY placement.category.trap paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard\n"
+      }
+    ]
+  },
+  {
+    "path": "content-multiplicity-focused-snapshot.xml",
+    "sha256": "e9030be341f5f5a1609dbfba4f8e25abac75474ccf112237f7183733ec2d5c07",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "2",
+      "result": "Passed",
+      "total": "2",
+      "passed": "2",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 15:22:25Z",
+      "end-time": "2026-10-12 15:22:26Z",
+      "duration": "0.5855434"
+    },
+    "failures": [],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": "Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  },
+  {
+    "path": "content-multiplicity-full-editmode.xml",
+    "sha256": "4bce33ba52c0d73f3461c13599fc33bbc7de4af7251a79fa758916be56174012",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1705",
+      "result": "Skipped:Ignored",
+      "total": "1705",
+      "passed": "1704",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 15:32:06Z",
+      "end-time": "2026-10-12 15:32:28Z",
+      "duration": "21.8798075"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Editor.DungeonSpatial.Tests.ProductionSpatialContentRecoveryTests.RepeatedCrossVersionRecoveryReturnsSameStatusVersionAndBytes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.DungeonSpatial.Tests.ProductionSpatialContentRecoveryTests.RepeatedEquivalentJournalTransitionRecovery_SelectsIdenticalStateAndBytes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourBootstrap.BootstrapRepeatedMonsterAcquisitionShowsBothOwnedInstancesAndFullCapacity(\"placement.option.monster.skeleton\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourBootstrap.BootstrapRepeatedMonsterAcquisitionShowsBothOwnedInstancesAndFullCapacity(\"placement.option.monster.goblin\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourCompatibility.RepeatedSemanticReasonsCountOccurrencesAtExactBoundary",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourContent.RepeatedDiagnosticAttemptsConsumeExactCumulativeIssueCapacity",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.PauseResumeAppliesOnceAndRepeatedResumeDoesNotReplay",
+        "output": "[WARN] Time delta looks large: 90000 seconds.\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourPassiveOnlineMana.DeterministicRepeatedTimelineProducesSameFractionalResult",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourRedeployment.FullMonsterCapacityRejectsSameOptionRedeploymentAndRetainsExactCustodyWalletAndBytes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_RepeatedPreviewIsByteAndConsequenceDeterministic",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSixA3FloorActivationEligibility.RepeatedCallsAndEquivalentPermissionOrderReturnEquivalentResults",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.EquivalentArrangementsAndRepeatedRunIdentitiesHaveIdenticalEvidenceAndOutcomes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.MonsterDistanceTiesChooseEarliestPathStepAcrossRepeatedTiles",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.MultiTileTrapTriggersOnceOnAnyOccupiedTileEvenAcrossRepeatedTraversal",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.basic\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.hidden_cache\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.glittering_hoard\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.basic\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.hidden_cache\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.glittering_hoard\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.spike\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.snare\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.chilling_sigil\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.spike\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.snare\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA3Intraroom.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.chilling_sigil\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentLootRejectionReasons",
+        "output": "Isolated scene boot 1: phase7a4-scene-5734cf5f24d04636919d1ab6a7f7f683.json\n[2026-10-12 15:29:38 UTC] [INFO] Entered BootState.\n[2026-10-12 15:29:39 UTC] [INFO] Offline passive mana grant persisted.\n[2026-10-12 15:29:39 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:29:39 UTC] [INFO] M0 init complete.\n[2026-10-12 15:29:39 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:29:39 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=0/2 UI=Basic Room \u00b7 Room 1: 0 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nFULL LOOT authority=gd66.content.room_capacity_exceeded UI=This room is full for this category. Choose another room or unassign content.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nCOLLISION LOOT authority=content.position.invalid UI=That cell cannot hold this content. Choose an unoccupied valid cell.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentRepeatedLootInstances",
+        "output": "Isolated scene boot 1: phase7a4-scene-d7268436275a426dbf5b5f4b241ee6b0.json\n[2026-10-12 15:30:12 UTC] [INFO] Entered BootState.\n[2026-10-12 15:30:12 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:30:12 UTC] [INFO] M0 init complete.\n[2026-10-12 15:30:12 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:30:12 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMULTIPLICITY placement.category.loot_node paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentRepeatedTrapInstances",
+        "output": "Isolated scene boot 1: phase7a4-scene-1d1e390d6ae64287a5b9e8f4de30dcd2.json\n[2026-10-12 15:30:19 UTC] [INFO] Entered BootState.\n[2026-10-12 15:30:19 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:30:19 UTC] [INFO] M0 init complete.\n[2026-10-12 15:30:19 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:30:19 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMULTIPLICITY placement.category.trap paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.snare\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.chilling_sigil\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.hidden_cache\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.RepeatedMonstersHaveDistinctIdentitiesAndFullCategoryRejectsWithoutAllocation",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.snare\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.chilling_sigil\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.hidden_cache\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"unaffordable\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"offline\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"pending\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"persistence\")",
+        "output": null
+      }
+    ]
+  },
+  {
+    "path": "content-multiplicity-full-playmode.xml",
+    "sha256": "bfd3ac2b4c29491b289bde779c20e7ebf8eaec51cf06f9a199bf0eeaa6c5256d",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3136",
+      "result": "Skipped:Ignored",
+      "total": "3136",
+      "passed": "3126",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 15:35:17Z",
+      "end-time": "2026-10-12 15:40:21Z",
+      "duration": "304.3653263"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests.Execute_FreshCandidateReplacementFailureRetriesToFinalizedWithoutRepeatedTransition",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.PauseResumeAppliesOnceAndRepeatedResumeDoesNotReplay",
+        "output": "[WARN] Time delta looks large: 90000 seconds.\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PassiveOnlineManaTests.DeterministicRepeatedTimelineProducesSameFractionalResult",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.EquivalentArrangementsAndRepeatedRunIdentitiesHaveIdenticalEvidenceAndOutcomes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.MonsterDistanceTiesChooseEarliestPathStepAcrossRepeatedTiles",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.MultiTileTrapTriggersOnceOnAnyOccupiedTileEvenAcrossRepeatedTraversal",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.basic\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.hidden_cache\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.glittering_hoard\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.basic\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.hidden_cache\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(\"placement.option.loot_node.glittering_hoard\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.spike\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.snare\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.chilling_sigil\",True)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.spike\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.snare\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSevenA3IntraroomTests.RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(\"placement.option.trap.chilling_sigil\",False)",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.PhaseSixA3FloorActivationEligibilityTests.RepeatedCallsAndEquivalentPermissionOrderReturnEquivalentResults",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.ProductionSpatialContentLoadingTests.RepeatedDiagnosticAttemptsConsumeExactCumulativeIssueCapacity",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.ProductionSpatialContentWorkloadLimitTests.OrderingWhitespaceSourceAndRepeatedResults_AreDeterministic",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.ReturnedContentRedeploymentTests.FullMonsterCapacityRejectsSameOptionRedeploymentAndRetainsExactCustodyWalletAndBytes",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.SpatialLayoutCompatibilityProfileTests.RepeatedSemanticReasonsCountOccurrencesAtExactBoundary",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.StructuralConstructionGameRootTests.BootstrapRepeatedMonsterAcquisitionShowsBothOwnedInstancesAndFullCapacity(\"placement.option.monster.skeleton\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.StructuralConstructionGameRootTests.BootstrapRepeatedMonsterAcquisitionShowsBothOwnedInstancesAndFullCapacity(\"placement.option.monster.goblin\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.StructuralEditServiceTests.Movement_RepeatedPreviewIsByteAndConsequenceDeterministic",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.snare\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.trap\",\"placement.option.trap.chilling_sigil\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.hidden_cache\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.RepeatedMonstersHaveDistinctIdentitiesAndFullCategoryRejectsWithoutAllocation",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.spike\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.snare\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.trap\",\"placement.option.trap.chilling_sigil\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.hidden_cache\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(\"placement.category.loot_node\",\"placement.option.loot_node.glittering_hoard\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"unaffordable\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"offline\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"pending\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(\"persistence\")",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.Gd66RawSavePayloadClassifierTests.RepeatedClassification_IsDeterministicAndInputUnchanged",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.Tests.EditMode.MvpDungeonPlacementScaffoldTests.PlacingSameCategoryWithSameOption_IsDeterministicNoOp",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.Tests.EditMode.ResearchCompletionClaimApplyResolverTests.Resolve_RepeatedInputs_ReturnIdenticalSummaryAndNeverMutateSave",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.Tests.EditMode.ResearchCompletionClaimReadinessResolverTests.Resolve_RepeatedIdenticalInputsReturnIdenticalSummaries",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.Tests.EditMode.ResearchCompletionEligibilityDiagnosticsTests.RepeatedTickAfterReadyShowsAlreadyPendingWithoutCompletionOrAdjacentRewards",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.Tests.EditMode.ResearchCompletionEligibilityResolverTests.Resolve_RepeatedIdenticalInputsReturnIdenticalSummaries",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.Tests.EditMode.ResearchCompletionPendingApplyResolverTests.Resolve_RepeatedInputsReturnIdenticalSummaries",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.Tests.EditMode.ResearchProgressStateResolverTests.Resolve_RepeatedIdenticalInputs_ReturnsIdenticalSummary",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.Tests.EditMode.ResearchVerificationBoundaryResolverTests.RepeatedIdenticalInputs_ReturnIdenticalSummaries",
+        "output": null
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentLootRejectionReasons",
+        "output": "Isolated scene boot 1: phase7a4-scene-d4e5bf0c9dc54e28b35ad616d2e21e8c.json\n[2026-10-12 15:39:46 UTC] [INFO] Entered BootState.\n[2026-10-12 15:39:46 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:39:46 UTC] [INFO] M0 init complete.\n[2026-10-12 15:39:46 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:39:46 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=0/2 UI=Basic Room \u00b7 Room 1: 0 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nFULL LOOT authority=gd66.content.room_capacity_exceeded UI=This room is full for this category. Choose another room or unassign content.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nCOLLISION LOOT authority=content.position.invalid UI=That cell cannot hold this content. Choose an unoccupied valid cell.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentRepeatedLootInstances",
+        "output": "Isolated scene boot 1: phase7a4-scene-3f0d77505b964cc98e037cc9672bd2c0.json\n[2026-10-12 15:39:55 UTC] [INFO] Entered BootState.\n[2026-10-12 15:39:55 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:39:55 UTC] [INFO] M0 init complete.\n[2026-10-12 15:39:55 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:39:55 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMULTIPLICITY placement.category.loot_node paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentRepeatedTrapInstances",
+        "output": "Isolated scene boot 1: phase7a4-scene-fdfc93c2fc814ec2ac3622330651b5e2.json\n[2026-10-12 15:39:57 UTC] [INFO] Entered BootState.\n[2026-10-12 15:39:57 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-12 15:39:57 UTC] [INFO] M0 init complete.\n[2026-10-12 15:39:57 UTC] [INFO] Entered HomeStubState.\n[2026-10-12 15:39:57 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMULTIPLICITY placement.category.trap paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard\n"
+      }
+    ]
+  }
+]

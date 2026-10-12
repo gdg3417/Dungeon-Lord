@@ -1,0 +1,30 @@
+{
+  "reviewed": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+  "qualified_implementation": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+  "branch": "codex/phase7-graphical-room-content-management",
+  "trees": {
+    "Assets": "3b0499f1375700277ae4ff74d733adf54b9d2b86",
+    "Packages": "e3fec9b0c4018adde155b4d8cd05cac3217df206",
+    "ProjectSettings": "c55e5632c33401052e04e4c9172dfadc312686f3",
+    "ContentAuthoring": "41a73986b5c781df4f2ad2ab83a6cd792d31a70c"
+  },
+  "changed_files": [
+    "Assets/_Project/Data/Bootstrap/string_table_en.json",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs",
+    "Assets/_Project/Editor/DungeonVisualBuildQualification.cs",
+    "Assets/_Project/Scripts/Core/GameRoot.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalSpatialMutation.cs",
+    "Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs",
+    "Assets/_Project/Tests/EditMode/ContentAcquisitionEconomyTests.cs",
+    "Assets/_Project/Tests/EditMode/PhaseSevenA3IntraroomTests.cs",
+    "Assets/_Project/Tests/EditMode/ReturnedContentRedeploymentTests.cs",
+    "Assets/_Project/Tests/EditMode/TransactionalRoomContentTests.cs",
+    "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs",
+    "Docs/38 - Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md",
+    "Tools/Presentation/collect_content_multiplicity_evidence.py",
+    "docs/planning/post-gd60-mvp-execution-plan.md"
+  ],
+  "save_schema": 13,
+  "draft_format": 5,
+  "draft_record_version": 4
+}

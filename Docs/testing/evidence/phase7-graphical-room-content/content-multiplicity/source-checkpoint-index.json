@@ -1,0 +1,246 @@
+[
+  {
+    "path": "content-multiplicity-final-source.json",
+    "sha256": "f93e1a0bbc620b93ee1284f653a6de39ac7ce04e5abc89ce08e38c9a49bb739c",
+    "head": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-focused-after-restored-source.json",
+    "sha256": "898cc50e2631c6c22ca68734d3d642f6929df172a767db6af1c112341646544b",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-focused-after-source.json",
+    "sha256": "baebec4330a9a2c87269c58253f4d83f5f5f982713a12aaceaa152a7bc8e7cc9",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Tests/EditMode/PhaseSevenA3IntraroomTests.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-focused-before-restored-source.json",
+    "sha256": "4f001801cc4da48cf1e492ad68b785094ed4372520c95de36e4022f5533b1025",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-focused-before-source.json",
+    "sha256": "d403537c28d62f05a3e578737b2cc6ef29f212bab22b39ee49edd4546a41d983",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Data/Bootstrap/string_table_en.json: mismatch",
+      "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs: mismatch",
+      "Assets/_Project/Editor/DungeonVisualBuildQualification.cs: mismatch",
+      "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalSpatialMutation.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs: mismatch",
+      "Assets/_Project/Tests/EditMode/ContentAcquisitionEconomyTests.cs: mismatch",
+      "Assets/_Project/Tests/EditMode/PhaseSevenA3IntraroomTests.cs: mismatch",
+      "Assets/_Project/Tests/EditMode/TransactionalRoomContentTests.cs: mismatch",
+      "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-focused-playmode-after-restored-source.json",
+    "sha256": "a99278ed29124685d528a2192f38a439134e9375362d3a0063f40e74100c4183",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-focused-playmode-after-source.json",
+    "sha256": "aeaa18a90fe48935d5bbdbb7e418faae2f33279b9db50565920bb105b846c314",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-focused02-after-restored-source.json",
+    "sha256": "a99278ed29124685d528a2192f38a439134e9375362d3a0063f40e74100c4183",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-focused02-after-source.json",
+    "sha256": "a99278ed29124685d528a2192f38a439134e9375362d3a0063f40e74100c4183",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-focused02-before-restored-source.json",
+    "sha256": "a99278ed29124685d528a2192f38a439134e9375362d3a0063f40e74100c4183",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-focused02-before-source.json",
+    "sha256": "868a70fe32bd103104383a0128a319dc7b83287ad8716a795d9a0113d7f9f635",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Data/Bootstrap/string_table_en.json: mismatch",
+      "Assets/_Project/Scripts/Core/GameRoot.cs: mismatch",
+      "Assets/_Project/Tests/EditMode/ReturnedContentRedeploymentTests.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-full-editmode-after-restored-source.json",
+    "sha256": "f93e1a0bbc620b93ee1284f653a6de39ac7ce04e5abc89ce08e38c9a49bb739c",
+    "head": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-full-editmode-after-source.json",
+    "sha256": "f93e1a0bbc620b93ee1284f653a6de39ac7ce04e5abc89ce08e38c9a49bb739c",
+    "head": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-full-editmode-before-source.json",
+    "sha256": "f93e1a0bbc620b93ee1284f653a6de39ac7ce04e5abc89ce08e38c9a49bb739c",
+    "head": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-full-playmode-after-restored-source.json",
+    "sha256": "f93e1a0bbc620b93ee1284f653a6de39ac7ce04e5abc89ce08e38c9a49bb739c",
+    "head": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-full-playmode-after-source.json",
+    "sha256": "62cae762c3ba26af097c0ec70c5ea961be5c98d8ae3dd48091473ccba0789c9a",
+    "head": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-full-playmode-before-source.json",
+    "sha256": "f93e1a0bbc620b93ee1284f653a6de39ac7ce04e5abc89ce08e38c9a49bb739c",
+    "head": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-snapshot-after-restored-source.json",
+    "sha256": "f08cc81447fb2eb39d3de54ac65c1e1a8a9d1bb5d324b480ace2d1058bd255fc",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-snapshot-after-source.json",
+    "sha256": "f08cc81447fb2eb39d3de54ac65c1e1a8a9d1bb5d324b480ace2d1058bd255fc",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-snapshot-before-restored-source.json",
+    "sha256": "f08cc81447fb2eb39d3de54ac65c1e1a8a9d1bb5d324b480ace2d1058bd255fc",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-snapshot-before-source.json",
+    "sha256": "4531d464913890b0e224a670a146936ab0c2341c41681e97fa73329e3ccfff5c",
+    "head": "c4d17bf82dec8984fc46fc7bdbde9ade28d7f46f",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/_Project/Tests/EditMode/PhaseSevenA3IntraroomTests.cs: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-windows-after-restored-source.json",
+    "sha256": "f93e1a0bbc620b93ee1284f653a6de39ac7ce04e5abc89ce08e38c9a49bb739c",
+    "head": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-windows-after-source.json",
+    "sha256": "e99010296449302ecf73ae386cddbf5093383b767d191412e9c0f99b2ce69e98",
+    "head": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [
+      "Assets/Settings/UniversalRP.asset: mismatch",
+      "Assets/UniversalRenderPipelineGlobalSettings.asset: mismatch",
+      "ProjectSettings/ProjectSettings.asset: mismatch",
+      "ProjectSettings/UnityConnectSettings.asset: mismatch"
+    ],
+    "unexpected": []
+  },
+  {
+    "path": "content-multiplicity-windows-before-source.json",
+    "sha256": "f93e1a0bbc620b93ee1284f653a6de39ac7ce04e5abc89ce08e38c9a49bb739c",
+    "head": "992dcc932eb78180bb5da7c7f030aebc340fcfb9",
+    "expected": 1208,
+    "actual": 1208,
+    "failures": [],
+    "unexpected": []
+  }
+]
