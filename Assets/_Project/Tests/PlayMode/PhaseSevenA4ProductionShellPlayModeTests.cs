@@ -49,6 +49,8 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         [UnityTest] public IEnumerator RoomContentSequentialLootDraft() { yield return Invoke("RoomContentSequentialLootDraft"); }
         [UnityTest] public IEnumerator RoomContentSequentialLootSaveBetween() { yield return Invoke("RoomContentSequentialLootSaveBetween"); }
         [UnityTest] public IEnumerator RoomContentLootRejectionReasons() { yield return Invoke("RoomContentLootRejectionReasons"); }
+        [UnityTest] public IEnumerator RoomContentRepeatedTrapInstances() { yield return Invoke("RoomContentRepeatedTrapInstances"); }
+        [UnityTest] public IEnumerator RoomContentRepeatedLootInstances() { yield return Invoke("RoomContentRepeatedLootInstances"); }
         [UnityTest]
         public IEnumerator RoomContentMapReassignmentCategories()
         { yield return Invoke("RoomContentMapReassignmentCategoriesInvalidRetryAndSave"); }

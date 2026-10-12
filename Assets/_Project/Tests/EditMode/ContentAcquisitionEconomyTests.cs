@@ -85,7 +85,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var stale = f.Authority.Execute(f.ActivePath, f.FileSystem, oldSession, oldState, oldRuntime, request);
             Assert.That(stale.IsSuccess, Is.False); Assert.That(stale.RuntimeProjection, Is.Null);
             CollectionAssert.AreEqual(durable, f.FileSystem.ReadAllBytes(f.ActivePath));
-            if (Category(option) == MvpDungeonPlacementIds.MonsterCategoryId)
             {
                 var second = DetachedCanonicalMutationRequest.Place(Category(option), option, Target(f), null,
                     new TileCoordinate(3, 1));
@@ -95,7 +94,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Unchanged(f, DetachedCanonicalMutationRequest.Place(Category(option), option, Target(f), null,
                     new TileCoordinate(3, 2)), DetachedSpatialMigrationPreparer.CapacityReason);
             }
-            else Unchanged(f, request, DetachedCanonicalSpatialMutation.NoOpReason);
         }
 
         [TestCase(MvpDungeonPlacementIds.SkeletonOptionId, MvpDungeonPlacementIds.SkeletonOptionId)]
@@ -298,13 +296,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void FullCategoryAndNoOpNeverCharge()
+        public void FullCategoryAndOverlapNeverCharge()
         {
             var f = Room();
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.TrapCategoryId,
                 MvpDungeonPlacementIds.SpikeTrapOptionId, Target(f))));
             Unchanged(f, DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.TrapCategoryId,
-                MvpDungeonPlacementIds.SpikeTrapOptionId, Target(f)), DetachedCanonicalSpatialMutation.NoOpReason);
+                MvpDungeonPlacementIds.SpikeTrapOptionId, Target(f)), DetachedCanonicalSpatialMutation.PositionInvalidReason);
             Assert.That(CanonicalRoomCapacityResolver.TryResolve(f.Production, f.State.Floors[0].Layout.Rooms[0].RoomDefinitionId,
                 out var capacity, out _), Is.True);
             var state = f.State;

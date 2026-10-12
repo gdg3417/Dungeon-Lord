@@ -1635,8 +1635,7 @@ namespace DungeonBuilder.M0
                     DetachedCanonicalMutationRequest.Redeploy(SelectedReturnedAssignmentId, target,
                         SelectedCanonicalFloorInstanceId, _selectedRoomLocalContentPosition));
                 success = result.IsSuccess;
-                reason = success ? "ui.returned_content.success" : result.IsNoOp
-                    ? "ui.returned_content.same_option" : result.Reason;
+                reason = success ? "ui.returned_content.success" : result.Reason;
             }
             string playerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(reason);
             SetBanner(LocalizeReturnedContent(string.IsNullOrEmpty(playerKey) ? reason : playerKey));

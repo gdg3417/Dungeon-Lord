@@ -18,10 +18,7 @@ namespace DungeonBuilder.M0
         public DungeonDraftContentPreview ContentPreview => contentPreview;
         public bool IsPlacingContent => IsEditing && contentIntent != null;
         public string ContentCategory => contentCategory;
-        private string ContentPreviewMessageKey => contentPreview?.Reason == DetachedCanonicalSpatialMutation.NoOpReason
-            ? contentCategory == MvpDungeonPlacementIds.LootNodeCategoryId ? "ui.dungeon.content.same_loot"
-                : contentCategory == MvpDungeonPlacementIds.TrapCategoryId ? "ui.dungeon.content.same_trap" : contentPreview.Reason
-            : contentPreview?.Reason == DetachedSpatialMigrationPreparer.CapacityReason ? "ui.dungeon.content.category_full"
+        private string ContentPreviewMessageKey => contentPreview?.Reason == DetachedSpatialMigrationPreparer.CapacityReason ? "ui.dungeon.content.category_full"
             : contentPreview?.Reason == DetachedCanonicalSpatialMutation.PositionInvalidReason ? "ui.dungeon.content.position_blocked"
             : contentPreview?.Reason;
         private string ContextRoomId => selectedRoomId ?? selected?.RoomInstanceId;

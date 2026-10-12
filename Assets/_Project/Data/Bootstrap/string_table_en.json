@@ -403,10 +403,6 @@
       "text": "Owned content redeployed into the selected room."
     },
     {
-      "key": "ui.returned_content.same_option",
-      "text": "This room already contains that content. The returned item remains in custody."
-    },
-    {
       "key": "ui.loading.boot",
       "text": "Waking the dungeon core. Restoring your last known state."
     },
@@ -3741,8 +3737,6 @@
     {"key": "ui.dungeon.content.position_hint", "text": "Tap a room cell to preview placement. Confirm Placement adds it to the draft."},
     {"key": "ui.dungeon.content.destination_hint", "text": "Tap another room on this floor or choose a destination below, then preview a position."},
     {"key": "ui.dungeon.content.destination_invalid", "text": "Choose a different constructed room. Your content remains selected."},
-    {"key": "ui.dungeon.content.same_loot", "text": "This room already contains this loot type. Choose another room."},
-    {"key": "ui.dungeon.content.same_trap", "text": "This room already contains this trap type. Choose another room."},
     {"key": "ui.dungeon.content.category_full", "text": "This room is full for this category. Choose another room or unassign content."},
     {"key": "ui.dungeon.content.position_blocked", "text": "That cell cannot hold this content. Choose an unoccupied valid cell."},
     {"key": "ui.dungeon.content.preview", "text": "Valid position. Confirm Placement adds it to the draft."},

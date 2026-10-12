@@ -21,6 +21,8 @@ namespace DungeonBuilder.M0.EditorTools
             => BuildWindowsAt("Builds/Development/Windows-map-reassignment/Dungeon Lord.exe");
         public static void BuildLootReassignmentWindows()
             => BuildWindowsAt("Builds/Development/Windows-loot-reassignment/Dungeon Lord.exe");
+        public static void BuildContentMultiplicityWindows()
+            => BuildWindowsAt("Builds/Development/Windows-content-multiplicity/Dungeon Lord.exe");
         private static void BuildWindowsAt(string outputPath)
         {
             DevelopmentBuildUtility.BuildDevelopment(BuildTarget.StandaloneWindows64, outputPath);

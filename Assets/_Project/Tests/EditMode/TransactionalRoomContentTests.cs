@@ -77,12 +77,44 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Context(f).Fingerprint(d.ReadModel), Is.EqualTo(before)); Assert.That(Quote(f,d).ContentAcquisitionCost, Is.EqualTo(50));
         }
         [TestCase("placement.category.trap", "placement.option.trap.spike")]
+        [TestCase("placement.category.trap", "placement.option.trap.snare")]
+        [TestCase("placement.category.trap", "placement.option.trap.chilling_sigil")]
         [TestCase("placement.category.loot_node", "placement.option.loot_node.basic")]
-        public void SameOptionTrapAndLootCannotDuplicate(string category, string option)
+        [TestCase("placement.category.loot_node", "placement.option.loot_node.hidden_cache")]
+        [TestCase("placement.category.loot_node", "placement.option.loot_node.glittering_hoard")]
+        public void SameOptionInstancesRetainIdentityCustodyEconomicsRecoveryAndReopen(string category, string option)
         {
-            var f = Room(); var d = TransactionalDungeonDraft.Create(f.State, Context(f), new Store());
-            Assert.That(d.ChangeContent(Add(f, category, option)), Is.True); Assert.That(d.ChangeContent(Add(f, category, option, 1)), Is.False);
-            Assert.That(d.CommandCount, Is.EqualTo(1)); Assert.That(d.ReadModel.Floors[0].RoomContents.Assignments.Length, Is.EqualTo(1));
+            var f = Room(); var context=Context(f); var store=new Store();
+            var d = TransactionalDungeonDraft.Create(f.State, context, store); var before=f.Session.GetCurrentBytes();
+            double mana=f.Runtime.structureRuntime.ManaReserve; Assert.That(f.Acquisition.TryPrice(category,option,out double price),Is.True);
+            Assert.That(d.ChangeContent(Add(f,category,option)),Is.True);
+            Assert.That(d.ChangeContent(Add(f,category,option)),Is.False,"Same option cannot overlap its sibling");
+            Assert.That(d.Reason,Is.EqualTo(DetachedCanonicalSpatialMutation.PositionInvalidReason));
+            Assert.That(d.ChangeContent(Add(f,category,option,1)),Is.True);
+            var assignments=d.ReadModel.Floors[0].RoomContents.Assignments; var first=assignments[0]; var sibling=assignments[1];
+            Assert.That(first.AssignmentId,Is.Not.EqualTo(sibling.AssignmentId)); Assert.That(first.Sequence,Is.LessThan(sibling.Sequence));
+            string unchangedSibling=JsonUtility.ToJson(sibling); var fingerprint=context.Fingerprint(d.ReadModel);
+            Assert.That(d.ChangeContent(Add(f,category,option,2)),Is.False); Assert.That(d.Reason,Is.EqualTo(DetachedSpatialMigrationPreparer.CapacityReason));
+            Assert.That(context.Fingerprint(d.ReadModel),Is.EqualTo(fingerprint)); Assert.That(d.CommandCount,Is.EqualTo(2));
+            Assert.That(Quote(f,d).ContentAcquisitions,Is.EqualTo(2)); Assert.That(Quote(f,d).Cost,Is.EqualTo(2*price));
+            var floor=f.State.Floors[0].FloorInstanceId;
+            Assert.That(d.ChangeContent(context.ContentIntent(DungeonDraftContentOperation.Reposition,floor,first.RoomInstanceId,first.AssignmentId,position:new TileCoordinate(2,1))),Is.True);
+            Assert.That(d.ChangeContent(context.ContentIntent(DungeonDraftContentOperation.Unassign,floor,assignmentId:first.AssignmentId)),Is.True);
+            var owned=d.ReadModel.LifecycleAndOwnership.ReturnedContents.Single(); Assert.That(owned.AssignmentId,Is.EqualTo(first.AssignmentId)); Assert.That(owned.Sequence,Is.EqualTo(first.Sequence));
+            Assert.That(JsonUtility.ToJson(d.ReadModel.Floors[0].RoomContents.Assignments.Single()),Is.EqualTo(unchangedSibling));
+            Assert.That(d.ChangeContent(context.ContentIntent(DungeonDraftContentOperation.Redeploy,floor,first.RoomInstanceId,first.AssignmentId,position:new TileCoordinate(2,1))),Is.True);
+            Assert.That(Quote(f,d).Cost,Is.EqualTo(2*price)); Flush(d);
+            d=TransactionalDungeonDraft.Recover(store.Read(),f.State,context,store,out var reason); Assert.That(d,Is.Not.Null,reason);
+            CollectionAssert.AreEqual(before,f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(mana));
+            var result=f.Authority.CommitDungeonDraft(f.ActivePath,f.FileSystem,f.Session,f.Runtime,d,Allowed); Assert.That(result.IsSuccess,Is.True,result.Reason); f.Accept(result); f.Reopen();
+            assignments=f.State.Floors[0].RoomContents.Assignments; Assert.That(assignments.Select(a=>a.AssignmentId),Is.EqualTo(new[] {first.AssignmentId,sibling.AssignmentId}));
+            Assert.That(assignments[0].Sequence,Is.EqualTo(first.Sequence)); Assert.That(assignments[0].RoomLocalPosition,Is.EqualTo(new TileCoordinate(2,1)));
+            Assert.That(JsonUtility.ToJson(assignments[1]),Is.EqualTo(unchangedSibling)); Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(mana-2*price));
+            Assert.That(f.State.LifecycleAndOwnership.ReturnedContents,Is.Empty);
+            var discard=TransactionalDungeonDraft.Create(f.State,Context(f),new Store()); Assert.That(discard.ChangeContent(Context(f).ContentIntent(DungeonDraftContentOperation.Unassign,floor,assignmentId:first.AssignmentId)),Is.True);
+            Assert.That(discard.Discard(),Is.True); Assert.That(f.State.Floors[0].RoomContents.Assignments.Length,Is.EqualTo(2));
+            var corrupt=Context(f).Copy(f.State); corrupt.Floors[0].RoomContents.Assignments[1].AssignmentId=first.AssignmentId;
+            Assert.That(CanonicalSpatialSaveContracts.Validate(corrupt,f.Profile.Canonical.Spatial,true).IsValid,Is.False,"Duplicate identities remain corrupt even when options may repeat");
         }
         [Test]
         public void AcquireUnassignRedeployChargesOnceAndDiscardNeverCreatesOwnership()
@@ -110,6 +142,39 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var result=f.Authority.CommitDungeonDraft(f.ActivePath,f.FileSystem,f.Session,f.Runtime,d,new GateEvaluationInput(RestrictedActionType.Purchase,false,true));
             Assert.That(result.IsSuccess,Is.True,result.Reason); f.Accept(result); f.Reopen();
             Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(mana)); Assert.That(f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId,Is.EqualTo(a.AssignmentId));
+        }
+        [TestCase("placement.category.trap","placement.option.trap.spike")]
+        [TestCase("placement.category.trap","placement.option.trap.snare")]
+        [TestCase("placement.category.trap","placement.option.trap.chilling_sigil")]
+        [TestCase("placement.category.loot_node","placement.option.loot_node.basic")]
+        [TestCase("placement.category.loot_node","placement.option.loot_node.hidden_cache")]
+        [TestCase("placement.category.loot_node","placement.option.loot_node.glittering_hoard")]
+        public void ExistingRepeatedInstanceReturnsAndRedeploysWithoutRepurchase(string category,string option)
+        {
+            var f=Room(); string room=f.State.Floors[0].Layout.Rooms[0].RoomInstanceId; var floor=f.State.Floors[0].FloorInstanceId;
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(category,option,room,floor,new TileCoordinate(0,0))));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(category,option,room,floor,new TileCoordinate(1,0))));
+            var first=f.State.Floors[0].RoomContents.Assignments[0]; string sibling=JsonUtility.ToJson(f.State.Floors[0].RoomContents.Assignments[1]); double mana=f.Runtime.structureRuntime.ManaReserve;
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(first.AssignmentId,floor)));
+            Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Single().AssignmentId,Is.EqualTo(first.AssignmentId));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(first.AssignmentId,room,floor,new TileCoordinate(2,1)))); f.Reopen();
+            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(mana)); Assert.That(f.State.LifecycleAndOwnership.ReturnedContents,Is.Empty);
+            Assert.That(f.State.Floors[0].RoomContents.Assignments[0].AssignmentId,Is.EqualTo(first.AssignmentId));
+            Assert.That(f.State.Floors[0].RoomContents.Assignments[0].Sequence,Is.EqualTo(first.Sequence));
+            Assert.That(JsonUtility.ToJson(f.State.Floors[0].RoomContents.Assignments[1]),Is.EqualTo(sibling));
+        }
+        [TestCase("unaffordable")][TestCase("offline")][TestCase("pending")][TestCase("persistence")]
+        public void TwoSameOptionPurchasesStillFailAtomicallyUnderExistingRestrictions(string failure)
+        {
+            var f=Room(); var d=TransactionalDungeonDraft.Create(f.State,Context(f),new Store()); var before=f.Session.GetCurrentBytes();
+            if(failure=="unaffordable") f.Runtime.structureRuntime.ManaReserve=0; double mana=f.Runtime.structureRuntime.ManaReserve;
+            Assert.That(d.ChangeContent(Add(f,"placement.category.loot_node","placement.option.loot_node.glittering_hoard")),Is.True);
+            Assert.That(d.ChangeContent(Add(f,"placement.category.loot_node","placement.option.loot_node.glittering_hoard",1)),Is.True); Flush(d);
+            if(failure=="persistence") f.FileSystem.EnableFailure(Operation.Replace,1);
+            var result=f.Authority.CommitDungeonDraft(f.ActivePath,f.FileSystem,f.Session,f.Runtime,d,new GateEvaluationInput(RestrictedActionType.Purchase,failure!="offline",failure=="pending"));
+            Assert.That(result.IsSuccess,Is.False); Assert.That(result.RuntimeProjection,Is.Null); Assert.That(d.CanSave,Is.True);
+            CollectionAssert.AreEqual(before,f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(mana));
+            Assert.That(f.State.Floors[0].RoomContents.Assignments,Is.Empty); Assert.That(f.State.LifecycleAndOwnership.ReturnedContents,Is.Empty);
         }
         [TestCase(false,false,"gate.error.offline_required")][TestCase(true,true,"gate.error.verification_pending")]
         public void RestrictedFinalPurchaseRetainsCanonicalAndDraft(bool online,bool pending,string reason)

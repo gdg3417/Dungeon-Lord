@@ -121,12 +121,11 @@ namespace DungeonBuilder.M0.Tests
             yield return SettleContentPanel(); var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             controller.EnterEdit(); AssertLootRoomCount(a,1); AssertLootRoomCount(b,1);
             controller.TapWorld(ContentCell(a,1,1)); controller.BeginContentReassignment(); controller.TapWorld(ContentCell(b,2,1));
-            Assert.That(controller.ContentPreview.IsValid,Is.False); Assert.That(controller.ContentPreview.Reason,Is.EqualTo(DetachedCanonicalSpatialMutation.NoOpReason));
-            Assert.That(controller.Draft.CommandCount,Is.Zero); Assert.That(controller.ConfirmContentPlacement(),Is.False); AssertCanonicalUnchanged(before,mana);
+            Assert.That(controller.ContentPreview.IsValid,Is.True,"Owner-approved matching option at 1/2 is eligible");
+            Assert.That(controller.Draft.CommandCount,Is.Zero); Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel();
+            AssertLootRoomCount(a,0); AssertLootRoomCount(b,2); AssertCanonicalUnchanged(before,mana);
             var info=controller.GetComponent<UIDocument>().rootVisualElement.Q<Label>("contentPlacementInfo").text;
-            TestContext.WriteLine("DUPLICATE LOOT authority="+controller.ContentPreview.Reason+" UI="+info);
-            string duplicateInfo=info;
-            yield return RoomContentCapture("loot-reassignment-duplicate.png"); controller.CancelContentPlacement();
+            Assert.That(root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft).ContentAcquisitionCost,Is.Zero); controller.CancelContentPlacement();
             Assert.That(controller.Discard(),Is.True); AssertCanonicalUnchanged(before,mana);
             // Prepare the separate full-room/collision fixture outside Edit Mode.
             PlaceLootFixture(a,"placement.option.loot_node.hidden_cache",2); yield return SettleContentPanel();
@@ -147,10 +146,65 @@ namespace DungeonBuilder.M0.Tests
             string collisionInfo=info; TestContext.WriteLine("COLLISION LOOT authority="+controller.ContentPreview.Reason+" UI="+info); Assert.That(controller.ConfirmContentPlacement(),Is.False);
             Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands)); AssertCanonicalUnchanged(before,mana); controller.CancelContentPlacement();
             Assert.That(controller.Discard(),Is.True); AssertCanonicalUnchanged(before,mana);
-            Assert.That(duplicateInfo,Does.StartWith(root.Content.GetString("ui.dungeon.content.same_loot","ui.dungeon.content.same_loot")));
             Assert.That(capacityInfo,Does.StartWith(root.Content.GetString("ui.dungeon.content.category_full","ui.dungeon.content.category_full")));
             Assert.That(collisionInfo,Does.StartWith(root.Content.GetString("ui.dungeon.content.position_blocked","ui.dungeon.content.position_blocked")));
         }
+        private void AssertInstanceCapacity(RoomSpatialInstance room,string category,int expected)
+        {
+            controller.TapWorld(ContentCell(room,3,3)); Assert.That(controller.OpenContentCategory(category),Is.True);
+            Assert.That(controller.Draft.ReadModel.Floors[0].RoomContents.Assignments.Count(a=>a.RoomInstanceId==room.RoomInstanceId && a.CategoryId==category),Is.EqualTo(expected));
+            Assert.That(controller.GetComponent<UIDocument>().rootVisualElement.Q<Label>("contentCapacity").text,Does.Contain(expected+" / 2"));
+        }
+        private IEnumerator RepeatedContentProduction(string category,string option,int width,int height,string capture)
+        {
+            yield return PrepareCanonicalLootRooms(); var root=GameRoot.Instance; var rooms=root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms;
+            var a=rooms[0]; var b=rooms[1]; var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(width,height); yield return SettleContentPanel(); controller.EnterEdit();
+            for(int i=1;i<=2;i++)
+            {
+                AssertInstanceCapacity(a,category,i-1); Assert.That(controller.SelectNewContent(option),Is.True);
+                int commands=controller.Draft.CommandCount; controller.TapWorld(ContentCell(a,i,1));
+                Assert.That(controller.ContentPreview.IsValid,Is.True,controller.ContentPreview.Reason); Assert.That(controller.Draft.CommandCount,Is.EqualTo(commands));
+                AssertCanonicalUnchanged(before,mana); Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel(); AssertInstanceCapacity(a,category,i);
+            }
+            var assigned=controller.Draft.ReadModel.Floors[0].RoomContents.Assignments.Where(x=>x.CategoryId==category).ToArray(); var first=assigned[0]; var sibling=assigned[1];
+            Assert.That(first.AssignmentId,Is.Not.EqualTo(sibling.AssignmentId)); Assert.That(first.OptionId,Is.EqualTo(sibling.OptionId));
+            var quote=root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft); Assert.That(root.SaveService.TryContentAcquisitionCost(category,option,out double price),Is.True);
+            Assert.That(quote.ContentAcquisitions,Is.EqualTo(2)); Assert.That(quote.ContentAcquisitionCost,Is.EqualTo(2*price));
+            Assert.That(controller.SelectNewContent(option),Is.True); controller.TapWorld(ContentCell(a,3,2));
+            Assert.That(controller.ContentPreview.IsValid,Is.False); Assert.That(controller.GetComponent<UIDocument>().rootVisualElement.Q<Label>("contentPlacementInfo").text,
+                Does.StartWith(root.Content.GetString("ui.dungeon.content.category_full",null))); Assert.That(controller.ConfirmContentPlacement(),Is.False);
+            yield return RoomContentCapture(capture); controller.CancelContentPlacement();
+            controller.TapWorld(ContentCell(a,1,1)); Assert.That(controller.SelectedContent.AssignmentId,Is.EqualTo(first.AssignmentId)); controller.BeginMove();
+            controller.TapWorld(ContentCell(a,1,2)); Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel();
+            Assert.That(controller.Draft.ReadModel.Floors[0].RoomContents.Assignments.Single(x=>x.AssignmentId==sibling.AssignmentId).RoomLocalPosition,Is.EqualTo(new TileCoordinate(2,1)));
+            AssertCanonicalUnchanged(before,mana); Assert.That(controller.Commit(),Is.True); yield return SettleContentPanel();
+            Assert.That(root.Save.structureRuntime.ManaReserve,Is.EqualTo(mana-2*price)); yield return RestartShell(); root=GameRoot.Instance;
+            before=File.ReadAllBytes(root.SaveService.SavePath); mana=root.Save.structureRuntime.ManaReserve;
+            controller.EnterEdit(); AssertInstanceCapacity(a,category,2);
+            controller.TapWorld(ContentCell(a,2,1)); Assert.That(controller.SelectedContent.AssignmentId,Is.EqualTo(sibling.AssignmentId)); Assert.That(controller.UnassignSelectedContent(),Is.True); yield return SettleContentPanel();
+            AssertInstanceCapacity(a,category,1); Assert.That(controller.SelectContentBrowser(true),Is.True); Assert.That(controller.SelectReturnedContent(sibling.AssignmentId),Is.True);
+            controller.TapWorld(ContentCell(a,2,2)); Assert.That(controller.ContentPreview.IsValid,Is.True); Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel(); AssertInstanceCapacity(a,category,2);
+            foreach(var target in new[] {first,sibling})
+            {
+                var current=controller.Draft.ReadModel.Floors[0].RoomContents.Assignments.Single(x=>x.AssignmentId==target.AssignmentId);
+                controller.TapWorld(ContentCell(a,current.RoomLocalPosition.X,current.RoomLocalPosition.Y)); Assert.That(controller.SelectedContent.AssignmentId,Is.EqualTo(target.AssignmentId));
+                controller.BeginContentReassignment(); controller.TapWorld(ContentCell(b,target==first?1:2,1)); Assert.That(controller.ContentPreview.IsValid,Is.True,controller.ContentPreview.Reason);
+                Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel();
+            }
+            AssertInstanceCapacity(a,category,0); AssertInstanceCapacity(b,category,2); AssertCanonicalUnchanged(before,mana);
+            quote=root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft); Assert.That(quote.ContentAcquisitions,Is.Zero); Assert.That(quote.Cost,Is.Zero);
+            yield return RestartShell(); root=GameRoot.Instance; Click(controller.GetComponent<UIDocument>().rootVisualElement.Q<Button>("confirm")); yield return SettleContentPanel();
+            AssertInstanceCapacity(b,category,2); Assert.That(controller.Commit(),Is.True); yield return SettleContentPanel(); yield return RestartShell(); root=GameRoot.Instance;
+            Assert.That(root.Save.structureRuntime.ManaReserve,Is.EqualTo(mana)); before=File.ReadAllBytes(root.SaveService.SavePath);
+            controller.EnterEdit(); AssertInstanceCapacity(b,category,2); assigned=root.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.Where(x=>x.CategoryId==category).ToArray();
+            AssertReassignedIdentity(assigned.Single(x=>x.AssignmentId==first.AssignmentId),first,b.RoomInstanceId,new TileCoordinate(1,1));
+            AssertReassignedIdentity(assigned.Single(x=>x.AssignmentId==sibling.AssignmentId),sibling,b.RoomInstanceId,new TileCoordinate(2,1));
+            controller.TapWorld(ContentCell(b,1,1)); Assert.That(controller.UnassignSelectedContent(),Is.True); yield return SettleContentPanel(); Assert.That(controller.Discard(),Is.True); AssertCanonicalUnchanged(before,mana);
+            TestContext.WriteLine("MULTIPLICITY "+category+" paid twice, map selection, sibling isolation, free redeployment and matching-option map reassignment, recovery/save/reopen/discard");
+        }
+        [UnityTest] public IEnumerator RoomContentRepeatedTrapInstances() { yield return RepeatedContentProduction("placement.category.trap","placement.option.trap.spike",1920,1080,"content-multiplicity-traps.png"); }
+        [UnityTest] public IEnumerator RoomContentRepeatedLootInstances() { yield return RepeatedContentProduction("placement.category.loot_node","placement.option.loot_node.glittering_hoard",720,1280,"content-multiplicity-loot.png"); }
         private static void AssertReassignedIdentity(RoomContentAssignment actual, RoomContentAssignment original, string room, TileCoordinate local)
         {
             Assert.That(actual.AssignmentId,Is.EqualTo(original.AssignmentId));

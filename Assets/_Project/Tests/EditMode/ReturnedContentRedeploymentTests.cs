@@ -330,7 +330,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(root.BannerMessage, Is.EqualTo(content.GetString(DetachedCanonicalSpatialMutation.ReturnedItemMissingReason, "")));
                 Assert.That(root.BannerMessage, Does.Not.Contain("content.redeployment."));
                 foreach (string key in new[] { "ui.returned_content.empty", "ui.returned_content.selection", "ui.returned_content.next",
-                    "ui.returned_content.redeploy", "ui.returned_content.success", "ui.returned_content.same_option",
+                    "ui.returned_content.redeploy", "ui.returned_content.success",
                     DetachedCanonicalSpatialMutation.ReturnedItemMissingReason, DetachedCanonicalSpatialMutation.TargetRoomMissingReason })
                     Assert.That(content.GetString(key, ""), Is.Not.Empty);
             }
