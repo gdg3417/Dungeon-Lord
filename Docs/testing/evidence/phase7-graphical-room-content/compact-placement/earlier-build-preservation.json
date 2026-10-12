@@ -1,0 +1,9 @@
+{
+  "paths": [
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows",
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows-room-content-uat"
+  ],
+  "files": 606,
+  "before_inventory_sha256": "7697d88d8020004e6a6d3a8de819da6984b41dc36c5d008e573bf513ff1eb672",
+  "unchanged": true
+}

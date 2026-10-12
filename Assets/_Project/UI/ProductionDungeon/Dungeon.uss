@@ -124,3 +124,24 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .session-actions #edit { flex-grow: 1; }
 .modal { display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(6,11,17,0.97); justify-content: center; padding: 24px; }
 .modal-content { background-color: var(--panel); padding: 18px; max-height: 100%; border-width: 2px; border-color: var(--gold); }
+.content-card { min-width: 180px; max-width: 260px; flex-direction: column; align-items: flex-start; white-space: normal; }
+.content-card-icon { width: 48px; height: 48px; -unity-background-scale-mode: scale-to-fit; }
+.content-card Label { white-space: normal; }
+.placing-content .bottom-chrome { max-height: 54%; }
+.landscape.placing-content .bottom-chrome { max-height: 46%; }
+.landscape.placing-content .top-content { flex-direction: column; align-items: stretch; }
+.landscape.placing-content .hud { flex-basis: auto; min-width: 0; }
+.landscape.placing-content .top-chrome { padding-top: 0; padding-bottom: 0; }
+.landscape.placing-content .metric-card { flex-direction: row; padding-top: 0; padding-bottom: 0; margin-top: 0; margin-bottom: 0; }
+.landscape.placing-content .top-chrome Label { padding-top: 0; padding-bottom: 0; }
+.landscape.placing-content #navigation { flex-basis: auto; flex-wrap: nowrap; }
+.landscape.placing-content #mode { flex-basis: auto; }
+.landscape.placing-content #draftSummary { flex-basis: 38%; min-width: 0; }
+.landscape.placing-content #editActions { flex-basis: 38%; min-width: 0; flex-wrap: nowrap; }
+.landscape.placing-content .legacy { flex-basis: 20%; }
+.placing-content #contentCapacity, .placing-content #contentPlacementInfo { padding-top: 0; padding-bottom: 0; }
+#contentPlacementActions { flex-shrink: 0; flex-wrap: nowrap; }
+#contentPlacementActions > Button { flex-grow: 1; min-width: 0; }
+#contentBrowserSelector { flex-shrink: 0; }
+#contentBrowserSelector > Button { flex-grow: 1; }
+.content-card { flex-shrink: 0; }

@@ -11,8 +11,21 @@ namespace DungeonBuilder.M0.EditorTools
     public static class DungeonVisualBuildQualification
     {
         public static void BuildWindows()
+            => BuildWindowsAt("Builds/Development/Windows/Dungeon Lord.exe");
+        // Retain the owner's earlier qualified player while producing one correction build.
+        public static void BuildRoomContentUatWindows()
+            => BuildWindowsAt("Builds/Development/Windows-room-content-uat/Dungeon Lord.exe");
+        public static void BuildCompactPlacementWindows()
+            => BuildWindowsAt("Builds/Development/Windows-placement-compact/Dungeon Lord.exe");
+        public static void BuildMapReassignmentWindows()
+            => BuildWindowsAt("Builds/Development/Windows-map-reassignment/Dungeon Lord.exe");
+        public static void BuildLootReassignmentWindows()
+            => BuildWindowsAt("Builds/Development/Windows-loot-reassignment/Dungeon Lord.exe");
+        public static void BuildContentMultiplicityWindows()
+            => BuildWindowsAt("Builds/Development/Windows-content-multiplicity/Dungeon Lord.exe");
+        private static void BuildWindowsAt(string outputPath)
         {
-            DevelopmentBuildUtility.BuildWindowsDevelopment();
+            DevelopmentBuildUtility.BuildDevelopment(BuildTarget.StandaloneWindows64, outputPath);
             var report = BuildReport.GetLatestReport();
             if (report == null || report.summary.result != BuildResult.Succeeded)
                 throw new InvalidOperationException("production.dungeon.build_report_missing");
@@ -26,7 +39,7 @@ namespace DungeonBuilder.M0.EditorTools
                 .Distinct().OrderBy(p => p, StringComparer.Ordinal).ToArray();
             if (dependencies.Length == 0 || dependencies.Any(p => !packed.Contains(p)))
                 throw new InvalidOperationException("production.dungeon.packed_art_missing:" + string.Join(",", dependencies.Where(p => !packed.Contains(p))));
-            string folder = "Builds/Development/Windows";
+            string folder = Path.GetDirectoryName(outputPath);
             File.WriteAllLines(Path.Combine(folder, "packed-dungeon-art.txt"), dependencies);
             File.WriteAllLines(Path.Combine(folder, "packed-source-assets.txt"), packed);
             File.WriteAllLines(Path.Combine(folder, "build-messages.txt"), report.steps.SelectMany(s => s.messages)

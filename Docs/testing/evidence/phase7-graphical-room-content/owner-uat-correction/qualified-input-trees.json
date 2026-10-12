@@ -1,0 +1,28 @@
+{
+  "reviewed": "6afca9caa672f02eee03a2c0ec5fc09f43af1928",
+  "qualified_implementation": "344a5edcf540ee6c0ed81c63be723a5f6a0a784e",
+  "branch": "codex/phase7-graphical-room-content-management",
+  "trees": {
+    "Assets": "434174e39a86b20d85bbb49c6c4fdc8914cbb884",
+    "Packages": "e3fec9b0c4018adde155b4d8cd05cac3217df206",
+    "ProjectSettings": "c55e5632c33401052e04e4c9172dfadc312686f3",
+    "ContentAuthoring": "41a73986b5c781df4f2ad2ab83a6cd792d31a70c"
+  },
+  "changed_files": [
+    "Assets/_Project/Data/Bootstrap/string_table_en.json",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/DungeonVisualCatalogTests.cs",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs",
+    "Assets/_Project/Editor/DungeonVisualBuildQualification.cs",
+    "Assets/_Project/Scripts/UI/DungeonFloorWorldView.cs",
+    "Assets/_Project/Scripts/UI/ProductionDungeonComposition.cs",
+    "Assets/_Project/Scripts/UI/ProductionDungeonController.cs",
+    "Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs",
+    "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs",
+    "Assets/_Project/UI/ProductionDungeon/Dungeon.uss",
+    "Assets/_Project/UI/ProductionDungeon/Dungeon.uxml",
+    "Tools/Presentation/collect_room_content_uat_evidence.py"
+  ],
+  "save_schema": 13,
+  "draft_format": 5,
+  "draft_record_version": 4
+}

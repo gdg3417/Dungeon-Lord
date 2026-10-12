@@ -1,0 +1,8 @@
+# Actual production captures
+
+The two focused captures were visually inspected before complete qualification. Final PlayMode regenerates both; the evidence collector checks capture timestamps against that run and retains SHA-256 hashes. Final captures are reviewed again before the Windows build.
+
+- [Two Spike Traps, landscape 1920x1080](screenshots/content-multiplicity-traps.png): two separate trap sprites occupy different cells. Room 1 reads **2 / 2**. A third-copy preview has the localized category-full explanation and disabled Confirm. The draft quote is **40 mana** for two configured 20-mana purchases; canonical mana remains 900 before Save. Cancel, Save and Discard are reachable in the accepted compact landscape sheet.
+- [Two Glittering Hoards, portrait 720x1280](screenshots/content-multiplicity-loot.png): two separate Hoard sprites occupy different cells. Room 1 reads **2 / 2**, a third is rejected by capacity, and the draft quote is **50 mana** for two configured 25-mana purchases. Canonical mana remains 900 before Save. The warm transparent room grid and accepted bottom sheet are unchanged; actions remain reachable.
+
+The preceding 100-mana room construction was committed before these fixtures' preservation baselines; it is not part of either displayed content quote. Tests verify the intermediate 1/2 labels and later free returned redeployment/reassignment, recovery, Save/reopen and Discard. Captures illustrate presentation; identity, economics and simulation assertions provide the automated proof. Existing placeholder mappings are unchanged. No standalone runtime UAT is claimed from Editor screenshots.

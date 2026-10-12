@@ -1,0 +1,571 @@
+[
+  {
+    "path": "TestResults/room-content-focused-03.xml",
+    "sha256": "8c358d67664d26b80ace7b95560769b56340103b5afba8a016258fa58641bd0c",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "25",
+      "result": "Failed(Child)",
+      "total": "25",
+      "passed": "24",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 17:53:25Z",
+      "end-time": "2026-10-10 17:53:27Z",
+      "duration": "1.6704298"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.ExistingReturnedIdentityRedeploysOfflineWithoutCharge",
+        "message": "System.NullReferenceException : Object reference not set to an instance of an object",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.StructuralInvestment.Ids (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalSpatialSaveState state) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\StructuralInvestment.cs:24 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.StructuralInvestment.Zero (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalSpatialSaveState state) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\StructuralInvestment.cs:32 \n  at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Rebase (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalSpatialSaveState state) [0x00012] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1566 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomContentTests.ExistingReturnedIdentityRedeploysOfflineWithoutCharge () [0x0002d] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomContentTests.cs:106 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Corrected fixture to use its configured canonical unassignment authority",
+        "resolved_by": "room-content-focused-domain-08.xml"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "path": "TestResults/room-content-focused-domain-04.xml",
+    "sha256": "08c003a9a8c53ae0536343124f5163b638ac471a38870bf630a2da6e25043527",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "218",
+      "result": "Failed(Child)",
+      "total": "218",
+      "passed": "208",
+      "failed": "10",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 17:59:21Z",
+      "end-time": "2026-10-10 17:59:38Z",
+      "duration": "17.6701032"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.ConstructionRecordBindingsAndPredecessorCorruptionFailClosed(\"context\")",
+        "message": "System.ArgumentException : Value does not fall within the expected range.",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftFormat.Exact[T] (System.Byte[] bytes) [0x00034] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftFormat.cs:81 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomConstructionTests.ConstructionRecordBindingsAndPredecessorCorruptionFailClosed (System.String corruption) [0x00140] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomConstructionTests.cs:388 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Preserved corruption fixtures using exact frozen historical DTOs without weakening production validation",
+        "resolved_by": "room-content-focused-domain-05.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.ConstructionRecordBindingsAndPredecessorCorruptionFailClosed(\"downgrade\")",
+        "message": "System.ArgumentException : Value does not fall within the expected range.",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftFormat.Exact[T] (System.Byte[] bytes) [0x00034] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftFormat.cs:81 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomConstructionTests.ConstructionRecordBindingsAndPredecessorCorruptionFailClosed (System.String corruption) [0x00140] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomConstructionTests.cs:388 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Preserved corruption fixtures using exact frozen historical DTOs without weakening production validation",
+        "resolved_by": "room-content-focused-domain-05.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.ConstructionRecordBindingsAndPredecessorCorruptionFailClosed(\"predecessor\")",
+        "message": "System.ArgumentException : Value does not fall within the expected range.",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftFormat.Exact[T] (System.Byte[] bytes) [0x00034] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftFormat.cs:81 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomConstructionTests.ConstructionRecordBindingsAndPredecessorCorruptionFailClosed (System.String corruption) [0x00140] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomConstructionTests.cs:388 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Preserved corruption fixtures using exact frozen historical DTOs without weakening production validation",
+        "resolved_by": "room-content-focused-domain-05.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.ConstructionRecordBindingsAndPredecessorCorruptionFailClosed(\"duplicate\")",
+        "message": "System.ArgumentException : Value does not fall within the expected range.",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftFormat.Exact[T] (System.Byte[] bytes) [0x00034] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftFormat.cs:81 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomConstructionTests.ConstructionRecordBindingsAndPredecessorCorruptionFailClosed (System.String corruption) [0x00140] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomConstructionTests.cs:388 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Preserved corruption fixtures using exact frozen historical DTOs without weakening production validation",
+        "resolved_by": "room-content-focused-domain-05.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.MalformedConstructionPayloadRecoveryFailsClosed(\"duplicate\")",
+        "message": "System.ArgumentException : Value does not fall within the expected range.",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Command.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftCommand value) [0x00020] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:20 \n  at System.Linq.Enumerable+SelectArrayIterator`2[TSource,TResult].ToArray () [0x00012] in <6faa6124236442759eb396cfbfdad508>:0 \n  at System.Linq.Enumerable.ToArray[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0001f] in <6faa6124236442759eb396cfbfdad508>:0 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Journal.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal value) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:36 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftFormat.Encode (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal journal) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftFormat.cs:67 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomConstructionTests.MalformedConstructionPayloadRecoveryFailsClosed (System.String shape) [0x0012a] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomConstructionTests.cs:290 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Preserved corruption fixtures using exact frozen historical DTOs without weakening production validation",
+        "resolved_by": "room-content-focused-domain-05.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.MalformedConstructionPayloadRecoveryFailsClosed(\"empty\")",
+        "message": "System.ArgumentException : Value does not fall within the expected range.",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Command.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftCommand value) [0x00020] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:20 \n  at System.Linq.Enumerable+SelectArrayIterator`2[TSource,TResult].ToArray () [0x00012] in <6faa6124236442759eb396cfbfdad508>:0 \n  at System.Linq.Enumerable.ToArray[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0001f] in <6faa6124236442759eb396cfbfdad508>:0 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Journal.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal value) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:36 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftFormat.Encode (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal journal) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftFormat.cs:67 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomConstructionTests.MalformedConstructionPayloadRecoveryFailsClosed (System.String shape) [0x0012a] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomConstructionTests.cs:290 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Preserved corruption fixtures using exact frozen historical DTOs without weakening production validation",
+        "resolved_by": "room-content-focused-domain-05.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.MalformedConstructionPayloadRecoveryFailsClosed(\"cancel_payload\")",
+        "message": "System.ArgumentException : Value does not fall within the expected range.",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Command.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftCommand value) [0x00020] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:20 \n  at System.Linq.Enumerable+SelectArrayIterator`2[TSource,TResult].ToArray () [0x00012] in <6faa6124236442759eb396cfbfdad508>:0 \n  at System.Linq.Enumerable.ToArray[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0001f] in <6faa6124236442759eb396cfbfdad508>:0 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Journal.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal value) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:36 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftFormat.Encode (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal journal) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftFormat.cs:67 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomConstructionTests.MalformedConstructionPayloadRecoveryFailsClosed (System.String shape) [0x0012a] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomConstructionTests.cs:290 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Preserved corruption fixtures using exact frozen historical DTOs without weakening production validation",
+        "resolved_by": "room-content-focused-domain-05.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.MalformedConstructionPayloadRecoveryFailsClosed(\"extra_kind\")",
+        "message": "System.ArgumentException : Value does not fall within the expected range.",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Command.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftCommand value) [0x00020] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:20 \n  at System.Linq.Enumerable+SelectArrayIterator`2[TSource,TResult].ToArray () [0x00012] in <6faa6124236442759eb396cfbfdad508>:0 \n  at System.Linq.Enumerable.ToArray[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0001f] in <6faa6124236442759eb396cfbfdad508>:0 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Journal.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal value) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:36 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftFormat.Encode (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal journal) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftFormat.cs:67 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomConstructionTests.MalformedConstructionPayloadRecoveryFailsClosed (System.String shape) [0x0012a] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomConstructionTests.cs:290 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Preserved corruption fixtures using exact frozen historical DTOs without weakening production validation",
+        "resolved_by": "room-content-focused-domain-05.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.MalformedConstructionPayloadRecoveryFailsClosed(\"missing_point\")",
+        "message": "System.ArgumentException : Value does not fall within the expected range.",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Command.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftCommand value) [0x00020] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:20 \n  at System.Linq.Enumerable+SelectArrayIterator`2[TSource,TResult].ToArray () [0x00012] in <6faa6124236442759eb396cfbfdad508>:0 \n  at System.Linq.Enumerable.ToArray[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0001f] in <6faa6124236442759eb396cfbfdad508>:0 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Journal.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal value) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:36 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftFormat.Encode (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal journal) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftFormat.cs:67 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomConstructionTests.MalformedConstructionPayloadRecoveryFailsClosed (System.String shape) [0x0012a] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomConstructionTests.cs:290 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Preserved corruption fixtures using exact frozen historical DTOs without weakening production validation",
+        "resolved_by": "room-content-focused-domain-05.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomConstruction.MalformedConstructionPayloadRecoveryFailsClosed(\"bad_id\")",
+        "message": "System.ArgumentException : Value does not fall within the expected range.",
+        "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Command.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftCommand value) [0x00020] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:20 \n  at System.Linq.Enumerable+SelectArrayIterator`2[TSource,TResult].ToArray () [0x00012] in <6faa6124236442759eb396cfbfdad508>:0 \n  at System.Linq.Enumerable.ToArray[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0001f] in <6faa6124236442759eb396cfbfdad508>:0 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftV4Journal.From (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal value) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftHistoricalFormat4.cs:36 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftFormat.Encode (DungeonBuilder.M0.Gameplay.DungeonSpatial.DungeonDraftJournal journal) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\DungeonDraftFormat.cs:67 \n  at DungeonBuilder.M0.Tests.EditMode.TransactionalRoomConstructionTests.MalformedConstructionPayloadRecoveryFailsClosed (System.String shape) [0x0012a] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\TransactionalRoomConstructionTests.cs:290 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 ",
+        "disposition": "Preserved corruption fixtures using exact frozen historical DTOs without weakening production validation",
+        "resolved_by": "room-content-focused-domain-05.xml"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "path": "TestResults/room-content-focused-domain-05.xml",
+    "sha256": "1463f38822b9b79c5ccf19076f9c3ec71249deb9e96376012c400f3d6f146344",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "40",
+      "result": "Passed",
+      "total": "40",
+      "passed": "40",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 18:08:34Z",
+      "end-time": "2026-10-10 18:08:37Z",
+      "duration": "2.9106229"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "path": "TestResults/room-content-focused-domain-08.xml",
+    "sha256": "5c02f6ad80aaa1cd445a8d0250b5c561154907303740a02bd026e8f9728343a9",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "128",
+      "result": "Passed",
+      "total": "128",
+      "passed": "128",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 18:21:09Z",
+      "end-time": "2026-10-10 18:21:21Z",
+      "duration": "11.8412492"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "path": "TestResults/room-content-focused-label-10.xml",
+    "sha256": "aee509366eea98f5efbb95804f84ef799af6b3a845936040ed0351625805b599",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Passed",
+      "total": "1",
+      "passed": "1",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 18:54:48Z",
+      "end-time": "2026-10-10 18:54:50Z",
+      "duration": "1.8159563"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "path": "TestResults/room-content-focused-snapshot-11.xml",
+    "sha256": "5d6e8198ce2eecfaf5e57f13f8685d04d5816fca504fcffd9ddff67ea1b89994",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "35",
+      "result": "Passed",
+      "total": "35",
+      "passed": "35",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 19:12:41Z",
+      "end-time": "2026-10-10 19:12:43Z",
+      "duration": "2.4195542"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "path": "TestResults/room-content-focused-ui-06.xml",
+    "sha256": "533a5abd629e18575e5f6f7119440844724e7bdcaddfc7baacb439b841d0a045",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "2",
+      "result": "Passed",
+      "total": "2",
+      "passed": "2",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 18:15:19Z",
+      "end-time": "2026-10-10 18:15:23Z",
+      "duration": "3.8531169"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "path": "TestResults/room-content-focused-ui-07.xml",
+    "sha256": "bdb7658e59c89c0797e6274403fe33bd8c49d8c124075f930baa6fb8cf2942ce",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "37",
+      "result": "Failed(Child)",
+      "total": "37",
+      "passed": "34",
+      "failed": "3",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 18:17:23Z",
+      "end-time": "2026-10-10 18:18:13Z",
+      "duration": "50.8955803"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellExplicitDeleteQuiescenceAndFreshBoot",
+        "message": "  Expected: 1\n  But was:  0\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<ExplicitDeleteShell>d__30.MoveNext () [0x00223] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:834\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+        "disposition": "Older movement journeys now explicitly confirm their previews; lifecycle and durability assertions retained",
+        "resolved_by": "room-content-focused-ui-09.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellFailedExplicitDeleteQuiescence",
+        "message": "  Expected: 1\n  But was:  0\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<ExplicitDeleteShell>d__30.MoveNext () [0x00223] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:834\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+        "disposition": "Older movement journeys now explicitly confirm their previews; lifecycle and durability assertions retained",
+        "resolved_by": "room-content-focused-ui-09.xml"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.ProductionShellSelectionPreviewLifetime",
+        "message": "  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<SelectionCloseEmptyTapFloorDiscardAndCommitClearPreview>d__36.MoveNext () [0x00490] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1076\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+        "disposition": "Older movement journeys now explicitly confirm their previews; lifecycle and durability assertions retained",
+        "resolved_by": "room-content-focused-ui-09.xml"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "path": "TestResults/room-content-focused-ui-09.xml",
+    "sha256": "ed35a66d9a0f03d0c00a32d4a90fa80737ac819340ece449444248f81cdcf45c",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "38",
+      "result": "Passed",
+      "total": "38",
+      "passed": "38",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 18:22:15Z",
+      "end-time": "2026-10-10 18:23:08Z",
+      "duration": "52.9095356"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "path": "TestResults/room-content-full-editmode.xml",
+    "sha256": "115f4cebf020d9805d79336d59ea46b0a9d2b6f4e273b3ede9d56c2b0893e04a",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "1659",
+      "result": "Skipped:Ignored",
+      "total": "1659",
+      "passed": "1658",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 19:22:28Z",
+      "end-time": "2026-10-10 19:22:48Z",
+      "duration": "19.8147615"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ]
+  },
+  {
+    "path": "TestResults/room-content-full-playmode.xml",
+    "sha256": "719c27fe1e884e1258d04f8ed8494f1901af05728aa9dc4e41b552d80e6fbfed",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "3095",
+      "result": "Skipped:Ignored",
+      "total": "3095",
+      "passed": "3085",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 19:24:27Z",
+      "end-time": "2026-10-10 19:28:41Z",
+      "duration": "253.4708666"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ]
+  },
+  {
+    "path": "TestResults/room-content-initial-full-editmode.xml",
+    "sha256": "dd80e7d5ac460d516539e923abbb0dfc679391f329fb4dcbf8fea1a84f07918a",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "1658",
+      "result": "Skipped:Ignored",
+      "total": "1658",
+      "passed": "1657",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 18:34:56Z",
+      "end-time": "2026-10-10 18:35:16Z",
+      "duration": "19.7421193"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ]
+  },
+  {
+    "path": "TestResults/room-content-initial-full-playmode.xml",
+    "sha256": "e601d979062f70d56a0b5410114e9ff9464e0884c9c4e10127589337c4053a0b",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "3094",
+      "result": "Skipped:Ignored",
+      "total": "3094",
+      "passed": "3084",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 18:36:06Z",
+      "end-time": "2026-10-10 18:40:20Z",
+      "duration": "253.3664727"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ]
+  },
+  {
+    "path": "TestResults/room-content-label-full-editmode.xml",
+    "sha256": "af76335a20d27313cc5a5b6712b8a430508f86e78b3365625db746ed97f1984a",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "1658",
+      "result": "Skipped:Ignored",
+      "total": "1658",
+      "passed": "1657",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 19:04:32Z",
+      "end-time": "2026-10-10 19:04:52Z",
+      "duration": "19.8138774"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ]
+  },
+  {
+    "path": "TestResults/room-content-label-full-playmode.xml",
+    "sha256": "4540c34f3688e4081eb08736a2e23512fc02f7019a88f1f723d528b5003fbc7f",
+    "run_attributes": {
+      "id": "2",
+      "testcasecount": "3094",
+      "result": "Skipped:Ignored",
+      "total": "3094",
+      "passed": "3084",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-10 19:06:18Z",
+      "end-time": "2026-10-10 19:10:31Z",
+      "duration": "252.7899303"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ]
+  }
+]

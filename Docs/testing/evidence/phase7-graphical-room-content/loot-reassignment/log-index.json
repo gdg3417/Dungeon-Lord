@@ -1,0 +1,51 @@
+[
+  {
+    "path": "loot-reassignment-focused-exact.log",
+    "sha256": "e2841c297632158ed59fc4bd0a746d6c5c41ad176e3103d9775cecf2ba7a79fe",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "loot-reassignment-focused-exact02.log",
+    "sha256": "a8140918dc0f743c843a66d9d77f55ce03476b4ddf2f14b3bbaa4be8135e696c",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "loot-reassignment-focused.log",
+    "sha256": "0d365ea2af41bdb174f170e2071b503ee68b39986cee49f17f8672074858f010",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "loot-reassignment-full-editmode.log",
+    "sha256": "a404f9ba7724e9805b487dda886321f393f07eff79d7e91422923912a64e599b",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "loot-reassignment-full-playmode.log",
+    "sha256": "c33913e5924b81a24833e7a088dee213d3612d0bb9fa3f6dc86d4734dcf740b1",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "loot-reassignment-red.log",
+    "sha256": "c28154d93287f36e9280fd190708e505dd3a56dfc31001d0c17abf8bbaf85ce6",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "loot-reassignment-windows-build.log",
+    "sha256": "5d8d9f6e4bf6e42e9d84e20ed40e5ec5d4d74b7d22b90acb640b6c0b3afc051a",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  }
+]

@@ -1,0 +1,208 @@
+[
+  {
+    "path": "map-reassignment-focused-01.xml",
+    "sha256": "f48379d4f1e81648714408872e90f9db4014242ed02d904a5e03e88036a9f05e",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "47",
+      "result": "Passed",
+      "total": "47",
+      "passed": "47",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-11 18:15:28Z",
+      "end-time": "2026-10-11 18:16:12Z",
+      "duration": "44.6969223"
+    },
+    "failures": [],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentCapacity",
+        "output": "Isolated scene boot 1: phase7a4-scene-c0b32204950f4a798fe91763ce21afc7.json\n[2026-10-11 18:16:03 UTC] [INFO] Entered BootState.\n[2026-10-11 18:16:03 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 18:16:03 UTC] [INFO] M0 init complete.\n[2026-10-11 18:16:03 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 18:16:03 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentCategories",
+        "output": "Isolated scene boot 1: phase7a4-scene-784a51c1af284cd09d588960ef8bf489.json\n[2026-10-11 18:16:04 UTC] [INFO] Entered BootState.\n[2026-10-11 18:16:04 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 18:16:04 UTC] [INFO] M0 init complete.\n[2026-10-11 18:16:04 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 18:16:04 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMAP REASSIGN placement.category.monster identity/sequence preserved; one acknowledged command; no reacquisition\nMAP REASSIGN placement.category.trap identity/sequence preserved; one acknowledged command; no reacquisition\nMAP REASSIGN placement.category.loot_node identity/sequence preserved; one acknowledged command; no reacquisition\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentInput",
+        "output": "Isolated scene boot 1: phase7a4-scene-2dadc22f73d14a448487dd173d3a769e.json\n[2026-10-11 18:16:05 UTC] [INFO] Entered BootState.\n[2026-10-11 18:16:05 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 18:16:05 UTC] [INFO] M0 init complete.\n[2026-10-11 18:16:05 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 18:16:05 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMAP REASSIGN production mouse/touch, preview-only destination tap, touch Confirm, restart recovery and Discard passed\n"
+      }
+    ]
+  },
+  {
+    "path": "map-reassignment-full-editmode.xml",
+    "sha256": "de341fa0022fb6d5b47783b276608fd3ebb6c85a8517542023dd94049b8af346",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1672",
+      "result": "Skipped:Ignored",
+      "total": "1672",
+      "passed": "1671",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-11 18:26:48Z",
+      "end-time": "2026-10-11 18:27:07Z",
+      "duration": "19.7139817"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentCapacityMoveOwnedAndDiscard",
+        "output": "Isolated scene boot 1: phase7a4-scene-b1303d0393ea4eb8b05f2a99aac58b59.json\n[2026-10-11 18:24:54 UTC] [INFO] Entered BootState.\n[2026-10-11 18:24:54 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 18:24:54 UTC] [INFO] M0 init complete.\n[2026-10-11 18:24:54 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 18:24:54 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentCategoriesInvalidRetryAndSave",
+        "output": "Isolated scene boot 1: phase7a4-scene-b0561f5b57a749c881eeb6f1e9e4ae59.json\n[2026-10-11 18:24:59 UTC] [INFO] Entered BootState.\n[2026-10-11 18:25:00 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 18:25:00 UTC] [INFO] M0 init complete.\n[2026-10-11 18:25:00 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 18:25:00 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMAP REASSIGN placement.category.monster identity/sequence preserved; one acknowledged command; no reacquisition\nMAP REASSIGN placement.category.trap identity/sequence preserved; one acknowledged command; no reacquisition\nMAP REASSIGN placement.category.loot_node identity/sequence preserved; one acknowledged command; no reacquisition\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentProductionMouseTouchRecovery",
+        "output": "Isolated scene boot 1: phase7a4-scene-23ce2d80b5cb4afaa90b70fdc7d3b570.json\n[2026-10-11 18:25:05 UTC] [INFO] Entered BootState.\n[2026-10-11 18:25:05 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 18:25:05 UTC] [INFO] M0 init complete.\n[2026-10-11 18:25:05 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 18:25:06 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMAP REASSIGN production mouse/touch, preview-only destination tap, touch Confirm, restart recovery and Discard passed\n"
+      }
+    ]
+  },
+  {
+    "path": "map-reassignment-full-playmode.xml",
+    "sha256": "0f06170e900435d72feb7dfcb2cca88a1aef5e11ecc73208b3f93446b435a7fd",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3103",
+      "result": "Skipped:Ignored",
+      "total": "3103",
+      "passed": "3093",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-11 18:28:21Z",
+      "end-time": "2026-10-11 18:33:18Z",
+      "duration": "297.2858396"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentCapacity",
+        "output": "Isolated scene boot 1: phase7a4-scene-bd4730ab28b3400ea3bc9429f017b48e.json\n[2026-10-11 18:32:53 UTC] [INFO] Entered BootState.\n[2026-10-11 18:32:53 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 18:32:53 UTC] [INFO] M0 init complete.\n[2026-10-11 18:32:53 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 18:32:53 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentCategories",
+        "output": "Isolated scene boot 1: phase7a4-scene-6f8d65bc2d0745e39fdd092200292727.json\n[2026-10-11 18:32:54 UTC] [INFO] Entered BootState.\n[2026-10-11 18:32:54 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 18:32:54 UTC] [INFO] M0 init complete.\n[2026-10-11 18:32:54 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 18:32:54 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMAP REASSIGN placement.category.monster identity/sequence preserved; one acknowledged command; no reacquisition\nMAP REASSIGN placement.category.trap identity/sequence preserved; one acknowledged command; no reacquisition\nMAP REASSIGN placement.category.loot_node identity/sequence preserved; one acknowledged command; no reacquisition\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentInput",
+        "output": "Isolated scene boot 1: phase7a4-scene-dda63b00ed224063a8c0c755b4d382ef.json\n[2026-10-11 18:32:56 UTC] [INFO] Entered BootState.\n[2026-10-11 18:32:56 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 18:32:56 UTC] [INFO] M0 init complete.\n[2026-10-11 18:32:56 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 18:32:56 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nMAP REASSIGN production mouse/touch, preview-only destination tap, touch Confirm, restart recovery and Discard passed\n"
+      }
+    ]
+  },
+  {
+    "path": "map-reassignment-red.xml",
+    "sha256": "0e1a685c772a94fe72f6ad7a6da411ac9c1d2f8f63a85f959375667be70f19d2",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3",
+      "result": "Failed(Child)",
+      "total": "3",
+      "passed": "0",
+      "failed": "3",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-11 17:51:59Z",
+      "end-time": "2026-10-11 17:52:03Z",
+      "duration": "4.5820804"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentCapacity",
+        "message": "  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMapReassignmentCapacityMoveOwnedAndDiscard>d__73.MoveNext () [0x00299] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:157\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentCategories",
+        "message": "  Invalid map tap must preserve pending reassignment\n  Expected: \"placement.category.monster\"\n  But was:  null\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMapReassignmentCategoriesInvalidRetryAndSave>d__72.MoveNext () [0x003ed] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:95\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentInput",
+        "message": "  Actual production mouse destination tap\n  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMapReassignmentProductionMouseTouchRecovery>d__74.MoveNext () [0x0037c] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:195\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentCapacity",
+        "output": "Isolated scene boot 1: phase7a4-scene-8bc04c339985408abfb984d51b9aae9f.json\n[2026-10-11 17:51:59 UTC] [INFO] Entered BootState.\n[2026-10-11 17:52:00 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 17:52:00 UTC] [INFO] M0 init complete.\n[2026-10-11 17:52:00 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 17:52:00 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentCategories",
+        "output": "Isolated scene boot 1: phase7a4-scene-28f6b0194ac0434180066aafc98f9a7f.json\n[2026-10-11 17:52:01 UTC] [INFO] Entered BootState.\n[2026-10-11 17:52:01 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 17:52:01 UTC] [INFO] M0 init complete.\n[2026-10-11 17:52:01 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 17:52:01 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentInput",
+        "output": "Isolated scene boot 1: phase7a4-scene-1eff07c99f1f454b8d2ef186543def57.json\n[2026-10-11 17:52:02 UTC] [INFO] Entered BootState.\n[2026-10-11 17:52:02 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 17:52:02 UTC] [INFO] M0 init complete.\n[2026-10-11 17:52:02 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 17:52:02 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nSaving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  }
+]

@@ -1,0 +1,100 @@
+[
+  {
+    "path": "placement-compact-focused-01.log",
+    "sha256": "f8d757d13a2ee6259220d7b1b8483854e9b94b594fdd446a8cbace0f9de50933",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-focused-02.log",
+    "sha256": "b88376b8ca268377efee447592bfafdbd0cf8ff9c28a062ac15a0bf6ef5d602a",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-focused-03.log",
+    "sha256": "c6044de913f4bee5b6459a6f4e67b31439c5dc6a0b6bba0974f1167b8b4d6f64",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-focused-04.log",
+    "sha256": "d5097e365957ed09c552ad6621df1c7b64647600554f6e53677d9eb275e7236f",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-focused-05.log",
+    "sha256": "23cad6eb6a650cd534d94bcbd75c543a6233eeae5af139435b71752e9cbd1e70",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-focused-06.log",
+    "sha256": "58dc16e2c2c4c506a7fe9187306e55636da73271d4b0b163eb182448c20f93bf",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-focused-07.log",
+    "sha256": "ade281b3805c170683f585d0d1c966dc10a29fa48e3cc68312d80842a6471c10",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-focused-08.log",
+    "sha256": "c98bb3c25bce3e9caee6753452aa35209ccf018bf6a43598d7e1f2a233dc2fd3",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-focused-09.log",
+    "sha256": "d830bb4f4393739445dd3a86486d9412d1f8efebc97482c4ebec5250729004a0",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-focused-10.log",
+    "sha256": "5d9894114f2cf6cc6eefd5a250d4a79e3b72c5579de875248a8d9cbfdff06bb0",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-focused-11.log",
+    "sha256": "b7c9b665f588106eaf5e209166a819ed0fdbe2e5ee5afc03f7cbedbc077837e6",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-full-editmode.log",
+    "sha256": "a1a49ca04cd8c7bb21856f22b5dac5f2d494478c61e9852a1b2fda20dbd3d432",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-full-playmode.log",
+    "sha256": "04eb35bb091b2ff401486655751710ce126809381388c3a34ff910e504b204d4",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "placement-compact-windows-build.log",
+    "sha256": "d9f3f299745364494bad0fd6301aacb2dd004ab49d5c2317cfe8993ca23166e0",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  }
+]

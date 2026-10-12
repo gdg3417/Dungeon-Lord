@@ -1,0 +1,12 @@
+[
+  {
+    "path": "screenshots/loot-reassignment-duplicate.png",
+    "sha256": "d878492c7a674aaec592357b4d123049589650b02c4d0060da33a9863bb73b2f",
+    "bytes": 597257
+  },
+  {
+    "path": "screenshots/loot-reassignment-sequential.png",
+    "sha256": "30e09886d4e4d9e203674833026a2a821b1b29df018947cb1a486e266cc97eff",
+    "bytes": 516452
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "repository": "gdg3417/Dungeon-Lord",
+  "baseline": "5932a9fe0b7cec87c81f09e8e7d619df62c53101",
+  "dependency_pr": "https://github.com/gdg3417/Dungeon-Lord/pull/230",
+  "merged": true,
+  "merged_at": "2026-10-10T17:19:47Z",
+  "dependency_head": "66ca6ee3ae20b46def35e26aabc9e0cd1c293d5d",
+  "origin_main_reverified": "5932a9fe0b7cec87c81f09e8e7d619df62c53101",
+  "corrected_branch": "codex/phase7-graphical-room-content-management",
+  "qualified_implementation": "916fc1625c17344b895613e62c597059a01f4cc1"
+}

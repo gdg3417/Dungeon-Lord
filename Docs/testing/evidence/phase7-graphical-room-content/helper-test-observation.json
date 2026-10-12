@@ -1,0 +1,30 @@
+{
+  "source_sha256": "9884a2648063e17504955d893dada410b7b4d46b294e067be30fa8566fb7b5e4",
+  "cases": [
+    "test_allowed_transforms_and_wrong_namespace",
+    "test_changed_required_target_fails",
+    "test_clean_and_untracked_inputs_accepted",
+    "test_missing_required_target_fails",
+    "test_missing_tracked_source_fails_closed",
+    "test_redirected_input_descendant_rejected",
+    "test_redirected_target_rejected",
+    "test_repeat_is_idempotent_and_leaves_generated_library_alone",
+    "test_stale_removed_art_and_metadata_rejected",
+    "test_stale_removed_script_rejected_before_copy",
+    "test_target_only_in_each_input_root_fails_even_generated_meta",
+    "test_unsafe_paths_rejected_and_unrelated_unchanged"
+  ],
+  "command": "python -m unittest discover -s Tools/Presentation -p test_qualification_inputs.py",
+  "sandbox_attempt": {
+    "tests": 12,
+    "setup_cleanup_errors": 24,
+    "reason": "Windows sandbox temporary-directory Git setup and cleanup permission failures"
+  },
+  "unrestricted_rerun": {
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0
+  },
+  "evidence": "Observed terminal tool results; helper implementation unchanged"
+}

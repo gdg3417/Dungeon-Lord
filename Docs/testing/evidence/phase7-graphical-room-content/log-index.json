@@ -1,0 +1,130 @@
+[
+  {
+    "path": "Temp/room-content-focused-01.log",
+    "sha256": "1f33bbb60590ea23b4f383cf51b64b5fa5206c518dfb1965b915e97dec531e6a",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-focused-02.log",
+    "sha256": "b381d3186617f02f88e3dc4184ffe04165200c692598b0ffc592949c88cc6bd7",
+    "redactions": 0,
+    "compiler_errors": [
+      "Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\TransactionalDungeonDraft.cs(262,21): error CS0136: A local or parameter named 'preview' cannot be declared in this scope because that name is used in an enclosing local scope to define a local or parameter"
+    ],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-focused-03.log",
+    "sha256": "3f475af025eeb86ab57cfa2b4ef62cd470a5e9a003a2ea32915564cd4522f800",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-focused-domain-04.log",
+    "sha256": "96d8a995687ef61b62865fb45cfbbe01a82d3893578fbdacae589c83cddbb6de",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-focused-domain-05.log",
+    "sha256": "fb4ca1c4daf7e9a6a6a83237381852023af0ad3503d1b3e9451d6e5ad3c138a0",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-focused-domain-08.log",
+    "sha256": "df375772a180d820c41fcf79acc229ef6abb6ddd1290ce23a71233bc3c94c931",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-focused-label-10.log",
+    "sha256": "8e40d04bd478e04d85b39b0de4283b4e95a37a1a4ed7e7dab17e72293ee99f2a",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-focused-snapshot-11.log",
+    "sha256": "260411f56683d4ac73cf7b4fd4b07a9928353ea6db1e7473c0faf43a8eb4407b",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-focused-ui-06.log",
+    "sha256": "72a4b929a87a1a351215476e91a54fb0e737180b883dc821cab1e6f671f4ae86",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-focused-ui-07.log",
+    "sha256": "fe545cf96dfbad1be38d1933411a83426e5c698baeb718c282bac1fd79a1743e",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-focused-ui-09.log",
+    "sha256": "6a4c30ae7198fe4dcde948dc125a329bef7bdce8f6ac2499bcabfb2b8855c905",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-full-editmode.log",
+    "sha256": "ac08e39fca43240c766000e906189beec87cd9d6e7e2d23b72b7212494a247a8",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-full-playmode.log",
+    "sha256": "2374e545bbdafe0aa304eb9b6dfe609ebe043ab6add1ba5ad3927577763640dc",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-initial-full-editmode.log",
+    "sha256": "9ed59a71a1480e194c539da9ce7691af47b08b12e3b0628f3762d58860b3dc38",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-initial-full-playmode.log",
+    "sha256": "a00e4f6351abaacb5e78e728efabdffcc7c4fcf29d109e785b87c1815938bd85",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-label-full-editmode.log",
+    "sha256": "3bf1327851e4a3f4b353c67520785d1ce51747f8aa031536a4c7c398958fb52f",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-label-full-playmode.log",
+    "sha256": "8686a2bfff0dfb0d0553130ac7c280ae17406eda72254e952992ef9afb8a8cd8",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "Temp/room-content-windows-build.log",
+    "sha256": "7ca7d0cbccfeed2588e7b2f107c12c4014d92353eefd03a6ed73491cf428c6a1",
+    "redactions": 0,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  }
+]

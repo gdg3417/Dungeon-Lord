@@ -1,0 +1,20 @@
+[
+  {
+    "mode": "editmode",
+    "removed": [],
+    "added": [
+      "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentCompactAcquisitionOwnedReassignAndOverflow",
+      "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentCompactMoveAllCategoriesAndDraftCosts"
+    ],
+    "changed": []
+  },
+  {
+    "mode": "playmode",
+    "removed": [],
+    "added": [
+      "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentCompactMove",
+      "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentCompactPlacementAndOverflow"
+    ],
+    "changed": []
+  }
+]

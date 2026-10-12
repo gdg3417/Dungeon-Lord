@@ -1,0 +1,51 @@
+[
+  {
+    "path": "room-content-uat-focused-01.log",
+    "sha256": "fbfa006cf0bcde2073ff3521a71206c1dc0d8158fe02877d8ec125369c05f63b",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "room-content-uat-focused-02.log",
+    "sha256": "efb1ecb0f12a72b59b165ebae7763029d996416d32fad459e39d77bfeeae8b17",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "room-content-uat-focused-03.log",
+    "sha256": "59085a36f8e68cde2be860cf35be2c5c89758c3cd7a9be8cdc58d96b53ff7db2",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "room-content-uat-focused-04.log",
+    "sha256": "355814c9d8f5437c507f221bf62f6ca06ddb915c91c87f1fdaa2f0b1c989d621",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "room-content-uat-full-editmode.log",
+    "sha256": "e86ee0efdc4c5472cee8196812cb73d01d3f8381d508f3635c74f80efa2fccce",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "room-content-uat-full-playmode.log",
+    "sha256": "738259d6eacc40f76a9b9aadb36e008b6ab7b2243f1357e045f8c22faddb0f59",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "room-content-uat-windows-build.log",
+    "sha256": "5f0c0d0bf552a90c04cc54e13e365917bbf8d2491b805c221efa68b206af0aa1",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  }
+]

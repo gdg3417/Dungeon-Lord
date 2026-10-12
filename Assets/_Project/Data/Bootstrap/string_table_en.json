@@ -20,7 +20,7 @@
     {"key": "ui.dungeon.route.ready", "text": "Ready"},
     {"key": "ui.dungeon.route.incomplete", "text": "Incomplete"},
     {"key": "ui.dungeon.room.info", "text": "Monsters: {0} / {1}\nTraps: {2} / {3}\nLoot: {4} / {5}"},
-    {"key": "ui.dungeon.content.info", "text": "Room: {0}\nRoom-local tile: {1}, {2}"},
+    {"key": "ui.dungeon.content.info", "text": "Room: {0}"},
     {"key": "ui.dungeon.sheet.inspection", "text": "Selected Object"},
     {"key": "ui.dungeon.sheet.edit", "text": "Edit · Choose a Category"},
     {"key": "ui.dungeon.sheet.placement", "text": "Edit · Place Room"},
@@ -401,10 +401,6 @@
     {
       "key": "ui.returned_content.success",
       "text": "Owned content redeployed into the selected room."
-    },
-    {
-      "key": "ui.returned_content.same_option",
-      "text": "This room already contains that content. The returned item remains in custody."
     },
     {
       "key": "ui.loading.boot",
@@ -3735,6 +3731,35 @@
     {"key": "ui.dungeon.construction.correct", "text": "Correct placement: {0}"},
     {"key": "ui.dungeon.construction.review", "text": "New rooms in the final draft: {0}."},
     {"key": "ui.dungeon.details.expand", "text": "Expand Details"},
-    {"key": "ui.dungeon.details.collapse", "text": "Collapse Details"}
+    {"key": "ui.dungeon.details.collapse", "text": "Collapse Details"},
+    {"key": "ui.dungeon.content.room_required", "text": "Select a constructed room to manage its contents."},
+    {"key": "ui.dungeon.content.choose", "text": "Choose New to purchase content or Owned to redeploy returned content."},
+    {"key": "ui.dungeon.content.position_hint", "text": "Tap a room cell to preview placement. Confirm Placement adds it to the draft."},
+    {"key": "ui.dungeon.content.destination_hint", "text": "Tap another room on this floor or choose a destination below, then preview a position."},
+    {"key": "ui.dungeon.content.destination_invalid", "text": "Choose a different constructed room. Your content remains selected."},
+    {"key": "ui.dungeon.content.category_full", "text": "This room is full for this category. Choose another room or unassign content."},
+    {"key": "ui.dungeon.content.position_blocked", "text": "That cell cannot hold this content. Choose an unoccupied valid cell."},
+    {"key": "ui.dungeon.content.preview", "text": "Valid position. Confirm Placement adds it to the draft."},
+    {"key": "ui.dungeon.content.confirmed", "text": "Content changed in the draft. Review and Save Changes to commit."},
+    {"key": "ui.dungeon.content.returned", "text": "Returned to owned custody in the draft. Redeploy without purchasing again."},
+    {"key": "ui.dungeon.content.capacity", "text": "{0}: {1} / {2} in this category"},
+    {"key": "ui.dungeon.content.assigned", "text": "Assigned at ({0}, {1})"},
+    {"key": "ui.dungeon.content.owned", "text": "Owned · redeploy free"},
+    {"key": "ui.dungeon.content.new", "text": "New · {0} mana"},
+    {"key": "ui.dungeon.content.coordinates", "text": "Room position: ({0}, {1})"},
+    {"key": "ui.dungeon.content.destination", "text": "Floor {0} · {1}"},
+    {"key": "ui.dungeon.content.reassign", "text": "Reassign"},
+    {"key": "ui.dungeon.content.unassign", "text": "Unassign"},
+    {"key": "ui.dungeon.content.review", "text": "New owned items: {0}. Included acquisition cost: {1} mana."},
+    {"key": "ui.dungeon.content.transaction", "text": "Final transaction: {0} mana ({1} structural + {2} new content)."},
+    {"key": "ui.dungeon.content.browser_new", "text": "New"},
+    {"key": "ui.dungeon.content.browser_owned", "text": "Owned ({0})"},
+    {"key": "ui.dungeon.content.new_hint", "text": "Choose content to purchase. Assigned objects can be selected on the map."},
+    {"key": "ui.dungeon.content.owned_hint", "text": "Choose a returned item to redeploy free."},
+    {"key": "ui.dungeon.content.owned_empty", "text": "No returned content in this category. Select an assigned object on the map to move, reassign or unassign it."},
+    {"key": "ui.dungeon.content.add_monster", "text": "Add Monster"},
+    {"key": "ui.dungeon.content.add_trap", "text": "Add Trap"},
+    {"key": "ui.dungeon.content.add_loot", "text": "Add Loot"},
+    {"key": "ui.dungeon.content.target", "text": "{0} · {1}"}
   ]
 }

@@ -87,6 +87,19 @@ namespace DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests
             CollectionAssert.AreEquivalent(new[] {"CategoryId","OptionId","Sprite"},fields);
             Assert.That(typeof(DungeonVisualCatalog).GetFields().Any(f=>f.FieldType==typeof(SaveData)),Is.False);
         }
+        [TestCase("placement.category.monster","placement.option.monster.goblin")]
+        [TestCase("placement.category.trap","placement.option.trap.chilling_sigil")]
+        [TestCase("placement.category.trap","placement.option.trap.snare")]
+        [TestCase("placement.category.loot_node","placement.option.loot_node.hidden_cache")]
+        [TestCase("placement.category.loot_node","placement.option.loot_node.basic")]
+        public void AcceptedUnillustratedOptionsRetainCategoryFallbacks(string category,string option)
+        {
+            var catalog=AssetDatabase.LoadAssetAtPath<DungeonVisualCatalog>(Path);
+            Assert.That(catalog.Contents.Any(c=>c.OptionId==option),Is.False);
+            var fallback=category==CanonicalSpatialSaveContracts.MonsterCategoryId ? catalog.MonsterFallback :
+                category==CanonicalSpatialSaveContracts.TrapCategoryId ? catalog.TrapFallback : catalog.LootFallback;
+            Assert.That(catalog.Resolve(category,option),Is.EqualTo(fallback));
+        }
     }
 }
 #endif

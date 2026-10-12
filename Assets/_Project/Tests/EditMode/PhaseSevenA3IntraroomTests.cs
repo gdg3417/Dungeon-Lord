@@ -216,6 +216,83 @@ namespace DungeonBuilder.M0.Tests.EditMode
             e.Ordinal + ":" + e.Kind + ":" + e.AssignmentId + ":" + e.PathStep + ":" + e.Position.X + "," + e.Position.Y +
             ":" + string.Join(";", (e.Path ?? Array.Empty<TileCoordinate>()).Select(t => t.X + "," + t.Y))).ToArray();
 
+        [TestCase(MvpDungeonPlacementIds.SpikeTrapOptionId,true)]
+        [TestCase(MvpDungeonPlacementIds.SnareTrapOptionId,true)]
+        [TestCase(MvpDungeonPlacementIds.ChillingSigilOptionId,true)]
+        [TestCase(MvpDungeonPlacementIds.SpikeTrapOptionId,false)]
+        [TestCase(MvpDungeonPlacementIds.SnareTrapOptionId,false)]
+        [TestCase(MvpDungeonPlacementIds.ChillingSigilOptionId,false)]
+        public void RepeatedTrapInstancesTriggerOnlyTheirOwnEncounteredCells(string option,bool secondReached)
+        {
+            var first=A("trap.first",MvpDungeonPlacementIds.TrapCategoryId,option,1,1);
+            var second=A("trap.second",MvpDungeonPlacementIds.TrapCategoryId,option,2,secondReached?1:3,1);
+            var room=Room(first,second); var result=Run(room); int count=secondReached?2:1;
+            Assert.That(result.SpatialEvents.Count(e=>e.Kind==RunSpatialEventKind.TrapTriggered),Is.EqualTo(count));
+            Assert.That(result.EncounterEvents.Select(e=>e.AssignmentId),Is.EqualTo(secondReached?new[] {first.AssignmentId,second.AssignmentId}:new[] {first.AssignmentId}));
+            Assert.That(result.EncounterEvents.GroupBy(e=>e.AssignmentId).All(g=>g.Count()==1),Is.True);
+            Assert.That(result.ReachedRoutePlacementEffects.ContributingOptionIds.Count(x=>x==option),Is.EqualTo(count));
+            Assert.That(result.ConfiguredRoutePlacementEffects.ContributingOptionIds.Count(x=>x==option),Is.EqualTo(2));
+            var config=Config(); var effect=config.MvpPlacementEffects.Single(e=>e.OptionId==option);
+            Assert.That(result.ReachedRoutePlacementEffects.Danger,Is.EqualTo(Run(Room()).ReachedRoutePlacementEffects.Danger+count*effect.Danger));
+            var reversed=Room(second,first);
+            Assert.That(JsonUtility.ToJson(Run(reversed)),Is.EqualTo(JsonUtility.ToJson(result)).And.EqualTo(JsonUtility.ToJson(Run(room))));
+        }
+
+        [TestCase(MvpDungeonPlacementIds.BasicLootNodeOptionId,true)]
+        [TestCase(MvpDungeonPlacementIds.HiddenCacheOptionId,true)]
+        [TestCase(MvpDungeonPlacementIds.GlitteringHoardOptionId,true)]
+        [TestCase(MvpDungeonPlacementIds.BasicLootNodeOptionId,false)]
+        [TestCase(MvpDungeonPlacementIds.HiddenCacheOptionId,false)]
+        [TestCase(MvpDungeonPlacementIds.GlitteringHoardOptionId,false)]
+        public void RepeatedLootInstancesContributeOnceOnlyWhenReachedAndRoomCleared(string option,bool secondReached)
+        {
+            var first=A("loot.first",MvpDungeonPlacementIds.LootNodeCategoryId,option,0,2);
+            var second=A("loot.second",MvpDungeonPlacementIds.LootNodeCategoryId,option,3,3,1); var room=Room(first,second);
+            if(!secondReached) { room.Spatial.TraversableTiles=room.Spatial.TraversableTiles.Where(t=>t.X!=2).ToArray(); room.Spatial.Egress=T(1,1); }
+            var result=Run(room); int count=secondReached?2:1;
+            Assert.That(result.SpatialEvents.Count(e=>e.Kind==RunSpatialEventKind.LootReached),Is.EqualTo(count));
+            Assert.That(result.SpatialEvents.Count(e=>e.Kind==RunSpatialEventKind.LootUnreachable),Is.EqualTo(secondReached?0:1));
+            Assert.That(result.SpatialEvents.Where(e=>e.Kind==RunSpatialEventKind.LootReached).Select(e=>e.AssignmentId),
+                Is.EqualTo(secondReached?new[] {first.AssignmentId,second.AssignmentId}:new[] {first.AssignmentId}));
+            Assert.That(result.ReachedRoutePlacementEffects.ContributingOptionIds.Count(x=>x==option),Is.EqualTo(count));
+            Assert.That(result.ConfiguredRoutePlacementEffects.ContributingOptionIds.Count(x=>x==option),Is.EqualTo(2));
+            var effect=Config().MvpPlacementEffects.Single(e=>e.OptionId==option);
+            Assert.That(result.ReachedRoutePlacementEffects.LootBonus,Is.EqualTo(count*effect.LootBonus));
+            if(result.Success) Assert.That(result.ClearedRewardPlacementEffects.ContributingOptionIds.Count(x=>x==option),Is.EqualTo(count));
+            Assert.That(JsonUtility.ToJson(Run(room)),Is.EqualTo(JsonUtility.ToJson(result)));
+            var fail=Config(); fail.BaseSuccessChance=0; fail.SuccessThreshold=1;
+            var failed=Run(room,fail); Assert.That(failed.Success,Is.False); Assert.That(failed.LootSummary.TotalGeneratedWorldValue,Is.Zero);
+            Assert.That(failed.ClearedRewardPlacementEffects.ContributingOptionIds,Is.Empty);
+        }
+
+        [TestCase(MvpDungeonPlacementIds.TrapCategoryId,MvpDungeonPlacementIds.SpikeTrapOptionId)]
+        [TestCase(MvpDungeonPlacementIds.LootNodeCategoryId,MvpDungeonPlacementIds.GlitteringHoardOptionId)]
+        public void CanonicalRepeatedInstancesProjectIntoImmutableActiveRunSnapshot(string category,string option)
+        {
+            var f=CanonicalRoom();
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(category,option,null,null,T(1,1))));
+            var old=PhaseSixA4Tests.Snapshot(f); var engine=PhaseFiveBBranchIntegrationTests.Service(f.Configuration);
+            string baseline=JsonUtility.ToJson(engine.SimulateSnapshot(1,old));
+            Assert.That(engine.SimulateSnapshot(1,old).SpatialEvents.Single(e=>e.Kind==RunSpatialEventKind.AdventurerTraversal).Path,Does.Contain(T(1,2)),"Second trap fixture must lie on the actual production traversal");
+            var context=new DungeonDraftContext(f.Production,f.Configuration,f.Occupancy,f.Profile,f.Compatibility,f.RemovalPolicy);
+            var draft=TransactionalDungeonDraft.Create(f.State,context,new PhaseSevenA4TransactionalEditorTests.Store());
+            var before=f.Session.GetCurrentBytes(); double mana=f.Runtime.structureRuntime.ManaReserve;
+            Assert.That(draft.ChangeContent(context.ContentIntent(DungeonDraftContentOperation.Acquire,f.State.Floors[0].FloorInstanceId,
+                f.State.Floors[0].Layout.Rooms[0].RoomInstanceId,categoryId:category,optionId:option,position:T(1,2))),Is.True);
+            Assert.That(JsonUtility.ToJson(engine.SimulateSnapshot(1,old)),Is.EqualTo(baseline),"Editing cannot rewrite an existing run snapshot");
+            CollectionAssert.AreEqual(before,f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(mana));
+            Assert.That(draft.Discard(),Is.True);
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(category,option,null,null,T(1,2))));
+            var snapshot=PhaseSixA4Tests.Snapshot(f); var room=snapshot.Floors[0].MaterializePlan().RequiredRooms.Single().Room;
+            Assert.That(room.Assignments.Select(a=>a.AssignmentId).Distinct().Count(),Is.EqualTo(2));
+            Assert.That(room.Assignments.All(a=>a.OptionId==option),Is.True);
+            var result=engine.SimulateSnapshot(1,snapshot);
+            var kind=category==MvpDungeonPlacementIds.TrapCategoryId?RunSpatialEventKind.TrapTriggered:RunSpatialEventKind.LootReached;
+            Assert.That(result.SpatialEvents.Count(e=>e.Kind==kind),Is.EqualTo(2));
+            Assert.That(JsonUtility.ToJson(engine.SimulateSnapshot(1,old)),Is.EqualTo(baseline));
+            Assert.That(JsonUtility.ToJson(engine.SimulateSnapshot(1,snapshot)),Is.EqualTo(JsonUtility.ToJson(result)));
+        }
+
         private static Fixture CanonicalRoom()
         {
             var f = Fixture.Create(null); f.Configuration = Config();

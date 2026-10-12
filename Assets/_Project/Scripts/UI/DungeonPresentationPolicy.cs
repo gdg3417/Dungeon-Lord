@@ -38,6 +38,7 @@ namespace DungeonBuilder.M0
         public Color InvalidColor = new Color(1, 0.47f, 0.48f);
         public Color GridColor = new Color(0.12f, 0.16f, 0.20f);
         public Color FloorBoundaryColor = new Color(0.35f, 0.48f, 0.58f);
+        public Color RoomPlacementGridColor = new Color(0.86f, 0.79f, 0.57f);
         public Color EditorGridColor = new Color(0.18f, 0.23f, 0.28f);
 
         public float Text(DungeonTextSize size) => size == DungeonTextSize.Small ? SmallText :

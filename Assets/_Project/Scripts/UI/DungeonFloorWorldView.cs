@@ -33,6 +33,8 @@ namespace DungeonBuilder.M0
         private readonly SpriteRenderer[] floorBoundary = new SpriteRenderer[4];
         private Texture2D anchorTexture;
         private Sprite anchorSprite;
+        private Texture2D placementGridTexture;
+        private Sprite placementGridSprite;
         public Rect LegalBounds { get; private set; }
         public int GridTileCount { get; private set; }
         public TileCoordinate[] MoveGuidanceAnchors { get; private set; } = Array.Empty<TileCoordinate>();
@@ -54,6 +56,9 @@ namespace DungeonBuilder.M0
         public bool GridVisible => grid != null && grid.gameObject.activeSelf;
         public bool PreviewVisible => highlight != null && highlight.gameObject.activeSelf;
         public int ConstructionPreviewTileCount { get; private set; }
+        private Tilemap roomPlacementGrid;
+        public int RoomPlacementGridTileCount { get; private set; }
+        public string RoomPlacementGridTarget { get; private set; }
         public string FloorInstanceId => floor?.FloorInstanceId;
 
         public void Initialize(DungeonPresentationPolicy policy)
@@ -64,8 +69,10 @@ namespace DungeonBuilder.M0
             gameObject.AddComponent<Grid>();
             rooms = Layer("Rooms", 0); fixedStructures = Layer("Fixed", 0);
             corridors = Layer("Corridors", 0); grid = Layer("EditorGrid", -1);
-            perimeter = Layer("StonePerimeter", 1); surrounding = Layer("Surrounding", -3);
-            invalidRooms = Layer("InvalidRoomIntents", 1); selectedRoom = Layer("RoomSelection", 1);
+            // Floor grid stays behind textures; only the current content target gets an overlay.
+            roomPlacementGrid = Layer("RoomPlacementGrid", 1);
+            perimeter = Layer("StonePerimeter", 2); surrounding = Layer("Surrounding", -3);
+            invalidRooms = Layer("InvalidRoomIntents", 1); selectedRoom = Layer("RoomSelection", 2);
             moveAnchors = Layer("MoveAnchors", 3);
             constructionPreview = Layer("ConstructionPreview", 2); invalidConstruction = Layer("InvalidConstructionIntents", 1);
             for (int i = 0; i < floorBoundary.Length; i++) floorBoundary[i] = Entity("FloorBoundary" + i, -1);
@@ -79,6 +86,13 @@ namespace DungeonBuilder.M0
             }
             anchorTexture.SetPixels(pixels); anchorTexture.Apply();
             anchorSprite = Sprite.Create(anchorTexture, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 32);
+            // The overview art has a one-pixel outline. A policy-width hollow overlay remains
+            // legible on masonry at room focus without painting over the cell interior.
+            placementGridTexture = new Texture2D(32, 32, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point };
+            for (int y=0;y<32;y++) for (int x=0;x<32;x++)
+                pixels[y*32+x] = Mathf.Min(x+.5f,y+.5f,31.5f-x,31.5f-y)/32 < policy.FloorBoundaryWidth ? Color.white : Color.clear;
+            placementGridTexture.SetPixels(pixels); placementGridTexture.Apply();
+            placementGridSprite = Sprite.Create(placementGridTexture, new Rect(0,0,32,32), new Vector2(.5f,.5f),32);
             highlight = Entity("Selection", 3);
             if (policy.Visuals != null) highlight.sprite = policy.Visuals.Selection;
             ClearPreview();
@@ -378,6 +392,11 @@ namespace DungeonBuilder.M0
         }
         public string SelectCorridor(TileCoordinate cell) => floor?.Layout.Edges.Where(e=>e.Footprint?.OccupiedTiles?.Contains(cell)==true)
             .OrderBy(e=>e.EdgeId,StringComparer.Ordinal).Select(e=>e.EdgeId).FirstOrDefault();
+        public string SelectContentRoom(TileCoordinate cell) => floor?.Layout.Rooms
+            .Where(r => floor.RoomContents.RoomSemantics.Any(s => s.RoomInstanceId == r.RoomInstanceId &&
+                s.LegacyRoomOriginKind != LegacyRoomOriginKind.ImplicitCompatibilityContainer))
+            .OrderBy(r => r.RoomInstanceId, StringComparer.Ordinal)
+            .FirstOrDefault(r => Footprint(r.RoomDefinitionId, r.Anchor, r.Orientation).Contains(cell))?.RoomInstanceId;
         public void SelectRoomFootprint(string roomId)
         {
             selectedRoom.ClearAllTiles(); if (roomId == null || floor == null) return;
@@ -419,9 +438,12 @@ namespace DungeonBuilder.M0
             Preview(cell,true); highlight.color=policy.SelectionColor;
         }
         public bool TryRoomLocal(RoomContentAssignment assignment, TileCoordinate cell, out TileCoordinate local)
+            => TryRoomLocal(assignment.RoomInstanceId, cell, out local);
+        public bool TryRoomLocal(string roomId, TileCoordinate cell, out TileCoordinate local)
         {
             local = default;
-            var room = floor.Layout.Rooms.Single(r => r.RoomInstanceId == assignment.RoomInstanceId);
+            var room = floor?.Layout.Rooms.SingleOrDefault(r => r.RoomInstanceId == roomId);
+            if (room == null) return false;
             var definition = production.Catalog.Rooms.Single(d => d.RoomDefinitionId == room.RoomDefinitionId);
             var shape = definition.GrossFootprint;
             bool rotated = room.Orientation == CardinalOrientation.Ninety || room.Orientation == CardinalOrientation.TwoSeventy;
@@ -435,7 +457,36 @@ namespace DungeonBuilder.M0
             highlight.transform.localPosition = new Vector3(cell.X + 0.5f, cell.Y + 0.5f);
             highlight.transform.localScale = new Vector3(policy.PreviewSize, policy.PreviewSize, 1);
         }
-        public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); selectedRoom?.ClearAllTiles(); constructionPreview?.ClearAllTiles(); ConstructionPreviewTileCount = 0; }
+        public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); selectedRoom?.ClearAllTiles(); constructionPreview?.ClearAllTiles(); ConstructionPreviewTileCount = 0; ClearRoomPlacementGrid(); }
+
+        public void ClearRoomPlacementGrid()
+        { roomPlacementGrid?.ClearAllTiles(); RoomPlacementGridTileCount = 0; RoomPlacementGridTarget = null; }
+        public void PresentRoomPlacementGrid(string roomId)
+        {
+            if (RoomPlacementGridTarget == roomId) return;
+            ClearRoomPlacementGrid();
+            var room = floor?.Layout.Rooms.SingleOrDefault(r => r.RoomInstanceId == roomId);
+            if (room == null || !GridVisible) return;
+            var cells = Footprint(room.RoomDefinitionId, room.Anchor, room.Orientation);
+            if (cells.Length > maximumGridTiles) return;
+            var tile = Tile(policy.RoomPlacementGridColor, policy.GridTileSize, placementGridSprite);
+            foreach (var cell in cells) roomPlacementGrid.SetTile(new Vector3Int(cell.X, cell.Y, 0), tile);
+            RoomPlacementGridTileCount = cells.Length; RoomPlacementGridTarget = roomId;
+        }
+
+        public void PresentContentPreview(string roomId, string category, string option, TileCoordinate local, bool valid)
+        {
+            constructionPreview.ClearAllTiles(); ConstructionPreviewTileCount = 0;
+            var assignment = new RoomContentAssignment { RoomInstanceId = roomId };
+            if (!RoomContentSpatialOccupancyAuthority.TryResolve(occupancy, category, option, out var rule)) return;
+            foreach (var offset in rule.OccupiedTileOffsets)
+                if (Position(assignment, new TileCoordinate(local.X + offset.X, local.Y + offset.Y), out var cell))
+                {
+                    constructionPreview.SetTile(new Vector3Int(cell.X, cell.Y, 0), valid ? roomSelectionTile : invalidIntentTile);
+                    ConstructionPreviewTileCount++;
+                }
+            if (Position(assignment, local, out var anchor)) Preview(anchor, valid);
+        }
 
         public void PresentConstructionPreview(StructuralEditPreview preview)
         {
@@ -497,7 +548,7 @@ namespace DungeonBuilder.M0
         }
         public void ClearMoveGuidance() { moveAnchors?.ClearAllTiles(); MoveGuidanceAnchors = Array.Empty<TileCoordinate>(); }
         public void SetEdit(bool edit)
-        { grid.gameObject.SetActive(edit); foreach (var edge in floorBoundary) edge.gameObject.SetActive(edit); if (!edit) ClearMoveGuidance(); }
+        { grid.gameObject.SetActive(edit); foreach (var edge in floorBoundary) edge.gameObject.SetActive(edit); if (!edit) { ClearMoveGuidance(); ClearRoomPlacementGrid(); } }
         public bool TryRoomBounds(string roomId, out Rect bounds)
         {
             bounds=default;
@@ -508,7 +559,7 @@ namespace DungeonBuilder.M0
             bounds=Rect.MinMaxRect(cells.Min(t=>t.X),cells.Min(t=>t.Y),cells.Max(t=>t.X)+1,cells.Max(t=>t.Y)+1); return true;
         }
         private void OnDestroy()
-        { foreach (Tile tile in ownedTiles) Release(tile); Release(sprite); Release(anchorSprite); Release(anchorTexture); }
+        { foreach (Tile tile in ownedTiles) Release(tile); Release(sprite); Release(anchorSprite); Release(anchorTexture); Release(placementGridSprite); Release(placementGridTexture); }
         private static void Release(UnityEngine.Object value)
         { if (value == null) return; if (Application.isPlaying) Destroy(value); else DestroyImmediate(value); }
     }

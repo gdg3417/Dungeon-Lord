@@ -1,0 +1,27 @@
+{
+  "MeasuredUtc": "2026-10-10T19:47:48.9102457Z",
+  "SelectedProject": "C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation",
+  "Sizes": [
+    {
+      "Path": "C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation",
+      "FileCount": 41978,
+      "Bytes": 2689501087.0,
+      "GiB": 2.505
+    },
+    {
+      "Path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Library",
+      "FileCount": 40310,
+      "Bytes": 2379926211.0,
+      "GiB": 2.216
+    },
+    {
+      "Path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Builds\\Development\\Windows",
+      "FileCount": 303,
+      "Bytes": 181816061.0,
+      "GiB": 0.169
+    }
+  ],
+  "HasLibrary": true,
+  "HasUnityLock": false,
+  "ExistingProjectsBuildsCachesDeleted": false
+}

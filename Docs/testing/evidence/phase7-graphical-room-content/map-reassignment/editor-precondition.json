@@ -1,0 +1,9 @@
+{
+  "phase": "Before first disposable refresh",
+  "owner_reply": "Closed",
+  "observed_editor_processes": [],
+  "observed_validation_lock": false,
+  "validation_path": "C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation",
+  "historical_initial_inventory_lock": true,
+  "closed_before_refresh": true
+}

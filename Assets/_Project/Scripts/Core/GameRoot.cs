@@ -932,6 +932,11 @@ namespace DungeonBuilder.M0
         public void InvalidateOptionalBranchPreview()
         { OptionalBranchPreview = null; StructuralConstructionReasonKey = string.Empty; }
 
+        public GateEvaluationResult DungeonDraftPurchaseEligibility() => _restrictedActionGate.Evaluate(
+            new GateEvaluationInput(RestrictedActionType.Purchase, IsOnline, VerificationPending));
+        public DetachedCanonicalWriteResult CommitProductionDungeonDraft(TransactionalDungeonDraft draft) =>
+            SaveService.CommitDungeonDraft(Save, draft, new GateEvaluationInput(RestrictedActionType.Purchase, IsOnline, VerificationPending));
+
         public DetachedCanonicalWriteResult AcquireCorridorContent(string categoryId, string optionId,
             string floorInstanceId, string optionalBranchId, TileCoordinate tile)
         {
@@ -1630,8 +1635,7 @@ namespace DungeonBuilder.M0
                     DetachedCanonicalMutationRequest.Redeploy(SelectedReturnedAssignmentId, target,
                         SelectedCanonicalFloorInstanceId, _selectedRoomLocalContentPosition));
                 success = result.IsSuccess;
-                reason = success ? "ui.returned_content.success" : result.IsNoOp
-                    ? "ui.returned_content.same_option" : result.Reason;
+                reason = success ? "ui.returned_content.success" : result.Reason;
             }
             string playerKey = Gd66MigrationReasonRegistry.PlayerLocalizationKey(reason);
             SetBanner(LocalizeReturnedContent(string.IsNullOrEmpty(playerKey) ? reason : playerKey));

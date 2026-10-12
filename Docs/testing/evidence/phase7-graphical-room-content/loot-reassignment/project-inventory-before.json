@@ -1,0 +1,66 @@
+[
+  {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\room-construction-validation",
+    "bytes": 2503827200,
+    "GiB": 2.332,
+    "library_bytes": 2303713128,
+    "library_present": true,
+    "locked": true
+  },
+  {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\room-construction-validation-bounds-186ba37",
+    "bytes": 2458076090,
+    "GiB": 2.289,
+    "library_bytes": 2265763368,
+    "library_present": true,
+    "locked": false
+  },
+  {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-final-validation",
+    "bytes": 2653251741,
+    "GiB": 2.471,
+    "library_bytes": 2381829915,
+    "library_present": true,
+    "locked": false
+  },
+  {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation",
+    "bytes": 3257814873,
+    "GiB": 3.034,
+    "library_bytes": 2392021953,
+    "library_present": true,
+    "locked": true
+  },
+  {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-overlay-validation",
+    "bytes": 2678838931,
+    "GiB": 2.495,
+    "library_bytes": 2383461244,
+    "library_present": true,
+    "locked": false
+  },
+  {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-review-validation",
+    "bytes": 2623458282,
+    "GiB": 2.443,
+    "library_bytes": 2382514008,
+    "library_present": true,
+    "locked": false
+  },
+  {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-uat-validation",
+    "bytes": 2634527906,
+    "GiB": 2.454,
+    "library_bytes": 2382737705,
+    "library_present": true,
+    "locked": false
+  },
+  {
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-validation",
+    "bytes": 2181027300,
+    "GiB": 2.031,
+    "library_bytes": 2105711099,
+    "library_present": true,
+    "locked": false
+  }
+]

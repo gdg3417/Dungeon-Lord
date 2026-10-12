@@ -385,7 +385,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string commitPath = f.FileSystem.Paths.Single(p => p.StartsWith(path) && p.EndsWith(suffix));
             string candidatePath = commitPath.Substring(0, commitPath.Length - "commit".Length) + "candidate";
             var commit = DungeonDraftFormat.Exact<DungeonDraftCommitRecord>(f.FileSystem.ReadAllBytes(commitPath));
-            var candidate = DungeonDraftFormat.Exact<DungeonDraftCandidate>(f.FileSystem.ReadAllBytes(candidatePath));
+            var candidate = DungeonDraftFormat.Exact<DungeonDraftV3Candidate>(f.FileSystem.ReadAllBytes(candidatePath));
             Assert.That(commit.Version, Is.EqualTo(3)); Assert.That(candidate.JournalFormatVersion, Is.EqualTo(4));
             if (corruption == "context") candidate.RuleIdentity = commit.RuleIdentity = new string('0', 64);
             if (corruption == "downgrade") candidate.JournalFormatVersion = commit.JournalFormatVersion = 3;

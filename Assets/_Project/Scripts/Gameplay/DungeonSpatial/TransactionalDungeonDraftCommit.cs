@@ -8,11 +8,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         public DetachedCanonicalWriteResult CommitDungeonDraft(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
-            SaveData currentRuntime, TransactionalDungeonDraft draft)
+            SaveData currentRuntime, TransactionalDungeonDraft draft, GateEvaluationInput? purchaseInput = null)
         {
             if (draft == null || currentRuntime?.structureRuntime == null || fileSystem == null)
                 return Failure(TransactionalDungeonDraft.InvalidReason);
-            var draftContext = new DungeonDraftContext(production, configuration, context.RoomContentOccupancy, limits, compatibility);
+            var draftContext = new DungeonDraftContext(production, configuration, context.RoomContentOccupancy, limits, compatibility, removalPolicy);
             if (!draft.MatchesRuleContext(draftContext)) return Failure(TransactionalDungeonDraft.IncompatibleReason);
             var owned = ValidateSession(session);
             if (owned?.CurrentTargetValidated != true || !owned.IsValid ||
@@ -30,8 +30,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!DetachedCanonicalProductionSemanticValidation.Validate(final, production, configuration,
                     limits.Canonical.Spatial, context.RoomContentOccupancy, true).IsValid)
                 return Failure(TransactionalDungeonDraft.InvalidReason);
-            var priced = StructuralEconomyService.PreviewFinalDraft(owned.State, final, owned.Investment,
-                recovered.NormalizedMovementTargets(), currentRuntime.structureRuntime.ManaReserve, economy, economyModifiers);
+            var priced = StructuralEconomyService.PreviewFinalContentDraft(owned.State, final, owned.Investment,
+                recovered.NormalizedMovementTargets(), currentRuntime.structureRuntime.ManaReserve, economy, acquisition, economyModifiers);
+            if (currentRuntime.structureRuntime.PlacementLocked) return Failure("ui.banner.place_blocked_heat_crisis");
+            if (priced.ContentAcquisitions > 0)
+            {
+                if (!purchaseInput.HasValue || purchaseInput.Value.ActionType != RestrictedActionType.Purchase)
+                    return Failure("gate.error.offline_required");
+                var gate = new RestrictedActionGateService().Evaluate(purchaseInput.Value);
+                if (!gate.Allowed) return Failure(gate.MessageKey);
+            }
             if (!priced.IsAffordable) return Failure(priced.Reason);
             var snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, priced.ResultingMana, limits);
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);

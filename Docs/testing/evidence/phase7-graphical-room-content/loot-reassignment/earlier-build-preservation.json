@@ -1,0 +1,11 @@
+{
+  "paths": [
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows",
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows-room-content-uat",
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows-placement-compact",
+    "Temp/ui-composition-floorhud-validation/Builds/Development/Windows-map-reassignment"
+  ],
+  "files": 1212,
+  "before_inventory_sha256": "628429cbc04dd5ffb35daef7c84d1fadf77ca9647e2f0f5f5c9700644f2960ef",
+  "unchanged": true
+}

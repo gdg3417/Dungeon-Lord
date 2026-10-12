@@ -439,7 +439,9 @@ namespace DungeonBuilder.M0.Tests
             controller.TapWorld(new TileCoordinate(-100, -100)); Assert.That(controller.Draft.CommandCount, Is.Zero);
             Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(1, 1), definition.GrossFootprint,
                 room.Anchor, room.Orientation, out var target), Is.True);
-            controller.TapWorld(target); Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+            controller.TapWorld(target); Assert.That(controller.Draft.CommandCount, Is.Zero);
+            Assert.That(controller.ContentPreview.IsValid, Is.True);
+            Assert.That(controller.ConfirmContentPlacement(), Is.True); Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
             Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
             yield return null;
             Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged));
@@ -451,6 +453,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(GameRoot.Instance.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments[0].RoomLocalPosition,
                 Is.EqualTo(new TileCoordinate(0, 0)));
             controller.EnterEdit(); controller.TapWorld(start); controller.BeginMove(); controller.TapWorld(target);
+            Assert.That(controller.ConfirmContentPlacement(), Is.True);
             yield return null;
             Assert.That(controller.Commit(), Is.True);
             Assert.That(controller.World.GridVisible, Is.False);
@@ -827,9 +830,12 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(2, 1), definition.GrossFootprint,
                 room.Anchor, room.Orientation, out var pending), Is.True);
             controller.EnterEdit(); controller.TapWorld(start); controller.BeginMove(); controller.TapWorld(first);
+            Assert.That(controller.Draft.CommandCount, Is.Zero);
+            Assert.That(controller.ConfirmContentPlacement(), Is.True);
             yield return null;
             Assert.That(controller.Draft.AcknowledgedSequence, Is.EqualTo(1));
             controller.BeginMove(); controller.TapWorld(pending);
+            Assert.That(controller.ConfirmContentPlacement(), Is.True);
             Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Pending));
             string active = root.SaveService.SavePath;
             byte[] canonical = File.ReadAllBytes(active);
@@ -1068,6 +1074,7 @@ namespace DungeonBuilder.M0.Tests
             controller.SelectFloor(floor.FloorInstanceId); controller.TapWorld(start);
             Assert.That(controller.Discard(), Is.True); Assert.That(controller.World.PreviewVisible, Is.False);
             controller.EnterEdit(); controller.TapWorld(start); controller.BeginMove(); controller.TapWorld(target);
+            Assert.That(controller.ConfirmContentPlacement(), Is.True);
             yield return null;
             Assert.That(controller.World.PreviewVisible, Is.True);
             Assert.That(controller.Commit(), Is.True); Assert.That(controller.World.PreviewVisible, Is.False);

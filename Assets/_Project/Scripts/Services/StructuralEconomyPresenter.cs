@@ -39,6 +39,10 @@ namespace DungeonBuilder.M0
                     FormatTransactionAmount(preview.CreditedRefund))
                 : string.Format(CultureInfo.InvariantCulture, text("ui.structural.economy.cost"),
                     FormatTransactionAmount(preview.BaseCost), FormatTransactionAmount(preview.Cost));
+            if (!removal && preview.ContentAcquisitions > 0)
+                amount = string.Format(CultureInfo.InvariantCulture, text("ui.dungeon.content.transaction"),
+                    FormatTransactionAmount(preview.Cost), FormatTransactionAmount(preview.Cost - preview.ContentAcquisitionCost),
+                    FormatTransactionAmount(preview.ContentAcquisitionCost));
             if (!removal && preview.RefundBasis > 0)
                 amount += "\n" + string.Format(CultureInfo.InvariantCulture, text("ui.structural.economy.refund"),
                     FormatTransactionAmount(preview.RefundBasis), FormatTransactionAmount(preview.Refund),

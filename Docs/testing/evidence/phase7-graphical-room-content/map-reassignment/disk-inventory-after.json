@@ -1,0 +1,19 @@
+{
+  "project": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation",
+  "bytes": 3255534018,
+  "library_bytes": 2390898524,
+  "players": {
+    "Windows": 181816061,
+    "Windows-map-reassignment": 181827605,
+    "Windows-placement-compact": 181826735,
+    "Windows-room-content-uat": 181826080
+  },
+  "validation_lock": false,
+  "cleanup_without_deletion": [
+    "Seven other inventoried Temp projects",
+    "Three preserved historical Windows players",
+    "Imported caches and historical test/log evidence"
+  ],
+  "deleted": [],
+  "quarantined": []
+}

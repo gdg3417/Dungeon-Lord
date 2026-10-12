@@ -38,6 +38,44 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator TransactionalRoomConstructionProductionParity()
         { yield return Invoke("TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery"); }
         [UnityTest]
+        public IEnumerator RoomContentProductionParity()
+        { yield return Invoke("RoomContentProductionPreviewCustodySaveDiscardAndLayouts"); }
+        [UnityTest]
+        public IEnumerator RoomContentInputAndResume()
+        { yield return Invoke("RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated"); }
+        [UnityTest]
+        public IEnumerator RoomContentReassignmentAndConstruction()
+        { yield return Invoke("RoomContentExplicitReassignmentWithConstructionAndInspectionReuse"); }
+        [UnityTest] public IEnumerator RoomContentSequentialLootDraft() { yield return Invoke("RoomContentSequentialLootDraft"); }
+        [UnityTest] public IEnumerator RoomContentSequentialLootSaveBetween() { yield return Invoke("RoomContentSequentialLootSaveBetween"); }
+        [UnityTest] public IEnumerator RoomContentLootRejectionReasons() { yield return Invoke("RoomContentLootRejectionReasons"); }
+        [UnityTest] public IEnumerator RoomContentRepeatedTrapInstances() { yield return Invoke("RoomContentRepeatedTrapInstances"); }
+        [UnityTest] public IEnumerator RoomContentRepeatedLootInstances() { yield return Invoke("RoomContentRepeatedLootInstances"); }
+        [UnityTest]
+        public IEnumerator RoomContentMapReassignmentCategories()
+        { yield return Invoke("RoomContentMapReassignmentCategoriesInvalidRetryAndSave"); }
+        [UnityTest]
+        public IEnumerator RoomContentMapReassignmentCapacity()
+        { yield return Invoke("RoomContentMapReassignmentCapacityMoveOwnedAndDiscard"); }
+        [UnityTest]
+        public IEnumerator RoomContentMapReassignmentInput()
+        { yield return Invoke("RoomContentMapReassignmentProductionMouseTouchRecovery"); }
+        [UnityTest]
+        public IEnumerator RoomContentUatBrowserAndTargets()
+        { yield return Invoke("RoomContentUatBrowserIdentityAndDirectTargetSwitch"); }
+        [UnityTest]
+        public IEnumerator RoomContentUatGridAndInvalidFootprints()
+        { yield return Invoke("RoomContentUatGridAndMulticellInvalidTransitions"); }
+        [UnityTest]
+        public IEnumerator RoomContentUatMeasuredPlacementLayout()
+        { yield return Invoke("RoomContentUatPlacementGeometryAndLocalizedFeedback"); }
+        [UnityTest]
+        public IEnumerator RoomContentCompactMove()
+        { yield return Invoke("RoomContentCompactMoveAllCategoriesAndDraftCosts"); }
+        [UnityTest]
+        public IEnumerator RoomContentCompactPlacementAndOverflow()
+        { yield return Invoke("RoomContentCompactAcquisitionOwnedReassignAndOverflow"); }
+        [UnityTest]
         public IEnumerator CompositionNormalInspectionFocusRailCollapse()
         { yield return Invoke("CompositionNormalInspectionFocusRailAndCollapseAreReadOnly"); }
         [UnityTest]

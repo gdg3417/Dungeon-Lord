@@ -1,0 +1,91 @@
+# Graphical room-content management qualification
+
+Owner UAT on this original packet confirmed placement, Move/Unassign/Reassign, Save/reopen and Discard/recovery. The subsequent [PR #231 owner-UAT correction qualification](owner-uat-correction/qualification.md) records presentation fixes, fresh complete suites/build and preservation audits. Historical evidence below is retained.
+
+Baseline: merged PR #230, `5932a9fe0b7cec87c81f09e8e7d619df62c53101`. Branch: `codex/phase7-graphical-room-content-management`. Selected configuration: GPT-6.1 Sol, High; Complex. The approved packet extends established authorities across draft identity, custody, economics, persistence and UI. GPT-6 Sol High is the availability fallback; no substitution or new ownership policy was needed.
+
+## Reconciliation and authority
+
+PR #229 room construction and PR #230 production composition are merged dependencies. Phase 7A1 supplies frozen authored migration profiles; A2/schema 13 supplies durable exact room-local coordinates; A3 supplies deterministic spatial engagement; A4/A5 supply the whole-dungeon transactional editor, movement, durability and recovery. A0 Decisions 38–43 require room-first categories, ownership-preserving management and one final transaction. Specs 38 and 28, the glossary, Phase 4A economy and current acquisition/removal/occupancy contracts remain authoritative.
+
+The reusable detached spatial mutation handles NEW acquisition, unassignment and redeployment. Reassignment composes detached unassignment and redeployment as one replayable command. Reposition reuses exact-position validation. These operations mutate only the draft read model. No live acquisition or custody write is used during Edit Mode. Stable IDs, option/category/sequence and canonical ordinal ordering remain owned by the existing contracts. Placement evaluation uses injected occupancy and configured workload limits. No new gameplay values or content definitions are introduced.
+
+`StructuralEconomyService` compares baseline owned identities (assigned plus returned) against the complete final ownership set. Only new identities are priced using `ContentAcquisitionEconomySnapshot`; a purchased item unassigned into custody still costs its acquisition price. Returning/redeploying/reassigning an existing identity costs no acquisition mana. Content never enters structural investment/refund accounting. Final purchase eligibility uses the current restricted-action gate; affordability uses the current wallet. The existing `DetachedCanonicalWriteAuthority` validates the full resulting state, prepares one complete save, persists exact validated bytes, performs durable readback and then publishes. Run snapshots remain immutable and material floor-knowledge fingerprints retain their existing applicability behavior.
+
+Save schema remains **13**, with no migration or save DTO changes. Draft journal vocabulary is **5**, and its separate immutable candidate/commit record version is **4**. Frozen journal formats 2–4 and record versions 1–3 retain their exact serialization. New evidence appends to the existing predecessor chain without rewriting older files. The frozen A5 material-rule fingerprint is preserved; custody commands separately bind the exact removal-policy fingerprint. Unknown durability blocks further accepted commands/commit and requires independent recovery evidence. Historical compatibility and corruption assertions remain active.
+
+## Player behavior
+
+Select a constructed room, enter Edit Mode, then choose Monsters, Traps or Loot. The bottom sheet shows current capacity, assigned items, returned owned items and actual configured new options/prices. Select a choice, tap an exact local cell, inspect occupied-cell validity, then Confirm Placement. Confirmation changes the local draft; Save Changes reviews the combined transaction and commits the entire dungeon. Existing assignments support Move, Unassign and explicit destination-room Reassign. Returned choices redeploy the same identity without purchasing again. Preview cancellation adds no journal command; Discard removes the draft without creating ownership or spending mana.
+
+Room inspection, Focus Room, Fit Floor, floor navigation, camera controls and the category bar remain. Input System mouse/touch, portrait/landscape and Small/Default/Large text are qualified. Detailed economics remain in the final review while a compact quote stays beside Save/Discard. Existing artwork is reused; options without authored art retain the catalog's fallback. Player strings are localization keys with English fallback.
+
+## Qualification record
+
+Final qualified Unity/content implementation: `916fc1625c17344b895613e62c597059a01f4cc1`. Initial implementation `62eb3cdd1c2f828ea7a2d331fce9851844e23d95` is directly parented by the verified baseline. A branch-setup mistake initially placed the implementation at `0c27767` on the former PR branch; it was corrected by creating the requested branch from `origin/main` and cherry-picking the implementation. The old PR head and merged baseline have the identical tree `a8301e29ddd8450a9ca6bbbf55fbd8138ee697ba`; both initial implementation commits have tree `40a3d5b41b51a8644359757c1c097f3a73c11aaf`. No code changed during this history correction. The initial pre-full-Edit inventory records the original implementation ref; subsequent inventories record the corrected branch/ref. The localized destination-label correction and assertion are committed at `7f2b1c6`. Final review then identified that unassignment preview returned a mutable internal assignment reference; `916fc16` returns a detached copy and adds an ownership-isolation regression. This is a direct defensive-copy correction, without a persistence/authority-policy ambiguity or model substitution. Complete suites repeat after both material corrections. The final four input trees are retained separately from later evidence-only commits.
+
+Complete qualification passed on the frozen implementation above. Raw intermediate failures are retained with their dispositions; no Unity or Windows pass is inferred from source inspection. Subsequent commits contain documentation, evidence and its collector only, leaving all four qualified input trees unchanged.
+
+Unity CLI beta 10 and Editor 6000.3.2f1 use the following commands from the repository root. `$roomContentPython` is the bundled Python executable, and `$roomContentUnity` is `C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe`. A single Unity invocation uses the disposable checkout at a time.
+
+```powershell
+& $roomContentPython -m unittest discover -s Tools/Presentation -p test_qualification_inputs.py
+& $roomContentPython Tools/Presentation/prepare_validation.py ui-composition-floorhud-validation
+& $roomContentPython Tools/Presentation/verify_qualified_source.py ui-composition-floorhud-validation TestResults/room-content-pre-full-edit-source.json
+& $roomContentUnity test C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation --mode EditMode --filter 'TransactionalRoomContent|TransactionalRoomConstruction|PhaseSevenA4TransactionalEditor|FileDungeonDraftStore|DungeonDraftFormat' --output TestResults/room-content-focused-domain-08.xml --timeout 1800 --no-color -- -logFile C:/Dev/Dungeon-Lord/Temp/room-content-focused-domain-08.log
+& $roomContentUnity test C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation --mode PlayMode --filter PhaseSevenA4ProductionShellPlayModeTests --output TestResults/room-content-focused-ui-09.xml --timeout 1800 --no-color -- -logFile C:/Dev/Dungeon-Lord/Temp/room-content-focused-ui-09.log
+& $roomContentUnity test C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation --mode EditMode --output TestResults/room-content-full-editmode.xml --timeout 1800 --no-color -- -logFile C:/Dev/Dungeon-Lord/Temp/room-content-full-editmode.log
+& $roomContentUnity test C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation --mode PlayMode --output TestResults/room-content-full-playmode.xml --timeout 1800 --no-color -- -logFile C:/Dev/Dungeon-Lord/Temp/room-content-full-playmode.log
+& $roomContentUnity run C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation --timeout 1800 --no-color -- -buildTarget StandaloneWindows64 -executeMethod DungeonBuilder.M0.EditorTools.DungeonVisualBuildQualification.BuildWindows -logFile C:/Dev/Dungeon-Lord/Temp/room-content-windows-build.log
+```
+
+Strict verification runs immediately before and after each complete suite and build. Every input file is included, with the existing explicitly reviewed save-name substitutions, config formatting, text CRLF/LF and BOM normalization. Generated source-root output differences are archived before strict preparation restores disposable inputs; they are never silently accepted as source.
+
+### Intermediate outcomes and dispositions
+
+| Run | Passed | Failed | Skipped | Disposition |
+|---|---:|---:|---:|---|
+| Focused 03 | 24 | 1 | 0 | Returned-custody fixture used a preparation helper without removal policy; corrected to use its canonical authority |
+| Domain 04 | 208 | 10 | 0 | Frozen historical serialization rejected intentionally malformed corruption fixtures; preserved strict production validation while allowing fixture encoding; historical candidate fixture now uses its frozen DTO |
+| Domain 05 | 40 | 0 | 0 | All new domain cases and the ten historical corruption cases passed |
+| Production UI 06 | 2 | 0 | 0 | New journeys passed; screenshot review then identified economics visibility and asynchronous capture timing corrections |
+| Production shell 07 | 34 | 3 | 0 | Old move/delete/preview journeys expected tap mutation; added explicit confirmation and retained their original canonical, durability and lifecycle assertions |
+| Domain 08 | 128 | 0 | 0 | Focused content, construction, journal and transaction regressions passed |
+| Production shell 09 | 38 | 0 | 0 | All production shell journeys passed |
+| Initial full EditMode | 1,657 | 0 | 1 | Complete initial implementation passed; final destination-label correction follows |
+| Initial full PlayMode | 3,084 | 0 | 10 | Complete initial implementation passed; final destination-label correction follows |
+| Destination label 10 | 1 | 0 | 0 | Explicit reassignment and construction journey passed with distinct room labels |
+| Label-corrected full EditMode | 1,657 | 0 | 1 | Passed; later defensive preview-copy correction requires another complete qualification |
+| Label-corrected full PlayMode | 3,084 | 0 | 10 | Passed; later defensive preview-copy correction requires another complete qualification |
+| Snapshot isolation 11 | 35 | 0 | 0 | All content-domain cases passed, including preview mutation without changing draft ownership |
+| Strict helper unrestricted rerun | 12 | 0 | 0 | Sandbox first attempt had 24 setup/cleanup errors across 12 tests; unrestricted rerun passed |
+| Final full EditMode | 1,658 | 0 | 1 | Total 1,659; frozen `916fc16` implementation |
+| Final full PlayMode | 3,085 | 0 | 10 | Total 3,095; frozen `916fc16` implementation |
+
+Unity attempt 01 failed sandbox licensing/hardware access before a test verdict. Attempt 02 found a local-name CS0136 compile error, corrected before successful runs. Neither is called a test pass. Full failure messages and per-case names are retained in the XML archive and report summary. Each earlier failed case is covered by a later successful focused/full run. The original corruption/lifecycle assertions were not removed or weakened.
+
+The one EditMode skip and ten PlayMode skips are unchanged platform/runner applicability cases from merged PR #230. Their complete names and exact reasons are retained in [report-summary.json](report-summary.json); [test-outcome-comparison.json](test-outcome-comparison.json) verifies no removed cases or changed existing outcomes. Each mode adds 38 passing cases over PR #230. Final logs contain no C# compiler errors or warnings. Fifteen XML reports are retained in [qualification-reports.zip](qualification-reports.zip); redacted Unity logs and their concise indexes are also retained.
+
+The existing disposable project `C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation` is reused with its Library intact. See [pre-reuse inventory](validation-inventory.md). All four input roots and generated metadata remain strictly compared; target-only files are rejected. Only the existing reviewed save-name substitutions and normalizations are permitted. No owner project execution or owner save namespace is used. No cleanup or quarantine of existing projects, builds, caches or owner files was performed; existing tests retain their scoped temporary-fixture cleanup.
+
+### Windows build, source equality and owner preservation
+
+The Windows Standalone 64-bit Development build succeeded on Unity 6000.3.2f1 at `2026-10-10T19:39:21.4963271Z`, after the final suites, with **zero build errors and one warning**. The warning says Unity Cloud native-symbol upload was omitted because its access token was empty; it does not prevent the local player from building. The build includes only `Bootstrap.unity`. All 52 referenced dungeon art paths occur in the packed source-asset inventory. See [build report](build-report.json), [messages](build-messages.txt) and [player manifest](windows-artifact-manifest.json).
+
+One final player is retained in place at `C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation/Builds/Development/Windows/Dungeon Lord.exe`. Its directory contains 303 files, 181,816,061 bytes (0.169 GiB), each hashed in the manifest. The selected project is approximately **2.505 GiB**, including **2.216 GiB** of retained Library; the final read-only process check found no Unity.exe, and its UnityLockfile is absent. [Disk inventory](disk-inventory.json) records the measurements. No additional full imported project or duplicate final build was created. Seven unselected copies remain approximately 16.5 GiB; [build-cleanup-inventory.json](build-cleanup-inventory.json) separately lists 19 historical root build directories totaling approximately 3.60 GiB. These are proposed owner cleanup candidates only.
+
+Final strict checkpoints immediately before/after EditMode were equal across 1,208 inputs; pre-PlayMode was equal. Post-PlayMode rejected the two expected Unity TMP/settings serializations, archived their complete diffs, and restored equality before the Windows build. Immediate post-build verification rejected four expected Unity serializations (`UniversalRP.asset`, `UniversalRenderPipelineGlobalSettings.asset`, `ProjectSettings.asset`, `UnityConnectSettings.asset`), with zero target-only files. Their complete diffs were archived; strict preparation restored the disposable inputs, and final verification returned **1,208 inputs, zero mismatches, zero target-only files**. No unexpected file was ignored. [Source checkpoint index](source-checkpoint-index.json) records each inventory SHA-256, every mismatch and every reviewed transformation; [source-inventories-and-output-diffs.zip](source-inventories-and-output-diffs.zip) retains the complete inventories and diffs. The final/pre-build inventory SHA-256 is `516edeaeb4977368f52e4e43c2c840b6c942f82f955b8403ce43aca2c0afaceb`.
+
+[Qualified input trees](qualified-input-trees.json) records the full baseline and implementation SHAs, changed-file inventory, branch reconciliation and immutable Git tree IDs for Assets, Packages, ProjectSettings and ContentAuthoring. Runtime configuration values, purchase tables, occupancy policy and content definitions are unchanged; only localization data adds player labels. Save schema remains 13. The strict qualification helpers and their namespace logic are unchanged and all 12 helper tests pass.
+
+[Owner preservation](owner-preservation.json) verifies identical before/after SHA-256 for the primary save, both primary-prefix draft sidecars, owner ProjectSettings and owner TMP settings; the primary-prefix filename inventory is identical. The primary save hash remains `39224b12446ec30990d043385e77634e45cc7da1dc5e50e75237b33f25c79df2`. The separate existing safe validation save is also unchanged ([audit](validation-save-preservation.json)). Neither the primary owner game nor primary save namespace was executed during qualification. This is a file preservation audit, not a claim to have hashed all Windows registry or Unity editor preferences; runtime source has no PlayerPrefs calls.
+
+Only five final PlayMode screenshots are retained and visually inspected: [normal room, valid preview, invalid overlap, selected assignment and final review](screenshots.md). They show readable localized feedback and accessible Confirm/Save/Discard controls. They are production-scene captures, not a claim of completed manual Windows UAT.
+
+## Retained limitations and owner UAT
+
+External review and owner UAT are pending. The owner journey covers adding one monster/trap/loot, invalid overlap/capacity recovery, moving/unassigning/redeploying, reviewing and saving, closing/reopening, discarding later edits, focused-room readability and equivalent Windows behavior. Automated tests cover transactional edge cases so owner UAT can focus on comprehension and gameplay interactions.
+
+The reused validation project's default namespace already contains a separate schema-13 safe dungeon with two rooms, zero assignments and 981 mana at the read-only audit. Editor UAT can open `C:/Dev/Dungeon-Lord/Temp/ui-composition-floorhud-validation`; the qualified Windows build uses that same isolated namespace. Test Editor and Windows sequentially, closing the first before reopening the same validation save in the other. The primary owner dungeon is not a qualification target. The safe validation save is also hashed before/after the final qualification/build.
+
+No Floor 2 research/construction/lifecycle UI, new content, combat expansion, loot-table authoring, corridor content editor, research tree, entrance movement, capacity rebalance, new floor bounds, landscape side inspector, art-theme framework, Bootstrap retirement, broad refactor or unrelated migration is included. Existing straight-corridor construction limits and the absence of a live mana-reservation owner remain separate dependencies. No specification decision requires new approval in this packet.

@@ -1,0 +1,260 @@
+[
+  {
+    "path": "loot-reassignment-focused-exact.xml",
+    "sha256": "c507b90e913141e7026e090e8967427fab7fc080554f2ae26671b72856f72e84",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Failed(Child)",
+      "total": "1",
+      "passed": "0",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-11 20:50:04Z",
+      "end-time": "2026-10-11 20:50:06Z",
+      "duration": "2.243758"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentLootRejectionReasons",
+        "message": "  Expected: 850.0d\n  But was:  840.0d\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x0001a] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1138\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentLootRejectionReasons>d__75.MoveNext () [0x005e1] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:147\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentLootRejectionReasons",
+        "output": "Isolated scene boot 1: phase7a4-scene-a95cffbcbc7843d59f79b8ad20cd2503.json\n[2026-10-11 20:50:05 UTC] [INFO] Entered BootState.\n[2026-10-11 20:50:05 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 20:50:05 UTC] [INFO] M0 init complete.\n[2026-10-11 20:50:05 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 20:50:05 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nDUPLICATE LOOT authority=gd66.diagnostic.canonical_write_noop UI=This room already contains this loot type. Choose another room.\nGlittering Hoard \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nFULL LOOT authority=gd66.content.room_capacity_exceeded UI=This room is full for this category. Choose another room or unassign content.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nCOLLISION LOOT authority=content.position.invalid UI=That cell cannot hold this content. Choose an unoccupied valid cell.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nSaving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  },
+  {
+    "path": "loot-reassignment-focused-exact02.xml",
+    "sha256": "4f1320aeb11077a53331bcaae2f52b457cd0068f4f3fc54004d43b13b08a80e7",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Passed",
+      "total": "1",
+      "passed": "1",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-11 20:52:09Z",
+      "end-time": "2026-10-11 20:52:11Z",
+      "duration": "2.2095548"
+    },
+    "failures": [],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentLootRejectionReasons",
+        "output": "Isolated scene boot 1: phase7a4-scene-a9aab7968fc14a09bdc619fe96bf273e.json\n[2026-10-11 20:52:09 UTC] [INFO] Entered BootState.\n[2026-10-11 20:52:09 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 20:52:09 UTC] [INFO] M0 init complete.\n[2026-10-11 20:52:09 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 20:52:09 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nDUPLICATE LOOT authority=gd66.diagnostic.canonical_write_noop UI=This room already contains this loot type. Choose another room.\nGlittering Hoard \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nFULL LOOT authority=gd66.content.room_capacity_exceeded UI=This room is full for this category. Choose another room or unassign content.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nCOLLISION LOOT authority=content.position.invalid UI=That cell cannot hold this content. Choose an unoccupied valid cell.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nSaving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  },
+  {
+    "path": "loot-reassignment-focused.xml",
+    "sha256": "67c8c6871539091fe5ff893fde8364c057cf0224210089e6cc65e2e915f6a4ff",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "50",
+      "result": "Passed",
+      "total": "50",
+      "passed": "50",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-11 20:46:30Z",
+      "end-time": "2026-10-11 20:47:21Z",
+      "duration": "50.354712"
+    },
+    "failures": [],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentLootRejectionReasons",
+        "output": "Isolated scene boot 1: phase7a4-scene-72c483c19d49456faee716ac572c0830.json\n[2026-10-11 20:47:05 UTC] [INFO] Entered BootState.\n[2026-10-11 20:47:05 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 20:47:05 UTC] [INFO] M0 init complete.\n[2026-10-11 20:47:05 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 20:47:05 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nDUPLICATE LOOT authority=gd66.diagnostic.canonical_write_noop UI=This room already contains this loot type. Choose another room.\nGlittering Hoard \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nFULL LOOT authority=gd66.content.room_capacity_exceeded UI=This room is full for this category. Choose another room or unassign content.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nCOLLISION LOOT authority=content.position.invalid UI=That cell cannot hold this content. Choose an unoccupied valid cell.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentSequentialLootDraft",
+        "output": "Isolated scene boot 1: phase7a4-scene-4162966cf1684418a8502639d517acf9.json\n[2026-10-11 20:47:14 UTC] [INFO] Entered BootState.\n[2026-10-11 20:47:14 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 20:47:14 UTC] [INFO] M0 init complete.\n[2026-10-11 20:47:14 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 20:47:14 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nSEQUENTIAL LOOT saveBetween=False A2/B1 -> A1/B2 -> A2/B1; identities, wallet, recovery and reopening preserved\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentSequentialLootSaveBetween",
+        "output": "Isolated scene boot 1: phase7a4-scene-315fae02a66e4491a0fd3c7419bbf976.json\n[2026-10-11 20:47:15 UTC] [INFO] Entered BootState.\n[2026-10-11 20:47:16 UTC] [INFO] Offline passive mana grant persisted.\n[2026-10-11 20:47:16 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 20:47:16 UTC] [INFO] M0 init complete.\n[2026-10-11 20:47:16 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 20:47:16 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nSEQUENTIAL LOOT saveBetween=True A2/B1 -> A1/B2 -> A2/B1; identities, wallet, recovery and reopening preserved\n"
+      }
+    ]
+  },
+  {
+    "path": "loot-reassignment-full-editmode.xml",
+    "sha256": "32c733a92b054f08855c5dcdb495c7553101cd1608e7c5652730f166704378e8",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1675",
+      "result": "Skipped:Ignored",
+      "total": "1675",
+      "passed": "1674",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-11 21:04:39Z",
+      "end-time": "2026-10-11 21:04:59Z",
+      "duration": "20.1701235"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentLootRejectionReasons",
+        "output": "Isolated scene boot 1: phase7a4-scene-7615758a7b0541d7ae37f17e84744885.json\n[2026-10-11 21:02:25 UTC] [INFO] Entered BootState.\n[2026-10-11 21:02:25 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 21:02:25 UTC] [INFO] M0 init complete.\n[2026-10-11 21:02:25 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 21:02:25 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nDUPLICATE LOOT authority=gd66.diagnostic.canonical_write_noop UI=This room already contains this loot type. Choose another room.\nGlittering Hoard \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nFULL LOOT authority=gd66.content.room_capacity_exceeded UI=This room is full for this category. Choose another room or unassign content.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nCOLLISION LOOT authority=content.position.invalid UI=That cell cannot hold this content. Choose an unoccupied valid cell.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentSequentialLootDraft",
+        "output": "Isolated scene boot 1: phase7a4-scene-56d342fc6a1d495698e4d483a6476d34.json\n[2026-10-11 21:02:59 UTC] [INFO] Entered BootState.\n[2026-10-11 21:02:59 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 21:02:59 UTC] [INFO] M0 init complete.\n[2026-10-11 21:02:59 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 21:02:59 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nSEQUENTIAL LOOT saveBetween=False A2/B1 -> A1/B2 -> A2/B1; identities, wallet, recovery and reopening preserved\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentSequentialLootSaveBetween",
+        "output": "Isolated scene boot 1: phase7a4-scene-4f126fc238274811bd59fcbc7333161b.json\n[2026-10-11 21:03:05 UTC] [INFO] Entered BootState.\n[2026-10-11 21:03:05 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 21:03:05 UTC] [INFO] M0 init complete.\n[2026-10-11 21:03:05 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 21:03:05 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nSEQUENTIAL LOOT saveBetween=True A2/B1 -> A1/B2 -> A2/B1; identities, wallet, recovery and reopening preserved\n"
+      }
+    ]
+  },
+  {
+    "path": "loot-reassignment-full-playmode.xml",
+    "sha256": "ad5d9d690ac0627d4d1dd714966879942a0acf122bcaf44c16fa2653f560b44f",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3106",
+      "result": "Skipped:Ignored",
+      "total": "3106",
+      "passed": "3096",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-11 21:09:04Z",
+      "end-time": "2026-10-11 21:14:04Z",
+      "duration": "299.9722454"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentLootRejectionReasons",
+        "output": "Isolated scene boot 1: phase7a4-scene-a8235f50e6ec48efafbede2742c68509.json\n[2026-10-11 21:13:33 UTC] [INFO] Entered BootState.\n[2026-10-11 21:13:33 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 21:13:33 UTC] [INFO] M0 init complete.\n[2026-10-11 21:13:33 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 21:13:33 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nDUPLICATE LOOT authority=gd66.diagnostic.canonical_write_noop UI=This room already contains this loot type. Choose another room.\nGlittering Hoard \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nFULL LOOT authority=gd66.content.room_capacity_exceeded UI=This room is full for this category. Choose another room or unassign content.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nCOLLISION LOOT authority=content.position.invalid UI=That cell cannot hold this content. Choose an unoccupied valid cell.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentSequentialLootDraft",
+        "output": "Isolated scene boot 1: phase7a4-scene-da88d743849e47d8af93f63c2ec71c8f.json\n[2026-10-11 21:13:41 UTC] [INFO] Entered BootState.\n[2026-10-11 21:13:42 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 21:13:42 UTC] [INFO] M0 init complete.\n[2026-10-11 21:13:42 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 21:13:42 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nSEQUENTIAL LOOT saveBetween=False A2/B1 -> A1/B2 -> A2/B1; identities, wallet, recovery and reopening preserved\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentSequentialLootSaveBetween",
+        "output": "Isolated scene boot 1: phase7a4-scene-570e9ae30d3e4798a90d67cb797ee646.json\n[2026-10-11 21:13:43 UTC] [INFO] Entered BootState.\n[2026-10-11 21:13:43 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 21:13:43 UTC] [INFO] M0 init complete.\n[2026-10-11 21:13:43 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 21:13:43 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nSEQUENTIAL LOOT saveBetween=True A2/B1 -> A1/B2 -> A2/B1; identities, wallet, recovery and reopening preserved\n"
+      }
+    ]
+  },
+  {
+    "path": "loot-reassignment-red.xml",
+    "sha256": "857f75fdc19a5521f5d393e876df4a03410878f670e4167f2861e55a6276c7e4",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "50",
+      "result": "Failed(Child)",
+      "total": "50",
+      "passed": "49",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-11 20:39:08Z",
+      "end-time": "2026-10-11 20:40:00Z",
+      "duration": "51.4647879"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentLootRejectionReasons",
+        "message": "  Expected: String starting with \"ui.dungeon.content.same_loot\"\n  But was:  \"Unavailable\nGlittering Hoard \u00b7 Basic Room \u00b7 Room 2\"\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentLootRejectionReasons>d__75.MoveNext () [0x0059d] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:145\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": [],
+    "measured_output": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentLootRejectionReasons",
+        "output": "Isolated scene boot 1: phase7a4-scene-95ebab1c02cd4b6aa07e89d73f6f0a95.json\n[2026-10-11 20:39:44 UTC] [INFO] Entered BootState.\n[2026-10-11 20:39:44 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 20:39:44 UTC] [INFO] M0 init complete.\n[2026-10-11 20:39:44 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 20:39:44 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nDUPLICATE LOOT authority=gd66.diagnostic.canonical_write_noop UI=Unavailable\nGlittering Hoard \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nFULL LOOT authority=gd66.content.room_capacity_exceeded UI=Unavailable\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nCOLLISION LOOT authority=content.position.invalid UI=That room-local position cannot hold the selected content.\nHidden Cache \u00b7 Basic Room \u00b7 Room 2\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentSequentialLootDraft",
+        "output": "Isolated scene boot 1: phase7a4-scene-3093cada6f02476486582703174f69b3.json\n[2026-10-11 20:39:53 UTC] [INFO] Entered BootState.\n[2026-10-11 20:39:53 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 20:39:53 UTC] [INFO] M0 init complete.\n[2026-10-11 20:39:53 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 20:39:53 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nSEQUENTIAL LOOT saveBetween=False A2/B1 -> A1/B2 -> A2/B1; identities, wallet, recovery and reopening preserved\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentSequentialLootSaveBetween",
+        "output": "Isolated scene boot 1: phase7a4-scene-e704e875067c491797b2f750d9f34e04.json\n[2026-10-11 20:39:55 UTC] [INFO] Entered BootState.\n[2026-10-11 20:39:55 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-11 20:39:55 UTC] [INFO] M0 init complete.\n[2026-10-11 20:39:55 UTC] [INFO] Entered HomeStubState.\n[2026-10-11 20:39:55 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=1/2 UI=Basic Room \u00b7 Room 1: 1 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=2/2 UI=Basic Room \u00b7 Room 2: 2 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nLOOT COUNT compat.floor.00.legacy-room.00=2/2 UI=Basic Room \u00b7 Room 1: 2 / 2 in this category\nLOOT COUNT compat.floor.00.room.player.0000=1/2 UI=Basic Room \u00b7 Room 2: 1 / 2 in this category\nSEQUENTIAL LOOT saveBetween=True A2/B1 -> A1/B2 -> A2/B1; identities, wallet, recovery and reopening preserved\n"
+      }
+    ]
+  }
+]

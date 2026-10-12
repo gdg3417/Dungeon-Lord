@@ -49,4 +49,5 @@ MonoBehaviour:
   InvalidColor: {r: 1, g: 0.47, b: 0.48, a: 1}
   GridColor: {r: 0.12, g: 0.16, b: 0.2, a: 1}
   FloorBoundaryColor: {r: 0.35, g: 0.48, b: 0.58, a: 1}
+  RoomPlacementGridColor: {r: 0.86, g: 0.79, b: 0.57, a: 1}
   EditorGridColor: {r: 0.18, g: 0.23, b: 0.28, a: 1}

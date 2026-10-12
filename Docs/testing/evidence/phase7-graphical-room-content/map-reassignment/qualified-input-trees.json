@@ -1,0 +1,23 @@
+{
+  "reviewed": "ed06ad9e6f7fd8693b5ff9867b45d469e4ac395e",
+  "qualified_implementation": "ff5e0c255143c8c4a5e3694f8ca148cd283400ec",
+  "branch": "codex/phase7-graphical-room-content-management",
+  "trees": {
+    "Assets": "598e8b8cada6c533b9e338761a21965df232b5f9",
+    "Packages": "e3fec9b0c4018adde155b4d8cd05cac3217df206",
+    "ProjectSettings": "c55e5632c33401052e04e4c9172dfadc312686f3",
+    "ContentAuthoring": "41a73986b5c781df4f2ad2ab83a6cd792d31a70c"
+  },
+  "changed_files": [
+    "Assets/_Project/Data/Bootstrap/string_table_en.json",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs",
+    "Assets/_Project/Editor/DungeonVisualBuildQualification.cs",
+    "Assets/_Project/Scripts/UI/ProductionDungeonController.cs",
+    "Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs",
+    "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs",
+    "Tools/Presentation/collect_map_reassignment_evidence.py"
+  ],
+  "save_schema": 13,
+  "draft_format": 5,
+  "draft_record_version": 4
+}

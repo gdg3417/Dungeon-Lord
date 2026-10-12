@@ -1,0 +1,37 @@
+[
+  {
+    "path": "map-reassignment-focused-01.log",
+    "sha256": "18766e9422dffdca755ec74056108b607edc27026a79eb6d9036e9e7c25d3838",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "map-reassignment-full-editmode.log",
+    "sha256": "eeaaa4c2707c273876d0b318681c32c1d5bac05ddfcf9140053cc570c7df4591",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "map-reassignment-full-playmode.log",
+    "sha256": "9186a5aa7fe094bdffc4c732b282acb9749bdc8e0aa1558a1836ff4dbaac8703",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "map-reassignment-red.log",
+    "sha256": "ee7657ef58cedd49c26cc0a4ebb87ff37ae719fb2c703d9713fc82df21f9e130",
+    "redactions": 1,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "path": "map-reassignment-windows-build.log",
+    "sha256": "20e326391d833b0b7c3d90f0767057c54cafefbb5da525da01974af0c3fd5c80",
+    "redactions": 2,
+    "compiler_errors": [],
+    "compiler_warnings": []
+  }
+]
