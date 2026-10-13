@@ -227,6 +227,51 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Service().RestoreCheckpoint(checkpoint.GetBytes(), checkpoint.Identity, checkpoint.StartIdentity, checkpoint.NextOrdinal, new RunCheckpointLimits(1, 100)).FailureReason,
                 Is.EqualTo("run.checkpoint.byte_limit"));
         }
+        [Test]
+        public void ExportAndRestoreAcceptExactlyTheReplayLimit()
+        {
+            var state = CreateForPlayMode(); state.Advance(7, 0);
+            var limits = new RunCheckpointLimits(4000000, state.NextOrdinal);
+            var checkpoint = state.ExportCheckpoint(limits);
+            var restored = Service().RestoreCheckpoint(checkpoint.GetBytes(), checkpoint.Identity,
+                checkpoint.StartIdentity, checkpoint.NextOrdinal, limits);
+            Assert.That(restored.IsValid, Is.True, restored.FailureReason);
+            Assert.That(B.Structured(restored.Execution.Inspect()), Is.EqualTo(B.Structured(state.Inspect())));
+        }
+        [Test]
+        public void ReplayLimitRejectionLeavesActiveExecutionUnchangedAndUsable()
+        {
+            var state = CreateForPlayMode(); state.Advance(7, 0);
+            var before = B.Structured(state.Inspect());
+            var rejected = Assert.Throws<InvalidOperationException>(() => state.ExportCheckpoint(new RunCheckpointLimits(4000000, state.NextOrdinal - 1)));
+            Assert.That(rejected.Message, Is.EqualTo("run.checkpoint.replay_limit"));
+            Assert.That(B.Structured(state.Inspect()), Is.EqualTo(before));
+            var adequate = new RunCheckpointLimits(4000000, state.NextOrdinal);
+            var checkpoint = state.ExportCheckpoint(adequate);
+            var restored = Service().RestoreCheckpoint(checkpoint.GetBytes(), checkpoint.Identity,
+                checkpoint.StartIdentity, checkpoint.NextOrdinal, adequate);
+            Assert.That(restored.IsValid, Is.True, restored.FailureReason);
+            Assert.That(B.Structured(state.DrainToCompletion()), Is.EqualTo(B.Structured(restored.Execution.DrainToCompletion())));
+        }
+        [Test]
+        public void ZeroEventAndTerminalCheckpointsUseTheSameReplayLimit()
+        {
+            var empty = CreateForPlayMode(); var zero = new RunCheckpointLimits(4000000, 0);
+            var emptyCheckpoint = empty.ExportCheckpoint(zero);
+            var emptyRestore = Service().RestoreCheckpoint(emptyCheckpoint.GetBytes(), emptyCheckpoint.Identity,
+                emptyCheckpoint.StartIdentity, emptyCheckpoint.NextOrdinal, zero);
+            Assert.That(emptyRestore.IsValid, Is.True, emptyRestore.FailureReason);
+
+            var terminal = CreateForPlayMode(); terminal.DrainToCompletion();
+            var terminalLimit = new RunCheckpointLimits(4000000, terminal.NextOrdinal);
+            var terminalCheckpoint = terminal.ExportCheckpoint(terminalLimit);
+            Assert.That(Service().RestoreCheckpoint(terminalCheckpoint.GetBytes(), terminalCheckpoint.Identity,
+                terminalCheckpoint.StartIdentity, terminalCheckpoint.NextOrdinal, terminalLimit).IsValid, Is.True);
+            var rejected = Assert.Throws<InvalidOperationException>(() => terminal.ExportCheckpoint(
+                new RunCheckpointLimits(4000000, terminal.NextOrdinal - 1)));
+            Assert.That(rejected.Message, Is.EqualTo("run.checkpoint.replay_limit"));
+            Assert.That(terminal.IsTerminal, Is.True);
+        }
         [TestCase(false)] [TestCase(true)]
         public void LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(bool absent)
         {

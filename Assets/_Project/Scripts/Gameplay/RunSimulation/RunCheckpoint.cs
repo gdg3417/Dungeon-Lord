@@ -90,6 +90,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal static RunCheckpoint Export(RunExecution execution, long deadline, bool taken, byte[] prefix, RunCheckpointLimits limits)
         {
             if (limits == null) throw new ArgumentNullException(nameof(limits));
+            if (execution.NextOrdinal > limits.MaximumReplayEvents) throw new InvalidOperationException("run.checkpoint.replay_limit");
             if (execution.StartInputs.Length > limits.MaximumBytes) throw new InvalidOperationException("run.checkpoint.byte_limit");
             var view = execution.Inspect();
             var payload = Bytes(w => {
