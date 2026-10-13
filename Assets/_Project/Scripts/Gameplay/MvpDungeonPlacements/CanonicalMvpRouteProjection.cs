@@ -70,6 +70,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 save.corridorContent = validation.CorridorContent;
                 save.sharedBranchKnowledge = validation.BranchKnowledge;
                 save.sharedFloorKnowledge = validation.FloorKnowledge;
+                save.livingDungeon = validation.LivingDungeon;
                 reason = null;
                 return true;
             }

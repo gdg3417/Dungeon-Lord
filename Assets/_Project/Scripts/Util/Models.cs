@@ -1515,6 +1515,7 @@ namespace DungeonBuilder.M0
         [NonSerialized] public CorridorContentAuthority corridorContent;
         [NonSerialized] public SharedBranchKnowledgeAuthority sharedBranchKnowledge;
         [NonSerialized] public SharedFloorKnowledgeAuthority sharedFloorKnowledge;
+        [NonSerialized] public LivingDungeonState livingDungeon;
         public int mvpSelectedRoomSlotIndex;
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();

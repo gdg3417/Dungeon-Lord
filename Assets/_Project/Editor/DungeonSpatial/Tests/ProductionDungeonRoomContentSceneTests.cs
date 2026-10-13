@@ -332,7 +332,10 @@ namespace DungeonBuilder.M0.Tests
         [UnityTest]
         public IEnumerator RoomContentMapReassignmentProductionMouseTouchRecovery()
         {
-            var root=GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
+            var root=GameRoot.Instance;
+            // This preview-preservation fixture controls autonomous ticks while it compares exact save bytes.
+            root.TimeService.OnPause();
+            Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
             var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var source=floor.Layout.Rooms[0]; var original=floor.RoomContents.Assignments.Single();
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1920,1080); yield return SettleContentPanel();

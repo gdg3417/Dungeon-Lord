@@ -170,3 +170,9 @@ Tier is continuous numeric membership over finite values valid under the applica
 - Spec 16 regional population/cohort lifecycle is deferred for MVP. A stable run ID or admission queue is not a regional cohort implementation.
 
 See the design lock's approved decision list and open implementation contracts for details. The roadmap's A/B/C sequence is recommended dependency order, not a fixed PR count.
+
+### Phase B2 implementation boundary (2026-10-13, independent review pending)
+
+The approved B2 schema/migration direction is implemented as schema 14's eighth canonical `primary.livingDungeon` owner. Existing seven owners and frozen schemas 7–13 remain authoritative. Trusted checkpoint pins, shared run-history allocation and resumable integer-clock scheduling use the existing detached complete-save transaction. This changes the earlier provisional schema statement only for this reviewed implementation packet; it does not activate production automatic arrivals or offline progression. See the [implementation contract](planning/living-dungeon-phase-b2-implementation-contract.md) and [qualification evidence](testing/evidence/living-dungeon-phase-b2/qualification.md).
+
+Structural capacity, admission demand and technical processing/storage bounds are independent concerns. Initial two-active/four-retained qualification limits are versioned configuration, not permanent gameplay ceilings. The owner scenarios (25 attractive floors/20 parties and 100 dangerous floors/2–5 powerful parties) remain architectural requirements without approved capacity/attraction formulas. Current B1 checkpoint storage exceeds Profile A for the synthetic scale workloads; production floor/content qualification and storage/performance approval remain dependencies. Terminal records are retained unconsumed until a later approved economic settlement/retirement contract.

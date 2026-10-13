@@ -11,11 +11,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public readonly struct CanonicalSpatialSerializationLimits
     {
         public CanonicalSpatialSerializationLimits(SpatialSerializedInputLimits serialized,
-            CanonicalSpatialSaveWorkloadLimits spatial)
-        { Serialized = serialized; Spatial = spatial; }
+            CanonicalSpatialSaveWorkloadLimits spatial, SaveSpatialMigrationLimitsProfile historical = null)
+        { Serialized = serialized; Spatial = spatial; Historical = historical; }
 
         public SpatialSerializedInputLimits Serialized { get; }
         public CanonicalSpatialSaveWorkloadLimits Spatial { get; }
+        internal SaveSpatialMigrationLimitsProfile Historical { get; }
+        internal CanonicalSpatialSerializationLimits ForSchema(int schema) =>
+            schema < CanonicalSaveSchemaVersions.LivingDungeonIntroduction && Historical != null ? Historical.Canonical : this;
         public bool IsValid => Serialized.IsValid && Spatial.IsValid;
     }
 
@@ -71,6 +74,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static SpatialContractResult<byte[]> SerializeForSchema(DetachedCanonicalSpatialSaveState source,
             CanonicalSpatialSerializationLimits limits, int schemaVersion)
         {
+            limits = limits.ForSchema(schemaVersion);
             var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
             if (!limits.IsValid)
             { issues.Add(SpatialContractIssue.InvalidLimits); return Result<byte[]>(null, issues); }
@@ -99,9 +103,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         internal static SpatialContractResult<SerializedMembers> SerializeMembers(
-            DetachedCanonicalSpatialSaveState source, CanonicalSpatialSerializationLimits limits)
+            DetachedCanonicalSpatialSaveState source, CanonicalSpatialSerializationLimits limits,
+            int schemaVersion = CanonicalSaveSchemaVersions.CurrentWritableTarget)
         {
-            SpatialContractResult<byte[]> complete = Serialize(source, limits);
+            limits = limits.ForSchema(schemaVersion);
+            SpatialContractResult<byte[]> complete = SerializeForSchema(source, limits, schemaVersion);
             if (!complete.IsValid)
                 return new SpatialContractResult<SerializedMembers>(null, complete.Issues);
             try
@@ -113,12 +119,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 // Match full serialization after detached clones turn native null strings into empty strings.
                 NormalizeNativeAuthorityForCanonicalBytes(canonical.Authority);
                 var authorityWriter = new ContractJsonWriter(limits.Serialized);
-                Write(authorityWriter, canonical.Authority, typeof(CanonicalSpatialAuthorityMarker));
+                Write(authorityWriter, canonical.Authority, typeof(CanonicalSpatialAuthorityMarker), schemaVersion);
                 var floorsWriter = new ContractJsonWriter(limits.Serialized);
-                Write(floorsWriter, canonical.Floors, typeof(SavedSpatialFloor[]));
+                Write(floorsWriter, canonical.Floors, typeof(SavedSpatialFloor[]), schemaVersion);
                 var lifecycleWriter = new ContractJsonWriter(limits.Serialized);
                 Write(lifecycleWriter, canonical.LifecycleAndOwnership,
-                    typeof(StructuralLifecycleAndOwnershipState));
+                    typeof(StructuralLifecycleAndOwnershipState), schemaVersion);
                 return new SpatialContractResult<SerializedMembers>(
                     new SerializedMembers(authorityWriter.Finish(), floorsWriter.Finish(),
                         lifecycleWriter.Finish()),
@@ -175,6 +181,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static SpatialContractResult<DetachedCanonicalSpatialSaveState> ParseCore(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, bool includeLifecycle, int schemaVersion)
         {
+            limits = limits.ForSchema(schemaVersion);
             var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
             if (!limits.IsValid)
             { issues.Add(SpatialContractIssue.InvalidLimits); return Result<DetachedCanonicalSpatialSaveState>(null, issues); }

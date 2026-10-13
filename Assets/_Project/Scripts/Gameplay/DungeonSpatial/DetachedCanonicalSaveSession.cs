@@ -200,7 +200,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment,
             CorridorContentAuthority corridorContent,
             SharedBranchKnowledgeAuthority branchKnowledge,
-            SharedFloorKnowledgeAuthority floorKnowledge)
+            SharedFloorKnowledgeAuthority floorKnowledge,
+            LivingDungeonState livingDungeon = null, bool manualRun = false)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -213,6 +214,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out ContractJsonNode root))
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 ContractJsonNode primary = root.Fields[2].Value;
+                var retainedOwner = primary.Fields[primary.Fields.Count - 1].Value;
+                bool activated = retainedOwner.Fields[2].Value.Kind != ContractJsonKind.Null;
+                bool unfinished = activated && retainedOwner.Fields[2].Value.Fields[2].Value.Text !=
+                    retainedOwner.Fields[2].Value.Fields[3].Value.Text;
+                if (unfinished && livingDungeon == null)
+                {
+                    int start = primary.Fields.Count - 8;
+                    if (!SerializeNode(primary.Fields[start].Value).AsSpan().SequenceEqual(spatial.Value.Authority) ||
+                        !SerializeNode(primary.Fields[start + 1].Value).AsSpan().SequenceEqual(spatial.Value.Floors) ||
+                        !SerializeNode(primary.Fields[start + 2].Value).AsSpan().SequenceEqual(spatial.Value.LifecycleAndOwnership) ||
+                        investment != null || corridorContent != null || branchKnowledge != null || floorKnowledge != null)
+                        return Failure(LivingDungeonScheduling.Boundary);
+                }
                 var writer = new ContractJsonWriter(limits.Canonical.Serialized);
                 writer.Node(); writer.Token("{");
                 WriteField(writer, root.Fields[0].Key, root.Fields[0].Value, true);
@@ -236,11 +250,34 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         valueBytes = SerializeNode(retained);
                     }
                     else if (!recognizedState.TryGet(name, out valueBytes)) continue;
+                    if (recognizedState != null && (activated || livingDungeon?.IsDormant == false) && name == "runHistory" && TryFind(primary, name, out var priorHistory))
+                    {
+                        var historyIssues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
+                        if (!ContractJson.TryParse(valueBytes, limits.Canonical.Serialized, historyIssues, out var nextHistory))
+                            return Failure(LivingDungeonScheduling.Invalid);
+                        if (!LivingDungeonScheduling.HistorySequence(priorHistory, out int oldValue) ||
+                            !LivingDungeonScheduling.HistorySequence(nextHistory, out int nextValue) ||
+                            nextValue < oldValue) return Failure(LivingDungeonScheduling.Invalid);
+                        if (manualRun && (oldValue == int.MaxValue || nextValue != checked(oldValue + 1)))
+                            return Failure(LivingDungeonScheduling.Invalid);
+                        if (!manualRun)
+                        {
+                            var expected = JsonUtility.FromJson<RunHistoryState>(Encoding.UTF8.GetString(SerializeNode(priorHistory)));
+                            expected.NextRunSequence = nextValue;
+                            if ((livingDungeon == null && nextValue != oldValue) ||
+                                JsonUtility.ToJson(expected) != Encoding.UTF8.GetString(valueBytes)) return Failure(LivingDungeonScheduling.Invalid);
+                        }
+                        // Scheduling changes only the allocator. Preserve the other historical fields, nulls and extensions.
+                        valueBytes = MergeHistory(priorHistory, nextHistory, manualRun);
+                    }
+                    if (unfinished && livingDungeon == null && !LifecycleMember(name) &&
+                        (!TryFind(primary, name, out var priorValue) || !SerializeNode(priorValue).AsSpan().SequenceEqual(valueBytes)))
+                        return Failure(LivingDungeonScheduling.Boundary);
                     copiedBytes = Add(copiedBytes, valueBytes.Length,
                         limits.Whole.MaximumCopiedValueBytes);
                     WriteRawField(writer, name, valueBytes, first); first = false;
                 }
-                const int canonicalMemberCount = 7;
+                const int canonicalMemberCount = 8;
                 int canonicalStart = primary.Fields.Count - canonicalMemberCount;
                 for (int index = 0; index < canonicalStart; index++)
                 {
@@ -268,6 +305,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 writer.Token(","); writer.String(PhaseSixFloorKnowledge.OwnerName); writer.Token(":");
                 if (floorKnowledge != null) PhaseSixFloorKnowledge.Write(writer, floorKnowledge);
                 else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[canonicalStart + 6].Value);
+                writer.Token(","); writer.String(LivingDungeonContracts.OwnerName); writer.Token(":");
+                if (livingDungeon != null) LivingDungeonContracts.Write(writer, livingDungeon);
+                else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[canonicalStart + 7].Value);
                 writer.Token("}");
 
                 for (int index = 3; index < root.Fields.Count; index++)
@@ -307,6 +347,34 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return writer.Finish();
         }
 
+        private byte[] MergeHistory(ContractJsonNode prior, ContractJsonNode next, bool manualRun)
+        {
+            bool Changed(string key) => key == "NextRunSequence" || (manualRun && (key == "LatestOutcome" || key == "RecentOutcomes"));
+            var writer = new ContractJsonWriter(limits.Canonical.Serialized); writer.Node(); writer.Token("{"); bool first = true;
+            foreach (var field in prior.Fields)
+            {
+                var value = Changed(field.Key) && TryFind(next, field.Key, out var replacement) ? replacement : field.Value;
+                WriteField(writer, field.Key, value, first); first = false;
+            }
+            foreach (var field in next.Fields)
+                if (Changed(field.Key) && !TryFind(prior, field.Key, out _))
+                { WriteField(writer, field.Key, field.Value, first); first = false; }
+            writer.Token("}"); return writer.Finish();
+        }
+
+        internal DetachedCanonicalSaveSessionResult PrepareLivingDungeonReplacement(
+            DetachedRecognizedSaveStateSnapshotResult recognized, DetachedCanonicalSpatialSaveState spatial,
+            LivingDungeonState livingDungeon) => recognized?.IsSuccess == true
+                ? PrepareReplacement(recognized.Snapshot, spatial, null, null, null, null, livingDungeon)
+                : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+
+        internal DetachedCanonicalSaveSessionResult PrepareManualRunReplacement(
+            DetachedRecognizedSaveStateSnapshotResult recognized, DetachedCanonicalSpatialSaveState spatial,
+            StructuralInvestmentRecord[] investment, CorridorContentAuthority corridor,
+            SharedBranchKnowledgeAuthority branch, SharedFloorKnowledgeAuthority floor) => recognized?.IsSuccess == true
+                ? PrepareReplacement(recognized.Snapshot, spatial, investment, corridor, branch, floor, null, true)
+                : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+
         private static void WriteField(ContractJsonWriter writer, string key,
             ContractJsonNode value, bool first)
         {
@@ -344,6 +412,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static bool IsFrozenLegacySpatialMember(string name) =>
             name == "mvpDungeonPlacements" || name == "mvpDungeonFloorLayout" ||
             name == "mvpRoomSlotAssignments";
+
+        private static bool LifecycleMember(string name) => name == "lastSavedUtcUnix" ||
+            name == "lastPausedUtcUnix" || name == "lastResumedUtcUnix" || name == "lastKnownAppState";
 
         private static bool TryFind(ContractJsonNode parent, string name, out ContractJsonNode value)
         {

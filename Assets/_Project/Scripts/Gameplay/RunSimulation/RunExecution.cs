@@ -118,6 +118,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private int encounters, lootInteractions;
         public bool IsTerminal { get; private set; }
         public long NextOrdinal => ordinal;
+        internal bool OutcomeTaken => taken;
         internal RunExecution(RunParty party, RunLogicalTiming timing, long maximumEvents)
         {
             Party = party; this.timing = timing;

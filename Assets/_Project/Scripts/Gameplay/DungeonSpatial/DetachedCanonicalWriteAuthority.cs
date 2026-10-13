@@ -265,6 +265,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     !CanonicalEqual(currentRuntime.validatedCanonicalSpatialState, owned.State)) return Failure(invalid);
             }
             catch { return Failure(invalid); }
+            if (owned.LivingDungeon?.IsDormant == false &&
+                (!owned.LivingDungeon.IsClosed || !LivingDungeonScheduling.AllocatorValid(currentRuntime.runHistory, owned.LivingDungeon, true)))
+                return Failure(LivingDungeonScheduling.Invalid);
             try
             {
                 if (!session.GetCurrentBytes().SequenceEqual(fileSystem.ReadAllBytes(activePath)))
@@ -283,6 +286,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 candidate.canonicalSpatialAuthority = owned.State.Authority; candidate.spatialFloors = owned.State.Floors;
                 candidate.corridorContent = owned.CorridorContent; candidate.sharedBranchKnowledge = owned.BranchKnowledge;
                 candidate.sharedFloorKnowledge = owned.FloorKnowledge;
+                candidate.livingDungeon = owned.LivingDungeon;
                 candidate.lastSavedUtcUnix = savedUtcUnix;
                 simulation.CalculatePhaseFiveBRun(candidate, owned, production, postureId, limits.Canonical);
             }
@@ -296,7 +300,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var snapshot = DetachedRecognizedSaveStateSnapshot.Capture(candidate, limits);
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             var result = PrepareAndPersist(activePath, fileSystem, session,
-                session.PrepareLiveReplacement(snapshot, owned.State, owned.Investment,
+                session.PrepareManualRunReplacement(snapshot, owned.State, owned.Investment,
                     owned.CorridorContent, candidate.sharedBranchKnowledge,
                     candidate.sharedFloorKnowledge), false);
             if (result.IsSuccess)

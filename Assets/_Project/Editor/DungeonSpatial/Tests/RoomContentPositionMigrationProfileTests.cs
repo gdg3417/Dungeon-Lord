@@ -422,8 +422,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void SchemaTwelveContractRemainsFrozenWhileSchemaThirteenActivatesPosition()
         {
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(13));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(13));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(14));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(14));
+            Assert.That(CanonicalSaveSchemaVersions.RoomContentPositionIntroduction, Is.EqualTo(13));
             CollectionAssert.AreEqual(new[] { "AssignmentId", "CategoryId", "OptionId",
                     "RoomInstanceId", "RoomLocalPosition", "Sequence" },
                 typeof(RoomContentAssignment).GetFields(BindingFlags.Instance | BindingFlags.Public)

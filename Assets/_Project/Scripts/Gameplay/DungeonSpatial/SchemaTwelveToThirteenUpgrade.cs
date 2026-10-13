@@ -52,7 +52,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     }
                 }
                 SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> members =
-                    CanonicalSpatialSaveSerializer.SerializeMembers(upgraded, limits);
+                    CanonicalSpatialSaveSerializer.SerializeMembers(upgraded, limits,
+                        CanonicalSaveSchemaVersions.RoomContentPositionIntroduction);
                 if (!members.IsValid) return false;
                 var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
                 if (!ContractJson.TryParse(source, limits.Serialized, issues, out ContractJsonNode root))
@@ -93,7 +94,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 writer.Token("}");
                 byte[] prepared = writer.Finish();
-                if (!DetachedCompleteSaveContract.ParseValidateAndRoundTrip(prepared, limits).IsValid)
+                if (!DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(prepared, limits).IsValid)
                     return false;
                 candidate = prepared;
                 return true;

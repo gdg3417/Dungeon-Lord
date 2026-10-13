@@ -101,8 +101,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             Assert.That(Json(f.Runtime.structureRuntime), Is.EqualTo(Json(beforeRuntime.structureRuntime)));
             Assert.That(Json(f.Runtime.runHistory), Is.EqualTo(Json(beforeRuntime.runHistory)));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(13));
-            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":13"));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(14));
+            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":14"));
             AssertRejected(f, item.AssignmentId, DetachedCanonicalSpatialMutation.ActiveAssignmentMissingReason);
         }
 

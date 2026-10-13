@@ -203,6 +203,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaElevenToTwelveUpgrade.TryPrepare(schemaEight, fixture.Limits, out schemaEight), Is.True);
             Assert.That(SchemaTwelveToThirteenUpgrade.TryPrepare(schemaEight, fixture.Limits,
                 PhaseFourTestSupport.PositionProfiles(fixture.Limits), out schemaEight), Is.True);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(schemaEight, fixture.Limits).IsValid, Is.True);
+            Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(schemaEight, fixture.Limits, out schemaEight), Is.True);
             DetachedCompleteSaveValidationResult contextual =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.CurrentContext);
             Assert.That(contextual.IsValid, Is.True, contextual.Reason);

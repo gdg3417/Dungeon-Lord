@@ -100,6 +100,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 PhaseFiveSaveContracts.Write(writer, PhaseFiveSaveContracts.EmptyKnowledge());
                 writer.Token(","); writer.String(PhaseSixFloorKnowledge.OwnerName); writer.Token(":");
                 PhaseSixFloorKnowledge.Write(writer, PhaseSixFloorKnowledge.Empty());
+                writer.Token(","); writer.String(LivingDungeonContracts.OwnerName); writer.Token(":");
+                LivingDungeonContracts.Write(writer, LivingDungeonState.Empty());
                 writer.Token("}}");
                 byte[] bytes = writer.Finish();
                 var context = new DetachedCurrentTargetValidationContext(compatibility, production,

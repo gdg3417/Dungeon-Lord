@@ -13,6 +13,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class DetachedSpatialSaveLoadCoordinatorTests
     {
+        [TestCase(1, "livingDungeon", false)] [TestCase(2, "livingDungeon", false)]
+        [TestCase(3, "livingDungeon", false)] [TestCase(4, "livingDungeon", false)]
+        [TestCase(5, "livingDungeon", false)] [TestCase(6, "livingDungeon", false)]
+        [TestCase(6, "LivingDungeon", false)] [TestCase(1, "livingDungeon", true)] [TestCase(1, "LivingDungeon", true)]
+        public void NewOwnerCollisionInLegacySourceRejectsBeforeAnyMigrationWrite(int schema, string ownerName, bool unwrapped)
+        {
+            var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(schema, unwrapped);
+            string json = Encoding.UTF8.GetString(fixture.Original);
+            byte[] source = Encoding.UTF8.GetBytes(unwrapped ? "{\"" + ownerName + "\":null," + json.Substring(1) :
+                json.Replace("\"primary\":{}", "\"primary\":{\"" + ownerName + "\":null}"));
+            Assert.That(RawSavePayloadClassifier.Classify(source,
+                Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator, new RawSaveEnvelopeVersionContract(1, 6),
+                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator).IsSuccess, Is.True);
+            var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            string active = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "b2-legacy-collision-" + Guid.NewGuid().ToString("N") + ".json"));
+            fs.Seed(active, source);
+            var result = Coordinator(fixture).Load(active, Supported(fs, active));
+            Assert.That(result.IsSuccess, Is.False); Assert.That(result.Session, Is.Null);
+            Assert.That(result.Reason, Is.EqualTo(SchemaSevenToEightUpgrade.InvalidReason));
+            CollectionAssert.AreEqual(source, fs.ReadAllBytes(active));
+            Assert.That(fs.Operations.Any(o => o.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write ||
+                o.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace), Is.False);
+        }
+
         [Test]
         public void NarrowHallRepairChangesOnlyRecognizedSpatialEvidenceAndPreservesUnknownBytes()
         {
@@ -254,7 +278,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
             Assert.That(service.CanonicalSession, Is.Not.Null);
             Assert.That(Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":13"));
+                Does.Contain("\"schemaVersion\":14"));
         }
 
         [Test]

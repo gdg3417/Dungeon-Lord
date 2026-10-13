@@ -58,7 +58,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch (EncoderFallbackException) { return Failure(InvalidReason); }
         }
 
-        public static SaveSpatialMigrationLimitsLoadResult Load(byte[] framedBytes)
+        public static SaveSpatialMigrationLimitsLoadResult Load(byte[] framedBytes) => LoadCore(framedBytes, true);
+        private static SaveSpatialMigrationLimitsProfile historical;
+        private static SaveSpatialMigrationLimitsLoadResult LoadCore(byte[] framedBytes, bool includeHistorical)
         {
             if (framedBytes == null || framedBytes.Length == 0) return Failure(MissingReason);
             // Production text assets use exactly one terminal LF. ContractJson receives only the
@@ -100,8 +102,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 whole.MaximumCopiedValueBytes > raw.MaximumInputBytes ||
                 whole.MaximumUnknownMemberBytes > raw.MaximumInputBytes)
                 return Failure(InvalidReason);
+            if (includeHistorical)
+            {
+                if (historical == null)
+                {
+                    TextAsset frozen = Resources.Load<TextAsset>("save_spatial_migration_limits_schema13");
+                    var loaded = LoadCore(frozen?.bytes, false);
+                    if (!loaded.IsSuccess) return Failure(loaded.Reason);
+                    historical = loaded.Profile;
+                }
+                raw = new RawSavePayloadClassificationLimits(values[0], values[1], values[2], values[3], values[4], values[5], historical);
+            }
             return new SaveSpatialMigrationLimitsLoadResult(new SaveSpatialMigrationLimitsProfile(raw,
-                new CanonicalSpatialSerializationLimits(serialized, spatial), whole), null);
+                new CanonicalSpatialSerializationLimits(serialized, spatial, includeHistorical ? historical : null), whole), null);
         }
 
         private static SaveSpatialMigrationLimitsLoadResult Failure(string reason) =>

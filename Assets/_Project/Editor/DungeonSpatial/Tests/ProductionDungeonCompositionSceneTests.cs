@@ -182,6 +182,7 @@ namespace DungeonBuilder.M0.Tests
             int commands=controller.Draft.CommandCount;
             try
             {
+                yield return WaitForViewportGeometry();
                 yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("displaySettings")));
                 Assert.That(ui.Q("displayPopover").resolvedStyle.display,Is.EqualTo(DisplayStyle.Flex));
                 yield return CompositionTap(CompositionButtonScreen(ui.Q<Button>("large")));
