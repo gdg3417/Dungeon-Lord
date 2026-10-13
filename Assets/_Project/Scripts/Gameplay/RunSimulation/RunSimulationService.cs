@@ -121,7 +121,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 MvpOrderedRouteRoom routeRoom = route[i];
                 if (snapshot != null)
                     foreach (var step in snapshot.Floors[floorOrdinal].TraverseConnection(i)) yield return step;
-                if (routeRoom.Spatial == null) yield return new RunStep(RunStepKind.RoomEntry, routeRoom.FloorIndex, routeRoom.RoomInstanceId);
+                if (routeRoom.Spatial == null) foreach (var boundary in RunStep.Pure(new RunStep(RunStepKind.RoomEntry, routeRoom.FloorIndex, routeRoom.RoomInstanceId))) yield return boundary;
                 MvpPlacementEffectsSummary localEffects = MvpPlacementEffectsResolver.ResolvePlacements(routeRoom.ToOrderedPlacements(), _config);
                 int entrants = currentSurvivors;
                 // Preserve the pre-Phase-5B one-room loot identity; multi-room identity is unchanged.
@@ -135,6 +135,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                         foreach (var step in ResolveSpatialRoom(routeRoom, party, events, spatialEvents, posture, manaAtStart, spatial)) yield return step;
                         localEffects = spatial.Effects;
                     }
+                    yield return RunStep.Before(RunStepKind.RoomComplete);
                     AddPlacementEffects(reachedEffects, localEffects);
                     rooms.Add(BuildEmptyRoomSummary(routeRoom, entrants, localEffects, roomSeed, generatedValue + (traversal?.Value ?? 0)));
                     yield return new RunStep(RunStepKind.RoomComplete, routeRoom.FloorIndex, routeRoom.RoomInstanceId);
@@ -175,6 +176,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 else foreach (RunRoomAssignment assignment in assignments)
                 {
                     if (party.IsWiped) break;
+                    yield return RunStep.Before(InteractionStep(routeRoom, assignment, null).Kind);
                     if (assignment.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId)
                     {
                         yield return InteractionStep(routeRoom, assignment, null);
@@ -186,6 +188,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     events.Add(encounter);
                     yield return InteractionStep(routeRoom, assignment, encounter);
                 }
+                yield return RunStep.Before(RunStepKind.RoomComplete);
                 if (party.IsWiped && routeRoom.Spatial == null)
                 {
                     // Unreached later assignments cannot contribute loot, attraction, or Heat effects.
@@ -254,6 +257,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 // is now also required there for spatial inputs, without changing that contract.
                 if (snapshot == null || snapshot.Floors.Count == 1 || party.IsWiped || rooms.LastOrDefault()?.StoppedRoute == true) break;
                 string next = floorOrdinal + 1 < snapshot.Floors.Count ? snapshot.Floors[floorOrdinal + 1].FloorInstanceId : null;
+                yield return RunStep.Before(RunStepKind.FloorDecision);
                 var transition = FloorTransitionDecision.Resolve(_config.PhaseSix, party,
                     snapshot.Floors[floorOrdinal].FloorInstanceId, next, generatedValue + (traversal?.Value ?? 0),
                     objective.Pull(snapshot.Floors[floorOrdinal].FloorIndex, next != null,
@@ -263,9 +267,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 yield return new RunStep(RunStepKind.FloorDecision, snapshot.Floors[floorOrdinal].FloorIndex, null,
                     continueChosen: transition.Descend);
                 if (!transition.Descend) { deliberateExit = next != null; break; }
-                yield return new RunStep(RunStepKind.FloorTransfer, snapshot.Floors[floorOrdinal + 1].FloorIndex, null);
+                foreach (var boundary in RunStep.Pure(new RunStep(RunStepKind.FloorTransfer, snapshot.Floors[floorOrdinal + 1].FloorIndex, null))) yield return boundary;
             }
 
+            yield return RunStep.Before(RunStepKind.Terminal);
             if (traversal != null)
             {
                 generatedItems.AddRange(traversal.Items); generatedValue += traversal.Value;
@@ -499,10 +504,12 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             foreach (RunRoomAssignment assignment in compatibilityRoom.OrderedAssignments())
             {
                 if (party.IsWiped) break;
+                yield return RunStep.Before(InteractionStep(compatibilityRoom, assignment, null).Kind);
                 var encounter = RunEncounterResolver.Resolve(party, _config.PhaseFiveB, assignment, 0, 0, pressure);
                 events.Add(encounter);
                 yield return InteractionStep(compatibilityRoom, assignment, encounter);
             }
+            yield return RunStep.Before(RunStepKind.Terminal);
             if (party.IsWiped) { success = false; score = 0; reasonKey = PartyWipedReasonKey; }
             string[] feedbackTagKeys = BuildFeedbackTagKeys(runtime, success, compositionOutcome);
             RunLootSummary lootSummary = party.IsWiped ? new RunLootSummary { ResolverSuccess = true } : ApplyCompositionToLootSummary(

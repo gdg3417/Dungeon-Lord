@@ -1,0 +1,148 @@
+{
+  "unchanged": true,
+  "total_verified_files": 2462,
+  "original_audit": "owner-preservation.json",
+  "additional_files": {
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_action_test.json": {
+      "bytes": 33326,
+      "sha256": "f9c52145b468f92033b10c0220ed8393aa4d077833e93afeb234b939326852d1"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_compact_feedback_test.json": {
+      "bytes": 24299,
+      "sha256": "73b7a5bad2ed3921054acb19cc8bf97df6be7029c6afa0438b691b626d209d5c"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_copy_feedback_test.json": {
+      "bytes": 24556,
+      "sha256": "e65d84bfa80b93de8b89d9ae4374c66643fbe70bed9a9ff62f21574f417f0160"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_dev_run_feedback_clear_test.json": {
+      "bytes": 34973,
+      "sha256": "c21698706a0d875f54761bdcca370fd2f0eb14f32ccf2357b062031dcb2647b9"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_diagnostics_page_down_smoke_scroll_test.json": {
+      "bytes": 33326,
+      "sha256": "f9c52145b468f92033b10c0220ed8393aa4d077833e93afeb234b939326852d1"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_f6_room_slot_consistency_test.json": {
+      "bytes": 28797,
+      "sha256": "5a67c605b5ff361440f48c6df27ad268043c23557ad3accb888541db21b9b1b7"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_feedback_run_test.json": {
+      "bytes": 24525,
+      "sha256": "7e6ab1949167d70fcb9a50a6a3cd4e8b522248a017aaefa24e3030342afca456"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_intent_fallback_test.json": {
+      "bytes": 33065,
+      "sha256": "0e37c41dc45f3baa838053fadc7d9622e58ebf62eae0dd07f267c174ef85d554"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_intent_posture_test.json": {
+      "bytes": 33821,
+      "sha256": "7fba243be3c3c4e85ea29a2cfcbd16f3f42446583e367aae5d3540d5510275ba"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_no_raw_ids_test.json": {
+      "bytes": 24556,
+      "sha256": "b7362a12a493ae67f02bd8d7ac4913461f114bdb03a51a78520747a4343b1229"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_overflow_scroll_test.json": {
+      "bytes": 33326,
+      "sha256": "f9c52145b468f92033b10c0220ed8393aa4d077833e93afeb234b939326852d1"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_run_feedback_focus_test.json": {
+      "bytes": 24210,
+      "sha256": "c7a134d834ab914f614cd89b7afd257018446c578c4bc9c20138cd5f4e5a4817"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_run_feedback_outcome_cue_test.json": {
+      "bytes": 24299,
+      "sha256": "a3bd88f9dd375665f7fdee9b3820dc3047b4420b0af6695da96366c715efd223"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_run_feedback_updates_test.json": {
+      "bytes": 34973,
+      "sha256": "c21698706a0d875f54761bdcca370fd2f0eb14f32ccf2357b062031dcb2647b9"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_run_focus_page_down_smoke_scroll_test.json": {
+      "bytes": 33326,
+      "sha256": "f9c52145b468f92033b10c0220ed8393aa4d077833e93afeb234b939326852d1"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\bootstrap_overlay_vs15_flow_test.json": {
+      "bytes": 25475,
+      "sha256": "2dfadda9fc131646dc1555d4c4f29bf8c18610118b23db52fff59ca3709ab1d2"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\living-dungeon-phase-a-validation.json": {
+      "bytes": 77415,
+      "sha256": "6b882198f9b2b23c7183b7fa7ffe7f3d645ae079f4ba99979b72dbf766818c95"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\mvp_canonical_journey_test.json": {
+      "bytes": 38868,
+      "sha256": "d5b6d9c96b3a3423a033cdee83398603e91733a4c14098f3cad3d4c92abf8a87"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\phase7-room-construction-uat-b681ebc8e4664312a1feb2a471ebd4f2.json": {
+      "bytes": 8834,
+      "sha256": "efb7b0dc9c3e4dd06f469c0d5ef0e054222b31bb93d1c6a1c2bea71dc2b9248e"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\phase7a5-guidance-validation-fallback.json": {
+      "bytes": 5509,
+      "sha256": "b58fe488d0b5b5f2b299ca5b0dd0cdc69857d6726de1f152739cc071d8f83155"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\room-construction-validation-fallback.json": {
+      "bytes": 5511,
+      "sha256": "2b912967910a2a0e95cd5377ca9abab6977883ab0c9a4a0f5aa0494117c170cc"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\run_sim_test_applied.json": {
+      "bytes": 28059,
+      "sha256": "c99fd62864b6f37af5e0ca0760d40ec3fd9b394bab9104e204550797bd9bf2f6"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\run_sim_test_clamp.json": {
+      "bytes": 27960,
+      "sha256": "0ad4262bf6f7d7ee33b78066cbbbeeeadcb7fd03d77bd2380215870bae5d9c7a"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\run_sim_test_composition_outcome.json": {
+      "bytes": 32867,
+      "sha256": "0f2345074259481449c82742e4f577f8bc1c7bc1a305848d470adca4ef93f263"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\run_sim_test_composition_persisted_slots.json": {
+      "bytes": 33588,
+      "sha256": "86e152aca30e6c7dd8b2f0aa376836d631602aa70ef9b697afc77cb0e0a43666"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\run_sim_test_not_applied.json": {
+      "bytes": 26639,
+      "sha256": "9ae48017ede1d958f1b39cabcae33e36f7d6c90d3fac0ae3a6557f1a340c3cb4"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\save_primary_backup_20260821020204.json": {
+      "bytes": 20045,
+      "sha256": "e0f9a2851117fd97076c1dba64144a712ef1ac1d91656552cb4f9e914b228df3"
+    },
+    "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\save_primary_backup_20260821020209.json": {
+      "bytes": 20045,
+      "sha256": "473934320d09c9dca0445f7e048d3d4764f8f20a050412cd66b2dfa2cd7512c7"
+    }
+  },
+  "test_fixture_restoration": {
+    "restored": [
+      "bootstrap_overlay_action_test.json",
+      "bootstrap_overlay_compact_feedback_test.json",
+      "bootstrap_overlay_copy_feedback_test.json",
+      "bootstrap_overlay_dev_run_feedback_clear_test.json",
+      "bootstrap_overlay_diagnostics_page_down_smoke_scroll_test.json",
+      "bootstrap_overlay_f6_room_slot_consistency_test.json",
+      "bootstrap_overlay_feedback_run_test.json",
+      "bootstrap_overlay_intent_fallback_test.json",
+      "bootstrap_overlay_intent_posture_test.json",
+      "bootstrap_overlay_no_raw_ids_test.json",
+      "bootstrap_overlay_overflow_scroll_test.json",
+      "bootstrap_overlay_run_feedback_focus_test.json",
+      "bootstrap_overlay_run_feedback_outcome_cue_test.json",
+      "bootstrap_overlay_run_feedback_updates_test.json",
+      "bootstrap_overlay_run_focus_page_down_smoke_scroll_test.json",
+      "bootstrap_overlay_vs15_flow_test.json",
+      "mvp_canonical_journey_test.json",
+      "run_sim_test_applied.json",
+      "run_sim_test_clamp.json",
+      "run_sim_test_composition_outcome.json",
+      "run_sim_test_composition_persisted_slots.json",
+      "run_sim_test_not_applied.json"
+    ],
+    "original_owner_files_unchanged": true,
+    "primary_save_restored": false,
+    "exact_byte_preservation": true
+  }
+}

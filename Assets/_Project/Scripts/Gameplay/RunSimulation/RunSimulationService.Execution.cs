@@ -9,6 +9,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 {
     public sealed partial class RunSimulationService
     {
+        public RunCheckpointRestoreResult RestoreCheckpoint(byte[] bytes, string expectedCheckpointIdentity, string expectedStartIdentity,
+            long expectedOrdinal, RunCheckpointLimits limits) =>
+            RunCheckpointCodec.Restore(bytes, expectedCheckpointIdentity, expectedStartIdentity, expectedOrdinal, limits);
         public RunExecution StartSnapshot(int sequence, ActiveFloorRunSnapshot snapshot,
             RunLogicalTiming timing = null, long? eventLimit = null)
         {
@@ -78,6 +81,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (eventLimit.HasValue && eventLimit.Value > bound) throw new ArgumentException("run.execution.invalid_limit");
             var state = new RunExecution(RunPartyGenerator.Create(capturedConfig.PhaseFiveB, RunId(sequence)), timing,
                 eventLimit ?? bound) { Traversal = traversal, Snapshot = snapshot };
+            state.StartInputs = RunStartCapture.Capture(capturedConfig, engine._lootConfig, engine._lootTableId,
+                captured, tickStarted, sequence, postureId, rooms, snapshot, timing, eventLimit ?? bound);
+            state.PrefixDigest = RunCheckpointCodec.Hash(state.StartInputs);
             state.Initialize(engine.ExecuteAndFinish(state, captured, tickStarted, sequence, postureId, rooms,
                 traversal, snapshot, objective));
             return state;
