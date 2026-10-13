@@ -1,5 +1,7 @@
 # Living Dungeon Phase A implementation and qualification
 
+The focused PR #233 nonspatial loot event correction and subsequent regression/build rerun are recorded in [review-correction qualification](review-correction/qualification.md). The original evidence below and original frozen fixtures are retained.
+
 Verified baseline: `a9a9c8e98a0360c1b01224044eb78015200e4a40`, merged PR #232. Local main was `39ed8aa`; refreshed origin/main and live GitHub main matched the expected merge. PRs #230–#232 were verified merged. The initial tree was clean on the design-lock branch; implementation branch `codex/living-dungeon-phase-a` was created from origin/main. A subsequent fetch during qualification still found the same main baseline.
 
 Recommendation: GPT-6.1 Sol, High, Complex, for the locked deterministic refactor across established simulation/save/economy authorities. No fallback selected. AGENTS.md and canonical model policy were read, along with the owner lock, active roadmap, Phase 7A0/Phase 6 locks, invariants, M6-FU0 and relevant Specs 2/16/17/25/28/29/36/38. Existing simulation/spatial/branch/floor/HP/economy, detached writer, SaveService/GameRoot publication, validator, migration and test architecture were inspected. The Unity CLI skill supplied the qualification workflow.

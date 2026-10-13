@@ -1,0 +1,163 @@
+[
+  {
+    "file": "phase-a-review-focused-editmode.xml",
+    "sha256": "fc3c144d9a6066eaccca8a18f2f60e219982819c7a24c6865512c55646a703e9",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "42",
+      "result": "Passed",
+      "total": "42",
+      "passed": "42",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 23:28:17Z",
+      "end-time": "2026-10-12 23:28:18Z",
+      "duration": "1.6686634"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "phase-a-review-focused-playmode.xml",
+    "sha256": "914bc9507579d4fb010524ace0ffad82787a29c872777de8f619357b0aa8abbe",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "2",
+      "result": "Passed",
+      "total": "2",
+      "passed": "2",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 23:28:57Z",
+      "end-time": "2026-10-12 23:28:57Z",
+      "duration": "0.1440779"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "phase-a-review-full-editmode.xml",
+    "sha256": "0fa3972e92050c14894582e52952107e5074ac291c7dcf2a5a3693158b12cd34",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1747",
+      "result": "Skipped:Ignored",
+      "total": "1747",
+      "passed": "1746",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 23:48:34Z",
+      "end-time": "2026-10-12 23:48:56Z",
+      "duration": "21.9479801"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ]
+  },
+  {
+    "file": "phase-a-review-full-playmode.xml",
+    "sha256": "4ab95249d5650562fe01ac3e69b259bfc80de1ad5242cbd0537acaf1f7991cf4",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3180",
+      "result": "Skipped:Ignored",
+      "total": "3180",
+      "passed": "3170",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 23:50:35Z",
+      "end-time": "2026-10-12 23:55:45Z",
+      "duration": "309.9736571"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ]
+  },
+  {
+    "file": "phase-a-review-initial-full-editmode.xml",
+    "sha256": "e4c8bbcee4fed061f3c763504c4acf0f615f73c9a3467169c79c92f05a98ae95",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1747",
+      "result": "Skipped:Ignored",
+      "total": "1747",
+      "passed": "1746",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-12 23:38:38Z",
+      "end-time": "2026-10-12 23:39:00Z",
+      "duration": "21.8417819"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ]
+  }
+]

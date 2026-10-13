@@ -1,0 +1,10 @@
+{
+  "diff_check": "passed",
+  "python_compile": "passed",
+  "strict_input_tests": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0
+  }
+}

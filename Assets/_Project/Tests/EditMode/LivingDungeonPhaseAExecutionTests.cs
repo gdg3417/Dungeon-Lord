@@ -22,6 +22,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new StructureRuntimeState { Heat = 9.75, ManaReserve = 100 }, 42, 1, RunPostureResolver.BalancedId,
                 new[] { B.Room(0, true, B.Content()), B.Room(1, true, B.Content()) }, timing ?? Timing(), limit);
         public static object CreateExecutionForPlayMode() => Start();
+        public static object CreateNonspatialExecutionForPlayMode() => NonspatialLoot();
         public static string CompleteForPlayMode(object execution) => B.Structured(((RunExecution)execution).DrainToCompletion());
         public static void AdvanceForPlayMode(object execution)
         { var state=(RunExecution)execution; state.Advance(1,state.NextOrdinal); }
@@ -29,6 +30,72 @@ namespace DungeonBuilder.M0.Tests.EditMode
             s.EventId + ":" + s.Kind + ":" + s.LogicalTime + ":" + s.FloorIndex + ":" + s.RoomId + ":" +
             s.AssignmentId + ":" + s.Position.X + "," + s.Position.Y + ":" + s.PositionSpace + ":" + s.Distance + ":" +
             s.ContinueChosen + ":" + s.CarriedLootValueAfter + ":" + B.Structured(s.Encounter)));
+
+        private static RunExecution NonspatialLoot(bool wipe = false) =>
+            new RunSimulationService(B.Configuration(wipe ? "wipe" : "clear"), PhaseSixA4Tests.Loot()).StartRoute(
+                new StructureRuntimeState { ManaReserve = 100 }, 42, 1, RunPostureResolver.BalancedId,
+                new[] { B.Room(0, false, wipe ? Enumerable.Range(0, 3).Select(i => B.Assignment("killer" + i,
+                    MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 0, 1, i))
+                    .Concat(B.Content().Where(a => a.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId)).ToArray()
+                    : B.Content()) });
+
+        [Test]
+        public void NonspatialLootBoundaryCountsReachOnceAndDefersRewardToRoomComplete()
+        {
+            var state = NonspatialLoot();
+            Assert.That(state.AdvanceToNextEvent(0).Kind, Is.EqualTo(RunStepKind.RoomEntry));
+            for (int i = 0; i < 4; i++)
+                Assert.That(state.AdvanceToNextEvent(state.NextOrdinal).Encounter, Is.Not.Null);
+            var before = state.Inspect();
+            Assert.That(before.ReachedLootInteractions, Is.Zero);
+            Assert.That(before.CarriedLootValue, Is.Zero);
+            var first = state.AdvanceToNextEvent(state.NextOrdinal);
+            Assert.That(first.Kind, Is.EqualTo(RunStepKind.LootInteraction));
+            Assert.That(first.AssignmentId, Is.EqualTo("l1"));
+            Assert.That(first.Encounter, Is.Null);
+            Assert.That(state.Inspect().ReachedLootInteractions, Is.EqualTo(1));
+            CollectionAssert.AreEqual(before.Members.Select(m => m.Health), state.Inspect().Members.Select(m => m.Health));
+            Assert.That(state.Inspect().CarriedLootValue, Is.Zero);
+            var second = state.AdvanceToNextEvent(state.NextOrdinal);
+            Assert.That(second.Kind, Is.EqualTo(RunStepKind.LootInteraction));
+            Assert.That(second.AssignmentId, Is.EqualTo("l2"));
+            Assert.That(state.Inspect().ReachedLootInteractions, Is.EqualTo(2));
+            Assert.That(state.Inspect().CarriedLootValue, Is.Zero);
+            Assert.That(state.AdvanceToNextEvent(state.NextOrdinal).Kind, Is.EqualTo(RunStepKind.RoomComplete));
+            Assert.That(state.Inspect().CarriedLootValue, Is.GreaterThan(0));
+            var outcome = state.DrainToCompletion();
+            Assert.That(outcome.LootSummary.TotalGeneratedWorldValue, Is.GreaterThan(0));
+            Assert.That(state.Inspect().ReachedLootInteractions, Is.EqualTo(2));
+        }
+
+        [TestCase(1)] [TestCase(2)] [TestCase(7)]
+        public void NonspatialLootIdentitiesAndOrdinalsAreBatchIndependent(int budget)
+        {
+            var one = NonspatialLoot(); var many = NonspatialLoot();
+            var a = new List<RunStep>(); var b = new List<RunStep>();
+            while (!one.IsTerminal) a.AddRange(one.Advance(1, one.NextOrdinal));
+            while (!many.IsTerminal) b.AddRange(many.Advance(budget, many.NextOrdinal));
+            Assert.That(Steps(b), Is.EqualTo(Steps(a)));
+            foreach (string id in new[] { "l1", "l2" })
+            {
+                var interaction = a.Single(s => s.Kind == RunStepKind.LootInteraction && s.AssignmentId == id);
+                Assert.That(interaction.Ordinal, Is.LessThan(a.Single(s => s.Kind == RunStepKind.RoomComplete).Ordinal));
+                Assert.That(interaction.CarriedLootValueAfter, Is.Zero);
+            }
+            CollectionAssert.AreEqual(Enumerable.Range(0, a.Count).Select(i => (long)i), a.Select(s => s.Ordinal));
+            Assert.That(B.Structured(many.TakeOutcome()), Is.EqualTo(B.Structured(one.TakeOutcome())));
+        }
+
+        [Test]
+        public void NonspatialWipeDoesNotEmitUnreachedLootBoundaries()
+        {
+            var state = NonspatialLoot(true); var steps = new List<RunStep>();
+            while (!state.IsTerminal) steps.Add(state.AdvanceToNextEvent(state.NextOrdinal));
+            Assert.That(state.TakeOutcome().Party.IsWiped, Is.True);
+            Assert.That(steps.Any(s => s.Kind == RunStepKind.LootInteraction), Is.False);
+            Assert.That(state.Inspect().ReachedLootInteractions, Is.Zero);
+            Assert.That(state.Inspect().CarriedLootValue, Is.Zero);
+        }
 
         [TestCase(1)] [TestCase(2)] [TestCase(7)]
         public void DifferentBatchesHaveIdenticalEventSequenceAndStructuredOutcome(int budget)

@@ -1,0 +1,27 @@
+[
+  {
+    "mode": "editmode",
+    "removed": [],
+    "added": [
+      "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.NonspatialLootBoundaryCountsReachOnceAndDefersRewardToRoomComplete",
+      "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.NonspatialLootIdentitiesAndOrdinalsAreBatchIndependent(1)",
+      "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.NonspatialLootIdentitiesAndOrdinalsAreBatchIndependent(2)",
+      "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.NonspatialLootIdentitiesAndOrdinalsAreBatchIndependent(7)",
+      "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseAExecution.NonspatialWipeDoesNotEmitUnreachedLootBoundaries"
+    ],
+    "changed": []
+  },
+  {
+    "mode": "playmode",
+    "removed": [],
+    "added": [
+      "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseAExecutionTests.NonspatialLootBoundaryCountsReachOnceAndDefersRewardToRoomComplete",
+      "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseAExecutionTests.NonspatialLootIdentitiesAndOrdinalsAreBatchIndependent(1)",
+      "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseAExecutionTests.NonspatialLootIdentitiesAndOrdinalsAreBatchIndependent(2)",
+      "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseAExecutionTests.NonspatialLootIdentitiesAndOrdinalsAreBatchIndependent(7)",
+      "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseAExecutionTests.NonspatialWipeDoesNotEmitUnreachedLootBoundaries",
+      "DungeonBuilder.M0.Tests.PlayMode.LivingDungeonPhaseAPlayModeTests.NonspatialLootRemainsUnreachedWhilePausedBeforeItsBoundary"
+    ],
+    "changed": []
+  }
+]

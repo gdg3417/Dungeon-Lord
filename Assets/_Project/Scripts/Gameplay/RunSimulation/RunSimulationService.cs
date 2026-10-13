@@ -175,7 +175,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 else foreach (RunRoomAssignment assignment in assignments)
                 {
                     if (party.IsWiped) break;
-                    if (assignment.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId) continue;
+                    if (assignment.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId)
+                    {
+                        yield return InteractionStep(routeRoom, assignment, null);
+                        continue;
+                    }
                     executed.Add(new MvpDungeonPlacementEntry(assignment.CategoryId, assignment.OptionId, executed.Count));
                     var encounter = RunEncounterResolver.Resolve(party, _config.PhaseFiveB, assignment,
                         routeRoom.FloorIndex, routeRoom.RoomIndex, pressure);
