@@ -126,6 +126,14 @@ namespace DungeonBuilder.M0.Economy
                 return result;
 
             PassiveManaRateSummary rate = canonicalOnline.ResolveRate(save, heatConfiguration);
+            return Calculate(result, rate);
+        }
+
+        // Shared by the one actual grant and read-only historical projections.
+        private static OfflinePassiveManaResult Calculate(OfflinePassiveManaResult result, PassiveManaRateSummary rate)
+        {
+            double wallet = result.WalletBefore;
+            double effectiveOfflineEfficiency = result.EffectiveOfflineEfficiency;
             result.CanonicalRate = rate;
             if (rate == null || !rate.RuleResolved || !FiniteNonnegative(rate.ManaPerHour))
                 return result;
@@ -151,6 +159,30 @@ namespace DungeonBuilder.M0.Economy
             return result;
         }
 
+        public HistoricalOfflineManaInterval CaptureHistoricalInterval(SaveData intervalStart,
+            RunSimulationConfig heatConfiguration, long acceptedEndUtcUnix)
+        {
+            var accepted = Resolve(intervalStart, heatConfiguration, acceptedEndUtcUnix);
+            if (!accepted.CalculationAccepted) throw new ArgumentException("mana.history.invalid_interval");
+            return new HistoricalOfflineManaInterval(accepted);
+        }
+
+        public OfflinePassiveManaResult EvaluateHistorical(HistoricalOfflineManaInterval interval, long admissionUtcUnix)
+        {
+            if (interval == null || admissionUtcUnix < interval.StartUtcUnix || admissionUtcUnix > interval.EndUtcUnix)
+                throw new ArgumentException("mana.history.invalid_timestamp");
+            var result = new OfflinePassiveManaResult {
+                Reason = OfflinePassiveManaReason.CanonicalStateOrConfigurationInvalid,
+                SourceSavedUtcUnix = interval.StartUtcUnix, ObservedCurrentUtcUnix = admissionUtcUnix,
+                ObservedElapsedSeconds = admissionUtcUnix - interval.StartUtcUnix,
+                ConfiguredBaseOfflineEfficiency = interval.BaseEfficiency,
+                EffectiveOfflineEfficiency = interval.EffectiveEfficiency,
+                WalletBefore = interval.Wallet, WalletAfter = interval.Wallet, Capacity = interval.Capacity };
+            Calculate(result, interval.InspectRate());
+            result.PersistenceRequired = false;
+            return result;
+        }
+
         private static OfflinePassiveManaResult Reject(OfflinePassiveManaResult result,
             OfflinePassiveManaReason reason)
         {
@@ -160,5 +192,25 @@ namespace DungeonBuilder.M0.Economy
 
         private static bool FiniteNonnegative(double value) =>
             !double.IsNaN(value) && !double.IsInfinity(value) && value >= 0d;
+    }
+
+    // Retained interval-start calculation inputs only; neither a wallet nor a save owner.
+    public sealed class HistoricalOfflineManaInterval
+    {
+        private readonly string rate;
+        public long StartUtcUnix { get; }
+        public long EndUtcUnix { get; }
+        public double Wallet { get; }
+        public double Capacity { get; }
+        public double BaseEfficiency { get; }
+        public double EffectiveEfficiency { get; }
+        internal HistoricalOfflineManaInterval(OfflinePassiveManaResult accepted)
+        {
+            StartUtcUnix = accepted.SourceSavedUtcUnix; EndUtcUnix = accepted.ObservedCurrentUtcUnix;
+            Wallet = accepted.WalletBefore; Capacity = accepted.Capacity;
+            BaseEfficiency = accepted.ConfiguredBaseOfflineEfficiency; EffectiveEfficiency = accepted.EffectiveOfflineEfficiency;
+            rate = UnityEngine.JsonUtility.ToJson(accepted.CanonicalRate);
+        }
+        public PassiveManaRateSummary InspectRate() => UnityEngine.JsonUtility.FromJson<PassiveManaRateSummary>(rate);
     }
 }

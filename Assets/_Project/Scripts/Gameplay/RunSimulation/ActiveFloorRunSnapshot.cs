@@ -13,17 +13,39 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     {
         private readonly string plan;
         private readonly string spatial;
+        private readonly string connections;
+        internal long ConnectionWorkBound { get; }
         public string FloorInstanceId { get; }
         public int FloorIndex { get; }
         public string KnowledgeFingerprint { get; }
-        internal RunnableFloorSnapshot(SavedSpatialFloor floor, PhaseFiveBRoutePlan value, string fingerprint)
+        internal RunnableFloorSnapshot(SavedSpatialFloor floor, PhaseFiveBRoutePlan value, string fingerprint,
+            RunConnectionSnapshot movement)
         {
             FloorInstanceId = floor.FloorInstanceId; FloorIndex = floor.FloorIndex;
             KnowledgeFingerprint = fingerprint;
             plan = JsonUtility.ToJson(value); spatial = JsonUtility.ToJson(floor);
+            connections = JsonUtility.ToJson(movement);
+            ConnectionWorkBound = movement.Required.Sum(p => (long)p.Path.Length) +
+                movement.BranchApproach.Sum(p => 2L * p.Path.Length);
         }
         public PhaseFiveBRoutePlan MaterializePlan() => JsonUtility.FromJson<PhaseFiveBRoutePlan>(plan);
         public SavedSpatialFloor InspectSpatialInputs() => JsonUtility.FromJson<SavedSpatialFloor>(spatial);
+        internal IEnumerable<RunStep> TraverseConnection(int index)
+        {
+            var connection = JsonUtility.FromJson<RunConnectionSnapshot>(connections).Required[index];
+            for (int i = 1; i < connection.Path.Length; i++)
+                yield return new RunStep(RunStepKind.Movement, FloorIndex, connection.RoomId,
+                    connection.Id, connection.Path[i], 1, space: RunPositionSpace.Floor);
+        }
+        internal IEnumerable<RunStep> TraverseBranchApproach(string branch, bool returning)
+        {
+            var path = JsonUtility.FromJson<RunConnectionSnapshot>(connections).BranchApproach.Single(p => p.Id == branch);
+            var cells = returning ? path.Path.Reverse().ToArray() : path.Path;
+            for (int i = 1; i < cells.Length; i++)
+                yield return new RunStep(RunStepKind.Movement, FloorIndex, path.RoomId, branch, cells[i], 1, space: RunPositionSpace.RoomLocal);
+        }
+        internal TileCoordinate BranchSocket(string branch) =>
+            JsonUtility.FromJson<RunConnectionSnapshot>(connections).BranchApproach.Single(p => p.Id == branch).Path.Last();
     }
 
     public sealed class ActiveFloorRunSnapshot
@@ -43,6 +65,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public string LootTableId { get; }
         public IReadOnlyList<RunnableFloorSnapshot> Floors { get; }
         public RunSimulationConfig Configuration => JsonUtility.FromJson<RunSimulationConfig>(configuration);
+        internal long ConnectionWorkBound => Floors.Sum(f => f.ConnectionWorkBound);
         private ActiveFloorRunSnapshot(RunnableFloorSnapshot[] floors, RunSimulationConfig config, LootConfig lootConfig, string lootTableId, SharedBranchKnowledgeAuthority branchKnowledge, SharedFloorKnowledgeAuthority sharedFloorKnowledge, SaveData executionInputs, string postureId)
         { Floors = Array.AsReadOnly(floors); configuration = JsonUtility.ToJson(config);
           knowledge = JsonUtility.ToJson(branchKnowledge);
@@ -99,7 +122,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (!FloorKnowledgeApplicability.TryCompute(state, owned.CorridorContent, limits,
                     floor.FloorInstanceId, out string fingerprint))
                     throw new ArgumentException(PhaseFiveBRouteProjection.InvalidRoute);
-                floors.Add(new RunnableFloorSnapshot(floor, plan, fingerprint));
+                floors.Add(new RunnableFloorSnapshot(floor, plan, fingerprint,
+                    RunConnectionSnapshot.Capture(floor, plan, production.Catalog, limits.Spatial.MaximumMaterializedTiles)));
             }
             if (floors.Sum(f => f.MaterializePlan().Forks.Length) > config.PhaseFiveB.BranchDecision.MaximumDecisionsPerRun)
                 throw new ArgumentException(BranchRunWorkload.WorkloadExceeded);

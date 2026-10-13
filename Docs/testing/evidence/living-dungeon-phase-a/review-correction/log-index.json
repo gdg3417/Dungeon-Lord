@@ -1,0 +1,32 @@
+[
+  {
+    "file": "phase-a-review-build.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-review-focused-editmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-review-focused-playmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-review-full-editmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-review-full-playmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-review-initial-full-editmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  }
+]

@@ -1,0 +1,55 @@
+[
+  {
+    "file": "phase-a-build.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-differential.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-final-focused.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-final-full-editmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-final-full-playmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-first-compile.log",
+    "compiler_errors": [
+      "Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunConnectionSnapshot.cs(40,51): error CS0117: 'RoomLocalCoordinateTransform' does not contain a definition for 'TryFromFloor'",
+      "Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunConnectionSnapshot.cs(44,21): error CS1503: Argument 2: cannot convert from 'var[]' to 'System.Collections.Generic.IEnumerable<DungeonBuilder.M0.Gameplay.DungeonSpatial.TileCoordinate>'"
+    ],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-focused-1.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-focused-2.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-focused-playmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-a-full-editmode-initial.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  }
+]

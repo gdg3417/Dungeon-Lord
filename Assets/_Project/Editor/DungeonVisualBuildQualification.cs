@@ -23,6 +23,10 @@ namespace DungeonBuilder.M0.EditorTools
             => BuildWindowsAt("Builds/Development/Windows-loot-reassignment/Dungeon Lord.exe");
         public static void BuildContentMultiplicityWindows()
             => BuildWindowsAt("Builds/Development/Windows-content-multiplicity/Dungeon Lord.exe");
+        public static void BuildLivingDungeonPhaseAWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-phase-a/Dungeon Lord.exe");
+        public static void BuildLivingDungeonPhaseAReviewWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-phase-a-review/Dungeon Lord.exe");
         private static void BuildWindowsAt(string outputPath)
         {
             DevelopmentBuildUtility.BuildDevelopment(BuildTarget.StandaloneWindows64, outputPath);

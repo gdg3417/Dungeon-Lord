@@ -1,0 +1,21 @@
+[
+  "Assets/_Project/Editor/DungeonVisualBuildQualification.cs",
+  "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.cs",
+  "Assets/_Project/Tests/EditMode/LivingDungeonPhaseAExecutionTests.cs",
+  "Assets/_Project/Tests/PlayMode/LivingDungeonPhaseAPlayModeTests.cs",
+  "Docs/testing/evidence/living-dungeon-phase-a/qualification.md",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/baseline.json",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/changed-files.json",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/input-checkpoints.zip",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/log-index.json",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/owner-preservation.json",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/production-gates.json",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/qualification-reports.zip",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/qualification.md",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/report-summary.json",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/static-checks.json",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/test-outcome-comparison.json",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/unity-logs-redacted.zip",
+  "Docs/testing/evidence/living-dungeon-phase-a/review-correction/windows-build.json",
+  "Tools/Simulation/phase_a_review_qualification.py"
+]
