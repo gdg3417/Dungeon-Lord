@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
@@ -30,19 +31,32 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         }
         public PhaseFiveBRoutePlan MaterializePlan() => JsonUtility.FromJson<PhaseFiveBRoutePlan>(plan);
         public SavedSpatialFloor InspectSpatialInputs() => JsonUtility.FromJson<SavedSpatialFloor>(spatial);
+        internal void WriteCheckpoint(BinaryWriter w)
+        {
+            RunCheckpointCodec.Text(w, FloorInstanceId); w.Write(FloorIndex); RunCheckpointCodec.Text(w, KnowledgeFingerprint);
+            RunCheckpointCodec.Text(w, plan); RunCheckpointCodec.Text(w, spatial); RunCheckpointCodec.Text(w, connections);
+            w.Write(ConnectionWorkBound);
+        }
+        private RunnableFloorSnapshot(BinaryReader r)
+        {
+            FloorInstanceId = RunCheckpointCodec.Text(r); FloorIndex = r.ReadInt32(); KnowledgeFingerprint = RunCheckpointCodec.Text(r);
+            plan = RunCheckpointCodec.Text(r); spatial = RunCheckpointCodec.Text(r); connections = RunCheckpointCodec.Text(r);
+            ConnectionWorkBound = r.ReadInt64();
+        }
+        internal static RunnableFloorSnapshot ReadCheckpoint(BinaryReader r) => new RunnableFloorSnapshot(r);
         internal IEnumerable<RunStep> TraverseConnection(int index)
         {
             var connection = JsonUtility.FromJson<RunConnectionSnapshot>(connections).Required[index];
             for (int i = 1; i < connection.Path.Length; i++)
-                yield return new RunStep(RunStepKind.Movement, FloorIndex, connection.RoomId,
-                    connection.Id, connection.Path[i], 1, space: RunPositionSpace.Floor);
+                foreach (var boundary in RunStep.Pure(new RunStep(RunStepKind.Movement, FloorIndex, connection.RoomId,
+                    connection.Id, connection.Path[i], 1, space: RunPositionSpace.Floor))) yield return boundary;
         }
         internal IEnumerable<RunStep> TraverseBranchApproach(string branch, bool returning)
         {
             var path = JsonUtility.FromJson<RunConnectionSnapshot>(connections).BranchApproach.Single(p => p.Id == branch);
             var cells = returning ? path.Path.Reverse().ToArray() : path.Path;
             for (int i = 1; i < cells.Length; i++)
-                yield return new RunStep(RunStepKind.Movement, FloorIndex, path.RoomId, branch, cells[i], 1, space: RunPositionSpace.RoomLocal);
+                foreach (var boundary in RunStep.Pure(new RunStep(RunStepKind.Movement, FloorIndex, path.RoomId, branch, cells[i], 1, space: RunPositionSpace.RoomLocal))) yield return boundary;
         }
         internal TileCoordinate BranchSocket(string branch) =>
             JsonUtility.FromJson<RunConnectionSnapshot>(connections).BranchApproach.Single(p => p.Id == branch).Path.Last();
@@ -66,6 +80,24 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public IReadOnlyList<RunnableFloorSnapshot> Floors { get; }
         public RunSimulationConfig Configuration => JsonUtility.FromJson<RunSimulationConfig>(configuration);
         internal long ConnectionWorkBound => Floors.Sum(f => f.ConnectionWorkBound);
+        internal void WriteCheckpoint(BinaryWriter w)
+        {
+            foreach (var text in new[] { configuration, loot, knowledge, floorKnowledge, initialRuntime, PostureId, LootTableId })
+                RunCheckpointCodec.Text(w, text);
+            w.Write(TickStarted); w.Write(Floors.Count); foreach (var floor in Floors) floor.WriteCheckpoint(w);
+        }
+        private ActiveFloorRunSnapshot(BinaryReader r)
+        {
+            configuration = RunCheckpointCodec.Text(r); loot = RunCheckpointCodec.Text(r); knowledge = RunCheckpointCodec.Text(r);
+            floorKnowledge = RunCheckpointCodec.Text(r); initialRuntime = RunCheckpointCodec.Text(r);
+            PostureId = RunCheckpointCodec.Text(r); LootTableId = RunCheckpointCodec.Text(r); TickStarted = r.ReadInt64();
+            int count = r.ReadInt32();
+            if (count <= 0 || count > r.BaseStream.Length - r.BaseStream.Position) throw new InvalidDataException("run.checkpoint.encoding");
+            var floors = new RunnableFloorSnapshot[count];
+            for (int i = 0; i < count; i++) floors[i] = RunnableFloorSnapshot.ReadCheckpoint(r);
+            Floors = Array.AsReadOnly(floors);
+        }
+        internal static ActiveFloorRunSnapshot ReadCheckpoint(BinaryReader r) => new ActiveFloorRunSnapshot(r);
         private ActiveFloorRunSnapshot(RunnableFloorSnapshot[] floors, RunSimulationConfig config, LootConfig lootConfig, string lootTableId, SharedBranchKnowledgeAuthority branchKnowledge, SharedFloorKnowledgeAuthority sharedFloorKnowledge, SaveData executionInputs, string postureId)
         { Floors = Array.AsReadOnly(floors); configuration = JsonUtility.ToJson(config);
           knowledge = JsonUtility.ToJson(branchKnowledge);

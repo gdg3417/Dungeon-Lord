@@ -58,12 +58,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             var fork = state.Forks.SingleOrDefault(f => f.FloorIndex == room.FloorIndex && f.RoomIndex == room.RoomIndex);
             if (fork == null) yield break;
             var e = new BranchOutcomeEvidence { Fork = fork, Reason = "branch.outcome.stopped" };
-            state.Evidence.Add(e);
+
             if (stopped || party.IsWiped)
-            { e.PrecedenceReason = "branch.decision.retreat_precedence"; yield break; }
+            { e.PrecedenceReason = "branch.decision.retreat_precedence"; state.Evidence.Add(e); yield break; }
             if (execution.Snapshot != null)
                 foreach (var step in execution.Snapshot.Floors.Single(f => f.FloorIndex == room.FloorIndex)
                     .TraverseBranchApproach(fork.OptionalBranchId, false)) yield return step;
+            yield return RunStep.Before(RunStepKind.BranchDecision);
+            state.Evidence.Add(e);
             state.Workload.Decision(fork.FloorInstanceId);
             e.Decision = BranchDecisionResolver.Resolve(_config.PhaseFiveB.BranchDecision, new BranchDecisionInput {
                 Party = party, FloorInstanceId = fork.FloorInstanceId, OptionalBranchId = fork.OptionalBranchId,
@@ -96,9 +98,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (fork.Tiles != null && target < 0) throw new ArgumentException(PhaseFiveBRouteProjection.InvalidRoute);
                 while (pathCursor < target)
                 {
-                    yield return new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
-                        fork.OptionalBranchId, fork.Tiles[++pathCursor], 1, space: RunPositionSpace.Floor);
+                    foreach (var boundary in RunStep.Pure(new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
+                        fork.OptionalBranchId, fork.Tiles[++pathCursor], 1, space: RunPositionSpace.Floor))) yield return boundary;
                 }
+                yield return RunStep.Before(a.CategoryId == MvpDungeonPlacementIds.TrapCategoryId ? RunStepKind.TrapTrigger : RunStepKind.LootInteraction);
                 state.Workload.Assignment();
                 if (a.CategoryId != MvpDungeonPlacementIds.TrapCategoryId && a.CategoryId != MvpDungeonPlacementIds.LootNodeCategoryId)
                     throw new ArgumentException(PhaseFiveBRouteProjection.InvalidRoute);
@@ -141,19 +144,20 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (!party.IsWiped && fork.Tiles != null)
             {
                 while (pathCursor < fork.Tiles.Length - 1)
-                    yield return new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
-                        fork.OptionalBranchId, fork.Tiles[++pathCursor], 1, space: RunPositionSpace.Floor);
+                    foreach (var boundary in RunStep.Pure(new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
+                        fork.OptionalBranchId, fork.Tiles[++pathCursor], 1, space: RunPositionSpace.Floor))) yield return boundary;
                 for (int index = fork.Tiles.Length - 2; index >= 0; index--)
-                    yield return new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
-                        fork.OptionalBranchId, fork.Tiles[index], 1, space: RunPositionSpace.Floor);
+                    foreach (var boundary in RunStep.Pure(new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
+                        fork.OptionalBranchId, fork.Tiles[index], 1, space: RunPositionSpace.Floor))) yield return boundary;
                 // Final corridor-to-room socket edge, then reverse the legal room approach.
-                yield return new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
+                foreach (var boundary in RunStep.Pure(new RunStep(RunStepKind.Movement, room.FloorIndex, room.RoomInstanceId,
                     fork.OptionalBranchId, execution.Snapshot == null ? default : execution.Snapshot.Floors
-                        .Single(f => f.FloorIndex == room.FloorIndex).BranchSocket(fork.OptionalBranchId), 1, space: RunPositionSpace.RoomLocal);
+                        .Single(f => f.FloorIndex == room.FloorIndex).BranchSocket(fork.OptionalBranchId), 1, space: RunPositionSpace.RoomLocal))) yield return boundary;
                 if (execution.Snapshot != null)
                     foreach (var step in execution.Snapshot.Floors.Single(f => f.FloorIndex == room.FloorIndex)
                         .TraverseBranchApproach(fork.OptionalBranchId, true)) yield return step;
             }
+            if (!party.IsWiped) yield return RunStep.Before(RunStepKind.BranchReturn);
             e.ReachedAssignments = reached.ToArray(); e.Encounters = encounters.ToArray();
             e.Reason = party.IsWiped ? "branch.outcome.wiped" : "branch.outcome.completed";
             e.Returned = !party.IsWiped;

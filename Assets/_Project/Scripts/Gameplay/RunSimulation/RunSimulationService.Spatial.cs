@@ -19,18 +19,21 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             var reached = new List<MvpDungeonPlacementEntry>();
             if (room.IncludeRoomPlacement) reached.Add(new MvpDungeonPlacementEntry(
                 MvpDungeonPlacementIds.RoomCategoryId, room.RoomOptionId, 0));
+            yield return RunStep.Before(RunStepKind.RoomEntry);
             RecordSpatial(room, evidence, RunSpatialEventKind.RoomEntered, 0, plan.Path[0]);
             yield return new RunStep(RunStepKind.RoomEntry, room.FloorIndex, room.RoomInstanceId, position: plan.Path[0], space: RunPositionSpace.RoomLocal);
             int lastStep = 0, interaction = 0;
             for (int step = 0; step < plan.Path.Length && !party.IsWiped; step++)
             {
                 lastStep = step;
-                if (step > 0) yield return new RunStep(RunStepKind.Movement, room.FloorIndex,
-                    room.RoomInstanceId, position: plan.Path[step], distance: 1, space: RunPositionSpace.RoomLocal);
+                if (step > 0) foreach (var boundary in RunStep.Pure(new RunStep(RunStepKind.Movement, room.FloorIndex,
+                    room.RoomInstanceId, position: plan.Path[step], distance: 1, space: RunPositionSpace.RoomLocal))) yield return boundary;
                 while (interaction < plan.Interactions.Length && plan.Interactions[interaction].Step == step && !party.IsWiped)
                 {
                     var scheduled = plan.Interactions[interaction++];
                     var a = scheduled.Assignment;
+                    yield return RunStep.Before(!scheduled.Reached ? RunStepKind.UnreachableInteraction : InteractionStep(room, a, null).Kind,
+                        scheduled.Reached && a.CategoryId != MvpDungeonPlacementIds.LootNodeCategoryId ? Math.Max(0, (scheduled.Movement?.Length ?? 1) - 1) : 0);
                     var e = RecordSpatial(room, evidence, scheduled.Kind, step, plan.Path[step], a);
                     e.ConfiguredStart = a.RoomLocalPosition; e.Path = scheduled.Movement;
                     if (!scheduled.Reached)
@@ -61,6 +64,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             traversal.Path = plan.Path.Take(lastStep + 1).ToArray();
             if (!party.IsWiped)
             {
+                yield return RunStep.Before(RunStepKind.RoomEgress);
                 RecordSpatial(room, evidence, RunSpatialEventKind.RoomEgressReached, lastStep, plan.Path[lastStep]);
                 yield return new RunStep(RunStepKind.RoomEgress, room.FloorIndex, room.RoomInstanceId, position: plan.Path[lastStep], space: RunPositionSpace.RoomLocal);
             }

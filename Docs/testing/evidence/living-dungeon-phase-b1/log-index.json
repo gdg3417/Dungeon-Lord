@@ -1,0 +1,69 @@
+[
+  {
+    "file": "phase-b1-before-metadata-focused-editmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-before-metadata-full-editmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-before-metadata-full-playmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-build.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-focused-editmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-focused-playmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-full-editmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-full-playmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-initial-focused-editmode.log",
+    "compiler_errors": [
+      "Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunStartCapture.cs(11,60): error CS0246: The type or namespace name 'MvpOrderedRouteRoom' could not be found (are you missing a using directive or an assembly reference?)",
+      "Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunStartCapture.cs(13,85): error CS0246: The type or namespace name 'MvpOrderedRouteRoom' could not be found (are you missing a using directive or an assembly reference?)",
+      "Assets\\_Project\\Tests\\PlayMode\\LivingDungeonPhaseB1PlayModeTests.cs(4,25): error CS0234: The type or namespace name 'Gameplay' does not exist in the namespace 'DungeonBuilder.M0' (are you missing an assembly reference?)"
+    ],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-initial-results-editmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-second-compile.log",
+    "compiler_errors": [
+      "Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB1Tests.cs(101,117): error CS0123: No overload for 'LivingDungeonPhaseABaselineTests.Structured(object)' matches delegate 'Func<RunStep, string>'",
+      "Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB1Tests.cs(101,59): error CS0123: No overload for 'LivingDungeonPhaseABaselineTests.Structured(object)' matches delegate 'Func<RunStep, string>'"
+    ],
+    "compiler_warnings": []
+  },
+  {
+    "file": "phase-b1-second-results-editmode.log",
+    "compiler_errors": [],
+    "compiler_warnings": []
+  }
+]

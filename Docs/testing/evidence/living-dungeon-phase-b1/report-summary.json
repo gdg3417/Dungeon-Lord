@@ -1,0 +1,711 @@
+[
+  {
+    "file": "phase-b1-before-metadata-focused-editmode.xml",
+    "sha256": "48cc0dbb5583e7c812a86cc6194746b3f4842541ebb58791d57f0ced6c33be06",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "75",
+      "result": "Passed",
+      "total": "75",
+      "passed": "75",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-13 01:45:14Z",
+      "end-time": "2026-10-13 01:45:24Z",
+      "duration": "9.6232014"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(False)",
+        "output": "Verified every event boundary: 25\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(True)",
+        "output": "Verified every event boundary: 22\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",True)",
+        "output": "Verified every event boundary: 33\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"wipe\",True)",
+        "output": "Verified every event boundary: 6\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",False)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"retreat\",True)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(False)",
+        "output": "Verified every event boundary: 1\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(True)",
+        "output": "Verified every event boundary: 4\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCanonicalBranchAndTwoFloorRestore(False)",
+        "output": "canonicalTwoFloors=False; events=25; checkpointBytes=39011; advanceMs=0.4956; encodeMs=0.5387; restoreAndVerifyMs=32.2148\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCanonicalBranchAndTwoFloorRestore(True)",
+        "output": "canonicalTwoFloors=True; events=22; checkpointBytes=41386; advanceMs=1.7353; encodeMs=2.8578; restoreAndVerifyMs=79.0981\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(1)",
+        "output": "rooms=1; events=17; checkpointBytes=19004; advanceMs=0.2881; encodeMs=0.2701; restoreAndVerifyMs=15.8936\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(100)",
+        "output": "rooms=100; events=1601; checkpointBytes=225322; advanceMs=22.2025; encodeMs=3.0405; restoreAndVerifyMs=202.8876\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.SplitDeadlinesEqualTimesAndWorkBudgetsPreserveEveryEvent(7)",
+        "output": "Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-b1-before-metadata-full-editmode.xml",
+    "sha256": "ffd58beebb723cbb21a8f3e42bda2c34f207090f94303620c904b1b25cb2b91c",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1780",
+      "result": "Skipped:Ignored",
+      "total": "1780",
+      "passed": "1779",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-13 01:57:29Z",
+      "end-time": "2026-10-13 01:57:51Z",
+      "duration": "22.2688693"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(False)",
+        "output": "Verified every event boundary: 25\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(True)",
+        "output": "Verified every event boundary: 22\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",True)",
+        "output": "Verified every event boundary: 33\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"wipe\",True)",
+        "output": "Verified every event boundary: 6\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",False)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"retreat\",True)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(False)",
+        "output": "Verified every event boundary: 1\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(True)",
+        "output": "Verified every event boundary: 4\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCanonicalBranchAndTwoFloorRestore(False)",
+        "output": "canonicalTwoFloors=False; events=25; checkpointBytes=39011; advanceMs=0.525; encodeMs=0.5871; restoreAndVerifyMs=32.0859\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCanonicalBranchAndTwoFloorRestore(True)",
+        "output": "canonicalTwoFloors=True; events=22; checkpointBytes=41386; advanceMs=0.8641; encodeMs=0.5853; restoreAndVerifyMs=33.5621\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(1)",
+        "output": "rooms=1; events=17; checkpointBytes=19004; advanceMs=0.2993; encodeMs=0.2647; restoreAndVerifyMs=15.8867\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(100)",
+        "output": "rooms=100; events=1601; checkpointBytes=225322; advanceMs=22.526; encodeMs=3.0395; restoreAndVerifyMs=234.98\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-b1-before-metadata-full-playmode.xml",
+    "sha256": "51c86b672da9b3e06fd7279ad0f25904124b982f4a9fbacb28698519719ebf8f",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3214",
+      "result": "Skipped:Ignored",
+      "total": "3214",
+      "passed": "3204",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-13 02:00:00Z",
+      "end-time": "2026-10-13 02:05:24Z",
+      "duration": "324.3324103"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(False)",
+        "output": "Verified every event boundary: 25\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(True)",
+        "output": "Verified every event boundary: 22\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",True)",
+        "output": "Verified every event boundary: 33\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"wipe\",True)",
+        "output": "Verified every event boundary: 6\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",False)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"retreat\",True)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(False)",
+        "output": "Verified every event boundary: 1\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(True)",
+        "output": "Verified every event boundary: 4\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.MeasureCanonicalBranchAndTwoFloorRestore(False)",
+        "output": "canonicalTwoFloors=False; events=25; checkpointBytes=39011; advanceMs=0.6611; encodeMs=0.7523; restoreAndVerifyMs=75.2442\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.MeasureCanonicalBranchAndTwoFloorRestore(True)",
+        "output": "canonicalTwoFloors=True; events=22; checkpointBytes=41386; advanceMs=1.5638; encodeMs=1.0859; restoreAndVerifyMs=65.9533\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.MeasureCheckpointSizeRestoreAndAdvancement(1)",
+        "output": "rooms=1; events=17; checkpointBytes=19004; advanceMs=0.3688; encodeMs=0.456; restoreAndVerifyMs=22.8032\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.MeasureCheckpointSizeRestoreAndAdvancement(100)",
+        "output": "rooms=100; events=1601; checkpointBytes=225322; advanceMs=82.4406; encodeMs=3.2807; restoreAndVerifyMs=229.1725\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-b1-focused-editmode.xml",
+    "sha256": "f59235761e3a67ce163754e23d5a72d2abf8115410354d00d5efd9dd1e974386",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "76",
+      "result": "Passed",
+      "total": "76",
+      "passed": "76",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-13 02:10:25Z",
+      "end-time": "2026-10-13 02:10:35Z",
+      "duration": "10.5912243"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(False)",
+        "output": "Verified every event boundary: 25\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(True)",
+        "output": "Verified every event boundary: 22\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",True)",
+        "output": "Verified every event boundary: 33\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"wipe\",True)",
+        "output": "Verified every event boundary: 6\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",False)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"retreat\",True)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(False)",
+        "output": "Verified every event boundary: 1\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(True)",
+        "output": "Verified every event boundary: 4\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCanonicalBranchAndTwoFloorRestore(False)",
+        "output": "canonicalTwoFloors=False; events=25; checkpointBytes=39011; advanceMs=0.6505; encodeMs=0.5827; restoreAndVerifyMs=35.4269\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCanonicalBranchAndTwoFloorRestore(True)",
+        "output": "canonicalTwoFloors=True; events=22; checkpointBytes=41386; advanceMs=0.9494; encodeMs=0.5668; restoreAndVerifyMs=34.1491\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(1)",
+        "output": "rooms=1; events=17; checkpointBytes=19004; advanceMs=0.3094; encodeMs=0.263; restoreAndVerifyMs=15.8586\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(100)",
+        "output": "rooms=100; events=1601; checkpointBytes=225322; advanceMs=24.2471; encodeMs=3.1503; restoreAndVerifyMs=234.8208\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.SplitDeadlinesEqualTimesAndWorkBudgetsPreserveEveryEvent(7)",
+        "output": "Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-b1-focused-playmode.xml",
+    "sha256": "f4f8817307eef9664613c3b8db402586cfb3d8d6fa96487ec8db7d7574a03ba1",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3",
+      "result": "Passed",
+      "total": "3",
+      "passed": "3",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-13 02:11:08Z",
+      "end-time": "2026-10-13 02:11:08Z",
+      "duration": "0.3739683"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.LivingDungeonPhaseB1PlayModeTests.FreshRestorationAndDeadlinePauseAcrossFramesRetainOutcome",
+        "output": "Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-b1-full-editmode.xml",
+    "sha256": "2c109b713f5372d0939f7e238c2f6636545e1e53328bfb63feb31a9f5d9e11bf",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1781",
+      "result": "Skipped:Ignored",
+      "total": "1781",
+      "passed": "1780",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-13 02:20:18Z",
+      "end-time": "2026-10-13 02:20:40Z",
+      "duration": "21.9435573"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(False)",
+        "output": "Verified every event boundary: 25\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(True)",
+        "output": "Verified every event boundary: 22\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",True)",
+        "output": "Verified every event boundary: 33\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"wipe\",True)",
+        "output": "Verified every event boundary: 6\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",False)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"retreat\",True)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(False)",
+        "output": "Verified every event boundary: 1\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(True)",
+        "output": "Verified every event boundary: 4\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCanonicalBranchAndTwoFloorRestore(False)",
+        "output": "canonicalTwoFloors=False; events=25; checkpointBytes=39011; advanceMs=0.5934; encodeMs=0.5739; restoreAndVerifyMs=34.9118\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCanonicalBranchAndTwoFloorRestore(True)",
+        "output": "canonicalTwoFloors=True; events=22; checkpointBytes=41386; advanceMs=0.8425; encodeMs=0.6064; restoreAndVerifyMs=33.1304\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(1)",
+        "output": "rooms=1; events=17; checkpointBytes=19004; advanceMs=0.3003; encodeMs=0.2643; restoreAndVerifyMs=15.9454\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(100)",
+        "output": "rooms=100; events=1601; checkpointBytes=225322; advanceMs=23.8492; encodeMs=3.2825; restoreAndVerifyMs=225.3038\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-b1-full-playmode.xml",
+    "sha256": "86b97382daa5dc49cff9ed1a9f5259d291e958cd3d195432c9089699a75fcbb8",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3215",
+      "result": "Skipped:Ignored",
+      "total": "3215",
+      "passed": "3205",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-13 02:21:12Z",
+      "end-time": "2026-10-13 02:26:32Z",
+      "duration": "320.1322583"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(False)",
+        "output": "Verified every event boundary: 25\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(True)",
+        "output": "Verified every event boundary: 22\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",True)",
+        "output": "Verified every event boundary: 33\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"wipe\",True)",
+        "output": "Verified every event boundary: 6\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",False)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"retreat\",True)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(False)",
+        "output": "Verified every event boundary: 1\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(True)",
+        "output": "Verified every event boundary: 4\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.MeasureCanonicalBranchAndTwoFloorRestore(False)",
+        "output": "canonicalTwoFloors=False; events=25; checkpointBytes=39011; advanceMs=2.8858; encodeMs=2.4498; restoreAndVerifyMs=48.6589\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.MeasureCanonicalBranchAndTwoFloorRestore(True)",
+        "output": "canonicalTwoFloors=True; events=22; checkpointBytes=41386; advanceMs=0.8988; encodeMs=0.5881; restoreAndVerifyMs=33.4384\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.MeasureCheckpointSizeRestoreAndAdvancement(1)",
+        "output": "rooms=1; events=17; checkpointBytes=19004; advanceMs=0.2932; encodeMs=0.2644; restoreAndVerifyMs=15.5648\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.MeasureCheckpointSizeRestoreAndAdvancement(100)",
+        "output": "rooms=100; events=1601; checkpointBytes=225322; advanceMs=52.4551; encodeMs=3.0762; restoreAndVerifyMs=207.4261\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-b1-initial-results-editmode.xml",
+    "sha256": "163e8b2241a1f1745dacb21fa0dcc063c992d84bcbb2a6de71c69a8b3016b928",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "69",
+      "result": "Failed(Child)",
+      "total": "69",
+      "passed": "67",
+      "failed": "2",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-13 01:39:48Z",
+      "end-time": "2026-10-13 01:39:56Z",
+      "duration": "7.9383633"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.BranchAndTransferCannotCommitBeyondDeadline(True)",
+        "message": "System.InvalidOperationException : Sequence contains no matching element",
+        "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] predicate) [0x00070] in <6faa6124236442759eb396cfbfdad508>:0 \n  at DungeonBuilder.M0.Tests.EditMode.PhaseSixA4Tests.AddContent (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int32 floorIndex, System.String category, System.String option) [0x00014] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\PhaseSixA4Tests.cs:417 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.Canonical (System.Boolean twoFloors, System.Action& unchanged) [0x0003f] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB1Tests.cs:81 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.BranchAndTransferCannotCommitBeyondDeadline (System.Boolean twoFloors) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB1Tests.cs:143 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(True)",
+        "message": "System.InvalidOperationException : Sequence contains no matching element",
+        "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] predicate) [0x00070] in <6faa6124236442759eb396cfbfdad508>:0 \n  at DungeonBuilder.M0.Tests.EditMode.PhaseSixA4Tests.AddContent (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int32 floorIndex, System.String category, System.String option) [0x00014] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\PhaseSixA4Tests.cs:417 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.Canonical (System.Boolean twoFloors, System.Action& unchanged) [0x0003f] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB1Tests.cs:81 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication (System.Boolean twoFloors) [0x00005] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB1Tests.cs:92 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+      }
+    ],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(False)",
+        "output": "Verified every event boundary: 25\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",True)",
+        "output": "Verified every event boundary: 33\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"wipe\",True)",
+        "output": "Verified every event boundary: 6\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",False)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"retreat\",True)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(1)",
+        "output": "rooms=1; events=17; checkpointBytes=19004; advanceMs=0.2858; encodeMs=0.271; restoreAndVerifyMs=16.0064\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(100)",
+        "output": "rooms=100; events=1601; checkpointBytes=225322; advanceMs=23.662; encodeMs=3.1733; restoreAndVerifyMs=228.3475\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.SplitDeadlinesEqualTimesAndWorkBudgetsPreserveEveryEvent(7)",
+        "output": "Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  },
+  {
+    "file": "phase-b1-second-results-editmode.xml",
+    "sha256": "e7ba4a134f0b90c801922dc2fceba565fe4573090108f4dc86308cabf76fd0cc",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "74",
+      "result": "Failed(Child)",
+      "total": "74",
+      "passed": "73",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-13 01:41:46Z",
+      "end-time": "2026-10-13 01:41:55Z",
+      "duration": "9.6715733"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.AlteredOrdinalWithMatchingCallerExpectationStillFailsReplayEvidence",
+        "message": "System.ArgumentException : Destination array was not long enough. Check destIndex and length, and the array's lower bounds\nParameter name: destinationArray",
+        "stack": "  at System.Array.Copy (System.Array sourceArray, System.Int32 sourceIndex, System.Array destinationArray, System.Int32 destinationIndex, System.Int32 length) [0x000cb] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at System.Array.Copy (System.Array sourceArray, System.Int64 sourceIndex, System.Array destinationArray, System.Int64 destinationIndex, System.Int64 length) [0x00068] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB1Tests.AlteredOrdinalWithMatchingCallerExpectationStillFailsReplayEvidence () [0x00078] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-floorhud-validation\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB1Tests.cs:244 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+      }
+    ],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(False)",
+        "output": "Verified every event boundary: 25\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryBranchApproachChoiceReturnAndFloorTransferBoundaryRestoresWithoutPublication(True)",
+        "output": "Verified every event boundary: 22\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",True)",
+        "output": "Verified every event boundary: 33\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"wipe\",True)",
+        "output": "Verified every event boundary: 6\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"clear\",False)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.EveryRoomCombatTrapLootRewardAndPartialTerminalWipeBoundaryRestoresExactly(\"retreat\",True)",
+        "output": "Verified every event boundary: 17\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(False)",
+        "output": "Verified every event boundary: 1\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.LegacyNullAndEmptyAssignmentDiscriminatorsSurviveNewObjectReconstruction(True)",
+        "output": "Verified every event boundary: 4\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCanonicalBranchAndTwoFloorRestore(False)",
+        "output": "canonicalTwoFloors=False; events=25; checkpointBytes=39011; advanceMs=0.5571; encodeMs=0.5578; restoreAndVerifyMs=30.9822\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCanonicalBranchAndTwoFloorRestore(True)",
+        "output": "canonicalTwoFloors=True; events=22; checkpointBytes=41386; advanceMs=0.9869; encodeMs=0.6422; restoreAndVerifyMs=35.898\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(1)",
+        "output": "rooms=1; events=17; checkpointBytes=19004; advanceMs=0.3221; encodeMs=0.2966; restoreAndVerifyMs=16.2049\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.MeasureCheckpointSizeRestoreAndAdvancement(100)",
+        "output": "rooms=100; events=1601; checkpointBytes=225322; advanceMs=24.0431; encodeMs=3.0675; restoreAndVerifyMs=228.7359\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB1.SplitDeadlinesEqualTimesAndWorkBudgetsPreserveEveryEvent(7)",
+        "output": "Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+      }
+    ]
+  }
+]

@@ -1,0 +1,150 @@
+[
+  {
+    "path": "Assets/_Project/Editor/DungeonSpatial/Tests/LivingDungeonPhaseB1EditModeFixtures.cs",
+    "purpose": "Register B1 tests in the repository Editor runner"
+  },
+  {
+    "path": "Assets/_Project/Editor/DungeonSpatial/Tests/LivingDungeonPhaseB1EditModeFixtures.cs.meta",
+    "purpose": "Stable Unity import identity for the paired new script"
+  },
+  {
+    "path": "Assets/_Project/Editor/DungeonVisualBuildQualification.cs",
+    "purpose": "Preserving Windows B1 build output slot"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/ActiveFloorRunSnapshot.cs",
+    "purpose": "Explicit retained snapshot wire values and pure connection announcements"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunCheckpoint.cs",
+    "purpose": "Immutable format-1 encoding, independent pins, bounded replay/evidence validation and failure results"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunCheckpoint.cs.meta",
+    "purpose": "Stable Unity import identity for the paired new script"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunExecution.cs",
+    "purpose": "Pre-effect due-time checks, bounded progression, checkpoint export and accepted-time/terminal lifecycle"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Branches.cs",
+    "purpose": "Announce existing room/interaction/branch/floor/terminal boundaries before their resolver effects"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Execution.cs",
+    "purpose": "Start input capture and checkpoint restoration through the same engine"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Spatial.cs",
+    "purpose": "Announce existing room/interaction/branch/floor/terminal boundaries before their resolver effects"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.cs",
+    "purpose": "Announce existing room/interaction/branch/floor/terminal boundaries before their resolver effects"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunStartCapture.cs",
+    "purpose": "Complete retained typed inputs and fresh reconstruction with canonical null-aware recapture"
+  },
+  {
+    "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunStartCapture.cs.meta",
+    "purpose": "Stable Unity import identity for the paired new script"
+  },
+  {
+    "path": "Assets/_Project/Tests/EditMode/LivingDungeonPhaseB1Tests.cs",
+    "purpose": "Fresh-instance restoration, deadline/equivalence/failure, frame and workload qualification"
+  },
+  {
+    "path": "Assets/_Project/Tests/EditMode/LivingDungeonPhaseB1Tests.cs.meta",
+    "purpose": "Stable Unity import identity for the paired new script"
+  },
+  {
+    "path": "Assets/_Project/Tests/PlayMode/LivingDungeonPhaseB1PlayModeTests.cs",
+    "purpose": "Fresh-instance restoration, deadline/equivalence/failure, frame and workload qualification"
+  },
+  {
+    "path": "Assets/_Project/Tests/PlayMode/LivingDungeonPhaseB1PlayModeTests.cs.meta",
+    "purpose": "Stable Unity import identity for the paired new script"
+  },
+  {
+    "path": "Docs/planning/living-dungeon-phase-b1-implementation-contract.md",
+    "purpose": "Pre-implementation choice, exact format/semantics/bounds and future canonical ownership"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/baseline.json",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/before-metadata-source.zip",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/changed-files.json",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/expanded-save-preservation.json",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/input-checkpoints.zip",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/log-index.json",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/owner-preservation.json",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/production-gates.json",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/proposed-pr-description.md",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/qualification-reports.zip",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/qualification.md",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/report-summary.json",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/self-review.md",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/static-checks.json",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/test-outcome-comparison.json",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/unity-logs-redacted.zip",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Docs/testing/evidence/living-dungeon-phase-b1/windows-build.json",
+    "purpose": "Actual B1 qualification, source/preservation, performance, review and publication evidence"
+  },
+  {
+    "path": "Tools/Simulation/phase_b1_qualification.py",
+    "purpose": "Strict isolated-source and owner/fixture preservation; retained result/build evidence"
+  },
+  {
+    "path": "docs/planning/post-gd60-mvp-execution-plan.md",
+    "purpose": "Actual merged Phase A/B1 status and deferred B2/B3/C dependency sequencing"
+  }
+]
