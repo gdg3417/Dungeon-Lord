@@ -205,8 +205,20 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (steps.Length == 0) throw new InvalidOperationException("run.execution.terminal");
             return steps[0];
         }
-        public RunOutcomeRecord DrainToCompletion()
-        { while (!IsTerminal) AdvanceCore(1, ordinal, false); return TakeOutcome(); }
+        public RunOutcomeRecord DrainToCompletion(bool retainPresentationSteps = false)
+        {
+            // Only completed manual publication opts in. The existing geometry-derived
+            // event ceiling bounds this session evidence; checkpoint execution is unchanged.
+            var steps = retainPresentationSteps ? new List<RunStep>() : null;
+            while (!IsTerminal)
+            {
+                AdvanceCore(1, ordinal, false);
+                steps?.Add(last.Value);
+            }
+            var outcome = TakeOutcome();
+            if (steps != null) outcome.PresentationSteps = steps.ToArray();
+            return outcome;
+        }
         public RunOutcomeRecord TakeOutcome()
         {
             if (!IsTerminal || taken || failure != null) throw new InvalidOperationException("run.execution.outcome_unavailable");

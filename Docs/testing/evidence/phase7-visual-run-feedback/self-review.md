@@ -1,0 +1,14 @@
+# Correction diff review
+
+Reviewed the observer identity capture/retention, display projection/cursor, canonical renderer bindings/restoration, feedback label, presentation policy/localization, regression fixtures and isolated qualification tooling.
+
+- The corridor identity uses existing canonical serialization and SHA-256, including stable assignment IDs, category/option, floor/branch/edge, sequence and tile. Positive order invariance and negative tile/option/ID/sequence/removal cases pass. Wallet/Heat and out-of-scope branch data do not enter this hash. The original spatial fingerprint remains mandatory.
+- A currently playing older run is checked against its own traversed branches when newer outcomes publish. No graphical state can approve a canonical edit or modify historical evidence.
+- All monster motion comes from recorded `Path`/`ConfiguredStart`, projected with the canonical transform and validated endpoints/adjacent edges. Ordinals enforce sequential encounters. No combat/pathfinding/targeting/damage resolver changes occur.
+- Existing monster renderer instances move, retain resolved endpoint/tint/order, and restore their original pose/color/order on Close or Edit Mode. There is no duplicate canonical/engaged monster or unrecorded monster-death state.
+- Damage feedback requires a matching authoritative encounter and displays recorded damage/member/HP. Mitigation is described only with positive unmitigated damage and zero applied damage. Off-path/unreachable interactions cannot create a damage label. Casualties require positive prior HP and zero recorded post-HP.
+- Historical content and casualty views are bounded and pooled. Only selected-floor content is bound; hidden party/interaction renderers do not animate offscreen. One label avoids overlapping damage bursts. No frame loop allocates paths/collections or searches gameplay routes.
+- Editing, floor/camera changes, pause/resume, restart and Close retain read-only behavior. Scene/model tests compare canonical save bytes and serialized runtime/history before and after playback. Internal nonserialized fields preserve schema 14 and frozen public gameplay evidence contracts.
+- Original evidence is unchanged. Refreshed owner inputs are archived before replacement; existing UAT save progress, owner saves/backups and earlier players are preserved. The updated player is built to a new directory and not launched for owner testing.
+
+Known visual limits remain: aggregate party position, potentially overlapping historical symbols at shared recorded encounter tiles, lightweight markers and conservative spatial compatibility. There is no recorded monster HP/death or individual adventurer path to animate. Session-only detail is unavailable after restart. Desktop fixtures do not qualify phone performance or replace owner gameplay acceptance. No merge or subsequent phase is authorized.

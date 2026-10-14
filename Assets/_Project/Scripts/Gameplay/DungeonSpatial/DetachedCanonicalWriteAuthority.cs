@@ -289,6 +289,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 candidate.livingDungeon = owned.LivingDungeon;
                 candidate.lastSavedUtcUnix = savedUtcUnix;
                 simulation.CalculatePhaseFiveBRun(candidate, owned, production, postureId, limits.Canonical);
+                if (!StructuralEditService.TryFingerprint(owned.State, limits.Canonical, out var presentationFingerprint))
+                    return Failure(invalid);
+                candidate.runHistory.LatestOutcome.PresentationLayoutFingerprint = presentationFingerprint;
+                if (!DungeonBuilder.M0.Gameplay.RunSimulation.RunTransientEvidence.TryCorridorFingerprint(
+                    candidate.runHistory.LatestOutcome, owned.CorridorContent, limits.Canonical, out var corridorFingerprint))
+                    return Failure(invalid);
+                candidate.runHistory.LatestOutcome.PresentationCorridorFingerprint = corridorFingerprint;
             }
             catch (Exception error)
             {

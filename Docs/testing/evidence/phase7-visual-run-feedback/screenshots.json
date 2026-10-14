@@ -1,0 +1,227 @@
+[
+  {
+    "file": "composition-visual-feedback-casualty-1280x720.png",
+    "sha256": "4be29a79631b2acf7959a50791046615046447712357809635074739d8bce036",
+    "bytes": 362428
+  },
+  {
+    "file": "composition-visual-feedback-casualty-1920x1080.png",
+    "sha256": "df0a2df41b4c8235b0e41ffc088981c7ddce9ee339726af24e58cacbfa5de18a",
+    "bytes": 665943
+  },
+  {
+    "file": "composition-visual-feedback-casualty-720x1280.png",
+    "sha256": "8d7e0fbd57330308abd4a6c6c3d1f40ddc6250c7ef8e5ccd829f454efa310ba3",
+    "bytes": 532304
+  },
+  {
+    "file": "composition-visual-feedback-complete-1280x720.png",
+    "sha256": "fbf037d2d41514f23354dd2b4f4c8f7c3a99da30421845189290cfd2b214a16e",
+    "bytes": 342652
+  },
+  {
+    "file": "composition-visual-feedback-complete-1920x1080.png",
+    "sha256": "f1c35503a7c8bd000039c1cf7a3118b23b1200768e201d3e4494a0942f169671",
+    "bytes": 667462
+  },
+  {
+    "file": "composition-visual-feedback-complete-720x1280.png",
+    "sha256": "d80b165ab1578e4be8ba2f92197a70ca0b6019417ddd844d2771d5ecab4f31d2",
+    "bytes": 536115
+  },
+  {
+    "file": "composition-visual-feedback-damage-MonsterEngagement-10-1280x720.png",
+    "sha256": "20cbfa336fe612dc35c51999fb6bf78ae0d95d3a9bd645c0dce88be62939c60b",
+    "bytes": 341032
+  },
+  {
+    "file": "composition-visual-feedback-damage-MonsterEngagement-10-1920x1080.png",
+    "sha256": "b6cdb29d86a7a1ffea3834a95a1d1deceb916fa83ac1a695f957f23c8915d83d",
+    "bytes": 662773
+  },
+  {
+    "file": "composition-visual-feedback-damage-MonsterEngagement-10-720x1280.png",
+    "sha256": "aabb294fb4dd7886de82e9b768431df952b907934db46033d6af2d7bf1d0607e",
+    "bytes": 522351
+  },
+  {
+    "file": "composition-visual-feedback-damage-MonsterEngagement-9-1280x720.png",
+    "sha256": "3751b832c2d924487b462e7e60a3c5da046f83747554149a25328ccf046b1402",
+    "bytes": 342149
+  },
+  {
+    "file": "composition-visual-feedback-damage-MonsterEngagement-9-1920x1080.png",
+    "sha256": "e34c0acb9cf5e7511246b5736f54752535a6dc6897659ab95ddfe7f979aa2ffe",
+    "bytes": 665418
+  },
+  {
+    "file": "composition-visual-feedback-damage-MonsterEngagement-9-720x1280.png",
+    "sha256": "1f7fd08f21f07afe0e7973bb4c25b06b5721b79a1f3fe55cfb41612a6475960b",
+    "bytes": 524851
+  },
+  {
+    "file": "composition-visual-feedback-damage-TrapTrigger-11-1280x720.png",
+    "sha256": "5415d04d36ca8cd39ba1ebc473acbca1224850322362f1845163e1872eb125f4",
+    "bytes": 340730
+  },
+  {
+    "file": "composition-visual-feedback-damage-TrapTrigger-11-1920x1080.png",
+    "sha256": "bea9696ffe35f4166cf76594dc772436ecb906492f8b0c6f7f6e59b0f83d0845",
+    "bytes": 662573
+  },
+  {
+    "file": "composition-visual-feedback-damage-TrapTrigger-11-720x1280.png",
+    "sha256": "23dc06bf7f0f0b61aef360f2e476351e60041cdcc9e1eb53ab4dde7d710c43f6",
+    "bytes": 522353
+  },
+  {
+    "file": "composition-visual-feedback-damage-TrapTrigger-3-1280x720.png",
+    "sha256": "ecc01ddc6a6881878024e97aa6dcaf96f78944917cad81b35813ad3fc402852b",
+    "bytes": 341901
+  },
+  {
+    "file": "composition-visual-feedback-damage-TrapTrigger-3-1920x1080.png",
+    "sha256": "7851cffaa7da68e0a12283f27a63b359cc98e1e50d92bf9b875935549cf676be",
+    "bytes": 664879
+  },
+  {
+    "file": "composition-visual-feedback-damage-TrapTrigger-3-720x1280.png",
+    "sha256": "83c9cb3a5a62ff4cf381f9db9c40e88683459dfa07ad280d6c39f4169b8b9899",
+    "bytes": 529125
+  },
+  {
+    "file": "composition-visual-feedback-LootInteraction-1280x720.png",
+    "sha256": "6d3f3bacb655fb87c7c67c59f52eabf9dc1995f66550f13405ac3b42076ca1a3",
+    "bytes": 346842
+  },
+  {
+    "file": "composition-visual-feedback-LootInteraction-1920x1080.png",
+    "sha256": "cd8ec73684043232d6c1aee7d41cca6c4b94a09b164cfb4dd538f900811c564e",
+    "bytes": 678612
+  },
+  {
+    "file": "composition-visual-feedback-LootInteraction-720x1280.png",
+    "sha256": "f8afaf0818283a664bfd795fff17ff1ed5a59dbba26c40db9230543ef92904eb",
+    "bytes": 535379
+  },
+  {
+    "file": "composition-visual-feedback-mitigated-trap-1280x720.png",
+    "sha256": "e33029ef772bb0a7c7034e456d987cde0256d7e636b95c544aec82f9ddabfda4",
+    "bytes": 356913
+  },
+  {
+    "file": "composition-visual-feedback-mitigated-trap-1920x1080.png",
+    "sha256": "79bd94a9fd3ee2f3e59b0211f1037c6b975dc6a423266ae9aec281d7cc9b04bd",
+    "bytes": 653283
+  },
+  {
+    "file": "composition-visual-feedback-mitigated-trap-720x1280.png",
+    "sha256": "c194a217fefc0dbb0761908f5d377ae5843e6f904876f0eefc0419d40ad593e4",
+    "bytes": 525182
+  },
+  {
+    "file": "composition-visual-feedback-monster-approach-10-1280x720.png",
+    "sha256": "d1e3cf5b15331470d0353c6adaa7cfe11c1dec763f8e9af0e4669e21e98fc25d",
+    "bytes": 347442
+  },
+  {
+    "file": "composition-visual-feedback-monster-approach-10-1920x1080.png",
+    "sha256": "c5b089d8cc0933ed26a1b0110028879ac98183fdb334aae6caecaaa0e57e57c1",
+    "bytes": 676895
+  },
+  {
+    "file": "composition-visual-feedback-monster-approach-10-720x1280.png",
+    "sha256": "06211c300139abcf66623d124a8155e2c7e5423c2c5da1830bac67fbf68d9577",
+    "bytes": 532660
+  },
+  {
+    "file": "composition-visual-feedback-monster-approach-9-1280x720.png",
+    "sha256": "48a19ef34c17dc7d893b831f27edba01c1b9a5d1896e9dd4548f88ce69eb6496",
+    "bytes": 348332
+  },
+  {
+    "file": "composition-visual-feedback-monster-approach-9-1920x1080.png",
+    "sha256": "473d87d6cdd44b629d48159d20e850cdda836348714a7d0f6421d6ef240b1dcf",
+    "bytes": 678861
+  },
+  {
+    "file": "composition-visual-feedback-monster-approach-9-720x1280.png",
+    "sha256": "534addfbbc496d7fd87be9532ef7507a6c644264a7f5b645c7b3cf108db0549a",
+    "bytes": 534812
+  },
+  {
+    "file": "composition-visual-feedback-MonsterEngagement-1280x720.png",
+    "sha256": "3751b832c2d924487b462e7e60a3c5da046f83747554149a25328ccf046b1402",
+    "bytes": 342149
+  },
+  {
+    "file": "composition-visual-feedback-MonsterEngagement-1920x1080.png",
+    "sha256": "e34c0acb9cf5e7511246b5736f54752535a6dc6897659ab95ddfe7f979aa2ffe",
+    "bytes": 665418
+  },
+  {
+    "file": "composition-visual-feedback-MonsterEngagement-720x1280.png",
+    "sha256": "1f7fd08f21f07afe0e7973bb4c25b06b5721b79a1f3fe55cfb41612a6475960b",
+    "bytes": 524851
+  },
+  {
+    "file": "composition-visual-feedback-Movement-1280x720.png",
+    "sha256": "33a991b15de1e5332e4473d98737a0650f0a92c7904c20e48d3530f704846cc6",
+    "bytes": 345050
+  },
+  {
+    "file": "composition-visual-feedback-Movement-1920x1080.png",
+    "sha256": "b4db80b06e6f28003d6b223d8530e0adec20fe207d1a0730eb533913402b25fc",
+    "bytes": 676016
+  },
+  {
+    "file": "composition-visual-feedback-Movement-720x1280.png",
+    "sha256": "af214fe6080584dc4f06f7a124c7e6263c615d85d998f1281849803e2ccd8e94",
+    "bytes": 540694
+  },
+  {
+    "file": "composition-visual-feedback-resolved-10-1280x720.png",
+    "sha256": "5415d04d36ca8cd39ba1ebc473acbca1224850322362f1845163e1872eb125f4",
+    "bytes": 340730
+  },
+  {
+    "file": "composition-visual-feedback-resolved-10-1920x1080.png",
+    "sha256": "bea9696ffe35f4166cf76594dc772436ecb906492f8b0c6f7f6e59b0f83d0845",
+    "bytes": 662573
+  },
+  {
+    "file": "composition-visual-feedback-resolved-10-720x1280.png",
+    "sha256": "23dc06bf7f0f0b61aef360f2e476351e60041cdcc9e1eb53ab4dde7d710c43f6",
+    "bytes": 522353
+  },
+  {
+    "file": "composition-visual-feedback-resolved-9-1280x720.png",
+    "sha256": "d9629d49bedf097d9f5016f3c54a94a17b010133d6bb0f1c7eb193060d1a4682",
+    "bytes": 347612
+  },
+  {
+    "file": "composition-visual-feedback-resolved-9-1920x1080.png",
+    "sha256": "353246c4a5cf59a7e77e813cca55af03e4264740ccb6995498ee9138a91b2d66",
+    "bytes": 677214
+  },
+  {
+    "file": "composition-visual-feedback-resolved-9-720x1280.png",
+    "sha256": "624510a2d624cdbc0c78d9bff6767f99c47b409dfadfa8ab4c31f867dbd996cd",
+    "bytes": 533031
+  },
+  {
+    "file": "composition-visual-feedback-TrapTrigger-1280x720.png",
+    "sha256": "ecc01ddc6a6881878024e97aa6dcaf96f78944917cad81b35813ad3fc402852b",
+    "bytes": 341901
+  },
+  {
+    "file": "composition-visual-feedback-TrapTrigger-1920x1080.png",
+    "sha256": "7851cffaa7da68e0a12283f27a63b359cc98e1e50d92bf9b875935549cf676be",
+    "bytes": 664879
+  },
+  {
+    "file": "composition-visual-feedback-TrapTrigger-720x1280.png",
+    "sha256": "83c9cb3a5a62ff4cf381f9db9c40e88683459dfa07ad280d6c39f4169b8b9899",
+    "bytes": 529125
+  }
+]

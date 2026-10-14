@@ -497,6 +497,9 @@ namespace DungeonBuilder.M0
         public Gameplay.RunSimulation.FloorTransitionEvidence[] FloorTransitions { get; internal set; }
         public Gameplay.RunSimulation.TransientDepthObjective DepthObjective { get; internal set; }
         public Gameplay.RunSimulation.RunSpatialEvent[] SpatialEvents { get; internal set; }
+        [field: NonSerialized] internal Gameplay.RunSimulation.RunStep[] PresentationSteps { get; set; }
+        [field: NonSerialized] internal string PresentationLayoutFingerprint { get; set; }
+        [field: NonSerialized] internal string PresentationCorridorFingerprint { get; set; }
         public string RunId;
         public long TickStarted;
         public bool Success;

@@ -19,6 +19,7 @@
         <ui:Label name="capacity" class="capacity-bar" />
         <ui:VisualElement name="mapArea" class="map-area" picking-mode="Ignore">
             <ui:VisualElement name="viewport" class="viewport" />
+            <ui:Label name="replayDamage" class="replay-damage" picking-mode="Ignore" />
             <ui:VisualElement name="floorRail" class="floor-rail" picking-mode="Ignore">
                 <ui:Button name="collapseFloors" tooltip="ui.dungeon.floors.collapse" />
                 <ui:ScrollView name="floorList" mode="Vertical" class="floor-list"><ui:VisualElement name="floors" /></ui:ScrollView>
@@ -37,6 +38,13 @@
             </ui:VisualElement>
             </ui:VisualElement>
             <ui:Label name="status" />
+            <ui:VisualElement name="replayPanel" class="replay-panel">
+                <ui:ScrollView name="replayDetails" mode="Vertical" class="replay-details">
+                <ui:Label name="replayEvent" />
+                <ui:Label name="replayFloor" />
+                </ui:ScrollView>
+                <ui:VisualElement class="row"><ui:Button name="pauseReplay" tooltip="ui.dungeon.replay.pause" /><ui:Button name="closeReplay" tooltip="ui.dungeon.replay.close" /></ui:VisualElement>
+            </ui:VisualElement>
             <ui:ScrollView name="blockerScroll" mode="Horizontal"><ui:VisualElement name="constructionBlockers" class="category-row" /></ui:ScrollView>
             <ui:VisualElement name="placementContext" class="placement-context">
                 <ui:VisualElement class="placement-information">
@@ -49,7 +57,9 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:ScrollView name="contextDetails" mode="Vertical" class="context-details">
+            <ui:Label name="replayLegend" />
             <ui:VisualElement name="floorSummary" class="summary-card"><ui:Label name="floorName" class="mode" /><ui:Label name="floorInfo" /></ui:VisualElement>
+            <ui:Label name="replayAvailability" />
             <ui:Label name="economics" />
             <ui:VisualElement name="roomContentPanel">
                 <ui:Label name="contentCapacity" />
@@ -72,6 +82,7 @@
             <ui:VisualElement name="inspectionActions" class="row"><ui:Button name="focusRoom" tooltip="ui.dungeon.focus_room" /><ui:Button name="move" tooltip="ui.dungeon.move" /><ui:Button name="reassignContent" tooltip="ui.dungeon.content.reassign" /><ui:Button name="unassignContent" tooltip="ui.dungeon.content.unassign" /><ui:Button name="closeSheet" tooltip="ui.dungeon.floor_summary" /></ui:VisualElement>
             <ui:VisualElement name="sessionActions" class="row session-actions">
                 <ui:Button name="edit" tooltip="ui.dungeon.edit" />
+                <ui:Button name="replayRun" tooltip="ui.dungeon.replay.start" />
                 <ui:Label name="draftSummary" />
                 <ui:VisualElement name="editActions" class="row">
                     <ui:Button name="save" tooltip="ui.dungeon.save" />

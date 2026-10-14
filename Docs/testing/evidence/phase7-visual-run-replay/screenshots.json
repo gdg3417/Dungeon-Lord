@@ -1,0 +1,77 @@
+[
+  {
+    "file": "composition-visual-replay-complete-1280x720.png",
+    "sha256": "42119c91cd5e608ce5f53113ea5593f62f463f809ae41b6e417283128ce40819",
+    "bytes": 342539
+  },
+  {
+    "file": "composition-visual-replay-complete-1920x1080.png",
+    "sha256": "fe9a31ee9b02f320355644c36c8fa09320ad7aad269e3e92a73d54d644ddca48",
+    "bytes": 641895
+  },
+  {
+    "file": "composition-visual-replay-complete-720x1280.png",
+    "sha256": "7b234700c54bd57337b2b5eec1d61f955bdd9b165734d0aae861f14b05c7c851",
+    "bytes": 547056
+  },
+  {
+    "file": "composition-visual-replay-LootInteraction-1280x720.png",
+    "sha256": "e64e793c4c1f32f41bfd6c0ea3aed88a3d233d9c729d88856de89dae2c2f7fc7",
+    "bytes": 343839
+  },
+  {
+    "file": "composition-visual-replay-LootInteraction-1920x1080.png",
+    "sha256": "8f338a374243bd44fe317c5eea531fd65ac185af93549992df208aad6d39f6e8",
+    "bytes": 679784
+  },
+  {
+    "file": "composition-visual-replay-LootInteraction-720x1280.png",
+    "sha256": "7adf95ffdc817149bf9954ba500648571ba9abede2bb8bd9d9b0f607e400ebc5",
+    "bytes": 548825
+  },
+  {
+    "file": "composition-visual-replay-MonsterEngagement-1280x720.png",
+    "sha256": "595247dd31e3f02ee7761bce451f429f308c352a202eb7ce7404662fb43fbf1c",
+    "bytes": 343165
+  },
+  {
+    "file": "composition-visual-replay-MonsterEngagement-1920x1080.png",
+    "sha256": "c1f8e55922a1b45d6b5f340d0b04b5fc79efe0e33e759d4bfe6e69e6010550c2",
+    "bytes": 678585
+  },
+  {
+    "file": "composition-visual-replay-MonsterEngagement-720x1280.png",
+    "sha256": "40c46665362c3d8c9121796a63cb58d944905993cf879e1256d6357b684b124f",
+    "bytes": 546848
+  },
+  {
+    "file": "composition-visual-replay-Movement-1280x720.png",
+    "sha256": "d86b0ff61ec44142c9e126872e50c5a0075bc3b8f2ca0ca7f5f6f596d4a1a231",
+    "bytes": 337820
+  },
+  {
+    "file": "composition-visual-replay-Movement-1920x1080.png",
+    "sha256": "9449979d3b8d7f686747635aa2dacd5004a8bec9067ca030b860c3cbb4207cce",
+    "bytes": 669705
+  },
+  {
+    "file": "composition-visual-replay-Movement-720x1280.png",
+    "sha256": "72588b78b0e1f76d4ac7b69966eba876f0a8d0aab8bb8e03e4c17793abd71356",
+    "bytes": 542283
+  },
+  {
+    "file": "composition-visual-replay-TrapTrigger-1280x720.png",
+    "sha256": "403fafb4846eb3a2156ed201fa5b8b87d3e1d394385d49f326843e641e4bc427",
+    "bytes": 342720
+  },
+  {
+    "file": "composition-visual-replay-TrapTrigger-1920x1080.png",
+    "sha256": "af2e14eb9826efc43dc8aaa5677163d33122a5cbbf25d66833699795460c3989",
+    "bytes": 677564
+  },
+  {
+    "file": "composition-visual-replay-TrapTrigger-720x1280.png",
+    "sha256": "28fa1d397741c99db1dbfb44a0979fd3ebb5b94a7ff4a40f557756e3b1139e89",
+    "bytes": 546705
+  }
+]

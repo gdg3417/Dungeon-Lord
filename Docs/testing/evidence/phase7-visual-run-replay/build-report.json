@@ -1,0 +1,13 @@
+{
+  "utcTimestamp": "2026-10-14T12:49:01.5437330Z",
+  "unityVersion": "6000.3.2f1",
+  "targetPlatform": "StandaloneWindows64",
+  "applicationVersion": "1.0",
+  "developmentBuild": true,
+  "includedScenes": ["Assets/_Project/Scenes/Bootstrap.unity"],
+  "outputPath": "Builds/Development/Windows-visual-run-replay/Dungeon Lord.exe",
+  "buildResult": "Succeeded",
+  "totalBuildSize": 181509140,
+  "errorCount": 0,
+  "warningCount": 1
+}

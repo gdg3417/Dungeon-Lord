@@ -1,0 +1,16 @@
+{
+  "removed": [],
+  "added": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunFeedbackCasualtyAndMitigatedDamageAreRecordedAndReadOnly",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CorridorAuthorityChangesFailHistoricalValidationWithoutChangingSpatialFingerprint(\"id\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CorridorAuthorityChangesFailHistoricalValidationWithoutChangingSpatialFingerprint(\"option\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CorridorAuthorityChangesFailHistoricalValidationWithoutChangingSpatialFingerprint(\"removed\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CorridorAuthorityChangesFailHistoricalValidationWithoutChangingSpatialFingerprint(\"sequence\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CorridorAuthorityChangesFailHistoricalValidationWithoutChangingSpatialFingerprint(\"tile\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CorridorIdentityIsCanonicalAndIgnoresUnrelatedGameplayChanges",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence(False,False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence(False,True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence(True,False)"
+  ],
+  "changed": []
+}

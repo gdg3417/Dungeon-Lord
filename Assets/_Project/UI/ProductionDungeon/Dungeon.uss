@@ -1,5 +1,8 @@
 :root { --space: 8px; --panel: rgb(17,26,34); --ink: rgb(239,232,212); --gold: rgb(211,177,107); --cool: rgb(123,203,225); }
 .safe-root { position: absolute; color: var(--ink); }
+.replay-panel { display: none; flex-shrink: 0; }
+.replay-details { flex-shrink: 1; }
+#replayAvailability { display: none; }
 .top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/panel.png"); -unity-slice-left: 14; -unity-slice-right: 14; -unity-slice-top: 14; -unity-slice-bottom: 14; }
 .top-chrome { flex-shrink: 0; }
 .bottom-chrome { flex-shrink: 1; max-height: 42%; border-top-width: 2px; border-top-color: var(--gold); }
@@ -145,3 +148,4 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 #contentBrowserSelector { flex-shrink: 0; }
 #contentBrowserSelector > Button { flex-grow: 1; }
 .content-card { flex-shrink: 0; }
+.replay-damage { position: absolute; display: none; background-color: rgba(18, 22, 30, 0.96); border-radius: 6px; padding: 6px; white-space: normal; -unity-text-align: middle-center; -unity-font-style: bold; }
