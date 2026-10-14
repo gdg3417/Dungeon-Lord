@@ -171,7 +171,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             foreach (var link in links.Values.OrderBy(l => l.ActorId, StringComparer.Ordinal).ThenBy(l => l.TargetId, StringComparer.Ordinal))
                 Emit(CombatC0EventKind.Eligibility, link.Reason, 0, actors.Single(a => a.Id == link.ActorId), actors.Single(a => a.Id == link.TargetId));
             var participating = actors.Where(a => !a.IsMonster || links.Values.Any(l => l.Reason == CombatC0Reason.Legal &&
-                (l.ActorId == a.Id || l.TargetId == a.Id))).ToArray();
+                ((l.ActorId == a.Id && health[l.TargetId] > 0) ||
+                 (l.TargetId == a.Id && health[l.ActorId] > 0)))).ToArray();
             var targetOrder = participating.ToDictionary(a => a.Id, a => participating.Where(t => t.IsMonster != a.IsMonster)
                 .OrderBy(t => a.IsMonster ? ClassRank(a.Profile.TargetClassOrder, t.ClassId) : 0)
                 .ThenBy(t => t.Order).ThenBy(t => t.Id, StringComparer.Ordinal).ToArray(), StringComparer.Ordinal);

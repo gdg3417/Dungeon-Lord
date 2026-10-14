@@ -187,8 +187,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void CanonicalManualRunPublishesC0OnceKeepsManaHistoryAndTransientEvidenceOnly()
         {
-            var f=Canonical(); double mana=f.Runtime.structureRuntime.ManaReserve; int sequence=f.Runtime.runHistory.NextRunSequence;
+            var f=Canonical(); int sequence=f.Runtime.runHistory.NextRunSequence;
             PhaseSixA4Tests.AddContent(f,0,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.GoblinOptionId);
+            double mana=f.Runtime.structureRuntime.ManaReserve;
             f.Accept(PhaseFiveBBranchIntegrationTests.Run(f)); var run=f.Runtime.runHistory.LatestOutcome;
             Assert.That(CombatC0Diagnostics.IsCombatC0(run),Is.True); Assert.That(CombatC0Diagnostics.Events(run).Count,Is.GreaterThan(0));
             Assert.That(CombatC0Diagnostics.Monsters(run),Has.Count.EqualTo(2));
@@ -326,6 +327,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(run.Success,Is.False); Assert.That(run.EncounterEvents,Is.Empty); Assert.That(run.LootSummary.RollCount,Is.Zero);
             Assert.That(run.PresentationSteps.Any(s=>s.Kind==RunStepKind.TrapTrigger||s.Kind==RunStepKind.LootInteraction||s.Kind==RunStepKind.Movement),Is.False);
             Assert.That(CombatC0Diagnostics.Events(run).Last().Reason,Is.EqualTo(CombatC0Reason.PartyWiped));
+        }
+        [Test] public void DeadRangedMemberCannotAdmitAnOtherwiseIneligibleDefender()
+        {
+            var c=Config(); var party=Party("warrior","ranger"); party.Members[1].ApplyDamage(party.Members[1].MaxHealth);
+            var a=Monster("legal",1,2); var b=Monster("isolated",3,3,1); var room=B.Room(0,true,a,b);
+            room.Spatial.Ingress=new TileCoordinate(1,1);
+            room.Spatial.TraversableTiles=room.Spatial.TraversableTiles.Where(t=>!t.Equals(new TileCoordinate(3,2))&&!t.Equals(new TileCoordinate(2,3))).ToArray();
+            var kernel=Kernel(c,party,a,b); var geometry=new CombatC0Geometry(room.Spatial,new CombatC0RoomBounds("phase.a.floor",room.RoomInstanceId,4,4),kernel);
+            var group=geometry.Collect(room.Spatial.Ingress,new[]{a,b},new Dictionary<string,TileCoordinate>{{a.AssignmentId,a.RoomLocalPosition},{b.AssignmentId,b.RoomLocalPosition}},new HashSet<string>());
+            Assert.That(group.Participating,Is.EqualTo(new[]{a.AssignmentId}));
+            var result=kernel.Resolve("phase.a.floor",room.RoomInstanceId,0,group.Assignments,group.Links);
+            Assert.That(result.Completion,Is.EqualTo(CombatC0Reason.DefendersDefeated)); Assert.That(kernel.MonsterHealth(b.AssignmentId),Is.EqualTo(8));
+            Assert.That(result.Events.Any(e=>e.Kind==CombatC0EventKind.Attack&&e.ActorId.EndsWith("/isolated")),Is.False);
         }
         [Test] public void ActualProductionRoomAndFloorEnvelopeFitsApprovedWorkAndParticipantBounds()
         {
