@@ -72,6 +72,11 @@ with zipfile.ZipFile(OUT / 'qualification-support.zip', 'w', zipfile.ZIP_DEFLATE
             archive.write(path, path.name)
     for path in sorted((ROOT / 'Temp').glob('combat-c0-integration-*.log')):
         archive.writestr('logs/' + path.name, redact(path.read_text(encoding='utf-8-sig', errors='replace')))
+    baseline_log = ROOT / 'Temp/combat-c0-b1-baseline.log'
+    if baseline_log.exists():
+        archive.writestr('logs/' + baseline_log.name, redact(baseline_log.read_text(encoding='utf-8-sig', errors='replace')))
+    for path in sorted((ROOT / 'TestResults/combat-c0-integration/baseline').glob('*.json')):
+        archive.write(path, 'preintegration-capture/' + path.name)
 
 build = ROOT / 'Temp/ui-composition-combat-c0-integration-validation/Builds/Development/Windows-combat-c0-integration'
 if (build / 'build-report.json').exists():

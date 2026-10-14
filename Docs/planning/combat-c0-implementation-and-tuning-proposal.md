@@ -1,6 +1,6 @@
 # Combat C0 approved implementation contract
 
-Status: Owner-approved initial MVP/playtest configuration. Production integration implemented on PR #238; final automated qualification and external review are recorded separately. This approval does not qualify permanent balance or C1/C2.
+Status: Owner-approved initial MVP/playtest configuration. Production integration and automated qualification passed on PR #238; external review and owner UAT remain pending. This approval does not qualify permanent balance or C1/C2.
 
 ## 2026-10-14 approval and production implementation
 
@@ -16,7 +16,7 @@ The existing loot/egress path and trap scheduling remain authoritative. At each 
 
 Known limitations: shared party anchor, fixed attacks, immutable encounter positions, no production interior opacity content, no combat animation, no durable C0 checkpoint or detailed replay after reopen. Existing room-clear and retreat thresholds remain active outside combat. Empty rooms and ineligible monsters do not create death rewards. Future balance changes belong to versioned configuration and testing; aggro, individual formation, spells, equipment, healing and disengagement remain deferred. C1 consumes evidence for presentation; C2 requires separate save/recovery/reserve approval.
 
-Final review, exact source/test/build evidence and owner UAT status belong in `Docs/testing/evidence/combat-c0/integration/`. Earlier qualification applies only to the historical prerequisite kernel and is not evidence for this integrated runtime.
+Final review, exact source/test/build evidence and owner UAT status are in [integration/qualification.md](../testing/evidence/combat-c0/integration/qualification.md): 82 focused, 405 regression, 1,979 full EditMode, 3,405 full PlayMode, 65 included production gates and 12 strict-input checks pass; existing skips remain. Windows Development Build succeeds with zero errors and one existing native-symbol warning. Earlier qualification applies only to the historical prerequisite kernel and is not evidence for this integrated runtime.
 
 ## Historical pre-approval proposal (preserved record)
 

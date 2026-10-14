@@ -1,0 +1,346 @@
+[
+  {
+    "file": "combat-c0-integration-focused-03.xml",
+    "sha256": "d3e2393cc8cb45a8e6c87d141c7f5434a51046a630a9592c878527486991b6a4",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "77",
+      "result": "Passed",
+      "total": "77",
+      "passed": "77",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 21:53:19Z",
+      "end-time": "2026-10-14 21:53:24Z",
+      "duration": "5.0974603"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": []
+  },
+  {
+    "file": "combat-c0-integration-focused-04.xml",
+    "sha256": "9dc6e12e04937cccf65bddb0c671836d068cd5c350e96647f7e5c078aa8a4cda",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "79",
+      "result": "Passed",
+      "total": "79",
+      "passed": "79",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 21:54:59Z",
+      "end-time": "2026-10-14 21:55:04Z",
+      "duration": "4.7526621"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0IntegrationEditModeFixtures.ActualProductionRoomAndFloorEnvelopeFitsApprovedWorkAndParticipantBounds",
+        "output": "spatial.room.basic: conservative room work 19421, path 46\nspatial.room.large_chamber: conservative room work 143231, path 146\nspatial.room.rectangle: conservative room work 29100, path 43\nProduction envelope upper work 602024, participants 32, encounters 27; managed observation 765644800\n"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-integration-focused-final-source.xml",
+    "sha256": "fdea28e6cb827d33aab38f7df47d391abb260bef2c87ca9622bbf7ba9e88d61c",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "82",
+      "result": "Passed",
+      "total": "82",
+      "passed": "82",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 22:11:04Z",
+      "end-time": "2026-10-14 22:11:10Z",
+      "duration": "5.4385305"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0IntegrationEditModeFixtures.ActualProductionRoomAndFloorEnvelopeFitsApprovedWorkAndParticipantBounds",
+        "output": "spatial.room.basic: conservative room work 19421, path 46\nspatial.room.large_chamber: conservative room work 143231, path 146\nspatial.room.rectangle: conservative room work 29100, path 43\nProduction envelope upper work 602024, participants 32, encounters 27; thread allocation counter unavailable on this Unity Mono runtime\n"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-integration-focused-final.xml",
+    "sha256": "25c5e203a71045da2901ad34e9b3b201385c9556c6dfab74a50d31f7fbb457f3",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "79",
+      "result": "Passed",
+      "total": "79",
+      "passed": "79",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 21:57:43Z",
+      "end-time": "2026-10-14 21:57:47Z",
+      "duration": "4.8268926"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0IntegrationEditModeFixtures.ActualProductionRoomAndFloorEnvelopeFitsApprovedWorkAndParticipantBounds",
+        "output": "spatial.room.basic: conservative room work 19421, path 46\nspatial.room.large_chamber: conservative room work 143231, path 146\nspatial.room.rectangle: conservative room work 29100, path 43\nProduction envelope upper work 602024, participants 32, encounters 27; fixture/adapter thread allocations 0\n"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-integration-focused-metadata.xml",
+    "sha256": "8ad91fbb605f8c745cfb518996f691370acf96165eb3e0a3fd7b5ffb230fc661",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "82",
+      "result": "Passed",
+      "total": "82",
+      "passed": "82",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 22:36:28Z",
+      "end-time": "2026-10-14 22:36:34Z",
+      "duration": "5.5069311"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0IntegrationEditModeFixtures.ActualProductionRoomAndFloorEnvelopeFitsApprovedWorkAndParticipantBounds",
+        "output": "spatial.room.basic: conservative room work 19421, path 46\nspatial.room.large_chamber: conservative room work 143231, path 146\nspatial.room.rectangle: conservative room work 29100, path 43\nProduction envelope upper work 602024, participants 32, encounters 27; thread allocation counter unavailable on this Unity Mono runtime\n"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-integration-focused-qualified.xml",
+    "sha256": "89283eed017985c83f4c53852b91eb9189701f9461691a56a25267fc0d3434c0",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "81",
+      "result": "Failed(Child)",
+      "total": "81",
+      "passed": "80",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 22:08:06Z",
+      "end-time": "2026-10-14 22:08:11Z",
+      "duration": "5.3696805"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0IntegrationEditModeFixtures.CanonicalManualRunPublishesC0OnceKeepsManaHistoryAndTransientEvidenceOnly",
+        "message": "  Expected: 970.0d\n  But was:  950.0d\n"
+      }
+    ],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0IntegrationEditModeFixtures.ActualProductionRoomAndFloorEnvelopeFitsApprovedWorkAndParticipantBounds",
+        "output": "spatial.room.basic: conservative room work 19421, path 46\nspatial.room.large_chamber: conservative room work 143231, path 146\nspatial.room.rectangle: conservative room work 29100, path 43\nProduction envelope upper work 602024, participants 32, encounters 27; thread allocation counter unavailable on this Unity Mono runtime\n"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-integration-focused.xml",
+    "sha256": "4e3be14352886430a20b036d400681bcd693fb9f1f6cc9abe330d850b85abf2a",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "72",
+      "result": "Passed",
+      "total": "72",
+      "passed": "72",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 21:47:53Z",
+      "end-time": "2026-10-14 21:47:57Z",
+      "duration": "4.2385216"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": []
+  },
+  {
+    "file": "combat-c0-integration-full-editmode.xml",
+    "sha256": "eb3d256a6946484c6375ac81e4e6623cee06fb9affeca33ec93db5cc357d47d5",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1980",
+      "result": "Skipped:Ignored",
+      "total": "1980",
+      "passed": "1979",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 22:31:51Z",
+      "end-time": "2026-10-14 22:32:25Z",
+      "duration": "33.5286304"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0IntegrationEditModeFixtures.ActualProductionRoomAndFloorEnvelopeFitsApprovedWorkAndParticipantBounds",
+        "output": "spatial.room.basic: conservative room work 19421, path 46\nspatial.room.large_chamber: conservative room work 143231, path 146\nspatial.room.rectangle: conservative room work 29100, path 43\nProduction envelope upper work 602024, participants 32, encounters 27; thread allocation counter unavailable on this Unity Mono runtime\n"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-integration-full-playmode.xml",
+    "sha256": "4b15ac3bf2db88ee8b39e85727198a95ea39a4cb8a7b3febc3d8048520970cef",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3415",
+      "result": "Skipped:Ignored",
+      "total": "3415",
+      "passed": "3405",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 22:38:55Z",
+      "end-time": "2026-10-14 22:48:35Z",
+      "duration": "579.8402912"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.CombatC0IntegrationTests.ActualProductionRoomAndFloorEnvelopeFitsApprovedWorkAndParticipantBounds",
+        "output": "spatial.room.basic: conservative room work 19421, path 46\nspatial.room.large_chamber: conservative room work 143231, path 146\nspatial.room.rectangle: conservative room work 29100, path 43\nProduction envelope upper work 602024, participants 32, encounters 27; thread allocation counter unavailable on this Unity Mono runtime\n"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-integration-regression-final.xml",
+    "sha256": "9a1fce02e0b0f7ea006ee086436998788cd599b64da13af2cf33f2ea1368569e",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "405",
+      "result": "Passed",
+      "total": "405",
+      "passed": "405",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 22:17:26Z",
+      "end-time": "2026-10-14 22:17:36Z",
+      "duration": "9.9918955"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": []
+  },
+  {
+    "file": "combat-c0-integration-regression.xml",
+    "sha256": "767e4a85eb55157af35c9d0c0b666dac3d2cf17147ee62ab379983fd7765bb1b",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "405",
+      "result": "Failed(Child)",
+      "total": "405",
+      "passed": "404",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 22:03:51Z",
+      "end-time": "2026-10-14 22:03:58Z",
+      "duration": "7.0978769"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls",
+        "message": "  Expected: True\n  But was:  False\n"
+      }
+    ],
+    "skips": [],
+    "measurements": []
+  }
+]

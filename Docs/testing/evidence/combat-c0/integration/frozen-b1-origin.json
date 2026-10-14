@@ -1,0 +1,15 @@
+{
+  "source": "c0dba584f1d1b9f10ccc50bf51fc26c831c5f81e",
+  "unity_version": "6000.3.2f1",
+  "archive": "Assets\\_Project\\Tests\\EditMode\\combat-c0-b1-golden.zip",
+  "archive_sha256": "197793b3b6f4dd127b0e96ce3003f3bee58138e58a81ee1d7dec13b2374dc8fb",
+  "boundaries": 115,
+  "scenarios": [
+    "canonical-branch",
+    "canonical-two-floors",
+    "clear",
+    "retreat",
+    "wipe"
+  ],
+  "regenerated_after_integration": false
+}

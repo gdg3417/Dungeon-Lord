@@ -1,6 +1,10 @@
+# Historical C0 prerequisite qualification
+
+The approved PR #238 continuation implements production C0. Current integrated qualification is recorded in [integration/qualification.md](integration/qualification.md). The unchanged reports below qualify only the earlier prerequisite source; their former approval blocker is closed by the dated owner addendum.
+
 # Combat C0 prerequisite qualification
 
-Status: **Automated prerequisite qualification passed; production C0 remains blocked and this PR is not merge-ready.** See the [unapproved tuning/technical packet](../../../planning/combat-c0-implementation-and-tuning-proposal.md) and [implemented boundary / acceptance gaps](implementation-review.md). No owner Unity gameplay test is requested.
+Historical status at c0dba584: **Automated prerequisite qualification passed; production C0 remains blocked and this PR is not merge-ready.** See the [unapproved tuning/technical packet](../../../planning/combat-c0-implementation-and-tuning-proposal.md) and [implemented boundary / acceptance gaps](implementation-review.md). No owner Unity gameplay test is requested.
 
 Baseline: `eb80df1e3fd09c18aedb062afc108eb941deb8a3`, merged #237. Branch: `codex/combat-c0-deterministic-combat`. Validated Unity source: `a6c9d6e13013e9fa6993b2f4b094da6139a483e4`; subsequent changes are documentation/evidence only. Final fetch still found no newer main commit.
 
