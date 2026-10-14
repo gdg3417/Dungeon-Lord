@@ -14,6 +14,17 @@ namespace DungeonBuilder.M0
         public float ReplayPartySize = .5f, ReplayMarkerSize = .85f;
         public int MaximumReplaySteps = 8192;
         public Color ReplayPartyColor = new Color(.98f, .94f, .78f);
+        public float ReplayMonsterTileSeconds = .3f, ReplayDamageSeconds = 1.6f;
+        public float ReplayStateBadgeSize = .32f, ReplayCasualtySize = .3f;
+        public int MaximumReplayMarkers = 256;
+        public Color ReplayEngagingColor = new Color(1, .65f, .25f);
+        public Color ReplayResolvedColor = new Color(.48f, .62f, .72f);
+        public Color ReplayTriggeredColor = new Color(1, .58f, .22f);
+        public Color ReplayLootReachedColor = new Color(.48f, .8f, .5f);
+        public Color ReplayDamageColor = new Color(1, .75f, .55f), ReplayCasualtyColor = new Color(1, .35f, .4f);
+        public Color ReplayMitigatedColor = new Color(.65f, 1, .85f);
+        public float ReplayFeedbackTextSize = 20, ReplayFeedbackWidth = 260, ReplayFeedbackOffset = 38;
+        public float ReplayDescriptionHeight = 100;
         public float ReferenceShortSide = 720;
         public Color SelectionColor = new Color(.96f,.76f,.37f);
         public float SmallText = 16, DefaultText = 20, LargeText = 26;

@@ -16,7 +16,7 @@
     {"key":"ui.dungeon.replay.completed","text":"Replay complete: {0} · Survivors {1} · Casualties {2} · Score {3}"},
     {"key":"ui.dungeon.replay.damage","text":"Member {0}: {1} damage, {2} HP remaining · {3} survivors."},
     {"key":"ui.dungeon.replay.roomentry","text":"Entering a room."},
-    {"key":"ui.dungeon.replay.movement","text":"Following the recorded path."},
+    {"key":"ui.dungeon.replay.movement","text":"Following the recorded path: reachable loot is visited before room exit."},
     {"key":"ui.dungeon.replay.monsterengagement","text":"Monster encounter."},
     {"key":"ui.dungeon.replay.traptrigger","text":"Trap triggered."},
     {"key":"ui.dungeon.replay.lootinteraction","text":"Loot node reached. Rewards depend on the recorded room outcome."},
@@ -3785,6 +3785,12 @@
     {"key": "ui.dungeon.content.add_monster", "text": "Add Monster"},
     {"key": "ui.dungeon.content.add_trap", "text": "Add Trap"},
     {"key": "ui.dungeon.content.add_loot", "text": "Add Loot"},
-    {"key": "ui.dungeon.content.target", "text": "{0} · {1}"}
+    {"key": "ui.dungeon.content.target", "text": "{0} · {1}"},
+    {"key": "ui.dungeon.replay.approach", "text": "Monster approaching along its recorded path; encounters resolve one at a time."},
+    {"key": "ui.dungeon.replay.hit", "text": "Member {0}: −{1} HP\n{2} HP remaining"},
+    {"key": "ui.dungeon.replay.hit_mitigated", "text": "Member {0}: {1} damage · mitigated\n{2} HP remaining"},
+    {"key": "ui.dungeon.replay.hit_casualty", "text": "Member {0}: −{1} HP\n{2} HP · fallen"},
+    {"key": "ui.dungeon.replay.hit_zero", "text": "Member {0}: {1} damage\n{2} HP remaining"},
+    {"key": "ui.dungeon.replay.legend", "text": "Gold: current · Blue: encounter resolved · Orange: trap triggered · Green: loot reached · Red ×: unreachable · Small red diamond: adventurer casualty. Historical markers reset on Close; monster death is not recorded."}
   ]
 }

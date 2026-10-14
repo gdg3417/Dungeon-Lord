@@ -1,0 +1,277 @@
+[
+  {
+    "file": "visual-feedback-focused-01.xml",
+    "sha256": "8fb547adb1d6e8b1c371ebce08af628fadde8cdb6fa3e378222bca7dbe100f5b",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "23",
+      "result": "Failed(Child)",
+      "total": "23",
+      "passed": "19",
+      "failed": "4",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 15:14:50Z",
+      "end-time": "2026-10-14 15:14:58Z",
+      "duration": "7.7014255"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls",
+        "message": "  edit\n  Expected: less than or equal to 721.0f\n  But was:  774.0f\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.UatSafeAction (UnityEngine.UIElements.Button button) [0x00074] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonCompositionSceneTests.cs:153\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<VisualRunReplayProductionLifecycleAndResponsiveControls>d__67.MoveNext () [0x003d0] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonReplaySceneTests.cs:43\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence(False,False)",
+        "message": "  Expected: (11.50, 20.50)\n  But was:  (11.50, 20.50)\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence (System.Boolean fatal, System.Boolean zero) [0x00250] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Tests\\EditMode\\VisualRunReplayTests.cs:153\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence(True,False)",
+        "message": "  Expected: (11.50, 20.50)\n  But was:  (11.50, 20.50)\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence (System.Boolean fatal, System.Boolean zero) [0x00250] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Tests\\EditMode\\VisualRunReplayTests.cs:153\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence(False,True)",
+        "message": "  Expected: (11.50, 20.50)\n  But was:  (11.50, 20.50)\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence (System.Boolean fatal, System.Boolean zero) [0x00250] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Tests\\EditMode\\VisualRunReplayTests.cs:153\n"
+      }
+    ],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CompletedPublicationProjectsActualStepsAndDoesNotWriteOrResolveAgain",
+        "output": "Pure playback: 14 recorded steps / 528 display updates / 0.0875 ms (Windows Editor; excludes view/UI and projection construction).\n"
+      }
+    ]
+  },
+  {
+    "file": "visual-feedback-focused-02.xml",
+    "sha256": "d085f06263a19e7b57bba98f5e8c86f17da9f095d74c79847b317e9ace9eb16e",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "23",
+      "result": "Failed(Child)",
+      "total": "23",
+      "passed": "22",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 15:17:30Z",
+      "end-time": "2026-10-14 15:17:40Z",
+      "duration": "9.4448997"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence(True,False)",
+        "message": "  Expected: 10000\n  But was:  5000\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence (System.Boolean fatal, System.Boolean zero) [0x00391] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Tests\\EditMode\\VisualRunReplayTests.cs:164\n"
+      }
+    ],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CompletedPublicationProjectsActualStepsAndDoesNotWriteOrResolveAgain",
+        "output": "Pure playback: 14 recorded steps / 528 display updates / 0.1035 ms (Windows Editor; excludes view/UI and projection construction).\n"
+      }
+    ]
+  },
+  {
+    "file": "visual-feedback-focused-03.xml",
+    "sha256": "ddca13ab21b19e3f809a2f04ba19e19449a08c49883bdd689a5a3440869b9a5f",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "24",
+      "result": "Failed(Child)",
+      "total": "24",
+      "passed": "22",
+      "failed": "2",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 15:24:03Z",
+      "end-time": "2026-10-14 15:24:11Z",
+      "duration": "8.7126937"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunFeedbackCasualtyAndMitigatedDamageAreRecordedAndReadOnly",
+        "message": "System.ArgumentException : run.phase5b.invalid_configuration",
+        "stack": "  at DungeonBuilder.M0.Gameplay.RunSimulation.RunPartyGenerator.Create (DungeonBuilder.M0.Gameplay.RunSimulation.PhaseFiveBConfig config, System.String runId) [0x001d2] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunParty.cs:98 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService.CreateExecution (DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState runtime, System.Int64 tickStarted, System.Int32 sequence, System.String postureId, DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpOrderedRouteRoom[] route, DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService+BranchTraversal traversal, DungeonBuilder.M0.Gameplay.RunSimulation.ActiveFloorRunSnapshot snapshot, DungeonBuilder.M0.Gameplay.RunSimulation.TransientDepthObjective objective, DungeonBuilder.M0.Gameplay.RunSimulation.RunLogicalTiming timing, System.Nullable`1[T] eventLimit) [0x003f5] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunSimulationService.Execution.cs:82 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService.StartRoute (DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState runtime, System.Int64 tickStarted, System.Int32 sequence, System.String postureId, DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpOrderedRouteRoom[] route, DungeonBuilder.M0.Gameplay.RunSimulation.RunLogicalTiming timing, System.Nullable`1[T] eventLimit) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunSimulationService.Execution.cs:31 \n  at DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.CombatEvidence (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Boolean fatal, System.Boolean zero, DungeonBuilder.M0.Gameplay.DungeonSpatial.SavedSpatialFloor source) [0x002f7] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Tests\\EditMode\\VisualRunReplayTests.cs:119 \n  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<VisualRunFeedbackCasualtyAndMitigatedDamageAreRecordedAndReadOnly>d__67.MoveNext () [0x001f9] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonReplaySceneTests.cs:35 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 "
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence(False,True)",
+        "message": "System.ArgumentException : run.phase5b.invalid_configuration",
+        "stack": "  at DungeonBuilder.M0.Gameplay.RunSimulation.RunPartyGenerator.Create (DungeonBuilder.M0.Gameplay.RunSimulation.PhaseFiveBConfig config, System.String runId) [0x001d2] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunParty.cs:98 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService.CreateExecution (DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState runtime, System.Int64 tickStarted, System.Int32 sequence, System.String postureId, DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpOrderedRouteRoom[] route, DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService+BranchTraversal traversal, DungeonBuilder.M0.Gameplay.RunSimulation.ActiveFloorRunSnapshot snapshot, DungeonBuilder.M0.Gameplay.RunSimulation.TransientDepthObjective objective, DungeonBuilder.M0.Gameplay.RunSimulation.RunLogicalTiming timing, System.Nullable`1[T] eventLimit) [0x003f5] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunSimulationService.Execution.cs:82 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService.StartRoute (DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState runtime, System.Int64 tickStarted, System.Int32 sequence, System.String postureId, DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.MvpOrderedRouteRoom[] route, DungeonBuilder.M0.Gameplay.RunSimulation.RunLogicalTiming timing, System.Nullable`1[T] eventLimit) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunSimulationService.Execution.cs:31 \n  at DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.CombatEvidence (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Boolean fatal, System.Boolean zero, DungeonBuilder.M0.Gameplay.DungeonSpatial.SavedSpatialFloor source) [0x002f7] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Tests\\EditMode\\VisualRunReplayTests.cs:119 \n  at DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.SequentialApproachDamageAndCasualtiesUseOnlyRecordedEvidence (System.Boolean fatal, System.Boolean zero) [0x00006] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-visual-replay-validation\\Assets\\_Project\\Tests\\EditMode\\VisualRunReplayTests.cs:129 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+      }
+    ],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CompletedPublicationProjectsActualStepsAndDoesNotWriteOrResolveAgain",
+        "output": "Pure playback: 14 recorded steps / 528 display updates / 0.0590 ms (Windows Editor; excludes view/UI and projection construction).\n"
+      }
+    ]
+  },
+  {
+    "file": "visual-feedback-focused-04.xml",
+    "sha256": "1967c20f8157e615cf3de026b1f6e60e514fdd534d4ab83462ece7b3571d633c",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "258",
+      "result": "Passed",
+      "total": "258",
+      "passed": "258",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 15:32:35Z",
+      "end-time": "2026-10-14 15:32:45Z",
+      "duration": "10.5571519"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CompletedPublicationProjectsActualStepsAndDoesNotWriteOrResolveAgain",
+        "output": "Pure playback: 14 recorded steps / 528 display updates / 0.0587 ms (Windows Editor; excludes view/UI and projection construction).\n"
+      }
+    ]
+  },
+  {
+    "file": "visual-feedback-focused-playmode.xml",
+    "sha256": "9dfa8cf9363b0365e77182e225d489f7984c3464077bddbfb472aa8369d7ed56",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "53",
+      "result": "Passed",
+      "total": "53",
+      "passed": "53",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 15:34:57Z",
+      "end-time": "2026-10-14 15:36:44Z",
+      "duration": "107.7041478"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": []
+  },
+  {
+    "file": "visual-feedback-full-editmode.xml",
+    "sha256": "07cb4c24d4bb33cb955ee3ec7938635b47e02faeb5cf5fe20b401f4c1a3c1c15",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1898",
+      "result": "Skipped:Ignored",
+      "total": "1898",
+      "passed": "1897",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 15:52:21Z",
+      "end-time": "2026-10-14 15:52:50Z",
+      "duration": "28.8094921"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CompletedPublicationProjectsActualStepsAndDoesNotWriteOrResolveAgain",
+        "output": "Pure playback: 14 recorded steps / 528 display updates / 0.0313 ms (Windows Editor; excludes view/UI and projection construction).\n"
+      }
+    ]
+  },
+  {
+    "file": "visual-feedback-full-playmode.xml",
+    "sha256": "889d3964fa89c6c643e4bd9d05f59484ed128587d6890a6c3da154a8a8e1ce85",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3334",
+      "result": "Skipped:Ignored",
+      "total": "3334",
+      "passed": "3324",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 15:53:59Z",
+      "end-time": "2026-10-14 16:03:29Z",
+      "duration": "570.1646584"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.CompletedPublicationProjectsActualStepsAndDoesNotWriteOrResolveAgain",
+        "output": "Pure playback: 14 recorded steps / 528 display updates / 0.0830 ms (Windows Editor; excludes view/UI and projection construction).\n"
+      }
+    ]
+  }
+]
