@@ -105,3 +105,7 @@ Monster deaths do not directly create penalties. The cost is implicit through up
 - Poor monster composition weakens dungeon defense
 
 - Over commitment increases systemic risk
+
+### Owner-approved recovery clarification (2026-10-14)
+
+The [Combat and Reserve-Backed Floor Recovery Owner Design Lock](../docs/planning/decisions/combat-and-recovery-owner-design-lock.md) supersedes the future-facing automatic replacement and empty-slot rules above. On vacant floors, approved recovery first restores eligible injured or defeated existing monsters toward configured functional readiness, preserving monster identity and committed progression. Insufficient funding leaves an inactive pending defense and pending recovery; automatic creation of a replacement identity is not the default. New-identity replacement remains a separate future option. Stable monster HP/level persistence, slot representation, and migration require save-design review. The wording above remains historical design evidence and describes no shipped recovery implementation.

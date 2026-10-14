@@ -69,3 +69,7 @@ Intentional collapse provides no benefits.
 The system fails if collapse is profitable or unrecoverable.
 
 System Spec 11 is locked.
+
+### Owner-approved vacant-floor monster recovery clarification (2026-10-14)
+
+The [Combat and Reserve-Backed Floor Recovery Owner Design Lock](../docs/planning/decisions/combat-and-recovery-owner-design-lock.md) supersedes “Recovery is primarily driven by player action with minimal passive assistance” only for eligible monster recovery on a vacant floor. Recovery proceeds toward a configured readiness threshold subject to affordability, prioritizes functional readiness before optional top-ups in stable order, and leaves unaffordable work pending for automatic retry only while vacant. No recovery or healing occurs while a party occupies the floor. Other failure, collapse, and recovery policies remain unchanged; these approved rules are not yet implemented.

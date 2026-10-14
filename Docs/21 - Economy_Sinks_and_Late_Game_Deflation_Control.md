@@ -99,3 +99,7 @@ When players feel stuck, they should be able to rebuild layout, change monster r
 9.2 Clarity
 
 The UI should make clear which sink is limiting progress, for example expansion upkeep, monster upkeep, or lack of usable mana due to reserves.
+
+### Owner-approved protected reserve and recovery spending clarification (2026-10-14)
+
+The [Combat and Reserve-Backed Floor Recovery Owner Design Lock](../docs/planning/decisions/combat-and-recovery-owner-design-lock.md) governs future reserve-backed affordability. Keep one total-mana wallet; derive a global required protected floor from configured obligations and calculate discretionary usable mana as `max(0, TotalMana - RequiredReservedMana)`. Construction and upgrades must afford both purchase cost and added obligation. Recovery may spend protected mana once, while leaving the required amount unchanged. The current `ManaReserve` field remains the spendable wallet; no second balance, tuning value, or implementation is introduced here. Existing mana sources and sink authorities remain in force.
