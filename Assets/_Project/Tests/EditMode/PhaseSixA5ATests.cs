@@ -20,7 +20,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static ActiveFloorRunSnapshot Snapshot(Fixture f) => PhaseSixA4Tests.Snapshot(f);
         private static string FrozenEleven(byte[] bytes)
         {
-            string value = Encoding.UTF8.GetString(bytes)
+            string value = Encoding.UTF8.GetString(PhaseFourTestSupport.FrozenThirteen(bytes))
                 .Replace("\"schemaVersion\":13", "\"schemaVersion\":11")
                 .Replace("\"schemaVersion\":12", "\"schemaVersion\":11")
                 .Replace(",\"sharedFloorKnowledge\":{\"Records\":[]}", "");

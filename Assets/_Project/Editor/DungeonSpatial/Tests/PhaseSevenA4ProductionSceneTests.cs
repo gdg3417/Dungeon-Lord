@@ -133,7 +133,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
             Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana - charge));
             Assert.That(store.Read(), Is.Null);
-            Assert.That(File.ReadAllText(root.SaveService.SavePath), Does.Contain("\"schemaVersion\":13"));
+            Assert.That(File.ReadAllText(root.SaveService.SavePath), Does.Contain("\"schemaVersion\":14"));
             controller.EnterEdit(); controller.TapWorld(new TileCoordinate(1, 3)); yield return null; yield return null;
             Assert.That(controller.SelectedRoomInstanceId, Is.Not.Null);
             Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.Flex), "Room selection restores the A5 contextual actions after collapsed construction");
@@ -190,6 +190,8 @@ namespace DungeonBuilder.M0.Tests
         [UnityTest]
         public IEnumerator TransactionalRoomConstructionOutOfBoundsIntentBoundsRecoverCameraAndSave()
         {
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1920, 1080);
+            yield return WaitForViewportGeometry();
             var root = GameRoot.Instance;
             var legalBounds = controller.World.LegalBounds;
             controller.EnterEdit();
@@ -256,6 +258,7 @@ namespace DungeonBuilder.M0.Tests
             AssertCanonicalUnchanged(canonicalBefore, manaBefore);
 
             simulatedTouch = InputSystem.AddDevice<Touchscreen>();
+            yield return WaitForViewportGeometry();
             var camera = controller.GetComponentInChildren<Camera>();
             var accessibleCell = attemptedCells.First(cell => !legalBounds.Contains(new Vector2(cell.X + 0.5f, cell.Y + 0.5f)));
             Vector2 screenPoint = camera.WorldToScreenPoint(new Vector3(accessibleCell.X + 0.5f, accessibleCell.Y + 0.5f, 0));
@@ -1089,6 +1092,37 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(draft.Move(floor.FloorInstanceId, assignment.RoomInstanceId, assignment.AssignmentId, new TileCoordinate(1, 1)), Is.True);
             Assert.That(draft.FlushNext(), Is.True);
         }
+        private IEnumerator WaitForViewportGeometry()
+        {
+            var document = controller.GetComponent<UIDocument>();
+            var camera = controller.GetComponentInChildren<Camera>();
+            Rect previous = default;
+            Vector3 previousPosition = default;
+            float previousSize = 0;
+            int stableFrames = 0;
+            for (int frame = 0; frame < 120; frame++)
+            {
+                yield return null;
+                var bounds = document.rootVisualElement.Q("viewport").worldBound;
+                float scale = document.panelSettings.scale;
+                var expected = new Rect(bounds.x * scale, Screen.height - bounds.yMax * scale,
+                    bounds.width * scale, bounds.height * scale);
+                bool configured = expected.width > 0 && expected.height > 0 &&
+                    Mathf.Abs(camera.pixelRect.x - expected.x) < 1 && Mathf.Abs(camera.pixelRect.y - expected.y) < 1 &&
+                    Mathf.Abs(camera.pixelRect.width - expected.width) < 1 && Mathf.Abs(camera.pixelRect.height - expected.height) < 1 &&
+                    controller.Viewport.ScreenRect == expected;
+                bool stable = configured && expected == previous && camera.transform.position == previousPosition &&
+                    camera.orthographicSize == previousSize;
+                stableFrames = stable ? stableFrames + 1 : 0;
+                previous = expected;
+                previousPosition = camera.transform.position;
+                previousSize = camera.orthographicSize;
+                if (stableFrames >= 3) yield break;
+            }
+            Assert.Fail("Production viewport geometry did not settle before simulated screen input: expected=" + previous +
+                "; camera=" + camera.pixelRect + "; viewport=" + controller.Viewport.ScreenRect);
+        }
+
         private IEnumerator RestartShell()
         {
             var document = controller.GetComponent<UIDocument>();

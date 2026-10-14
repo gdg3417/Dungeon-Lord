@@ -13,7 +13,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         {
             if (!PhaseFiveBConfigValidation.IsValid(_config.PhaseFiveB)) throw new ArgumentException(BranchDecisionResolver.InvalidConfiguration);
             var snapshot = ActiveFloorRunSnapshot.Create(owned, production, _config, limits, _lootConfig, _lootTableId, candidate, postureId);
-            int sequence = Math.Max(1, candidate.runHistory.NextRunSequence);
+            int sequence;
+            if (owned.LivingDungeon?.IsDormant == false)
+            {
+                if (!LivingDungeonScheduling.AllocatorValid(candidate.runHistory, owned.LivingDungeon, true))
+                    throw new InvalidOperationException(LivingDungeonScheduling.Invalid);
+                sequence = candidate.runHistory.NextRunSequence;
+            }
+            else sequence = Math.Max(1, candidate.runHistory.NextRunSequence);
             var execution = StartSnapshot(sequence, snapshot);
             var outcome = execution.DrainToCompletion();
             BranchTraversal traversal = execution.Traversal;

@@ -1,0 +1,314 @@
+{
+  "reviewedCommit": "c887cf7bd12a700ff4230b6a90a6f6460092ddf4",
+  "mainBaseline": "af464e05d63acfa73a57786888266d5901feac2f",
+  "reports": [
+    {
+      "file": "phase-b2-alias-focused-editmode.xml",
+      "sha256": "8ae9e30cd35be4c6dade11bc615af8d73019dbd601256a46c6e33272926874b8",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "40",
+        "result": "Passed",
+        "total": "40",
+        "passed": "40",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-13 23:43:18Z",
+        "end-time": "2026-10-13 23:43:29Z",
+        "duration": "10.7677599"
+      },
+      "skips": [],
+      "measurements": [
+        {
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.SharedAllocatorCannotActivateHistoricalAnomalyOrExhaustion(int.MaxValue)",
+          "output": "Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\\TestResults.xml\n"
+        }
+      ]
+    },
+    {
+      "file": "phase-b2-alias-full-editmode.xml",
+      "sha256": "0ed71e4ae2cf3e3911113a0f499e6e8d79aa011a594886f6e14780b8fc6fa5d3",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "1874",
+        "result": "Skipped:Ignored",
+        "total": "1874",
+        "passed": "1873",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "1",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-13 23:57:35Z",
+        "end-time": "2026-10-13 23:57:57Z",
+        "duration": "21.9541484"
+      },
+      "skips": [
+        {
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+          "reason": "gd66.test.windows_only_inverse"
+        }
+      ],
+      "measurements": [
+        {
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.CheckpointByteAndReplayBoundariesUseExactLegalEngineBytes",
+          "output": "Exact checkpoint byte boundary bytes=65536; replayEvents=0; restoreMs=5.7973\nExact replay boundary events=2048; checkpointBytes=284562; restoreMs=83.106; syntheticLargerByteBudget=true; profileACoupledBoundaryQualified=false\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.CompleteSaveProfileRetainedLimitMeasurement",
+          "output": "Profile A completeBytes=218487; retained=4; active=2; checkpointBytes=155923; replayEvents=50; validateMeanMs=28.19852; validateAllocations=0; reopenMs=141.1902; completeTransactionMs=186.9; transactionAllocations=0; byteCeiling=655360; replayCeiling=8192; byteReplayCeilingsAreBoundsNotAttainedWorkloads=true\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.NearLimitFrozenSchemaThirteenMigratesWithReservedHeadroom",
+          "output": "Synthetic dormant complete-save ceiling bytes=655360; validateMs=19.6319; reopenMs=19.3741; activeReplayWorkload=false\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.RealWindowsMigrationAndUnfinishedPrefixReopenUseOneAtomicAuthority",
+          "output": "Windows migration/readback/unfinished-prefix reopen; durableBytes=61746; reopenMs=41.5171; namespace=C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-b2-alias-validation\\TestResults\\living-dungeon-b2-windows\\6dda3fea1dfe427c9de85eff84854f1f; ownerFilesUsed=false\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.SyntheticTaggedFloorScaleRetainsEngineOrderingAndReconstruction(25,20)",
+          "output": "Synthetic tagged floors=25; parties=20; initialBinaryBytes=1382280; events=8021; uninterruptedMs=13282.6827; splitRestoreMs=51203.2548; allocations=0; perCheckpointMax=69158; serializedTerminalOwnerBytes=1849511; terminalReplayEvents=8020; productionCompleteSaveQualified=false; canonicalFloorSnapshotsQualified=false\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.SyntheticTaggedFloorScaleRetainsEngineOrderingAndReconstruction(100,5)",
+          "output": "Synthetic tagged floors=100; parties=5; initialBinaryBytes=1129326; events=8006; uninterruptedMs=41262.8131; splitRestoreMs=73237.8089; allocations=0; perCheckpointMax=225904; serializedTerminalOwnerBytes=1508348; terminalReplayEvents=8005; productionCompleteSaveQualified=false; canonicalFloorSnapshotsQualified=false\n"
+        }
+      ]
+    },
+    {
+      "file": "phase-b2-alias-full-playmode.xml",
+      "sha256": "0b9494947771d2d8322272e206c931ba7902a4bf69fc10226d5b6cbc0575c456",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "3310",
+        "result": "Skipped:Ignored",
+        "total": "3310",
+        "passed": "3300",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "10",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-13 23:58:47Z",
+        "end-time": "2026-10-14 00:08:16Z",
+        "duration": "568.724924"
+      },
+      "skips": [
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+          "reason": "gd66.test.windows_only_inverse"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+          "reason": "gd66.test.windows_player_only"
+        }
+      ],
+      "measurements": [
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB2Tests.CheckpointByteAndReplayBoundariesUseExactLegalEngineBytes",
+          "output": "Exact checkpoint byte boundary bytes=65536; replayEvents=0; restoreMs=5.7465\nExact replay boundary events=2048; checkpointBytes=284562; restoreMs=65.5814; syntheticLargerByteBudget=true; profileACoupledBoundaryQualified=false\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB2Tests.CompleteSaveProfileRetainedLimitMeasurement",
+          "output": "Profile A completeBytes=218487; retained=4; active=2; checkpointBytes=155923; replayEvents=50; validateMeanMs=30.34498; validateAllocations=0; reopenMs=126; completeTransactionMs=198.813; transactionAllocations=0; byteCeiling=655360; replayCeiling=8192; byteReplayCeilingsAreBoundsNotAttainedWorkloads=true\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB2Tests.NearLimitFrozenSchemaThirteenMigratesWithReservedHeadroom",
+          "output": "Synthetic dormant complete-save ceiling bytes=655360; validateMs=19.2491; reopenMs=18.7918; activeReplayWorkload=false\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB2Tests.RealWindowsMigrationAndUnfinishedPrefixReopenUseOneAtomicAuthority",
+          "output": "Windows migration/readback/unfinished-prefix reopen; durableBytes=61746; reopenMs=69.7704; namespace=C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-b2-alias-validation\\TestResults\\living-dungeon-b2-windows\\cb438194d94c4acfae55d5a8dee5c3de; ownerFilesUsed=false\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB2Tests.SyntheticTaggedFloorScaleRetainsEngineOrderingAndReconstruction(25,20)",
+          "output": "Synthetic tagged floors=25; parties=20; initialBinaryBytes=1382280; events=8021; uninterruptedMs=13015.6044; splitRestoreMs=50876.1432; allocations=0; perCheckpointMax=69158; serializedTerminalOwnerBytes=1849511; terminalReplayEvents=8020; productionCompleteSaveQualified=false; canonicalFloorSnapshotsQualified=false\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB2Tests.SyntheticTaggedFloorScaleRetainsEngineOrderingAndReconstruction(100,5)",
+          "output": "Synthetic tagged floors=100; parties=5; initialBinaryBytes=1129326; events=8006; uninterruptedMs=40630.8338; splitRestoreMs=73174.4776; allocations=0; perCheckpointMax=225904; serializedTerminalOwnerBytes=1508348; terminalReplayEvents=8005; productionCompleteSaveQualified=false; canonicalFloorSnapshotsQualified=false\n"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.PlayMode.LivingDungeonPhaseB2PlayModeTests.MeasureActualFrameGcAllocationAtRetainedProfileLimit",
+          "output": "Profile A retained=4 active=2; observedFrameGcAllocationMaximumBytes=15098307; includesEditorAndTestHarnessAllocations=true; threadAllocationCounterOnThisMonoHostReturnsZero=true\n"
+        }
+      ]
+    }
+  ],
+  "baselineComparison": [
+    {
+      "mode": "editmode",
+      "baseline": "phase-b2-final-safeguard-full-editmode.xml",
+      "current": "phase-b2-alias-full-editmode.xml",
+      "baselineReport": {
+        "id": "2",
+        "testcasecount": "1850",
+        "result": "Skipped:Ignored",
+        "total": "1850",
+        "passed": "1849",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "1",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-13 21:43:22Z",
+        "end-time": "2026-10-13 21:43:44Z",
+        "duration": "22.1625098"
+      },
+      "currentReport": {
+        "id": "2",
+        "testcasecount": "1874",
+        "result": "Skipped:Ignored",
+        "total": "1874",
+        "passed": "1873",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "1",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-13 23:57:35Z",
+        "end-time": "2026-10-13 23:57:57Z",
+        "duration": "21.9541484"
+      },
+      "removedOrChangedOccurrences": 0,
+      "unchangedSkips": true,
+      "addedOccurrences": 24
+    },
+    {
+      "mode": "playmode",
+      "baseline": "phase-b2-final-ui-qualified-full-playmode.xml",
+      "current": "phase-b2-alias-full-playmode.xml",
+      "baselineReport": {
+        "id": "2",
+        "testcasecount": "3286",
+        "result": "Skipped:Ignored",
+        "total": "3286",
+        "passed": "3276",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "10",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-13 22:47:28Z",
+        "end-time": "2026-10-13 22:56:43Z",
+        "duration": "554.7929447"
+      },
+      "currentReport": {
+        "id": "2",
+        "testcasecount": "3310",
+        "result": "Skipped:Ignored",
+        "total": "3310",
+        "passed": "3300",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "10",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-13 23:58:47Z",
+        "end-time": "2026-10-14 00:08:16Z",
+        "duration": "568.724924"
+      },
+      "removedOrChangedOccurrences": 0,
+      "unchangedSkips": true,
+      "addedOccurrences": 24
+    }
+  ],
+  "build": {
+    "utcTimestamp": "2026-10-14T00:10:00.4041513Z",
+    "unityVersion": "6000.3.2f1",
+    "targetPlatform": "StandaloneWindows64",
+    "applicationVersion": "1.0",
+    "developmentBuild": true,
+    "includedScenes": [
+      "Assets/_Project/Scenes/Bootstrap.unity"
+    ],
+    "outputPath": "Builds/Development/Windows-living-dungeon-phase-b2/Dungeon Lord.exe",
+    "buildResult": "Succeeded",
+    "totalBuildSize": 181485192,
+    "errorCount": 0,
+    "warningCount": 1
+  },
+  "packedConfigAndFrozenSchema13": true,
+  "packedFilename": "living-dungeon-phase-b2-alias-validation.json",
+  "packedArtCount": 52,
+  "preservation": {
+    "verifiedFiles": 10794,
+    "restoredDisposableFixtures": [
+      "bootstrap_overlay_action_test.json",
+      "bootstrap_overlay_compact_feedback_test.json",
+      "bootstrap_overlay_copy_feedback_test.json",
+      "bootstrap_overlay_dev_run_feedback_clear_test.json",
+      "bootstrap_overlay_diagnostics_page_down_smoke_scroll_test.json",
+      "bootstrap_overlay_f6_room_slot_consistency_test.json",
+      "bootstrap_overlay_feedback_run_test.json",
+      "bootstrap_overlay_intent_fallback_test.json",
+      "bootstrap_overlay_intent_posture_test.json",
+      "bootstrap_overlay_no_raw_ids_test.json",
+      "bootstrap_overlay_overflow_scroll_test.json",
+      "bootstrap_overlay_run_feedback_focus_test.json",
+      "bootstrap_overlay_run_feedback_outcome_cue_test.json",
+      "bootstrap_overlay_run_feedback_updates_test.json",
+      "bootstrap_overlay_run_focus_page_down_smoke_scroll_test.json",
+      "bootstrap_overlay_vs15_flow_test.json",
+      "mvp_canonical_journey_test.json",
+      "run_sim_test_applied.json",
+      "run_sim_test_clamp.json",
+      "run_sim_test_composition_outcome.json",
+      "run_sim_test_composition_persisted_slots.json",
+      "run_sim_test_not_applied.json"
+    ],
+    "primaryRestored": false,
+    "permanentUatRestored": false,
+    "b2UatCloneRestored": false
+  },
+  "qualificationProject": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-b2-alias-validation",
+  "commands": [
+    "unity test DISPOSABLE --mode EditMode --filter ActivatedAllocator|FinalRecordAlias|HistoricalEmptyLatest|DormantSchemaThirteen|ActivatedCanonicalSave|ManualAndAutomatic|SchedulerAndOrdinaryWrites|DormantMigration|SharedAllocator|CollisionAndPopulatedBlank|FrozenProductionBudgets|FailedAdmissionPersistence --output TestResults/phase-b2-alias-focused-editmode.xml --timeout 1800 --no-color",
+    "unity test DISPOSABLE --mode EditMode --output TestResults/phase-b2-alias-full-editmode.xml --timeout 1800 --no-color",
+    "unity test DISPOSABLE --mode PlayMode --output TestResults/phase-b2-alias-full-playmode.xml --timeout 2400 --no-color",
+    "unity build DISPOSABLE --target StandaloneWindows64 --execute-method DungeonBuilder.M0.EditorTools.DungeonVisualBuildQualification.BuildLivingDungeonPhaseB2Windows --allow-dirty-build --timeout 1800 --no-tail --log-file TestResults/phase-b2-alias-windows-build.log --no-color"
+  ]
+}

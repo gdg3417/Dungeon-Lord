@@ -22,9 +22,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (!SchemaElevenToTwelveUpgrade.TryPrepare(eleven, limits, out byte[] twelve))
             { return false; }
             if (!SchemaTwelveToThirteenUpgrade.TryPrepare(twelve, limits, PositionProfiles(limits),
-                    out current))
+                    out byte[] thirteen))
             { return false; }
-            return true;
+            return SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out current);
         }
 
         internal static RoomContentPositionMigrationProfilesSnapshot PositionProfiles(
@@ -63,7 +63,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         // Test-only projection for fixtures that intentionally exercise frozen contracts.
         internal static string FrozenTen(byte[] current)
         {
-            string value = System.Text.Encoding.UTF8.GetString(current);
+            string value = System.Text.Encoding.UTF8.GetString(FrozenThirteen(current));
             int owner = value.LastIndexOf(",\"sharedFloorKnowledge\":", System.StringComparison.Ordinal);
             if (owner >= 0)
             {
@@ -96,12 +96,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         internal static byte[] FrozenTwelve(byte[] current)
         {
-            string value = System.Text.Encoding.UTF8.GetString(current).Replace(
+            string value = System.Text.Encoding.UTF8.GetString(FrozenThirteen(current)).Replace(
                 "\"schemaVersion\":13", "\"schemaVersion\":12");
             value = System.Text.RegularExpressions.Regex.Replace(value,
                 ",\"RoomLocalPosition\":\\{\"X\":-?[0-9]+,\"Y\":-?[0-9]+\\}", string.Empty);
             return System.Text.Encoding.UTF8.GetBytes(value);
         }
+        internal static byte[] FrozenThirteen(byte[] current) => System.Text.Encoding.UTF8.GetBytes(
+            System.Text.Encoding.UTF8.GetString(current).Replace(
+                ",\"livingDungeon\":{\"FormatVersion\":1,\"Revision\":0,\"Scheduler\":null,\"Parties\":[]}", "")
+                .Replace("\"schemaVersion\":14", "\"schemaVersion\":13"));
         internal static StructuralEconomySnapshot Economy(ProductionSpatialContentSnapshot production,
             CanonicalSpatialSerializationLimits limits)
         {

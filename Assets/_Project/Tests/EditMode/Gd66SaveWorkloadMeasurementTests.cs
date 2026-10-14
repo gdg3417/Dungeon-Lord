@@ -409,12 +409,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             // Current canonical owners are not unknown preservation data, even though the
             // frozen legacy raw classifier describes them as unknown primary members.
             string[] owners = { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership",
-                "structuralInvestment", "corridorContent", "sharedBranchKnowledge", "sharedFloorKnowledge" };
+                "structuralInvestment", "corridorContent", "sharedBranchKnowledge", "sharedFloorKnowledge", "livingDungeon" };
             var unknown = classification.UnknownRootMembers.Concat(classification.UnknownPrimaryMembers.Where(value =>
                 !owners.Contains(value.Name))).ToArray();
             int copied = classification.Members.Where(value => value.State != RawSaveMemberState.Absent &&
                 value.Name != "corridorContent" && value.Name != "sharedBranchKnowledge" &&
-                value.Name != "sharedFloorKnowledge")
+                value.Name != "sharedFloorKnowledge" && value.Name != "livingDungeon")
                 .Sum(value => value.ByteLength);
             Assert.That(MinimumWhole(fixture, 0), Is.EqualTo(bytes.Length));
             Assert.That(MinimumWhole(fixture, 1), Is.EqualTo(copied));

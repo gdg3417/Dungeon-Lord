@@ -20,11 +20,28 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         // failed delimiter alternatives), making it distinct from the input byte limit.
         public RawSavePayloadClassificationLimits(int maximumInputBytes, int maximumNestingDepth,
             int maximumObjectMembers, int maximumArrayElements, int maximumStringBytes,
-            int maximumScanWork)
+            int maximumScanWork, SaveSpatialMigrationLimitsProfile historical = null)
         { MaximumInputBytes = maximumInputBytes; MaximumNestingDepth = maximumNestingDepth;
           MaximumObjectMembers = maximumObjectMembers; MaximumArrayElements = maximumArrayElements;
           MaximumStringBytes = maximumStringBytes;
-          MaximumScanWork = maximumScanWork; }
+          MaximumScanWork = maximumScanWork; Historical = historical; }
+        internal SaveSpatialMigrationLimitsProfile Historical { get; }
+        internal RawSavePayloadClassificationLimits ForPayload(byte[] bytes)
+        {
+            if (Historical == null || bytes == null) return this;
+            byte[] prefix = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":");
+            if (bytes.Length > prefix.Length)
+            {
+                bool matches = true;
+                for (int i = 0; i < prefix.Length; i++) if (bytes[i] != prefix[i]) { matches = false; break; }
+                int end = prefix.Length;
+                while (end < bytes.Length && bytes[end] >= '0' && bytes[end] <= '9') end++;
+                if (matches && end > prefix.Length && end - prefix.Length <= 10 &&
+                    int.TryParse(Encoding.ASCII.GetString(bytes, prefix.Length, end - prefix.Length), out int schema) &&
+                    schema >= CanonicalSaveSchemaVersions.LivingDungeonIntroduction) return this;
+            }
+            return Historical.Raw;
+        }
         public int MaximumInputBytes { get; }
         public int MaximumNestingDepth { get; }
         public int MaximumObjectMembers { get; }
@@ -198,6 +215,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static bool TryValidateWorkload(byte[] bytes, RawSavePayloadClassificationLimits limits,
             out string reason)
         {
+            limits = limits.ForPayload(bytes);
             reason = WorkloadExceededReason;
             if (!limits.IsValid || bytes == null || bytes.Length > limits.MaximumInputBytes) return false;
             return Scanner.TryParse(bytes, limits, out _, out reason, out _);
@@ -217,6 +235,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (sourceBytes == null) return Failed(UnreadableReason, 0);
             if (sourceBytes.Length > limits.MaximumInputBytes) return Failed(WorkloadExceededReason, limits.MaximumInputBytes);
             byte[] owned = (byte[])sourceBytes.Clone();
+            limits = limits.ForPayload(owned);
+            if (owned.Length > limits.MaximumInputBytes) return Failed(WorkloadExceededReason, limits.MaximumInputBytes);
             Node root; string reason; int offset;
             if (!Scanner.TryParse(owned, limits, out root, out reason, out offset)) return Failed(reason, offset);
             if (root.Kind != RawJsonValueKind.Object) return Failed(AmbiguousEnvelopeReason, root.Start);
@@ -263,7 +283,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var unknownRoot = envelope == RawSaveEnvelopeKind.WrappedSaveRoot
                 ? Unknown(root, owned, true, false)
                 : new List<RawUnknownMemberEvidence>();
-            var unknownPrimary = Unknown(payload, owned, false, true);
+            bool livingOwner = envelope == RawSaveEnvelopeKind.WrappedSaveRoot &&
+                acceptedVersion.GetValueOrDefault() >= CanonicalSaveSchemaVersions.LivingDungeonIntroduction;
+            if (livingOwner) evidence.Add(Evidence(LivingDungeonContracts.OwnerName,
+                Find(payload, LivingDungeonContracts.OwnerName), owned));
+            var unknownPrimary = Unknown(payload, owned, false, true, livingOwner);
             return new RawSavePayloadClassification(envelope, null, -1, acceptedVersion,
                 Evidence("schema", schema, owned), Evidence("schemaVersion", schemaVersion, owned),
                 Evidence("primary", primary, owned), evidence, unknownRoot, unknownPrimary,
@@ -339,14 +363,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         { for (int i = 0; i < node.Members.Count; i++) if (string.Equals(node.Members[i].Name, name, StringComparison.Ordinal)) return node.Members[i].Value; return null; }
         private static byte[] Slice(byte[] bytes, int start, int end)
         { var result = new byte[end - start]; Buffer.BlockCopy(bytes, start, result, 0, result.Length); return result; }
-        private static List<RawUnknownMemberEvidence> Unknown(Node node, byte[] bytes, bool root, bool saveData)
+        private static List<RawUnknownMemberEvidence> Unknown(Node node, byte[] bytes, bool root, bool saveData, bool livingOwner = false)
         {
             var result = new List<RawUnknownMemberEvidence>();
             for (int i = 0; i < node.Members.Count; i++)
             {
                 Member member = node.Members[i]; bool known = root
                     ? member.Name == "schema" || member.Name == "schemaVersion" || member.Name == "primary"
-                    : saveData && Array.IndexOf(SaveDataMembers, member.Name) >= 0;
+                    : saveData && (Array.IndexOf(SaveDataMembers, member.Name) >= 0 ||
+                        (livingOwner && member.Name == LivingDungeonContracts.OwnerName));
                 if (!known) result.Add(new RawUnknownMemberEvidence(member.Name, member.Value.Kind,
                     member.Value.Start, Slice(bytes, member.Value.Start, member.Value.End)));
             }
@@ -455,7 +480,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             if (f.CanClose && closing) { p++; f.Node.End = p; stack.Pop(); continue; }
                             string name; if (!String(bytes, ref p, limits, budget, out name)) return Failure(budget, p, out reason, out errorOffset);
                             if (!f.Names.Add(name)) { errorOffset = p; return false; }
-                            if (f.Names.Count > limits.MaximumObjectMembers) { reason = WorkloadExceededReason; errorOffset = p; return false; }
+                            // Schema 14 appends exactly one primary owner. Nested/historical limits stay unchanged.
+                            int memberLimit = limits.MaximumObjectMembers;
+                            if (ReferenceEquals(f.Node, Find(root, "primary")) && Find(root, "schemaVersion")?.Text == "14" &&
+                                f.Names.Contains("livingDungeon")) memberLimit = checked(memberLimit + 1);
+                            if (f.Names.Count > memberLimit) { reason = WorkloadExceededReason; errorOffset = p; return false; }
                             f.Name = name;
                             if (!Skip(bytes, ref p, budget)) return BudgetFailure(budget, out reason, out errorOffset);
                             bool colon; if (!Check(bytes, p, (byte)':', budget, out colon)) return BudgetFailure(budget, out reason, out errorOffset);

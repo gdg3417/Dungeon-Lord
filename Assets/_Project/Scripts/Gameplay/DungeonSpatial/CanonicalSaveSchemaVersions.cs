@@ -7,6 +7,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const int FloorActivationIntroduction = 11;
         public const int FloorKnowledgeIntroduction = 12;
         public const int RoomContentPositionIntroduction = 13;
-        public const int CurrentWritableTarget = RoomContentPositionIntroduction;
+        public const int LivingDungeonIntroduction = 14;
+        public const int CurrentWritableTarget = LivingDungeonIntroduction;
     }
 }

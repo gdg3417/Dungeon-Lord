@@ -35,8 +35,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(first, second);
 
             DetachedCompleteSaveValidationResult upgraded =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(first, fixture.Context);
-            Assert.That(upgraded.IsValid && upgraded.CurrentTargetValidated, Is.True);
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(first, fixture.Profile.Canonical);
+            Assert.That(upgraded.IsValid, Is.True);
             AssertPreserved(frozen.State, upgraded.State);
             TileCoordinate migratedPosition =
                 upgraded.State.Floors[0].RoomContents.Assignments[0].RoomLocalPosition;
@@ -251,9 +251,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(
                     schemaTwelve, fixture.Profile.Canonical);
             DetachedCompleteSaveValidationResult upgraded =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(first, fixture.Context);
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(first, fixture.Profile.Canonical);
             Assert.That(frozen.IsValid, Is.True);
-            Assert.That(upgraded.IsValid && upgraded.CurrentTargetValidated, Is.True,
+            Assert.That(upgraded.IsValid, Is.True,
                 upgraded.Reason);
             RoomContentAssignment[] migrated = upgraded.State.Floors[0].RoomContents.Assignments;
             Assert.That(migrated, Has.Length.EqualTo(assignments.Length));

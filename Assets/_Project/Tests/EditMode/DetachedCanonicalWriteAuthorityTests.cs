@@ -311,7 +311,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertCandidateSuccess(fixture, result);
             DetachedCompleteSaveValidationResult durable = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 fixture.FileSystem.ReadAllBytes(fixture.ActivePath), fixture.Context);
-            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(13));
+            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(14));
             Assert.That(durable.State.Floors[0].RoomContents.Assignments.Any(value =>
                 assigned.Select(item => item.AssignmentId).Contains(value.AssignmentId)), Is.False);
             foreach (RoomContentAssignment expected in assigned)
@@ -964,7 +964,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Validation.State.Authority.MigrationDescriptorFingerprint, Is.Null.Or.Empty);
             Assert.That(result.Validation.State.Floors, Is.Empty);
             string json = Encoding.UTF8.GetString(fileSystem.ReadAllBytes(path));
-            Assert.That(json, Does.Contain("\"schemaVersion\":13"));
+            Assert.That(json, Does.Contain("\"schemaVersion\":14"));
             Assert.That(result.Validation.State.LifecycleAndOwnership, Is.Not.Null);
             Assert.That(result.Validation.State.LifecycleAndOwnership.Floors, Is.Empty);
             Assert.That(result.Validation.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);
