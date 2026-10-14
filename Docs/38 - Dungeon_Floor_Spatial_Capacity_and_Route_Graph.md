@@ -284,3 +284,7 @@ Future tests must construct 80 unique test-namespace floors with integer indexes
 # 18. Historical GD65B2A authoring-source dependency status
 
 GD65B1 is complete at merged PR #179. GD65B2A approves only the future normalized, version-controlled Dungeon Spatial source contract at `ContentAuthoring/DungeonSpatial/`; it does not create that package. No production authoring tables, production records, generated catalog/English table/manifest, exporter, recovery, loader, composition assignment, pre-build integration, or catalog activation exists yet. Spatial design, geometry, capacity, route, connection, and progression decisions are unchanged. Save schema remains 6, current runtime/save authority remains unchanged, and GD66 remains blocked until GD65B is complete.
+
+## 19. Owner-approved combat and party occupancy clarification (2026-10-14)
+
+The [Combat and Reserve-Backed Floor Recovery Owner Design Lock](../docs/planning/decisions/combat-and-recovery-owner-design-lock.md) governs future combat eligibility and party occupancy. Existing footprints, traversable geometry, and configured content capacity remain the spatial authorities; legal engagement uses those authorities and introduces no universal hardcoded combatant cap. MVP permits one adventurer party per floor. A descending party waits if the destination floor is occupied; it does not skip or exit for occupancy. Floor occupancy is gameplay policy, not a change to geometric capacity or a new save field. These rules are approved direction, not current runtime behavior.

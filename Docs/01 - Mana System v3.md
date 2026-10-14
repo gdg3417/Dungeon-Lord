@@ -142,3 +142,7 @@ If Reserved Mana exceeds incoming mana generation, the dungeon enters a fragile 
 - Excessive reserved mana limits growth
 
 - Poor layouts underperform regardless of monster strength
+
+### Owner-approved combat and recovery clarification (2026-10-14)
+
+For future implementation, see the [Combat and Reserve-Backed Floor Recovery Owner Design Lock](../docs/planning/decisions/combat-and-recovery-owner-design-lock.md). The existing `StructureRuntimeState.ManaReserve` and current single wallet are spendable balance authorities; this historical “reserved mana” pool wording does not mean the runtime has an implemented protected allocation. The approved future model derives a required reserve from configured obligations, exposes usable mana as `max(0, TotalMana - RequiredReservedMana)`, protects it from ordinary spending, and permits authorized recovery to spend it exactly once without lowering the requirement. Existing passive, skill-spill, and adventurer-death mana sources remain unchanged. No field rename, second wallet, or schema change is authorized here.
