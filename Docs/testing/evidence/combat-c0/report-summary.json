@@ -1,0 +1,178 @@
+[
+  {
+    "file": "combat-c0-focused-editmode-02.xml",
+    "sha256": "2964e7ac9fb31d7b2aeb256eccfb26d1696fa26974350e039f6b0e7334bca8dd",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "0",
+      "result": "Passed",
+      "total": "0",
+      "passed": "0",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 19:31:43Z",
+      "end-time": "2026-10-14 19:31:43Z",
+      "duration": "0.0129164"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": []
+  },
+  {
+    "file": "combat-c0-focused-editmode-03.xml",
+    "sha256": "9b8b1dd879374dba3aa2d75a2d3c5905643375bb432ad5e6d5e762385399057a",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "42",
+      "result": "Passed",
+      "total": "42",
+      "passed": "42",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 19:35:44Z",
+      "end-time": "2026-10-14 19:35:45Z",
+      "duration": "0.2401967"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0KernelTestsFixture.SyntheticMaximumConfiguredWorkloadHasCanonicalBoundedEvidence",
+        "output": "C0 injected envelope: participants=64; rounds=32; events=2640; charged work=4750; elapsed_ms=7.4025\n"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-full-editmode.xml",
+    "sha256": "7bab9b5caf5f0dffc5f4f875c64768ed974771de6d81b1879d72e53ca738556f",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1940",
+      "result": "Skipped:Ignored",
+      "total": "1940",
+      "passed": "1939",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 20:02:23Z",
+      "end-time": "2026-10-14 20:02:52Z",
+      "duration": "28.9586677"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0KernelTestsFixture.SyntheticMaximumConfiguredWorkloadHasCanonicalBoundedEvidence",
+        "output": "C0 injected envelope: participants=64; rounds=32; events=2640; charged work=4750; elapsed_ms=6.5314\n"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-full-playmode.xml",
+    "sha256": "9767b2643c7dde368034827134ed4926e1995c6984f7fe0e8e98095c18823d70",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3376",
+      "result": "Skipped:Ignored",
+      "total": "3376",
+      "passed": "3366",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 20:06:15Z",
+      "end-time": "2026-10-14 20:15:40Z",
+      "duration": "564.2823964"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.CombatC0KernelTests.SyntheticMaximumConfiguredWorkloadHasCanonicalBoundedEvidence",
+        "output": "C0 injected envelope: participants=64; rounds=32; events=2640; charged work=4750; elapsed_ms=6.9405\n"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-regression-editmode.xml",
+    "sha256": "d791ef1cf765ed967c3bc66d793df34d9b764b029881b9fbc8d6018b333a92f1",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "404",
+      "result": "Passed",
+      "total": "404",
+      "passed": "404",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-14 19:47:05Z",
+      "end-time": "2026-10-14 19:47:15Z",
+      "duration": "10.3477247"
+    },
+    "failures": [],
+    "skips": [],
+    "measurements": []
+  }
+]

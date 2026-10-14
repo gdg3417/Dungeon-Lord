@@ -4,7 +4,7 @@ Status: **Proposed, unapproved; production integration blocked. Not merge-ready.
 
 Baseline `eb80df1e3fd09c18aedb062afc108eb941deb8a3`, merged #237. Branch `codex/combat-c0-deterministic-combat`. Remote main was verified by fetch; initial clean local branch was `codex/lock-combat-recovery-design`, local main still at #236. No intervening remote changes. Recommendation: GPT-6.1 Sol, High; Complex, well-specified gameplay implementation. Reason: deterministic execution/geometry/HP/settlement/checkpoint integration. User-directed fallback: GPT-6 Sol High, then GPT-5.6 Sol High; no automatic Astra escalation. The task runtime does not expose a trustworthy actual model/reasoning identifier; no substitution was requested by this agent and none can be independently verified here.
 
-This packet implements only the explicitly authorized safe bounded prerequisites. The October 14 [owner lock](decisions/combat-and-recovery-owner-design-lock.md), section 8, leaves formulas, tuning, LOS, positions, encounter conditions, ties, encoding and work limits unapproved. It does not authorize their production activation. No owner Unity testing is requested at this stage.
+This packet implements only the explicitly authorized safe bounded prerequisites. The October 14 [owner lock](../../docs/planning/decisions/combat-and-recovery-owner-design-lock.md), section 8, leaves formulas, tuning, LOS, positions, encounter conditions, ties, encoding and work limits unapproved. It does not authorize their production activation. No owner Unity testing is requested at this stage.
 
 ## Existing ownership and evidence
 
@@ -24,7 +24,7 @@ Reviewed sources include Specs 01/03/06/11/21/28/38, Monsterology, glossary, roa
 
 ## Inventory: approved active values versus authoring drafts
 
-The [Phase 5B owner-approved contract](phase-5b-production-tuning-and-run-condition-contract.md), sections 8 and 13, and active bootstrap config approve adventurer level-one HP: Warrior 10, Cleric 8, Rogue 7, Ranger 7, Mage 6; initial party size 3–5 and level 1. Initial formation priority is Warrior 1, Rogue 2, Ranger 3, Cleric 4, Mage 5.
+The [Phase 5B owner-approved contract](../../docs/planning/phase-5b-production-tuning-and-run-condition-contract.md), sections 8 and 13, and active bootstrap config approve adventurer level-one HP: Warrior 10, Cleric 8, Rogue 7, Ranger 7, Mage 6; initial party size 3–5 and level 1. Initial formation priority is Warrior 1, Rogue 2, Ranger 3, Cleric 4, Mage 5.
 
 Existing one-shot, severity-interpolated damage is Goblin 1–2 and Skeleton 1–3, both `run.targeting.lead_active`. These are approved **B1 assignment interaction** values, not an approval to repeat them each C0 round. Traps remain Snare 1–2, Spike 2–4, Chilling Sigil 0–0 with existing expertise mitigation and targeting.
 
@@ -61,6 +61,8 @@ P3 proposes Manhattan range and integer tile-centre supercover LOS; any touched 
 ## Config, evidence and workload contract proposal
 
 Proposed production owner: one optional, explicitly enabled versioned `CombatC0` section of existing `RunSimulationConfig`, in existing bootstrap JSON; absent/disabled keeps B1. Enabled-but-incomplete fails before mutation, with no fallback. The typed shape needs executable/rule/version, damage policy, initiative/tie policy, targeting, all five class and both monster profiles, attack type/range, position/grouping/LOS/opacity policies, zero-progress and round-limit behavior, and technical bounds. No C0 config is serialized into an existing B1 start.
+
+Proposed identities (all unapproved): configuration version `1`; production executable `run.executable.combat-c0.v1`; rule `run.combat.c0.basic.v1`; damage `combat.c0.fixed_integer.v1`; initiative `combat.c0.initiative_descending_party_first.v1`; targeting `combat.c0.targeting.class_priority.v1`; position `combat.c0.party_anchor.distinct_melee.v1`; grouping `combat.c0.earliest_path_step.room_group.v1`; range `combat.c0.manhattan.v1`; LOS `combat.c0.supercover.solid_corner.v1`; zero-progress `combat.c0.zero_damage_round.v1`; round-limit `combat.c0.technical_failure.v1`. These are review proposals only; the existing injected kernel deliberately uses qualification identities. New manual C0 remains untimed, with rounds/work as duration bounds; production logical attack durations and timed scheduling remain unapproved and B2 remains B1.
 
 Proposed technical bounds for owner review: 32 rounds/encounter, 64 total run participants including party, 30 encounters/run, 32,768 combat events/run, 1,000,000 charged resolver work units/run, and existing spatial tile/parser limits without relaxation. These are proposed qualification limits, not gameplay density caps. For the kernel, work units count staging participants + directed links + action slots + target checks; they are not CPU instructions. Sorting/input validation also costs bounded work. A geometry adapter needs its own budget accounting before production.
 
