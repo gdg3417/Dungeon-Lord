@@ -14,6 +14,29 @@ namespace DungeonBuilder.M0.Tests
     public abstract partial class PhaseSevenA4ProductionSceneTests
     {
         [UnityTest]
+        public IEnumerator CombatC0ProductionManualRunUsesRealGeometryAndKeepsTransientDiagnostics()
+        {
+            var root = GameRoot.Instance; root.Save.structureRuntime.ManaReserve = 1000;
+            var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var room = floor.Layout.Rooms[0];
+            Assert.That(root.SaveService.ExecuteCanonicalMutation(root.Save, DetachedCanonicalMutationRequest.Place(
+                "placement.category.monster", "placement.option.monster.skeleton", room.RoomInstanceId,
+                floor.FloorInstanceId, new TileCoordinate(0,3))).IsSuccess, Is.True);
+            double mana = root.Save.structureRuntime.ManaReserve;
+            int sequence = root.Save.runHistory.NextRunSequence;
+            Assert.That(root.SimulateRunOnce(), Is.True);
+            var run = root.Save.runHistory.LatestOutcome;
+            Assert.That(CombatC0Diagnostics.IsCombatC0(run), Is.True);
+            Assert.That(CombatC0Diagnostics.Monsters(run), Has.Count.EqualTo(2));
+            Assert.That(CombatC0Diagnostics.Events(run).Count(e => e.Kind == CombatC0EventKind.EncounterStart), Is.EqualTo(1));
+            Assert.That(CombatC0Diagnostics.Events(run).Any(e => e.Kind == CombatC0EventKind.Attack && e.Damage > 0), Is.True);
+            Assert.That(root.Save.runHistory.NextRunSequence, Is.EqualTo(sequence+1));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            Assert.That(RunPartyDiagnosticsPresenter.Build(run, root.Content.GetString), Does.Contain("Combat #"));
+            Assert.That(controller.StartReplay(), Is.False);
+            Assert.That(File.ReadAllText(root.SaveService.SavePath), Does.Not.Contain("CombatEvents").And.Not.Contain("CombatMonsters"));
+            yield return null;
+        }
+        [UnityTest]
         public IEnumerator VisualRunFeedbackCasualtyAndMitigatedDamageAreRecordedAndReadOnly()
         {
             var root = GameRoot.Instance; root.Save.structureRuntime.ManaReserve = 1000;
@@ -85,6 +108,11 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator VisualRunReplayProductionLifecycleAndResponsiveControls()
         {
             var root = GameRoot.Instance;
+            // PR #236 qualifies the historical B1 event renderer. Explicitly select
+            // that supported executable for this fixture; new production runs use C0.
+            var historicalService = (RunSimulationService)typeof(GameRoot).GetField("_runSimulationService",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(root);
+            historicalService.Config.CombatC0.Enabled = false;
             Assert.That(controller.StartReplay(), Is.False);
             root.Save.structureRuntime.ManaReserve = 1000; // Explicit fixture funding before content purchases.
             var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var room = floor.Layout.Rooms[0];
@@ -110,6 +138,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.SaveService.CommitFloorConstruction(root.Save, root.SaveService.PreviewFloorConstruction(root.Save)).IsSuccess, Is.True);
             string otherFloor = root.Save.validatedCanonicalSpatialState.Floors.Single(f => f.FloorIndex == 1).FloorInstanceId;
             Assert.That(root.SimulateRunOnce(), Is.True);
+            Assert.That(CombatC0Diagnostics.IsCombatC0(root.Save.runHistory.LatestOutcome), Is.False);
             floor = root.Save.validatedCanonicalSpatialState.Floors[0];
             var originals = floor.RoomContents.Assignments.ToDictionary(a => a.AssignmentId, a => {
                 Assert.That(DungeonRunReplay.TryProject(a.RoomLocalPosition, RunPositionSpace.RoomLocal, a.RoomInstanceId,

@@ -188,8 +188,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void CanonicalManualRunPublishesC0OnceKeepsManaHistoryAndTransientEvidenceOnly()
         {
             var f=Canonical(); double mana=f.Runtime.structureRuntime.ManaReserve; int sequence=f.Runtime.runHistory.NextRunSequence;
+            PhaseSixA4Tests.AddContent(f,0,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.GoblinOptionId);
             f.Accept(PhaseFiveBBranchIntegrationTests.Run(f)); var run=f.Runtime.runHistory.LatestOutcome;
             Assert.That(CombatC0Diagnostics.IsCombatC0(run),Is.True); Assert.That(CombatC0Diagnostics.Events(run).Count,Is.GreaterThan(0));
+            Assert.That(CombatC0Diagnostics.Monsters(run),Has.Count.EqualTo(2));
+            Assert.That(CombatC0Diagnostics.Events(run).Count(e=>e.Kind==CombatC0EventKind.EncounterStart),Is.EqualTo(1));
             Assert.That(run.RunId,Is.EqualTo("run-"+sequence)); Assert.That(f.Runtime.runHistory.NextRunSequence,Is.EqualTo(sequence+1));
             Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(mana)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget,Is.EqualTo(14));
             string aggregate=JsonUtility.ToJson(run); Assert.That(aggregate,Does.Not.Contain("Combat").And.Not.Contain("Health"));
@@ -313,6 +316,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(B.Structured(CombatC0Diagnostics.Events(a)),Is.EqualTo(B.Structured(CombatC0Diagnostics.Events(b))));
             Assert.That(CombatC0Diagnostics.ChargedWork(a),Is.EqualTo(CombatC0Diagnostics.ChargedWork(b)));
         }
+        [Test] public void ProductionC0WipeStopsUnreachedTrapLootAndMovement()
+        {
+            var c=Config(); foreach(var p in c.CombatC0.Monsters) { p.Damage=int.MaxValue; p.MaxHealth=int.MaxValue; p.Initiative=int.MaxValue; }
+            var room=B.Room(0,true,Monster(),B.Assignment("trap",MvpDungeonPlacementIds.TrapCategoryId,MvpDungeonPlacementIds.SpikeTrapOptionId,1,1),
+                B.Assignment("loot",MvpDungeonPlacementIds.LootNodeCategoryId,MvpDungeonPlacementIds.HiddenCacheOptionId,3,1));
+            var run=Start(c,room).DrainToCompletion(true);
+            Assert.That(run.Party.IsWiped,Is.True); Assert.That(run.SurvivalSummary.DeathCount,Is.EqualTo(run.Party.Members.Count));
+            Assert.That(run.Success,Is.False); Assert.That(run.EncounterEvents,Is.Empty); Assert.That(run.LootSummary.RollCount,Is.Zero);
+            Assert.That(run.PresentationSteps.Any(s=>s.Kind==RunStepKind.TrapTrigger||s.Kind==RunStepKind.LootInteraction||s.Kind==RunStepKind.Movement),Is.False);
+            Assert.That(CombatC0Diagnostics.Events(run).Last().Reason,Is.EqualTo(CombatC0Reason.PartyWiped));
+        }
         [Test] public void ActualProductionRoomAndFloorEnvelopeFitsApprovedWorkAndParticipantBounds()
         {
             long allocatedBefore=GC.GetAllocatedBytesForCurrentThread();
@@ -355,8 +369,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(total,Is.LessThan(c.CombatC0.MaximumWork)); Assert.That(participants,Is.LessThanOrEqualTo(c.CombatC0.MaximumParticipants));
             Assert.That(encounters,Is.LessThanOrEqualTo(c.CombatC0.MaximumEncounters));
             long allocated=GC.GetAllocatedBytesForCurrentThread()-allocatedBefore;
-            Assert.That(allocated,Is.LessThan(128L*1024*1024)); // Test-only allocation regression ceiling, not a platform promise.
-            TestContext.WriteLine("Production envelope upper work "+total+", participants "+participants+", encounters "+encounters+"; fixture/adapter thread allocations "+allocated);
+            if(allocated>0) Assert.That(allocated,Is.LessThan(128L*1024*1024)); // Test-only regression ceiling, not a platform promise.
+            TestContext.WriteLine("Production envelope upper work "+total+", participants "+participants+", encounters "+encounters+
+                (allocated>0 ? "; fixture/adapter thread allocations "+allocated : "; thread allocation counter unavailable on this Unity Mono runtime"));
         }
         [Serializable] private sealed class GoldenEntry { public string Scenario,File,Identity,StartIdentity,Inspection; public long Ordinal; public bool Consumed; }
         [Serializable] private sealed class GoldenManifest { public string Source,UnityVersion; public GoldenEntry[] Entries; }
