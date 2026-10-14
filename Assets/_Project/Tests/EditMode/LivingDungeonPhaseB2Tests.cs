@@ -198,8 +198,115 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(PhaseFiveBBranchIntegrationTests.Run(f)); f.Reopen();
             Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.EqualTo("run-2"));
             Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(3));
+            Assert.That(UnityEngine.JsonUtility.ToJson(f.Runtime.runHistory.LatestOutcome), Is.EqualTo(
+                UnityEngine.JsonUtility.ToJson(f.Runtime.runHistory.RecentOutcomes.Last())));
             CollectionAssert.AreEqual(prefix, Bytes(Owner(f), f.Profile.Canonical.Serialized));
             Admit(f, 1, 1); CollectionAssert.AreEqual(new[] { 1, 3 }, Owner(f).Parties.Select(p => p.Sequence));
+        }
+        private static RunHistoryState AliasHistory(string scenario)
+        {
+            var history = new RunHistoryState { NextRunSequence = 3 };
+            history.AppendOutcome(new RunOutcomeRecord { RunId = "run-1", Score = 1 }, 10);
+            if (scenario != "absent")
+                history.AppendOutcome(new RunOutcomeRecord { RunId = "run-2", Score = 2 }, 10);
+            history.LatestOutcome = UnityEngine.JsonUtility.FromJson<RunOutcomeRecord>(
+                UnityEngine.JsonUtility.ToJson(history.RecentOutcomes.Last()));
+            switch (scenario)
+            {
+                case "absent": history.LatestOutcome = new RunOutcomeRecord { RunId = "run-2", Score = 2 }; break;
+                case "earlier": history.LatestOutcome = history.RecentOutcomes[0]; break;
+                case "score": history.LatestOutcome.Score++; break;
+                case "tags": history.LatestOutcome.FeedbackTagKeys = new[] { "test.history.conflict" }; break;
+                case "null": case "omitted": history.LatestOutcome = null; break;
+                case "default": history.LatestOutcome = new RunOutcomeRecord(); break;
+            }
+            return history;
+        }
+        private static string AliasHistoryJson(string scenario)
+        {
+            string json = UnityEngine.JsonUtility.ToJson(AliasHistory(scenario));
+            if (scenario == "null" || scenario == "omitted")
+            {
+                string field = "\"LatestOutcome\":" + UnityEngine.JsonUtility.ToJson(new RunOutcomeRecord()) + ",";
+                Assert.That(json, Does.Contain(field));
+                json = json.Replace(field, scenario == "null" ? "\"LatestOutcome\":null," : "");
+            }
+            return json;
+        }
+        [TestCase("absent")] [TestCase("earlier")] [TestCase("score")] [TestCase("tags")]
+        [TestCase("null")] [TestCase("default")] [TestCase("omitted")]
+        public void ActivatedAllocatorRejectsMissingOrContradictoryFinalAlias(string scenario)
+        {
+            var history = AliasHistory(scenario);
+            string before = UnityEngine.JsonUtility.ToJson(history);
+            var owner = LivingDungeonState.Empty();
+            Assert.That(LivingDungeonScheduling.AllocatorValid(history, owner, true), Is.False);
+            Assert.That(LivingDungeonScheduling.AllocatorValid(history, owner, false), Is.False);
+            Assert.That(UnityEngine.JsonUtility.ToJson(history), Is.EqualTo(before));
+            Assert.That(owner.IsDormant, Is.True); Assert.That(owner.Revision, Is.Zero);
+        }
+        [Test]
+        public void ActivatedAllocatorAcceptsEqualFinalRecordAliasWithoutReferenceIdentity()
+        {
+            var history = AliasHistory("valid");
+            Assert.That(history.LatestOutcome, Is.Not.SameAs(history.RecentOutcomes.Last()));
+            Assert.That(LivingDungeonScheduling.AllocatorValid(history, LivingDungeonState.Empty(), true), Is.True);
+            var f = Controlled(); string json = Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace(
+                HistoryBytes(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized), UnityEngine.JsonUtility.ToJson(history));
+            f.FileSystem.Seed(f.ActivePath, Encoding.UTF8.GetBytes(json)); f.Reopen(); Activate(f); f.Reopen();
+            Admit(f, 0, 0);
+            Assert.That(Owner(f).Parties.Single().Sequence, Is.EqualTo(3));
+            Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(4));
+        }
+        [TestCase(false)] [TestCase(true)]
+        public void HistoricalEmptyLatestRepresentationsRemainActivatableWithoutRewritingHistory(bool defaultRecord)
+        {
+            var history = new RunHistoryState { LatestOutcome = defaultRecord ? new RunOutcomeRecord() : null };
+            Assert.That(LivingDungeonScheduling.AllocatorValid(history, LivingDungeonState.Empty(), true), Is.True);
+            var f = Controlled(); string historyJson = defaultRecord ? UnityEngine.JsonUtility.ToJson(history) :
+                "{\"NextRunSequence\":1,\"LatestOutcome\":null,\"RecentOutcomes\":[]}";
+            string json = Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace(
+                HistoryBytes(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized), historyJson);
+            f.FileSystem.Seed(f.ActivePath, Encoding.UTF8.GetBytes(json)); f.Reopen(); Activate(f); f.Reopen();
+            Assert.That(HistoryBytes(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized), Is.EqualTo(historyJson));
+        }
+        [TestCase("absent")] [TestCase("earlier")] [TestCase("score")] [TestCase("tags")]
+        [TestCase("null")] [TestCase("default")] [TestCase("omitted")]
+        public void DormantSchemaThirteenPreservesConflictingAliasAndActivationRejectsWithoutMutation(string scenario)
+        {
+            var f = Controlled(); string history = AliasHistoryJson(scenario);
+            string json = Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace(
+                HistoryBytes(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized), history);
+            byte[] source = PhaseFourTestSupport.FrozenThirteen(Encoding.UTF8.GetBytes(json));
+            var before = (byte[])source.Clone();
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(source, f.Profile.Canonical).IsValid, Is.True);
+            Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(source, f.Profile.Canonical, out var migrated), Is.True);
+            CollectionAssert.AreEqual(before, source);
+            CollectionAssert.AreEqual(source, PhaseFourTestSupport.FrozenThirteen(migrated));
+            Assert.That(HistoryBytes(migrated, f.Profile.Canonical.Serialized), Is.EqualTo(history));
+            f.FileSystem.Seed(f.ActivePath, migrated); f.Reopen(); var session = f.Session;
+            var result = Writer(f).ConfigureLivingDungeon(f.ActivePath, f.FileSystem, session, ProfileA().Id, 1);
+            Assert.That(result.IsSuccess, Is.False); Assert.That(result.Reason, Is.EqualTo(LivingDungeonScheduling.Invalid));
+            Assert.That(result.Session, Is.Null); Assert.That(result.RuntimeProjection, Is.Null);
+            CollectionAssert.AreEqual(migrated, session.GetCurrentBytes());
+            CollectionAssert.AreEqual(migrated, f.FileSystem.ReadAllBytes(f.ActivePath));
+            f.Reopen(); Assert.That(Owner(f).IsDormant, Is.True); Assert.That(Owner(f).Revision, Is.Zero);
+        }
+        [TestCase("absent")] [TestCase("earlier")] [TestCase("score")] [TestCase("tags")]
+        [TestCase("null")] [TestCase("default")] [TestCase("omitted")]
+        public void ActivatedCanonicalSaveRejectsConflictingAliasWithoutRewritingSource(string scenario)
+        {
+            var f = Controlled(); Activate(f); var committed = f.Session.GetCurrentBytes();
+            string json = Encoding.UTF8.GetString(committed).Replace(
+                HistoryBytes(committed, f.Profile.Canonical.Serialized), AliasHistoryJson(scenario));
+            byte[] candidate = Encoding.UTF8.GetBytes(json); var before = (byte[])candidate.Clone();
+            f.FileSystem.Seed(f.ActivePath, candidate);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, f.Context).IsValid, Is.False);
+            var opened = DetachedCanonicalSaveSession.Open(candidate, f.Context, f.Profile);
+            Assert.That(opened.IsSuccess, Is.False); Assert.That(opened.Session, Is.Null);
+            CollectionAssert.AreEqual(before, candidate);
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            CollectionAssert.AreEqual(committed, f.Session.GetCurrentBytes());
         }
         private static string HistoryBytes(byte[] bytes, SpatialSerializedInputLimits limits)
         {

@@ -74,8 +74,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (history == null || history.NextRunSequence <= 0 ||
                 (requireAvailable && history.NextRunSequence == int.MaxValue)) return false;
+            var recent = history.RecentOutcomes ?? Array.Empty<RunOutcomeRecord>();
+            if (recent.Length != 0 && history.LatestOutcome == null) return false;
             var ids = new HashSet<int>();
-            foreach (var r in history.RecentOutcomes ?? Array.Empty<RunOutcomeRecord>())
+            foreach (var r in recent)
                 if (r == null || !Sequence(r.RunId, out int sequence) || sequence >= history.NextRunSequence || !ids.Add(sequence)) return false;
             // Unity's historical null-class encoding writes an exact default record for an empty latest slot.
             // Interpret only that byte-equivalent default with empty recent history as absence; preserve its bytes.
@@ -85,8 +87,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 if (!Sequence(history.LatestOutcome.RunId, out int latest) || latest >= history.NextRunSequence) return false;
                 // Latest is an alias only for the final recent record; contradictory aliases are rejected.
-                var recent = history.RecentOutcomes ?? Array.Empty<RunOutcomeRecord>();
-                if (ids.Contains(latest) && (recent.Length == 0 || recent[recent.Length - 1].RunId != history.LatestOutcome.RunId ||
+                if (recent.Length != 0 && (recent[recent.Length - 1].RunId != history.LatestOutcome.RunId ||
                     UnityEngine.JsonUtility.ToJson(recent[recent.Length - 1]) != UnityEngine.JsonUtility.ToJson(history.LatestOutcome))) return false;
                 ids.Add(latest);
             }

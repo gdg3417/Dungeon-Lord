@@ -1,5 +1,7 @@
 # Living Dungeon Phase B2 qualification
 
+The evidence below records the original implementation qualification at reviewed commit `c887cf7bd12a700ff4230b6a90a6f6460092ddf4`. Subsequent PR #235 alias-validation correction and its latest full-suite/build results are recorded separately in [alias-review-correction.md](alias-review-correction.md): 1,873/0/1 EditMode, 3,300/0/10 PlayMode, unchanged skips, 65 passing production gates and a successful Windows Development Build. Original reports and measurements are preserved.
+
 Baseline: merged PR #234, `af464e05d63acfa73a57786888266d5901feac2f`; branch `codex/living-dungeon-phase-b2`. Recommended configuration: GPT-6.1 Sol, High, Complex, for reviewed persistence/migration and deterministic cross-system scheduling. No availability fallback was selected. This is an implementation packet awaiting independent review, not merge approval or production automatic scheduling.
 
 ## Implemented authority
