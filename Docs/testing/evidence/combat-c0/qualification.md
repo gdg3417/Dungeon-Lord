@@ -64,6 +64,8 @@ Windows **StandaloneWindows64 Development**, Bootstrap only, **Succeeded**, **0 
 
 Player: `C:/Dev/Dungeon-Lord/Temp/ui-composition-combat-c0-validation/Builds/Development/Windows-combat-c0-prerequisite/Dungeon Lord.exe`. Report, messages, packed asset lists and complete hashes are in [windows-artifact-manifest.json](windows-artifact-manifest.json) and adjacent build artifacts. Previous players use distinct paths and were not overwritten.
 
+Unity-generated build stack traces and the built-in sprite list contained trailing spaces, detected during final Git whitespace review. Readable text copies normalize only trailing whitespace/line endings. The exact original build reports/lists remain in [build-reports-original.zip](build-reports-original.zip) and the original player output; manifest hashes describe the original files. No Unity source or validation result changed.
+
 The preserving helper backed up the 22 established disposable test fixtures before Unity execution, retained modified fixture bytes, and restored the original bytes after qualification. Owner primary saves were never reset or restored. The final audit verified **13,531 protected files, zero changed hashes**. Exact hashes are in the support archive's `preservation-after.json`; the audit covers save/settings and prior build files, and excludes evolving Unity log/XML files under LocalLow under the established helper contract. Explicit test reports and qualification evidence here use new filenames and are retained.
 
 ## Completion boundary

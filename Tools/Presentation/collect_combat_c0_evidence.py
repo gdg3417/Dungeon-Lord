@@ -76,8 +76,17 @@ with zipfile.ZipFile(OUT / 'qualification-support.zip', 'w', zipfile.ZIP_DEFLATE
 build = ROOT / 'Temp/ui-composition-combat-c0-validation/Builds/Development/Windows-combat-c0-prerequisite'
 if (build / 'build-report.json').exists():
     report = json.loads((build / 'build-report.json').read_text())
-    for name in ('build-report.json', 'build-messages.txt', 'packed-dungeon-art.txt', 'packed-source-assets.txt'):
-        (OUT / name).write_bytes((build / name).read_bytes())
+    with zipfile.ZipFile(OUT / 'build-reports-original.zip', 'w', zipfile.ZIP_DEFLATED) as originals:
+        for name in ('build-report.json', 'build-messages.txt', 'packed-dungeon-art.txt', 'packed-source-assets.txt'):
+            source = build / name
+            originals.write(source, name)
+            if name.endswith('.txt'):
+                # Raw build bytes stay in the archive/player output; readable Git copies
+                # normalize only generated trailing whitespace and line endings.
+                text = '\n'.join(line.rstrip() for line in source.read_text(encoding='utf-8-sig').splitlines()) + '\n'
+                (OUT / name).write_text(text, encoding='utf-8', newline='\n')
+            else:
+                (OUT / name).write_bytes(source.read_bytes())
     files = sorted(p for p in build.rglob('*') if p.is_file())
     namespace = 'combat-c0-prerequisite-validation-20261014.json'
     write('windows-artifact-manifest.json', dict(report=report, files=len(files), bytes=sum(p.stat().st_size for p in files),

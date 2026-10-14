@@ -467,7 +467,7 @@ Assets/_Project/UI/ProductionDungeon/DungeonTheme.tss
 Assets/_Project/UI/ProductionDungeon/Panel.asset
 Assets/_Project/UI/ProductionDungeon/Presentation.asset
 Assets/_Project/UI/ProductionDungeon/Visuals.asset
-Built-in Sprite: 
+Built-in Sprite:
 Built-in Texture2D: Splash Screen Unity Logo
 Packages/com.unity.2d.animation/IK/Runtime/CCDSolver2D.cs
 Packages/com.unity.2d.animation/IK/Runtime/Culling/AlwaysUpdateCullingStrategy.cs
