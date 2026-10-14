@@ -10,6 +10,10 @@ namespace DungeonBuilder.M0
     public sealed class DungeonPresentationPolicy : ScriptableObject
     {
         public DungeonVisualCatalog Visuals;
+        public float ReplayMovementSeconds = .22f, ReplayInteractionSeconds = .85f;
+        public float ReplayPartySize = .5f, ReplayMarkerSize = .85f;
+        public int MaximumReplaySteps = 8192;
+        public Color ReplayPartyColor = new Color(.98f, .94f, .78f);
         public float ReferenceShortSide = 720;
         public Color SelectionColor = new Color(.96f,.76f,.37f);
         public float SmallText = 16, DefaultText = 20, LargeText = 26;

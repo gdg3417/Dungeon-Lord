@@ -1,0 +1,20 @@
+{
+  "removed": [],
+  "added": [
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.ActualEngineUnreachableInteractionsAndWipeNeverInventReach(False)",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.ActualEngineUnreachableInteractionsAndWipeNeverInventReach(True)",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.CompletedPublicationProjectsActualStepsAndDoesNotWriteOrResolveAgain",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.EvidenceRetainsThroughOrdinaryPublicationAndLimitsRejectWithoutEffects",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.MissingRestartAndHistoricalLayoutsFailClosed(False)",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.MissingRestartAndHistoricalLayoutsFailClosed(True)",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.PlaybackLifecycleAndPartitioningAreDeterministic",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.ProjectionUsesCanonicalTransformForRepositionedRotatedRoom(Ninety)",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.ProjectionUsesCanonicalTransformForRepositionedRotatedRoom(OneEighty)",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.ProjectionUsesCanonicalTransformForRepositionedRotatedRoom(TwoSeventy)",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.ProjectionUsesCanonicalTransformForRepositionedRotatedRoom(Zero)",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.TwoFloorConnectionsAndBranchReturnsFollowOriginalOrdinalStream(False)",
+    "DungeonBuilder.M0.Tests.EditMode.VisualRunReplayTests.TwoFloorConnectionsAndBranchReturnsFollowOriginalOrdinalStream(True)",
+    "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.VisualRunReplayProductionLifecycleAndResponsiveControls"
+  ],
+  "changed": []
+}

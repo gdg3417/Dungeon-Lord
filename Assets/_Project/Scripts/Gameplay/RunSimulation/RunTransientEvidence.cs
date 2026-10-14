@@ -18,6 +18,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 run.Party = match.Party; run.EncounterEvents = match.EncounterEvents; run.BranchOutcomes = match.BranchOutcomes;
                 run.FloorTransitions = match.FloorTransitions; run.DepthObjective = match.DepthObjective;
                 run.SpatialEvents = match.SpatialEvents;
+                run.PresentationSteps = match.PresentationSteps;
+                run.PresentationLayoutFingerprint = match.PresentationLayoutFingerprint;
             }
         }
     }

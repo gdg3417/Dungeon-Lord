@@ -19,7 +19,7 @@ namespace DungeonBuilder.M0
         { EdgeId=edgeId; Kind=kind; Socket=socket; Facing=facing; Center=center; }
     }
     /// <summary>Presentation only. Tilemaps and sprite views never supply placement or simulation state.</summary>
-    public sealed class DungeonFloorWorldView : MonoBehaviour
+    public sealed partial class DungeonFloorWorldView : MonoBehaviour
     {
         private Tilemap rooms, fixedStructures, corridors, grid, invalidRooms, selectedRoom, moveAnchors, constructionPreview, invalidConstruction, perimeter, surrounding;
         private readonly List<SpriteRenderer> fixedPool = new List<SpriteRenderer>();
@@ -123,6 +123,7 @@ namespace DungeonBuilder.M0
             RoomContentSpatialOccupancySnapshot occupancy, int maximumTiles, int maximumGridTiles, bool edit)
         {
             ReconstructionCount++;
+            HideReplay();
             floor = selected; this.production = production; this.occupancy = occupancy;
             this.maximumTiles = maximumTiles; invalidIntents = Array.Empty<DungeonDraftInvalidMovement>(); invalidRooms.ClearAllTiles(); InvalidFootprintTileCount = 0;
             this.maximumGridTiles = maximumGridTiles;

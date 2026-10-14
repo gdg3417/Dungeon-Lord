@@ -33,6 +33,8 @@ namespace DungeonBuilder.M0.EditorTools
             => BuildWindowsAt("Builds/Development/Windows-living-dungeon-phase-b1-export-limit/Dungeon Lord.exe");
         public static void BuildLivingDungeonPhaseB2Windows()
             => BuildWindowsAt("Builds/Development/Windows-living-dungeon-phase-b2/Dungeon Lord.exe");
+        public static void BuildVisualRunReplayWindows()
+            => BuildWindowsAt("Builds/Development/Windows-visual-run-replay/Dungeon Lord.exe");
         private static void BuildWindowsAt(string outputPath)
         {
             DevelopmentBuildUtility.BuildDevelopment(BuildTarget.StandaloneWindows64, outputPath);

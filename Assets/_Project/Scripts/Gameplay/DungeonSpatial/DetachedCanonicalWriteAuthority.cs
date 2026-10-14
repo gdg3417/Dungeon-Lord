@@ -289,6 +289,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 candidate.livingDungeon = owned.LivingDungeon;
                 candidate.lastSavedUtcUnix = savedUtcUnix;
                 simulation.CalculatePhaseFiveBRun(candidate, owned, production, postureId, limits.Canonical);
+                if (!StructuralEditService.TryFingerprint(owned.State, limits.Canonical, out var presentationFingerprint))
+                    return Failure(invalid);
+                candidate.runHistory.LatestOutcome.PresentationLayoutFingerprint = presentationFingerprint;
             }
             catch (Exception error)
             {

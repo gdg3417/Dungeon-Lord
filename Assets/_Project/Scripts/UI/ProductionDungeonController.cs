@@ -78,6 +78,7 @@ namespace DungeonBuilder.M0
             }
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
             if (!legacy) ReadInput();
+            UpdateReplay();
         }
 
         private bool HasCanonicalRuntime()
@@ -143,6 +144,7 @@ namespace DungeonBuilder.M0
             Button("closeDisplay", () => ui.Q("displayPopover").style.display = DisplayStyle.None);
             InitializeConstruction();
             InitializeRoomContent();
+            InitializeReplay();
             Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
             Button("default", () => SetTextSize(DungeonTextSize.Default));
@@ -370,6 +372,7 @@ namespace DungeonBuilder.M0
             }
             if (IsEditing && draftContext.Fingerprint(save.validatedCanonicalSpatialState) != draft.BaselineFingerprint)
                 feedback = TransactionalDungeonDraft.StaleReason;
+            RefreshReplayAvailability();
             Present();
         }
 
@@ -389,6 +392,7 @@ namespace DungeonBuilder.M0
             ApplyCamera();
             PresentFloorRail();
             SetTextSize(textSize);
+            world.PresentReplay(replay, IsEditing || legacy);
         }
         public void SelectFloor(string id)
         { if (!HasCanonicalRuntime() || !renderState.Floors.Any(f => f.FloorInstanceId == id)) return;
@@ -428,6 +432,9 @@ namespace DungeonBuilder.M0
             PresentConstruction();
             PresentComposition();
             PresentRoomContent();
+            if (IsEditing) replay?.Suspend();
+            world.PresentReplay(replay, IsEditing || legacy);
+            PresentReplayControls();
             SetTextSize(textSize);
         }
         private void PresentHud()
@@ -599,6 +606,7 @@ namespace DungeonBuilder.M0
           while (draft != null && draft.Durability == DraftDurability.Pending) if (!draft.FlushNext()) break; }
         private void OnDestroy()
         {
+            replay?.Close();
             if (bootstrapCamera != null) { bootstrapCamera.cullingMask = bootstrapCameraMask; bootstrapCamera.backgroundColor=bootstrapCameraColor; }
             if (root?.SaveService != null) root.SaveService.CanonicalRuntimePublished -= CanonicalPublished;
         }

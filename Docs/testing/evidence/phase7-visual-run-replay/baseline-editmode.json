@@ -1,0 +1,20 @@
+{
+  "removed": [],
+  "added": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.ActualEngineUnreachableInteractionsAndWipeNeverInventReach(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.ActualEngineUnreachableInteractionsAndWipeNeverInventReach(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.CompletedPublicationProjectsActualStepsAndDoesNotWriteOrResolveAgain",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.EvidenceRetainsThroughOrdinaryPublicationAndLimitsRejectWithoutEffects",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.MissingRestartAndHistoricalLayoutsFailClosed(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.MissingRestartAndHistoricalLayoutsFailClosed(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.PlaybackLifecycleAndPartitioningAreDeterministic",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.ProjectionUsesCanonicalTransformForRepositionedRotatedRoom(Ninety)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.ProjectionUsesCanonicalTransformForRepositionedRotatedRoom(OneEighty)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.ProjectionUsesCanonicalTransformForRepositionedRotatedRoom(TwoSeventy)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.ProjectionUsesCanonicalTransformForRepositionedRotatedRoom(Zero)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.TwoFloorConnectionsAndBranchReturnsFollowOriginalOrdinalStream(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.VisualRunReplay.TwoFloorConnectionsAndBranchReturnsFollowOriginalOrdinalStream(True)"
+  ],
+  "changed": []
+}

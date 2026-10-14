@@ -1,0 +1,16 @@
+Log: 1 URP assets included in build
+- UniversalRP - Assets/Settings/UniversalRP.asset
+	 - Renderer2D - Assets/Settings/Renderer2D.asset - UnityEngine.Rendering.Universal.Renderer2DData
+
+Log: Including Unity Splash Screen logo because 'Show Unity Logo' is enabled.
+Warning: Exception occurred attempting to connect to Unity services. Native symbols will not be uploaded for this build. Exception details:
+System.UriFormatException: Invalid URI: The URI is empty.
+  at System.Uri.CreateThis (System.String uri, System.Boolean dontEscape, System.UriKind uriKind) [0x0007b] in <cfa413e048c04da594d277ab945af8a8>:0 
+  at System.Uri..ctor (System.String uriString) [0x00014] in <cfa413e048c04da594d277ab945af8a8>:0 
+  at System.Net.WebRequest.Create (System.String requestUriString) [0x0000e] in <cfa413e048c04da594d277ab945af8a8>:0 
+  at UnityEditor.CrashReporting.CrashReporting.GetUsymUploadAuthToken () [0x000a9] in <d9024bdc2a414b3c81b047ea3e343594>:0 
+  at System.Uri.CreateThis (System.String uri, System.Boolean dontEscape, System.UriKind uriKind) [0x0007b] in <cfa413e048c04da594d277ab945af8a8>:0 
+  at System.Uri..ctor (System.String uriString) [0x00014] in <cfa413e048c04da594d277ab945af8a8>:0 
+  at System.Net.WebRequest.Create (System.String requestUriString) [0x0000e] in <cfa413e048c04da594d277ab945af8a8>:0 
+  at UnityEditor.CrashReporting.CrashReporting.GetUsymUploadAuthToken () [0x000a9] in <d9024bdc2a414b3c81b047ea3e343594>:0 
+Log: Stripping Runtime Debug Shader Variants, you won't be able to use some features of Rendering Debugger in the Player Build.

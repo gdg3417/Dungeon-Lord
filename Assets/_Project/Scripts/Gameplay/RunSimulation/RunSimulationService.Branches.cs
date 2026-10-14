@@ -22,7 +22,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             }
             else sequence = Math.Max(1, candidate.runHistory.NextRunSequence);
             var execution = StartSnapshot(sequence, snapshot);
-            var outcome = execution.DrainToCompletion();
+            var outcome = execution.DrainToCompletion(retainPresentationSteps: true);
             BranchTraversal traversal = execution.Traversal;
             if (outcome.RunHeatApplicationSummary?.RuleResolved == true)
                 candidate.structureRuntime.Heat = outcome.RunHeatApplicationSummary.HeatAfter;

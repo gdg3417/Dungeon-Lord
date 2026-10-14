@@ -556,20 +556,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
             const string overlayPath = "Assets/_Project/Scripts/UI/BootstrapOverlay.cs";
             const string productionUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonController.cs";
             const string constructionUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs";
+            const string replayUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonReplay.cs";
             string[] consumers = Directory.GetFiles("Assets/_Project/Scripts", "*.cs", SearchOption.AllDirectories)
                 .Where(path => Regex.IsMatch(File.ReadAllText(path), @"\.ProductionSpatialContent\b"))
                 .Select(path => path.Replace('\\', '/'))
                 .ToArray();
-            // Construction is a partial of the already approved production controller,
+            // Construction and replay are partials of the already approved production controller,
             // not another runtime publisher or composition root.
-            CollectionAssert.AreEquivalent(new[] { compositionPath, overlayPath, productionUiPath, constructionUiPath }, consumers);
-            foreach (string path in new[] { productionUiPath, constructionUiPath })
+            CollectionAssert.AreEquivalent(new[] { compositionPath, overlayPath, productionUiPath, constructionUiPath, replayUiPath }, consumers);
+            foreach (string path in new[] { productionUiPath, constructionUiPath, replayUiPath })
             {
                 string productionUi = File.ReadAllText(path);
                 Assert.That(productionUi, Does.Contain("sealed partial class ProductionDungeonController"));
                 Assert.That(productionUi, Does.Not.Contain("LoadProductionSpatialContent("));
                 Assert.That(productionUi, Does.Not.Contain("ConfigureCanonical("));
             }
+            Assert.That(File.ReadAllText(replayUiPath), Does.Not.Contain("SaveService."), "Replay cannot invoke gameplay persistence");
             string composition = File.ReadAllText(compositionPath);
             Assert.That(Regex.IsMatch(composition,
                 @"Content\.LoadSpatialLayoutCompatibilityProfiles[\s\S]{0,200}Content\.ProductionSpatialContent"),
