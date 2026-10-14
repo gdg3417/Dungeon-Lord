@@ -37,6 +37,8 @@ namespace DungeonBuilder.M0.EditorTools
             => BuildWindowsAt("Builds/Development/Windows-visual-run-replay/Dungeon Lord.exe");
         public static void BuildVisualRunFeedbackWindows()
             => BuildWindowsAt("Builds/Development/Windows-visual-run-feedback/Dungeon Lord.exe");
+        public static void BuildCombatC0PrerequisiteWindows()
+            => BuildWindowsAt("Builds/Development/Windows-combat-c0-prerequisite/Dungeon Lord.exe");
         private static void BuildWindowsAt(string outputPath)
         {
             DevelopmentBuildUtility.BuildDevelopment(BuildTarget.StandaloneWindows64, outputPath);
