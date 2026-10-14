@@ -274,6 +274,7 @@ namespace DungeonBuilder.M0
 [Serializable]
     public sealed class RunSimulationConfig
     {
+        [NonSerialized] internal Gameplay.RunSimulation.CombatC0Config CombatC0;
         public Gameplay.RunSimulation.PhaseFiveBConfig PhaseFiveB;
         public Gameplay.RunSimulation.PhaseSixRunConfig PhaseSix;
         public double BaseSuccessChance;
@@ -490,6 +491,10 @@ namespace DungeonBuilder.M0
     [Serializable]
     public sealed class RunOutcomeRecord
     {
+        [field: NonSerialized] internal Gameplay.RunSimulation.CombatC0Event[] CombatEvents { get; set; }
+        [field: NonSerialized] internal Gameplay.RunSimulation.CombatC0MonsterState[] CombatMonsters { get; set; }
+        [field: NonSerialized] internal string CombatExecutable { get; set; }
+        [field: NonSerialized] internal long CombatWork { get; set; }
         // Properties are transient: Unity and the strict public-field save contract omit them.
         public Gameplay.RunSimulation.RunParty Party { get; internal set; }
         public Gameplay.RunSimulation.RunEncounterEvent[] EncounterEvents { get; internal set; }

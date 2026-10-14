@@ -1,3 +1,25 @@
+# Combat C0 approved implementation contract
+
+Status: Owner-approved initial MVP/playtest configuration. Production integration implemented on PR #238; final automated qualification and external review are recorded separately. This approval does not qualify permanent balance or C1/C2.
+
+## 2026-10-14 approval and production implementation
+
+The owner directly approved all seven external-review Option A recommendations, including their future-development clarifications, in the PR #238 continuation request. The original October 14 design lock remains authoritative with its dated approval addendum. The historical proposal below records the pre-approval state and is superseded for C0 by this section.
+
+Production bootstrap configuration now enables `run.executable.combat-c0.v1` / `run.combat.c0.basic.v1`, using exactly P1 values and the approved initiative, targeting, party anchor, grouping, Manhattan/supercover and fail-closed policies listed below. Adventurer HP remains solely in Phase 5B. Goblins and Skeletons remain melee; injected ranged defender profiles test the same adapter without new species. The limits are 32 rounds, 64 run participants, 30 encounters, 32,768 events and 1,000,000 charged work units. Every enabled field is required, typed and validated. Absent/disabled selects B1; malformed enabled config cannot create a gameplay service.
+
+One source of authoring authority remains `Assets/_Project/Data/Bootstrap/run_simulation_config.json`. A separate strict parser attaches its optional C0 DTO to a `[NonSerialized] internal` configuration member. Unity JSON therefore retains the exact historical B1 representation. Snapshots capture immutable C0 profiles and confirmed canonical gross room boundaries separately; neither is added to checkpoint encoding. `StartManualSnapshot` selects C0; `StartSnapshot` and `StartRoute` retain actual B1 code and serialized inputs for restoration and B2. C0 has no durable start capture and explicitly refuses checkpoint export.
+
+The existing loot/egress path and trap scheduling remain authoritative. At each route anchor, the geometry adapter computes distinct legal melee positions and directed range/LOS eligibility. All eligible defenders share deterministic rounds; later groups use unique encounter ordinals and the same run-local HP. A complete encounter is one untimed run boundary with its ordered immutable action evidence attached. Any stalemate or exhausted round/event/work/encounter limit throws before publication; the existing detached transaction discards all staged run effects. No extra death reward, save authority or serialized runtime state is added.
+
+`CombatC0Diagnostics.Events/Monsters/ChargedWork` provides read-only completed-run inspection. Existing development run diagnostics display the chronological records with localization-backed labels/reasons. Events carry executable/rule/run/floor/room/encounter IDs, combat and run-boundary ordinals, round/action, actor/target/attack/targeting IDs, positions, HP/damage/defeat and explicit eligibility/completion/bypass reasons. Historical B1 replay remains supported; C0 explains its diagnostic availability instead of attempting the old one-sided animation.
+
+Known limitations: shared party anchor, fixed attacks, immutable encounter positions, no production interior opacity content, no combat animation, no durable C0 checkpoint or detailed replay after reopen. Existing room-clear and retreat thresholds remain active outside combat. Empty rooms and ineligible monsters do not create death rewards. Future balance changes belong to versioned configuration and testing; aggro, individual formation, spells, equipment, healing and disengagement remain deferred. C1 consumes evidence for presentation; C2 requires separate save/recovery/reserve approval.
+
+Final review, exact source/test/build evidence and owner UAT status belong in `Docs/testing/evidence/combat-c0/integration/`. Earlier qualification applies only to the historical prerequisite kernel and is not evidence for this integrated runtime.
+
+## Historical pre-approval proposal (preserved record)
+
 # Combat C0 prerequisite and owner review packet
 
 Status: **Proposed, unapproved; production integration blocked. Not merge-ready.**

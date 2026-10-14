@@ -5,8 +5,8 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Gameplay.RunSimulation
 {
-    // Deliberately internal and injection-only. No production loader/default/activation flag.
-    // These proposed semantics are executable test prerequisites, pending owner review.
+    // Immutable run capture. Historical qualification uses its separate test identity;
+    // the validated optional production section supplies all approved C0 values.
     internal sealed class CombatC0AttackProfile
     {
         internal string Id { get; }
@@ -14,12 +14,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal int Damage { get; }
         internal int Initiative { get; }
         internal int MonsterHealth { get; }
+        internal string AttackType { get; }
+        internal int? Range { get; }
         internal IReadOnlyList<string> TargetClassOrder { get; }
         internal CombatC0AttackProfile(string id, string attackId, int damage, int initiative,
-            int monsterHealth, string[] targetClassOrder)
+            int monsterHealth, string[] targetClassOrder, string attackType = null, int? range = null)
         {
             Id = id; AttackId = attackId; Damage = damage; Initiative = initiative;
             MonsterHealth = monsterHealth;
+            AttackType = attackType; Range = range;
             TargetClassOrder = targetClassOrder == null ? null : Array.AsReadOnly((string[])targetClassOrder.Clone());
         }
     }
@@ -30,7 +33,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal const string Invalid = "combat.c0.invalid_configuration";
         internal const string Targeting = "combat.c0.qualification.class_priority.v1";
         internal const string InitiativeOrder = "combat.c0.qualification.initiative_descending_party_first.v1";
-        internal string RulesId => Rules;
+        internal string RulesId { get; }
+        internal string TargetingId { get; }
+        internal bool IsProduction => RulesId == CombatC0Config.Executable;
         internal int MaximumRounds { get; }
         internal int MaximumParticipants { get; }
         internal int MaximumEncounters { get; }
@@ -43,7 +48,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             int maximumRounds, int maximumParticipants, int maximumEncounters, int maximumEvents,
             long maximumWork, CombatC0AttackProfile[] classes, CombatC0AttackProfile[] monsters)
         {
-            if (rulesId != Rules || targetingId != Targeting || initiativeId != InitiativeOrder ||
+            bool production = rulesId == CombatC0Config.Executable;
+            if ((production ? targetingId != CombatC0Config.TargetPolicy || initiativeId != CombatC0Config.InitiativePolicy :
+                rulesId != Rules || targetingId != Targeting || initiativeId != InitiativeOrder) ||
                 maximumRounds <= 0 || maximumParticipants <= 0 || maximumEncounters <= 0 ||
                 maximumEvents <= 0 || maximumWork <= 0 || classes == null || monsters == null)
                 throw new ArgumentException(Invalid);
@@ -52,6 +59,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             string[] expectedMonsters = { MvpDungeonPlacementIds.GoblinOptionId, MvpDungeonPlacementIds.SkeletonOptionId };
             Validate(classes, expectedClasses, false, expectedClasses);
             Validate(monsters, expectedMonsters, true, expectedClasses);
+            if (production && classes.Concat(monsters).Any(p =>
+                p.AttackType == CombatC0Config.Melee ? p.Range != 1 : p.AttackType != CombatC0Config.Ranged || !p.Range.HasValue || p.Range <= 0))
+                throw new ArgumentException(Invalid);
+            RulesId = rulesId; TargetingId = targetingId;
             MaximumRounds = maximumRounds; MaximumParticipants = maximumParticipants;
             MaximumEncounters = maximumEncounters; MaximumEvents = maximumEvents; MaximumWork = maximumWork;
             // Profiles and nested priorities are immutable; own collection order too.

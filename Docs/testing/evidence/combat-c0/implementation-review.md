@@ -1,3 +1,9 @@
+# Combat C0 review status
+
+The owner-approved PR #238 continuation supersedes the pre-approval gaps in the historical record below. Production manual C0, real geometry, encounter-level identities, immutable optional configuration and atomic failure integration are now implemented. Current review and qualification are under `integration/`; the earlier reports remain prerequisite evidence only. No C1/C2 work is included.
+
+## Historical prerequisite review at c0dba584
+
 # C0 prerequisite review and acceptance gaps
 
 This branch is a draft prerequisite, **not completed Combat C0 and not merge-ready**. Production/manual callers remain B1. The [owner review packet](../../../planning/combat-c0-implementation-and-tuning-proposal.md) records every proposed value and technical decision; no production approval is inferred.

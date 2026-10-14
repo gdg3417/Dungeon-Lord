@@ -109,6 +109,7 @@ namespace DungeonBuilder.M0
             out DungeonRunReplay replay, out string reason)
         {
             replay = null; reason = Missing;
+            if (CombatC0Diagnostics.IsCombatC0(outcome)) { reason = "ui.dungeon.replay.combat_c0"; return false; }
             var steps = outcome?.PresentationSteps;
             if (steps == null || steps.Length == 0 || steps.Length > policy.MaximumReplaySteps ||
                 outcome.Party == null || policy.ReplayMovementSeconds <= 0 || policy.ReplayInteractionSeconds <= 0 ||

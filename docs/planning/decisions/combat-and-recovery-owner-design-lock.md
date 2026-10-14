@@ -110,6 +110,20 @@ The implemented B1 checkpoint/reconstruction behavior and B2 dormant persistence
 
 This lock does not select combat formulas, HP or damage values, initiative values, range/duration, LOS geometry data, exact legal capacity, tie-break encoding, encounter start/end conditions, round limit, recovery price, readiness threshold, recovery amount/order details beyond functional-readiness-first stable ordering, rounding representation, protected-obligation formula/data fields, save schema, migration, event encoding, or performance limits. Each requires the named owner/configuration/save review before implementation. Existing approved values and formulas remain owned by their current authorities.
 
+### Approval addendum — 2026-10-14, PR #238 continuation
+
+The owner's direct continuation instruction approves all seven external-review Option A recommendations and their future-development clarifications for initial C0 MVP/playtesting. This closes C0's production tuning and technical-policy gates; it does not rewrite the preceding historical record or approve recovery, persistence, C1 presentation, C2, automatic activation or a C0 durable checkpoint.
+
+Approved basic attacks are fixed integers. Damage/initiative/range: Warrior 2/30/melee 1, Rogue 3/50/melee 1, Ranger 2/40/ranged 4, Cleric 1/10/melee 1, Mage 3/20/ranged 4, Goblin 1/35/melee 1, Skeleton 2/25/melee 1. Goblin HP is 8 and Skeleton HP 10; adventurer HP remains Phase 5B-owned. These numbers remain configuration-owned initial playtest tuning.
+
+Initiative descends, then adventurers before monsters, numeric MemberOrdinal, canonical numeric Sequence, ordinal AssignmentId. Monster target class priority is Warrior, Rogue, Ranger, Cleric, Mage, then MemberOrdinal; adventurers select legal living defenders by Sequence/AssignmentId. The shared party anchor follows the canonical path. Melee defenders select distinct reachable four-neighbour adjacent positions in canonical order with distance/coordinate ties; blocked geometry and living defenders cannot be crossed. Deterministic conflict resolution may move a defender off the party anchor; an unresolved conflict prohibits attack.
+
+Range is Manhattan; visibility uses integer tile-centre supercover with solid corner touches blocking. Friendly participants are transparent. Production uses confirmed room boundaries; reserved/nontraversable/occupied cells do not imply opacity. Interior walls are synthetic test fixtures only, with no new production opacity authoring schema.
+
+Pause at the earliest eligible route step and group all currently eligible defenders. Later groups may occur in the same room; retain monster HP and encounter-level duplicate protection. Preserve monster/trap/loot ordering, actual party HP, existing retreat/continuation and singular settlement. A no-HP-change full round or exceeded technical limit fails the complete detached manual transaction without partial publication.
+
+Approved config-owned limits: 32 rounds/encounter, 64 participants/run, 30 encounters/run, 32,768 combat events/run, 1,000,000 charged work units/run including geometry. The optional enabled/versioned `CombatC0` bootstrap section and proposed policy IDs are approved consistently with the [implementation contract](../../../Docs/planning/combat-c0-implementation-and-tuning-proposal.md). Absent/disabled remains B1; invalid enabled configuration fails closed. B2 remains on its qualified B1 executable. Numerical balancing and later formations, aggro, opacity content, spells, disengagement and timed combat remain future work.
+
 ## 9. Acceptance criteria
 
 ### Automated

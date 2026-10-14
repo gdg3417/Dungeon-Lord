@@ -43,6 +43,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 run.PresentationSteps = match.PresentationSteps;
                 run.PresentationLayoutFingerprint = match.PresentationLayoutFingerprint;
                 run.PresentationCorridorFingerprint = match.PresentationCorridorFingerprint;
+                run.CombatEvents = match.CombatEvents; run.CombatMonsters = match.CombatMonsters;
+                run.CombatExecutable = match.CombatExecutable; run.CombatWork = match.CombatWork;
             }
         }
     }

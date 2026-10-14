@@ -69,6 +69,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private readonly string knowledge;
         private readonly string floorKnowledge;
         private readonly string initialRuntime;
+        internal CombatC0QualificationConfig CombatRules { get; private set; }
+        internal CombatC0RoomBounds[] CombatBounds { get; private set; }
         public long TickStarted { get; }
         public string PostureId { get; }
         public DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState InitialRuntime =>
@@ -159,7 +161,18 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             }
             if (floors.Sum(f => f.MaterializePlan().Forks.Length) > config.PhaseFiveB.BranchDecision.MaximumDecisionsPerRun)
                 throw new ArgumentException(BranchRunWorkload.WorkloadExceeded);
-            return new ActiveFloorRunSnapshot(floors.ToArray(), config, lootConfig, lootTableId, owned.BranchKnowledge, owned.FloorKnowledge, executionInputs, postureId);
+            var snapshot = new ActiveFloorRunSnapshot(floors.ToArray(), config, lootConfig, lootTableId, owned.BranchKnowledge, owned.FloorKnowledge, executionInputs, postureId);
+            snapshot.CombatRules = config.CombatC0?.Capture();
+            if (snapshot.CombatRules != null)
+            {
+                var catalog = production.Catalog;
+                snapshot.CombatBounds = floors.SelectMany(f => f.MaterializePlan().RequiredRooms.Select(r => {
+                    var spatial = r.Room.Spatial;
+                    var shape = catalog.Rooms.Single(d => d.RoomDefinitionId == spatial.RoomDefinitionId).GrossFootprint;
+                    return new CombatC0RoomBounds(spatial.FloorInstanceId, spatial.RoomInstanceId, shape.Width, shape.Height);
+                })).ToArray();
+            }
+            return snapshot;
         }
     }
 }

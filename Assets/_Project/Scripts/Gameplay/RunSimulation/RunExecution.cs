@@ -53,6 +53,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         // Resolver evidence is already read-only to callers; includes exact HP/death causality.
         public RunEncounterEvent Encounter { get; }
         internal bool IsAnnouncement { get; }
+        internal IReadOnlyList<CombatC0Event> CombatEvents { get; }
         internal static RunStep Before(RunStepKind kind, int distance = 0) =>
             new RunStep(kind, -1, null, distance: distance, announcement: true);
         internal static IEnumerable<RunStep> Pure(RunStep step)
@@ -60,13 +61,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal RunStep(RunStepKind kind, int floor, string room, string assignment = null,
             TileCoordinate position = default, int distance = 0, RunEncounterEvent encounter = null,
             string run = null, long ordinal = 0, long time = 0, RunPositionSpace space = RunPositionSpace.None,
-            bool? continueChosen = null, int carriedLootValue = 0, bool announcement = false)
+            bool? continueChosen = null, int carriedLootValue = 0, bool announcement = false,
+            IReadOnlyList<CombatC0Event> combatEvents = null)
         { Kind = kind; FloorIndex = floor; RoomId = room; AssignmentId = assignment;
           Position = position; Distance = distance; Encounter = encounter; RunId = run; Ordinal = ordinal; LogicalTime = time;
-          PositionSpace = space; ContinueChosen = continueChosen; CarriedLootValueAfter = carriedLootValue; IsAnnouncement = announcement; }
+          PositionSpace = space; ContinueChosen = continueChosen; CarriedLootValueAfter = carriedLootValue; IsAnnouncement = announcement; CombatEvents = combatEvents; }
         internal RunStep Stamp(string run, long ordinal, long time, int carriedLootValue) =>
             new RunStep(Kind, FloorIndex, RoomId, AssignmentId, Position, Distance, Encounter, run, ordinal, time,
-                PositionSpace, ContinueChosen, carriedLootValue);
+                PositionSpace, ContinueChosen, carriedLootValue, combatEvents: CombatEvents);
     }
 
     public readonly struct RunMemberState
@@ -111,6 +113,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal byte[] PrefixDigest;
         public string StartIdentity => StartInputs == null ? null : RunCheckpointCodec.Identity(StartInputs);
         internal RunParty Party { get; }
+        internal CombatC0ExecutionState Combat;
         internal RunOutcomeRecord Outcome;
         internal RunSimulationService.BranchTraversal Traversal;
         internal ActiveFloorRunSnapshot Snapshot;
@@ -184,7 +187,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     // Ordinal advancement explicitly authorizes this committed prefix too.
                     if (!deadline.HasValue && acceptedDeadline >= 0) acceptedDeadline = Math.Max(acceptedDeadline, logicalTime);
                     last = step.Stamp(Party.RunId, ordinal++, logicalTime, CarriedLootValue);
+                    if (step.CombatEvents != null) Combat.Record(step.CombatEvents, last.Value.Ordinal);
                     if (step.Encounter != null) encounters++;
+                    if (step.CombatEvents != null && step.CombatEvents.Any(e => e.Kind == CombatC0EventKind.EncounterStart)) encounters++;
                     if (step.Kind == RunStepKind.LootInteraction) lootInteractions++;
                     batch?.Add(last.Value); processed++;
                     if (step.Kind == RunStepKind.Terminal)
@@ -222,10 +227,12 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public RunOutcomeRecord TakeOutcome()
         {
             if (!IsTerminal || taken || failure != null) throw new InvalidOperationException("run.execution.outcome_unavailable");
+            Combat?.Finish(Outcome);
             taken = true; return Outcome;
         }
         public RunCheckpoint ExportCheckpoint(RunCheckpointLimits limits)
         {
+            if (Combat != null) throw new InvalidOperationException("combat.c0.checkpoint_contract_unapproved");
             if (failure != null || advancing || StartInputs == null)
                 throw new InvalidOperationException("run.checkpoint.unavailable");
             return RunCheckpointCodec.Export(this, acceptedDeadline, taken, PrefixDigest, limits);

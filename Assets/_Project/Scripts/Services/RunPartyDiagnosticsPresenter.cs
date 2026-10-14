@@ -34,7 +34,11 @@ namespace DungeonBuilder.M0
             var transitions = (outcome.FloorTransitions ?? Array.Empty<Gameplay.RunSimulation.FloorTransitionEvidence>())
                 .Select(t => string.Format(localize("ui.run.floor.transition_format", "ui.run.floor.transition_format"),
                     t.CurrentFloorInstanceId, t.NextFloorInstanceId, localize(t.Reason, t.Reason)));
-            return string.Join("\n", members.Concat(events).Concat(branches).Concat(transitions));
+            var combat = Gameplay.RunSimulation.CombatC0Diagnostics.Events(outcome).Select(e => string.Format(
+                localize("ui.run.combat.event_format", "ui.run.combat.event_format"), e.Ordinal, e.RunOrdinal,
+                e.EncounterId, e.Round, e.Kind, localize("combat.c0.reason." + e.Reason, "combat.c0.reason." + e.Reason),
+                e.ActorId, e.TargetId, e.HealthBefore, e.HealthAfter, e.Damage, e.SourcePosition, e.TargetPosition));
+            return string.Join("\n", members.Concat(events).Concat(branches).Concat(transitions).Concat(combat));
         }
     }
 }

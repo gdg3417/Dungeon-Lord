@@ -7,7 +7,7 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 namespace DungeonBuilder.M0.Gameplay.RunSimulation
 {
     // Isolated bounded reciprocal kernel, not an alternate route/settlement simulator.
-    // No production caller exists while the implementation-contract gate is open.
+    // Production uses the approved C0 identity; historical B1 never calls this kernel.
     internal sealed class CombatC0Kernel
     {
         internal const string InvalidState = "combat.c0.invalid_state";
@@ -15,8 +15,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private readonly CombatC0QualificationConfig config;
         private readonly RunParty party;
         private readonly Actor[] members, monsters;
-        private readonly Dictionary<(string, string), CombatC0EncounterResult> completed = new Dictionary<(string, string), CombatC0EncounterResult>();
-        private readonly Dictionary<(string, string), CombatC0AttackLink[]> completedLinks = new Dictionary<(string, string), CombatC0AttackLink[]>();
+        private readonly Dictionary<string, Actor> monstersByAssignment;
+        private readonly Dictionary<string, CombatC0AttackProfile> classProfiles;
+        private readonly Dictionary<(string, string, int), CombatC0EncounterResult> completed = new Dictionary<(string, string, int), CombatC0EncounterResult>();
+        private readonly Dictionary<(string, string, int), CombatC0AttackLink[]> completedLinks = new Dictionary<(string, string, int), CombatC0AttackLink[]>();
         private int eventCount;
         private long workCount;
         private bool resolving;
@@ -33,9 +35,21 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal string RulesId => config.RulesId;
         internal int EventCount => eventCount;
         internal long WorkCount => workCount;
+        internal CombatC0QualificationConfig Configuration => config;
+        internal int CompletedCount => completed.Count;
+        internal RunParty Party => party;
+        internal void ChargeGeometry(long units)
+        {
+            if (units < 0 || units > config.MaximumWork - workCount) throw new InvalidOperationException(Workload);
+            workCount += units;
+        }
+        internal CombatC0AttackProfile MonsterProfile(string assignment) => monstersByAssignment[assignment].Profile;
+        internal CombatC0AttackProfile MemberProfile(string classId) => classProfiles[classId];
+        internal CombatC0MonsterState[] InspectMonsters() => monsters.Select(m => new CombatC0MonsterState(
+            m.Placement, m.Profile.MonsterHealth, m.Health)).ToArray();
         internal static string MemberId(RunParty party, int ordinal) => party.RunId + "/member/" + ordinal.ToString(CultureInfo.InvariantCulture);
         internal static string MonsterId(RunParty party, string assignment) => party.RunId + "/monster/" + assignment;
-        internal int MonsterHealth(string assignment) => monsters.Single(m => m.Placement.AssignmentId == assignment).Health;
+        internal int MonsterHealth(string assignment) => monstersByAssignment[assignment].Health;
 
         internal CombatC0Kernel(RunParty party, CombatC0QualificationConfig config, CombatC0MonsterPlacement[] placements)
         {
@@ -56,6 +70,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 return new Actor { Id = MonsterId(party, p.AssignmentId), Order = p.Sequence, Placement = p, Profile = profile,
                     Health = profile.MonsterHealth };
             }).ToArray();
+            monstersByAssignment = monsters.ToDictionary(m => m.Placement.AssignmentId, StringComparer.Ordinal);
+            classProfiles = config.Classes.ToDictionary(c => c.Id, StringComparer.Ordinal);
+            if (config.IsProduction) ChargeGeometry(checked((long)placements.Length * placements.Length +
+                (long)members.Length * members.Length + placements.Length + members.Length));
         }
         private void ValidateParty()
         {
@@ -64,14 +82,18 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 party.Members.Select(m => m.MemberOrdinal).Distinct().Count() != party.Members.Count) throw new ArgumentException(InvalidState);
         }
 
-        // Per-room receipt prevents repeated path intersections from repeating combat.
+        // Legacy qualification callers use encounter zero per room. Production supplies
+        // a run-global ordinal, so multiple distinct encounters in a room retain HP.
         // All work is staged; invalid state or exhausted evidence/work budgets publish no HP.
         internal CombatC0EncounterResult Resolve(string floor, string room, string[] assignments, CombatC0AttackLink[] links)
+            => Resolve(floor, room, 0, assignments, links);
+        internal CombatC0EncounterResult Resolve(string floor, string room, int encounterOrdinal, string[] assignments, CombatC0AttackLink[] links)
         {
             if (resolving) throw new InvalidOperationException(InvalidState);
-            if (string.IsNullOrWhiteSpace(floor) || string.IsNullOrWhiteSpace(room) || assignments == null || links == null)
+            if (string.IsNullOrWhiteSpace(floor) || string.IsNullOrWhiteSpace(room) || encounterOrdinal < 0 || assignments == null || links == null)
                 throw new ArgumentException(InvalidState);
-            bool repeated = completed.TryGetValue((floor, room), out var receipt);
+            var key = (floor, room, encounterOrdinal);
+            bool repeated = completed.TryGetValue(key, out var receipt);
             if (!repeated && completed.Count >= config.MaximumEncounters) throw new InvalidOperationException(Workload);
             ValidateParty();
             if (assignments.Length > monsters.Length || assignments.Distinct(StringComparer.Ordinal).Count() != assignments.Length)
@@ -89,7 +111,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 if (link == null || link.ActorId == null || link.TargetId == null ||
                     !byId.TryGetValue(link.ActorId, out var actor) || !byId.TryGetValue(link.TargetId, out var target) ||
-                    actor.IsMonster == target.IsMonster || link.Reason < CombatC0Reason.Legal || link.Reason > CombatC0Reason.Unreachable ||
+                    actor.IsMonster == target.IsMonster || link.Reason < CombatC0Reason.Legal ||
+                    (link.Reason > CombatC0Reason.Unreachable && link.Reason != CombatC0Reason.PartyAnchorConflict) ||
                     matrix.ContainsKey((link.ActorId, link.TargetId))) throw new ArgumentException(InvalidState);
                 matrix.Add((link.ActorId, link.TargetId), link);
                 CheckPosition(positions, link.ActorId, link.Source); CheckPosition(positions, link.TargetId, link.Target);
@@ -97,7 +120,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             var canonicalLinks = links.OrderBy(l => l.ActorId, StringComparer.Ordinal).ThenBy(l => l.TargetId, StringComparer.Ordinal).ToArray();
             if (repeated)
             {
-                var previous = completedLinks[(floor, room)];
+                var previous = completedLinks[key];
                 if (previous.Length != canonicalLinks.Length || previous.Where((p, i) => p.ActorId != canonicalLinks[i].ActorId ||
                     p.TargetId != canonicalLinks[i].TargetId || !p.Source.Equals(canonicalLinks[i].Source) ||
                     !p.Target.Equals(canonicalLinks[i].Target) || p.Reason != canonicalLinks[i].Reason).Any())
@@ -107,8 +130,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             resolving = true;
             try
             {
-                var result = ResolveStaged(floor, room, actors, matrix, positions);
-                completedLinks.Add((floor, room), canonicalLinks);
+                var result = ResolveStaged(floor, room, encounterOrdinal, actors, matrix, positions);
+                completedLinks.Add(key, canonicalLinks);
                 return result;
             }
             finally { resolving = false; }
@@ -119,12 +142,16 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             positions[id] = tile;
         }
 
-        private CombatC0EncounterResult ResolveStaged(string floor, string room, Actor[] actors,
+        private CombatC0EncounterResult ResolveStaged(string floor, string room, int encounterOrdinal, Actor[] actors,
             Dictionary<(string, string), CombatC0AttackLink> links, Dictionary<string, TileCoordinate> positions)
         {
             long work = workCount;
             void Charge(long amount) { work = checked(work + amount); if (work > config.MaximumWork) throw new InvalidOperationException(Workload); }
             Charge(checked(actors.LongLength + links.Count));
+            // Conservative charges for validation, canonical pair sorting, actor lookups
+            // and target-order construction. Existing qualification counters stay historical.
+            if (config.IsProduction) Charge(checked(actors.LongLength * actors.LongLength * actors.LongLength +
+                (long)links.Count * links.Count + (long)links.Count * actors.Length));
             var health = actors.ToDictionary(a => a.Id, a => a.IsMonster ? a.Health : a.Member.CurrentHealth, StringComparer.Ordinal);
             var initial = new Dictionary<string, int>(health, StringComparer.Ordinal);
             string encounter = party.RunId + "/combat/" + completed.Count.ToString(CultureInfo.InvariantCulture);
@@ -137,7 +164,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     kind == CombatC0EventKind.Attack || kind == CombatC0EventKind.Skipped ? actionOrdinal++ : -1,
                     round, floor, room, kind, reason, actor?.Id, target?.Id, actor?.Profile.AttackId,
                     actor != null && positions.TryGetValue(actor.Id, out var source) ? source : (TileCoordinate?)null,
-                    target != null && positions.TryGetValue(target.Id, out var destination) ? destination : (TileCoordinate?)null, before, after));
+                    target != null && positions.TryGetValue(target.Id, out var destination) ? destination : (TileCoordinate?)null, before, after,
+                    executable: config.RulesId, targeting: config.TargetingId));
             }
             Emit(CombatC0EventKind.EncounterStart, CombatC0Reason.Legal, 0);
             foreach (var link in links.Values.OrderBy(l => l.ActorId, StringComparer.Ordinal).ThenBy(l => l.TargetId, StringComparer.Ordinal))
@@ -180,6 +208,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (!completion.HasValue && !damaged) completion = CombatC0Reason.ZeroDamageRound;
             }
             if (!completion.HasValue) completion = CombatC0Reason.RoundLimit;
+            if (config.IsProduction && (completion == CombatC0Reason.ZeroDamageRound || completion == CombatC0Reason.RoundLimit))
+                throw new InvalidOperationException(completion == CombatC0Reason.ZeroDamageRound ? "combat.c0.stalemate" : "combat.c0.round_limit");
             Emit(CombatC0EventKind.EncounterComplete, completion.Value, round);
             var result = new CombatC0EncounterResult(completion.Value, events.ToArray());
             // No skills/healing, so stage -> existing party damage authority is exact.
@@ -187,8 +217,16 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (actor.IsMonster) actor.Health = health[actor.Id];
                 else actor.Member.ApplyDamage(initial[actor.Id] - health[actor.Id]);
             eventCount = checked(eventCount + events.Count); workCount = work;
-            completed.Add((floor, room), result);
+            completed.Add((floor, room, encounterOrdinal), result);
             return result;
+        }
+        internal CombatC0Event RecordBypass(string floor, string room, string assignment, CombatC0AttackLink link)
+        {
+            if (eventCount >= config.MaximumEvents) throw new InvalidOperationException(Workload);
+            ChargeGeometry(1);
+            return new CombatC0Event(party.RunId, null, eventCount++, -1, 0, floor, room, CombatC0EventKind.Bypass,
+                link.Reason, link.ActorId, link.TargetId, MonsterProfile(assignment).AttackId, link.Source, link.Target,
+                executable: config.RulesId, targeting: config.TargetingId);
         }
         private static int ClassRank(IReadOnlyList<string> order, string classId)
         { for (int i = 0; i < order.Count; i++) if (order[i] == classId) return i; throw new ArgumentException(InvalidState); }

@@ -46,12 +46,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal TileCoordinate[] Path;
         internal ScheduledSpatialInteraction[] Interactions;
 
-        internal static IntraroomTraversal Plan(MvpOrderedRouteRoom room)
+        internal static IntraroomTraversal Plan(MvpOrderedRouteRoom room, bool includeHistoricalMonsters = true, Action<long> charge = null)
         {
             var spatial = room.Spatial;
             if (spatial == null || spatial.Assignments == null) IntraroomSnapshot.Invalid();
-            var paths = new DeterministicRoomPaths(spatial.TraversableTiles, spatial.MaximumMaterializedTiles);
+            var paths = new DeterministicRoomPaths(spatial.TraversableTiles, spatial.MaximumMaterializedTiles, charge);
             var assignments = room.OrderedAssignments();
+            // Charge validation/sorting/footprint membership conservatively by cardinality.
+            charge?.Invoke(checked((long)assignments.Length * assignments.Length + spatial.TraversableTiles.LongLength +
+                spatial.Assignments.Sum(a => (long)(a.OccupiedTiles?.Length ?? 0)) * spatial.TraversableTiles.LongLength));
             if (assignments.Length != spatial.Assignments.Length ||
                 spatial.Assignments.Select(a => a.AssignmentId).Distinct(StringComparer.Ordinal).Count() != assignments.Length)
                 IntraroomSnapshot.Invalid();
@@ -73,6 +76,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (!paths.TryShortest(path[path.Count - 1], new[] { spatial.Egress }, out var exit))
                 IntraroomSnapshot.Invalid();
             path.AddRange(exit.Skip(1));
+            charge?.Invoke(path.Count);
             // One BFS per monster, then scan the planned path for minimum distance / earliest step.
             // Duplicate route cells keep their earliest step. No per-step path searches/allocations.
             foreach (var a in assignments.Where(a => a.CategoryId != MvpDungeonPlacementIds.LootNodeCategoryId))
@@ -80,11 +84,13 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (a.CategoryId == MvpDungeonPlacementIds.TrapCategoryId)
                 {
                     var occupied = new HashSet<TileCoordinate>(footprints[a.AssignmentId]);
+                    charge?.Invoke(checked(path.Count + footprints[a.AssignmentId].LongLength));
                     int step = path.FindIndex(t => occupied.Contains(t));
                     if (step >= 0) events.Add(new ScheduledSpatialInteraction { Assignment = a, Step = step,
                         Kind = RunSpatialEventKind.TrapTriggered });
                     continue;
                 }
+                if (!includeHistoricalMonsters) continue;
                 paths.Search(a.RoomLocalPosition);
                 int best = int.MaxValue, engagement = -1;
                 for (int step = 0; step < path.Count; step++)
@@ -96,6 +102,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     Kind = engagement < 0 ? RunSpatialEventKind.MonsterUnreachable : RunSpatialEventKind.MonsterEngaged,
                     Movement = engagement < 0 ? new[] { a.RoomLocalPosition } : paths.PathTo(path[engagement]) });
             }
+            charge?.Invoke(checked((long)events.Count * events.Count));
             return new IntraroomTraversal { Path = path.ToArray(), Interactions = events.OrderBy(e => e.Step)
                 .ThenBy(e => CategoryRank(e.Assignment.CategoryId)).ThenBy(e => e.Assignment.Sequence)
                 .ThenBy(e => e.Assignment.AssignmentId, StringComparer.Ordinal).ToArray() };
