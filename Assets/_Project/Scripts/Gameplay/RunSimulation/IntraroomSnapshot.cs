@@ -103,9 +103,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private readonly Dictionary<TileCoordinate, int> index;
         private readonly int[][] neighbours;
         private readonly int[] queue, parent, distance;
+        private readonly Action<long> charge;
 
-        public DeterministicRoomPaths(IEnumerable<TileCoordinate> cells, int maximumTiles)
+        public DeterministicRoomPaths(IEnumerable<TileCoordinate> cells, int maximumTiles, Action<long> charge = null)
         {
+            this.charge = charge;
             if (cells == null || maximumTiles <= 0) IntraroomSnapshot.Invalid();
             // Bound enumeration before sorting/allocation, including arbitrary future providers.
             var bounded = new List<TileCoordinate>();
@@ -113,11 +115,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 if (bounded.Count >= maximumTiles) IntraroomSnapshot.Workload();
                 bounded.Add(cell);
+                charge?.Invoke(1);
             }
             tiles = bounded.OrderBy(t => t).ToArray();
+            charge?.Invoke(checked((long)tiles.Length * tiles.Length));
             index = new Dictionary<TileCoordinate, int>();
             for (int i = 0; i < tiles.Length; i++)
             {
+                charge?.Invoke(1);
                 if (index.ContainsKey(tiles[i])) IntraroomSnapshot.Invalid();
                 index.Add(tiles[i], i);
             }
@@ -137,20 +142,23 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
         private void AddNeighbour(List<int> target, long x, long y)
         {
+            charge?.Invoke(1);
             if (x >= int.MinValue && x <= int.MaxValue && y >= int.MinValue && y <= int.MaxValue &&
                 index.TryGetValue(new TileCoordinate((int)x, (int)y), out int i)) target.Add(i);
         }
 
         internal bool Search(TileCoordinate start)
         {
-            for (int i = 0; i < distance.Length; i++) { distance[i] = -1; parent[i] = -1; }
+            for (int i = 0; i < distance.Length; i++) { charge?.Invoke(1); distance[i] = -1; parent[i] = -1; }
             if (!index.TryGetValue(start, out int first)) return false;
             int head = 0, tail = 0; queue[tail++] = first; distance[first] = 0;
             while (head < tail)
             {
                 int current = queue[head++];
+                charge?.Invoke(1);
                 foreach (int next in neighbours[current])
                 {
+                    charge?.Invoke(1);
                     if (distance[next] >= 0) continue;
                     distance[next] = distance[current] + 1; parent[next] = current;
                     queue[tail++] = next;
@@ -164,7 +172,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             int last = index[end];
             if (distance[last] < 0) return Array.Empty<TileCoordinate>();
             var path = new TileCoordinate[distance[last] + 1];
-            for (int i = path.Length - 1; i >= 0; i--) { path[i] = tiles[last]; last = parent[last]; }
+            for (int i = path.Length - 1; i >= 0; i--) { charge?.Invoke(1); path[i] = tiles[last]; last = parent[last]; }
             return path;
         }
         public bool TryShortest(TileCoordinate start, IEnumerable<TileCoordinate> destinations,
@@ -175,6 +183,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             bool found = false; TileCoordinate target = default; int best = int.MaxValue;
             foreach (var tile in destinations)
             {
+                charge?.Invoke(1);
                 int d = Distance(tile);
                 if (d < 0 || d > best || (d == best && found && tile.CompareTo(target) >= 0)) continue;
                 found = true; best = d; target = tile;

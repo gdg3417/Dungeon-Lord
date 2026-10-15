@@ -1,0 +1,17 @@
+"""Isolated diagnostics input qualification; never refresh the owner's UAT project."""
+import sys
+import qualify_visual_feedback as audit
+
+audit.NAME = 'ui-composition-combat-c0-access-validation'
+audit.OUT = audit.ROOT / 'TestResults/combat-c0-access'
+audit.inputs.NAMESPACE = 'combat-c0-access-validation-20261015.json'
+
+if __name__ == '__main__':
+    mode = sys.argv[1]
+    if mode == 'prepare': audit.prepare()
+    elif mode == 'refresh': audit.write('inputs-refreshed.json', audit.inputs.prepare(audit.ROOT, audit.NAME))
+    elif mode == 'check': sys.exit(audit.check())
+    elif mode == 'checkpoint': audit.checkpoint(sys.argv[2])
+    elif mode == 'restore-fixtures': audit.restore_test_fixtures()
+    elif mode == 'audit': sys.exit(audit.audit())
+    else: raise ValueError('Unsupported qualification operation')

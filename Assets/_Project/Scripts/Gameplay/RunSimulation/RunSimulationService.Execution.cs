@@ -14,6 +14,13 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             RunCheckpointCodec.Restore(bytes, expectedCheckpointIdentity, expectedStartIdentity, expectedOrdinal, limits);
         public RunExecution StartSnapshot(int sequence, ActiveFloorRunSnapshot snapshot,
             RunLogicalTiming timing = null, long? eventLimit = null)
+            => StartCapturedSnapshot(sequence, snapshot, timing, eventLimit, false);
+
+        public RunExecution StartManualSnapshot(int sequence, ActiveFloorRunSnapshot snapshot)
+            => StartCapturedSnapshot(sequence, snapshot, null, null, true);
+
+        private RunExecution StartCapturedSnapshot(int sequence, ActiveFloorRunSnapshot snapshot,
+            RunLogicalTiming timing, long? eventLimit, bool manual)
         {
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
             var config = snapshot.Configuration;
@@ -23,7 +30,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 Workload = new BranchRunWorkload(config.PhaseFiveB.BranchDecision) };
             var objective = TransientDepthObjective.Select(config.PhaseSix, RunId(sequence));
             return engine.CreateExecution(snapshot.InitialRuntime, snapshot.TickStarted, sequence, snapshot.PostureId,
-                first.RequiredRooms.Select(r => r.Room).ToArray(), traversal, snapshot, objective, timing, eventLimit);
+                first.RequiredRooms.Select(r => r.Room).ToArray(), traversal, snapshot, objective, timing, eventLimit,
+                manual ? snapshot.CombatRules : null, manual ? snapshot.CombatBounds : null);
         }
 
         public RunExecution StartRoute(StructureRuntimeState runtime, long tickStarted, int sequence,
@@ -32,7 +40,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
         private RunExecution CreateExecution(StructureRuntimeState runtime, long tickStarted, int sequence,
             string postureId, MvpOrderedRouteRoom[] route, BranchTraversal traversal, ActiveFloorRunSnapshot snapshot,
-            TransientDepthObjective objective, RunLogicalTiming timing, long? eventLimit)
+            TransientDepthObjective objective, RunLogicalTiming timing, long? eventLimit,
+            CombatC0QualificationConfig combatRules = null, CombatC0RoomBounds[] combatBounds = null)
         {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
             if (tickStarted < 0 || sequence <= 0) throw new ArgumentException("run.execution.invalid_identity");
@@ -61,6 +70,12 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (timing != null && snapshot == null && rooms.Any(r => r.Spatial == null))
                 throw new ArgumentException("run.execution.timed_geometry_required");
             long bound = 1; // terminal
+            long combatPlanningWork = 0;
+            void ChargePlanning(long units)
+            {
+                combatPlanningWork = checked(combatPlanningWork + units);
+                if (combatPlanningWork > combatRules.MaximumWork) throw new InvalidOperationException(CombatC0Kernel.Workload);
+            }
             var plans = snapshot == null ? new[] { new PhaseFiveBRoutePlan { RequiredRooms = rooms.Select(r =>
                 new PhaseFiveBRequiredRoom { Room = r }).ToArray(), Forks = traversal?.Forks ?? Array.Empty<PhaseFiveBFork>() } } :
                 snapshot.Floors.Select(f => f.MaterializePlan()).ToArray();
@@ -69,9 +84,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 bound = checked(bound + 2); // floor decision/transfer
                 foreach (var r in plan.RequiredRooms.Select(r => r.Room))
                 {
-                    var path = r.Spatial == null ? null : IntraroomTraversal.Plan(r);
+                    var path = r.Spatial == null ? null : IntraroomTraversal.Plan(r, combatRules == null,
+                        combatRules == null ? (Action<long>)null : ChargePlanning);
                     bound = checked(bound + 4 + (path?.Path.LongLength ?? 0) +
-                        (path?.Interactions.LongLength ?? r.OrderedAssignments().LongLength));
+                        (path?.Interactions.LongLength ?? r.OrderedAssignments().LongLength) +
+                        (combatRules == null ? 0 : r.OrderedAssignments().LongCount(a => a.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId)));
                 }
                 foreach (var fork in plan.Forks)
                     bound = checked(bound + 2 + fork.Assignments.LongLength + 2 * (fork.Tiles?.LongLength ?? 0));
@@ -81,14 +98,28 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (eventLimit.HasValue && eventLimit.Value > bound) throw new ArgumentException("run.execution.invalid_limit");
             var state = new RunExecution(RunPartyGenerator.Create(capturedConfig.PhaseFiveB, RunId(sequence)), timing,
                 eventLimit ?? bound) { Traversal = traversal, Snapshot = snapshot };
-            state.StartInputs = RunStartCapture.Capture(capturedConfig, engine._lootConfig, engine._lootTableId,
-                captured, tickStarted, sequence, postureId, rooms, snapshot, timing, eventLimit ?? bound);
-            state.PrefixDigest = RunCheckpointCodec.Hash(state.StartInputs);
+            if (combatRules != null)
+            {
+                if (timing != null) throw new ArgumentException("combat.c0.manual_only");
+                state.Combat = new CombatC0ExecutionState(state.Party, combatRules,
+                    plans.SelectMany(p => p.RequiredRooms.Select(r => r.Room)).ToArray(), combatBounds);
+                state.Combat.Kernel.ChargeGeometry(combatPlanningWork);
+            }
+            else
+            {
+                state.StartInputs = RunStartCapture.Capture(capturedConfig, engine._lootConfig, engine._lootTableId,
+                    captured, tickStarted, sequence, postureId, rooms, snapshot, timing, eventLimit ?? bound);
+                state.PrefixDigest = RunCheckpointCodec.Hash(state.StartInputs);
+            }
             state.Initialize(engine.ExecuteAndFinish(state, captured, tickStarted, sequence, postureId, rooms,
                 traversal, snapshot, objective));
             return state;
         }
         [Serializable] private sealed class RouteCapture { public MvpOrderedRouteRoom[] Rooms; }
+        internal RunExecution StartCombatC0Route(StructureRuntimeState runtime, long tick, int sequence,
+            string posture, MvpOrderedRouteRoom[] route, CombatC0RoomBounds[] bounds) =>
+            CreateExecution(runtime, tick, sequence, posture, route, null, null, null, null, null,
+                _config.CombatC0?.Capture() ?? throw new ArgumentException(CombatC0Kernel.InvalidState), bounds);
 
         private IEnumerable<RunStep> ExecuteAndFinish(RunExecution state, StructureRuntimeState runtime,
             long tickStarted, int sequence, string postureId, MvpOrderedRouteRoom[] route,

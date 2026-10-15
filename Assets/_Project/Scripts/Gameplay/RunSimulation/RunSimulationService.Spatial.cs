@@ -12,8 +12,13 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
         private IEnumerable<RunStep> ResolveSpatialRoom(MvpOrderedRouteRoom room, RunParty party,
             List<RunEncounterEvent> encounters, List<RunSpatialEvent> evidence, RunPostureConfig posture,
-            double mana, SpatialRoomResolution result)
+            double mana, SpatialRoomResolution result, CombatC0ExecutionState combat = null)
         {
+            if (combat != null)
+            {
+                foreach (var step in ResolveCombatRoom(room, party, encounters, evidence, posture, mana, result, combat)) yield return step;
+                yield break;
+            }
             var plan = IntraroomTraversal.Plan(room);
             result.MaximumPressure = 0d;
             var reached = new List<MvpDungeonPlacementEntry>();

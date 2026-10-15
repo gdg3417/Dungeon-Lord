@@ -1,0 +1,17 @@
+{
+  "removed": [],
+  "added": [
+    "DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests.AliasesDisambiguateSharedSuffixesIndependentOfCollectionInsertion",
+    "DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests.BypassWithoutEncounterHasLocationAndDoesNotInventAnEncounterOrPosition",
+    "DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests.CompactAttackReportsActualHealthDamageAndDefeatWithoutMutatingEvidence",
+    "DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests.HistoricalB1MemberTextRemainsExact",
+    "DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests.LocalizedNonAttacksDoNotInventDamage(Bypass,OutOfRange)",
+    "DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests.LocalizedNonAttacksDoNotInventDamage(Eligibility,LineOfSightBlocked)",
+    "DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests.LocalizedNonAttacksDoNotInventDamage(EncounterComplete,DefendersDefeated)",
+    "DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests.LocalizedNonAttacksDoNotInventDamage(Skipped,DefeatedBeforeAction)",
+    "DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests.NumericNullableCoordinatesAndActionFormattingAreInvariant",
+    "DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests.ReplayDistinguishesC0FromMissingHistoricalEvidenceWithoutEnablingIt",
+    "DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests.C0FocusedDiagnosticsUseExistingPagingAndConstrainTextToSafeArea"
+  ],
+  "changed": []
+}

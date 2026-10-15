@@ -545,4 +545,94 @@
     "AnalysisUnlockId": "research.unlock.basic_run_analysis",
     "AnalysisResearchProjectId": "research.project.m7_a2_scaffold"
   }
+,
+    "CombatC0": {
+    "Enabled": true,
+    "Version": 1,
+    "ExecutableId": "run.executable.combat-c0.v1",
+    "RuleSourceId": "run.combat.c0.basic.v1",
+    "DamagePolicyId": "combat.c0.fixed_integer.v1",
+    "InitiativePolicyId": "combat.c0.initiative_descending_party_first.v1",
+    "TargetingPolicyId": "combat.c0.targeting.class_priority.v1",
+    "PositionPolicyId": "combat.c0.party_anchor.distinct_melee.v1",
+    "GroupPolicyId": "combat.c0.earliest_path_step.room_group.v1",
+    "RangePolicyId": "combat.c0.manhattan.v1",
+    "LineOfSightPolicyId": "combat.c0.supercover.solid_corner.v1",
+    "ZeroProgressPolicyId": "combat.c0.zero_damage_round.v1",
+    "RoundLimitPolicyId": "combat.c0.technical_failure.v1",
+    "MaximumRounds": 32,
+    "MaximumParticipants": 64,
+    "MaximumEncounters": 30,
+    "MaximumEvents": 32768,
+    "MaximumWork": 1000000,
+    "MonsterTargetClassOrder": [
+      "adventurer.class.warrior",
+      "adventurer.class.rogue",
+      "adventurer.class.ranger",
+      "adventurer.class.cleric",
+      "adventurer.class.mage"
+    ],
+    "Classes": [
+      {
+        "Id": "adventurer.class.warrior",
+        "AttackId": "combat.c0.basic.warrior.v1",
+        "AttackType": "combat.c0.attack.melee",
+        "Damage": 2,
+        "Initiative": 30,
+        "Range": 1
+      },
+      {
+        "Id": "adventurer.class.rogue",
+        "AttackId": "combat.c0.basic.rogue.v1",
+        "AttackType": "combat.c0.attack.melee",
+        "Damage": 3,
+        "Initiative": 50,
+        "Range": 1
+      },
+      {
+        "Id": "adventurer.class.ranger",
+        "AttackId": "combat.c0.basic.ranger.v1",
+        "AttackType": "combat.c0.attack.ranged",
+        "Damage": 2,
+        "Initiative": 40,
+        "Range": 4
+      },
+      {
+        "Id": "adventurer.class.cleric",
+        "AttackId": "combat.c0.basic.cleric.v1",
+        "AttackType": "combat.c0.attack.melee",
+        "Damage": 1,
+        "Initiative": 10,
+        "Range": 1
+      },
+      {
+        "Id": "adventurer.class.mage",
+        "AttackId": "combat.c0.basic.mage.v1",
+        "AttackType": "combat.c0.attack.ranged",
+        "Damage": 3,
+        "Initiative": 20,
+        "Range": 4
+      }
+    ],
+    "Monsters": [
+      {
+        "Id": "placement.option.monster.goblin",
+        "AttackId": "combat.c0.basic.goblin.v1",
+        "AttackType": "combat.c0.attack.melee",
+        "MaxHealth": 8,
+        "Damage": 1,
+        "Initiative": 35,
+        "Range": 1
+      },
+      {
+        "Id": "placement.option.monster.skeleton",
+        "AttackId": "combat.c0.basic.skeleton.v1",
+        "AttackType": "combat.c0.attack.melee",
+        "MaxHealth": 10,
+        "Damage": 2,
+        "Initiative": 25,
+        "Range": 1
+      }
+    ]
+  }
 }

@@ -1,0 +1,39 @@
+# Integrated C0 static review — 2026-10-14
+
+Owner approval is the direct PR #238 continuation instruction, accepting all seven Option A recommendations and future-development clarifications. Initial tuning/policy gates are closed. This review concerns production C0; the parent directory preserves the earlier prerequisite record.
+
+## Authority and isolation
+
+The sole configuration authoring source is the optional `CombatC0` section of bootstrap run JSON. Enabled configuration is strictly parsed under an existing frozen parser envelope, validates required types/fields/IDs/profiles/priorities/ranges/uniqueness and positive work limits, and has no runtime numeric fallback. Disabled/absent selects historical B1. Adventurer maximum HP remains Phase 5B-owned. Monster HP, damage, initiative, type/range and targeting priority are configuration-owned.
+
+The root C0 DTO is an internal `[NonSerialized]` member. Immutable profiles and canonical gross room bounds are captured separately by the transient snapshot. B1 JSON encoding, snapshot checkpoint writes/reads, enum, start capture and evidence fold are not extended. `StartManualSnapshot` alone selects C0. `StartSnapshot`/`StartRoute` preserve B1 for old restoration and B2. C0 starts have no B1 start bytes/digest and explicitly reject checkpoint export. The frozen ZIP was captured from reviewed prerequisite head `c0dba584f1d1b9f10ccc50bf51fc26c831c5f81e` before runtime edits, not regenerated as an expected result under C0. It supplies 115 boundary/consumed checkpoints across clear, retreat, wipe, branch and real two-floor cases, with original inspection/outcome text and config encoding.
+
+## Geometry and lifecycle
+
+The existing canonical snapshot owns traversability, assignments and base-local coordinates. C0 captures gross boundaries from that same canonical catalog. The unchanged loot/egress route and trap scheduling remain authoritative. Deterministic BFS selects distinct four-neighbour melee engagement positions by canonical monster order, shortest distance and coordinate order. Living defender positions and the party anchor restrict movement; a defender starting on the anchor can move to a legal engagement tile or receives an explicit denial. No universal participant capacity replaces geometry.
+
+Ranged eligibility uses configured Manhattan range and integer tile-centre supercover. Corner side cells are checked; friendly participants do not imply opacity. Production room interiors currently have no authored reserved cells. Only confirmed boundaries are solid in production; synthetic fixtures explicitly provide interior opacity for obstruction tests. Missing/reserved/occupied cells are not invented walls. No new writable geometry or opacity schema is added.
+
+At each route step, collect all defenders that a **living** member can attack or that can attack a living member. Freeze positions for their shared initiative rounds. After completion, later encounters use unique encounter ordinals and the same run-local HP. Resolved/defeated identities are never recreated. Duplicate completed receipt resolution returns the original result without new HP/events; changed duplicate inputs reject. The geometry adapter scans at route/encounter boundaries, never per frame or attack. A wipe stops unreached movement/traps/loot. Existing retreat and room-clear thresholds still apply outside combat.
+
+Static review corrected a dead ranged member admitting an otherwise ineligible defender. A direct geometry/kernel regression now verifies that the legal defender completes while the isolated defender retains HP and cannot attack.
+
+## Atomicity and economy
+
+An encounter stages HP and evidence, checks all technical budgets and terminal conditions, then commits to the existing transient party damage method and run-local monster state. Production zero-progress/round-limit completion throws rather than manufacturing victory/retreat. Event/work/encounter exhaustion also fails. The complete existing detached manual transaction publishes only after successful calculation, canonical validation, atomic persistence and readback. A later failure discards earlier staged room damage, loot, knowledge, history, Heat and allocation. Tests cover earlier staged loot followed by later technical failure, and failed atomic writes after successful C0 combat.
+
+Room placement effects are reached once per admitted defender/trap/loot assignment. Trap HP authority is unchanged. Existing room loot rolls, extraction, casualty-derived Heat, retreat, floor/branch learning and history remain singular. There is no new monster-death reward or mana grant/spend. Writable schema stays 14; SaveService, checkpoint codec, canonical writer, migrations and B2 scheduling are unchanged. C0 fields are internal transient properties omitted by both Unity and strict public-field serialization. Same-session readback retains evidence; reopen retains aggregate history and fabricates no roster, monster HP or action events.
+
+## Evidence and resources
+
+Each complete encounter occupies one untimed run boundary. Its immutable chronological events record executable/rule/run/floor/room/encounter IDs, combat/action/round ordinals, the run boundary ordinal, actor/target/attack/targeting IDs, positions, target HP/damage/defeat and eligibility/skip/completion reasons. Combining run boundaries and combat ordinals preserves trap/loot chronology without recalculating combat. `CombatC0Diagnostics` exposes read-only records and final monster HP. Existing developer run diagnostics localize labels/reasons. The PR #236 renderer continues to consume its supported historical type; C0 returns a localized explanation until C1.
+
+Production limits are 32 rounds, 64 participants, 30 encounters, 32,768 events and 1,000,000 charged work units. Geometry sorting/validation/BFS/path/LOS, route planning, conservative kernel preparation and action/target checks are charged. Existing canonical capture/parser validation retains its separate frozen limits. No ceiling is relaxed. Work units bound defined operations, not CPU instructions.
+
+For room vertices V, route steps S, members A and defenders M, geometric preparation is bounded by sorting/adjacency and each collection by O(M(V+edges+M)+AM·LOS); rounds use precomputed legal links and target orders, bounded by O(R(A+M)²). No per-attack path search occurs. Temporary geometry/matrices and target lists are bounded by captured geometry/participants; successful receipts and chronological copies together remain O(E) with the global event ceiling. No unbounded log, coroutine, frame-time or global RNG controls results.
+
+The actual catalog permits Basic 16 tiles/2 defenders/2 loot nodes, Rectangle 15/3/2, Large Chamber 30/4/4, on two floors of 60/80 space. A pessimistic repeated-collection fixture plus integer knapsack (ignoring fixed structures/corridors) gives 602,024 work, 32 total participants and 27 encounters. This fits approval without truncating ordinary MVP layouts. The original synthetic 64-participant kernel test remains separate from production geometry and mobile readiness. Unity Mono returns zero for the thread allocation counter; it is recorded as unavailable, not allocation-free execution. Storage bounds are structural; no mobile performance claim is made.
+
+## Review disposition
+
+No unresolved static correctness or authority finding remains after the living-participant correction. Full automated qualification is recorded separately in [qualification.md](qualification.md). External review and owner Editor/standalone gameplay acceptance remain distinct from automated results. C1 animation, C2 durable monster/recovery/reserve state, individual formation, authored interior opacity, aggro, spells, healing, round-level disengagement, timed/durable C0 and automatic activation remain deferred.

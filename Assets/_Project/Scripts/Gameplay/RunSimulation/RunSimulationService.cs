@@ -132,7 +132,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     if (routeRoom.Spatial != null)
                     {
                         var spatial = new SpatialRoomResolution();
-                        foreach (var step in ResolveSpatialRoom(routeRoom, party, events, spatialEvents, posture, manaAtStart, spatial)) yield return step;
+                        foreach (var step in ResolveSpatialRoom(routeRoom, party, events, spatialEvents, posture, manaAtStart, spatial, state.Combat)) yield return step;
                         localEffects = spatial.Effects;
                     }
                     yield return RunStep.Before(RunStepKind.RoomComplete);
@@ -162,7 +162,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (routeRoom.Spatial != null)
                 {
                     var spatial = new SpatialRoomResolution();
-                    foreach (var step in ResolveSpatialRoom(routeRoom, party, events, spatialEvents, posture, manaAtStart, spatial)) yield return step;
+                    foreach (var step in ResolveSpatialRoom(routeRoom, party, events, spatialEvents, posture, manaAtStart, spatial, state.Combat)) yield return step;
                     localEffects = spatial.Effects; pressure = spatial.MaximumPressure;
                     composition = BuildCompositionOutcomeSummary(localEffects, manaAtStart);
                     localActiveEncounter = localEffects.ContributingOptionIds.Any(id =>

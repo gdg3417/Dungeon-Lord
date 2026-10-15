@@ -1,0 +1,23 @@
+[
+  "Assets/_Project/Data/Bootstrap/string_table_en.json",
+  "Assets/_Project/Editor/DungeonSpatial/Tests/CombatC0DiagnosticsEditModeFixtures.cs",
+  "Assets/_Project/Editor/DungeonSpatial/Tests/CombatC0DiagnosticsEditModeFixtures.cs.meta",
+  "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonReplaySceneTests.cs",
+  "Assets/_Project/Scripts/Services/RunPartyDiagnosticsPresenter.cs",
+  "Assets/_Project/Scripts/UI/BootstrapOverlay.cs",
+  "Assets/_Project/Tests/EditMode/BootstrapOverlayPagingTests.cs",
+  "Assets/_Project/Tests/EditMode/CombatC0DiagnosticsTests.cs",
+  "Assets/_Project/Tests/EditMode/CombatC0DiagnosticsTests.cs.meta",
+  "Docs/testing/evidence/combat-c0/diagnostics-20261015/build-reports.zip",
+  "Docs/testing/evidence/combat-c0/diagnostics-20261015/changed-files.json",
+  "Docs/testing/evidence/combat-c0/diagnostics-20261015/historical-editmode-comparison.json",
+  "Docs/testing/evidence/combat-c0/diagnostics-20261015/historical-playmode-comparison.json",
+  "Docs/testing/evidence/combat-c0/diagnostics-20261015/qualification-reports.zip",
+  "Docs/testing/evidence/combat-c0/diagnostics-20261015/qualification-support.zip",
+  "Docs/testing/evidence/combat-c0/diagnostics-20261015/report-summary.json",
+  "Docs/testing/evidence/combat-c0/diagnostics-20261015/windows-artifact-manifest.json",
+  "Docs/testing/evidence/combat-c0/diagnostics-readability.md",
+  "Docs/testing/evidence/combat-c0/integration/qualification.md",
+  "Tools/Presentation/collect_combat_c0_diagnostics_evidence.py",
+  "Tools/Presentation/qualify_combat_c0_diagnostics.py"
+]

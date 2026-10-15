@@ -1,0 +1,327 @@
+[
+  {
+    "file": "combat-c0-diagnostics-build-gates.xml",
+    "sha256": "ee1b5ae4c8223869019eb04b5da24b4a660545149d827c73fdc529e759fd0eb7",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "65",
+      "result": "Passed",
+      "total": "65",
+      "passed": "65",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 17:48:39Z",
+      "end-time": "2026-10-15 17:48:45Z",
+      "duration": "5.6634647"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c0-diagnostics-focused-c0.xml",
+    "sha256": "1900faa012c3518b78f7311b2e9084e64e5c45052c9c18de9869cc3cc45c8dca",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "82",
+      "result": "Failed(Child)",
+      "total": "82",
+      "passed": "81",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 16:01:07Z",
+      "end-time": "2026-10-15 16:01:14Z",
+      "duration": "6.2794068"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC0ProductionManualRunUsesRealGeometryAndKeepsTransientDiagnostics",
+        "message": "  Expected: String containing \"Combat #\"\n  But was:  \"Member 1: Ranger, HP 1/7\nMember 2: Cleric, HP 8/8\nMember 3: Mage, HP 6/6\nMember 4: Cleric, HP 8/8\nMember 5: Mage, HP 6/6\nA1 = run-1/member/0\nA2 = run-1/member/1\nA3 = run-1/member/2\nA4 = run-1/member/3\nA5 = run-1/member/4\nM1 = run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000\nM2 = run-1/monster/compat.floor.00.legacy-room.00.content.monster.0001\nE1 = run-1/combat/0\nE1 R0 #0 \u2014 \u2192 \u2014: Start: Legal attack\nE1 R0 #1 A1 \u2192 M1: Eligibility: Legal attack\n  (1,0) \u2192 (0,0)\nE1 R0 #2 A1 \u2192 M2: Eligibility: Legal attack\n  (1,0) \u2192 (1,1)\nE1 R0 #3 A2 \u2192 M1: Eligibility: Legal attack\n  (1,0) \u2192 (0,0)\nE1 R0 #4 A2 \u2192 M2: Eligibility: Legal attack\n  (1,0) \u2192 (1,1)\nE1 R0 #5 A3 \u2192 M1: Eligibility: Legal attack\n  (1,0) \u2192 (0,0)\nE1 R0 #6 A3 \u2192 M2: Eligibility: Legal attack\n  (1,0) \u2192 (1,1)\nE1 R0 #7 A4 \u2192 M1: Eligibility: Legal attack\n  (1,0) \u2192 (0,0)\nE1 R0 #8 A4 \u2192 M2: Eligibility: Legal attack\n  (1,0) \u2192 (1,1)\nE1 R0 #9 A5 \u2192 M1: Eligibility: Legal attack\n  (1,0) \u2192 (0,0)\nE1 R0 #10 A5 \u2192 M2: Eligibility: Legal attack\n  (1,0) \u2192 (1,1)\nE1 R0 #11 M1 \u2192 A1: Eligibility: Legal attack\n  (0,0) \u2192 (1,0)\nE1 R0 #12 M1 \u2192 A2: Eligibility: Legal attack\n  (0,0) \u2192 (1,0)\nE1 R0 #13 M1 \u2192 A3: Eligibility: Legal attack\n  (0,0) \u2192 (1,0)\nE1 R0 #14 M1 \u2192 A4: Eligibility: Legal attack\n  (0,0) \u2192 (1,0)\nE1 R0 #15 M1 \u2192 A5: Eligibility: Legal attack\n  (0,0) \u2192 (1,0)\nE1 R0 #16 M2 \u2192 A1: Eligibility: Legal attack\n  (1,1) \u2192 (1,0)\nE1 R0 #17 M2 \u2192 A2: Eligibility: Legal attack\n  (1,1) \u2192 (1,0)\nE1 R0 #18 M2 \u2192 A3: Eligibility: Legal attack\n  (1,1) \u2192 (1,0)\nE1 R0 #19 M2 \u2192 A4: Eligibility: Legal attack\n  (1,1) \u2192 (1,0)\nE1 R0 #20 M2 \u2192 A5: Eligibility: Legal attack\n  (1,1) \u2192 (1,0)\nE1 R1 #21 A1 \u2192 M1: Attack: HP 10 \u2192 8, damage 2\n  (1,0) \u2192 (0,0)\nE1 R1 #22 M1 \u2192 A1: Attack: HP 7 \u2192 5, damage 2\n  (0,0) \u2192 (1,0)\nE1 R1 #23 M2 \u2192 A1: Attack: HP 5 \u2192 3, damage 2\n  (1,1) \u2192 (1,0)\nE1 R1 #24 A3 \u2192 M1: Attack: HP 8 \u2192 5, damage 3\n  (1,0) \u2192 (0,0)\nE1 R1 #25 A5 \u2192 M1: Attack: HP 5 \u2192 2, damage 3\n  (1,0) \u2192 (0,0)\nE1 R1 #26 A2 \u2192 M1: Attack: HP 2 \u2192 1, damage 1\n  (1,0) \u2192 (0,0)\nE1 R1 #27 A4 \u2192 M1: Attack: HP 1 \u2192 0, damage 1; defeated\n  (1,0) \u2192 (0,0)\nE1 R2 #28 A1 \u2192 M2: Attack: HP 10 \u2192 8, damage 2\n  (1,0) \u2192 (1,1)\nE1 R2 #29 M1 \u2192 \u2014: Skipped: Defeated before action\n  (0,0) \u2192 \u2014\nE1 R2 #30 M2 \u2192 A1: Attack: HP 3 \u2192 1, damage 2\n  (1,1) \u2192 (1,0)\nE1 R2 #31 A3 \u2192 M2: Attack: HP 8 \u2192 5, damage 3\n  (1,0) \u2192 (1,1)\nE1 R2 #32 A5 \u2192 M2: Attack: HP 5 \u2192 2, damage 3\n  (1,0) \u2192 (1,1)\nE1 R2 #33 A2 \u2192 M2: Attack: HP 2 \u2192 1, damage 1\n  (1,0) \u2192 (1,1)\nE1 R2 #34 A4 \u2192 M2: Attack: HP 1 \u2192 0, damage 1; defeated\n  (1,0) \u2192 (1,1)\nE1 R2 #35 \u2014 \u2192 \u2014: Complete: Participating defenders defeated\"\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c0-diagnostics-focused-final02.xml",
+    "sha256": "016c623a1771e23dc5f0503a5cac1c58e3b873057c66f3ebca81fe6deb562827",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "93",
+      "result": "Failed(Child)",
+      "total": "93",
+      "passed": "92",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 16:06:35Z",
+      "end-time": "2026-10-15 16:06:42Z",
+      "duration": "6.3522365"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.FocusedC0OverlayPagesWithoutOverflow",
+        "message": "  Expected: String containing \"combat-row-19\"\n  But was:  \"Diagnostics: Run Diagnostics Focus\nF1 toggles Dev Panel\nF2 toggles Run Diagnostics focus\nF3 cycles Diagnostics Page\nMouse wheel or PageUp PageDown scroll diagnostics\nrun-heat-application-line\nrun-attraction-line\nrun-forecast-line\nrun-demand-budget-line\"\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c0-diagnostics-focused-final03.xml",
+    "sha256": "96de73ae8b1904e76efd54b21c101ef010e9ad06c2e2d3a9292ba5621ce64d98",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "11",
+      "result": "Passed",
+      "total": "11",
+      "passed": "11",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 17:46:43Z",
+      "end-time": "2026-10-15 17:46:44Z",
+      "duration": "0.641684"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c0-diagnostics-focused-new.xml",
+    "sha256": "5693e5349a792103d26e66f5a36354bfcbb762391c2d4bd7fb463c442b3fb13a",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "11",
+      "result": "Failed(Child)",
+      "total": "11",
+      "passed": "10",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 16:12:06Z",
+      "end-time": "2026-10-15 16:12:07Z",
+      "duration": "0.626903"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.FocusedC0OverlayPagesWithoutOverflow",
+        "message": "  Expected: greater than or equal to 2\n  But was:  0\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c0-diagnostics-focused-new02.xml",
+    "sha256": "c8fd01de40ab9325c95619d687c9fe4a6d9a47674f332a034b83cb78d02d956e",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "11",
+      "result": "Passed",
+      "total": "11",
+      "passed": "11",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 16:17:41Z",
+      "end-time": "2026-10-15 16:17:42Z",
+      "duration": "0.6896314"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c0-diagnostics-focused-r2.xml",
+    "sha256": "c1bfe0a507b4f32b9469c59580c801f0c81f988dbece13925c3fa08513a53513",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "11",
+      "result": "Passed",
+      "total": "11",
+      "passed": "11",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 16:39:31Z",
+      "end-time": "2026-10-15 16:39:32Z",
+      "duration": "0.8408043"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c0-diagnostics-focused-static.xml",
+    "sha256": "fdd55948fb47123e74e38827b15834366c0e0dd37ed5cef095a5a9df001c7b39",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "11",
+      "result": "Passed",
+      "total": "11",
+      "passed": "11",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 19:16:22Z",
+      "end-time": "2026-10-15 19:16:23Z",
+      "duration": "0.5852093"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c0-diagnostics-focused.xml",
+    "sha256": "dfeeea676471e4d2c315120253254f9d79c618e81023895078c6915815c864c8",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "0",
+      "result": "Passed",
+      "total": "0",
+      "passed": "0",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 15:59:04Z",
+      "end-time": "2026-10-15 15:59:04Z",
+      "duration": "0.0288762"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c0-diagnostics-full-editmode-static.xml",
+    "sha256": "14f1280c607ff703edc6ff11f374883a0c1ae2086bac6627f39ad7fb4e5dbebd",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1991",
+      "result": "Skipped:Ignored",
+      "total": "1991",
+      "passed": "1990",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 19:00:26Z",
+      "end-time": "2026-10-15 19:01:00Z",
+      "duration": "33.4992316"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-diagnostics-full-playmode-static.xml",
+    "sha256": "8bc6e05a91bc44f2be7feb6f2ea95e579049254af7fd436fba781f7fca65364b",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3426",
+      "result": "Skipped:Ignored",
+      "total": "3426",
+      "passed": "3416",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 19:04:42Z",
+      "end-time": "2026-10-15 19:14:19Z",
+      "duration": "577.1051492"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ]
+  },
+  {
+    "file": "combat-c0-diagnostics-regression.xml",
+    "sha256": "0a341b09de3146dbc5863815fffd88b83f8de9ca0c417d3df867d8152540310d",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "500",
+      "result": "Passed",
+      "total": "500",
+      "passed": "500",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 16:31:33Z",
+      "end-time": "2026-10-15 16:31:47Z",
+      "duration": "13.5663874"
+    },
+    "failures": [],
+    "skips": []
+  }
+]

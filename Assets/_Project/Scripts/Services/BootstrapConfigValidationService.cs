@@ -26,8 +26,7 @@ namespace DungeonBuilder.M0
 
             try
             {
-                RunSimulationConfig config = JsonUtility.FromJson<RunSimulationConfig>(configJson);
-                if (!IsValidRunSimulationConfig(config))
+                if (!TryParseRunSimulationConfig(configJson, out RunSimulationConfig config))
                 {
                     return false;
                 }
@@ -49,7 +48,7 @@ namespace DungeonBuilder.M0
             try
             {
                 config = JsonUtility.FromJson<RunSimulationConfig>(configJson);
-                return IsValidRunSimulationConfig(config);
+                return CombatC0Config.TryAttach(configJson, config) && IsValidRunSimulationConfig(config);
             }
             catch { config = null; return false; }
         }
@@ -83,7 +82,7 @@ namespace DungeonBuilder.M0
 
         internal static bool IsValidRunSimulationConfig(RunSimulationConfig config)
         {
-            if (config == null || !PhaseFiveBConfigValidation.IsValid(config.PhaseFiveB) ||
+            if (config == null || !CombatC0Config.IsValid(config.CombatC0) || !PhaseFiveBConfigValidation.IsValid(config.PhaseFiveB) ||
                 !PhaseSixRunConfigValidation.IsValid(config.PhaseSix))
             {
                 return false;

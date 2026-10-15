@@ -1,0 +1,26 @@
+[
+  {
+    "log": "Temp\\combat-c0-integration-focused-final-source.log",
+    "compiler_diagnostics": []
+  },
+  {
+    "log": "Temp\\combat-c0-integration-focused-metadata.log",
+    "compiler_diagnostics": []
+  },
+  {
+    "log": "Temp\\combat-c0-integration-regression-final.log",
+    "compiler_diagnostics": []
+  },
+  {
+    "log": "Temp\\combat-c0-integration-full-editmode.log",
+    "compiler_diagnostics": []
+  },
+  {
+    "log": "Temp\\combat-c0-integration-full-playmode.log",
+    "compiler_diagnostics": []
+  },
+  {
+    "log": "Temp\\combat-c0-integration-build.log",
+    "compiler_diagnostics": []
+  }
+]

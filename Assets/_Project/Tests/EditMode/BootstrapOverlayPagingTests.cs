@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using TMPro;
+using System.Linq;
 using UnityEngine;
 
 namespace DungeonBuilder.Tests.EditMode
@@ -1259,6 +1260,29 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(smokeText, Does.Contain("Run simulated."));
             Assert.That(smokeText, Does.Contain("Heat: 8 -> 8"));
             Assert.That(smokeText, Does.Not.Contain(firstFeedback));
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void FocusedDiagnosticsPreserveHistoricalOverflowAndIgnoreStalePaging(bool combatC0)
+        {
+            SetSave(new SaveData { runHistory = new RunHistoryState { LatestOutcome = new RunOutcomeRecord {
+                CombatExecutable = combatC0 ? DungeonBuilder.M0.Gameplay.RunSimulation.CombatC0Config.Executable : null } } });
+            SetLine("<RunSurvivalLine>k__BackingField", string.Join("\n", Enumerable.Range(0, 20).Select(i => "evidence-row-" + i)));
+            // A prior full Run Diagnostics page may have an offset; focus has no paging slot.
+            _overlay.CycleFullDiagnosticsPage();
+            _overlay.ToggleDiagnosticsVisibility();
+            _overlay.CycleFullDiagnosticsPage();
+            _overlay.ScrollFullDiagnosticsLines(8);
+            _overlay.ToggleRunDiagnosticsFocus();
+            string first = RefreshText();
+            Assert.That(first, Does.Contain("evidence-row-0").And.Contain("evidence-row-19"));
+            Assert.That(_overlay.overlayText.overflowMode, Is.EqualTo(TextOverflowModes.Overflow));
+            _overlay.ScrollFullDiagnosticsLines(4);
+            Assert.That(RefreshText(), Is.EqualTo(first));
+            _overlay.ToggleRunDiagnosticsFocus();
+            _overlay.ToggleRunDiagnosticsFocus();
+            Assert.That(RefreshText(), Is.EqualTo(first), "Reopening cannot inherit a C0 paging offset");
         }
 
         [Test]
