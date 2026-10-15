@@ -1,5 +1,7 @@
 # C0 diagnostics readability correction — 2026-10-15
 
+> **Later owner-approved scope correction (2026-10-15):** the raw play-by-play is developer evidence, not a player-facing C0 acceptance feature. Focused C0 paging and global TMP masking below were reverted after review; no new navigation UI is required. Numeric coordinate formatting, compact localized aliases and complete immutable records remain. This document's earlier qualification is historical, not proof of the later reversion. See [authoritative evidence and current qualification](authoritative-20261015/qualification.md) and the revised [owner acceptance plan](integration/owner-uat.md). C1 owns visible attacks, HP changes and graphical playback.
+
 PR #238, existing branch `codex/combat-c0-deterministic-combat`, reviewed baseline `164fc6cb97bf48a9731a4e797858ff0a1e418c9b`. The owner's first Editor UAT loaded two existing floors and completed reciprocal C0 run `run-68`; that observation is owner evidence, not an automated gameplay acceptance claim. This correction addresses presentation only. Keep the PR draft and request external re-review before additional owner UAT.
 
 ## Display contract

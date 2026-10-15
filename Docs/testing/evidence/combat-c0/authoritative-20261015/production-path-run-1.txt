@@ -1,0 +1,399 @@
+Combat C0 authoritative production-path evidence — automated disposable fixture
+Not owner run-68/69/71/72. Input-reproduction findings are archived separately.
+Unity=6000.3.2f1; scene=DontDestroyOnLoad; save=C:\Users\gdg34\AppData\LocalLow\gdg3417\Dungeon Lord\phase7a4-scene-b9f8f92e4e3c4ead83751292de45416d.json
+run=run-1; events=18; chargedWork=1729
+Loaded production combat configuration (unchanged during this run):
+{
+    "Enabled": true,
+    "Version": 1,
+    "ExecutableId": "run.executable.combat-c0.v1",
+    "RuleSourceId": "run.combat.c0.basic.v1",
+    "DamagePolicyId": "combat.c0.fixed_integer.v1",
+    "InitiativePolicyId": "combat.c0.initiative_descending_party_first.v1",
+    "TargetingPolicyId": "combat.c0.targeting.class_priority.v1",
+    "PositionPolicyId": "combat.c0.party_anchor.distinct_melee.v1",
+    "GroupPolicyId": "combat.c0.earliest_path_step.room_group.v1",
+    "RangePolicyId": "combat.c0.manhattan.v1",
+    "LineOfSightPolicyId": "combat.c0.supercover.solid_corner.v1",
+    "ZeroProgressPolicyId": "combat.c0.zero_damage_round.v1",
+    "RoundLimitPolicyId": "combat.c0.technical_failure.v1",
+    "MaximumRounds": 32,
+    "MaximumParticipants": 64,
+    "MaximumEncounters": 30,
+    "MaximumEvents": 32768,
+    "MaximumWork": 1000000,
+    "MonsterTargetClassOrder": [
+        "adventurer.class.warrior",
+        "adventurer.class.rogue",
+        "adventurer.class.ranger",
+        "adventurer.class.cleric",
+        "adventurer.class.mage"
+    ],
+    "Classes": [
+        {
+            "Id": "adventurer.class.warrior",
+            "AttackId": "combat.c0.basic.warrior.v1",
+            "AttackType": "combat.c0.attack.melee",
+            "Damage": 2,
+            "Initiative": 30,
+            "Range": 1
+        },
+        {
+            "Id": "adventurer.class.rogue",
+            "AttackId": "combat.c0.basic.rogue.v1",
+            "AttackType": "combat.c0.attack.melee",
+            "Damage": 3,
+            "Initiative": 50,
+            "Range": 1
+        },
+        {
+            "Id": "adventurer.class.ranger",
+            "AttackId": "combat.c0.basic.ranger.v1",
+            "AttackType": "combat.c0.attack.ranged",
+            "Damage": 2,
+            "Initiative": 40,
+            "Range": 4
+        },
+        {
+            "Id": "adventurer.class.cleric",
+            "AttackId": "combat.c0.basic.cleric.v1",
+            "AttackType": "combat.c0.attack.melee",
+            "Damage": 1,
+            "Initiative": 10,
+            "Range": 1
+        },
+        {
+            "Id": "adventurer.class.mage",
+            "AttackId": "combat.c0.basic.mage.v1",
+            "AttackType": "combat.c0.attack.ranged",
+            "Damage": 3,
+            "Initiative": 20,
+            "Range": 4
+        }
+    ],
+    "Monsters": [
+        {
+            "Id": "placement.option.monster.goblin",
+            "AttackId": "combat.c0.basic.goblin.v1",
+            "AttackType": "combat.c0.attack.melee",
+            "MaxHealth": 8,
+            "Damage": 1,
+            "Initiative": 35,
+            "Range": 1
+        },
+        {
+            "Id": "placement.option.monster.skeleton",
+            "AttackId": "combat.c0.basic.skeleton.v1",
+            "AttackType": "combat.c0.attack.melee",
+            "MaxHealth": 10,
+            "Damage": 2,
+            "Initiative": 25,
+            "Range": 1
+        }
+    ]
+}
+Participants: full canonical IDs, initiative inputs and final HP
+party id=run-1/member/0; memberOrdinal=0; class=adventurer.class.ranger; initiative=40; maxHP=7; finalHP=5; active=True
+party id=run-1/member/1; memberOrdinal=1; class=adventurer.class.cleric; initiative=10; maxHP=8; finalHP=8; active=True
+party id=run-1/member/2; memberOrdinal=2; class=adventurer.class.mage; initiative=20; maxHP=6; finalHP=6; active=True
+party id=run-1/member/3; memberOrdinal=3; class=adventurer.class.cleric; initiative=10; maxHP=8; finalHP=8; active=True
+party id=run-1/member/4; memberOrdinal=4; class=adventurer.class.mage; initiative=20; maxHP=6; finalHP=6; active=True
+monster id=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; assignment=compat.floor.00.legacy-room.00.content.monster.0000; option=placement.option.monster.skeleton; sequence=0; initiative=25; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; placed=(0,0); maxHP=10; finalHP=0; defeated=True
+Chronological events: exact API enumeration, no sorting, filtering or truncation.
+ordinal=0; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=EncounterStart; reason=Legal; actor=<none>; target=<none>; attack=<none>; targeting=combat.c0.targeting.class_priority.v1; space=None; source=<none>; destination=<none>; beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=1; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Eligibility; reason=Legal; actor=run-1/member/0; target=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; attack=combat.c0.basic.ranger.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(1,0); destination=(0,0); beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=2; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Eligibility; reason=Legal; actor=run-1/member/1; target=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; attack=combat.c0.basic.cleric.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(1,0); destination=(0,0); beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=3; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Eligibility; reason=Legal; actor=run-1/member/2; target=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; attack=combat.c0.basic.mage.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(1,0); destination=(0,0); beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=4; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Eligibility; reason=Legal; actor=run-1/member/3; target=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; attack=combat.c0.basic.cleric.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(1,0); destination=(0,0); beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=5; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Eligibility; reason=Legal; actor=run-1/member/4; target=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; attack=combat.c0.basic.mage.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(1,0); destination=(0,0); beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=6; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Eligibility; reason=Legal; actor=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; target=run-1/member/0; attack=combat.c0.basic.skeleton.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(0,0); destination=(1,0); beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=7; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Eligibility; reason=Legal; actor=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; target=run-1/member/1; attack=combat.c0.basic.skeleton.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(0,0); destination=(1,0); beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=8; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Eligibility; reason=Legal; actor=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; target=run-1/member/2; attack=combat.c0.basic.skeleton.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(0,0); destination=(1,0); beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=9; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Eligibility; reason=Legal; actor=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; target=run-1/member/3; attack=combat.c0.basic.skeleton.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(0,0); destination=(1,0); beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=10; runOrdinal=2; actionOrdinal=-1; round=0; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Eligibility; reason=Legal; actor=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; target=run-1/member/4; attack=combat.c0.basic.skeleton.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(0,0); destination=(1,0); beforeHP=0; afterHP=0; damage=0; defeated=False
+ordinal=11; runOrdinal=2; actionOrdinal=0; round=1; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Attack; reason=Legal; actor=run-1/member/0; target=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; attack=combat.c0.basic.ranger.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(1,0); destination=(0,0); beforeHP=10; afterHP=8; damage=2; defeated=False
+ordinal=12; runOrdinal=2; actionOrdinal=1; round=1; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Attack; reason=Legal; actor=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; target=run-1/member/0; attack=combat.c0.basic.skeleton.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(0,0); destination=(1,0); beforeHP=7; afterHP=5; damage=2; defeated=False
+ordinal=13; runOrdinal=2; actionOrdinal=2; round=1; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Attack; reason=Legal; actor=run-1/member/2; target=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; attack=combat.c0.basic.mage.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(1,0); destination=(0,0); beforeHP=8; afterHP=5; damage=3; defeated=False
+ordinal=14; runOrdinal=2; actionOrdinal=3; round=1; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Attack; reason=Legal; actor=run-1/member/4; target=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; attack=combat.c0.basic.mage.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(1,0); destination=(0,0); beforeHP=5; afterHP=2; damage=3; defeated=False
+ordinal=15; runOrdinal=2; actionOrdinal=4; round=1; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Attack; reason=Legal; actor=run-1/member/1; target=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; attack=combat.c0.basic.cleric.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(1,0); destination=(0,0); beforeHP=2; afterHP=1; damage=1; defeated=False
+ordinal=16; runOrdinal=2; actionOrdinal=5; round=1; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=Attack; reason=Legal; actor=run-1/member/3; target=run-1/monster/compat.floor.00.legacy-room.00.content.monster.0000; attack=combat.c0.basic.cleric.v1; targeting=combat.c0.targeting.class_priority.v1; space=RoomLocal; source=(1,0); destination=(0,0); beforeHP=1; afterHP=0; damage=1; defeated=True
+ordinal=17; runOrdinal=2; actionOrdinal=-1; round=1; run=run-1; encounter=run-1/combat/0; executable=run.executable.combat-c0.v1; rules=run.executable.combat-c0.v1; ruleSource=run.combat.c0.basic.v1; floor=compat.floor.00; room=compat.floor.00.legacy-room.00; kind=EncounterComplete; reason=DefendersDefeated; actor=<none>; target=<none>; attack=<none>; targeting=combat.c0.targeting.class_priority.v1; space=None; source=<none>; destination=<none>; beforeHP=0; afterHP=0; damage=0; defeated=False
+Resulting canonical aggregate run outcome (transient properties intentionally excluded):
+{
+    "RunId": "run-1",
+    "TickStarted": 0,
+    "Success": true,
+    "Score": 2096,
+    "ReasonKey": "run.reason.success",
+    "HeatAtStart": 0.0,
+    "ManaAtStart": 1000.0,
+    "CrisisActiveAtStart": false,
+    "HasBreakdown": true,
+    "BaseChance": 0.6,
+    "HeatPenaltyApplied": 0.0,
+    "ManaBonusApplied": 9.98,
+    "CrisisPenaltyApplied": 0.0,
+    "FinalChance": 1.0,
+    "SuccessThresholdUsed": 0.5,
+    "FeedbackTagKeys": [
+        "run.feedback.success",
+        "run.feedback.strong_mana_reserve"
+    ],
+    "LootSummary": {
+        "LootTableId": "loot.table.run.basic",
+        "ResolverSeed": 507408,
+        "ResolverSuccess": true,
+        "ResolverErrorCode": 0,
+        "RollCount": 2,
+        "GeneratedItemIds": [
+            "loot.item.coin.chipped",
+            "loot.item.relic.bronze"
+        ],
+        "TotalGeneratedWorldValue": 10,
+        "TotalGeneratedReserveCost": 2,
+        "TotalGeneratedTradeableWorldValue": 2
+    },
+    "SurvivalSummary": {
+        "PartySize": 5,
+        "SurvivorCount": 5,
+        "DeathCount": 0,
+        "SurvivorRatio": 1.0,
+        "CasualtyPressure": 0.18,
+        "CasualtyLootExtractionPenalty": 0.0,
+        "CasualtyHeatDelta": 0.0,
+        "DeterministicSeed": 1056921074,
+        "RuleResolved": true,
+        "DeterministicErrorCode": 0,
+        "RuleSourceId": "run.party.phase5b.v1",
+        "SuccessAtResolution": true
+    },
+    "LootExtractionSummary": {
+        "RuleSourceId": "run.loot_extraction.rule.v1",
+        "DeterministicSeed": 507408,
+        "RuleResolved": true,
+        "DeterministicErrorCode": 0,
+        "SurvivorRatioUsed": 1.0,
+        "GeneratedItemCount": 2,
+        "ExtractedItemIds": [
+            "loot.item.coin.chipped",
+            "loot.item.relic.bronze"
+        ],
+        "LostItemIds": [],
+        "TotalExtractedWorldValue": 10,
+        "TotalExtractedReserveCost": 2,
+        "TotalExtractedTradeableWorldValue": 2
+    },
+    "LootBreakdown": [
+        {
+            "LootId": "loot.item.coin.chipped",
+            "NameKey": "loot.item.coin.chipped.name",
+            "Quantity": 1,
+            "TotalWorldValue": 2,
+            "TotalTradeableWorldValue": 2
+        },
+        {
+            "LootId": "loot.item.relic.bronze",
+            "NameKey": "loot.item.relic.bronze.name",
+            "Quantity": 1,
+            "TotalWorldValue": 8,
+            "TotalTradeableWorldValue": 0
+        }
+    ],
+    "LootHeatCoolingSummary": {
+        "RuleSourceId": "run.loot_heat_cooling.rule.v1",
+        "DeterministicSeed": 507408,
+        "RuleResolved": true,
+        "DeterministicErrorCode": 0,
+        "ExtractedTradeableWorldValueUsed": 2.0,
+        "CoolingPerTradeableWorldValueUsed": 0.1,
+        "UnclampedHeatDelta": -0.2,
+        "AppliedHeatDelta": 0.0,
+        "HeatBeforeCooling": 0.0,
+        "HeatAfterCooling": 0.0
+    },
+    "AdventurerAttractionSummary": {
+        "RuleSourceId": "run.adventurer_attraction.rule.v1",
+        "DeterministicSeed": 507408,
+        "RuleResolved": true,
+        "DeterministicErrorCode": 0,
+        "ExtractedWorldValueUsed": 10.0,
+        "AttractionPerExtractedWorldValueUsed": 1.0,
+        "AttractionSignalValue": 10.0
+    },
+    "AdventurerInterestForecastSummary": {
+        "RuleSourceId": "run.adventurer_interest_forecast.rule.v1",
+        "DeterministicSeed": 507408,
+        "RuleResolved": true,
+        "DeterministicErrorCode": 0,
+        "AttractionSignalUsed": 10.0,
+        "ForecastInterestScore": 10.0,
+        "ForecastBandId": "adventurer_interest.medium"
+    },
+    "AdventurerDemandBudgetSummary": {
+        "RuleSourceId": "run.adventurer_demand_budget.rule.v1",
+        "DeterministicSeed": 507408,
+        "RuleResolved": true,
+        "DeterministicErrorCode": 0,
+        "ForecastBandIdUsed": "adventurer_interest.medium",
+        "ForecastInterestScoreUsed": 10.0,
+        "DemandBudgetScore": 10.0,
+        "DemandBudgetBandId": "adventurer_demand.medium"
+    },
+    "RunHeatDeltaSummary": {
+        "RuleResolved": true,
+        "DeterministicErrorCode": 0,
+        "DeathHeatDelta": 0.0,
+        "EliteDeathHeatDelta": 0.0,
+        "MultipleDeathBonusDelta": 0.0,
+        "SurvivorCoolingDelta": -2.5,
+        "LootCoolingDelta": -0.2,
+        "FinalHeatDelta": -2.7,
+        "RuleSourceIdUsed": "run.heat_delta.rule.v1",
+        "DeterministicSeed": 507408
+    },
+    "RunHeatApplicationSummary": {
+        "RuleResolved": true,
+        "DeterministicErrorCode": 0,
+        "HeatBefore": 0.0,
+        "AppliedDelta": 0.0,
+        "HeatAfter": 0.0,
+        "TierBefore": "heat_tier.peace",
+        "TierAfter": "heat_tier.peace",
+        "TierChanged": false,
+        "RuleSourceIdUsed": "run.heat_application.rule.v1"
+    },
+    "CompositionOutcomeSummary": {
+        "RuleResolved": true,
+        "RuleSourceId": "mvp.composition_outcome.rule.gd11.v1",
+        "PlacementEffects": {
+            "RuleResolved": true,
+            "RuleSourceId": "mvp.placement_effects.rule.gd10.v1",
+            "PathCapacity": 2,
+            "Danger": 3,
+            "ManaPressure": 2,
+            "HeatPressure": 0,
+            "LootBonus": 0,
+            "Attraction": 0,
+            "ContributingOptionIds": [
+                "placement.option.room.basic",
+                "placement.option.monster.skeleton"
+            ],
+            "EffectLocalizationKeys": [
+                "ui.mvp_placement_effects.explanation.room.basic",
+                "ui.mvp_placement_effects.explanation.monster.skeleton"
+            ]
+        },
+        "SuccessChanceDelta": -0.0049999999999999979,
+        "EffectiveManaReserve": 998.0,
+        "ManaReservePressureCost": 2.0,
+        "SurvivorRatioDelta": -0.06,
+        "GeneratedLootMultiplier": 1.0,
+        "ExtractedLootMultiplier": 1.0,
+        "HeatDeltaOffset": 0.0,
+        "AttractionSignalBonus": 0.0
+    },
+    "RunPostureId": "run.posture.balanced",
+    "RoomResolutions": [
+        {
+            "FloorIndex": 0,
+            "RoomIndex": 0,
+            "RoomOptionId": "placement.option.room.basic",
+            "Reached": true,
+            "Cleared": true,
+            "PartyEntering": 5,
+            "SurvivorsLeaving": 5,
+            "Deaths": 0,
+            "StoppedRoute": false,
+            "StopReasonKey": "",
+            "LocalPlacementEffects": {
+                "RuleResolved": true,
+                "RuleSourceId": "mvp.placement_effects.rule.gd10.v1",
+                "PathCapacity": 2,
+                "Danger": 3,
+                "ManaPressure": 2,
+                "HeatPressure": 0,
+                "LootBonus": 0,
+                "Attraction": 0,
+                "ContributingOptionIds": [
+                    "placement.option.room.basic",
+                    "placement.option.monster.skeleton"
+                ],
+                "EffectLocalizationKeys": [
+                    "ui.mvp_placement_effects.explanation.room.basic",
+                    "ui.mvp_placement_effects.explanation.monster.skeleton"
+                ]
+            },
+            "GeneratedLootValue": 10,
+            "CarriedLootValueAfterRoom": 10,
+            "LootLostInRoom": 0,
+            "LocalHeatPressureDelta": 0.0,
+            "CasualtyPressureHeatDelta": 0.0,
+            "CasualtyPressure": 0.18,
+            "CasualtyLootExtractionPenalty": 0.0,
+            "ManaPressureCost": 2.0,
+            "DeterministicSeed": 507408,
+            "RuleSourceId": "mvp.composition_outcome.rule.gd11.v1"
+        }
+    ],
+    "HighestRoomReached": 0,
+    "ClearedRoomCount": 1,
+    "ReachedRoomCount": 1,
+    "ConfiguredRoomCount": 1,
+    "FinalRouteOutcomeKey": "run.route.outcome.cleared",
+    "ConfiguredRoutePlacementEffects": {
+        "RuleResolved": true,
+        "RuleSourceId": "mvp.placement_effects.rule.gd10.v1",
+        "PathCapacity": 2,
+        "Danger": 3,
+        "ManaPressure": 2,
+        "HeatPressure": 0,
+        "LootBonus": 0,
+        "Attraction": 0,
+        "ContributingOptionIds": [
+            "placement.option.room.basic",
+            "placement.option.monster.skeleton"
+        ],
+        "EffectLocalizationKeys": [
+            "ui.mvp_placement_effects.explanation.room.basic",
+            "ui.mvp_placement_effects.explanation.monster.skeleton"
+        ]
+    },
+    "ReachedRoutePlacementEffects": {
+        "RuleResolved": true,
+        "RuleSourceId": "mvp.placement_effects.rule.gd10.v1",
+        "PathCapacity": 2,
+        "Danger": 3,
+        "ManaPressure": 2,
+        "HeatPressure": 0,
+        "LootBonus": 0,
+        "Attraction": 0,
+        "ContributingOptionIds": [
+            "placement.option.room.basic",
+            "placement.option.monster.skeleton"
+        ],
+        "EffectLocalizationKeys": [
+            "ui.mvp_placement_effects.explanation.room.basic",
+            "ui.mvp_placement_effects.explanation.monster.skeleton"
+        ]
+    },
+    "ClearedRewardPlacementEffects": {
+        "RuleResolved": true,
+        "RuleSourceId": "mvp.placement_effects.rule.gd10.v1",
+        "PathCapacity": 2,
+        "Danger": 3,
+        "ManaPressure": 2,
+        "HeatPressure": 0,
+        "LootBonus": 0,
+        "Attraction": 0,
+        "ContributingOptionIds": [
+            "placement.option.room.basic",
+            "placement.option.monster.skeleton"
+        ],
+        "EffectLocalizationKeys": [
+            "ui.mvp_placement_effects.explanation.room.basic",
+            "ui.mvp_placement_effects.explanation.monster.skeleton"
+        ]
+    }
+}
+Economy/history after the existing atomic manual transaction:
+mana=1000; heat=0; nextRunSequence=2; latest=run-1; selected=run-1

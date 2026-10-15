@@ -11,7 +11,8 @@ namespace DungeonBuilder.M0.EditorTools.Tests
         {
             if (!System.Array.Exists(System.Environment.GetCommandLineArgs(), arg => arg == "-c0DiagnosticsSerialImports")) return;
             string project = System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(UnityEngine.Application.dataPath));
-            if (project != "ui-composition-combat-c0-diagnostics-validation-r2" &&
+            if (project != "ui-composition-combat-c0-access-validation" &&
+                project != "ui-composition-combat-c0-diagnostics-validation-r2" &&
                 project != "ui-composition-combat-c0-diagnostics-validation-warm")
                 throw new System.InvalidOperationException("qualification.project.invalid");
             const string key = "qualification.c0.original_import_workers";
@@ -27,11 +28,13 @@ namespace DungeonBuilder.M0.EditorTools.Tests
                 UnityEditor.SessionState.EraseInt(key);
             };
         }
-        [Test] public void FocusedC0OverlayPagesWithoutOverflow()
+        [TestCase(false)]
+        [TestCase(true)]
+        public void FocusedDiagnosticsKeepHistoricalPresentation(bool combatC0)
         {
             var fixture = new DungeonBuilder.Tests.EditMode.BootstrapOverlayPagingTests();
             fixture.SetUp();
-            try { fixture.C0FocusedDiagnosticsUseExistingPagingAndConstrainTextToSafeArea(); }
+            try { fixture.FocusedDiagnosticsPreserveHistoricalOverflowAndIgnoreStalePaging(combatC0); }
             finally { fixture.TearDown(); }
         }
     }

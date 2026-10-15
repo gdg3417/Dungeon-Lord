@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="12" result="Passed" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-15 21:48:09Z" end-time="2026-10-15 21:48:10Z" duration="0.5823815">
+  <test-suite type="TestSuite" id="1000" name="Dungeon Lord" fullname="Dungeon Lord" runstate="Runnable" testcasecount="1993" result="Passed" start-time="2026-10-15 21:48:09Z" end-time="2026-10-15 21:48:10Z" duration="0.582382" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="3313" name="Assembly-CSharp-Editor.dll" fullname="C:/Dev/Dungeon-Lord/Temp/ui-composition-combat-c0-access-validation/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="1993" result="Passed" start-time="2026-10-15 21:48:09Z" end-time="2026-10-15 21:48:10Z" duration="0.554307" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="35604" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="3314" name="DungeonBuilder" fullname="DungeonBuilder" runstate="Runnable" testcasecount="1993" result="Passed" start-time="2026-10-15 21:48:09Z" end-time="2026-10-15 21:48:10Z" duration="0.532230" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="3315" name="M0" fullname="DungeonBuilder.M0" runstate="Runnable" testcasecount="1993" result="Passed" start-time="2026-10-15 21:48:09Z" end-time="2026-10-15 21:48:10Z" duration="0.510826" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="3322" name="EditorTools" fullname="DungeonBuilder.M0.EditorTools" runstate="Runnable" testcasecount="611" result="Passed" start-time="2026-10-15 21:48:09Z" end-time="2026-10-15 21:48:10Z" duration="0.490351" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="3325" name="Tests" fullname="DungeonBuilder.M0.EditorTools.Tests" runstate="Runnable" testcasecount="93" result="Passed" start-time="2026-10-15 21:48:09Z" end-time="2026-10-15 21:48:10Z" duration="0.482109" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="3207" name="CombatC0DiagnosticsEditModeFixtures" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures" classname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures" runstate="Runnable" testcasecount="12" result="Passed" start-time="2026-10-15 21:48:09Z" end-time="2026-10-15 21:48:10Z" duration="0.479943" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="3218" name="AliasesDisambiguateSharedSuffixesIndependentOfCollectionInsertion" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.AliasesDisambiguateSharedSuffixesIndependentOfCollectionInsertion" methodname="AliasesDisambiguateSharedSuffixesIndependentOfCollectionInsertion" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" seed="1556815637" result="Passed" start-time="2026-10-15 21:48:09Z" end-time="2026-10-15 21:48:10Z" duration="0.185836" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="3220" name="BypassWithoutEncounterHasLocationAndDoesNotInventAnEncounterOrPosition" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.BypassWithoutEncounterHasLocationAndDoesNotInventAnEncounterOrPosition" methodname="BypassWithoutEncounterHasLocationAndDoesNotInventAnEncounterOrPosition" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" seed="189135299" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.024216" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="3212" name="CompactAttackReportsActualHealthDamageAndDefeatWithoutMutatingEvidence" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.CompactAttackReportsActualHealthDamageAndDefeatWithoutMutatingEvidence" methodname="CompactAttackReportsActualHealthDamageAndDefeatWithoutMutatingEvidence" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" seed="528903713" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.026313" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="3210" name="FocusedDiagnosticsKeepHistoricalPresentation" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.FocusedDiagnosticsKeepHistoricalPresentation" classname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.060957" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3208" name="FocusedDiagnosticsKeepHistoricalPresentation(False)" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.FocusedDiagnosticsKeepHistoricalPresentation(False)" methodname="FocusedDiagnosticsKeepHistoricalPresentation" classname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures" runstate="Runnable" seed="1439918677" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.057887" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3209" name="FocusedDiagnosticsKeepHistoricalPresentation(True)" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.FocusedDiagnosticsKeepHistoricalPresentation(True)" methodname="FocusedDiagnosticsKeepHistoricalPresentation" classname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures" runstate="Runnable" seed="2016085628" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.001102" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-case id="3219" name="HistoricalB1MemberTextRemainsExact" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.HistoricalB1MemberTextRemainsExact" methodname="HistoricalB1MemberTextRemainsExact" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" seed="305932188" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.006955" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="3217" name="LocalizedNonAttacksDoNotInventDamage" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.127807" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3213" name="LocalizedNonAttacksDoNotInventDamage(Eligibility,LineOfSightBlocked)" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(Eligibility,LineOfSightBlocked)" methodname="LocalizedNonAttacksDoNotInventDamage" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" seed="1045356254" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.023337" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3214" name="LocalizedNonAttacksDoNotInventDamage(Skipped,DefeatedBeforeAction)" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(Skipped,DefeatedBeforeAction)" methodname="LocalizedNonAttacksDoNotInventDamage" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" seed="2091330453" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.022914" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3215" name="LocalizedNonAttacksDoNotInventDamage(EncounterComplete,DefendersDefeated)" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(EncounterComplete,DefendersDefeated)" methodname="LocalizedNonAttacksDoNotInventDamage" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" seed="721345957" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.023899" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3216" name="LocalizedNonAttacksDoNotInventDamage(Bypass,OutOfRange)" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(Bypass,OutOfRange)" methodname="LocalizedNonAttacksDoNotInventDamage" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" seed="1461407740" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.054750" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-case id="3211" name="NumericNullableCoordinatesAndActionFormattingAreInvariant" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.NumericNullableCoordinatesAndActionFormattingAreInvariant" methodname="NumericNullableCoordinatesAndActionFormattingAreInvariant" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" seed="732625010" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.028993" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="3221" name="ReplayDistinguishesC0FromMissingHistoricalEvidenceWithoutEnablingIt" fullname="DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.ReplayDistinguishesC0FromMissingHistoricalEvidenceWithoutEnablingIt" methodname="ReplayDistinguishesC0FromMissingHistoricalEvidenceWithoutEnablingIt" classname="DungeonBuilder.M0.Tests.EditMode.CombatC0DiagnosticsTests" runstate="Runnable" seed="1859912565" result="Passed" start-time="2026-10-15 21:48:10Z" end-time="2026-10-15 21:48:10Z" duration="0.007190" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

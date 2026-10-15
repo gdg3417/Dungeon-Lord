@@ -205,6 +205,8 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator FloorHudStatesAndInput()
         { yield return Invoke("FloorHudStatesAndInputCapture"); }
 
+        [UnityTest] public IEnumerator CombatC0ProductionEvidenceExport() { yield return Invoke("CombatC0ProductionEvidenceExport"); }
+
         private IEnumerator Invoke(string method) => (IEnumerator)fixtureType.GetMethod(method,
             BindingFlags.Public | BindingFlags.Instance).Invoke(fixture, null);
     }

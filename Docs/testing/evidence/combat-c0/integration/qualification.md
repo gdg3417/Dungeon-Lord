@@ -1,5 +1,7 @@
 # Production Combat C0 qualification — 2026-10-14
 
+> **2026-10-15 owner-approved acceptance addendum:** raw combat diagnostics navigation is not a player-facing C0 requirement. Authoritative ordered event records and automated HP/geometry/transaction tests establish mechanical correctness; C1 owns visible attacks, HP changes and graphical playback. The later overlay paging/masking correction is reverted and has focused validation only. Earlier full-suite/build results below remain historical. Final required qualification is to be determined by external review before any new full suites or Windows build. See [current evidence and limitations](../authoritative-20261015/qualification.md).
+
 Status: **Production integration and automated qualification passed; ready for external review. PR #238 remains draft and unmerged. Owner Editor/standalone gameplay UAT is pending.** Configuration and technical policies were explicitly approved in the owner's continuation instruction; no C0 tuning decision remains unapproved. C1/C2 are deferred.
 
 Repository `gdg3417/Dungeon-Lord`, branch `codex/combat-c0-deterministic-combat`, main baseline `eb80df1e3fd09c18aedb062afc108eb941deb8a3`, reviewed prerequisite head `c0dba584f1d1b9f10ccc50bf51fc26c831c5f81e`. Final fetch confirmed both remote references unchanged before publication.

@@ -1,0 +1,65 @@
+[
+  {
+    "path": "Assets/_Project/Editor/DungeonSpatial/Tests/CombatC0DiagnosticsNavigationSceneTests.cs",
+    "bytes": 3541,
+    "sha256": "3651ab6d26f1b1cacaec02e665af1daed507f00c8430eb79f4d61a7686d7493f",
+    "archived_sha256": "3651ab6d26f1b1cacaec02e665af1daed507f00c8430eb79f4d61a7686d7493f",
+    "archived_log_credentials_redacted": false
+  },
+  {
+    "path": "Assets/_Project/Editor/DungeonSpatial/Tests/CombatC0DiagnosticsNavigationSceneTests.cs.meta",
+    "bytes": 251,
+    "sha256": "a87341b610a00499ed8503cb21490b5d751b6a502e14e6f759ce0e10a2888b5e",
+    "archived_sha256": "a87341b610a00499ed8503cb21490b5d751b6a502e14e6f759ce0e10a2888b5e",
+    "archived_log_credentials_redacted": false
+  },
+  {
+    "path": "Tools/Presentation/qualify_combat_c0_access.py",
+    "bytes": 820,
+    "sha256": "e3a4dd3e99cd7ed9e5d0a924761bbe1d4b935d67f899039c0cf14f685723c402",
+    "archived_sha256": "e3a4dd3e99cd7ed9e5d0a924761bbe1d4b935d67f899039c0cf14f685723c402",
+    "archived_log_credentials_redacted": false
+  },
+  {
+    "path": "TestResults/combat-c0-access-baseline.xml",
+    "bytes": 13162,
+    "sha256": "7def956ef68a71e1753a425e7eaaa5fd788561c6bbfa13b8ebda6239aae4b36f",
+    "archived_sha256": "7def956ef68a71e1753a425e7eaaa5fd788561c6bbfa13b8ebda6239aae4b36f",
+    "archived_log_credentials_redacted": false
+  },
+  {
+    "path": "TestResults/combat-c0-access-input-trace.xml",
+    "bytes": 8356,
+    "sha256": "747470cf48eaeeeaba016183f3ddb8253aab1982366a2b85f5085b3e1b3778e9",
+    "archived_sha256": "747470cf48eaeeeaba016183f3ddb8253aab1982366a2b85f5085b3e1b3778e9",
+    "archived_log_credentials_redacted": false
+  },
+  {
+    "path": "Temp/combat-c0-access-baseline.log",
+    "bytes": 217050,
+    "sha256": "beaf35935ec606743427decbf0b6a86d4c788e1ee469a13a97f875a0a72ed22f",
+    "archived_sha256": "1d6b0840ec9dca4f289f3ef3cd245fe2dbf615a250980259149c0bcacb00e53f",
+    "archived_log_credentials_redacted": true
+  },
+  {
+    "path": "Temp/combat-c0-access-input-trace.log",
+    "bytes": 60063,
+    "sha256": "da2d1673a4484acdd24dc171a26b889c5fb564dc2ffa9fb257451eec94bc06cf",
+    "archived_sha256": "357e1916a07c556b3369487a87e6c0e6821acaf9c225a92f00a8aefd269ec74c",
+    "archived_log_credentials_redacted": true
+  },
+  {
+    "path": "TestResults/combat-c0-access/preservation-before.json",
+    "bytes": 4094862,
+    "sha256": "8cb1a68da6b7cc883146dc7e181c2597d95b6641cdc775dfcc8e19706449fa4f",
+    "archived_sha256": "8cb1a68da6b7cc883146dc7e181c2597d95b6641cdc775dfcc8e19706449fa4f",
+    "archived_log_credentials_redacted": false
+  },
+  {
+    "path": "TestResults/combat-c0-access/preservation-after.json",
+    "bytes": 5697924,
+    "sha256": "a0344cdf84f34b16730172f3fa9f6803e520daca6378835c53272d9cb7074eed",
+    "archived_sha256": "a0344cdf84f34b16730172f3fa9f6803e520daca6378835c53272d9cb7074eed",
+    "archived_log_credentials_redacted": false
+  }
+]

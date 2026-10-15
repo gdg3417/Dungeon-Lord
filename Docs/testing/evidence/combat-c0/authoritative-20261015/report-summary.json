@@ -1,0 +1,147 @@
+{
+  "tested_base_commit": "404251f71150b1de317cd1707b9dc2fdda9e508f",
+  "qualification_scope": "Focused only; final full-suite/build requirements deferred to external review",
+  "unity": "6000.3.2f1 (a9779f353c9b)",
+  "project": "Temp/ui-composition-combat-c0-access-validation",
+  "fallback_namespace": "combat-c0-access-validation-20261015.json",
+  "actual_test_namespace": "phase7a4-scene-b9f8f92e4e3c4ead83751292de45416d.json",
+  "event_report_sha256": "bcfdb4c5adc8fc791f3faebdb227386613290beba50c8cfbfb0ea15f8811f9fe",
+  "event_count": 18,
+  "reports": [
+    {
+      "file": "combat-c0-authoritative-focused-editmode.xml",
+      "sha256": "be4cecf96867538b900319de28409cf9a0975a5fb0455b1845068b033572e3e3",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "12",
+        "result": "Passed",
+        "total": "12",
+        "passed": "12",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-15 21:48:09Z",
+        "end-time": "2026-10-15 21:48:10Z",
+        "duration": "0.5823815"
+      },
+      "cases": [
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.AliasesDisambiguateSharedSuffixesIndependentOfCollectionInsertion",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.BypassWithoutEncounterHasLocationAndDoesNotInventAnEncounterOrPosition",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.CompactAttackReportsActualHealthDamageAndDefeatWithoutMutatingEvidence",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.FocusedDiagnosticsKeepHistoricalPresentation(False)",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.FocusedDiagnosticsKeepHistoricalPresentation(True)",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.HistoricalB1MemberTextRemainsExact",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(Eligibility,LineOfSightBlocked)",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(Skipped,DefeatedBeforeAction)",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(EncounterComplete,DefendersDefeated)",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(Bypass,OutOfRange)",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.NumericNullableCoordinatesAndActionFormattingAreInvariant",
+          "result": "Passed"
+        },
+        {
+          "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.ReplayDistinguishesC0FromMissingHistoricalEvidenceWithoutEnablingIt",
+          "result": "Passed"
+        }
+      ]
+    },
+    {
+      "file": "combat-c0-authoritative-production-path.xml",
+      "sha256": "69420eb78aaefa72e0c3662bd010a981be6bdce179419e58996fb68c603645b1",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "1",
+        "result": "Passed",
+        "total": "1",
+        "passed": "1",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-15 21:49:25Z",
+        "end-time": "2026-10-15 21:49:26Z",
+        "duration": "1.6306859"
+      },
+      "cases": [
+        {
+          "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC0ProductionEvidenceExport",
+          "result": "Passed"
+        }
+      ]
+    },
+    {
+      "file": "combat-c0-authoritative-production-path-final.xml",
+      "sha256": "d0f403a1d2f4de22632d45d35080810ca650d72988569948e035ddb6e5ccd7ab",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "1",
+        "result": "Passed",
+        "total": "1",
+        "passed": "1",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-15 21:53:41Z",
+        "end-time": "2026-10-15 21:53:42Z",
+        "duration": "1.4333602"
+      },
+      "cases": [
+        {
+          "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC0ProductionEvidenceExport",
+          "result": "Passed"
+        }
+      ]
+    }
+  ],
+  "strict_input_count": 1298,
+  "protected_files": 14442,
+  "changed_protected_files": 0,
+  "frozen_b1_sha256": "197793b3b6f4dd127b0e96ce3003f3bee58138e58a81ee1d7dec13b2374dc8fb",
+  "frozen_b1_unchanged": true,
+  "owner_project_refreshed": false,
+  "full_suites_rerun": false,
+  "windows_rebuilt": false,
+  "initial_event_report_sha256": "1e50cec4c8f4f48e13a603e8d079a1688470bb084d7464c421fe8298868af3c3",
+  "final_production_test_source_sha256": "b8b5b974dec8475f66d6fc866db2ba3dee60346758e04b43a85f9a5d17ca3524",
+  "raw_export_sha256": "cea85bd9ee331648c8aa5a873740f592e90dd0f0ca29e10b3fe7fb8efcd0bd06",
+  "raw_initial_export_sha256": "42e9c95ffd67a5c55338bb8708c3d5ad2f8f75682d30eb2da1bf8ad2cf4739c5",
+  "review_artifact_normalization": "CRLF -> LF only; raw exports retained in final support ZIP"
+}

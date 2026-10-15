@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-15 21:53:41Z" end-time="2026-10-15 21:53:42Z" duration="1.4333602">
+  <test-suite type="TestSuite" id="4953" name="Dungeon Lord" fullname="Dungeon Lord" runstate="Runnable" testcasecount="3428" result="Passed" start-time="2026-10-15 21:53:41Z" end-time="2026-10-15 21:53:42Z" duration="1.433360" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="4945" name="DungeonLord.WindowsStandaloneQualification.dll" fullname="C:/Dev/Dungeon-Lord/Temp/ui-composition-combat-c0-access-validation/Library/ScriptAssemblies/DungeonLord.WindowsStandaloneQualification.dll" runstate="Runnable" testcasecount="60" result="Passed" start-time="2026-10-15 21:53:41Z" end-time="2026-10-15 21:53:42Z" duration="1.376689" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="34024" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="4946" name="DungeonBuilder" fullname="DungeonBuilder" runstate="Runnable" testcasecount="60" result="Passed" start-time="2026-10-15 21:53:41Z" end-time="2026-10-15 21:53:42Z" duration="1.375740" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="4947" name="M0" fullname="DungeonBuilder.M0" runstate="Runnable" testcasecount="60" result="Passed" start-time="2026-10-15 21:53:41Z" end-time="2026-10-15 21:53:42Z" duration="1.375032" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="4948" name="Tests" fullname="DungeonBuilder.M0.Tests" runstate="Runnable" testcasecount="60" result="Passed" start-time="2026-10-15 21:53:41Z" end-time="2026-10-15 21:53:42Z" duration="1.374354" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="4949" name="PlayMode" fullname="DungeonBuilder.M0.Tests.PlayMode" runstate="Runnable" testcasecount="60" result="Passed" start-time="2026-10-15 21:53:41Z" end-time="2026-10-15 21:53:42Z" duration="1.373614" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="4890" name="PhaseSevenA4ProductionShellPlayModeTests" fullname="DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests" classname="DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests" runstate="Runnable" testcasecount="54" result="Passed" start-time="2026-10-15 21:53:41Z" end-time="2026-10-15 21:53:42Z" duration="1.372110" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="4944" name="CombatC0ProductionEvidenceExport" fullname="DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC0ProductionEvidenceExport" methodname="CombatC0ProductionEvidenceExport" classname="DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests" runstate="Runnable" seed="619364490" result="Passed" start-time="2026-10-15 21:53:41Z" end-time="2026-10-15 21:53:42Z" duration="1.360074" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Isolated scene boot 1: phase7a4-scene-b9f8f92e4e3c4ead83751292de45416d.json
+[2026-10-15 21:53:41 UTC] [INFO] Entered BootState.
+[2026-10-15 21:53:41 UTC] [INFO] Saved canonical complete save. Reason: Boot
+[2026-10-15 21:53:41 UTC] [INFO] M0 init complete.
+[2026-10-15 21:53:41 UTC] [INFO] Entered HomeStubState.
+[2026-10-15 21:53:41 UTC] [INFO] Saved canonical complete save. Reason: StateChange
+Complete authoritative evidence: C:\Dev\Dungeon-Lord\Temp\ui-composition-combat-c0-access-validation\TestResults\combat-c0-authoritative\production-path-run-1-phase7a4-scene-b9f8f92e4e3c4ead83751292de45416d.txt
+Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
