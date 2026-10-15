@@ -45,8 +45,12 @@ with zipfile.ZipFile(OUT/'qualification-support.zip', 'w', zipfile.ZIP_DEFLATED)
         if path.is_file(): archive.write(path, path.name)
     for path in sorted((ROOT/'Temp').glob('combat-c0-diagnostics-*.log')):
         archive.writestr('logs/'+path.name, redact(path.read_text(encoding='utf-8-sig', errors='replace')))
+    for directory in ('native-import-failure', 'native-import-retry'):
+        for path in sorted((ROOT/'TestResults/combat-c0-diagnostics'/directory).glob('*')):
+            if path.is_file():
+                archive.writestr(directory+'/'+path.name, redact(path.read_text(encoding='utf-8-sig', errors='replace')))
 
-build = ROOT/'Temp/ui-composition-combat-c0-diagnostics-validation/Builds/Development/Windows-combat-c0-integration'
+build = ROOT/'Temp/ui-composition-combat-c0-diagnostics-validation-r2/Builds/Development/Windows-combat-c0-integration'
 report = json.loads((build/'build-report.json').read_text())
 files = sorted(p for p in build.rglob('*') if p.is_file())
 namespace = 'combat-c0-diagnostics-validation-20261015.json'

@@ -1283,22 +1283,36 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(_overlay.overlayText.overflowMode, Is.EqualTo(TextOverflowModes.Masking));
             _overlayObject.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             _textObject.transform.SetParent(_overlayObject.transform, false);
-            _overlay.overlayText.font = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
+            var sourceFont = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
                 "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset");
+            // Unicode layout must not populate the project's shared dynamic fallback atlas.
+            var transientFont = TMP_FontAsset.CreateFontAsset(UnityEditor.AssetDatabase.LoadAssetAtPath<Font>(
+                "Assets/TextMesh Pro/Fonts/LiberationSans.ttf"));
+            _overlay.overlayText.font = transientFont;
             _overlay.overlayText.fontSize = 20;
             _overlay.overlayText.enableAutoSizing = false;
             // Exercise the same safe-area widths as the existing desktop policy tests.
-            foreach (var size in new[] { new Vector2(1024, 768), new Vector2(1280, 720), new Vector2(1920, 1080) })
+            try
             {
-                var area = BootstrapOverlay.CalculateOverlayTextSafeArea(size.x, size.y, false);
-                var text = _overlay.overlayText;
-                text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, area.width);
-                text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, area.height);
-                text.text = "E1 R1 #7 A1 → M1: Attack: HP 3 → 0, damage 3; defeated\n  (1,2) → (2,2)";
-                Canvas.ForceUpdateCanvases();
-                text.ForceMeshUpdate(true, true);
-                Assert.That(text.textInfo.lineCount, Is.GreaterThanOrEqualTo(2));
-                Assert.That(text.textInfo.lineInfo.Take(text.textInfo.lineCount).All(line => line.maxAdvance <= area.width + 1), Is.True);
+                foreach (var size in new[] { new Vector2(1024, 768), new Vector2(1280, 720), new Vector2(1920, 1080) })
+                {
+                    var area = BootstrapOverlay.CalculateOverlayTextSafeArea(size.x, size.y, false);
+                    var text = _overlay.overlayText;
+                    text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, area.width);
+                    text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, area.height);
+                    text.text = "E1 R1 #7 A1 → M1: Attack: HP 3 → 0, damage 3; defeated\n  (1,2) → (2,2)";
+                    Canvas.ForceUpdateCanvases();
+                    text.ForceMeshUpdate(true, true);
+                    Assert.That(text.textInfo.lineCount, Is.GreaterThanOrEqualTo(2));
+                    Assert.That(text.textInfo.lineInfo.Take(text.textInfo.lineCount).All(line => line.maxAdvance <= area.width + 1), Is.True);
+                }
+            }
+            finally
+            {
+                _overlay.overlayText.font = sourceFont;
+                foreach (var texture in transientFont.atlasTextures) Object.DestroyImmediate(texture);
+                Object.DestroyImmediate(transientFont.material);
+                Object.DestroyImmediate(transientFont);
             }
         }
 
