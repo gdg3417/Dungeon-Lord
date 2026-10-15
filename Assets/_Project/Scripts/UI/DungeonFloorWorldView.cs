@@ -560,7 +560,7 @@ namespace DungeonBuilder.M0
             bounds=Rect.MinMaxRect(cells.Min(t=>t.X),cells.Min(t=>t.Y),cells.Max(t=>t.X)+1,cells.Max(t=>t.Y)+1); return true;
         }
         private void OnDestroy()
-        { foreach (Tile tile in ownedTiles) Release(tile); Release(sprite); Release(anchorSprite); Release(anchorTexture); Release(placementGridSprite); Release(placementGridTexture); }
+        { foreach (Tile tile in ownedTiles) Release(tile); Release(sprite); Release(anchorSprite); Release(anchorTexture); Release(placementGridSprite); Release(placementGridTexture); Release(replayAttackMaterial); }
         private static void Release(UnityEngine.Object value)
         { if (value == null) return; if (Application.isPlaying) Destroy(value); else DestroyImmediate(value); }
     }

@@ -87,15 +87,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(text, Does.Contain("floor.b").And.Contain("room").And.Contain("Bypass"));
             Assert.That(text, Does.Not.Contain("E1 =").And.Not.Contain("damage").And.Not.Contain("TileCoordinate"));
         }
-        [Test] public void ReplayDistinguishesC0FromMissingHistoricalEvidenceWithoutEnablingIt()
+        [Test] public void ReplayRequiresTransientDetailsForBothC0AndHistoricalRuns()
         {
             var outcome = Outcome();
             Assert.That(DungeonRunReplay.TryCreate(outcome, null, null, null, null, null, out _, out var reason), Is.False);
-            Assert.That(reason, Is.EqualTo("ui.dungeon.replay.combat_c0"));
+            Assert.That(reason, Is.EqualTo(DungeonRunReplay.Missing));
             outcome.CombatExecutable = null;
             Assert.That(DungeonRunReplay.TryCreate(outcome, null, null, null, null, null, out _, out var historical), Is.False);
             Assert.That(historical, Is.EqualTo(DungeonRunReplay.Missing));
-            Assert.That(Localize(reason, reason), Does.Contain("C1").And.Contain("Run Diagnostics"));
+            Assert.That(Localize(reason, reason), Does.Contain("saved history"));
             Assert.That(Localize(historical, historical), Does.Contain("saved history").And.Not.Contain("new manual run"));
         }
     }

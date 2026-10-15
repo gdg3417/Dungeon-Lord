@@ -206,6 +206,9 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         { yield return Invoke("FloorHudStatesAndInputCapture"); }
 
         [UnityTest] public IEnumerator CombatC0ProductionEvidenceExport() { yield return Invoke("CombatC0ProductionEvidenceExport"); }
+        [UnityTest] public IEnumerator CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence() { yield return Invoke("CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence"); }
+        [UnityTest] public IEnumerator CombatC1EditSuspensionLayoutInvalidationAndPinnedRun() { yield return Invoke("CombatC1EditSuspensionLayoutInvalidationAndPinnedRun"); }
+        [UnityTest] public IEnumerator CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers() { yield return Invoke("CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers"); }
 
         private IEnumerator Invoke(string method) => (IEnumerator)fixtureType.GetMethod(method,
             BindingFlags.Public | BindingFlags.Instance).Invoke(fixture, null);

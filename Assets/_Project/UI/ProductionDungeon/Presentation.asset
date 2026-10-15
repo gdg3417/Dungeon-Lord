@@ -13,6 +13,14 @@ MonoBehaviour:
   m_Name: Presentation
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.M0.DungeonPresentationPolicy
   Visuals: {fileID: 11400000, guid: bfd473850f6a23e448d64470e2a92e9e, type: 2}
+  ReplayCombatActionSeconds: 1.2
+  MaximumReplayCombatEvents: 32768
+  MaximumReplayCombatActors: 64
+  MaximumReplayCombatStateChanges: 131072
+  ReplayAttackWidth: 0.08
+  ReplayActorLabelWidth: 42
+  ReplayActorLabelOffset: 24
+  ReplayActorTextSize: 16
   ReferenceShortSide: 720
   SelectionColor: {r: 0.96, g: 0.76, b: 0.37, a: 1}
   SmallText: 16

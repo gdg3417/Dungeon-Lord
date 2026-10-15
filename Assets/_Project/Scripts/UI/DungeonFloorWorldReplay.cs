@@ -13,6 +13,13 @@ namespace DungeonBuilder.M0
         private readonly List<SpriteRenderer> replayCasualtyPool = new List<SpriteRenderer>();
         private readonly List<ReplayBinding> replayBindings = new List<ReplayBinding>();
         private DungeonRunReplay boundReplay;
+        private readonly List<CombatBinding> combatBindings = new List<CombatBinding>();
+        private LineRenderer replayAttack;
+        private Material replayAttackMaterial;
+        private sealed class CombatBinding
+        { internal int Actor; internal SpriteRenderer View; internal Vector3 Position; internal Color Color; internal int Order; }
+        public bool ReplayAttackVisible => replayAttack != null && replayAttack.gameObject.activeSelf;
+        public int ReplayDefenderCount => combatBindings.Count;
         private sealed class ReplayBinding
         {
             internal int FrameIndex;
@@ -28,6 +35,10 @@ namespace DungeonBuilder.M0
         public int ReplayCasualtyCount { get; private set; }
         public void HideReplay()
         {
+            foreach (var binding in combatBindings)
+            { binding.View.transform.localPosition=binding.Position; binding.View.color=binding.Color; binding.View.sortingOrder=binding.Order; }
+            combatBindings.Clear();
+            if (replayAttack != null) replayAttack.gameObject.SetActive(false);
             foreach (var binding in replayBindings)
             {
                 if (!binding.Canonical) binding.Content.gameObject.SetActive(false);
@@ -48,6 +59,16 @@ namespace DungeonBuilder.M0
         private void BindReplay(DungeonRunReplay replay)
         {
             HideReplay(); boundReplay = replay;
+            if (replay.Combat != null)
+                for (int a=0;a<replay.Combat.Actors.Count;a++)
+                {
+                    var actor=replay.Combat.Actors[a];
+                    if (!actor.IsMonster || actor.FloorId!=FloorInstanceId) continue;
+                    for (int i=0;i<identities.Count;i++)
+                        if (identities[i].AssignmentId==actor.AssignmentId)
+                        { var view=pool[i]; combatBindings.Add(new CombatBinding { Actor=a, View=view,
+                            Position=view.transform.localPosition, Color=view.color, Order=view.sortingOrder }); break; }
+                }
             int added = 0, casualties = 0;
             foreach (int index in replay.InteractionIndices)
             {
@@ -116,6 +137,7 @@ namespace DungeonBuilder.M0
             replayMarker.gameObject.SetActive(onFloor && current.HasMarker);
             if (onFloor) replayMarker.transform.localPosition = current.MarkerPosition;
             replayMarker.color = policy.ReplayEngagingColor;
+            PresentCombat(replay,onFloor);
             ReplayCasualtyCount = 0;
             foreach (var binding in replayBindings)
             {
@@ -143,6 +165,36 @@ namespace DungeonBuilder.M0
                     if (visible) ReplayCasualtyCount++;
                 }
             }
+        }
+        private void PresentCombat(DungeonRunReplay replay, bool onFloor)
+        {
+            if (replay.Combat==null) return;
+            foreach (var binding in combatBindings)
+            {
+                var actor=replay.Combat.Actors[binding.Actor]; var state=actor.At(replay.Index);
+                binding.View.transform.localPosition=state.Position;
+                binding.View.color=state.Health==0 ? policy.ReplayResolvedColor :
+                    replay.Current.ActorIndex==binding.Actor || replay.Current.TargetIndex==binding.Actor ? policy.ReplayEngagingColor : binding.Color;
+                binding.View.sortingOrder=state.Health==0 ? binding.Order : 3;
+            }
+            var e=replay.Current.Combat;
+            bool attack=onFloor && e?.Kind==CombatC0EventKind.Attack && replay.DamageVisible;
+            if (attack && replayAttack==null)
+            {
+                var child=new GameObject("RecordedAttack",typeof(LineRenderer)); child.layer=gameObject.layer;
+                child.transform.SetParent(transform,false); replayAttack=child.GetComponent<LineRenderer>();
+                replayAttack.useWorldSpace=false; replayAttack.positionCount=2; replayAttack.sortingOrder=7;
+                replayAttackMaterial=new Material(Shader.Find("Sprites/Default")); replayAttack.sharedMaterial=replayAttackMaterial;
+                replayAttack.startWidth=replayAttack.endWidth=policy.ReplayAttackWidth;
+                replayAttack.startColor=replayAttack.endColor=policy.ReplayEngagingColor;
+            }
+            if (replayAttack==null) return;
+            replayAttack.gameObject.SetActive(attack);
+            if (!attack) return;
+            replayAttack.SetPosition(0,replay.Combat.Actors[replay.Current.ActorIndex].IsMonster ?
+                replay.Combat.Actors[replay.Current.ActorIndex].At(replay.Index).Position : replay.Current.Position);
+            replayAttack.SetPosition(1,replay.Combat.Actors[replay.Current.TargetIndex].IsMonster ?
+                replay.Combat.Actors[replay.Current.TargetIndex].At(replay.Index).Position : replay.Current.Position);
         }
     }
 }

@@ -2,6 +2,7 @@
 .safe-root { position: absolute; color: var(--ink); }
 .replay-panel { display: none; flex-shrink: 0; }
 .replay-details { flex-shrink: 1; }
+.replay-actor { position: absolute; background-color: rgba(18, 22, 30, 0.92); border-radius: 3px; padding: 2px; white-space: normal; -unity-text-align: middle-center; }
 #replayAvailability { display: none; }
 .top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/panel.png"); -unity-slice-left: 14; -unity-slice-right: 14; -unity-slice-top: 14; -unity-slice-bottom: 14; }
 .top-chrome { flex-shrink: 0; }
