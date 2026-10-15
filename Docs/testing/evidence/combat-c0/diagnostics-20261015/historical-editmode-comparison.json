@@ -1,0 +1,17 @@
+{
+  "removed": [],
+  "added": [
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.AliasesDisambiguateSharedSuffixesIndependentOfCollectionInsertion",
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.BypassWithoutEncounterHasLocationAndDoesNotInventAnEncounterOrPosition",
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.CompactAttackReportsActualHealthDamageAndDefeatWithoutMutatingEvidence",
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.FocusedC0OverlayPagesWithoutOverflow",
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.HistoricalB1MemberTextRemainsExact",
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(Bypass,OutOfRange)",
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(Eligibility,LineOfSightBlocked)",
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(EncounterComplete,DefendersDefeated)",
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.LocalizedNonAttacksDoNotInventDamage(Skipped,DefeatedBeforeAction)",
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.NumericNullableCoordinatesAndActionFormattingAreInvariant",
+    "DungeonBuilder.M0.EditorTools.Tests.CombatC0DiagnosticsEditModeFixtures.ReplayDistinguishesC0FromMissingHistoricalEvidenceWithoutEnablingIt"
+  ],
+  "changed": []
+}

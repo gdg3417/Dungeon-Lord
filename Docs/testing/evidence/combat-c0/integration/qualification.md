@@ -70,3 +70,8 @@ Initial compile attempts found a missing namespace, a test referring to an absen
 Final reports have zero failing cases and zero C# compiler errors/warnings. Logs may include existing licensing/debugger/native-service messages and expected test diagnostics. Earlier failed reports and available logs remain archived; default Editor.log from the first compile attempts was overwritten by subsequent supported runs, so no complete raw log is claimed for those attempts.
 
 No blocking implementation/static-review finding remains. External review and owner UAT remain pending. Shared party anchor, fixed basic attacks, confirmed-boundary-only production LOS, developer evidence presentation, no durable C0 checkpoint and no detailed evidence after reopen are deliberate C0 limitations. C1 presentation, C2 persistence/recovery/reserve and automatic Living Dungeon activation remain separate.
+
+
+## 2026-10-15 diagnostics correction addendum
+
+The owner's first Editor UAT loaded both existing floors and completed reciprocal C0 `run-68`. It exposed numeric-coordinate formatting and diagnostics overflow defects. The focused correction, new tests, later qualification attempts and final results are recorded separately in [diagnostics-readability.md](../diagnostics-readability.md). Earlier integration reports/artifacts above remain historical and are not overwritten. PR #238 remains draft/unmerged; external re-review precedes further owner UAT. No C1 replay or C2 work is included.

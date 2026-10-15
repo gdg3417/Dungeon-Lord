@@ -52,14 +52,18 @@ with zipfile.ZipFile(ROOT/'Docs/testing/evidence/combat-c0/integration/qualifica
             current = ET.parse(path).getroot()
         if int(current.get('total', '0')) == 0 or current.get('failed') != '0': raise ValueError('Full suite did not pass')
         old = ET.fromstring(baseline.read('combat-c0-integration-full-'+mode+'.xml'))
-        def cases(run): return {c.get('fullname'): (c.get('result'), c.findtext('reason/message')) for c in run.iter('test-case')}
+        def cases(run):
+            result = {}
+            for case in run.iter('test-case'):
+                result.setdefault(case.get('fullname'), []).append((case.get('result'), case.findtext('reason/message')))
+            return {key: sorted(values) for key, values in result.items()}
         before, after = cases(old), cases(current)
         comparison = dict(removed=sorted(before.keys()-after.keys()), added=sorted(after.keys()-before.keys()),
             changed=[name for name in before.keys() & after.keys() if before[name] != after[name]])
         write('historical-'+mode+'-comparison.json', comparison)
         if comparison['removed'] or comparison['changed']: raise ValueError('Historical test result changed')
         if mode == 'editmode':
-            focused = ET.parse(ROOT/'TestResults/combat-c0-diagnostics-focused-final03.xml').getroot()
+            focused = ET.parse(ROOT/'TestResults/combat-c0-diagnostics-focused-static.xml').getroot()
             if after.keys() != before.keys() | cases(focused).keys(): raise ValueError('EditMode inventory coverage differs')
 
 with zipfile.ZipFile(OUT/'qualification-support.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
