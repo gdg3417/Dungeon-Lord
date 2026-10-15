@@ -31,7 +31,8 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(CombatC0Diagnostics.Events(run).Any(e => e.Kind == CombatC0EventKind.Attack && e.Damage > 0), Is.True);
             Assert.That(root.Save.runHistory.NextRunSequence, Is.EqualTo(sequence+1));
             Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana));
-            Assert.That(RunPartyDiagnosticsPresenter.Build(run, root.Content.GetString), Does.Contain("Combat #"));
+            string diagnostics = RunPartyDiagnosticsPresenter.Build(run, root.Content.GetString);
+            Assert.That(diagnostics, Does.Contain("E1 R").And.Contain("damage").And.Not.Contain("TileCoordinate"));
             Assert.That(controller.StartReplay(), Is.False);
             Assert.That(File.ReadAllText(root.SaveService.SavePath), Does.Not.Contain("CombatEvents").And.Not.Contain("CombatMonsters"));
             yield return null;

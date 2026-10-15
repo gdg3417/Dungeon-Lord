@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using TMPro;
+using System.Linq;
 using UnityEngine;
 
 namespace DungeonBuilder.Tests.EditMode
@@ -1259,6 +1260,46 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(smokeText, Does.Contain("Run simulated."));
             Assert.That(smokeText, Does.Contain("Heat: 8 -> 8"));
             Assert.That(smokeText, Does.Not.Contain(firstFeedback));
+        }
+
+        [Test]
+        public void C0FocusedDiagnosticsUseExistingPagingAndConstrainTextToSafeArea()
+        {
+            SetSave(new SaveData { runHistory = new RunHistoryState { LatestOutcome = new RunOutcomeRecord {
+                CombatExecutable = DungeonBuilder.M0.Gameplay.RunSimulation.CombatC0Config.Executable } } });
+            SetLine("<RunSurvivalLine>k__BackingField", string.Join("\n", Enumerable.Range(0, 20).Select(i => "combat-row-" + i)));
+            _overlay.ToggleRunDiagnosticsFocus();
+            string first = RefreshText();
+            Assert.That(first, Does.Not.Contain("combat-row-19"));
+            string last = first;
+            for (int i = 0; i < 40 && !last.Contains("combat-row-19"); i++)
+            {
+                _overlay.ScrollFullDiagnosticsLines(1);
+                last = RefreshText();
+            }
+            Assert.That(last, Does.Contain("combat-row-19"));
+            Assert.That(last, Is.Not.EqualTo(first));
+            Assert.That(_overlay.overlayText.textWrappingMode, Is.EqualTo(TextWrappingModes.Normal));
+            Assert.That(_overlay.overlayText.overflowMode, Is.EqualTo(TextOverflowModes.Masking));
+            _overlayObject.AddComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+            _textObject.transform.SetParent(_overlayObject.transform, false);
+            _overlay.overlayText.font = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
+                "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset");
+            _overlay.overlayText.fontSize = 20;
+            _overlay.overlayText.enableAutoSizing = false;
+            // Exercise the same safe-area widths as the existing desktop policy tests.
+            foreach (var size in new[] { new Vector2(1024, 768), new Vector2(1280, 720), new Vector2(1920, 1080) })
+            {
+                var area = BootstrapOverlay.CalculateOverlayTextSafeArea(size.x, size.y, false);
+                var text = _overlay.overlayText;
+                text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, area.width);
+                text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, area.height);
+                text.text = "E1 R1 #7 A1 → M1: Attack: HP 3 → 0, damage 3; defeated\n  (1,2) → (2,2)";
+                Canvas.ForceUpdateCanvases();
+                text.ForceMeshUpdate(true, true);
+                Assert.That(text.textInfo.lineCount, Is.GreaterThanOrEqualTo(2));
+                Assert.That(text.textInfo.lineInfo.Take(text.textInfo.lineCount).All(line => line.maxAdvance <= area.width + 1), Is.True);
+            }
         }
 
         [Test]

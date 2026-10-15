@@ -922,15 +922,17 @@ namespace DungeonBuilder.M0
 
         public void ScrollFullDiagnosticsLines(int lineDelta)
         {
-            if (_runDiagnosticsOnlyVisible || !_diagnosticsVisible || lineDelta == 0)
+            if ((_runDiagnosticsOnlyVisible && !UsesPagedRunDiagnostics) ||
+                (!_runDiagnosticsOnlyVisible && !_diagnosticsVisible) || lineDelta == 0)
             {
                 return;
             }
 
             string[] bodyLines = BuildCurrentFullDiagnosticsBody().ToString().Split('\n');
             int maxOffset = Mathf.Max(0, bodyLines.Length - VisibleDiagnosticsBodyLineCount);
-            _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] = Mathf.Clamp(
-                _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] + lineDelta,
+            int page = _runDiagnosticsOnlyVisible ? RunDiagnosticsPage : _fullDiagnosticsPage;
+            _fullDiagnosticsPageScrollOffsets[page] = Mathf.Clamp(
+                _fullDiagnosticsPageScrollOffsets[page] + lineDelta,
                 0,
                 maxOffset);
         }
@@ -1037,6 +1039,8 @@ namespace DungeonBuilder.M0
             float rightReserve = Mathf.Max(0f, Screen.width - safeArea.xMax);
             rectTransform.offsetMax = new Vector2(-rightReserve, -OverlayTextSafeTopMargin);
             overlayText.alignment = TextAlignmentOptions.TopLeft;
+            overlayText.textWrappingMode = TextWrappingModes.Normal;
+            overlayText.overflowMode = TextOverflowModes.Masking;
         }
 
         private void Update()
@@ -1128,7 +1132,10 @@ namespace DungeonBuilder.M0
             if (_runDiagnosticsOnlyVisible)
             {
                 AppendHeader(builder);
-                AppendRunDiagnostics(builder, includeBreakdownAndFeedback: false, includeHeatDiagnostics: true);
+                if (UsesPagedRunDiagnostics)
+                    AppendScrolledFullDiagnosticsBody(builder, BuildCurrentFullDiagnosticsBody());
+                else
+                    AppendRunDiagnostics(builder, includeBreakdownAndFeedback: false, includeHeatDiagnostics: true);
                 return builder.ToString();
             }
 
@@ -1285,9 +1292,16 @@ namespace DungeonBuilder.M0
             AppendLine(builder, GetLocalizedString("ui.dev.hint.scroll_diagnostics"));
         }
 
+        private bool UsesPagedRunDiagnostics => Gameplay.RunSimulation.CombatC0Diagnostics.IsCombatC0(_root?.Save?.runHistory?.LatestOutcome);
+
         private StringBuilder BuildCurrentFullDiagnosticsBody()
         {
             var builder = new StringBuilder();
+            if (_runDiagnosticsOnlyVisible && UsesPagedRunDiagnostics)
+            {
+                AppendRunDiagnostics(builder, includeBreakdownAndFeedback: false, includeHeatDiagnostics: true);
+                return builder;
+            }
             switch (_fullDiagnosticsPage)
             {
                 case RuntimeSummaryPage:
@@ -1325,8 +1339,9 @@ namespace DungeonBuilder.M0
         {
             string[] bodyLines = bodyBuilder.ToString().Split('\n');
             int maxOffset = Mathf.Max(0, bodyLines.Length - VisibleDiagnosticsBodyLineCount);
-            int offset = Mathf.Clamp(_fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage], 0, maxOffset);
-            _fullDiagnosticsPageScrollOffsets[_fullDiagnosticsPage] = offset;
+            int page = _runDiagnosticsOnlyVisible ? RunDiagnosticsPage : _fullDiagnosticsPage;
+            int offset = Mathf.Clamp(_fullDiagnosticsPageScrollOffsets[page], 0, maxOffset);
+            _fullDiagnosticsPageScrollOffsets[page] = offset;
             int end = Mathf.Min(bodyLines.Length, offset + VisibleDiagnosticsBodyLineCount);
             for (int i = offset; i < end; i++)
             {
