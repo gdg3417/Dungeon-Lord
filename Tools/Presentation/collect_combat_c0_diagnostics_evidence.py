@@ -30,7 +30,26 @@ write('report-summary.json', reports)
 with zipfile.ZipFile(ROOT/'Docs/testing/evidence/combat-c0/integration/qualification-reports.zip') as baseline:
     for mode in ('editmode', 'playmode'):
         path = ROOT/('TestResults/combat-c0-diagnostics-full-'+mode+'.xml')
-        current = ET.parse(path).getroot()
+        for suffix in ('static', 'warm', 'serial'):
+            candidate = ROOT/('TestResults/combat-c0-diagnostics-full-'+mode+'-'+suffix+'.xml')
+            if candidate.exists(): path = candidate; break
+        if mode == 'editmode' and not path.exists():
+            current = ET.Element('test-run')
+            seen = set()
+            for part in ('build-gates', 'editmode-complement'):
+                run = ET.parse(ROOT/('TestResults/combat-c0-diagnostics-'+part+'.xml')).getroot()
+                if int(run.get('total', '0')) == 0 or run.get('failed') != '0': raise ValueError('Partition did not pass')
+                for case in run.iter('test-case'):
+                    if case.get('fullname') in seen: raise ValueError('Overlapping EditMode partitions')
+                    seen.add(case.get('fullname')); current.append(case)
+            current.set('total', str(len(seen))); current.set('failed', '0')
+            write('editmode-partition-summary.json', dict(total=len(seen),
+                passed=sum(c.get('result') == 'Passed' for c in current),
+                skipped=sum(c.get('result') in ('Skipped', 'Inconclusive') for c in current),
+                parts=['combat-c0-diagnostics-build-gates.xml', 'combat-c0-diagnostics-editmode-complement.xml'],
+                unpartitioned_run='Timed out; not passing evidence'))
+        else:
+            current = ET.parse(path).getroot()
         if int(current.get('total', '0')) == 0 or current.get('failed') != '0': raise ValueError('Full suite did not pass')
         old = ET.fromstring(baseline.read('combat-c0-integration-full-'+mode+'.xml'))
         def cases(run): return {c.get('fullname'): (c.get('result'), c.findtext('reason/message')) for c in run.iter('test-case')}
@@ -39,18 +58,22 @@ with zipfile.ZipFile(ROOT/'Docs/testing/evidence/combat-c0/integration/qualifica
             changed=[name for name in before.keys() & after.keys() if before[name] != after[name]])
         write('historical-'+mode+'-comparison.json', comparison)
         if comparison['removed'] or comparison['changed']: raise ValueError('Historical test result changed')
+        if mode == 'editmode':
+            focused = ET.parse(ROOT/'TestResults/combat-c0-diagnostics-focused-final03.xml').getroot()
+            if after.keys() != before.keys() | cases(focused).keys(): raise ValueError('EditMode inventory coverage differs')
 
 with zipfile.ZipFile(OUT/'qualification-support.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
     for path in sorted((ROOT/'TestResults/combat-c0-diagnostics').glob('*')):
         if path.is_file(): archive.write(path, path.name)
     for path in sorted((ROOT/'Temp').glob('combat-c0-diagnostics-*.log')):
         archive.writestr('logs/'+path.name, redact(path.read_text(encoding='utf-8-sig', errors='replace')))
-    for directory in ('native-import-failure', 'native-import-retry'):
+    for directory in ('native-import-failure', 'native-import-retry', 'native-import-r2-stall',
+                      'complement-reimport-stall', 'serial-import-stall', 'warm-dynamic-font-stall'):
         for path in sorted((ROOT/'TestResults/combat-c0-diagnostics'/directory).glob('*')):
             if path.is_file():
                 archive.writestr(directory+'/'+path.name, redact(path.read_text(encoding='utf-8-sig', errors='replace')))
 
-build = ROOT/'Temp/ui-composition-combat-c0-diagnostics-validation-r2/Builds/Development/Windows-combat-c0-integration'
+build = ROOT/'Temp/ui-composition-combat-c0-diagnostics-validation-warm/Builds/Development/Windows-combat-c0-integration'
 report = json.loads((build/'build-report.json').read_text())
 files = sorted(p for p in build.rglob('*') if p.is_file())
 namespace = 'combat-c0-diagnostics-validation-20261015.json'

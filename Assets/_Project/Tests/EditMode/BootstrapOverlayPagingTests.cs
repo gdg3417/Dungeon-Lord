@@ -1285,10 +1285,9 @@ namespace DungeonBuilder.Tests.EditMode
             _textObject.transform.SetParent(_overlayObject.transform, false);
             var sourceFont = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
                 "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset");
-            // Unicode layout must not populate the project's shared dynamic fallback atlas.
-            var transientFont = TMP_FontAsset.CreateFontAsset(UnityEditor.AssetDatabase.LoadAssetAtPath<Font>(
-                "Assets/TextMesh Pro/Fonts/LiberationSans.ttf"));
-            _overlay.overlayText.font = transientFont;
+            // Use pre-baked glyphs for the geometry probe. Exact Unicode output is tested
+            // by CombatC0DiagnosticsTests; no dynamic atlas/font lifetime enters this test.
+            _overlay.overlayText.font = sourceFont;
             _overlay.overlayText.fontSize = 20;
             _overlay.overlayText.enableAutoSizing = false;
             // Exercise the same safe-area widths as the existing desktop policy tests.
@@ -1300,10 +1299,11 @@ namespace DungeonBuilder.Tests.EditMode
                     var text = _overlay.overlayText;
                     text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, area.width);
                     text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, area.height);
-                    text.text = "E1 R1 #7 A1 → M1: Attack: HP 3 → 0, damage 3; defeated\n  (1,2) → (2,2)";
+                    text.text = "M1 = test.c0/monster/" + new string('a', 80) +
+                        "\nE1 R1 #7 A1 -> M1: Attack: HP 3 -> 0, damage 3; defeated\n  (1,2) -> (2,2)";
                     Canvas.ForceUpdateCanvases();
                     text.ForceMeshUpdate(true, true);
-                    Assert.That(text.textInfo.lineCount, Is.GreaterThanOrEqualTo(2));
+                    Assert.That(text.textInfo.lineCount, Is.GreaterThanOrEqualTo(3));
                     Assert.That(text.textInfo.lineInfo.Take(text.textInfo.lineCount).All(line => line.maxAdvance <= area.width + 1), Is.True);
                 }
             }
@@ -1311,8 +1311,6 @@ namespace DungeonBuilder.Tests.EditMode
             {
                 _overlay.overlayText.text = string.Empty;
                 _overlay.overlayText.font = sourceFont;
-                // TMP_FontAsset.OnDestroy owns its atlas textures and material.
-                Object.DestroyImmediate(transientFont);
             }
         }
 

@@ -2,7 +2,7 @@
 import sys
 import qualify_visual_feedback as audit
 
-audit.NAME = 'ui-composition-combat-c0-diagnostics-validation-r2'
+audit.NAME = 'ui-composition-combat-c0-diagnostics-validation-warm'
 audit.OUT = audit.ROOT / 'TestResults/combat-c0-diagnostics'
 audit.inputs.NAMESPACE = 'combat-c0-diagnostics-validation-20261015.json'
 
