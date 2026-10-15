@@ -96,7 +96,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(DungeonRunReplay.TryCreate(outcome, null, null, null, null, null, out _, out var historical), Is.False);
             Assert.That(historical, Is.EqualTo(DungeonRunReplay.Missing));
             Assert.That(Localize(reason, reason), Does.Contain("C1").And.Contain("Run Diagnostics"));
-            Assert.That(Localize(historical, historical), Does.Contain("saved history"));
+            Assert.That(Localize(historical, historical), Does.Contain("saved history").And.Not.Contain("new manual run"));
         }
     }
 }

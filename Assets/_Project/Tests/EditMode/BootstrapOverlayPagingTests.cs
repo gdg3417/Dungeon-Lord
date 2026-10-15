@@ -1309,9 +1309,9 @@ namespace DungeonBuilder.Tests.EditMode
             }
             finally
             {
+                _overlay.overlayText.text = string.Empty;
                 _overlay.overlayText.font = sourceFont;
-                foreach (var texture in transientFont.atlasTextures) Object.DestroyImmediate(texture);
-                Object.DestroyImmediate(transientFont.material);
+                // TMP_FontAsset.OnDestroy owns its atlas textures and material.
                 Object.DestroyImmediate(transientFont);
             }
         }
