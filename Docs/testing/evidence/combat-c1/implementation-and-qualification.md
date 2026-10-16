@@ -1,5 +1,7 @@
 # Combat C1 authoritative graphical replay
 
+Current presentation correction (2026-10-16): owner Editor UAT identified obscured monster art and missing map-local C0 damage. The [readability correction and affected qualification](readability-20261016/qualification.md) supersede the initial label/feedback choices below. Original implementation reports retain their historical source applicability. Independent review and the short owner retest are next.
+
 Status (2026-10-16): implementation and required automated qualification complete. Independent ChatGPT PR review is next. Owner UAT has not started and acceptance is not claimed. Do not merge.
 
 Baseline: clean local `main` and freshly fetched `origin/main` both `22e7ce1b08ae17391bfd3542a45821a46f02bbe1`, containing merged PR #238. Implementation branch: `codex/combat-c1-graphical-replay`. Live GitHub records for #230, #231, #236, #237 and #238 were reviewed, including #236 and #238 final owner acceptance. Historical pre-merge reports retain their dated meaning.
