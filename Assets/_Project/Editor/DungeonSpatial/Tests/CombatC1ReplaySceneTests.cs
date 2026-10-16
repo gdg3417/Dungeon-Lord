@@ -77,7 +77,7 @@ namespace DungeonBuilder.M0.Tests
                 int labels=ui.Query<Label>(className:"replay-actor").ToList().Count;
                 if(pooledLabels<0) pooledLabels=labels; else Assert.That(labels,Is.EqualTo(pooledLabels));
                 controller.CloseReplay(); Assert.That(controller.World.ReplayAttackVisible,Is.False); Assert.That(controller.World.ReplayPartyVisible,Is.False);
-                Assert.That(ui.Query<Label>(className:"replay-actor").ToList().All(l=>l.style.display==DisplayStyle.None),Is.True);
+                Assert.That(ui.Query<Label>(className:"replay-actor").ToList().All(l=>l.parent.style.display==DisplayStyle.None),Is.True);
                 Assert.That(ui.Q("replayPartyInfo").style.display,Is.EqualTo(new StyleEnum<DisplayStyle>(DisplayStyle.None)));
                 CollectionAssert.AreEqual(bytes,File.ReadAllBytes(root.SaveService.SavePath)); Assert.That(JsonUtility.ToJson(root.Save),Is.EqualTo(live));
             }
@@ -122,7 +122,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(replay.Index,Is.EqualTo(cursor)); Assert.That(controller.World.ReplayPartyVisible,Is.False); Assert.That(controller.World.ReplayDefenderCount,Is.Zero);
             Assert.That(ui.Q<Label>("replayDamage").resolvedStyle.display,Is.EqualTo(DisplayStyle.None));
             Assert.That(ui.Q("replayPartyInfo").resolvedStyle.display,Is.EqualTo(DisplayStyle.None));
-            Assert.That(ui.Query<Label>(className:"replay-actor").ToList().All(l=>l.style.display==DisplayStyle.None),Is.True);
+            Assert.That(ui.Query<Label>(className:"replay-actor").ToList().All(l=>l.parent.style.display==DisplayStyle.None),Is.True);
             controller.SelectFloor(root.Save.validatedCanonicalSpatialState.Floors[0].FloorInstanceId); yield return null;
             for(int i=0;i<3;i++) yield return null;
             Assert.That(controller.World.ReplayDefenderCount,Is.GreaterThan(0)); AssertCombatMapReadability(ui); controller.CloseReplay();
@@ -147,15 +147,20 @@ namespace DungeonBuilder.M0.Tests
                 var body=Rect.MinMaxRect(min.x/document.panelSettings.scale,(Screen.height-max.y)/document.panelSettings.scale,
                     max.x/document.panelSettings.scale,(Screen.height-min.y)/document.panelSettings.scale);
                 Assert.That(damage.worldBound.Overlaps(body),Is.False,"Damage must not cover combat art");
-                foreach(var tag in ui.Query<Label>(className:"replay-actor").ToList().Where(l=>l.resolvedStyle.display==DisplayStyle.Flex))
-                { Assert.That(tag.worldBound.Overlaps(body),Is.False,"Name and HP must not cover combat art"); Assert.That(tag.resolvedStyle.whiteSpace,Is.EqualTo(WhiteSpace.NoWrap)); Assert.That(tag.resolvedStyle.backgroundColor.a,Is.Zero); }
+                foreach(var tag in ui.Query<Label>(className:"replay-actor").ToList().Where(l=>l.parent.resolvedStyle.display==DisplayStyle.Flex))
+                { Assert.That(tag.parent.worldBound.Overlaps(body),Is.False,"Name and HP must not cover combat art"); Assert.That(tag.resolvedStyle.whiteSpace,Is.EqualTo(WhiteSpace.NoWrap)); Assert.That(tag.parent.resolvedStyle.backgroundColor.a,Is.Zero); }
             }
             foreach(var a in replay.Combat.Actors.Where(a=>a.IsMonster&&a.RoomId==replay.Current.Step.RoomId))
             {
                 var tag=ui.Query<Label>(className:"replay-actor").ToList().Single(l=>Equals(l.userData,a.Id));
-                Assert.That(tag.resolvedStyle.display,Is.EqualTo(DisplayStyle.Flex),"Every defender retains its own name and HP");
-                Assert.That(tag.text,Is.EqualTo(string.Format(root.Content.GetString("ui.dungeon.replay.monster_hp",null),
-                    root.Content.GetString(a.ContentId+".display_name",null),a.At(replay.Index).Health,a.MaxHealth)));
+                Assert.That(tag.parent.resolvedStyle.display,Is.EqualTo(DisplayStyle.Flex),"Every defender retains its own name and HP");
+                Assert.That(tag.text,Is.EqualTo(root.Content.GetString(a.ContentId+".display_name",null)));
+                var hp=tag.parent.Q<Label>(className:"replay-actor-health");
+                Assert.That(hp.text,Is.EqualTo(string.Format(root.Content.GetString("ui.dungeon.replay.monster_health",null),a.At(replay.Index).Health,a.MaxHealth)));
+                Assert.That(hp.worldBound.height,Is.GreaterThan(0));
+                Assert.That(hp.worldBound.yMin,Is.GreaterThanOrEqualTo(tag.worldBound.yMax-.1f),"HP occupies its own visible line even when a localized name ellipsizes");
+                Assert.That(tag.parent.worldBound.Contains(hp.worldBound.min),Is.True);
+                Assert.That(hp.worldBound.xMax,Is.LessThanOrEqualTo(tag.parent.worldBound.xMax+.1f));
             }
         }
 
@@ -273,6 +278,8 @@ namespace DungeonBuilder.M0.Tests
                     {
                         Assert.That(frame.Step.Position,Is.EqualTo(tiles[0]),"Capture the actual assigned corridor trap, not initial Floor-space movement inside a room");
                         Assert.That(controller.Replay.DisplayPosition,Is.EqualTo(new Vector2(tiles[0].X+.5f,tiles[0].Y+.5f)));
+                        Assert.That(ui.Q<Label>("replayEvent").text,Does.Not.Contain("Member 1"));
+                        Assert.That(ui.Q<Label>("replayEvent").text,Does.Contain("Ranger").And.Contain("HP 7 → 5"));
                         yield return CompositionCapture("combat-c1-rpg-corridor",new Vector2Int(1920,1080)); captured=true;
                     }
                 }

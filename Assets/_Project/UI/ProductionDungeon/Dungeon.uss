@@ -2,7 +2,9 @@
 .safe-root { position: absolute; color: var(--ink); }
 .replay-panel { display: none; flex-shrink: 0; }
 .replay-details { flex-shrink: 1; }
-.replay-actor { position: absolute; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -unity-text-align: middle-center; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }
+.replay-actor-group { position: absolute; }
+.replay-actor, .replay-actor-health { white-space: nowrap; margin: 0; padding: 0; flex-shrink: 0; -unity-text-align: middle-center; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }
+.replay-actor { overflow: hidden; text-overflow: ellipsis; }
 .replay-party-info { position: absolute; display: none; }
 .replay-party-line { flex-direction: row; flex-shrink: 0; }
 .replay-party-row, .replay-party-health { white-space: nowrap; margin: 0; padding: 0; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }

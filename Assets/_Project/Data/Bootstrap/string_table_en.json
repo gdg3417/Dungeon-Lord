@@ -21,6 +21,8 @@
     {"key":"ui.dungeon.replay.no_denials","text":"No denied attack positions in this recorded encounter."},
     {"key":"ui.dungeon.replay.combat_legend","text":"Completed run recording. The diamond marks the shared party location. Nearby names and HP reflect recorded results; red numbers show damage. Lines connect recorded attacks. Next action pauses playback. Position reasons explains denied attacks."},
     {"key":"ui.dungeon.replay.monster_hp","text":"{0}\n{1}/{2} HP"},
+    {"key":"ui.dungeon.replay.monster_health","text":"{0}/{1} HP"},
+    {"key":"ui.dungeon.replay.trap_damage","text":"{0}: {1} damage · HP {2} → {3} · {4} survivors."},
     {"key":"ui.dungeon.replay.party_row","text":"{0} - {1}/{2}"},
     {"key":"ui.dungeon.replay.party_named_row","text":"{0} - {1} - {2}/{3}"},
     {"key":"ui.dungeon.replay.party_identity","text":"{0} -"},

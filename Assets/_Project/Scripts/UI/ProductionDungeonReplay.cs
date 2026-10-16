@@ -16,6 +16,7 @@ namespace DungeonBuilder.M0
         private Label replayDamage;
         private int damageTextIndex = -1;
         private readonly List<Label> replayActorLabels = new List<Label>();
+        private readonly List<Label> replayActorHealth = new List<Label>();
         private readonly List<Rect> replayActorRects = new List<Rect>(), replayTagRects = new List<Rect>();
         private Rect replayFeedbackRect;
         private VisualElement replayPartyInfo;
@@ -100,7 +101,7 @@ namespace DungeonBuilder.M0
         private void HideReplayFeedback()
         { if (replayDamage != null) replayDamage.style.display = DisplayStyle.None;
           if (replayPartyInfo!=null) replayPartyInfo.style.display=DisplayStyle.None;
-          foreach (var label in replayActorLabels) label.style.display = DisplayStyle.None; }
+          foreach (var label in replayActorLabels) label.parent.style.display = DisplayStyle.None; }
         private void PresentReplayFeedback()
         {
             if (replay?.Combat!=null)
@@ -112,7 +113,7 @@ namespace DungeonBuilder.M0
                 PresentCombatFeedback();
                 return;
             }
-            foreach (var label in replayActorLabels) label.style.display=DisplayStyle.None;
+            foreach (var label in replayActorLabels) label.parent.style.display=DisplayStyle.None;
             if(replayPartyInfo!=null) replayPartyInfo.style.display=DisplayStyle.None;
             replayDamage?.EnableInClassList("replay-combat-damage",false);
             if(replayDamage!=null) replayDamage.style.opacity=1;
@@ -176,8 +177,11 @@ namespace DungeonBuilder.M0
                 if (branch?.Decision != null) description += " " + Text(branch.Decision.Reason);
             }
             if (!replay.Complete && replay.DamageApplied && frame.Combat == null)
-                description += " " + Format("ui.dungeon.replay.damage", frame.Step.Encounter.MemberOrdinal + 1,
-                    frame.Step.Encounter.Damage, frame.Step.Encounter.HealthAfter, frame.Survivors);
+            {
+                var hit=frame.Step.Encounter;
+                description += " " + (replay.Combat==null ? Format("ui.dungeon.replay.damage",hit.MemberOrdinal+1,hit.Damage,hit.HealthAfter,frame.Survivors) :
+                    Format("ui.dungeon.replay.trap_damage",ActorName(replay.Combat.ActorIndex(replayOutcome.RunId+"/member/"+hit.MemberOrdinal.ToString(System.Globalization.CultureInfo.InvariantCulture))),hit.Damage,hit.HealthBefore,hit.HealthAfter,frame.Survivors));
+            }
             if (frame.Combat != null) description = CombatDescription(frame);
             ui.Q<Label>("replayEvent").text = Format("ui.dungeon.replay.event", replayOutcome.RunId,
                 Text(replayOutcome.RunPostureId + ".name"),
@@ -233,29 +237,39 @@ namespace DungeonBuilder.M0
         private void PresentCombatActorLabels()
         {
             if (replay?.Combat == null || IsEditing || legacy)
-            { foreach (var label in replayActorLabels) label.style.display = DisplayStyle.None; return; }
+            { foreach (var label in replayActorLabels) label.parent.style.display = DisplayStyle.None; return; }
             bool changed = actorTextIndex != replay.Index; actorTextIndex = replay.Index;
             for (int i=0;i<replay.Combat.Actors.Count;i++)
             {
                 if (replayActorLabels.Count == i)
-                { var label=new Label { pickingMode=PickingMode.Ignore,enableRichText=false }; label.AddToClassList("replay-actor");
-                  document.rootVisualElement.Q("mapArea").Add(label); replayActorLabels.Add(label); changed=true; }
+                {
+                    var group=new VisualElement { pickingMode=PickingMode.Ignore }; group.AddToClassList("replay-actor-group");
+                    document.rootVisualElement.Q("mapArea").Add(group);
+                    var label=new Label { pickingMode=PickingMode.Ignore,enableRichText=false,displayTooltipWhenElided=false }; label.AddToClassList("replay-actor");
+                    var health=new Label { pickingMode=PickingMode.Ignore,enableRichText=false }; health.AddToClassList("replay-actor-health");
+                    group.Add(label); group.Add(health); replayActorLabels.Add(label); replayActorHealth.Add(health); changed=true;
+                }
                 var view=replayActorLabels[i]; var actor=replay.Combat.Actors[i]; var state=actor.At(replay.Index);
+                var hp=replayActorHealth[i]; var container=view.parent;
                 bool visible=actor.IsMonster && actor.FloorId==selectedFloor;
-                if (changed) { view.text=Format("ui.dungeon.replay.monster_hp",ActorName(i),state.Health,actor.MaxHealth); view.userData=actor.Id; view.tooltip=view.text; }
+                if (changed)
+                {
+                    view.text=ActorName(i); hp.text=Format("ui.dungeon.replay.monster_health",state.Health,actor.MaxHealth); view.userData=actor.Id;
+                    view.tooltip=Format("ui.dungeon.replay.monster_hp",ActorName(i),state.Health,actor.MaxHealth);
+                }
                 float font=Mathf.Max(presentationPolicy.ReplayActorTextSize,presentationPolicy.Text(textSize)*presentationPolicy.ReplayActorTextScale);
-                view.style.fontSize=font;
+                view.style.fontSize=hp.style.fontSize=font;
                 var measured=view.MeasureTextSize(view.text,0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined);
-                var size=new Vector2(Mathf.Min(presentationPolicy.ReplayActorLabelWidth,measured.x+view.resolvedStyle.paddingLeft+view.resolvedStyle.paddingRight),
-                    measured.y+view.resolvedStyle.paddingTop+view.resolvedStyle.paddingBottom);
+                var healthSize=hp.MeasureTextSize(hp.text,0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined);
+                var size=new Vector2(Mathf.Max(healthSize.x,Mathf.Min(presentationPolicy.ReplayActorLabelWidth,measured.x)),measured.y+healthSize.y);
                 Rect placed=default;
                 visible &= i<replayActorRects.Count && TryPlaceCombatOverlay(replayActorRects[i],size,true,out placed);
-                view.style.display=visible ? DisplayStyle.Flex : DisplayStyle.None;
+                container.style.display=visible ? DisplayStyle.Flex : DisplayStyle.None;
                 if (visible)
-                { view.style.width=placed.width; view.style.left=placed.x; view.style.top=placed.y; replayTagRects.Add(placed); }
-                view.style.color=state.Health==0 ? presentationPolicy.ReplayCasualtyColor : presentationPolicy.ReplayPartyColor;
+                { container.style.width=placed.width; container.style.left=placed.x; container.style.top=placed.y; replayTagRects.Add(placed); }
+                view.style.color=hp.style.color=state.Health==0 ? presentationPolicy.ReplayCasualtyColor : presentationPolicy.ReplayPartyColor;
             }
-            for (int i=replay.Combat.Actors.Count;i<replayActorLabels.Count;i++) replayActorLabels[i].style.display=DisplayStyle.None;
+            for (int i=replay.Combat.Actors.Count;i<replayActorLabels.Count;i++) replayActorLabels[i].parent.style.display=DisplayStyle.None;
         }
         private Vector2 ReplayPanelPoint(Vector3 point)
         {
