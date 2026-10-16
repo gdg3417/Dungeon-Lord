@@ -1,0 +1,117 @@
+[
+  {
+    "file": "inputs-build-final-exact.json",
+    "sha256": "8b4e769f6267219a620d3f6c6bec88c07f9052ae8ac419a40f3241236432956f",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "inputs-build-superseded-exact.json",
+    "sha256": "852aa1852a0e0013a95e291934a027c248b5b35de9a64c0b5fd8fb7b1c062cb6",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "inputs-editmode-exact.json",
+    "sha256": "4ff6637fac3a70848ce39e28eaddddd6daaf77828b09ceb881bf4c097c628a82",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "inputs-editmode-final-exact.json",
+    "sha256": "dae09cf8f6c6971f0c5262aa3099551fa5a321732cebb872201e0dd7666ad443",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "inputs-focused01-exact.json",
+    "sha256": "04a7d750a097d66d3dbcc53efc50f812cb706a040c10a230b467b93b6235b6c1",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "inputs-focused02-exact.json",
+    "sha256": "62e3a39040d7dc1d0bd61bcfe298118f2c9bab3e6aa84930a0bf74c7f8403b6a",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "inputs-focused03-exact.json",
+    "sha256": "77d0d67ef60085e6bef9963d21584b9614ab1496f329acfc700db67714baf730",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "inputs-focused04-exact.json",
+    "sha256": "fa3f7e789ae755e69d0373e1fb4ac38e3dc607b77948d6f8dc56c406ec1f5228",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [
+      "Assets/_Project/Editor/DungeonSpatial/Tests/CombatC1ReplaySceneTests.cs: mismatch",
+      "Assets/_Project/Scripts/UI/ProductionDungeonReplay.cs: mismatch"
+    ],
+    "status": "superseded: final two source edits overlapped checkpoint; refreshed-final-source and final suites qualify the committed inputs"
+  },
+  {
+    "file": "inputs-health-line-focused-exact.json",
+    "sha256": "dae09cf8f6c6971f0c5262aa3099551fa5a321732cebb872201e0dd7666ad443",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "inputs-playmode-exact.json",
+    "sha256": "4ff6637fac3a70848ce39e28eaddddd6daaf77828b09ceb881bf4c097c628a82",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "inputs-playmode-final-exact.json",
+    "sha256": "dae09cf8f6c6971f0c5262aa3099551fa5a321732cebb872201e0dd7666ad443",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "inputs-production-final-exact.json",
+    "sha256": "81606195c60f954c3264ab257321052ae419d1f03d7f657d6951f5b6c6c0642e",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "owner-prepare-exact.json",
+    "sha256": "852aa1852a0e0013a95e291934a027c248b5b35de9a64c0b5fd8fb7b1c062cb6",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  },
+  {
+    "file": "prepare-exact.json",
+    "sha256": "04a7d750a097d66d3dbcc53efc50f812cb706a040c10a230b467b93b6235b6c1",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": [],
+    "status": "exact"
+  }
+]
