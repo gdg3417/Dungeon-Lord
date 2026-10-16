@@ -2451,7 +2451,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SpatialLayoutCompatibilityResult compatibilityResult =
                 SpatialLayoutCompatibilityProfiles.ParseAndValidate(
                     Asset(SpatialLayoutCompatibilityProfiles.ProductionPath), production, contentLimits);
-            Assert.That(compatibilityResult.Success, Is.True);
+            Assert.That(compatibilityResult.Success, Is.True, string.Join(",", compatibilityResult.Diagnostics));
             SpatialLayoutCompatibilitySnapshot compatibility = compatibilityResult.Value;
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selectedContract =
                 compatibility.SelectContract(7);

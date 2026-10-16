@@ -126,14 +126,15 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(recovered, Is.Not.Null, reason);
             Assert.That(recovered.ReadModel.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
             double charge = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft).Cost;
-            root.Save.structureRuntime.ManaReserve = mana = charge;
+            root.Save.structureRuntime.ManaReserve = mana = charge +
+                MonsterContinuity.RequiredReserve(root.Save.validatedCanonicalSpatialState, MonsterRecoveryRules.Capture(root.RunSimulationConfig));
             Click(ui.Q<Button>("save")); Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex));
             Click(ui.Q<Button>("confirm")); yield return null;
             Assert.That(controller.IsEditing, Is.False);
             Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
             Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana - charge));
             Assert.That(store.Read(), Is.Null);
-            Assert.That(File.ReadAllText(root.SaveService.SavePath), Does.Contain("\"schemaVersion\":14"));
+            Assert.That(File.ReadAllText(root.SaveService.SavePath), Does.Contain("\"schemaVersion\":15"));
             controller.EnterEdit(); controller.TapWorld(new TileCoordinate(1, 3)); yield return null; yield return null;
             Assert.That(controller.SelectedRoomInstanceId, Is.Not.Null);
             Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.Flex), "Room selection restores the A5 contextual actions after collapsed construction");
@@ -205,7 +206,7 @@ namespace DungeonBuilder.M0.Tests
                 controller.ConstructionPreview.DetachedCandidate);
             Assert.That(setupQuote.Cost, Is.GreaterThan(0));
             // Seed the disposable runtime before the draft starts so all draft actions preserve this exact balance.
-            root.Save.structureRuntime.ManaReserve = setupQuote.Cost;
+            root.Save.structureRuntime.ManaReserve = setupQuote.Cost + setupQuote.RequiredReserveAfter;
             var canonicalBefore = File.ReadAllBytes(root.SaveService.SavePath);
             double manaBefore = root.Save.structureRuntime.ManaReserve;
             var attemptedAnchor = default(TileCoordinate);
@@ -286,7 +287,7 @@ namespace DungeonBuilder.M0.Tests
             Click(ui.Q<Button>("save")); Click(ui.Q<Button>("confirm")); yield return null;
             Assert.That(controller.IsEditing, Is.False);
             Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
-            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(0));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(quote.RequiredReserveAfter));
             Assert.That(controller.World.LegalBounds, Is.EqualTo(legalBounds));
             Assert.That(root.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
         }
@@ -559,6 +560,8 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator PhaseSevenA5GraphicalRoomInvalidCorrectionEconomyAndAtomicSave()
         {
             var root = GameRoot.Instance; var before = File.ReadAllBytes(root.SaveService.SavePath);
+            root.Save.structureRuntime.ManaReserve += MonsterContinuity.RequiredReserve(
+                root.Save.validatedCanonicalSpatialState, MonsterRecoveryRules.Capture(root.RunSimulationConfig));
             double mana = root.Save.structureRuntime.ManaReserve;
             var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var room = floor.Layout.Rooms[0];
             var content = JsonUtility.ToJson(floor.RoomContents);

@@ -64,7 +64,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(final.AssignmentId, Is.EqualTo(original.AssignmentId)); Assert.That(final.CategoryId, Is.EqualTo(original.CategoryId));
             Assert.That(final.OptionId, Is.EqualTo(original.OptionId)); Assert.That(final.Sequence, Is.EqualTo(original.Sequence));
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(14)); Assert.That(store.Bytes, Is.Null);
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(15)); Assert.That(store.Bytes, Is.Null);
         }
 
         [Test]

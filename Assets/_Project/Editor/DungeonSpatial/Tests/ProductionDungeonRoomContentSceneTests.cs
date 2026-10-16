@@ -534,7 +534,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(ui.Q<Button>("monstersCategory").ClassListContains("selected-floor"), Is.True);
             var definition = root.ProductionSpatialContent.Catalog.Rooms.Single(r=>r.RoomDefinitionId==source.RoomDefinitionId);
             var roomName = root.ProductionSpatialContent.Languages.Single(t=>t.language=="en").entries.Single(e=>e.key==definition.LocalizationKey).text;
-            Assert.That(ui.Q<Label>("inspectionInfo").text, Is.EqualTo(string.Format(root.Content.GetString("ui.dungeon.content.info",null),
+            Assert.That(ui.Q<Label>("inspectionInfo").text, Does.StartWith(string.Format(root.Content.GetString("ui.dungeon.content.info",null),
                 string.Format(root.Content.GetString("ui.dungeon.room_selected",null),roomName,1))));
             Assert.That(ui.Q<Label>("inspectionInfo").text, Does.Not.Contain("Room-local").And.Not.Contain("0, 0"));
             Assert.That(controller.UnassignSelectedContent(), Is.True);

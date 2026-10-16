@@ -323,6 +323,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(undone.Validation.Investment.Sum(r => r.RenovationMana), Is.Zero);
             Assert.That(service.UndoStructuralRenovation(undone.RuntimeProjection).IsSuccess, Is.False);
         }
+        [Test] public void C2RenovationUndoRefundsOnlyRenovationAndRetainsRecoveredHealth()
+        {
+            var f=R1(); f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.SkeletonOptionId)));
+            CombatC2Tests.SetState(f,1,false,0); f.Runtime.structureRuntime.ManaReserve=100; // Test-only funding before the next canonical boundary.
+            var service=Service(f,()=>0); var move=service.ExecuteCanonicalMutation(f.Runtime,DetachedCanonicalMutationRequest.Move(Move(f)));
+            Assert.That(move.IsSuccess,Is.True,move.Reason); Assert.That(move.RecoveryManaSpent,Is.EqualTo(6));
+            Assert.That(move.RuntimeProjection.structureRuntime.ManaReserve,Is.EqualTo(84));
+            var undo=service.UndoStructuralRenovation(move.RuntimeProjection);
+            Assert.That(undo.IsSuccess,Is.True,undo.Reason); Assert.That(undo.RuntimeProjection.structureRuntime.ManaReserve,Is.EqualTo(94));
+            Assert.That(undo.RuntimeProjection.monsterContinuity.Records.Single().Health,Is.EqualTo(7));
+        }
 
         [Test]
         public void ContentUnassignmentFailureRetainsUndoAndSuccessInvalidatesIt()
@@ -473,6 +484,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 f.PositionProfiles, out byte[] thirteen), Is.True);
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(thirteen, f.Profile.Canonical).IsValid, Is.True);
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, f.Profile.Canonical, out thirteen), Is.True);
+            Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(thirteen,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out thirteen),Is.True);
             Assert.That(DetachedCanonicalSaveSession.Open(thirteen, f.Context, f.Profile).IsSuccess, Is.True);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(nine, f.Profile.Canonical, out _), Is.False);
             Assert.That(StructuralEconomyService.Preview(Delete(f), f.State, restored.Investment, 123.5, f.Economy).Refund, Is.Zero);

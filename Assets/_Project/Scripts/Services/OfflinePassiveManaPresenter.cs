@@ -36,7 +36,7 @@ namespace DungeonBuilder.M0
                     PlayerManaPresentationFormatter.FormatDiscreteAmount(
                         result.ActualAwardedMana, formatProvider),
                     PlayerManaPresentationFormatter.FormatDiscreteAmount(
-                        result.WalletAfter, formatProvider),
+                        result.PublishedWallet, formatProvider),
                     PlayerManaPresentationFormatter.FormatDiscreteAmount(
                         result.Capacity, formatProvider));
                 if (result.CapacityLimited)
@@ -44,6 +44,8 @@ namespace DungeonBuilder.M0
                     string limited = Localized(localize, CapacityLimitedKey);
                     if (!string.IsNullOrEmpty(limited)) text += "\n" + limited;
                 }
+                if (result.RecoveryManaSpent > 0) text += "\n" + string.Format(formatProvider,
+                    Localized(localize, "combat.c2.recovery_spent"), PlayerManaPresentationFormatter.FormatDiscreteAmount(result.RecoveryManaSpent, formatProvider));
                 return text;
             }
 

@@ -34,6 +34,8 @@ namespace DungeonBuilder.M0.Economy
         public double ActualAwardedMana { get; internal set; }
         public double WalletBefore { get; internal set; }
         public double WalletAfter { get; internal set; }
+        public double RecoveryManaSpent { get; internal set; }
+        public double PublishedWallet => WalletAfter - RecoveryManaSpent;
         public double Capacity { get; internal set; }
         public bool CapacityLimited { get; internal set; }
         public bool PersistenceRequired { get; internal set; }
@@ -45,7 +47,7 @@ namespace DungeonBuilder.M0.Economy
             Reason == OfflinePassiveManaReason.NoManaGenerated;
 
         internal OfflinePassiveManaResult WithPersistence(
-            OfflinePassiveManaReason reason, bool persisted)
+            OfflinePassiveManaReason reason, bool persisted, double recoveryManaSpent = 0)
         {
             return new OfflinePassiveManaResult
             {
@@ -61,6 +63,7 @@ namespace DungeonBuilder.M0.Economy
                 ActualAwardedMana = ActualAwardedMana,
                 WalletBefore = WalletBefore,
                 WalletAfter = WalletAfter,
+                RecoveryManaSpent = recoveryManaSpent,
                 Capacity = Capacity,
                 CapacityLimited = CapacityLimited,
                 PersistenceRequired = PersistenceRequired,

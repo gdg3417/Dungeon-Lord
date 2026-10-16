@@ -71,6 +71,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private readonly string initialRuntime;
         internal CombatC0QualificationConfig CombatRules { get; private set; }
         internal CombatC0RoomBounds[] CombatBounds { get; private set; }
+        private MonsterContinuityState monsterStarts;
+        internal MonsterContinuityState MonsterStarts => monsterStarts?.Copy();
         public long TickStarted { get; }
         public string PostureId { get; }
         public DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState InitialRuntime =>
@@ -163,6 +165,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 throw new ArgumentException(BranchRunWorkload.WorkloadExceeded);
             var snapshot = new ActiveFloorRunSnapshot(floors.ToArray(), config, lootConfig, lootTableId, owned.BranchKnowledge, owned.FloorKnowledge, executionInputs, postureId);
             snapshot.CombatRules = config.CombatC0?.Capture();
+            snapshot.monsterStarts = owned.MonsterContinuity?.Copy();
             if (snapshot.CombatRules != null)
             {
                 var catalog = production.Catalog;

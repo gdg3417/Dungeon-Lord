@@ -111,10 +111,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             Assert.That(d.IsStructurallyValid, Is.True, d.StructuralReason);
             var price = Price(f, d); Assert.That(price.Cost, Is.EqualTo(105)); Assert.That(price.Investment.Sum(r => r.RenovationMana), Is.Zero);
-            f.Runtime.structureRuntime.ManaReserve = price.Cost;
+            long reserve = MonsterContinuity.RequiredReserve(f.State, MonsterRecoveryRules.EditorFallback());
+            f.Runtime.structureRuntime.ManaReserve = price.Cost + reserve;
             var before = f.Session.GetCurrentBytes(); var result = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d);
             Assert.That(result.IsSuccess, Is.True, result.Reason); f.Accept(result); f.Reopen();
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero); Assert.That(f.State.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(reserve)); Assert.That(f.State.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
             Assert.That(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d).IsSuccess, Is.False);
         }
 
@@ -162,8 +163,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var result = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d);
             Assert.That(result.Reason, Is.EqualTo(StructuralEconomyService.InsufficientReason)); Assert.That(d.CanSave, Is.True);
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
-            f.Runtime.structureRuntime.ManaReserve = 333; result = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d);
-            Assert.That(result.IsSuccess, Is.True, result.Reason); Assert.That(result.RuntimeProjection.structureRuntime.ManaReserve, Is.Zero);
+            long reserve = MonsterContinuity.RequiredReserve(f.State, MonsterRecoveryRules.EditorFallback());
+            f.Runtime.structureRuntime.ManaReserve = 333 + reserve; result = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d);
+            Assert.That(result.IsSuccess, Is.True, result.Reason); Assert.That(result.RuntimeProjection.structureRuntime.ManaReserve, Is.EqualTo(reserve));
         }
 
         [Test]

@@ -120,6 +120,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var result = Writer(f).ConfigureLivingDungeon(f.ActivePath, f.FileSystem, f.Session, ProfileA().Id, 1);
             Assert.That(result.IsSuccess, Is.True, result.Reason);
         }
+        [Test] public void C2FundingWaitsForProvenCanonicalVacancyAtClosedB2Boundary()
+        {
+            var f=Controlled(); PhaseSixA4Tests.AddContent(f,0,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.GoblinOptionId);
+            Activate(f); CombatC2Tests.SetState(f,0,true,0); Admit(f,0,0);
+            Assert.That(Owner(f).IsClosed,Is.True);
+            f.Runtime.structureRuntime.ManaReserve=3.25;
+            f.Accept(Writer(f).SaveRecognizedState(f.ActivePath,f.FileSystem,f.Session,f.Runtime));
+            Assert.That(f.Runtime.monsterContinuity.Records.Single().Health,Is.Zero);
+            Complete(f,1000,false);
+            Assert.That(f.Runtime.monsterContinuity.Records.Single().Health,Is.EqualTo(3));
+            Assert.That(f.Runtime.monsterContinuity.Records.Single().RevivalRequired,Is.True);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(.25));
+        }
         [Test]
         public void DormantMigrationPreservesEveryPredecessorByteAndHistoricalAllocator()
         {
@@ -284,6 +297,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(before, source);
             CollectionAssert.AreEqual(source, PhaseFourTestSupport.FrozenThirteen(migrated));
             Assert.That(HistoryBytes(migrated, f.Profile.Canonical.Serialized), Is.EqualTo(history));
+            Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(migrated,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out migrated),Is.True);
             f.FileSystem.Seed(f.ActivePath, migrated); f.Reopen(); var session = f.Session;
             var result = Writer(f).ConfigureLivingDungeon(f.ActivePath, f.FileSystem, session, ProfileA().Id, 1);
             Assert.That(result.IsSuccess, Is.False); Assert.That(result.Reason, Is.EqualTo(LivingDungeonScheduling.Invalid));
@@ -406,15 +420,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SpatialContractSha256.Compute(File.ReadAllBytes("Assets/_Project/Resources/save_spatial_migration_limits_schema13.json")),
                 Is.EqualTo("e3ba04771aea8955afec08f52f67b7b5f124aec46d2803802d66208435c750ea"));
             var profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
-            Assert.That(profile.Canonical.Serialized.MaximumInputBytes, Is.EqualTo(655360));
+            Assert.That(profile.Canonical.Serialized.MaximumInputBytes, Is.EqualTo(1376256));
+            Assert.That(profile.Canonical.ForSchema(14).Serialized.MaximumInputBytes, Is.EqualTo(655360));
             Assert.That(profile.Canonical.ForSchema(13).Serialized.MaximumInputBytes, Is.EqualTo(262144));
             Assert.That(profile.Canonical.ForSchema(12).Serialized.MaximumParsedNodes, Is.EqualTo(8192));
             var f = Controlled(); var old = PhaseFourTestSupport.FrozenThirteen(f.Session.GetCurrentBytes());
             Assert.That(profile.Raw.ForPayload(old).MaximumInputBytes, Is.EqualTo(524288));
-            Assert.That(profile.Raw.ForPayload(f.Session.GetCurrentBytes()).MaximumInputBytes, Is.EqualTo(1310720));
+            Assert.That(profile.Raw.ForPayload(PhaseFourTestSupport.FrozenFourteen(f.Session.GetCurrentBytes())).MaximumInputBytes, Is.EqualTo(1310720));
+            Assert.That(profile.Raw.ForPayload(f.Session.GetCurrentBytes()).MaximumInputBytes, Is.EqualTo(2752512));
             Assert.That(RawSavePayloadClassifier.Classify(old, profile.Raw, new RawSaveEnvelopeVersionContract(1, 14),
                 Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator).UnknownPrimaryMembers.Any(v => v.Name == "livingDungeon"), Is.False);
-            var classified = RawSavePayloadClassifier.Classify(f.Session.GetCurrentBytes(), profile.Raw, new RawSaveEnvelopeVersionContract(1, 14),
+            var classified = RawSavePayloadClassifier.Classify(f.Session.GetCurrentBytes(), profile.Raw, new RawSaveEnvelopeVersionContract(1, 15),
                 Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator);
             Assert.That(classified.Members.Single(m => m.Name == "livingDungeon").State, Is.EqualTo(RawSaveMemberState.NonNull));
         }
@@ -530,8 +546,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] copy = (byte[])source.Clone(); fs.WriteAllBytesDurable(path, source);
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(source, f.Profile.Canonical, out var migrated), Is.True);
             Assert.That(ExactCompleteSaveAtomicPersistence.Persist(path, fs, source, migrated, 64,
-                b => DetachedCompleteSaveContract.ParseValidateAndRoundTrip(b, f.Context).IsValid), Is.Null);
+                b => DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(b, f.Profile.Canonical).IsValid), Is.Null);
             CollectionAssert.AreEqual(copy, source); CollectionAssert.AreEqual(migrated, fs.ReadAllBytes(path));
+            Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(migrated,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out var fifteen),Is.True);
+            Assert.That(ExactCompleteSaveAtomicPersistence.Persist(path,fs,migrated,fifteen,64,
+                b=>DetachedCompleteSaveContract.ParseValidateAndRoundTrip(b,f.Context).IsValid),Is.Null);
+            f.FileSystem.Seed(f.ActivePath,fifteen); f.Reopen();
             f.Accept(Writer(f).ConfigureLivingDungeon(path, fs, f.Session, ProfileA().Id, 1));
             f.Accept(Writer(f).InstallLivingDungeonOpportunity(path, fs, f.Session, 0, 0));
             f.Accept(Writer(f).AcceptLivingDungeonHorizon(path, fs, f.Session, 10000));
@@ -612,6 +632,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(source, frozenLimits).IsValid, Is.True);
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(source, f.Profile.Canonical, out var candidate), Is.True);
             Assert.That(candidate.Length, Is.EqualTo(source.Length + 79)); CollectionAssert.AreEqual(source, PhaseFourTestSupport.FrozenThirteen(candidate));
+            Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(candidate,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out candidate),Is.True);
             // Independent complete-save parser/round-trip ceiling, using dormant synthetic extension padding.
             // This is not a claim that four active checkpoints can attain both ceilings simultaneously.
             int envelope = f.Profile.Whole.MaximumCandidateBytes;

@@ -13,7 +13,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CanonicalSpatialSerializationLimits limits,
             RoomContentSpatialOccupancySnapshot roomContentOccupancy = null,
             bool allowEditorTestOccupancyFallback = true,
-            IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles = null)
+            IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles = null,
+            MonsterRecoveryRules monsterRecovery = null)
         { Compatibility = compatibility ?? throw new ArgumentNullException(nameof(compatibility));
           Production = production ?? throw new ArgumentNullException(nameof(production));
           RoomContentOccupancy = roomContentOccupancy;
@@ -29,7 +30,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 #endif
           this.legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
           if (!limits.IsValid) throw new ArgumentOutOfRangeException(nameof(limits)); Limits = limits;
-          LivingDungeonProfiles = livingDungeonProfiles?.ToArray(); }
+          LivingDungeonProfiles = livingDungeonProfiles?.ToArray();
+          MonsterRecovery = monsterRecovery ?? MonsterRecoveryRules.EditorFallback(); }
+        internal MonsterRecoveryRules MonsterRecovery { get; }
         internal IReadOnlyList<LivingDungeonProfile> LivingDungeonProfiles { get; }
         internal SpatialLayoutCompatibilitySnapshot Compatibility { get; }
         internal ProductionSpatialContentSnapshot Production { get; }
@@ -156,6 +159,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal StructuralInvestmentRecord[] Investment { get; set; }
         internal RoomContentSpatialOccupancySnapshot RoomContentOccupancy { get; set; }
         internal LivingDungeonState LivingDungeon { get; set; }
+        internal MonsterContinuityState MonsterContinuity { get; set; }
     }
 
     public static class DetachedCompleteSaveContract
@@ -168,6 +172,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 context.Limits, CanonicalSaveSchemaVersions.CurrentWritableTarget, true,
                 null, null, context.LivingDungeonProfiles);
             if (!result.IsValid || !result.LayoutContractVersion.HasValue) return Failure();
+            if (!MonsterContinuity.Valid(result.MonsterContinuity, result.State, context.MonsterRecovery, context.Limits.Spatial.MaximumRecords)) return Failure();
             if (!DetachedCanonicalProductionSemanticValidation.Validate(result.State, context.Production,
                 context.Configuration, context.Limits.Spatial, context.RoomContentOccupancy, true).IsValid)
                 return Failure();
@@ -185,7 +190,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     result.ResearchPendingExplicitNull, result.ResearchProgressExplicitNull,
                     result.LastOfflineSummaryExplicitNull, result.CorridorContent,
                     result.BranchKnowledge, result.FloorKnowledge) { Investment = result.Investment,
-                        RoomContentOccupancy = context.RoomContentOccupancy, LivingDungeon = result.LivingDungeon }
+                        RoomContentOccupancy = context.RoomContentOccupancy, LivingDungeon = result.LivingDungeon, MonsterContinuity = result.MonsterContinuity }
                 : Failure();
         }
 
@@ -246,6 +251,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             byte[] bytes, CanonicalSpatialSerializationLimits limits) =>
             ParseValidateAndRoundTripCore(bytes, limits, 13, true, null, null);
 
+        internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaFourteenAndRoundTrip(
+            byte[] bytes, CanonicalSpatialSerializationLimits limits, IReadOnlyList<LivingDungeonProfile> profiles = null) =>
+            ParseValidateAndRoundTripCore(bytes, limits, 14, true, null, null, profiles);
+
         private static DetachedCompleteSaveValidationResult ParseValidateAndRoundTripCore(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, int schemaVersion, bool requireLifecycle,
             string expectedTransactionId, string expectedDescriptorFingerprint,
@@ -269,7 +278,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 bool requirePhaseFive = schemaVersion >= 10;
                 bool requireFloorKnowledge = schemaVersion >= CanonicalSaveSchemaVersions.FloorKnowledgeIntroduction;
                 bool requireLivingDungeon = schemaVersion >= CanonicalSaveSchemaVersions.LivingDungeonIntroduction;
-                int canonicalMembers = requireLivingDungeon ? 8 : requireFloorKnowledge ? 7 : requirePhaseFive ? 6 : requireInvestment ? 4 : requireLifecycle ? 3 : 2;
+                bool requireMonsters = schemaVersion >= CanonicalSaveSchemaVersions.MonsterContinuityIntroduction;
+                int canonicalMembers = requireMonsters ? 9 : requireLivingDungeon ? 8 : requireFloorKnowledge ? 7 : requirePhaseFive ? 6 : requireInvestment ? 4 : requireLifecycle ? 3 : 2;
                 int canonicalStart = primary.Fields.Count - canonicalMembers;
                 if (primary.Fields.Count < canonicalMembers ||
                     primary.Fields[canonicalStart].Key != "canonicalSpatialAuthority" ||
@@ -279,6 +289,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         primary.Fields[canonicalStart + 5].Key != PhaseFiveSaveContracts.KnowledgeOwnerName)) ||
                     (requireFloorKnowledge && primary.Fields[canonicalStart + 6].Key != PhaseSixFloorKnowledge.OwnerName) ||
                     (requireLivingDungeon && primary.Fields[canonicalStart + 7].Key != LivingDungeonContracts.OwnerName) ||
+                    (requireMonsters && primary.Fields[canonicalStart + 8].Key != MonsterContinuity.Owner) ||
                     (requireLifecycle && primary.Fields[canonicalStart + 2].Key !=
                         "structuralLifecycleAndOwnership") || CaseAmbiguous(primary,
                         requireFloorKnowledge ? new[] { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership", "structuralInvestment", PhaseFiveSaveContracts.CorridorOwnerName, PhaseFiveSaveContracts.KnowledgeOwnerName, PhaseSixFloorKnowledge.OwnerName } :
@@ -290,6 +301,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!PrimaryOrderIsCanonical(primary, canonicalMembers)) return Failure();
                 if (requireLivingDungeon && primary.Fields.Take(canonicalStart).Any(f =>
                     string.Equals(f.Key, LivingDungeonContracts.OwnerName, StringComparison.OrdinalIgnoreCase))) return Failure();
+                if (requireMonsters && primary.Fields.Take(canonicalStart).Any(f =>
+                    string.Equals(f.Key, MonsterContinuity.Owner, StringComparison.OrdinalIgnoreCase))) return Failure();
 
                 var spatialWriter = new ContractJsonWriter(limits.Serialized);
                 spatialWriter.Node(); spatialWriter.Token("{"); spatialWriter.String("Authority"); spatialWriter.Token(":");
@@ -348,6 +361,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 LivingDungeonState livingDungeon = null;
                 if (requireLivingDungeon && !LivingDungeonContracts.TryRead(primary.Fields[canonicalStart + 7].Value,
                     livingDungeonProfiles, out livingDungeon)) return Failure();
+                MonsterContinuityState monsters = null;
+                if (requireMonsters && !MonsterContinuity.TryRead(primary.Fields[canonicalStart + 8].Value,
+                    limits.Spatial.MaximumRecords, out monsters)) return Failure();
+                if (requireMonsters && !MonsterContinuity.IdentitiesValid(monsters, parsedSpatial.Value)) return Failure();
                 if (requireLivingDungeon && !livingDungeon.IsDormant)
                 {
                     var historyNode = primary.Fields.SingleOrDefault(f => f.Key == "runHistory").Value;
@@ -360,7 +377,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         return Failure();
                     var ownerWriter = new ContractJsonWriter(limits.Serialized); LivingDungeonContracts.Write(ownerWriter, livingDungeon);
                     int ownerBytes = ownerWriter.Finish().Length + ContractJson.Bytes(",\"" + LivingDungeonContracts.OwnerName + "\":").Length;
-                    if (ownerBytes > profile.MaximumOwnerBytes || bytes.Length - ownerBytes > profile.MaximumBaseSaveBytes) return Failure();
+                    int monsterBytes = 0;
+                    if (requireMonsters)
+                    {
+                        var monsterWriter = new ContractJsonWriter(limits.Serialized); MonsterContinuity.Write(monsterWriter, monsters);
+                        monsterBytes = monsterWriter.Finish().Length + ContractJson.Bytes(",\"" + MonsterContinuity.Owner + "\":").Length;
+                    }
+                    if (ownerBytes > profile.MaximumOwnerBytes || bytes.Length - ownerBytes - monsterBytes > profile.MaximumBaseSaveBytes) return Failure();
                     var baseWriter = new ContractJsonWriter(profile.BaseBudget); baseWriter.Node(); baseWriter.Token("{");
                     for (int i = 0; i < root.Fields.Count; i++)
                     {
@@ -369,7 +392,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         else if (field.Key == "primary")
                         {
                             baseWriter.Node(); baseWriter.Token("{");
-                            for (int j = 0; j < primary.Fields.Count - 1; j++)
+                            for (int j = 0; j < canonicalStart + 7; j++)
                             {
                                 if (j != 0) baseWriter.Token(","); baseWriter.String(primary.Fields[j].Key); baseWriter.Token(":");
                                 WriteNode(baseWriter, primary.Fields[j].Value);
@@ -390,7 +413,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     false, ExplicitNull(primary, "researchPending"),
                     ExplicitNull(primary, "researchProgress"),
                     ExplicitNull(primary, "lastOfflineSummary"), corridorContent,
-                    branchKnowledge, floorKnowledge) { Investment = investment, LivingDungeon = livingDungeon };
+                    branchKnowledge, floorKnowledge) { Investment = investment, LivingDungeon = livingDungeon, MonsterContinuity = monsters };
             }
             catch { return Failure(); }
         }

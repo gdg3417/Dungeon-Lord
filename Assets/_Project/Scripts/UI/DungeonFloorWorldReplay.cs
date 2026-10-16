@@ -281,11 +281,11 @@ namespace DungeonBuilder.M0
             {
                 var actor=replay.Combat.Actors[binding.Actor]; var state=actor.At(replay.Index);
                 binding.View.transform.localPosition=state.Position;
-                binding.View.color=state.Health==0 ? policy.ReplayDefeatedMonsterColor : binding.Color;
-                binding.View.sortingOrder=state.Health==0 ? binding.Order : 3;
-                binding.Defeat.gameObject.SetActive(state.Health==0);
+                binding.View.color=state.RevivalRequired ? policy.ReplayDefeatedMonsterColor : binding.Color;
+                binding.View.sortingOrder=state.RevivalRequired ? binding.Order : 3;
+                binding.Defeat.gameObject.SetActive(state.RevivalRequired);
                 binding.Defeat.transform.localPosition=state.Position+policy.ReplayMonsterDefeatOffset;
-                if(state.Health==0) ReplayDefeatedMonsterCount++;
+                if(state.RevivalRequired) ReplayDefeatedMonsterCount++;
             }
             foreach(var site in combatCasualties)
             {

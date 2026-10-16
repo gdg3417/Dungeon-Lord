@@ -186,13 +186,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment = null,
             CorridorContentAuthority corridorContent = null,
             SharedBranchKnowledgeAuthority branchKnowledge = null,
-            SharedFloorKnowledgeAuthority floorKnowledge = null)
+            SharedFloorKnowledgeAuthority floorKnowledge = null,
+            MonsterContinuityState monsterContinuity = null)
         {
             if (recognizedState == null || !recognizedState.IsSuccess)
                 return Failure(recognizedState?.Reason ??
                     DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
             return PrepareReplacement(recognizedState.Snapshot, replacement, investment,
-                corridorContent, branchKnowledge, floorKnowledge);
+                corridorContent, branchKnowledge, floorKnowledge, monsterContinuity: monsterContinuity);
         }
 
         private DetachedCanonicalSaveSessionResult PrepareReplacement(
@@ -201,7 +202,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CorridorContentAuthority corridorContent,
             SharedBranchKnowledgeAuthority branchKnowledge,
             SharedFloorKnowledgeAuthority floorKnowledge,
-            LivingDungeonState livingDungeon = null, bool manualRun = false)
+            LivingDungeonState livingDungeon = null, bool manualRun = false,
+            MonsterContinuityState monsterContinuity = null)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -214,17 +216,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out ContractJsonNode root))
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 ContractJsonNode primary = root.Fields[2].Value;
-                var retainedOwner = primary.Fields[primary.Fields.Count - 1].Value;
+                var retainedOwner = primary.Fields[primary.Fields.Count - 2].Value;
                 bool activated = retainedOwner.Fields[2].Value.Kind != ContractJsonKind.Null;
                 bool unfinished = activated && retainedOwner.Fields[2].Value.Fields[2].Value.Text !=
                     retainedOwner.Fields[2].Value.Fields[3].Value.Text;
                 if (unfinished && livingDungeon == null)
                 {
-                    int start = primary.Fields.Count - 8;
+                    int start = primary.Fields.Count - 9;
                     if (!SerializeNode(primary.Fields[start].Value).AsSpan().SequenceEqual(spatial.Value.Authority) ||
                         !SerializeNode(primary.Fields[start + 1].Value).AsSpan().SequenceEqual(spatial.Value.Floors) ||
                         !SerializeNode(primary.Fields[start + 2].Value).AsSpan().SequenceEqual(spatial.Value.LifecycleAndOwnership) ||
-                        investment != null || corridorContent != null || branchKnowledge != null || floorKnowledge != null)
+                        investment != null || corridorContent != null || branchKnowledge != null || floorKnowledge != null || monsterContinuity != null)
                         return Failure(LivingDungeonScheduling.Boundary);
                 }
                 var writer = new ContractJsonWriter(limits.Canonical.Serialized);
@@ -277,7 +279,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         limits.Whole.MaximumCopiedValueBytes);
                     WriteRawField(writer, name, valueBytes, first); first = false;
                 }
-                const int canonicalMemberCount = 8;
+                const int canonicalMemberCount = 9;
                 int canonicalStart = primary.Fields.Count - canonicalMemberCount;
                 for (int index = 0; index < canonicalStart; index++)
                 {
@@ -308,6 +310,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 writer.Token(","); writer.String(LivingDungeonContracts.OwnerName); writer.Token(":");
                 if (livingDungeon != null) LivingDungeonContracts.Write(writer, livingDungeon);
                 else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[canonicalStart + 7].Value);
+                writer.Token(","); writer.String(MonsterContinuity.Owner); writer.Token(":");
+                var prior = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, context);
+                if (!prior.IsValid) return Failure(MonsterRecoveryRules.Invalid);
+                var continuity = monsterContinuity ?? MonsterContinuity.Reconcile(prior.MonsterContinuity, prior.State, replacement, context.MonsterRecovery);
+                MonsterContinuity.Write(writer, continuity);
                 writer.Token("}");
 
                 for (int index = 3; index < root.Fields.Count; index++)
@@ -371,8 +378,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal DetachedCanonicalSaveSessionResult PrepareManualRunReplacement(
             DetachedRecognizedSaveStateSnapshotResult recognized, DetachedCanonicalSpatialSaveState spatial,
             StructuralInvestmentRecord[] investment, CorridorContentAuthority corridor,
-            SharedBranchKnowledgeAuthority branch, SharedFloorKnowledgeAuthority floor) => recognized?.IsSuccess == true
-                ? PrepareReplacement(recognized.Snapshot, spatial, investment, corridor, branch, floor, null, true)
+            SharedBranchKnowledgeAuthority branch, SharedFloorKnowledgeAuthority floor,
+            MonsterContinuityState monsters = null) => recognized?.IsSuccess == true
+                ? PrepareReplacement(recognized.Snapshot, spatial, investment, corridor, branch, floor, null, true, monsters)
                 : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
 
         private static void WriteField(ContractJsonWriter writer, string key,

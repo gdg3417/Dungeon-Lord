@@ -11,14 +11,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public readonly struct CanonicalSpatialSerializationLimits
     {
         public CanonicalSpatialSerializationLimits(SpatialSerializedInputLimits serialized,
-            CanonicalSpatialSaveWorkloadLimits spatial, SaveSpatialMigrationLimitsProfile historical = null)
-        { Serialized = serialized; Spatial = spatial; Historical = historical; }
+            CanonicalSpatialSaveWorkloadLimits spatial, SaveSpatialMigrationLimitsProfile historical = null, int historicalBoundary = 14)
+        { Serialized = serialized; Spatial = spatial; Historical = historical; HistoricalBoundary = historicalBoundary; }
 
         public SpatialSerializedInputLimits Serialized { get; }
         public CanonicalSpatialSaveWorkloadLimits Spatial { get; }
         internal SaveSpatialMigrationLimitsProfile Historical { get; }
+        private int HistoricalBoundary { get; }
         internal CanonicalSpatialSerializationLimits ForSchema(int schema) =>
-            schema < CanonicalSaveSchemaVersions.LivingDungeonIntroduction && Historical != null ? Historical.Canonical : this;
+            schema < HistoricalBoundary && Historical != null ? Historical.Canonical.ForSchema(schema) : this;
         public bool IsValid => Serialized.IsValid && Spatial.IsValid;
     }
 

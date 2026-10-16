@@ -83,6 +83,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
             PersistRecognized(fixture);
             rows.Add(MeasureCurrent("custody-array-envelope-r3-completed-research", fixture));
             AssertProductionEnvelope(fixture, production);
+            // C2 recovery at this same maximum valid production geometry/custody envelope.
+            var rules=MonsterRecoveryRules.EditorFallback();
+            var deployed=fixture.State.Floors.SelectMany(f=>f.RoomContents.Assignments)
+                .Where(a=>a.CategoryId==MvpDungeonPlacementIds.MonsterCategoryId).ToDictionary(a=>a.AssignmentId,a=>a.OptionId);
+            var injured=fixture.Runtime.monsterContinuity.Copy();
+            foreach(var record in injured.Records.Where(r=>deployed.ContainsKey(r.AssignmentId)))
+            { record.Health=1; record.RevivalRequired=false; }
+            var staged=fixture.Session.PrepareLiveReplacement(DetachedRecognizedSaveStateSnapshot.CaptureWithMana(fixture.Runtime,0,production),
+                fixture.State,monsterContinuity:injured);
+            Assert.That(staged.IsSuccess,Is.True,staged.Reason);
+            fixture.FileSystem.Seed(fixture.ActivePath,staged.Update.GetBytes()); fixture.Reopen();
+            fixture.Runtime.structureRuntime.ManaReserve=1000; // Explicit test-only funding.
+            int debit=deployed.Values.Sum(option=>rules.Readiness(option)-1);
+            fixture.Accept(fixture.Authority.SaveRecognizedState(fixture.ActivePath,fixture.FileSystem,fixture.Session,fixture.Runtime));
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve,Is.EqualTo(1000-debit));
+            Assert.That(fixture.Runtime.monsterContinuity.Records.Where(r=>deployed.ContainsKey(r.AssignmentId)).All(r=>r.Health==rules.Readiness(deployed[r.AssignmentId])),Is.True);
+            AssertProductionEnvelope(fixture,production);
+            TestContext.WriteLine("C2 maximum production recovery; spatialRecords="+CountCanonicalRecords(fixture.State)+"; deployedMonsters="+deployed.Count+"; debit="+debit);
             foreach (string row in rows)
             { Debug.Log("PHASE3_LIMIT_MEASUREMENT " + row); TestContext.Progress.WriteLine("PHASE3_LIMIT_MEASUREMENT " + row); }
             Assert.That(rows.Count, Is.EqualTo(6));
@@ -409,12 +427,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             // Current canonical owners are not unknown preservation data, even though the
             // frozen legacy raw classifier describes them as unknown primary members.
             string[] owners = { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership",
-                "structuralInvestment", "corridorContent", "sharedBranchKnowledge", "sharedFloorKnowledge", "livingDungeon" };
+                "structuralInvestment", "corridorContent", "sharedBranchKnowledge", "sharedFloorKnowledge", "livingDungeon", "monsterContinuity" };
             var unknown = classification.UnknownRootMembers.Concat(classification.UnknownPrimaryMembers.Where(value =>
                 !owners.Contains(value.Name))).ToArray();
             int copied = classification.Members.Where(value => value.State != RawSaveMemberState.Absent &&
                 value.Name != "corridorContent" && value.Name != "sharedBranchKnowledge" &&
-                value.Name != "sharedFloorKnowledge" && value.Name != "livingDungeon")
+                value.Name != "sharedFloorKnowledge" && value.Name != "livingDungeon" && value.Name != "monsterContinuity")
                 .Sum(value => value.ByteLength);
             Assert.That(MinimumWhole(fixture, 0), Is.EqualTo(bytes.Length));
             Assert.That(MinimumWhole(fixture, 1), Is.EqualTo(copied));

@@ -45,7 +45,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             var prepared = session.PrepareLiveReplacement(snapshot, final, priced.Investment,
                 owned.CorridorContent, owned.BranchKnowledge);
-            var result = PrepareAndPersist(activePath, fileSystem, session, prepared, false);
+            var result = PrepareAndPersist(activePath, fileSystem, session, prepared, false, ordinarySpend: priced.Cost > 0);
             if (result.IsSuccess) draft.Committed();
             return result;
         }

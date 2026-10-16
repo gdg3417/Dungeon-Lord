@@ -24,7 +24,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (!SchemaTwelveToThirteenUpgrade.TryPrepare(twelve, limits, PositionProfiles(limits),
                     out byte[] thirteen))
             { return false; }
-            return SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out current);
+            return SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out var fourteen) &&
+                SchemaFourteenToFifteenUpgrade.TryPrepare(fourteen, limits, MonsterRecoveryRules.EditorFallback(), out current);
         }
 
         internal static RoomContentPositionMigrationProfilesSnapshot PositionProfiles(
@@ -103,9 +104,34 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return System.Text.Encoding.UTF8.GetBytes(value);
         }
         internal static byte[] FrozenThirteen(byte[] current) => System.Text.Encoding.UTF8.GetBytes(
-            System.Text.Encoding.UTF8.GetString(current).Replace(
+            System.Text.Encoding.UTF8.GetString(FrozenFourteen(current)).Replace(
                 ",\"livingDungeon\":{\"FormatVersion\":1,\"Revision\":0,\"Scheduler\":null,\"Parties\":[]}", "")
                 .Replace("\"schemaVersion\":14", "\"schemaVersion\":13"));
+        internal static byte[] FrozenFourteen(byte[] current)
+        {
+            var limits = new SpatialSerializedInputLimits(4000000, 50000, 30000, 4000000, 64);
+            var issues = new SpatialIssueCollector(64);
+            Assert.That(ContractJson.TryParse(current, limits, issues, out var root), Is.True);
+            var writer = new ContractJsonWriter(limits); writer.Node(); writer.Token("{");
+            for (int i = 0; i < root.Fields.Count; i++)
+            {
+                if (i != 0) writer.Token(","); var f = root.Fields[i]; writer.String(f.Key); writer.Token(":");
+                if (f.Key == "schemaVersion") writer.Token("14");
+                else if (f.Key == "primary")
+                {
+                    writer.Node(); writer.Token("{"); bool first = true;
+                    foreach (var p in f.Value.Fields)
+                    {
+                        if (p.Key == MonsterContinuity.Owner) continue;
+                        if (!first) writer.Token(","); first = false; writer.String(p.Key); writer.Token(":");
+                        DetachedCompleteSaveContract.WriteCanonicalNode(writer, p.Value);
+                    }
+                    writer.Token("}");
+                }
+                else DetachedCompleteSaveContract.WriteCanonicalNode(writer, f.Value);
+            }
+            writer.Token("}"); return writer.Finish();
+        }
         internal static StructuralEconomySnapshot Economy(ProductionSpatialContentSnapshot production,
             CanonicalSpatialSerializationLimits limits)
         {

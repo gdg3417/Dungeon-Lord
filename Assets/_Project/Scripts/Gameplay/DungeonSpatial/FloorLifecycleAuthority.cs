@@ -58,6 +58,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     ApplyDetachedActivation(candidate, eligible.TargetFloorInstanceId, true);
                 }
                 var recognized = DetachedRecognizedSaveStateSnapshot.Capture(current, limits);
+                long required = MonsterContinuity.RequiredReserve(candidate, context.MonsterRecovery);
+                if (required > MonsterContinuity.RequiredReserve(owned.State, context.MonsterRecovery) &&
+                    current.structureRuntime.ManaReserve < required)
+                { result.Reason = MonsterRecoveryRules.Insufficient; return result; }
                 var prepared = session.PrepareLiveReplacement(recognized, candidate, owned.Investment,
                     owned.CorridorContent, owned.BranchKnowledge);
                 if (!prepared.IsSuccess) { result.Reason = prepared.Reason; return result; }

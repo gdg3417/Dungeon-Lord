@@ -71,6 +71,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 save.sharedBranchKnowledge = validation.BranchKnowledge;
                 save.sharedFloorKnowledge = validation.FloorKnowledge;
                 save.livingDungeon = validation.LivingDungeon;
+                save.monsterContinuity = validation.MonsterContinuity;
                 reason = null;
                 return true;
             }

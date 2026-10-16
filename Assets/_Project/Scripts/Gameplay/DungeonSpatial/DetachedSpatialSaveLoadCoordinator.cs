@@ -60,6 +60,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly RoomContentPositionMigrationProfilesSnapshot positionMigrationProfiles;
         private readonly RoomContentSpatialOccupancySnapshot roomContentOccupancy;
         private readonly IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles;
+        private readonly MonsterRecoveryRules monsterRecovery;
 
         public DetachedSpatialSaveLoadCoordinator(SaveSpatialMigrationLimitsProfile limits,
             SpatialLayoutCompatibilitySnapshot compatibility,
@@ -68,7 +69,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RawSaveEnvelopeVersionContract rawVersions, RawLegacyBlankFloorContract blankFloor,
             RoomContentPositionMigrationProfilesSnapshot positionMigrationProfiles = null,
             RoomContentSpatialOccupancySnapshot roomContentOccupancy = null,
-            IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles = null)
+            IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles = null,
+            MonsterRecoveryRules monsterRecovery = null)
         {
             this.limits = limits; this.compatibility = compatibility; this.production = production;
             this.legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
@@ -79,6 +81,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             this.rawVersions = rawVersions; this.blankFloor = blankFloor;
             this.positionMigrationProfiles = positionMigrationProfiles;
             this.roomContentOccupancy = roomContentOccupancy;
+            this.monsterRecovery = monsterRecovery ?? MonsterRecoveryRules.EditorFallback();
             this.livingDungeonProfiles = livingDungeonProfiles == null ? null : new List<LivingDungeonProfile>(livingDungeonProfiles).AsReadOnly();
         }
 
@@ -127,9 +130,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (legacy == null) return Failure("gd66.transaction.pinned_input_missing");
                 recoveryContext = new DetachedSpatialMigrationRecoveryContext(compatibility, production,
                     validationInputs, legacyConfiguration, limits.Canonical, limits.Raw, rawVersions,
-                    blankFloor, limits.Whole, roomContentOccupancy, livingDungeonProfiles);
+                    blankFloor, limits.Whole, roomContentOccupancy, livingDungeonProfiles, monsterRecovery);
                 currentContext = new DetachedCurrentTargetValidationContext(compatibility, production,
-                    legacyConfiguration, limits.Canonical, roomContentOccupancy, livingDungeonProfiles: livingDungeonProfiles);
+                    legacyConfiguration, limits.Canonical, roomContentOccupancy, livingDungeonProfiles: livingDungeonProfiles, monsterRecovery: monsterRecovery);
             }
             catch { return Failure("gd66.profile.invalid"); }
 
@@ -144,6 +147,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                 recovered.TrustedPayload, recovered); }
 
+            var schemaFourteen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(trusted, limits.Canonical, livingDungeonProfiles);
+            if (schemaFourteen.IsValid)
+                return UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, schemaFourteen,
+                    currentContext, DetachedSpatialSaveLoadDisposition.Migrated, recovered, null);
             var schemaThirteen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(
                 trusted, limits.Canonical);
             if (schemaThirteen.IsValid)
@@ -221,7 +228,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             // Reject the new owner collision before the frozen legacy transaction can commit schema 7.
             // Frozen readers/preparation still recognize this as an extension; the current target cannot.
             if (classification.UnknownPrimaryMembers.Any(member => string.Equals(member.Name,
-                LivingDungeonContracts.OwnerName, StringComparison.OrdinalIgnoreCase)))
+                LivingDungeonContracts.OwnerName, StringComparison.OrdinalIgnoreCase) || string.Equals(member.Name,
+                MonsterContinuity.Owner, StringComparison.OrdinalIgnoreCase)))
                 return Failure(SchemaSevenToEightUpgrade.InvalidReason, recovered.TrustedPayload, recovered);
 
             DescriptorSeedResult descriptorResult = CreateDescriptorSeed(trusted, classification, schema);
@@ -264,7 +272,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedSpatialSaveLoadDisposition disposition, DetachedSpatialMigrationOutcome recovery,
             DetachedSpatialMigrationOutcome transaction)
         {
-            int frozenSchema = DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(
+            int frozenSchema = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(source, limits.Canonical, livingDungeonProfiles).IsValid ? 14 : DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(
                 source, limits.Canonical).IsValid ? 13 : DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(
                 source, limits.Canonical).IsValid ? 12 :
                 CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget;
@@ -274,7 +282,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 frozenValidation.LayoutContractVersion != frozenContract.Value.CanonicalLayoutContractVersion ||
                 !DetachedCanonicalProductionSemanticValidation.Validate(frozenValidation.State, production,
                     currentContext.Configuration, limits.Canonical.Spatial,
-                    frozenSchema == 13 ? currentContext.RoomContentOccupancy : null, frozenSchema == 13).IsValid ||
+                    frozenSchema >= 13 ? currentContext.RoomContentOccupancy : null, frozenSchema >= 13).IsValid ||
                 !TryUpgradeToCurrent(source, limits.Canonical, out byte[] candidate))
                 return Failure(SchemaSevenToEightUpgrade.InvalidReason,
                     transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
@@ -309,10 +317,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             out byte[] candidate)
         {
             candidate = null;
+            if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(source, limits, livingDungeonProfiles).IsValid)
+                return SchemaFourteenToFifteenUpgrade.TryPrepare(source, limits, monsterRecovery, out candidate, livingDungeonProfiles);
             if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(source, limits).IsValid)
-                return SchemaThirteenToFourteenUpgrade.TryPrepare(source, limits, out candidate);
+                return SchemaThirteenToFourteenUpgrade.TryPrepare(source, limits, out byte[] fourteen) &&
+                    SchemaFourteenToFifteenUpgrade.TryPrepare(fourteen, limits, monsterRecovery, out candidate, livingDungeonProfiles);
             return TryUpgradeToThirteen(source, limits, out byte[] thirteen) &&
-                SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out candidate);
+                SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out byte[] upgradedFourteen) &&
+                SchemaFourteenToFifteenUpgrade.TryPrepare(upgradedFourteen, limits, monsterRecovery, out candidate, livingDungeonProfiles);
         }
 
         private bool TryUpgradeToThirteen(byte[] source, CanonicalSpatialSerializationLimits limits,

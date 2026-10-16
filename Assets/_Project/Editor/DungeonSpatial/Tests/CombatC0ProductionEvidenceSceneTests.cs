@@ -31,14 +31,14 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(events.Count, Is.EqualTo(18));
             Assert.That(selected.RunId, Is.EqualTo(run.RunId));
             CollectionAssert.AreEqual(events, CombatC0Diagnostics.Events(selected));
-            Assert.That(events.All(e => e.RunId == run.RunId && e.ExecutableId == config.ExecutableId), Is.True);
+            Assert.That(events.All(e => e.RunId == run.RunId && e.ExecutableId == MonsterRecoveryRules.Executable), Is.True);
             Assert.That(events.Select(e => e.Ordinal), Is.Ordered.And.Unique);
             Assert.That(events.Any(e => e.Kind == CombatC0EventKind.Attack && e.Damage > 0), Is.True);
             Assert.That(events.Any(e => e.Kind == CombatC0EventKind.Attack && e.ActorId.Contains("/monster/")), Is.True);
             Assert.That(events.Last().Kind, Is.EqualTo(CombatC0EventKind.EncounterComplete));
             Assert.That(events.Last().Reason, Is.EqualTo(CombatC0Reason.DefendersDefeated));
             var hp = run.Party.Members.ToDictionary(m => CombatC0Kernel.MemberId(run.Party, m.MemberOrdinal), m => m.MaxHealth);
-            foreach (var monster in monsters) hp.Add(CombatC0Kernel.MonsterId(run.Party, monster.AssignmentId), monster.MaxHealth);
+            foreach (var monster in monsters) hp.Add(CombatC0Kernel.MonsterId(run.Party, monster.AssignmentId), monster.InitialHealth);
             foreach (var e in events.Where(e => e.Kind == CombatC0EventKind.Attack))
             {
                 Assert.That(hp[e.ActorId], Is.GreaterThan(0), "A defeated actor cannot attack");

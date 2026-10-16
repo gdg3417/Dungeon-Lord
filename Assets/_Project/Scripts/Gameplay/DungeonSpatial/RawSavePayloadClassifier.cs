@@ -20,11 +20,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         // failed delimiter alternatives), making it distinct from the input byte limit.
         public RawSavePayloadClassificationLimits(int maximumInputBytes, int maximumNestingDepth,
             int maximumObjectMembers, int maximumArrayElements, int maximumStringBytes,
-            int maximumScanWork, SaveSpatialMigrationLimitsProfile historical = null)
+            int maximumScanWork, SaveSpatialMigrationLimitsProfile historical = null, int historicalBoundary = 14,
+            int maximumMonsterRecords = 0)
         { MaximumInputBytes = maximumInputBytes; MaximumNestingDepth = maximumNestingDepth;
           MaximumObjectMembers = maximumObjectMembers; MaximumArrayElements = maximumArrayElements;
           MaximumStringBytes = maximumStringBytes;
-          MaximumScanWork = maximumScanWork; Historical = historical; }
+          MaximumScanWork = maximumScanWork; Historical = historical; HistoricalBoundary = historicalBoundary;
+          MaximumMonsterRecords = maximumMonsterRecords; }
+        internal int MaximumMonsterRecords { get; }
+        private int HistoricalBoundary { get; }
         internal SaveSpatialMigrationLimitsProfile Historical { get; }
         internal RawSavePayloadClassificationLimits ForPayload(byte[] bytes)
         {
@@ -38,9 +42,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 while (end < bytes.Length && bytes[end] >= '0' && bytes[end] <= '9') end++;
                 if (matches && end > prefix.Length && end - prefix.Length <= 10 &&
                     int.TryParse(Encoding.ASCII.GetString(bytes, prefix.Length, end - prefix.Length), out int schema) &&
-                    schema >= CanonicalSaveSchemaVersions.LivingDungeonIntroduction) return this;
+                    schema >= HistoricalBoundary) return this;
             }
-            return Historical.Raw;
+            return Historical.Raw.ForPayload(bytes);
         }
         public int MaximumInputBytes { get; }
         public int MaximumNestingDepth { get; }
@@ -287,7 +291,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 acceptedVersion.GetValueOrDefault() >= CanonicalSaveSchemaVersions.LivingDungeonIntroduction;
             if (livingOwner) evidence.Add(Evidence(LivingDungeonContracts.OwnerName,
                 Find(payload, LivingDungeonContracts.OwnerName), owned));
-            var unknownPrimary = Unknown(payload, owned, false, true, livingOwner);
+            bool monsterOwner = envelope == RawSaveEnvelopeKind.WrappedSaveRoot && acceptedVersion.GetValueOrDefault() >= CanonicalSaveSchemaVersions.MonsterContinuityIntroduction;
+            if (monsterOwner) evidence.Add(Evidence(MonsterContinuity.Owner, Find(payload, MonsterContinuity.Owner), owned));
+            var unknownPrimary = Unknown(payload, owned, false, true, livingOwner, monsterOwner);
             return new RawSavePayloadClassification(envelope, null, -1, acceptedVersion,
                 Evidence("schema", schema, owned), Evidence("schemaVersion", schemaVersion, owned),
                 Evidence("primary", primary, owned), evidence, unknownRoot, unknownPrimary,
@@ -363,7 +369,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         { for (int i = 0; i < node.Members.Count; i++) if (string.Equals(node.Members[i].Name, name, StringComparison.Ordinal)) return node.Members[i].Value; return null; }
         private static byte[] Slice(byte[] bytes, int start, int end)
         { var result = new byte[end - start]; Buffer.BlockCopy(bytes, start, result, 0, result.Length); return result; }
-        private static List<RawUnknownMemberEvidence> Unknown(Node node, byte[] bytes, bool root, bool saveData, bool livingOwner = false)
+        private static List<RawUnknownMemberEvidence> Unknown(Node node, byte[] bytes, bool root, bool saveData, bool livingOwner = false, bool monsterOwner = false)
         {
             var result = new List<RawUnknownMemberEvidence>();
             for (int i = 0; i < node.Members.Count; i++)
@@ -371,7 +377,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Member member = node.Members[i]; bool known = root
                     ? member.Name == "schema" || member.Name == "schemaVersion" || member.Name == "primary"
                     : saveData && (Array.IndexOf(SaveDataMembers, member.Name) >= 0 ||
-                        (livingOwner && member.Name == LivingDungeonContracts.OwnerName));
+                        (livingOwner && member.Name == LivingDungeonContracts.OwnerName) ||
+                        (monsterOwner && member.Name == MonsterContinuity.Owner));
                 if (!known) result.Add(new RawUnknownMemberEvidence(member.Name, member.Value.Kind,
                     member.Value.Start, Slice(bytes, member.Value.Start, member.Value.End)));
             }
@@ -484,6 +491,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             int memberLimit = limits.MaximumObjectMembers;
                             if (ReferenceEquals(f.Node, Find(root, "primary")) && Find(root, "schemaVersion")?.Text == "14" &&
                                 f.Names.Contains("livingDungeon")) memberLimit = checked(memberLimit + 1);
+                            if (ReferenceEquals(f.Node, Find(root, "primary")) && Find(root, "schemaVersion")?.Text == "15")
+                                memberLimit = checked(memberLimit + (f.Names.Contains("livingDungeon") ? 1 : 0) + (f.Names.Contains(MonsterContinuity.Owner) ? 1 : 0));
                             if (f.Names.Count > memberLimit) { reason = WorkloadExceededReason; errorOffset = p; return false; }
                             f.Name = name;
                             if (!Skip(bytes, ref p, budget)) return BudgetFailure(budget, out reason, out errorOffset);
@@ -518,7 +527,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         }
                         Node child; if (!Value(bytes, ref p, limits, budget, out child)) return Failure(budget, p, out reason, out errorOffset);
                         f.Node.Elements.Add(child); f.CanClose = true;
-                        if (f.Node.Elements.Count > limits.MaximumArrayElements) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; }
+                        int arrayLimit = limits.MaximumArrayElements;
+                        if (limits.MaximumMonsterRecords > arrayLimit && Find(root, "schemaVersion")?.Text == "15")
+                        {
+                            var primaryOwner = Find(root, "primary");
+                            var monsters = primaryOwner == null ? null : Find(primaryOwner, MonsterContinuity.Owner);
+                            if (monsters != null && ReferenceEquals(f.Node, Find(monsters, "Records"))) arrayLimit = limits.MaximumMonsterRecords;
+                        }
+                        if (f.Node.Elements.Count > arrayLimit) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; }
                         f.State = 1; if (Container(child)) { if (stack.Count >= limits.MaximumNestingDepth) { reason = WorkloadExceededReason; errorOffset = child.Start; return false; } stack.Push(new Frame { Node = child }); }
                     }
                 }

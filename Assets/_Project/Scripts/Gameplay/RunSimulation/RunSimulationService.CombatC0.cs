@@ -15,7 +15,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             var kernel = combat.Kernel;
             var plan = IntraroomTraversal.Plan(room, false, kernel.ChargeGeometry);
             var geometry = combat.Geometry(room);
-            var monsters = room.OrderedAssignments().Where(a => a.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId).ToArray();
+            var monsters = room.OrderedAssignments().Where(a => a.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId && kernel.MonsterEligible(a.AssignmentId)).ToArray();
             var positions = monsters.ToDictionary(a => a.AssignmentId, a => a.RoomLocalPosition, StringComparer.Ordinal);
             if (positions.Values.Distinct().Count() != positions.Count) throw new ArgumentException(CombatC0Kernel.InvalidState);
             var resolved = new HashSet<string>(StringComparer.Ordinal);

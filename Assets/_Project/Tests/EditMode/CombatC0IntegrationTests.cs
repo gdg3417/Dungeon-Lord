@@ -195,13 +195,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(CombatC0Diagnostics.Monsters(run),Has.Count.EqualTo(2));
             Assert.That(CombatC0Diagnostics.Events(run).Count(e=>e.Kind==CombatC0EventKind.EncounterStart),Is.EqualTo(1));
             Assert.That(run.RunId,Is.EqualTo("run-"+sequence)); Assert.That(f.Runtime.runHistory.NextRunSequence,Is.EqualTo(sequence+1));
-            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(mana)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget,Is.EqualTo(14));
+            double settledMana = mana - f.Runtime.monsterContinuity.Inspect().Sum(m => m.Health - run.CombatMonsters.Single(c => c.AssignmentId == m.AssignmentId).Health);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(settledMana)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget,Is.EqualTo(15));
             string aggregate=JsonUtility.ToJson(run); Assert.That(aggregate,Does.Not.Contain("Combat").And.Not.Contain("Health"));
             var clone=JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(f.Runtime)); RunTransientEvidence.Retain(f.Runtime,clone);
             Assert.That(B.Structured(CombatC0Diagnostics.Events(clone.runHistory.LatestOutcome)),Is.EqualTo(B.Structured(CombatC0Diagnostics.Events(run))));
             f.Reopen(); Assert.That(CombatC0Diagnostics.Events(f.Runtime.runHistory.LatestOutcome),Is.Empty);
             Assert.That(JsonUtility.ToJson(f.Runtime.runHistory.LatestOutcome),Is.EqualTo(aggregate));
-            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(mana));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(settledMana));
         }
         [Test] public void C0ManualSelectionAndScheduledB1SelectionUseSameCapturedGeometryWithoutChangingCheckpoint()
         {
@@ -228,7 +229,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void LaterCombatTechnicalFailureRollsBackEarlierDamageLootAndAllCanonicalState()
         {
             var f=Canonical(true); foreach(var p in f.Configuration.CombatC0.Monsters) { p.Damage=0; p.MaxHealth=p.Id==MvpDungeonPlacementIds.GoblinOptionId?1:int.MaxValue; }
-            var snapshot=PhaseSixA4Tests.Snapshot(f); var staged=PhaseFiveBBranchIntegrationTests.Service(f.Configuration).StartManualSnapshot(1,snapshot);
+            var snapshot=PhaseSixA4Tests.Snapshot(f); var staged=PhaseFiveBBranchIntegrationTests.Service(f.Configuration).StartHistoricalCombatC0Snapshot(1,snapshot);
             RunStep step; do { step=staged.AdvanceToNextEvent(staged.NextOrdinal); } while(step.Kind!=RunStepKind.RoomComplete);
             Assert.That(staged.Inspect().CarriedLootValue,Is.GreaterThan(0));
             Assert.Throws<InvalidOperationException>(()=>staged.DrainToCompletion());

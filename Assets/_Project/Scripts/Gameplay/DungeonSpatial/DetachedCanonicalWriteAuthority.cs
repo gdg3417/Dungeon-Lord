@@ -12,12 +12,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly byte[] persistedBytes;
         internal DetachedCanonicalWriteResult(bool success, string reason, bool noOp, bool roomEffect,
             byte[] bytes, DetachedCanonicalSaveSession session,
-            DetachedCompleteSaveValidationResult validation, SaveData runtime)
+            DetachedCompleteSaveValidationResult validation, SaveData runtime, double recoveryManaSpent = 0)
         {
             IsSuccess = success; Reason = reason; IsNoOp = noOp;
             ApplyExplicitRoomEffect = roomEffect;
             persistedBytes = bytes == null ? null : (byte[])bytes.Clone();
             Session = session; Validation = validation; RuntimeProjection = runtime;
+            RecoveryManaSpent = recoveryManaSpent;
         }
         public bool IsSuccess { get; }
         public string Reason { get; }
@@ -26,6 +27,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DetachedCanonicalSaveSession Session { get; }
         public DetachedCompleteSaveValidationResult Validation { get; }
         public SaveData RuntimeProjection { get; }
+        public double RecoveryManaSpent { get; }
         public byte[] GetPersistedBytes() => persistedBytes == null ? null : (byte[])persistedBytes.Clone();
     }
 
@@ -119,7 +121,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             DetachedCanonicalSaveSessionResult prepared = session.PrepareLiveReplacement(snapshot,
                 refreshed.Candidate, investment, owned.CorridorContent, owned.BranchKnowledge);
-            return PrepareAndPersist(activePath, fileSystem, session, prepared, false);
+            return PrepareAndPersist(activePath, fileSystem, session, prepared, false, ordinarySpend: refreshed.Profile.ConstructionMana > 0);
         }
 
         public DetachedCanonicalWriteResult Execute(string activePath,
@@ -168,6 +170,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 false, null, null, null, null);
             if (!mutation.IsSuccess) return Failure(mutation.Reason);
             StructuralInvestmentRecord[] investment = owned.Investment;
+            bool ordinarySpend = false;
             DetachedRecognizedSaveStateSnapshotResult snapshot;
             if (StructuralEconomyService.IsStructural(request))
             {
@@ -176,6 +179,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     StructuralEconomyService.Operation(request), StructuralEconomyService.Target(request), economyModifiers);
                 if (!priced.IsAffordable) return Failure(priced.Reason);
                 investment = priced.Investment;
+                ordinarySpend = priced.Cost > 0;
                 snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, priced.ResultingMana, limits);
             }
             else if (request.Kind == DetachedCanonicalMutationKind.RedeployReturnedContent ||
@@ -202,6 +206,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (!StructuralEconomySnapshot.Nonnegative(mana))
                         return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
                     if (mana < price) return Failure(ContentAcquisitionEconomySnapshot.InsufficientReason);
+                    ordinarySpend = price > 0;
                     snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, mana - price, limits);
                 }
                 else snapshot = DetachedRecognizedSaveStateSnapshot.Capture(currentRuntime, limits);
@@ -210,7 +215,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSaveSessionResult prepared =
                 session.PrepareLiveReplacement(snapshot, mutation.State, investment,
                     mutation.CorridorContent, mutation.BranchKnowledge);
-            return PrepareAndPersist(activePath, fileSystem, session, prepared, mutation.ApplyExplicitRoomEffect);
+            return PrepareAndPersist(activePath, fileSystem, session, prepared, mutation.ApplyExplicitRoomEffect, ordinarySpend);
         }
 
         internal DetachedCanonicalWriteResult UndoRenovation(string activePath,
@@ -287,8 +292,21 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 candidate.corridorContent = owned.CorridorContent; candidate.sharedBranchKnowledge = owned.BranchKnowledge;
                 candidate.sharedFloorKnowledge = owned.FloorKnowledge;
                 candidate.livingDungeon = owned.LivingDungeon;
+                candidate.monsterContinuity = owned.MonsterContinuity.Copy();
                 candidate.lastSavedUtcUnix = savedUtcUnix;
                 simulation.CalculatePhaseFiveBRun(candidate, owned, production, postureId, limits.Canonical);
+                var completed = candidate.runHistory.LatestOutcome;
+                if (DungeonBuilder.M0.Gameplay.RunSimulation.CombatC0Diagnostics.IsCombatC2(completed))
+                {
+                    var records = candidate.monsterContinuity.Records.ToDictionary(r => r.AssignmentId, StringComparer.Ordinal);
+                    foreach (var monster in completed.CombatMonsters)
+                    {
+                        var record = records[monster.AssignmentId];
+                        if (record.Health != monster.InitialHealth || record.RevivalRequired != monster.InitialRevivalRequired)
+                            return Failure(MonsterRecoveryRules.Invalid);
+                        record.Health = monster.Health; record.RevivalRequired = monster.RevivalRequired;
+                    }
+                }
                 if (!StructuralEditService.TryFingerprint(owned.State, limits.Canonical, out var presentationFingerprint))
                     return Failure(invalid);
                 candidate.runHistory.LatestOutcome.PresentationLayoutFingerprint = presentationFingerprint;
@@ -309,7 +327,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var result = PrepareAndPersist(activePath, fileSystem, session,
                 session.PrepareManualRunReplacement(snapshot, owned.State, owned.Investment,
                     owned.CorridorContent, candidate.sharedBranchKnowledge,
-                    candidate.sharedFloorKnowledge), false);
+                    candidate.sharedFloorKnowledge, candidate.monsterContinuity), false, recover: true);
             if (result.IsSuccess)
                 DungeonBuilder.M0.Gameplay.RunSimulation.RunTransientEvidence.Retain(candidate, result.RuntimeProjection);
             return result;
@@ -367,18 +385,57 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     currentRuntime, resultingMana, observedCurrentUtcUnix, limits);
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             return PrepareAndPersist(activePath, fileSystem, session,
-                session.PrepareLiveReplacement(snapshot, owned.State, owned.Investment), false);
+                session.PrepareLiveReplacement(snapshot, owned.State, owned.Investment), false, recover: true);
         }
 
         private DetachedCanonicalWriteResult PrepareAndPersist(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
-            DetachedCanonicalSaveSessionResult prepared, bool roomEffect)
+            DetachedCanonicalSaveSessionResult prepared, bool roomEffect, bool ordinarySpend = false, bool recover = false)
         {
             if (prepared == null || !prepared.IsSuccess || prepared.Update == null)
                 return Failure(prepared?.Reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
             byte[] candidate = prepared.Update.GetBytes();
+            double recoveryManaSpent = 0;
             DetachedCompleteSaveValidationResult validated =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
+            var predecessor = ValidateSession(session);
+            if (validated.IsValid && predecessor?.IsValid == true)
+            {
+                try
+                {
+                    if (!CanonicalMvpRouteProjection.TryPublishValidated(validated, production, out var proposed, out _) ||
+                        !CanonicalMvpRouteProjection.TryPublishValidated(predecessor, production, out var prior, out _)) return Failure(MonsterRecoveryRules.Invalid);
+                    long required = MonsterContinuity.RequiredReserve(validated.State, context.MonsterRecovery);
+                    long priorRequired = MonsterContinuity.RequiredReserve(predecessor.State, context.MonsterRecovery);
+                    if ((ordinarySpend || required > priorRequired) && proposed.structureRuntime.ManaReserve < required)
+                        return Failure(MonsterRecoveryRules.Insufficient);
+                    // No recovery at a partially processed B2 horizon. B2 checkpoints retain
+                    // their original B1 inputs and acquire no C2 injury attribution.
+                    var individuals = validated.MonsterContinuity.Records.ToDictionary(r => r.AssignmentId, StringComparer.Ordinal);
+                    bool fundablePending = proposed.structureRuntime.ManaReserve >= context.MonsterRecovery.ManaPerHealth &&
+                        validated.State.Floors.Where(f => f.ActivationState == FloorActivationState.Active).SelectMany(f => f.RoomContents.Assignments)
+                        .Any(a => a.CategoryId == CanonicalSpatialSaveContracts.MonsterCategoryId && individuals[a.AssignmentId].Health < context.MonsterRecovery.Readiness(a.OptionId));
+                    if (fundablePending && validated.LivingDungeon.IsClosed && (recover || required > priorRequired ||
+                        proposed.structureRuntime.ManaReserve > prior.structureRuntime.ManaReserve))
+                    {
+                        var occupied = OccupiedFloors(validated);
+                        var healed = validated.MonsterContinuity.Copy();
+                        double balance = MonsterContinuity.Recover(healed, validated.State, context.MonsterRecovery,
+                            proposed.structureRuntime.ManaReserve, occupied);
+                        if (balance != proposed.structureRuntime.ManaReserve)
+                        {
+                            recoveryManaSpent = proposed.structureRuntime.ManaReserve - balance;
+                            var intermediate = DetachedCanonicalSaveSession.Open(candidate, context, limits);
+                            var capture = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(proposed, balance, limits);
+                            var recovered = intermediate.Session.PrepareLiveReplacement(capture, validated.State, monsterContinuity: healed);
+                            if (!recovered.IsSuccess) return Failure(recovered.Reason);
+                            candidate = recovered.Update.GetBytes();
+                            validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
+                        }
+                    }
+                }
+                catch { return Failure(MonsterRecoveryRules.Invalid); }
+            }
             DetachedCanonicalSaveSessionResult reopened = validated.IsValid
                 ? DetachedCanonicalSaveSession.Open(candidate, context, limits) : null;
             if (!validated.IsValid || !validated.CurrentTargetValidated || reopened == null ||
@@ -405,13 +462,32 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 });
             return persistenceReason == null
                 ? new DetachedCanonicalWriteResult(true, null, false, roomEffect, candidate,
-                    reopened.Session, validated, runtime)
+                    reopened.Session, validated, runtime, recoveryManaSpent)
                 : Failure(persistenceReason);
         }
 
         private DetachedCompleteSaveValidationResult ValidateSession(DetachedCanonicalSaveSession session) =>
             session == null ? null : DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 session.GetCurrentBytes(), context);
+
+        private System.Collections.Generic.ISet<string> OccupiedFloors(DetachedCompleteSaveValidationResult owned)
+        {
+            var occupied = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
+            if (owned.LivingDungeon.IsDormant) return occupied;
+            var profile = LivingDungeonContracts.Profile(owned.LivingDungeon, context.LivingDungeonProfiles);
+            foreach (var party in owned.LivingDungeon.Parties)
+            {
+                var execution = LivingDungeonContracts.Restore(party, profile);
+                if (execution.IsTerminal) continue;
+                var last = execution.Inspect().LastStep;
+                // Qualification-only route checkpoints can lack canonical floor identity.
+                // Vacancy cannot be proven for these inputs, so recovery is ineligible.
+                if (execution.Snapshot == null) return owned.State.Floors.Select(f => f.FloorInstanceId).ToHashSet(StringComparer.Ordinal);
+                int index = last?.FloorIndex ?? execution.Snapshot.Floors[0].FloorIndex;
+                foreach (var floor in execution.Snapshot.Floors.Where(f => f.FloorIndex == index)) occupied.Add(floor.FloorInstanceId);
+            }
+            return occupied;
+        }
 
         private bool CanonicalEqual(DetachedCanonicalSpatialSaveState left,
             DetachedCanonicalSpatialSaveState right)

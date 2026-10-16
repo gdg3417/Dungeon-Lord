@@ -27,7 +27,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SpatialLayoutCompatibilitySnapshot compatibility, ProductionSpatialContentSnapshot production,
             byte[] legacyConfiguration, SaveSpatialMigrationLimitsProfile limits,
             ContentAcquisitionEconomySnapshot acquisition,
-            RoomContentSpatialOccupancySnapshot roomContentOccupancy = null)
+            RoomContentSpatialOccupancySnapshot roomContentOccupancy = null,
+            MonsterRecoveryRules monsterRecovery = null)
         {
             if (fileSystem == null || recognizedState == null || compatibility == null || production == null ||
                 legacyConfiguration == null || limits == null || fileSystem.Exists(activePath))
@@ -102,10 +103,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 PhaseSixFloorKnowledge.Write(writer, PhaseSixFloorKnowledge.Empty());
                 writer.Token(","); writer.String(LivingDungeonContracts.OwnerName); writer.Token(":");
                 LivingDungeonContracts.Write(writer, LivingDungeonState.Empty());
+                writer.Token(","); writer.String(MonsterContinuity.Owner); writer.Token(":");
+                MonsterContinuity.Write(writer, MonsterContinuityState.Empty());
                 writer.Token("}}");
                 byte[] bytes = writer.Finish();
                 var context = new DetachedCurrentTargetValidationContext(compatibility, production,
-                    legacyConfiguration, limits.Canonical, roomContentOccupancy);
+                    legacyConfiguration, limits.Canonical, roomContentOccupancy, monsterRecovery: monsterRecovery);
                 DetachedCompleteSaveValidationResult validation =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, context);
                 DetachedCanonicalSaveSessionResult opened = validation.IsValid && validation.CurrentTargetValidated

@@ -98,7 +98,7 @@ namespace DungeonBuilder.M0
             _canonicalSession = write.Session;
             CanonicalRuntimePublished?.Invoke(write.RuntimeProjection);
             _logger.Info("Offline passive mana grant persisted.");
-            return calculated.WithPersistence(calculated.Reason, true);
+            return calculated.WithPersistence(calculated.Reason, true, write.RecoveryManaSpent);
         }
         public double RenovationUndoRemainingSeconds
         {
@@ -113,8 +113,8 @@ namespace DungeonBuilder.M0
         {
             var owned = _canonicalSession == null ? null : DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 _canonicalSession.GetCurrentBytes(), _validationContext);
-            return StructuralEconomyService.Preview(spatial, owned?.State, owned?.Investment,
-                current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _economyModifiers);
+            return ProtectReservePreview(StructuralEconomyService.Preview(spatial, owned?.State, owned?.Investment,
+                current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _economyModifiers), owned?.State, spatial?.DetachedCandidate);
         }
         public DetachedCanonicalWriteResult UndoStructuralRenovation(SaveData current)
         {
@@ -166,8 +166,12 @@ namespace DungeonBuilder.M0
             if (proposed != null && !DungeonDraftContext.Validate(proposed)) return null;
             var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(_canonicalSession.GetCurrentBytes(), _validationContext);
             if (!owned.IsValid) return null;
-            return StructuralEconomyService.PreviewFinalContentDraft(owned.State, proposed ?? draft.ReadModel, owned.Investment,
+            var result = StructuralEconomyService.PreviewFinalContentDraft(owned.State, proposed ?? draft.ReadModel, owned.Investment,
                 draft.NormalizedMovementTargets(proposed), current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _acquisition, _economyModifiers);
+            result.RequiredReserveBefore = MonsterContinuity.RequiredReserve(owned.State, _validationContext.MonsterRecovery);
+            result.RequiredReserveAfter = MonsterContinuity.RequiredReserve(proposed ?? draft.ReadModel, _validationContext.MonsterRecovery);
+            StructuralEconomyService.RefreshBalance(result, current?.structureRuntime?.ManaReserve ?? double.NaN, _economy);
+            return result;
         }
         public IDungeonDraftStore CreateDungeonDraftStore() => _canonicalConfigured && _canonicalFileSystem != null
             ? new FileDungeonDraftStore(SavePath + ".editor-draft", _canonicalFileSystem, _limits) : null;
@@ -220,7 +224,7 @@ namespace DungeonBuilder.M0
                 legacyConfiguration == null || positionMigrationProfiles == null ||
                 roomContentOccupancy == null ? null : new DetachedCurrentTargetValidationContext(
                     compatibility, production, legacyConfiguration, limits.Canonical,
-                    roomContentOccupancy);
+                    roomContentOccupancy, monsterRecovery: MonsterRecoveryRules.Capture(legacyGameplayConfiguration));
         }
 
         public void ConfigureStructuralRemovalPolicy(StructuralContentRemovalPolicySnapshot policy) =>
@@ -272,7 +276,7 @@ namespace DungeonBuilder.M0
                 SaveData initial = CreateNew(contentVersion);
                 NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(SavePath,
                     _canonicalFileSystem, initial, _compatibility, _production, _legacyConfiguration,
-                    _limits, _acquisition, _roomContentOccupancy);
+                    _limits, _acquisition, _roomContentOccupancy, _validationContext.MonsterRecovery);
                 if (!created.IsSuccess)
                 { banner = created.Reason == ContentAcquisitionEconomySnapshot.InvalidReason ? created.Reason :
                     Gd66MigrationReasonRegistry.PlayerLocalizationKey(created.Reason); return null; }
@@ -282,7 +286,7 @@ namespace DungeonBuilder.M0
             var coordinator = new DetachedSpatialSaveLoadCoordinator(_limits, _compatibility, _production,
                 _legacyConfiguration, new Dictionary<string, byte[]>(),
                 new RawSaveEnvelopeVersionContract(1, 6), CreateBlankFloorContract(),
-                _positionMigrationProfiles, _roomContentOccupancy);
+                _positionMigrationProfiles, _roomContentOccupancy, monsterRecovery: _validationContext.MonsterRecovery);
             DetachedSpatialSaveLoadResult loaded = coordinator.Load(SavePath, preflight);
             if (!loaded.IsSuccess)
             {
@@ -472,7 +476,7 @@ namespace DungeonBuilder.M0
                     request.Kind == DetachedCanonicalMutationKind.StructuralReplacement) &&
                     StructuralEditService.TryFingerprint(result.Validation.State, _limits.Canonical, out string fingerprint))
                     _undo = new RenovationUndo { Previous = previous.State, Investment = previous.Investment,
-                        Fingerprint = fingerprint, Paid = beforeMana - result.RuntimeProjection.structureRuntime.ManaReserve,
+                        Fingerprint = fingerprint, Paid = beforeMana - result.RuntimeProjection.structureRuntime.ManaReserve - result.RecoveryManaSpent,
                         Started = _monotonicSeconds() };
                 _canonicalSession = result.Session; CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
             }
@@ -498,9 +502,13 @@ namespace DungeonBuilder.M0
         {
             if (!TryGetStructuralBaseline(out DetachedCanonicalSpatialSaveState state))
                 return new FloorConstructionPreview { Reason = FloorConstructionService.InvalidContextReason };
-            return FloorConstructionService.Preview(state, current, current?.completedResearch,
+            var preview = FloorConstructionService.Preview(state, current, current?.completedResearch,
                 _floorConstructionProfiles, _floorConstructionResearch, _production,
                 _legacyGameplayConfiguration, _limits.Canonical);
+            if (preview.IsValid && current.structureRuntime.ManaReserve - preview.Profile.ConstructionMana <
+                MonsterContinuity.RequiredReserve(state, _validationContext.MonsterRecovery))
+            { preview.IsAffordable = false; preview.Reason = MonsterRecoveryRules.Insufficient; }
+            return preview;
         }
 
         public DetachedCanonicalWriteResult CommitFloorConstruction(SaveData current,
@@ -604,6 +612,17 @@ namespace DungeonBuilder.M0
             preview.Economy = StructuralEconomyService.Preview(preview, owned?.State,
                 owned?.Investment, current?.structureRuntime?.ManaReserve ?? double.NaN,
                 _economy, _economyModifiers);
+            ProtectReservePreview(preview.Economy, owned?.State, preview.DetachedCandidate);
+            return preview;
+        }
+
+        private StructuralEconomyPreview ProtectReservePreview(StructuralEconomyPreview preview,
+            DetachedCanonicalSpatialSaveState before, DetachedCanonicalSpatialSaveState after)
+        {
+            if (preview == null || before == null || after == null) return preview;
+            preview.RequiredReserveBefore = MonsterContinuity.RequiredReserve(before, _validationContext.MonsterRecovery);
+            preview.RequiredReserveAfter = MonsterContinuity.RequiredReserve(after, _validationContext.MonsterRecovery);
+            StructuralEconomyService.RefreshBalance(preview, preview.CurrentMana, _economy);
             return preview;
         }
 

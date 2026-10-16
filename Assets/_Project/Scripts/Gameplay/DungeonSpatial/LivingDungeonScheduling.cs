@@ -267,7 +267,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (revision == owned.LivingDungeon.Revision)
                     return new DetachedCanonicalWriteResult(true, null, true, false, session.GetCurrentBytes(), session, owned, runtime);
                 var captured = DetachedRecognizedSaveStateSnapshot.Capture(runtime, limits);
-                return PrepareAndPersist(path, fs, session, session.PrepareLivingDungeonReplacement(captured, owned.State, owned.LivingDungeon), false);
+                // Existing controlled B2 transactions may prove vacancy at a closed
+                // boundary. This starts no scheduling and attributes no B1 injury.
+                return PrepareAndPersist(path, fs, session, session.PrepareLivingDungeonReplacement(captured, owned.State, owned.LivingDungeon), false, recover: true);
             }
             catch (Exception error) { return Failure(error.Message.StartsWith("living.", StringComparison.Ordinal) ? error.Message : LivingDungeonScheduling.Invalid); }
         }

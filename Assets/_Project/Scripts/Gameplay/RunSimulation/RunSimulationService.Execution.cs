@@ -18,9 +18,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
         public RunExecution StartManualSnapshot(int sequence, ActiveFloorRunSnapshot snapshot)
             => StartCapturedSnapshot(sequence, snapshot, null, null, true);
+        internal RunExecution StartHistoricalCombatC0Snapshot(int sequence, ActiveFloorRunSnapshot snapshot)
+            => StartCapturedSnapshot(sequence, snapshot, null, null, true, false);
 
         private RunExecution StartCapturedSnapshot(int sequence, ActiveFloorRunSnapshot snapshot,
-            RunLogicalTiming timing, long? eventLimit, bool manual)
+            RunLogicalTiming timing, long? eventLimit, bool manual, bool persistent = true)
         {
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
             var config = snapshot.Configuration;
@@ -31,7 +33,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             var objective = TransientDepthObjective.Select(config.PhaseSix, RunId(sequence));
             return engine.CreateExecution(snapshot.InitialRuntime, snapshot.TickStarted, sequence, snapshot.PostureId,
                 first.RequiredRooms.Select(r => r.Room).ToArray(), traversal, snapshot, objective, timing, eventLimit,
-                manual ? snapshot.CombatRules : null, manual ? snapshot.CombatBounds : null);
+                manual ? snapshot.CombatRules : null, manual ? snapshot.CombatBounds : null, manual && persistent ? snapshot.MonsterStarts : null);
         }
 
         public RunExecution StartRoute(StructureRuntimeState runtime, long tickStarted, int sequence,
@@ -41,7 +43,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private RunExecution CreateExecution(StructureRuntimeState runtime, long tickStarted, int sequence,
             string postureId, MvpOrderedRouteRoom[] route, BranchTraversal traversal, ActiveFloorRunSnapshot snapshot,
             TransientDepthObjective objective, RunLogicalTiming timing, long? eventLimit,
-            CombatC0QualificationConfig combatRules = null, CombatC0RoomBounds[] combatBounds = null)
+            CombatC0QualificationConfig combatRules = null, CombatC0RoomBounds[] combatBounds = null,
+            DungeonSpatial.MonsterContinuityState monsterStarts = null)
         {
             if (runtime == null) throw new ArgumentNullException(nameof(runtime));
             if (tickStarted < 0 || sequence <= 0) throw new ArgumentException("run.execution.invalid_identity");
@@ -102,7 +105,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 if (timing != null) throw new ArgumentException("combat.c0.manual_only");
                 state.Combat = new CombatC0ExecutionState(state.Party, combatRules,
-                    plans.SelectMany(p => p.RequiredRooms.Select(r => r.Room)).ToArray(), combatBounds);
+                    plans.SelectMany(p => p.RequiredRooms.Select(r => r.Room)).ToArray(), combatBounds, monsterStarts);
                 state.Combat.Kernel.ChargeGeometry(combatPlanningWork);
             }
             else

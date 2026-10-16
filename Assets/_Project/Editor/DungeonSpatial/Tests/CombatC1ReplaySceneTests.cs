@@ -246,8 +246,14 @@ namespace DungeonBuilder.M0.Tests
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
             foreach(int scenario in new[]{0,1,2})
             {
-                if(scenario>0) foreach(var m in service.Config.CombatC0.Monsters) { m.Damage=scenario==1?100:1; m.Initiative=100; m.MaxHealth=100; }
-                if(scenario==2) foreach(var c in service.Config.CombatC0.Classes) c.Damage=0;
+                if(scenario>0)
+                {
+                    foreach(var m in service.Config.CombatC0.Monsters) { m.Damage=scenario==1?100:1; m.Initiative=100; }
+                    // Visual-only casualty/zero-hit fixtures now retain persistent monster HP.
+                    // Keep the recorded party small enough to finish within the unchanged bound.
+                    foreach(var c in service.Config.CombatC0.Classes) c.Damage=0;
+                    foreach(var c in service.Config.PhaseFiveB.Classes) c.LevelOneMaxHealth=1;
+                }
                 Assert.That(root.SimulateRunOnce(),Is.True); var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
                 Assert.That(controller.StartReplay(),Is.True); controller.ToggleReplayPause();
                 for(int i=0;i<3;i++) yield return null;

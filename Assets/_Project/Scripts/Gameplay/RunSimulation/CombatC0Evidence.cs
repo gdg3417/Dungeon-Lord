@@ -49,7 +49,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             AttackId = attack; SourcePosition = source; TargetPosition = destination;
             HealthBefore = before; HealthAfter = after; Damage = before - after;
             ExecutableId = executable ?? CombatC0QualificationConfig.Rules;
-            RuleSourceId = ExecutableId == CombatC0Config.Executable ? CombatC0Config.Rule : ExecutableId;
+            RuleSourceId = ExecutableId == MonsterRecoveryRules.Executable ? MonsterRecoveryRules.Rule : ExecutableId == CombatC0Config.Executable ? CombatC0Config.Rule : ExecutableId;
             TargetingId = targeting ?? CombatC0QualificationConfig.Targeting; RunOrdinal = runOrdinal;
         }
         internal CombatC0Event AtBoundary(long ordinal) => new CombatC0Event(RunId, EncounterId, Ordinal, ActionOrdinal,
@@ -98,9 +98,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public string RoomId { get; }
         public int MaxHealth { get; }
         public int Health { get; }
-        public bool Defeated => Health == 0;
-        internal CombatC0MonsterState(CombatC0MonsterPlacement placement, int maximum, int health)
+        public int InitialHealth { get; }
+        public bool InitialRevivalRequired { get; }
+        public bool RevivalRequired { get; }
+        public bool Defeated => Health == 0 || RevivalRequired;
+        internal CombatC0MonsterState(CombatC0MonsterPlacement placement, int maximum, int health,
+            int? initialHealth = null, bool initialRevival = false)
         { AssignmentId = placement.AssignmentId; OptionId = placement.OptionId; FloorId = placement.FloorId;
-          RoomId = placement.RoomId; MaxHealth = maximum; Health = health; }
+          RoomId = placement.RoomId; MaxHealth = maximum; Health = health; InitialHealth = initialHealth ?? maximum;
+          InitialRevivalRequired = initialRevival; RevivalRequired = initialRevival || health == 0; }
     }
 }

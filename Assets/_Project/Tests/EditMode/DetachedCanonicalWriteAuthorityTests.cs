@@ -305,13 +305,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, target)));
             RoomContentAssignment[] assigned = fixture.State.Floors[0].RoomContents.Assignments.ToArray();
 
+            CombatC2Tests.SetState(fixture,8,false,fixture.Runtime.structureRuntime.ManaReserve);
+
             DetachedCanonicalWriteResult result = fixture.Execute(
                 DetachedCanonicalMutationRequest.Delete(DeletionPreview(fixture)));
 
             AssertCandidateSuccess(fixture, result);
             DetachedCompleteSaveValidationResult durable = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 fixture.FileSystem.ReadAllBytes(fixture.ActivePath), fixture.Context);
-            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(14));
+            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(15));
             Assert.That(durable.State.Floors[0].RoomContents.Assignments.Any(value =>
                 assigned.Select(item => item.AssignmentId).Contains(value.AssignmentId)), Is.False);
             foreach (RoomContentAssignment expected in assigned)
@@ -325,6 +327,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Is.EqualTo(StructuralContentRemovalDisposition.ReturnToPlayerCustody));
             }
             Assert.That(result.RuntimeProjection, Is.Not.Null);
+            var retained=durable.MonsterContinuity.Records.Single();
+            Assert.That(retained.AssignmentId,Is.EqualTo(assigned.Single(a=>a.CategoryId==MvpDungeonPlacementIds.MonsterCategoryId).AssignmentId));
+            Assert.That(retained.Health,Is.EqualTo(8)); Assert.That(retained.Level,Is.EqualTo(1)); Assert.That(retained.RevivalRequired,Is.False);
+            fixture.Accept(result); fixture.Reopen();
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Redeploy(retained.AssignmentId,fixture.State.Floors[0].Layout.Rooms.Single().RoomInstanceId)));
+            fixture.Reopen(); var redeployed=fixture.Runtime.monsterContinuity.Records.Single();
+            Assert.That(redeployed.AssignmentId,Is.EqualTo(retained.AssignmentId)); Assert.That(redeployed.Level,Is.EqualTo(1));
+            Assert.That(redeployed.Health,Is.EqualTo(8)); Assert.That(redeployed.RevivalRequired,Is.False);
         }
 
         [Test]
@@ -964,7 +974,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Validation.State.Authority.MigrationDescriptorFingerprint, Is.Null.Or.Empty);
             Assert.That(result.Validation.State.Floors, Is.Empty);
             string json = Encoding.UTF8.GetString(fileSystem.ReadAllBytes(path));
-            Assert.That(json, Does.Contain("\"schemaVersion\":14"));
+            Assert.That(json, Does.Contain("\"schemaVersion\":15"));
             Assert.That(result.Validation.State.LifecycleAndOwnership, Is.Not.Null);
             Assert.That(result.Validation.State.LifecycleAndOwnership.Floors, Is.Empty);
             Assert.That(result.Validation.State.LifecycleAndOwnership.ReturnedContents, Is.Empty);

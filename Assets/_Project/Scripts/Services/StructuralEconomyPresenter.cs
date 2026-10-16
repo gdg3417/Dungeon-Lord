@@ -26,7 +26,7 @@ namespace DungeonBuilder.M0
         public static string Present(StructuralEconomyPreview preview, Func<string, string> text,
             double passiveManaPerHour = double.NaN)
         {
-            if (preview == null || (preview.Reason != null && preview.Reason != StructuralEconomyService.InsufficientReason))
+            if (preview == null || (preview.Reason != null && preview.Reason != StructuralEconomyService.InsufficientReason && preview.Reason != MonsterRecoveryRules.Insufficient))
                 return text(StructuralEconomyService.InvalidReason);
             bool hasFractionalTransaction = HasMeaningfulFraction(preview.BaseCost) ||
                 HasMeaningfulFraction(preview.Cost) || HasMeaningfulFraction(preview.RefundBasis) ||
@@ -51,7 +51,7 @@ namespace DungeonBuilder.M0
                 text("ui.structural.economy.balance"),
                 FormatBalance(preview.CurrentMana, passiveManaPerHour, hasFractionalTransaction),
                 FormatBalance(preview.ResultingMana, passiveManaPerHour, hasFractionalTransaction)) + "\n" +
-                text(preview.IsAffordable ? "ui.structural.economy.affordable" : StructuralEconomyService.InsufficientReason);
+                text(preview.IsAffordable ? "ui.structural.economy.affordable" : preview.Reason);
         }
 
         private static bool HasMeaningfulFraction(double value) =>

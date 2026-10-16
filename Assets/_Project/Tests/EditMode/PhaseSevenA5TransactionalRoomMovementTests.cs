@@ -371,13 +371,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CurrentWalletExactBalanceAndInsufficientCommitAreAtomic(double mana)
         {
             var f = Room(); var d = TransactionalDungeonDraft.Create(f.State, Context(f), new Store());
-            f.Runtime.structureRuntime.ManaReserve = mana;
+            long reserve = MonsterContinuity.RequiredReserve(f.State, MonsterRecoveryRules.EditorFallback());
+            f.Runtime.structureRuntime.ManaReserve = mana + reserve;
             Assert.That(Move(d, f, 0, 3), Is.True); Flush(d); Assert.That(d.CanSave, Is.True);
             byte[] before = f.Session.GetCurrentBytes(); var result = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d);
             Assert.That(result.IsSuccess, Is.EqualTo(mana == 10), result.Reason);
-            if (result.IsSuccess) { f.Accept(result); f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
+            if (result.IsSuccess) { f.Accept(result); f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(reserve));
                 Assert.That(Ledger(f).Single(r => r.StructureId == f.State.Floors[0].Layout.Rooms[0].RoomInstanceId).RenovationMana, Is.EqualTo(10)); }
-            else { CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            else { CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana + reserve));
                 Assert.That(d.CanSave, Is.True); Assert.That(Ledger(f).Sum(r => r.RenovationMana), Is.Zero); }
         }
         [TestCase(false)][TestCase(true)]
@@ -463,10 +464,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var config = JsonUtility.FromJson<StructuralEconomyConfiguration>(File.ReadAllText("Assets/_Project/Resources/structural_economy.json"));
             config.Rooms.Single(r => r.DefinitionId == "spatial.room.basic").Mana = 333; config.MovementFactor = 0.5;
             Assert.That(StructuralEconomySnapshot.TryCreate(config, f.Production.Catalog, out f.Economy), Is.True);
-            f.Runtime.structureRuntime.ManaReserve = 167;
+            long reserve = MonsterContinuity.RequiredReserve(f.State, MonsterRecoveryRules.EditorFallback());
+            f.Runtime.structureRuntime.ManaReserve = 167 + reserve;
             Assert.That(Price(d, f).Cost, Is.EqualTo(167));
             f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d));
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero); Assert.That(Ledger(f).Sum(r => r.RenovationMana), Is.EqualTo(167));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(reserve)); Assert.That(Ledger(f).Sum(r => r.RenovationMana), Is.EqualTo(167));
         }
 
         [Test]

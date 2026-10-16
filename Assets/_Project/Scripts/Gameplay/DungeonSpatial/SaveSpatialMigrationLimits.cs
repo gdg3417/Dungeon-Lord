@@ -109,12 +109,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     TextAsset frozen = Resources.Load<TextAsset>("save_spatial_migration_limits_schema13");
                     var loaded = LoadCore(frozen?.bytes, false);
                     if (!loaded.IsSuccess) return Failure(loaded.Reason);
-                    historical = loaded.Profile;
+                    var schema14 = LoadCore(Resources.Load<TextAsset>("save_spatial_migration_limits_schema14")?.bytes, false);
+                    if (!schema14.IsSuccess) return Failure(schema14.Reason);
+                    var prior = loaded.Profile;
+                    var raw14 = schema14.Profile.Raw;
+                    historical = new SaveSpatialMigrationLimitsProfile(new RawSavePayloadClassificationLimits(raw14.MaximumInputBytes,
+                        raw14.MaximumNestingDepth, raw14.MaximumObjectMembers, raw14.MaximumArrayElements, raw14.MaximumStringBytes,
+                        raw14.MaximumScanWork, prior), new CanonicalSpatialSerializationLimits(schema14.Profile.Canonical.Serialized,
+                        schema14.Profile.Canonical.Spatial, prior), schema14.Profile.Whole);
                 }
-                raw = new RawSavePayloadClassificationLimits(values[0], values[1], values[2], values[3], values[4], values[5], historical);
+                raw = new RawSavePayloadClassificationLimits(values[0], values[1], values[2], values[3], values[4], values[5], historical, 15, values[11]);
             }
             return new SaveSpatialMigrationLimitsLoadResult(new SaveSpatialMigrationLimitsProfile(raw,
-                new CanonicalSpatialSerializationLimits(serialized, spatial, includeHistorical ? historical : null), whole), null);
+                new CanonicalSpatialSerializationLimits(serialized, spatial, includeHistorical ? historical : null, 15), whole), null);
         }
 
         private static SaveSpatialMigrationLimitsLoadResult Failure(string reason) =>

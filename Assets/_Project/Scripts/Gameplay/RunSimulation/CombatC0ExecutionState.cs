@@ -13,7 +13,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal readonly List<CombatC0Event> Events = new List<CombatC0Event>();
         private readonly Dictionary<(string, string), CombatC0RoomBounds> bounds;
         internal CombatC0ExecutionState(RunParty party, CombatC0QualificationConfig rules,
-            MvpOrderedRouteRoom[] rooms, CombatC0RoomBounds[] geometry)
+            MvpOrderedRouteRoom[] rooms, CombatC0RoomBounds[] geometry, MonsterContinuityState continuity = null)
         {
             if (geometry == null || rooms.Any(r => r.Spatial == null)) throw new ArgumentException(CombatC0Kernel.InvalidState);
             bounds = geometry.ToDictionary(b => (b.FloorId, b.RoomId));
@@ -21,7 +21,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 throw new ArgumentException(CombatC0Kernel.InvalidState);
             Kernel = new CombatC0Kernel(party, rules, rooms.SelectMany(r => r.OrderedAssignments()
                 .Where(a => a.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId)
-                .Select(a => new CombatC0MonsterPlacement(a.AssignmentId, a.OptionId, r.Spatial.FloorInstanceId, r.RoomInstanceId, a.Sequence))).ToArray());
+                .Select(a => new CombatC0MonsterPlacement(a.AssignmentId, a.OptionId, r.Spatial.FloorInstanceId, r.RoomInstanceId, a.Sequence))).ToArray(), continuity);
         }
         internal CombatC0Geometry Geometry(MvpOrderedRouteRoom room) => new CombatC0Geometry(room.Spatial,
             bounds[(room.Spatial.FloorInstanceId, room.RoomInstanceId)], Kernel);
@@ -37,7 +37,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     // Inspection returns immutable records/copies; it cannot advance or recalculate combat.
     public static class CombatC0Diagnostics
     {
-        public static bool IsCombatC0(RunOutcomeRecord outcome) => outcome?.CombatExecutable == CombatC0Config.Executable;
+        public static bool IsCombatC0(RunOutcomeRecord outcome) => outcome?.CombatExecutable == CombatC0Config.Executable || outcome?.CombatExecutable == MonsterRecoveryRules.Executable;
+        public static bool IsCombatC2(RunOutcomeRecord outcome) => outcome?.CombatExecutable == MonsterRecoveryRules.Executable;
         public static IReadOnlyList<CombatC0Event> Events(RunOutcomeRecord outcome) =>
             Array.AsReadOnly((CombatC0Event[])(outcome?.CombatEvents ?? Array.Empty<CombatC0Event>()).Clone());
         public static IReadOnlyList<CombatC0MonsterState> Monsters(RunOutcomeRecord outcome) =>

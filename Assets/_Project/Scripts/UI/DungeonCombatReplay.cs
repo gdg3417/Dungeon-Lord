@@ -11,9 +11,10 @@ namespace DungeonBuilder.M0
     public readonly struct DungeonReplayActorState
     {
         public readonly int Frame, Health;
+        public readonly bool RevivalRequired;
         public readonly Vector2 Position;
-        internal DungeonReplayActorState(int frame, int health, Vector2 position)
-        { Frame = frame; Health = health; Position = position; }
+        internal DungeonReplayActorState(int frame, int health, Vector2 position, bool revival = false)
+        { Frame = frame; Health = health; Position = position; RevivalRequired = revival || health == 0; }
     }
 
     public sealed class DungeonReplayActor
@@ -25,6 +26,7 @@ namespace DungeonBuilder.M0
         public string RoomId { get; }
         public int Ordinal { get; }
         public int MaxHealth { get; }
+        public int InitialHealth => states[0].Health;
         public bool IsMonster => AssignmentId != null;
         private readonly DungeonReplayActorState[] states;
         internal DungeonReplayActor(string id, string content, string assignment, string floor, string room,
@@ -64,10 +66,11 @@ namespace DungeonBuilder.M0
         {
             internal string Id, Content, Assignment, Floor, Room;
             internal int Ordinal, Maximum, Health, Final;
+            internal bool RevivalRequired;
             internal Vector2 Position;
             internal readonly List<DungeonReplayActorState> States = new List<DungeonReplayActorState>();
             internal bool Monster => Assignment != null;
-            internal void Record(int frame) => States.Add(new DungeonReplayActorState(frame, Health, Position));
+            internal void Record(int frame) => States.Add(new DungeonReplayActorState(frame, Health, Position, RevivalRequired));
             internal DungeonReplayActor Freeze() => new DungeonReplayActor(Id, Content, Assignment, Floor, Room,
                 Ordinal, Maximum, States.ToArray());
         }
@@ -123,13 +126,14 @@ namespace DungeonBuilder.M0
             foreach (var m in outcome.CombatMonsters.OrderBy(m => m.AssignmentId, StringComparer.Ordinal))
             {
                 if (m == null || string.IsNullOrEmpty(m.AssignmentId) || !floorIds.TryGetValue(m.FloorId, out var floor) ||
-                    m.MaxHealth <= 0 || m.Health < 0 || m.Health > m.MaxHealth) return false;
+                    m.MaxHealth <= 0 || m.Health < 0 || m.Health > m.MaxHealth || m.InitialHealth < 0 || m.InitialHealth > m.MaxHealth ||
+                    (m.InitialHealth == 0 && !m.InitialRevivalRequired)) return false;
                 var assignment = floor.RoomContents.Assignments.SingleOrDefault(a => a.AssignmentId == m.AssignmentId);
                 if (assignment == null || assignment.RoomInstanceId != m.RoomId || assignment.OptionId != m.OptionId ||
                     assignment.CategoryId != CanonicalSpatialSaveContracts.MonsterCategoryId ||
                     !TryProject(assignment.RoomLocalPosition, RunPositionSpace.RoomLocal, m.RoomId, floor, catalog, out var position)) return false;
                 actors.Add(new ActorCapture { Id = outcome.RunId + "/monster/" + m.AssignmentId, Content = m.OptionId, Assignment = m.AssignmentId,
-                    Floor = m.FloorId, Room = m.RoomId, Ordinal = monsterOrdinal++, Maximum = m.MaxHealth, Health = m.MaxHealth, Final = m.Health, Position = position });
+                    Floor = m.FloorId, Room = m.RoomId, Ordinal = monsterOrdinal++, Maximum = m.MaxHealth, Health = m.InitialHealth, Final = m.Health, Position = position, RevivalRequired = m.InitialRevivalRequired });
             }
             var actorById = actors.Select((a,i) => (a.Id,i)).ToDictionary(a => a.Id, a => a.i, StringComparer.Ordinal);
             foreach (var a in actors) a.Record(-1);
@@ -196,7 +200,7 @@ namespace DungeonBuilder.M0
                     {
                         var e = events[i]; var original = attached[i-start];
                         if (!SameCombatEvent(e,original) || e.Ordinal != i || e.RunOrdinal != s || e.RunId != outcome.RunId ||
-                            e.ExecutableId != CombatC0Config.Executable || e.EncounterId != encounter || e.FloorId != floorId || e.RoomId != step.RoomId ||
+                            e.ExecutableId != outcome.CombatExecutable || e.EncounterId != encounter || e.FloorId != floorId || e.RoomId != step.RoomId ||
                             !Enum.IsDefined(typeof(CombatC0EventKind),e.Kind) || !Enum.IsDefined(typeof(CombatC0Reason),e.Reason)) return false;
                         int actor = e.ActorId != null && actorById.TryGetValue(e.ActorId,out int ai) ? ai : -1;
                         int target = e.TargetId != null && actorById.TryGetValue(e.TargetId,out int ti) ? ti : -1;
@@ -211,7 +215,7 @@ namespace DungeonBuilder.M0
                         if (e.Kind == CombatC0EventKind.Eligibility)
                         {
                             if (bypass || actionsStarted || e.HealthBefore != 0 || e.HealthAfter != 0 || e.Round != 0 || e.ActionOrdinal != -1 || !PositionReason(e.Reason) ||
-                                actors[actors[actor].Monster ? actor : target].Health <= 0 || !links.TryAdd((actor,target),e.Reason)) return false;
+                                actors[actors[actor].Monster ? actor : target].Health <= 0 || actors[actors[actor].Monster ? actor : target].RevivalRequired || !links.TryAdd((actor,target),e.Reason)) return false;
                             if (e.Reason != CombatC0Reason.Legal) denied.Add(e);
                             else if (actors[actor].Monster ? actors[target].Health > 0 : actors[actor].Health > 0)
                                 participating.Add(actors[actor].Monster ? actor : target);
@@ -283,7 +287,7 @@ namespace DungeonBuilder.M0
                                 a.States[h]=new DungeonReplayActorState(a.States[h].Frame,a.States[h].Health,point);
                             int insert=a.States.FindIndex(v=>v.Frame>=boundaryFrame);
                             a.States.Insert(insert<0?a.States.Count:insert,new DungeonReplayActorState(boundaryFrame,
-                                insert<0?a.Health:(insert==0?a.Maximum:a.States[insert-1].Health),point)); changes++;
+                                insert<0?a.Health:(insert==0?a.States[0].Health:a.States[insert-1].Health),point)); changes++;
                         }
                         denials.Add(encounter,denied.ToArray()); encounterOrdinal++;
                     }

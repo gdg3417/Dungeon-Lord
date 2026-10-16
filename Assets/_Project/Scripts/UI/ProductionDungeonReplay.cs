@@ -230,7 +230,7 @@ namespace DungeonBuilder.M0
                 if (a.IsMonster && !replay.Complete && (a.FloorId != replay.Current.FloorId || a.RoomId != replay.Current.Step.RoomId)) continue;
                 var state = a.At(replay.Index);
                 text.AppendLine(Format("ui.dungeon.replay.actor_hp", ActorName(i), state.Health, a.MaxHealth,
-                    state.Health == 0 ? Text("ui.run.combat.defeated") : string.Empty));
+                    state.Health == 0 ? Text("ui.run.combat.defeated") : state.RevivalRequired ? Text("combat.c2.revival_pending") : string.Empty));
             }
             ui.Q<Label>("replayActors").text = text.ToString();
             text.Clear();
@@ -261,7 +261,8 @@ namespace DungeonBuilder.M0
                 if (changed)
                 {
                     view.text=ActorName(i); hp.text=Format("ui.dungeon.replay.monster_health",state.Health,actor.MaxHealth); view.userData=actor.Id;
-                    view.tooltip=Format("ui.dungeon.replay.monster_hp",ActorName(i),state.Health,actor.MaxHealth);
+                    view.tooltip=Format("ui.dungeon.replay.monster_hp",ActorName(i),state.Health,actor.MaxHealth) + "\n" +
+                        Format("combat.c2.replay_start",actor.InitialHealth,actor.MaxHealth) + (state.RevivalRequired ? "\n"+Text(state.Health == 0 ? "ui.run.combat.defeated" : "combat.c2.revival_pending") : string.Empty);
                 }
                 float font=Mathf.Max(presentationPolicy.ReplayActorTextSize,presentationPolicy.Text(textSize)*presentationPolicy.ReplayActorTextScale);
                 view.style.fontSize=hp.style.fontSize=font;
@@ -273,7 +274,7 @@ namespace DungeonBuilder.M0
                 container.style.display=visible ? DisplayStyle.Flex : DisplayStyle.None;
                 if (visible)
                 { container.style.width=placed.width; container.style.left=placed.x; container.style.top=placed.y; replayTagRects.Add(placed); }
-                view.style.color=hp.style.color=state.Health==0 ? presentationPolicy.ReplayCasualtyColor : presentationPolicy.ReplayPartyColor;
+                view.style.color=hp.style.color=state.RevivalRequired ? presentationPolicy.ReplayCasualtyColor : presentationPolicy.ReplayPartyColor;
             }
             for (int i=replay.Combat.Actors.Count;i<replayActorLabels.Count;i++) replayActorLabels[i].parent.style.display=DisplayStyle.None;
         }

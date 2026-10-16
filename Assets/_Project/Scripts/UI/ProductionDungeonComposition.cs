@@ -118,6 +118,15 @@ namespace DungeonBuilder.M0
                 contents.Count(a=>a.CategoryId==CanonicalSpatialSaveContracts.LootNodeCategoryId),roomDefinition.LootCapacity) :
                 Format("ui.dungeon.content.info",Format("ui.dungeon.room_selected", RoomName(roomDefinition),
                     Array.FindIndex(floor.Layout.Rooms, r => r.RoomInstanceId == room.RoomInstanceId) + 1));
+            var continuity = root.Save.monsterContinuity;
+            if (continuity != null)
+                foreach (var assignment in contents.Where(a => a.CategoryId == CanonicalSpatialSaveContracts.MonsterCategoryId &&
+                    (selected == null || a.AssignmentId == selected.AssignmentId)))
+                {
+                    var monster = continuity.Inspect().SingleOrDefault(m => m.AssignmentId == assignment.AssignmentId);
+                    if (monster != null) ui.Q<Label>("inspectionInfo").text += "\n" + ContentName(assignment.OptionId) + " " +
+                        ProductionDungeonPresenter.MonsterState(monster, assignment.OptionId, MonsterRecoveryRules.Capture(root.RunSimulationConfig), Text, Culture);
+                }
         }
     }
 }

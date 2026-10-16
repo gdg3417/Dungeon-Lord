@@ -245,24 +245,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string[] ordered = f.Acquisition.OrderedOptionIds.ToArray();
             CollectionAssert.AreEqual(ordered.OrderBy(id => id, StringComparer.Ordinal), ordered);
             c.Prices.Single(p => p.OptionId == MvpDungeonPlacementIds.SkeletonOptionId).Mana = 999;
-            f.Runtime.structureRuntime.ManaReserve = 7;
+            f.Runtime.structureRuntime.ManaReserve = 14; // Injected price plus configured readiness reserve.
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
                 MvpDungeonPlacementIds.SkeletonOptionId, Target(f))));
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(7));
             Assert.That(ContentAcquisitionEconomySnapshot.TryParse(File.ReadAllBytes(ConfigPath), f.Economy,
                 default, out _), Is.False);
             Assert.That(ContentAcquisitionEconomySnapshot.TryCreate(Config(), null, f.Profile.Canonical, out _), Is.False);
         }
 
-        [TestCase(25, true)] [TestCase(24, false)] [TestCase(0, false)]
+        [TestCase(32, true)] [TestCase(31, false)] [TestCase(25, false)] [TestCase(24, false)] [TestCase(0, false)]
         public void ExactBalanceSucceedsAndInsufficientBalanceChangesNothing(double balance, bool success)
         {
             var f = Room(); f.Runtime.structureRuntime.ManaReserve = balance;
             var request = DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
                 MvpDungeonPlacementIds.SkeletonOptionId, Target(f));
-            if (!success) { Unchanged(f, request, ContentAcquisitionEconomySnapshot.InsufficientReason); return; }
+            if (!success) { Unchanged(f, request, balance < 25 ? ContentAcquisitionEconomySnapshot.InsufficientReason : MonsterRecoveryRules.Insufficient); return; }
             f.Accept(f.Execute(request)); f.Reopen();
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(7));
         }
 
         [Test]
@@ -323,15 +323,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = ReturnedContentRedeploymentTests.Owned();
             var owned = f.State.LifecycleAndOwnership.ReturnedContents.First(i => i.OptionId == MvpDungeonPlacementIds.SkeletonOptionId);
             string[] ledger = Investment(f); int count = f.State.LifecycleAndOwnership.ReturnedContents.Length;
-            f.Runtime.structureRuntime.ManaReserve = 25;
+            f.Runtime.structureRuntime.ManaReserve = 39; // Price plus both individual reserve obligations.
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(owned.CategoryId, owned.OptionId, Target(f))));
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(14));
             Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Length, Is.EqualTo(count));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId, Is.Not.EqualTo(owned.AssignmentId));
             CollectionAssert.AreEqual(ledger, Investment(f));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(owned.AssignmentId, Target(f), null,
                 new TileCoordinate(2, 1))));
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(14));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Count(a => a.OptionId == owned.OptionId), Is.EqualTo(2));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Any(a => a.AssignmentId == owned.AssignmentId), Is.True);
             Unchanged(f, DetachedCanonicalMutationRequest.Redeploy(owned.AssignmentId, Target(f)),
@@ -340,7 +340,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Unchanged(f, DetachedCanonicalMutationRequest.Redeploy(trap.AssignmentId, "test.missing.room"));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(trap.AssignmentId, Target(f), null,
                 new TileCoordinate(1, 2)))); f.Reopen();
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(14));
             var assigned = f.State.Floors[0].RoomContents.Assignments.Single(a => a.AssignmentId == trap.AssignmentId);
             Assert.That(assigned.CategoryId, Is.EqualTo(trap.CategoryId)); Assert.That(assigned.OptionId, Is.EqualTo(trap.OptionId));
             Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Length, Is.EqualTo(count - 2));
@@ -368,12 +368,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Native();
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(40));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(14));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(14));
-            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":14"));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(15));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(15));
+            Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":15"));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId)));
+            Unchanged(f, DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.LootNodeCategoryId,
+                MvpDungeonPlacementIds.BasicLootNodeOptionId, Target(f)), MonsterRecoveryRules.Insufficient);
+            f.Runtime.structureRuntime.ManaReserve += 7; // Explicit test-only funding; starting mana and prices remain unchanged.
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId, Target(f))));
-            f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.Zero);
+            f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(7));
             Assert.That(Investment(f).Length, Is.GreaterThan(0));
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context).Investment.All(i => i.ConstructionMana == 0), Is.True);
         }

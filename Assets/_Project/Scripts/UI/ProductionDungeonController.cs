@@ -444,6 +444,7 @@ namespace DungeonBuilder.M0
             var ui = document.rootVisualElement;
             var hud = ProductionDungeonPresenter.Hud(root.Save, root.RunSimulationConfig, root.PassiveManaPerHourForPresentation, Text, Culture);
             ui.Q<Label>("totalMana").text = hud.TotalMana; ui.Q<Label>("usableMana").text = hud.UsableMana;
+            ui.Q<Label>("usableMana").tooltip = hud.Reserve;
             ui.Q<Label>("manaRate").text = hud.ManaPerHour; ui.Q<Label>("heat").text = hud.Heat;
         }
         private void RefreshEconomy()

@@ -241,7 +241,10 @@ namespace DungeonBuilder.M0
                 if (contentBrowserOwned) foreach (var returned in returnedChoices)
                 {
                     string id = returned.AssignmentId;
-                    Choice(ContentName(returned.OptionId), Text("ui.dungeon.content.owned"), id, returned.CategoryId, returned.OptionId, () => SelectReturnedContent(id));
+                    var monster = root.Save.monsterContinuity?.Inspect().SingleOrDefault(m => m.AssignmentId == id);
+                    string detail = Text("ui.dungeon.content.owned") + (monster == null ? string.Empty : "\n" +
+                        ProductionDungeonPresenter.MonsterState(monster, returned.OptionId, MonsterRecoveryRules.Capture(root.RunSimulationConfig), Text, Culture));
+                    Choice(ContentName(returned.OptionId), detail, id, returned.CategoryId, returned.OptionId, () => SelectReturnedContent(id));
                 }
                 if (!contentBrowserOwned) foreach (var effect in (draftContext.Configuration.MvpPlacementEffects ?? Array.Empty<MvpPlacementEffectConfig>()).Where(e => e.CategoryId == contentCategory).OrderBy(e => e.OptionId, StringComparer.Ordinal))
                 {

@@ -1,5 +1,7 @@
 **Cross Spec Glossary of Invariants**
 
+**Combat C2 implementation status (2026-10-16, pending independent review):** The owner's Combat C2 implementation instruction approves schema 15's ninth `primary.monsterContinuity` owner: existing AssignmentId, individual level, integer HP and explicit revival-required state. Maximum HP/readiness and required reserve are derived from validated configuration; `StructureRuntimeState.ManaReserve` remains total mana. Injuries, vacant active-floor living-first recovery and whole-HP debits use the existing complete-save transaction, while spatial/custody authorities retain location and ownership. C2 does not activate Living Dungeon scheduling or reinterpret frozen C0/B1/B2 evidence. See [contracts, qualification and owner validation still required](testing/evidence/combat-c2/implementation-and-qualification.md); earlier dated schema and unapproved-design statements remain historical.
+
 
 **Phase 6 final implementation status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`. Phase 6 is complete. Writable schema 12 includes `sharedFloorKnowledge`; lifecycle activation alone does not invalidate knowledge, while material gameplay-affecting floor changes make it inapplicable until fresh qualifying evidence replaces or reconfirms it. Knowledge-backed transitions and coarse durable aggregate reporting are complete; detailed transition causes remain same-session/transient.
 

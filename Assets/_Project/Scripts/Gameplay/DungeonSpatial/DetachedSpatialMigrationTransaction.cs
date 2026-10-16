@@ -39,7 +39,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RawLegacyBlankFloorContract blankFloor = null,
             DetachedWholeSaveLimits wholeSaveLimits = default(DetachedWholeSaveLimits),
             RoomContentSpatialOccupancySnapshot roomContentOccupancy = null,
-            IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles = null)
+            IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles = null,
+            MonsterRecoveryRules monsterRecovery = null)
         {
             Compatibility = compatibility ?? throw new ArgumentNullException(nameof(compatibility));
             ProductionContent = productionContent ?? throw new ArgumentNullException(nameof(productionContent));
@@ -54,8 +55,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             this.wholeSaveLimits = wholeSaveLimits;
             RoomContentOccupancy = roomContentOccupancy;
             LivingDungeonProfiles = livingDungeonProfiles?.ToArray();
+            MonsterRecovery = monsterRecovery ?? MonsterRecoveryRules.EditorFallback();
         }
         internal IReadOnlyList<LivingDungeonProfile> LivingDungeonProfiles { get; }
+        internal MonsterRecoveryRules MonsterRecovery { get; }
 
         public SpatialLayoutCompatibilitySnapshot Compatibility { get; }
         public ProductionSpatialContentSnapshot ProductionContent { get; }
@@ -1387,10 +1390,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     productionContent, configuration, completeLimits.Spatial, recoveryContext.RoomContentOccupancy, true).IsValid &&
                 PhaseFiveSaveContracts.Validate(thirteen.CorridorContent, thirteen.BranchKnowledge, thirteen.State,
                     productionContent, configuration, completeLimits.Spatial)) return true;
+            var fourteen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(bytes, completeLimits, recoveryContext.LivingDungeonProfiles);
+            if (fourteen.IsValid && DetachedCanonicalProductionSemanticValidation.Validate(fourteen.State,
+                    productionContent, configuration, completeLimits.Spatial, recoveryContext.RoomContentOccupancy, true).IsValid &&
+                PhaseFiveSaveContracts.Validate(fourteen.CorridorContent, fourteen.BranchKnowledge, fourteen.State,
+                    productionContent, configuration, completeLimits.Spatial)) return true;
             return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,
                 new DetachedCurrentTargetValidationContext(recoveryContext.Compatibility,
                     productionContent, recoveryContext.LegacyConfigurationBytes, completeLimits,
-                    recoveryContext.RoomContentOccupancy, false, recoveryContext.LivingDungeonProfiles)).IsValid;
+                    recoveryContext.RoomContentOccupancy, false, recoveryContext.LivingDungeonProfiles, recoveryContext.MonsterRecovery)).IsValid;
         }
 
         private SpatialTrustedPayload TrustedActive(string activePath, byte[] original, byte[] candidate)

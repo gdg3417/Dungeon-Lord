@@ -205,6 +205,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 PhaseFourTestSupport.PositionProfiles(fixture.Limits), out schemaEight), Is.True);
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(schemaEight, fixture.Limits).IsValid, Is.True);
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(schemaEight, fixture.Limits, out schemaEight), Is.True);
+            Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(schemaEight,fixture.Limits,MonsterRecoveryRules.EditorFallback(),out schemaEight),Is.True);
             DetachedCompleteSaveValidationResult contextual =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.CurrentContext);
             Assert.That(contextual.IsValid, Is.True, contextual.Reason);

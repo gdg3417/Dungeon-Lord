@@ -27,12 +27,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             internal string Id, ClassId;
             internal long Order;
             internal int Health;
+            internal int InitialHealth;
+            internal bool InitialRevival;
             internal RunPartyMember Member;
             internal CombatC0MonsterPlacement Placement;
             internal CombatC0AttackProfile Profile;
             internal bool IsMonster => Placement != null;
         }
-        internal string RulesId => config.RulesId;
+        internal string RulesId { get; }
         internal int EventCount => eventCount;
         internal long WorkCount => workCount;
         internal CombatC0QualificationConfig Configuration => config;
@@ -46,14 +48,17 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal CombatC0AttackProfile MonsterProfile(string assignment) => monstersByAssignment[assignment].Profile;
         internal CombatC0AttackProfile MemberProfile(string classId) => classProfiles[classId];
         internal CombatC0MonsterState[] InspectMonsters() => monsters.Select(m => new CombatC0MonsterState(
-            m.Placement, m.Profile.MonsterHealth, m.Health)).ToArray();
+            m.Placement, m.Profile.MonsterHealth, m.Health, m.InitialHealth, m.InitialRevival)).ToArray();
         internal static string MemberId(RunParty party, int ordinal) => party.RunId + "/member/" + ordinal.ToString(CultureInfo.InvariantCulture);
         internal static string MonsterId(RunParty party, string assignment) => party.RunId + "/monster/" + assignment;
         internal int MonsterHealth(string assignment) => monstersByAssignment[assignment].Health;
+        internal bool MonsterEligible(string assignment) => monstersByAssignment[assignment].Health > 0 && !monstersByAssignment[assignment].InitialRevival;
 
-        internal CombatC0Kernel(RunParty party, CombatC0QualificationConfig config, CombatC0MonsterPlacement[] placements)
+        internal CombatC0Kernel(RunParty party, CombatC0QualificationConfig config, CombatC0MonsterPlacement[] placements,
+            MonsterContinuityState continuity = null)
         {
             this.party = party; this.config = config;
+            RulesId = continuity == null ? config?.RulesId : MonsterRecoveryRules.Executable;
             if (party == null || config == null || placements == null || string.IsNullOrWhiteSpace(party.RunId) ||
                 party.Members == null || party.Members.Count == 0 ||
                 (long)party.Members.Count + placements.Length > config.MaximumParticipants) throw new ArgumentException(InvalidState);
@@ -65,10 +70,16 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 throw new ArgumentException(InvalidState);
             members = party.Members.OrderBy(m => m.MemberOrdinal).Select(m => new Actor { Id = MemberId(party, m.MemberOrdinal),
                 ClassId = m.ClassId, Member = m, Order = m.MemberOrdinal, Profile = config.Classes.Single(p => p.Id == m.ClassId) }).ToArray();
+            var starts = continuity?.Records.ToDictionary(r => r.AssignmentId, StringComparer.Ordinal);
+            if (starts != null) ChargeGeometry(checked((long)starts.Count + placements.Length));
             monsters = placements.OrderBy(p => p.Sequence).ThenBy(p => p.AssignmentId, StringComparer.Ordinal).Select(p => {
                 var profile = config.Monsters.Single(c => c.Id == p.OptionId);
+                var start = starts == null ? null : starts[p.AssignmentId];
+                if (start != null && (start.Health < 0 || start.Health > profile.MonsterHealth || (start.Health == 0 && !start.RevivalRequired)))
+                    throw new ArgumentException(InvalidState);
                 return new Actor { Id = MonsterId(party, p.AssignmentId), Order = p.Sequence, Placement = p, Profile = profile,
-                    Health = profile.MonsterHealth };
+                    Health = start?.Health ?? profile.MonsterHealth, InitialHealth = start?.Health ?? profile.MonsterHealth,
+                    InitialRevival = start?.RevivalRequired ?? false };
             }).ToArray();
             monstersByAssignment = monsters.ToDictionary(m => m.Placement.AssignmentId, StringComparer.Ordinal);
             classProfiles = config.Classes.ToDictionary(c => c.Id, StringComparer.Ordinal);
@@ -99,7 +110,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (assignments.Length > monsters.Length || assignments.Distinct(StringComparer.Ordinal).Count() != assignments.Length)
                 throw new ArgumentException(InvalidState);
             var candidates = assignments.Select(id => monsters.SingleOrDefault(m => m.Placement.AssignmentId == id)).ToArray();
-            if (candidates.Any(m => m == null || m.Placement.FloorId != floor || m.Placement.RoomId != room)) throw new ArgumentException(InvalidState);
+            if (candidates.Any(m => m == null || m.InitialRevival || m.Placement.FloorId != floor || m.Placement.RoomId != room)) throw new ArgumentException(InvalidState);
             var actors = members.Concat(candidates).OrderByDescending(a => a.Profile.Initiative)
                 .ThenBy(a => a.IsMonster).ThenBy(a => a.Order).ThenBy(a => a.Id, StringComparer.Ordinal).ToArray();
             // Exactly one directed pair per opposing participant, including explicit denials.
@@ -165,7 +176,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     round, floor, room, kind, reason, actor?.Id, target?.Id, actor?.Profile.AttackId,
                     actor != null && positions.TryGetValue(actor.Id, out var source) ? source : (TileCoordinate?)null,
                     target != null && positions.TryGetValue(target.Id, out var destination) ? destination : (TileCoordinate?)null, before, after,
-                    executable: config.RulesId, targeting: config.TargetingId));
+                    executable: RulesId, targeting: config.TargetingId));
             }
             Emit(CombatC0EventKind.EncounterStart, CombatC0Reason.Legal, 0);
             foreach (var link in links.Values.OrderBy(l => l.ActorId, StringComparer.Ordinal).ThenBy(l => l.TargetId, StringComparer.Ordinal))
@@ -227,7 +238,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             ChargeGeometry(1);
             return new CombatC0Event(party.RunId, null, eventCount++, -1, 0, floor, room, CombatC0EventKind.Bypass,
                 link.Reason, link.ActorId, link.TargetId, MonsterProfile(assignment).AttackId, link.Source, link.Target,
-                executable: config.RulesId, targeting: config.TargetingId);
+                executable: RulesId, targeting: config.TargetingId);
         }
         private static int ClassRank(IReadOnlyList<string> order, string classId)
         { for (int i = 0; i < order.Count; i++) if (order[i] == classId) return i; throw new ArgumentException(InvalidState); }

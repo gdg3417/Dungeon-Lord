@@ -30,7 +30,9 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(CombatC0Diagnostics.Events(run).Count(e => e.Kind == CombatC0EventKind.EncounterStart), Is.EqualTo(1));
             Assert.That(CombatC0Diagnostics.Events(run).Any(e => e.Kind == CombatC0EventKind.Attack && e.Damage > 0), Is.True);
             Assert.That(root.Save.runHistory.NextRunSequence, Is.EqualTo(sequence+1));
-            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            long recovery = CombatC0Diagnostics.Monsters(run).Sum(m => System.Math.Max(0,
+                MonsterRecoveryRules.Capture(root.RunSimulationConfig).Readiness(m.OptionId) - m.Health));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana - recovery));
             string diagnostics = RunPartyDiagnosticsPresenter.Build(run, root.Content.GetString);
             Assert.That(diagnostics, Does.Contain("E1 R").And.Contain("damage").And.Not.Contain("TileCoordinate"));
             Assert.That(controller.StartReplay(), Is.True);

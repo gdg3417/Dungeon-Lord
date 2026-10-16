@@ -19,6 +19,8 @@ namespace DungeonBuilder.M0.Economy
         public double Refund { get; internal set; }
         public double CreditedRefund { get; internal set; }
         public double ResultingMana { get; internal set; }
+        public long RequiredReserveBefore { get; internal set; }
+        public long RequiredReserveAfter { get; internal set; }
         public string Reason { get; internal set; }
         public bool IsAffordable => Reason == null;
         internal StructuralInvestmentRecord[] Investment { get; set; }
@@ -57,7 +59,7 @@ namespace DungeonBuilder.M0.Economy
 
         internal static void RefreshBalance(StructuralEconomyPreview preview, double balance, StructuralEconomySnapshot config)
         {
-            if (preview == null || config == null || preview.Reason != null && preview.Reason != InsufficientReason) return;
+            if (preview == null || config == null || preview.Reason != null && preview.Reason != InsufficientReason && preview.Reason != MonsterRecoveryRules.Insufficient) return;
             preview.CurrentMana = balance;
             double afterSpend = balance - preview.Cost;
             preview.ResultingMana = afterSpend < 0 || preview.Operation == StructuralEditOperation.Movement
@@ -65,6 +67,8 @@ namespace DungeonBuilder.M0.Economy
             preview.CreditedRefund = afterSpend < 0 ? 0 : preview.ResultingMana - afterSpend;
             preview.Reason = !StructuralEconomySnapshot.Nonnegative(balance) ? InvalidReason :
                 balance < preview.Cost ? InsufficientReason : balance - afterSpend != preview.Cost ? InvalidReason : null;
+            if (preview.Reason == null && (preview.Cost > 0 || preview.RequiredReserveAfter > preview.RequiredReserveBefore) &&
+                preview.ResultingMana < preview.RequiredReserveAfter) preview.Reason = MonsterRecoveryRules.Insufficient;
         }
 
         internal static StructuralEconomyPreview PreviewFinalDraft(DetachedCanonicalSpatialSaveState current,

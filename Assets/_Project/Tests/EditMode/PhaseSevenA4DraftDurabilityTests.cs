@@ -125,7 +125,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(recovered.CanSave, Is.True);
             f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, recovered));
             f.Reopen(); Assert.That(f.State.Floors[0].RoomContents.Assignments[0].RoomLocalPosition, Is.EqualTo(new TileCoordinate(2, 1)));
-            Assert.That(Store(f).Read(), Is.Null); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(14));
+            Assert.That(Store(f).Read(), Is.Null); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(15));
         }
 
         [TestCase("candidate-before", 0)]
