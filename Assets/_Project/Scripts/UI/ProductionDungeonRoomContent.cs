@@ -180,6 +180,9 @@ namespace DungeonBuilder.M0
             feedback = "ui.dungeon.content.returned"; Present(); return true;
         }
         private string ContentName(string option) => MvpDungeonPlacementPresenter.ResolveOptionName(option, (key, fallback) => root.Content.GetString(key, fallback));
+        private DetachedCanonicalSpatialSaveState contentEconomyCandidate;
+        private DungeonBuilder.M0.Economy.StructuralEconomyPreview contentEconomy;
+        private string acquisitionInformationPrefix;
         private void PresentRoomContent()
         {
             var ui = document.rootVisualElement;
@@ -255,7 +258,6 @@ namespace DungeonBuilder.M0
                 }
             }
             var info = ui.Q<Label>("contentPlacementInfo");
-            var gate = root.DungeonDraftPurchaseEligibility();
             info.text = contentIntent == null ? Text(reassigning != null ? feedback ?? "ui.dungeon.content.destination_hint" :
                 contentBrowserOwned ? returnedChoices.Length == 0 ? "ui.dungeon.content.owned_empty" : "ui.dungeon.content.owned_hint" : "ui.dungeon.content.new_hint") :
                 Text(ContentPreviewMessageKey ?? (contentPreview == null ? "ui.dungeon.content.position_hint" : "ui.dungeon.content.preview"));
@@ -269,9 +271,26 @@ namespace DungeonBuilder.M0
             }
             if (contentIntent?.Operation == DungeonDraftContentOperation.Acquire)
             {
-                info.text += "\n" + root.SaveService.PresentContentAcquisition(contentIntent.CategoryId, contentIntent.OptionId, root.Save, Text);
-                if (!gate.Allowed) info.text += "\n" + Text(gate.MessageKey);
+                // Geometry/edit boundaries produce a quote; wallet ticks only refresh its balance.
+                var candidate = contentPreview?.Candidate;
+                if (!ReferenceEquals(candidate, contentEconomyCandidate))
+                {
+                    contentEconomyCandidate = candidate;
+                    contentEconomy = candidate == null ? null : root.SaveService.PreviewDungeonDraft(root.Save, draft, candidate);
+                }
+                acquisitionInformationPrefix = info.text;
+                PresentAcquisitionInformation();
             }
+        }
+        private void PresentAcquisitionInformation()
+        {
+            if (contentIntent?.Operation != DungeonDraftContentOperation.Acquire) return;
+            root.SaveService.RefreshDraftPreviewBalance(contentEconomy, root.Save.structureRuntime.ManaReserve);
+            var info = document.rootVisualElement.Q<Label>("contentPlacementInfo");
+            info.text = acquisitionInformationPrefix + "\n" + root.SaveService.PresentContentAcquisition(
+                contentIntent.CategoryId, contentIntent.OptionId, root.Save, Text, contentEconomy);
+            var gate = root.DungeonDraftPurchaseEligibility();
+            if (!gate.Allowed) info.text += "\n" + Text(gate.MessageKey);
         }
     }
 }

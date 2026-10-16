@@ -26,10 +26,105 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return f;
         }
         private static string Target(Fixture f) => f.State.Floors[0].Layout.Rooms.Single().RoomInstanceId;
+        private static SaveService PresentationService(Fixture f)
+        {
+            byte[] legacy = (byte[])typeof(DetachedCurrentTargetValidationContext).GetField("legacyConfiguration",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(f.Context);
+            var service = new SaveService(new SimpleLogger(false, (level, message) => { }),
+                new SaveConfig { fileName = Path.GetFileName(f.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(f.ActivePath));
+            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration, legacy, f.PositionProfiles, f.Occupancy);
+            service.ConfigureStructuralEconomy(f.Economy); service.ConfigureContentAcquisitionEconomy(f.Acquisition);
+            service.ConfigureStructuralRemovalPolicy(f.RemovalPolicy);
+            service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
+                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, f.FileSystem, path));
+            Assert.That(service.LoadOrCreate("reserve-ui-test", out string banner), Is.Not.Null, banner);
+            return service;
+        }
+
+        [TestCase(MvpDungeonPlacementIds.GoblinOptionId, 24, false, false)]
+        [TestCase(MvpDungeonPlacementIds.GoblinOptionId, 26, false, true)]
+        [TestCase(MvpDungeonPlacementIds.SkeletonOptionId, 31, false, false)]
+        [TestCase(MvpDungeonPlacementIds.SkeletonOptionId, 32, false, true)]
+        [TestCase(MvpDungeonPlacementIds.GoblinOptionId, 32, true, false)]
+        [TestCase(MvpDungeonPlacementIds.GoblinOptionId, 33, true, true)]
+        [TestCase(MvpDungeonPlacementIds.SpikeTrapOptionId, 20, true, false)]
+        [TestCase(MvpDungeonPlacementIds.SpikeTrapOptionId, 27, true, true)]
+        [TestCase(MvpDungeonPlacementIds.HiddenCacheOptionId, 10, true, false)]
+        [TestCase(MvpDungeonPlacementIds.HiddenCacheOptionId, 17, true, true)]
+        [TestCase(MvpDungeonPlacementIds.HiddenCacheOptionId, 5, true, false)]
+        [TestCase(MvpDungeonPlacementIds.SpikeTrapOptionId, 20, false, true)]
+        public void PositionedAcquisitionFeedbackAgreesWithCanonicalDraftCommit(string option, double wallet, bool existing, bool allowed)
+        {
+            var f = Room();
+            if (existing) f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId, Target(f), null, new TileCoordinate(0, 0))));
+            var service = PresentationService(f); f.Runtime.structureRuntime.ManaReserve = wallet;
+            var context = service.DungeonDraftContext;
+            var draft = TransactionalDungeonDraft.Create(f.State, context, new PhaseSevenA4TransactionalEditorTests.Store());
+            var intent = context.ContentIntent(DungeonDraftContentOperation.Acquire, f.State.Floors[0].FloorInstanceId,
+                Target(f), categoryId: Category(option), optionId: option, position: new TileCoordinate(2, 2));
+            var spatial = draft.PreviewContent(intent); Assert.That(spatial.IsValid, Is.True, spatial.Reason);
+            var quote = service.PreviewDungeonDraft(f.Runtime, draft, spatial.Candidate);
+            Assert.That(quote, Is.Not.Null); Assert.That(quote.IsAffordable, Is.EqualTo(allowed), quote.Reason);
+            string visible = service.PresentContentAcquisition(Category(option), option, f.Runtime, key => key, quote);
+            Assert.That(visible.Contains("ui.content_acquisition.affordable"), Is.EqualTo(allowed));
+            if (!allowed) Assert.That(visible, Does.Contain(quote.Reason));
+            Assert.That(draft.ChangeContent(intent), Is.True);
+            while (draft.Durability == DraftDurability.Pending) Assert.That(draft.FlushNext(), Is.True);
+            var committed = service.CommitDungeonDraft(f.Runtime, draft, new GateEvaluationInput(RestrictedActionType.Purchase, true, false));
+            Assert.That(committed.IsSuccess, Is.EqualTo(allowed), committed.Reason);
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void ZeroAdditionalObligationQuotesRemainAffordableDuringDeficit(bool unassign)
+        {
+            var f = Room(); f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.GoblinOptionId, Target(f), null, new TileCoordinate(0, 0))));
+            var service = PresentationService(f); f.Runtime.structureRuntime.ManaReserve = 0;
+            var context = service.DungeonDraftContext;
+            var draft = TransactionalDungeonDraft.Create(f.State, context, new PhaseSevenA4TransactionalEditorTests.Store());
+            var intent = context.ContentIntent(unassign ? DungeonDraftContentOperation.Unassign : DungeonDraftContentOperation.Reposition,
+                f.State.Floors[0].FloorInstanceId, unassign ? null : Target(f), f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId,
+                position: unassign ? default : new TileCoordinate(2, 2));
+            var spatial = draft.PreviewContent(intent); Assert.That(spatial.IsValid, Is.True, spatial.Reason);
+            var quote = service.PreviewDungeonDraft(f.Runtime, draft, spatial.Candidate);
+            Assert.That(quote.IsAffordable, Is.True, quote.Reason);
+            Assert.That(quote.Cost, Is.Zero); Assert.That(quote.RequiredReserveAfter, Is.EqualTo(unassign ? 0 : 6));
+            Assert.That(StructuralEconomyPresenter.Present(quote, key => key), Does.Contain("ui.structural.economy.affordable"));
+            Assert.That(draft.ChangeContent(intent), Is.True);
+            while (draft.Durability == DraftDurability.Pending) Assert.That(draft.FlushNext(), Is.True);
+            Assert.That(service.CommitDungeonDraft(f.Runtime, draft).IsSuccess, Is.True);
+        }
         private static string Category(string option)
         {
             Assert.That(MvpDungeonPlacementIds.TryGetCategoryForOption(option, out string category), Is.True);
             return category;
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void InactiveFloorAndReturnedCustodyDoNotAddDeployedReserveToAcquisitionQuote(bool returnedCustody)
+        {
+            var f = PhaseSixA4Tests.Eligible();
+            // The owned defender is either on the inactive floor or in returned custody.
+            PhaseSixA4Tests.AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            if (returnedCustody) f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(
+                f.State.Floors[1].RoomContents.Assignments.Single().AssignmentId, f.State.Floors[1].FloorInstanceId)));
+            var service = PresentationService(f); f.Runtime.structureRuntime.ManaReserve = 20;
+            var context = service.DungeonDraftContext;
+            var draft = TransactionalDungeonDraft.Create(f.State, context, new PhaseSevenA4TransactionalEditorTests.Store());
+            var floor = f.State.Floors[1];
+            var intent = context.ContentIntent(DungeonDraftContentOperation.Acquire, floor.FloorInstanceId,
+                floor.Layout.Rooms[0].RoomInstanceId, categoryId: MvpDungeonPlacementIds.MonsterCategoryId,
+                optionId: MvpDungeonPlacementIds.GoblinOptionId, position: new TileCoordinate(2, 2));
+            var spatial = draft.PreviewContent(intent); Assert.That(spatial.IsValid, Is.True, spatial.Reason);
+            var quote = service.PreviewDungeonDraft(f.Runtime, draft, spatial.Candidate);
+            Assert.That(quote.RequiredReserveBefore, Is.Zero); Assert.That(quote.RequiredReserveAfter, Is.Zero);
+            Assert.That(quote.IsAffordable, Is.True, quote.Reason);
+            Assert.That(service.PresentContentAcquisition(intent.CategoryId, intent.OptionId, f.Runtime, key => key, quote),
+                Does.Contain("ui.content_acquisition.affordable"));
+            Assert.That(draft.ChangeContent(intent), Is.True);
+            while (draft.Durability == DraftDurability.Pending) Assert.That(draft.FlushNext(), Is.True);
+            Assert.That(service.CommitDungeonDraft(f.Runtime, draft, new GateEvaluationInput(RestrictedActionType.Purchase, true, false)).IsSuccess, Is.True);
         }
         private static string[] Investment(Fixture f) => DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
             f.Session.GetCurrentBytes(), f.Context).Investment.Select(JsonUtility.ToJson).ToArray();
@@ -266,12 +361,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void CommitRechecksManaAfterAnAffordablePresentation()
+        public void UnpositionedPriceDoesNotClaimAffordabilityAndCommitRechecksMana()
         {
             var f = Room(); f.Runtime.structureRuntime.ManaReserve = 25;
             string preview = ContentAcquisitionEconomyPresenter.Present(f.Acquisition, MvpDungeonPlacementIds.MonsterCategoryId,
                 MvpDungeonPlacementIds.SkeletonOptionId, f.Runtime.structureRuntime.ManaReserve, key => key);
-            Assert.That(preview, Does.Contain("ui.content_acquisition.affordable"));
+            Assert.That(preview, Does.Not.Contain("ui.content_acquisition.affordable"));
             f.Runtime.structureRuntime.ManaReserve = 24; // Authoritative current wallet changed after preview.
             Unchanged(f, DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
                 MvpDungeonPlacementIds.SkeletonOptionId, Target(f)), ContentAcquisitionEconomySnapshot.InsufficientReason);
@@ -428,7 +523,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(text(key), Is.Not.Empty);
             string visible = ContentAcquisitionEconomyPresenter.Present(f.Acquisition, MvpDungeonPlacementIds.MonsterCategoryId,
                 MvpDungeonPlacementIds.SkeletonOptionId, 24, text);
-            Assert.That(visible, Does.Contain(text(ContentAcquisitionEconomySnapshot.InsufficientReason)));
+            Assert.That(visible, Does.Not.Contain(text("ui.content_acquisition.affordable")));
             Assert.That(visible, Does.Contain("25").And.Contain("24"));
         }
     }

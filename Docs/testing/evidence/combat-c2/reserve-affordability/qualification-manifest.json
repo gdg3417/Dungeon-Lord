@@ -1,0 +1,3314 @@
+{
+  "reviewed_head": "d3f81ab866ff9c35b72ceb9fd86ef8015609b4f0",
+  "qualification_project": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2",
+  "unity": "6000.3.2f1",
+  "reports": [
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c2-reserve-ui-01-EditMode.xml",
+      "sha256": "c07c0d48843a37abe857b8e4f4fca92e2b1212bf572fd5c9a2de83aa2e1e9000",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "259",
+        "result": "Passed",
+        "total": "259",
+        "passed": "259",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-16 22:31:56Z",
+        "end-time": "2026-10-16 22:32:23Z",
+        "duration": "26.9067231"
+      },
+      "passed": 259,
+      "failed": 0,
+      "ignored": 0,
+      "other_skipped": 0,
+      "failures": [],
+      "production_gates": 65
+    },
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c2-reserve-ui-01-PlayMode.xml",
+      "sha256": "392f061439bea94cef86da15c4d7a531a9a3dba2cfd26c263c7dfbf934362a59",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "5",
+        "result": "Failed(Child)",
+        "total": "5",
+        "passed": "4",
+        "failed": "1",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-16 22:32:46Z",
+        "end-time": "2026-10-16 22:32:55Z",
+        "duration": "9.5913253"
+      },
+      "passed": 4,
+      "failed": 1,
+      "ignored": 0,
+      "other_skipped": 0,
+      "failures": [
+        {
+          "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentCompactPlacementAndOverflow",
+          "message": "  Long localized Move at least one quarter remains usable map\n  Expected: greater than or equal to 320.0f\n  But was:  282.0f\n"
+        }
+      ],
+      "production_gates": 0
+    },
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c2-reserve-ui-02-EditMode.xml",
+      "sha256": "2a3c7d3f6dccadd810a34dd262e805dfeabb0de4d883eea3a49055b5a314651a",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "259",
+        "result": "Passed",
+        "total": "259",
+        "passed": "259",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-16 22:56:10Z",
+        "end-time": "2026-10-16 22:56:37Z",
+        "duration": "27.2679893"
+      },
+      "passed": 259,
+      "failed": 0,
+      "ignored": 0,
+      "other_skipped": 0,
+      "failures": [],
+      "production_gates": 65
+    },
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c2-reserve-ui-02-PlayMode.xml",
+      "sha256": "0e5850b1b53c9c01b4f5965ada6420e500cc4f161dce2804545fe49730d632b2",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "5",
+        "result": "Failed(Child)",
+        "total": "5",
+        "passed": "4",
+        "failed": "1",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-16 22:57:00Z",
+        "end-time": "2026-10-16 22:57:14Z",
+        "duration": "13.5027276"
+      },
+      "passed": 4,
+      "failed": 1,
+      "ignored": 0,
+      "other_skipped": 0,
+      "failures": [
+        {
+          "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentCompactPlacementAndOverflow",
+          "message": "  New placement.category.monster costs=False two complete information lines\n  Expected: greater than or equal to 70.0f\n  But was:  43.0f\n"
+        }
+      ],
+      "production_gates": 0
+    },
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c2-reserve-ui-03-PlayMode.xml",
+      "sha256": "072ac786d11fa62963b27e4b2e7ac9104c03a1b7302d90d3d6b7c55288b54cc5",
+      "attributes": {
+        "id": "2",
+        "testcasecount": "5",
+        "result": "Passed",
+        "total": "5",
+        "passed": "5",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-16 22:58:44Z",
+        "end-time": "2026-10-16 22:59:06Z",
+        "duration": "21.7870793"
+      },
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "other_skipped": 0,
+      "failures": [],
+      "production_gates": 0
+    }
+  ],
+  "final_commands": [
+    {
+      "name": "EditMode",
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "arguments": [
+        "test",
+        "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2",
+        "--mode",
+        "EditMode",
+        "--filter",
+        "PhaseFourAcquisition;PhaseFourEconomy;ProductionSpatialContentBuildGateTests;CombatC2EditModeFixtures",
+        "--output",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c2-reserve-ui-02-EditMode.xml",
+        "--timeout",
+        "1200",
+        "--no-color",
+        "--",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\Temp\\combat-c2-reserve-ui-02-EditMode.log"
+      ],
+      "project": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2",
+      "startedUtc": "2026-10-16T22:55:49.5119015Z",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-16T22:56:40.8682525Z",
+      "xml": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c2-reserve-ui-02-EditMode.xml",
+      "total": 259,
+      "passed": 259,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "PlayMode",
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "arguments": [
+        "test",
+        "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2",
+        "--mode",
+        "PlayMode",
+        "--filter",
+        "CombatC2ReserveAffordabilityVisibleWithoutHover;RoomContentProductionParity;RoomContentUatMeasuredPlacementLayout;RoomContentCompactPlacementAndOverflow;CombatC2ConsecutiveRunsAndReadOnlyReplay",
+        "--output",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c2-reserve-ui-03-PlayMode.xml",
+        "--timeout",
+        "1200",
+        "--no-color",
+        "--",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\Temp\\combat-c2-reserve-ui-03-PlayMode.log"
+      ],
+      "project": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2",
+      "startedUtc": "2026-10-16T22:58:23.5209634Z",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-16T22:59:10.8414671Z",
+      "xml": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c2-reserve-ui-03-PlayMode.xml",
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "windows-build",
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "arguments": [
+        "build",
+        "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2",
+        "--target",
+        "StandaloneWindows64",
+        "--execute-method",
+        "DungeonBuilder.M0.EditorTools.DungeonVisualBuildQualification.BuildCombatC2ReserveUiWindows",
+        "--allow-dirty-build",
+        "--timeout",
+        "1800",
+        "--no-tail",
+        "--log-file",
+        "C:\\Dev\\Dungeon-Lord\\Temp\\combat-c2-reserve-ui-03-windows-build.log",
+        "--no-color"
+      ],
+      "project": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2",
+      "startedUtc": "2026-10-16T23:00:21.8970707Z",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-16T23:00:51.9795231Z"
+    }
+  ],
+  "build": {
+    "utcTimestamp": "2026-10-16T23:00:49.7810147Z",
+    "unityVersion": "6000.3.2f1",
+    "targetPlatform": "StandaloneWindows64",
+    "applicationVersion": "1.0",
+    "developmentBuild": true,
+    "includedScenes": [
+      "Assets/_Project/Scenes/Bootstrap.unity"
+    ],
+    "outputPath": "Builds/Development/Windows-combat-c2-reserve-ui-20261016/Dungeon Lord.exe",
+    "buildResult": "Succeeded",
+    "totalBuildSize": 181735587,
+    "errorCount": 0,
+    "warningCount": 1
+  },
+  "namespace_assets": [
+    "Dungeon Lord_Data\\sharedassets0.assets"
+  ],
+  "packed_required": [
+    "Assets/_Project/Resources/monster_recovery.json",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema14.json",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema13.json",
+    "Assets/_Project/Data/Bootstrap/build_config.json",
+    "Assets/_Project/Data/Bootstrap/string_table_en.json"
+  ],
+  "build_files": [
+    {
+      "path": "build-messages.txt",
+      "sha256": "e5c7212aff7bb668a60ecea8cce79d1fc2f0c376f872c38e9fcf27c32e98b202",
+      "bytes": 1584
+    },
+    {
+      "path": "build-report.json",
+      "sha256": "af4c8ed5d58596b989857b54809ad0612fb029b357586d43237568b3e56aa972",
+      "bytes": 458
+    },
+    {
+      "path": "D3D12\\D3D12Core.dll",
+      "sha256": "625bd40005b1c3708695d5256ecf230d278e6b8edba5a88af70f3d91324f3052",
+      "bytes": 4725304
+    },
+    {
+      "path": "D3D12\\d3d12SDKLayers.dll",
+      "sha256": "c0730cc70d3250d3de19c04c17845ba9e70eecaf502d684d1409195ebc5b5959",
+      "bytes": 4930104
+    },
+    {
+      "path": "Dungeon Lord.exe",
+      "sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "bytes": 667648
+    },
+    {
+      "path": "Dungeon Lord_BurstDebugInformation_DoNotShip\\Data\\Plugins\\x86_64\\lib_burst_generated.txt",
+      "sha256": "45adf8c241110381c2659e5d4cdde384089a1da61624b9f55aa315a72f892a12",
+      "bytes": 239721
+    },
+    {
+      "path": "Dungeon Lord_Data\\app.info",
+      "sha256": "c6f6b8692e8dbcf31c1fc3527e08ca5cbd73975a7d2b289495f22337a0c4fdd4",
+      "bytes": 20
+    },
+    {
+      "path": "Dungeon Lord_Data\\boot.config",
+      "sha256": "9ba0f59c06a1227fd5bdedad68756dac6f7ddbd5b2fae99dd583397dbb27a6fa",
+      "bytes": 387
+    },
+    {
+      "path": "Dungeon Lord_Data\\globalgamemanagers",
+      "sha256": "58742305aa578dfa2eed9f4ad16e0c132c15c9f584f01919cc412caef14737fa",
+      "bytes": 236276
+    },
+    {
+      "path": "Dungeon Lord_Data\\globalgamemanagers.assets",
+      "sha256": "03c67dfca077be012fe9db8a6b617351ea74e4b42fe62d528ea7fcaae87e1637",
+      "bytes": 1258948
+    },
+    {
+      "path": "Dungeon Lord_Data\\globalgamemanagers.assets.resS",
+      "sha256": "9d5cd592a38d46bd823a36366b1f5b84cf0a2b3ace58dec6a6374ca0d50fe6ec",
+      "bytes": 5718240
+    },
+    {
+      "path": "Dungeon Lord_Data\\level0",
+      "sha256": "a5a0e71bf9055d90b8ac9ff20919b3f6bdd7b22c23bdd95bb330674881851b58",
+      "bytes": 5004
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Assembly-CSharp.dll",
+      "sha256": "8a3f41175e54d5b1fa4e30175b08eebe98b441e78d0587fc3ab114915277a23a",
+      "bytes": 1709568
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Assembly-CSharp.pdb",
+      "sha256": "5f8c8c3959559dfb7376a54741e58094835647744c0d5366498ee5b92c66df7e",
+      "bytes": 624912
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Mono.Security.dll",
+      "sha256": "095361bdec0d4cedeb86e32584f51e02ae9f74f0bcf105fe34347c12ee09544e",
+      "bytes": 241152
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\mscorlib.dll",
+      "sha256": "c18ce37d14ac391ad399bbe0a6c784937895b6b2a5f7187d5d275b6c04c4bf50",
+      "bytes": 4632064
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\netstandard.dll",
+      "sha256": "6ae62e082dc494a2433984177f60ca4db5fae69b1f360a8b33754172b310b8c5",
+      "bytes": 90112
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.ComponentModel.Composition.dll",
+      "sha256": "84b56a5e6893447f11823e8d35951aa28c4b6fea9eff73460174b4b063562033",
+      "bytes": 257024
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Configuration.dll",
+      "sha256": "15ccff56f202331aeb5e28e24138ef5496b6072db48582ed5c08ce1d519f5d65",
+      "bytes": 124928
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Core.dll",
+      "sha256": "d7acdd810b2be97861665b5ebd8d8fcc9c38b613ae0ebf9a2ca961305be97b49",
+      "bytes": 1113088
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Data.DataSetExtensions.dll",
+      "sha256": "8c47bf3e74d016131d0ae8eefe2b7668e46bb4f672cb6239cc6f2f4368b74a36",
+      "bytes": 29696
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Data.dll",
+      "sha256": "5b3eadb7e34f34648516b3df01aa05c0bc9a4b55f51367ce355e70e13cdf1ccd",
+      "bytes": 2125312
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.dll",
+      "sha256": "335da294b98bc7a2b7b1bef3ad47c2023c366660e800f1fbd23e52f525a59464",
+      "bytes": 2641920
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Drawing.dll",
+      "sha256": "9a20d5903cf2fbfb1673568d50fa0205150b9268addbe57e8284baa06f5137d6",
+      "bytes": 489984
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.EnterpriseServices.dll",
+      "sha256": "b0e80a549ec87249dc2e637b862a81661d09e57680bbb73793da1ff74d3e4134",
+      "bytes": 44544
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.IO.Compression.dll",
+      "sha256": "86dff7ecfbec819d4ebc128b15525b8d0d818350b8a0a510abd3d7e7468475da",
+      "bytes": 114688
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.IO.Compression.FileSystem.dll",
+      "sha256": "76eeb7a027a1060e57323e4efd28a9c8597837f6f2ff6b78c7c7d78ddf076a28",
+      "bytes": 18432
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.IO.Hashing.dll",
+      "sha256": "ac7ac3e83805b0b621c48b90543dc733c9a89106835278618357d6187e3da74e",
+      "bytes": 50488
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Memory.dll",
+      "sha256": "c4f030a2cba7da7cdcf493257c24560e203d355904aee490d645a935842f834a",
+      "bytes": 4608
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Net.Http.dll",
+      "sha256": "fbc291e820be4628ca2ccf67d2d93809cac12135726639be39d11ff39796274d",
+      "bytes": 122880
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Numerics.dll",
+      "sha256": "b890a4ca4551337fd57c917dc7ab5e08556155ed0f1ae3f86d82ead4e9990a88",
+      "bytes": 119296
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Runtime.CompilerServices.Unsafe.dll",
+      "sha256": "01748200f2400c742aa689f1f5101bd6298efdfd92c00c18f4fa473847235ba9",
+      "bytes": 18024
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Runtime.dll",
+      "sha256": "e0a7334b7ba419aaab6bd3bb6992d693e689341a9178172c9bf99c2aa6a085bd",
+      "bytes": 12288
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Runtime.Serialization.dll",
+      "sha256": "5ae1e07f3da222777bd1442666bdbc8188550680a5cbe1e2e66b59e7749d91f0",
+      "bytes": 934400
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Security.dll",
+      "sha256": "d2aee18d6ceebe5d65f38d6cb0e05edde11cdef2dcfe2eeda3150311e9bc2dde",
+      "bytes": 320000
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.ServiceModel.Internals.dll",
+      "sha256": "22c0ccf71190679f48aaf0898d80b5081a3bebd446cd18a10c6a517031c24d48",
+      "bytes": 215040
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Transactions.dll",
+      "sha256": "76ab09be75f53ccf0a11511e7ad9a651ae1ce9d613b9b76d2430fd9a00e0dbc9",
+      "bytes": 35328
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Xml.dll",
+      "sha256": "4337d9c85f5821c50354fb38aa8932aaa189a795235f3bf5903665fe734cd8a8",
+      "bytes": 3160064
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\System.Xml.Linq.dll",
+      "sha256": "366267298e4279c54a7ee29c39e4255989920ee3b09effddf972c836ef41372b",
+      "bytes": 136704
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.2D.Animation.Runtime.dll",
+      "sha256": "ad099a7ec7185f451a479522acaf5867bebe99b1670d0e432953c6442c1217aa",
+      "bytes": 98816
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.2D.Animation.Runtime.pdb",
+      "sha256": "f9959ca74d63147cd199a262631938dd0d70d462128656afd7496d8759808605",
+      "bytes": 61688
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.2D.Common.Runtime.dll",
+      "sha256": "8d3178ab049f183e45a7189011151cc8b857ea6f4200b5d6c3f75ef0fc75b154",
+      "bytes": 63488
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.2D.Common.Runtime.pdb",
+      "sha256": "8a73b877e3a8447816ea56daa13c09dacf78f3b473ab8f13c98295c56e7c2531",
+      "bytes": 53500
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.2D.IK.Runtime.dll",
+      "sha256": "ed3252132e8e302df9a36ffaf396261dfb2a67fc9454b47cd8a680e2cf77b05d",
+      "bytes": 43008
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.2D.IK.Runtime.pdb",
+      "sha256": "4688c58d4f894e0443e379f6f3644df4e8a0f380e3c3d8426552284f5dc3b440",
+      "bytes": 36488
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.2D.SpriteShape.Runtime.dll",
+      "sha256": "9af75c3e87b12800a35dcb76b96792eb43e118062c8627fc61feb209f8bf2780",
+      "bytes": 126464
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.2D.SpriteShape.Runtime.pdb",
+      "sha256": "c5db174d424c80e4b73e5deb514c9e8b92ef43e42e7e9656ebdfed9030042d4b",
+      "bytes": 86644
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.2D.Tilemap.Extras.dll",
+      "sha256": "08157dc3a5922311cc97d72b57d396417067d79e7276dfb120a63697add252a5",
+      "bytes": 43008
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.2D.Tilemap.Extras.pdb",
+      "sha256": "b0d0d89834b558cbf735c290c8ea4c4db1aed910f5e5d7a9da5193853704ebb9",
+      "bytes": 34040
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Burst.dll",
+      "sha256": "30e0f830d52652160255e791e0514b51a19eb13ff6e1a384af156f0e21315990",
+      "bytes": 335360
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Burst.pdb",
+      "sha256": "e97ad59aae904cbb65d4292b0d104b16930b118bc1488727f8b94a692689253a",
+      "bytes": 220924
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Burst.Unsafe.dll",
+      "sha256": "9d9c1ff52411decbee5d9f0d1cd61ebeaa222077aa77a52101ea3debafae98e2",
+      "bytes": 5632
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Collections.dll",
+      "sha256": "a0df5105fd7ddd20c17f22c58326d4322d021670f8ae65d3677260e305b4fa75",
+      "bytes": 496640
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Collections.LowLevel.ILSupport.dll",
+      "sha256": "ff50383f807f9692e4913b97e47d86fefcb8faa33d6d48cd3e3fd6fc7ffb448d",
+      "bytes": 5120
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Collections.pdb",
+      "sha256": "bdcfc6b191463efca2de56b1ef026021e9cbf74033a4e199ce41959a79ccf65b",
+      "bytes": 313732
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.InputSystem.dll",
+      "sha256": "0cb73194423ebe0a88737294cfdb9ba62716b904dbf6f2e8e4ae7a2ad33f8a70",
+      "bytes": 1268224
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.InputSystem.ForUI.dll",
+      "sha256": "fb9d0367385c289987a73ad35884501adbc5cc046480d36ec1606b202e18b4b4",
+      "bytes": 16896
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.InputSystem.ForUI.pdb",
+      "sha256": "c7b2959477b0947f4d546d4c9464b339b34287cfa9717330383c6513725f2433",
+      "bytes": 21500
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.InputSystem.pdb",
+      "sha256": "cbe773ea8f9b062461a45c15e94dc5eb481a35af607b0e9f6c33328e4965e931",
+      "bytes": 576492
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.InternalAPIEngineBridge.001.dll",
+      "sha256": "458177d20d1d228a0a233046bb5e09bb8147374b4ee4bf529e9736a2cc5d5ff7",
+      "bytes": 7168
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.InternalAPIEngineBridge.001.pdb",
+      "sha256": "bf4cf6cbc471d67c3493d80aa57a944d99c7170801ac8fa19a1a308d16bdb151",
+      "bytes": 17856
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.InternalAPIEngineBridge.004.dll",
+      "sha256": "4da16bff8459145c438890101ef42e5ec107a999c00c86b25e1c62e6fc877e15",
+      "bytes": 4608
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.InternalAPIEngineBridge.004.pdb",
+      "sha256": "b1226d075d8b20d6dc94c0f1b7b0e5b2eebb1bf550630404aba96b54a70caaec",
+      "bytes": 16932
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Mathematics.dll",
+      "sha256": "e798072a2485e03ea98ba34c3fcaf48e45c152855efa59a3dc04bb4de82e3e3c",
+      "bytes": 886784
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Mathematics.pdb",
+      "sha256": "1f25e2fefc3e08f0f3ce7b074d913a93ca4f78b1e4bd2137dad2186db49d32d4",
+      "bytes": 516336
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Multiplayer.Center.Common.dll",
+      "sha256": "8c9b19aac8f6e8ee02c32307973ad92b2cd85a8efbe33fa0197e65dabe2eb799",
+      "bytes": 10752
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Multiplayer.Center.Common.pdb",
+      "sha256": "83149687b6eaed985e40cd5114cbce33ff65ac4fe68931ad04e53c48b5c71681",
+      "bytes": 18596
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipeline.Universal.ShaderLibrary.dll",
+      "sha256": "7148c15a72f7a7a8b77adfa1f24e0357274e7e7822fc1499dae85da1fb8aa31e",
+      "bytes": 9216
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipeline.Universal.ShaderLibrary.pdb",
+      "sha256": "7aab855964b290b7853b40166729e5581c141be636d5586123440c2c522143b1",
+      "bytes": 17344
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Core.Runtime.dll",
+      "sha256": "d69c8391a11b49eed19f85e1d09c9ef840687fa10193e59dbb0742670cf4e1eb",
+      "bytes": 1290752
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Core.Runtime.pdb",
+      "sha256": "0c87519e16084d256e21afd5d6167ea9ab3ffa3eca2811bbf2aba29bcad8bf1e",
+      "bytes": 480328
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Core.Runtime.Shared.dll",
+      "sha256": "0c781a09e3c55c21849150e43951572b2a88b3f72ff0c8b83e319ca14fda90a2",
+      "bytes": 5632
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Core.Runtime.Shared.pdb",
+      "sha256": "78274d6d3be1ad315d29d1c0e276cff3c0c02e2a7690d1d043221a288ae7e68d",
+      "bytes": 17108
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Core.ShaderLibrary.dll",
+      "sha256": "91b3638fdfca9de4a9f4e45a4e12d2e913611e417fe4fc4d98ad902e8a8e7804",
+      "bytes": 4608
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Core.ShaderLibrary.pdb",
+      "sha256": "5925b9a6906af4e05a60741ebbc004c4d31c77d84dcb2b93ad0326ba86b6b316",
+      "bytes": 16848
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.GPUDriven.Runtime.dll",
+      "sha256": "83438ce810287faca379756c637265011c7e2a134161784ebcc36571b1740816",
+      "bytes": 258560
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.GPUDriven.Runtime.pdb",
+      "sha256": "dc5834de987d641c0fe59419ee13bfade1fa5e21ab6d93a02cc0e6da773a640c",
+      "bytes": 130020
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll",
+      "sha256": "b3061fba0741927806cd35419855ac83547794881592819b6127e23b9f783af9",
+      "bytes": 4608
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.pdb",
+      "sha256": "85bb1dd77424d4de55a51e3060358331fa79936897d96d4de4985afa007edf5b",
+      "bytes": 16832
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Universal.2D.Runtime.dll",
+      "sha256": "c8118f8e6f1783523d9240d95154db56b893b56d1c58c0c990aa9c01d43022d0",
+      "bytes": 258560
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Universal.2D.Runtime.pdb",
+      "sha256": "991d78b1450cf272f04bd071c8f73ae15e2cc7746097095229a6183eb02ca119",
+      "bytes": 157508
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Universal.Config.Runtime.dll",
+      "sha256": "34f47431ed7fbae2c831029b3b3a93eb2329963ba68d4e9bc3cb513f48e2a4f2",
+      "bytes": 5632
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Universal.Config.Runtime.pdb",
+      "sha256": "1a88e165f674aa4f39790f80efc3c2c009d284251681a238336037088091c0ae",
+      "bytes": 17008
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Universal.Runtime.dll",
+      "sha256": "3cafaca0f48ad1df240de5a6f4944ddeee4750002326fd0ce58143f418178c6c",
+      "bytes": 799232
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Universal.Runtime.pdb",
+      "sha256": "786f9717e33991ebeed1329e413587cb67436775300c1b1990b811881cc913b0",
+      "bytes": 324548
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Universal.Shaders.dll",
+      "sha256": "7f063cfa4db5444a1494a1ed252d711eca1ee7dca1c3ac929c4d34dff598bbbb",
+      "bytes": 4608
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.RenderPipelines.Universal.Shaders.pdb",
+      "sha256": "c608f06e679f00352ed825181cda1e449c83f53480f48337300d6a711ba9eb46",
+      "bytes": 16840
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.TextMeshPro.dll",
+      "sha256": "e8a7cdd5f425e55735b1be52ab93333d9fca565d560392df99831430323e1777",
+      "bytes": 507392
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.TextMeshPro.pdb",
+      "sha256": "a62894f59fc3438835f03459b2f6e94d9e7b0f5e33c5f828bb93ff83da29b45d",
+      "bytes": 257500
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Timeline.dll",
+      "sha256": "e73993cf7b0d886c0be4de9f3d1cda666f4e54d922b3fd57467c63ca5bd9e73c",
+      "bytes": 147456
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.Timeline.pdb",
+      "sha256": "ff8ec14f03e7e984768d8cc3fb9bdb1bfc74b829209a9cb21927872a4f2c1844",
+      "bytes": 90596
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.UnifiedRayTracing.Runtime.dll",
+      "sha256": "7ee64607a824a4a4962e2f7f402091e149be77820d87893c8c13598d8d851945",
+      "bytes": 111104
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.UnifiedRayTracing.Runtime.pdb",
+      "sha256": "0a029a31c6507a43476c8e88f5f49f8768724a9efaad609bda7c7db1d7ed08d2",
+      "bytes": 60008
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.VisualScripting.Antlr3.Runtime.dll",
+      "sha256": "ed7ce205f66eafe39bbb5d084d42e7fe11cb4b386ff208e5d5110891be0b7b37",
+      "bytes": 86016
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.VisualScripting.Core.dll",
+      "sha256": "ca5622dfd3fe97377aa372003acee79ee6bcdfe4c7add21b1f67072ee44f4eb1",
+      "bytes": 673280
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.VisualScripting.Core.pdb",
+      "sha256": "aca9d0b6524e8db0902e337c0e61c050a739131b4c01a5e26d2b9b710591a505",
+      "bytes": 336696
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.VisualScripting.DocCodeExamples.dll",
+      "sha256": "d05ef8768be7682bf51d3076f599a68f1992ff376e17900cc92ba6c2a6d762e5",
+      "bytes": 7168
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.VisualScripting.DocCodeExamples.pdb",
+      "sha256": "afeb1eb5bbceef60fb06c7248600d1aee55463318a2912574b960bccb3c406c0",
+      "bytes": 17580
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.VisualScripting.Flow.dll",
+      "sha256": "feea23f1342acf2d122b3b942b89c676eadf28d23582fd3cf1081b083e218c07",
+      "bytes": 433152
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.VisualScripting.Flow.pdb",
+      "sha256": "aa2cb758af3a800eb8e7c31c281bcb5022ed786a4f3c8f0764042192a4e8e66b",
+      "bytes": 221568
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.VisualScripting.State.dll",
+      "sha256": "e1d449e7a2a56dba3ea946ba65aa6ce224a85cd365041a35830a52500e562197",
+      "bytes": 33792
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\Unity.VisualScripting.State.pdb",
+      "sha256": "c43b27486f06761d49bf03a4dc02b11ed9ef31ef545acfff7041af340580854c",
+      "bytes": 29944
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AccessibilityModule.dll",
+      "sha256": "ed91add45eaf3be0c7832aabc1eac18c1f5c132b7f157be6df950bd577d5a62d",
+      "bytes": 50088
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AccessibilityModule.pdb",
+      "sha256": "80718986c5bdf37fd193e47ec22716afbe8054bf01cc5a4ff36738263e8204e2",
+      "bytes": 22684
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AdaptivePerformanceModule.dll",
+      "sha256": "67923eda7a3bc06970eb3f1cd3202d923f8e3a73079ee26d5176692b46032651",
+      "bytes": 120240
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AdaptivePerformanceModule.pdb",
+      "sha256": "469aadb9821aab221b8cc150bca38779b8ebd9412e5cf607e05e033e431423ce",
+      "bytes": 50964
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AIModule.dll",
+      "sha256": "fa154e6f32e5dd47cbc3d94b8dd0d67736bdd216924c00833f2b3f0171faa4ef",
+      "bytes": 77224
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AIModule.pdb",
+      "sha256": "0a0e05604e8c445c66c30c3a3c34fde565e32853b58de38ebfe352cee1d8e50d",
+      "bytes": 20628
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AMDModule.dll",
+      "sha256": "e771307e9b00047e2398d3fb58dd6f1f810b016b52008155a5f9eeebc30d5ca6",
+      "bytes": 21928
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AMDModule.pdb",
+      "sha256": "3192cdd8d7ef35be9cd51191dd298d1f4df0cbb1cfe2153575fb4bdc15ffbe4d",
+      "bytes": 11996
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AndroidJNIModule.dll",
+      "sha256": "4ea73e5292141213011a9ef35be820dcc7d650cab443f1081ab880c0c7f78449",
+      "bytes": 121256
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AndroidJNIModule.pdb",
+      "sha256": "b4780bc4bef516bacf9865f947b8c33739dc9973aae359de665c8e8ae41f021b",
+      "bytes": 50196
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AnimationModule.dll",
+      "sha256": "90a876eaa9ae4af9b52bd726aca755d50971ebf0faa77f96eb211a2456e4385f",
+      "bytes": 225192
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AnimationModule.pdb",
+      "sha256": "dccfa031f81fefd464bbd83fd3212eda661a726ab4896a65e691e27b87cf1a8f",
+      "bytes": 60740
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ARModule.dll",
+      "sha256": "0556b9cdd72584e47e8deb2338d4a5cc97b21e55d5ed392ac70b1f5d272a83a1",
+      "bytes": 25512
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ARModule.pdb",
+      "sha256": "d6c7fb25a85f6b2307f4e9e644ce5556ce05b50e127f044217df928662a70eef",
+      "bytes": 9976
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AssetBundleModule.dll",
+      "sha256": "b2f4b168dbd3238a6c61502e4d99de78f50f221dc1bb52da5ea9c0f5cc298ae2",
+      "bytes": 41896
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AssetBundleModule.pdb",
+      "sha256": "c0754f64fd15d1c7bb4f59b9f2c5847c4468bafd552d029266b1f5cebc4f03e8",
+      "bytes": 14116
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AudioModule.dll",
+      "sha256": "64ece77b731f560f51a62e021ff71b6116a04c6ad30c1d8824d9ee2f51745575",
+      "bytes": 142248
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.AudioModule.pdb",
+      "sha256": "4b4c24a09bd475dd6497d3c35bba234716dc0813225118047bb382544998e6a6",
+      "bytes": 35052
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ClothModule.dll",
+      "sha256": "c6f745f03c543e1467050ce068cbe9da1db5e28cadedf3c8e8a11ff5413bf701",
+      "bytes": 36272
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ClothModule.pdb",
+      "sha256": "e59e94da61addcea4ca51d8e7223a378bc0c89eeab2c31642516ffd38f866690",
+      "bytes": 10560
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ClusterInputModule.dll",
+      "sha256": "0a3cc34f15839fb2d3eae4a42979d112389924d9dc64a0c2dfbb9b2dd8f72235",
+      "bytes": 27560
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ClusterInputModule.pdb",
+      "sha256": "86e8b065187a539b9dd811d42c970b61ed4d1246e5c20d0313dc1ab7fc895c6b",
+      "bytes": 9360
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ClusterRendererModule.dll",
+      "sha256": "0704f33f3f16c34fbb74a29cd85361f2a1972b0a1a4a578bad32ae6922ca0ec5",
+      "bytes": 26544
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ClusterRendererModule.pdb",
+      "sha256": "9e147938cd3d7bd9cf77b9f25fd2c8f2fa827ec4c063a9d49fb2c21a76e46f55",
+      "bytes": 9968
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ContentLoadModule.dll",
+      "sha256": "271dc2d84370bc3a1d75d485847f7a88ca37338be450e6e5a24585076e81fb45",
+      "bytes": 32168
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ContentLoadModule.pdb",
+      "sha256": "0bd680db1585862f186fe65dc79acebbb1d1f9285431f3ca2c864ccd70c456bd",
+      "bytes": 11140
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.CoreModule.dll",
+      "sha256": "397f712cedfb3fe75fac5a476a84043ac231b8fbd9eec7cb75941bdc0da4db7d",
+      "bytes": 1981360
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.CoreModule.pdb",
+      "sha256": "4a0e0d1d1cda0398da07e5dc6b131d991fe0f90bd0f7ee615c45263f0bf7db25",
+      "bytes": 572168
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.CrashReportingModule.dll",
+      "sha256": "41ac0029663e1f855e8c572bbd18a816fcc6b3b1ccdd2c987cc4af36cb578cd6",
+      "bytes": 26536
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.CrashReportingModule.pdb",
+      "sha256": "85e30803cc26bf782f523e406c8dd8ccc79b8a7c7563ad5c50c2ba6214220d21",
+      "bytes": 9972
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.DirectorModule.dll",
+      "sha256": "c5065683f20566b32313f2c8dc30ac6c4e0998f9cfc59bc27475621a17b6a0f5",
+      "bytes": 41384
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.DirectorModule.pdb",
+      "sha256": "411d855378b37b3d98859172ba494a2c26bc4cfa8342ea4e8dd31ee34866f494",
+      "bytes": 13888
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.dll",
+      "sha256": "74f610c588375c6fca6a556d91ba076416dcf10c192acc751d9a4e13fe244cc2",
+      "bytes": 196528
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.DSPGraphModule.dll",
+      "sha256": "f4ce3c98ebeaf366d5723ea351213fa5fb0f874eab17aeeced911d07fb377e7e",
+      "bytes": 31656
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.DSPGraphModule.pdb",
+      "sha256": "0e405d2f7faae7c7312474dba71f0db6037210b51cb86d90857e0fbf1d976f41",
+      "bytes": 9568
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.GameCenterModule.dll",
+      "sha256": "f288e5a9bb6c9a3626c96156d612ea211f6b58e37fab7686e7b7994dc0e15e54",
+      "bytes": 45488
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.GameCenterModule.pdb",
+      "sha256": "1aa32f55952ccda8a969fe8b448d2a64db7eb963dd200860225a53df48c692f3",
+      "bytes": 17452
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.GIModule.dll",
+      "sha256": "fa10ace4100139dd72cb13427755620c07cd369ccd80eff98c8a33f33db77405",
+      "bytes": 24488
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.GIModule.pdb",
+      "sha256": "2c5d171bdcb2b5fe2c4a723a350147a9b6e16dd94331e97f783ac0a73131d948",
+      "bytes": 9240
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.GraphicsStateCollectionSerializerModule.dll",
+      "sha256": "c319d01bddcb459210870f4c207be41651c73e539cd5b6a809e3f19ad7cc9b9d",
+      "bytes": 14256
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.GraphicsStateCollectionSerializerModule.pdb",
+      "sha256": "cbb129845e091e0a9ea1f8a8560853357485a4a84d036229981d3cc88d1d3126",
+      "bytes": 9268
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.GridModule.dll",
+      "sha256": "50d98920f4d06d9331a3ae1f529a8cfef97a7562d3c7d3b17abbe851cf212f37",
+      "bytes": 30128
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.GridModule.pdb",
+      "sha256": "c6a00dade80afbecfe4ef57ff3c6acdd94da36ddc1afb03103e72c751288ae17",
+      "bytes": 9996
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.HierarchyCoreModule.dll",
+      "sha256": "65ff0da572855945ad43c2ef4090ed0eb5c38f46c0e733d23cef4c43991e3c21",
+      "bytes": 109488
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.HierarchyCoreModule.pdb",
+      "sha256": "b5dca782ae839a49ff545ccec7a9dd15a4637707fe4557f25b76fddc4dbe0175",
+      "bytes": 36404
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.HierarchyModule.dll",
+      "sha256": "38697d6d777e126d5a6e5abba8f9b33dcd725c595e96b0734b16272e4cf6efa2",
+      "bytes": 102320
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.HierarchyModule.pdb",
+      "sha256": "a8d7895597eeba13c8c17c6da6ac61da1f2d999204198dd90b55a6e187d78c0c",
+      "bytes": 47624
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.HotReloadModule.dll",
+      "sha256": "b4629cf9ae38785fa5806e566c00c73127615a98f16565fb909cbe49ce2180b6",
+      "bytes": 24488
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.HotReloadModule.pdb",
+      "sha256": "8471d3860fa17c2a17be7aebc1e0ed42f737081dba3a44a7087c651c92ff87e6",
+      "bytes": 9240
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.IdentifiersModule.dll",
+      "sha256": "e66e3e13068a772cf1f4e8f2441df353d8234d0b067bd236963d0320cde6f94d",
+      "bytes": 14768
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.IdentifiersModule.pdb",
+      "sha256": "077f626b309e905eadb72d787461c4351cb111e8c82c2e5585fb29a3dee00601",
+      "bytes": 9504
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ImageConversionModule.dll",
+      "sha256": "de28149e20e5ef52f30599fa405026d2dc0017a533827ffb88afb1cfbfa4ea13",
+      "bytes": 31144
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ImageConversionModule.pdb",
+      "sha256": "f747f2437851bd318add0040207f5ac9149e80af7e91c7b549cc081d3277fce6",
+      "bytes": 10580
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.IMGUIModule.dll",
+      "sha256": "442f5eaefd63e15d4ee3a81970259300222f134497cfb8dafad14bb26cb2f7a7",
+      "bytes": 192432
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.IMGUIModule.pdb",
+      "sha256": "857d765e84e1d8cbee1f99947f06d1d2a7c8e119e58d65f873dea6ada5e8973e",
+      "bytes": 78316
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.InputForUIModule.dll",
+      "sha256": "5f385f4a784c31dad150918141af7e90fe3b2cdcdc20268533c01f131bf26f1f",
+      "bytes": 57768
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.InputForUIModule.pdb",
+      "sha256": "5073b5f1c52af52d11e7301b09be3df5eb84a029c338c4136594ccb256800f30",
+      "bytes": 26072
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.InputLegacyModule.dll",
+      "sha256": "d58bf233c9091fd532428c642fb946e402c0ee67e479eef519cd3524d200227e",
+      "bytes": 45480
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.InputLegacyModule.pdb",
+      "sha256": "34d8ec5f1432d49983bdf246da203a2b750ed498c77b8af1f658626345389b59",
+      "bytes": 15348
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.InputModule.dll",
+      "sha256": "b8df3827b1cc1157f353aeefdf5ba47c37b05de9c6dc3f6064e01862478475c2",
+      "bytes": 28080
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.InputModule.pdb",
+      "sha256": "5f22ddf6f81d32b5645bdf5c5eb43d3083241e71693aa1f080a47f5ee1d6baf3",
+      "bytes": 10612
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.InsightsModule.dll",
+      "sha256": "eb58601550862ab580ee1d1dab04ba13b44666f8a45df21f4d207fd65a072922",
+      "bytes": 14248
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.InsightsModule.pdb",
+      "sha256": "9891890ca8508d3492a3c9481d3317627a98fabcaff11a8f4ab9549d509df3bb",
+      "bytes": 9564
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.JSONSerializeModule.dll",
+      "sha256": "2a90967f36100a76e9052114cc661952e150256f2af0d1d858ce6abada83a048",
+      "bytes": 27048
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.JSONSerializeModule.pdb",
+      "sha256": "79744f8d16f01b08892bcf70da8fcbc2e78b7da629d9ead4efc3bee30e35a628",
+      "bytes": 9864
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.LocalizationModule.dll",
+      "sha256": "99d51692f5cfee611f17266269963c006132da8236c58a49865647c6158e0b45",
+      "bytes": 26544
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.LocalizationModule.pdb",
+      "sha256": "f4d5bcbeb24ee07dd6244d8e0d4edf153062b2e05ae40e5cc5793413aaa4e94c",
+      "bytes": 9660
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.MarshallingModule.dll",
+      "sha256": "31b692202ef8b937c0f8790e31a0177e6a6312813f71fd513edb7e95ef478c3d",
+      "bytes": 83376
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.MarshallingModule.pdb",
+      "sha256": "a7b73e2a84bfae7227b2f3bf29d372c25cd942eb320ecaed3089cab61e556025",
+      "bytes": 14252
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.MultiplayerModule.dll",
+      "sha256": "f0138f3f30fba3f9e0f18e5a04b68c796a2a92faa105eb1877f608ccdd2547e1",
+      "bytes": 18344
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.MultiplayerModule.pdb",
+      "sha256": "cd693a1b45ae84f520b5b9b1f9e490d9c1679d591b900176466ec90fbbd664e7",
+      "bytes": 10360
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.NVIDIAModule.dll",
+      "sha256": "7a7b3c2efc9ad04fbb7be6370e8d4b186eed20e5a2913d99e04a74fbad5c95ad",
+      "bytes": 40360
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.NVIDIAModule.pdb",
+      "sha256": "2c98508b02886067b31a3baf6b6f28849c5d287697481925ac47d9ebcb02ad17",
+      "bytes": 16196
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ParticleSystemModule.dll",
+      "sha256": "4ed5ca99e014d960d91f940545aeb4999dc845d89a1d9f9afdfb41b71353ef79",
+      "bytes": 171440
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ParticleSystemModule.pdb",
+      "sha256": "a1b186ab040586037b1984dda741c682aba1742ca85b4c7637e2d7b641dbaf20",
+      "bytes": 40428
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.pdb",
+      "sha256": "fe0d10ec73308ff9491bc867bb758687e5647686f2753bace3b974cdb567871f",
+      "bytes": 12676
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.PerformanceReportingModule.dll",
+      "sha256": "5d14c1e837ca29ce63a1d1ab71642b15675c5a3fb9a09a6dc24125c82643f746",
+      "bytes": 25000
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.PerformanceReportingModule.pdb",
+      "sha256": "8aaac1c08fc59b12d6e515d0917b3464216e5baf0e9c40cb82a839c93ce0053c",
+      "bytes": 9448
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.Physics2DModule.dll",
+      "sha256": "80d63f114233639ea9a2d3be9c17fabef0411201cc3a3b02d962675a4d26d172",
+      "bytes": 572848
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.Physics2DModule.pdb",
+      "sha256": "377f8424d2a9e1ab54a3c906c34e3c09c348288b0123b86743b195aced1ab826",
+      "bytes": 132160
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.PhysicsBackendPhysXModule.dll",
+      "sha256": "7ffd721f10c270cadb778ee19082f2954f10e631914677c65d54ff4adce9bfe9",
+      "bytes": 14248
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.PhysicsBackendPhysXModule.pdb",
+      "sha256": "2c51e02e0f5394e33286d958df9bb36ac53c459dbc3c532890ac4ea622b03ca9",
+      "bytes": 9260
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.PhysicsModule.dll",
+      "sha256": "c90ac913badde75bfcfa5df1e2edde04037c8a827ebb1cbc18ba491e4573b389",
+      "bytes": 181672
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.PhysicsModule.pdb",
+      "sha256": "5352764229f568992e2740359114d57a12887f4ce5f42d07a9c0a6c6840ade23",
+      "bytes": 45500
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.PropertiesModule.dll",
+      "sha256": "efa7524d5156ad64034ac986dd759c40bed2cf01ae3d2980687ba39bd33dfff2",
+      "bytes": 149424
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.PropertiesModule.pdb",
+      "sha256": "10dcdcc8b95f729031276ee77bb7cdc342dcd9c300b14bd85631a89ce95fb702",
+      "bytes": 59004
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.RenderAs2DModule.dll",
+      "sha256": "3d9f9bc47042f8da7bcc67c4e3aed5183a54269fdedb070609b529398e977ffb",
+      "bytes": 25520
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.RenderAs2DModule.pdb",
+      "sha256": "1becd8c6b71f6fada752b8520948480a55610cfd8bbf63556168eb75b89b1ea3",
+      "bytes": 9288
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll",
+      "sha256": "74d0bd01c4f18113c7cd0f7900b4f3779b7a43dcd8d0084877fdbfae46a77992",
+      "bytes": 24488
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.pdb",
+      "sha256": "47d17401138f513dad1e92c57562636fc456855d86ac74a5591cf593ac12d709",
+      "bytes": 9304
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ScreenCaptureModule.dll",
+      "sha256": "623b579104e94d868730c8fe08e10c28b45e61c7524d81f469adb06d61dfbdc8",
+      "bytes": 26032
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ScreenCaptureModule.pdb",
+      "sha256": "b713e7d59992ed1b5e1a86975a7349e06f2da87dbe0db210d4ade7d0f9689ff6",
+      "bytes": 9844
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ShaderRuntimeModule.dll",
+      "sha256": "2fbd733561a7a8e42625fc9bcffa52e23886ddb478a550ac102a289ae3d1b4e2",
+      "bytes": 25520
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ShaderRuntimeModule.pdb",
+      "sha256": "a66b53a121b3ad85ef461e2c0b7b96c8bd0e7fa9c738eec5247841715e80ed7a",
+      "bytes": 9280
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ShaderVariantAnalyticsModule.dll",
+      "sha256": "334ddf42d7aadc215cd5d318d4d17fda6775d77fe8f4b0c8f9853e6caddf8d56",
+      "bytes": 24496
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.ShaderVariantAnalyticsModule.pdb",
+      "sha256": "19308eccec535acea9d67191ed6daaf63242446718cb10d674f8bbdfb6162a7a",
+      "bytes": 9364
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.SharedInternalsModule.dll",
+      "sha256": "11b75777b89cd0e8c00c4abe6810abf3758cc99a60924d501655b8535005b7e4",
+      "bytes": 37800
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.SharedInternalsModule.pdb",
+      "sha256": "015ef2ae3758fcb267fbca33a7ff1955406a539da57bc8ce21faea510cad5fc7",
+      "bytes": 14252
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.SpriteMaskModule.dll",
+      "sha256": "985b38accc0bb76bf3334a04f87ba97fdcc6001ad8bad60e14e85eb7b3dc85cb",
+      "bytes": 28592
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.SpriteMaskModule.pdb",
+      "sha256": "0f2bb28f8639106202e6eebaa39d8c1490303d57a88140604ff14de4ca068843",
+      "bytes": 9572
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.SpriteShapeModule.dll",
+      "sha256": "2371c4863c1b07f434fe730df14feb53dac564ecd2e51edcfbe77dea625abb87",
+      "bytes": 31656
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.SpriteShapeModule.pdb",
+      "sha256": "4ef9af6cd8ae10e22258ddf2d041e7f6afb042c5b4e41e443e80a393f97e2a61",
+      "bytes": 10800
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.StreamingModule.dll",
+      "sha256": "cd177e3662d7bc48c69dcb10de752bb53befedea95a4ed263a206f994dee7af8",
+      "bytes": 25512
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.StreamingModule.pdb",
+      "sha256": "7bbd8b06a89a3c41d6e54ffa3879766e77cfef629d18c83521fc4f5418d9184a",
+      "bytes": 9316
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.SubstanceModule.dll",
+      "sha256": "fc1dd4697bbb7d6008445dbb5cd004ba1dff6e82388964d18e7b9fcf0be0da48",
+      "bytes": 29096
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.SubstanceModule.pdb",
+      "sha256": "96bd400fb4c218ac6df4fcde638bf31333ea30bc3b70aeac66e49c3b780968e0",
+      "bytes": 11444
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.SubsystemsModule.dll",
+      "sha256": "8fba94ffdb199a62693f10df0049baa9c6212dda22c331ef5c3a038bcf9fdc8a",
+      "bytes": 41904
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.SubsystemsModule.pdb",
+      "sha256": "033d0435ccf1e3c569aaf0f6daa475fa384ef7a3556ebcb38cef24310f68af30",
+      "bytes": 15984
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TerrainModule.dll",
+      "sha256": "6cd71a3eb61b07ab3a54eda79bc66ea08b48835485404e7d5bad52d5f41619cc",
+      "bytes": 133032
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TerrainModule.pdb",
+      "sha256": "6f936e01b8bfc2e41d62d14148026f8a534ccc07ddfe675af200ffdd9f47d0b1",
+      "bytes": 33936
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TerrainPhysicsModule.dll",
+      "sha256": "d5c289a753c2b82b121acc5246c0f97416d7870dc2f4a2aa71d45224daf39423",
+      "bytes": 25520
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TerrainPhysicsModule.pdb",
+      "sha256": "0dde26bbdba80b33072e5447be52500ed1d61eb4dbe296fc063f6f9cc30efdd1",
+      "bytes": 9704
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TextCoreFontEngineModule.dll",
+      "sha256": "8c8a46ed5a1771a74282bcafdc4855187f376b99168b48f160b4a94c92175efb",
+      "bytes": 81840
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TextCoreFontEngineModule.pdb",
+      "sha256": "d5641def0b34202957c1b9bb3198f343048d1ece94775aa990b5ae6fc3422353",
+      "bytes": 29276
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TextCoreTextEngineModule.dll",
+      "sha256": "625ad3aefd3e25f1767e31763b68d9d399e667557a6c51a261252b6fa39e49ee",
+      "bytes": 345520
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TextCoreTextEngineModule.pdb",
+      "sha256": "aa14549f62ba7d599f352bf9bd5f24114617483bab4b3c0d620722328343f2a9",
+      "bytes": 159608
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TextRenderingModule.dll",
+      "sha256": "5f5516661599b7631ed6dd3cdd46180e62122f1a62ac9fbc8e787267de7e8d52",
+      "bytes": 39344
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TextRenderingModule.pdb",
+      "sha256": "2f8913098db5fd62d64b82f2a73eab2fcd0cced26a828bf0ece8ecb67fd0ebfa",
+      "bytes": 15344
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TilemapModule.dll",
+      "sha256": "2e69957477762d935c0e0c09e45378fc88129f3eedf66a38a5b3d0a60914b6c1",
+      "bytes": 57768
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TilemapModule.pdb",
+      "sha256": "aede7160841ed06c0041459759167de2b1e9662e562434eedda8176b6de8e747",
+      "bytes": 18976
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TLSModule.dll",
+      "sha256": "a0285bfaf120c2b1dc445e7751ea2826d905eded45e75c6df237b22479c335e5",
+      "bytes": 31144
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.TLSModule.pdb",
+      "sha256": "7076226fe03f66b39672126d3a3dfbff70ad7fc94135b842685164a1cfa29b0b",
+      "bytes": 9260
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UI.dll",
+      "sha256": "13b876849fb3921b8555b0002d27ca626ca3cf3f5b3f33476847424c422a213b",
+      "bytes": 309248
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UI.pdb",
+      "sha256": "9f7da4362f2f7b780524e568e713c33c2e3e034cbd671496cfd22b495fbf054c",
+      "bytes": 187984
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UIElementsModule.dll",
+      "sha256": "38b7dbde27a2b55c807906a50ce70741bbfbb906f42359315bfe5452375f2e2f",
+      "bytes": 2417584
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UIElementsModule.pdb",
+      "sha256": "b58ab0a449893b20339edd77e05253556cd2e66f68838ca669e1d963eb1a6b1a",
+      "bytes": 1086920
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UIModule.dll",
+      "sha256": "d07d033ebefb610469a65270662b850cd98246c16da28cdfca641b9dc8d92dfd",
+      "bytes": 49576
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UIModule.pdb",
+      "sha256": "242a1e4062fd78d0edfc8ec542cbee0bb2d2016a3ae339e2c852a55217140131",
+      "bytes": 13832
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UmbraModule.dll",
+      "sha256": "76b779b9324753a3c508b86d1093eb31d3353727b10c3a336c85d71f1507b091",
+      "bytes": 24488
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UmbraModule.pdb",
+      "sha256": "87763a5a53fa03b3c9b7665b0f6dc006cb01f905679f7e087c745e2efe3ccd04",
+      "bytes": 9240
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityAnalyticsCommonModule.dll",
+      "sha256": "c775c3edf4172a17dd0d02edf7cda04cf6193192db3937219389b3d2e801adb3",
+      "bytes": 35752
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityAnalyticsCommonModule.pdb",
+      "sha256": "da9ded957b6f14a78ae404451d172c6671a62700c15e8295e267aa55d8c99926",
+      "bytes": 13720
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityAnalyticsModule.dll",
+      "sha256": "de9a9b29362ce7fbad330be11104ea8560dedd594511d2190283f294ec63dc8e",
+      "bytes": 60848
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityAnalyticsModule.pdb",
+      "sha256": "d214b4a893a76b10a5d35c14aa7706c2c1cfa7e87485c0152dcacc9e602cd1de",
+      "bytes": 17964
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityConnectModule.dll",
+      "sha256": "2113137ff7f76511391e6be5c3665858e066df3ff3b89cc7c561a83e0252f42d",
+      "bytes": 27568
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityConnectModule.pdb",
+      "sha256": "b39293139aa72972cae5cd3316ee79b8a54603a37d2b6affb47533cf82f5a6de",
+      "bytes": 9836
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityConsentModule.dll",
+      "sha256": "c19b60adefd274fedcb85fcefdba9c7ae43f316d090b8ca59de494d896d872d5",
+      "bytes": 16304
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityConsentModule.pdb",
+      "sha256": "a4f62ab1bb042f0216eb0db4dd28c00e6ebde61bedf2a74bc35d4cd545868c41",
+      "bytes": 9868
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityCurlModule.dll",
+      "sha256": "18f0fe14612b0b5b050ab5f147e049d227f1595fc46477b7616d342ec33bbabe",
+      "bytes": 26024
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityCurlModule.pdb",
+      "sha256": "0c5e4868b9751b3ab86e7265b316a04be79fff4b9aa02dc8fcdb39904cc777d6",
+      "bytes": 9632
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityWebRequestAssetBundleModule.dll",
+      "sha256": "74eadbc80d71284dc03892fc8ba01ad5d0eb49a7fb19a9de719237da7d31cad3",
+      "bytes": 28584
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityWebRequestAssetBundleModule.pdb",
+      "sha256": "ea14338e9494dca90e9865b6260779094f5c29850f7847a8b84988740cddbd02",
+      "bytes": 10812
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityWebRequestAudioModule.dll",
+      "sha256": "902bd1c29e99a000f34237ea1e6c812bb5a8ed436d09a6640d4cc6037373b98e",
+      "bytes": 28072
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityWebRequestAudioModule.pdb",
+      "sha256": "1481ba2ed8aae6725fe7ce0ef836cd9dff33cb8bca4836e78840f7fec447ab1f",
+      "bytes": 10616
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityWebRequestModule.dll",
+      "sha256": "2f4a6bfb1588b094cc84e7c02959656f1fa2efe79b9edd02b0361526da4aae93",
+      "bytes": 69040
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityWebRequestModule.pdb",
+      "sha256": "01e29c5d55972c5c685c4f96de1e631af9765f9853320622e4aa74a4dc77fa94",
+      "bytes": 28308
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityWebRequestTextureModule.dll",
+      "sha256": "ba5d5f44fde253d77a52ed70c2705ffc567c0a53785763cb3863450131e97600",
+      "bytes": 27560
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityWebRequestTextureModule.pdb",
+      "sha256": "426177c2463bf6d71c666fd9388843ddf6247923fb6b3740a096936750a9222b",
+      "bytes": 10780
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityWebRequestWWWModule.dll",
+      "sha256": "2d1a5d00d2b5328f0bb1466473943bc9cb4cbd5bf803f085f8b6a49ad18c6be5",
+      "bytes": 36272
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.UnityWebRequestWWWModule.pdb",
+      "sha256": "92f7b83285f1123f9fae30567cf9fefef4b727e7c99f25dc3f4db6ffc4b09649",
+      "bytes": 13684
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VectorGraphicsModule.dll",
+      "sha256": "184ff840331046dd3895f0ea9f7900b8dc88241c65a585eb57339edb0808926f",
+      "bytes": 252336
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VectorGraphicsModule.pdb",
+      "sha256": "2eed14627c5d1332d84e902bc3e24fe8afd5647b287078cf7ca101a25bd220b8",
+      "bytes": 142692
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VehiclesModule.dll",
+      "sha256": "99f0a12bf195c6f594102516ddc7b02b383b5d0337b1a1e7c6d9cce6b68af2ae",
+      "bytes": 31152
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VehiclesModule.pdb",
+      "sha256": "d20c8522754a36c7d8e0496086a6b7e6a30f811b8bc4a921cfd90330f4bc2677",
+      "bytes": 10484
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VFXModule.dll",
+      "sha256": "2c097d70b4eab1968d709f0dcaec45cc68dd7ad72d9d15e30cc85ebdfea61445",
+      "bytes": 78248
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VFXModule.pdb",
+      "sha256": "cfe5b0b149f5c8a329d29873709055b9577dff852084a19782c0f51afa202917",
+      "bytes": 18748
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VideoModule.dll",
+      "sha256": "f992da7e5a2aaa0ca038f22451b35a648c40aa2c09c1812c796f834418429361",
+      "bytes": 49064
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VideoModule.pdb",
+      "sha256": "24b00da07221ba0fc6f2d3d197b87d69cd01685164ac78a3472363abf4d32763",
+      "bytes": 14128
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VirtualTexturingModule.dll",
+      "sha256": "5c9df40e8d5ac76e5e08148dc2ed2f1ce40caa37d36bf257f86605f8c180beef",
+      "bytes": 42920
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VirtualTexturingModule.pdb",
+      "sha256": "fb86218345b4e440ac5bd7e9f5abb423d1efaea2f34edd18e5099bbc3f4058bd",
+      "bytes": 13488
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VRModule.dll",
+      "sha256": "c2ff9801b6988c42da539acb33c25c71276406fccc8df728399d0be69f049b59",
+      "bytes": 31656
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.VRModule.pdb",
+      "sha256": "433744db99c3540f0f31930a1e9ad9b34a99800c9efef4f6b0ceb22fc43a1d37",
+      "bytes": 10368
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.WindModule.dll",
+      "sha256": "52145100bdeb9565ca60d1323bd31f61e7508b99ffb0526e3941edf1ec25bc0a",
+      "bytes": 26536
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.WindModule.pdb",
+      "sha256": "0706067644f6a8917e0806647d74f1d22acc51a9c9dcbd5baad3b2a57950866e",
+      "bytes": 9376
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.XRModule.dll",
+      "sha256": "9f90bb4ae7f1b1d4ee5a57fe72b5f7ed3a6fa96ee8c226d2095f104288fee077",
+      "bytes": 87976
+    },
+    {
+      "path": "Dungeon Lord_Data\\Managed\\UnityEngine.XRModule.pdb",
+      "sha256": "c621a565a42ac6696dcb77db9c3b33c2d4104f2f656591d963c677fb784df22e",
+      "bytes": 24256
+    },
+    {
+      "path": "Dungeon Lord_Data\\Plugins\\x86_64\\lib_burst_generated.dll",
+      "sha256": "a28ee54b10048d70caee81fc9cfb47a5758baaaf67bb9ebd8bbdee6b7d78ac6f",
+      "bytes": 693248
+    },
+    {
+      "path": "Dungeon Lord_Data\\Plugins\\x86_64\\lib_burst_generated.pdb",
+      "sha256": "28ad734d4139a1be9b783e4774d158f53b8c9cec9b1bcb746a07c2629e016f1d",
+      "bytes": 4161536
+    },
+    {
+      "path": "Dungeon Lord_Data\\Resources\\unity default resources",
+      "sha256": "776d63d5d172cc1903a8086214e540819ca487b790d81f85607755211d604948",
+      "bytes": 5883780
+    },
+    {
+      "path": "Dungeon Lord_Data\\Resources\\unity_builtin_extra",
+      "sha256": "0d568406ee809d28cf096a203f78bbac3d108d50e8d831b7e31f5851eed2dee8",
+      "bytes": 401148
+    },
+    {
+      "path": "Dungeon Lord_Data\\resources.assets",
+      "sha256": "7d7c3a7cbaa73f2ab22a705391253b1d0efa57f923e3b33c7be85b13e5b583fd",
+      "bytes": 370120
+    },
+    {
+      "path": "Dungeon Lord_Data\\resources.assets.resS",
+      "sha256": "164e7fbe39a196c082676775029119270b43a920710b1a3d3d7fe60a7af73421",
+      "bytes": 356784
+    },
+    {
+      "path": "Dungeon Lord_Data\\RuntimeInitializeOnLoads.json",
+      "sha256": "420bb379597076ea1bb825617166ab5b1ad4da571d4bd64aa0fef02b7d808107",
+      "bytes": 3401
+    },
+    {
+      "path": "Dungeon Lord_Data\\ScriptingAssemblies.json",
+      "sha256": "2826dd565997e27e3a14f4ad9c335a617573927b3bba74fe2155818f9a61ac84",
+      "bytes": 4577
+    },
+    {
+      "path": "Dungeon Lord_Data\\sharedassets0.assets",
+      "sha256": "bcbc82e384593df3a8d623468b3c53f0304353f50047fddb1d093e2bb7fd75d9",
+      "bytes": 10966088
+    },
+    {
+      "path": "Dungeon Lord_Data\\sharedassets0.assets.resS",
+      "sha256": "83e1429eb68dcea8e3a6225a4b5842eff27cd02e6886c410ea385acb9f64c7de",
+      "bytes": 1716240
+    },
+    {
+      "path": "MonoBleedingEdge\\EmbedRuntime\\mono-2.0-bdwgc.dll",
+      "sha256": "aaa3c777075b85dbb9f07d3779c93bbd48171635551e0e9e50336a830edade55",
+      "bytes": 7828904
+    },
+    {
+      "path": "MonoBleedingEdge\\EmbedRuntime\\MonoPosixHelper.dll",
+      "sha256": "d6a2fd1619b67e5631b78c72369849516d674fda4074adcd736fcfbb32b6623d",
+      "bytes": 611240
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\2.0\\Browsers\\Compat.browser",
+      "sha256": "8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741",
+      "bytes": 1605
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\2.0\\DefaultWsdlHelpGenerator.aspx",
+      "sha256": "751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a",
+      "bytes": 60575
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\2.0\\machine.config",
+      "sha256": "e91782a27fa39fc6c1d6ee8b08529f5d35052310d0006034b878eb04b8f2af30",
+      "bytes": 29066
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\2.0\\settings.map",
+      "sha256": "49c6160f9d54af4270a3b4e997fc4a8301f79b9e2070118fa46ddbcbbc44f9a2",
+      "bytes": 2622
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\2.0\\web.config",
+      "sha256": "cf2b54339e069b9e42f7d6795eecbf562c50c1011f4ca8f65f578fe52d97ff92",
+      "bytes": 11635
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\4.0\\Browsers\\Compat.browser",
+      "sha256": "8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741",
+      "bytes": 1605
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\4.0\\DefaultWsdlHelpGenerator.aspx",
+      "sha256": "751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a",
+      "bytes": 60575
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\4.0\\machine.config",
+      "sha256": "e60aec2c5115d65b3acb3c55ea21576dbd770f579166c017125571e46ae560ed",
+      "bytes": 33598
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\4.0\\settings.map",
+      "sha256": "ce1db1ad8a9512073164e3eccdc193f7eda036e1a9733caec4635de21b2865c8",
+      "bytes": 2622
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\4.0\\web.config",
+      "sha256": "e38bb8cc68fe5b4edecdfd288d094b9e8ced7629039b2a347682aba0d8bd7492",
+      "bytes": 18802
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\4.5\\Browsers\\Compat.browser",
+      "sha256": "8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741",
+      "bytes": 1605
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\4.5\\DefaultWsdlHelpGenerator.aspx",
+      "sha256": "751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a",
+      "bytes": 60575
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\4.5\\machine.config",
+      "sha256": "ee950004b576fb28dc85f4b0435ed04bf96612de2e8b53be84d07afe85a0de6c",
+      "bytes": 34056
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\4.5\\settings.map",
+      "sha256": "ce1db1ad8a9512073164e3eccdc193f7eda036e1a9733caec4635de21b2865c8",
+      "bytes": 2622
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\4.5\\web.config",
+      "sha256": "c4cbddd4fd9347b58cc5a72b36dc4ba1ad2bb699e65869d05cd3fb9865f0d824",
+      "bytes": 18811
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\browscap.ini",
+      "sha256": "4ddd50f31fb968f30bedefc253a46dc3f2890192d05cdaa9e0a64a056eee807e",
+      "bytes": 311984
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\config",
+      "sha256": "5776169973a26a387b8b3e5c0f2301a7ab9a6dd7c7d3efa22a96abc47fbf8662",
+      "bytes": 3815
+    },
+    {
+      "path": "MonoBleedingEdge\\etc\\mono\\mconfig\\config.xml",
+      "sha256": "0c56e34c69124510fa8c19e7b4c2ca6c1c4ff460ae19f798dd0ca035809e396d",
+      "bytes": 25817
+    },
+    {
+      "path": "packed-dungeon-art.txt",
+      "sha256": "145bb1243a8e99006d01bd5939c2c4b7a0533df394a2eecb25c7533a2355284a",
+      "bytes": 3063
+    },
+    {
+      "path": "packed-source-assets.txt",
+      "sha256": "a8beb77fc64bc880c8d2f4f5858d693cc2948e90d745c8a3fd2b508600f1bf6a",
+      "bytes": 229112
+    },
+    {
+      "path": "UnityCrashHandler64.exe",
+      "sha256": "8694a5b053ee6f5e093b1bbed806aa7f4375f58696f0046db4b9a1b85be64d0f",
+      "bytes": 1674664
+    },
+    {
+      "path": "UnityPlayer.dll",
+      "sha256": "0b3ca5a98c9d9424ff7d3b311d50c5a2afb1282ad5d095e5535f29aed6b00874",
+      "bytes": 83434928
+    },
+    {
+      "path": "WinPixEventRuntime.dll",
+      "sha256": "81adcfd8253c3489be720da7e30f16004dc9a1f02a8b418c6c3aef4993032e6d",
+      "bytes": 58368
+    }
+  ],
+  "unchanged_core_and_configuration": [
+    {
+      "path": "Assets/_Project/Data/Bootstrap.meta",
+      "sha256": "fe461c5e9a7b09327490ab62e4ab7319e49f9bc700868c33f8a2d181699a115c"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/build_config.json",
+      "sha256": "edf2b29d6ffa3f3cecfd03d1607acd4370742719d316cf2889e43c3e5ac26828"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/build_config.json.meta",
+      "sha256": "6ec62fa702643104bb302ae2066ee6f9d560e08d69071014df72a8c34f5e02a9"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/content_bootstrap.json",
+      "sha256": "8a90c78da4e0941f4da7e02292de7df0e8cd53bc84ac3ab2c78d3014d9500b8f"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/content_bootstrap.json.meta",
+      "sha256": "aa51b33c9e7ddf807fbafd67eb0c34e9dca6f15c7575cb02ebcb1c215668bb0d"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/content_manifest.json",
+      "sha256": "757dc615bb2d9a418ba947536617aba629e5efcdbd5589d1ad771fedc79af4d3"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/content_manifest.json.meta",
+      "sha256": "fc60169d45ac36c460a7fa5a13dfc4cdfa83631540fdda43318813acf9425809"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/dev_commands.json",
+      "sha256": "bf1ce67cf81637fc09060d4d4ed575a848654cfe796d357ccf518ce372e1ff86"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/dev_commands.json.meta",
+      "sha256": "423b2ca28817fd4ada8750315b9710bf4adeb807fdf745a22b435ff321140cf9"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/heat_runtime.json",
+      "sha256": "94d5ce5af73bcb7cddc0e0f9a54bcc4de5f221b558b6562a1c6443ec423e04a9"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/heat_runtime.json.meta",
+      "sha256": "7a89d89ecd86ed1b74cd07eed6f8e5f9ce104deb9c30a7d48883773df324bb54"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/loot_config.json",
+      "sha256": "f0efb530aa6673c7cd12d2b2d5cbf87b4b93a49f77af6fd2af30e761d6ba327a"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/loot_config.json.meta",
+      "sha256": "2103fc7573dfc351fd0226d8b749451443c4760a5ce01dc8bee0eaccbf4262a2"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/run_simulation_config.json",
+      "sha256": "f07657572530df1955ae904c66a76feeb71ca7ae8a6e8382c25bb8b7a1cf4e16"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/run_simulation_config.json.meta",
+      "sha256": "ceffc6d1aaa741ce36917bec928aad83f9131401cdfc14169fe49b006c6e474b"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/schema_versions.json",
+      "sha256": "175ed4122c34284cea980fcde266eb4cc6d62454f810520e8fba6fb38d6e538a"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/schema_versions.json.meta",
+      "sha256": "1c68bcffb2ab2ce40f52514f4d9745d144ef2ab6385ea2360e2e8dd0b6ae3971"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/string_table_en.json",
+      "sha256": "4777dcceace43848cc843bb180bba8fe5857d8dfdae206b164345ff080ba90c6"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/string_table_en.json.meta",
+      "sha256": "fb141f6a05d73ae06c7e75ea78eb87a5a7b03d162a6685aca591caabdf9c3f97"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/structure_simulation_config.json",
+      "sha256": "21c3a64cdc9a9658711d1c3fea2dd609294c0cfceafdcbd83f20f96de10f7a45"
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/structure_simulation_config.json.meta",
+      "sha256": "e7ce3c2e29ab2c987d453be44911ebdf71e15b53335ea55c98aa3ec98a0a2e0d"
+    },
+    {
+      "path": "Assets/_Project/Data/Localization.meta",
+      "sha256": "d9e41bcca9b19c5c538ad2b0baa0c41ae79fea0fe7a1db578d226892b438c4df"
+    },
+    {
+      "path": "Assets/_Project/Data/Production.meta",
+      "sha256": "20ce710e930945338e97784fe5587b3c13ab91e61d964c6fd8aefd4ff75025df"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial.meta",
+      "sha256": "76a8bdc078b872bad490a736f22e21434fab59a122830790a6d5501d7e9ee52a"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json",
+      "sha256": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json.meta",
+      "sha256": "d9899a84f8538eb6e4bb4c5606161a8d069949db56c47af4d1d86823814fcfea"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json",
+      "sha256": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json.meta",
+      "sha256": "9ec0d7deddd32c996566976058ccd797bf4b7e58c6a7fbcbe5ce94e1a3ded3ef"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json",
+      "sha256": "8248d3037e24bd50f5a2df1f64292e6fa4f857949e5f4fcb37091a478f55443a"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json.meta",
+      "sha256": "46759c1e3bb98fe3f2159a705e0af50f67d3c85ebdf12f57ed38a4ab7f1d4c4e"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json",
+      "sha256": "37ece030181bb51ff887a75aa41a2293bdece9eed8d292ef6ec40e48beef3262"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json.meta",
+      "sha256": "55fb1be105353032dc5afe2add138ad4786d09de5cba4299e9367dd9d8e1ff8c"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json",
+      "sha256": "9d279717c15b9a1397d86261b8fd95df835cb2688ffa35b20e3c5d2773fa47c1"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json.meta",
+      "sha256": "c4887999253e0ca105bcf813c24a902176daf6564c241ae75d666703c65b0846"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research.meta",
+      "sha256": "82a3dbbf1af33291fd0299f73240f4456668462bcb16d6a48ca83879b6b2cf4c"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle.meta",
+      "sha256": "cec1450b2808a3b7ff0017e08fe6b3ab0b07559317e1a1829331c3707cab948a"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/README.txt",
+      "sha256": "c5aa6a754c61b9dbf418c0835b4d0f1fa0b68e3b222d87d9105ff3b0a315119e"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/README.txt.meta",
+      "sha256": "a62c406495e6fa6aaf06a37a96a3c26cbd0b813323ff90cf761521e37196f758"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/all_research_nodes.json",
+      "sha256": "56232db70606b0ec9ad358112fd9ec69cd8c4ba9a0277e19cd76e77542124291"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/all_research_nodes.json.meta",
+      "sha256": "fa5cbfde1861f3b492f89f7f2398f8e26a9e77334f9da5207de9dd5a4e8c9f6d"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology.meta",
+      "sha256": "483f2d6590bd76cf60a8e61f2e801223576aaf0842832dc3b071d0644c791d2a"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/cost_profiles.json",
+      "sha256": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/cost_profiles.json.meta",
+      "sha256": "033bd051cf9a6613f3fe91b3bc80e17e3e0a5e810264aa04b86176e3490af83c"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/lint_rules.json",
+      "sha256": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/lint_rules.json.meta",
+      "sha256": "e0c663c29cdfbf148a5cf86064e5488f441787bb1596613acd153b8cc6a27ec3"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/migration_map.json",
+      "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/migration_map.json.meta",
+      "sha256": "1e20bede937d9f7d390274930e0ead5b09da7885fc92080fa759dc0ec1806cc7"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/research_nodes.json",
+      "sha256": "4d2277f1965d94a910cb40b0191ef1d48cd688106aecf2d1bf8eea2479c1b038"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/research_nodes.json.meta",
+      "sha256": "1a72cff537456ae77a213f6ad0b207a1037c05ce47c5b542932d74769268bbb0"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/tables.json",
+      "sha256": "b1205a2f9c1169e91ee0d57d49afcb3cb2fc78c527b002c3e31d8bca85c41f00"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/tables.json.meta",
+      "sha256": "49c353c2d8e28391b63d467364caf6598f0a19f56f8b96b2fd565ab95f5c575a"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture.meta",
+      "sha256": "4227461e7d8aad1a4954c936c330fed1f2547b04604040738fb10fb4372a1a89"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/cost_profiles.json",
+      "sha256": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/cost_profiles.json.meta",
+      "sha256": "798390abe140adca14b632c7637f6dcb4b2d12e2d4b2c7d9769f4c0decd54767"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/lint_rules.json",
+      "sha256": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/lint_rules.json.meta",
+      "sha256": "d23b416ef5122d23f52078c3e97ed6a00b6b3b672891e37acaf84288ba4371b3"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/migration_map.json",
+      "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/migration_map.json.meta",
+      "sha256": "953b635abd91b550c98503375ae478f3547a198e03ac65243585ed0be6dc6948"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/research_nodes.json",
+      "sha256": "4c89c5ca09a5778826929f85e4dc3039aaec0957842110b97842b383b148174e"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/research_nodes.json.meta",
+      "sha256": "62bd940365f0222a6b010a700ac1704754d3baf845cbc9aba041afd3b17f9ff4"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json",
+      "sha256": "6b83faeff4a1180a86bf2c6b109110888022baad720311fd02808a0c2fc62870"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json.meta",
+      "sha256": "b31293337a7fcb91ee0050ab573d36e8c57356a2389a123974c3deb79fbe0683"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech.meta",
+      "sha256": "ab199b4001eafe8a49354f484557af2d5866db7de01dc953a6d29d79b77c1312"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/cost_profiles.json",
+      "sha256": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/cost_profiles.json.meta",
+      "sha256": "0402497170698f48b5357f3d0b46483df63395b46ea2d8afb03f148d0d7b600d"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/lint_rules.json",
+      "sha256": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/lint_rules.json.meta",
+      "sha256": "1921945707515693ae95c09e9bd6567bd5ced1703156051fa9cd2c483fa13e6c"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/migration_map.json",
+      "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/migration_map.json.meta",
+      "sha256": "1717c74853f36efa2acb52d0b1e3f3f9ae5f11ada8d51470e541417ca07b8fe8"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/research_nodes.json",
+      "sha256": "fb3a4bdcf0b57cd7695cb03ac6896c4ada71300d9f49a7e369c3fbbb633027b0"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/research_nodes.json.meta",
+      "sha256": "94988d71000146a273d67c3b741b98680df15caaed72dfccbf56411b2da7ed18"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/tables.json",
+      "sha256": "a301687c2c0f863cb731e3edfbde6a8f62fbc11ce860d80aff9a3283cd534519"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/tables.json.meta",
+      "sha256": "8dcae52f3d6ec40e334d780e0b28612c107247561d3b6c0e7ebd6b4a00d9fb39"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy.meta",
+      "sha256": "ef4f5b3f013936fb666c428fa6465f2915ccd281a459787405dba74a87a7e71d"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/cost_profiles.json",
+      "sha256": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/cost_profiles.json.meta",
+      "sha256": "e578024bac3ec66b172992bca6408cdf23d1835ca4d6a92cb399c05c50b3b156"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/lint_rules.json",
+      "sha256": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/lint_rules.json.meta",
+      "sha256": "0007e5d4b60558610abec50c8d021b3bfad0635b88cffdb42c6fbf0fd2b9bb38"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/migration_map.json",
+      "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/migration_map.json.meta",
+      "sha256": "06c29297757de562ca14aa260625775c17d907e6cf6d150b7985c66c61322a65"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/research_nodes.json",
+      "sha256": "b29068659ccbc92951154ad47996d0d89cb63a0d9e53314f6991fce72961013d"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/research_nodes.json.meta",
+      "sha256": "278c80cae687faf2ba90c50672e99713e4b4c1f5878e5e1573eec5649821d2be"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/tables.json",
+      "sha256": "097fd12a8c777e87c47314e30612c6efa25ec90b64e049dcaec6d05ae671768d"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/tables.json.meta",
+      "sha256": "08e20b160957060bfefa3476b83b087efdacd63d3523d6eff989776b057b9b7f"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/manifest.json",
+      "sha256": "cbb1b1825ddad3c6344d34130433cbab9144b08e9bd9dd704850826698da642b"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/manifest.json.meta",
+      "sha256": "0c8ffee8da89810673ec1e51595410c175c2c74135a11d71c9d9b170f39b963f"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology.meta",
+      "sha256": "79924c6d0818c0f80adacd992d4c3b867f801693e4fee4d3eb8a740ebfa82a35"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/cost_profiles.json",
+      "sha256": "380fa552588e508f3120fdeec96a0ae2c40583c4b470c05422003cc34160d594"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/cost_profiles.json.meta",
+      "sha256": "896f2f00bb3bb9f0f8abc11a1bdef50ee9c6dda8342862d7049f05b39928a4f5"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/lint_rules.json",
+      "sha256": "89e24e75a042bdebb241854159b8e81723b0901831fe130b6678a25365a93cad"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/lint_rules.json.meta",
+      "sha256": "f788db5bc38b78372eb85f3fea0c90a6b61bd52334a704eca9074bfca7a434c9"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/migration_map.json",
+      "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/migration_map.json.meta",
+      "sha256": "8df254c1e8df06e7aaabf89f8502cadeeef1662eab5e7e643ac914da44dc4e9a"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/research_nodes.json",
+      "sha256": "eb9dd8b3a9900e90852ce3dd843d210f368b0236dab5e873c4a520eec07d7144"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/research_nodes.json.meta",
+      "sha256": "50f6377f9deab65f3103ed09daef9b9ad93f3be1bd90f8bc0077166a23ad60cb"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/tables.json",
+      "sha256": "774579042d82819619e6d649e305d2ef9c95dffc1e620f79bb74bd87299a3c6c"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/tables.json.meta",
+      "sha256": "70073e557db70a4875d8bc4f3bb0a541d1b5c1c3d48206c2b9098028eb1041e5"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/schemas.json",
+      "sha256": "3c79a38ee5cab3177234621c0c51ef1e5b8e6838764ea1051cef6bad79ec9496"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/schemas.json.meta",
+      "sha256": "535d40d19f7b092dec4219879fcc5f3de4d5e85437f209b10ae9aaa50f5092db"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft.meta",
+      "sha256": "ab5e48d148b8251c517e1bf7177b9c3c7b276a74d13767183a149a522e8816c8"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/cost_profiles.json",
+      "sha256": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/cost_profiles.json.meta",
+      "sha256": "fe27fc09f9348f9cc40e3643cb6dd81b02b6eedeb473a358584d5aefbfc5b8d2"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/lint_rules.json",
+      "sha256": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/lint_rules.json.meta",
+      "sha256": "5760bd839fe2f5233d92f690cf56b709d5a697c875c89f5b12eb93a909c7386d"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/migration_map.json",
+      "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/migration_map.json.meta",
+      "sha256": "96f5429d9574b4e0064a25eae28b8f358128048cec240b27ac685b2e3ed10c3a"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/research_nodes.json",
+      "sha256": "c1d97843a98e4df969706a7e91d2ef82a5d09f43fc0b7da9a11908a9fa10cae4"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/research_nodes.json.meta",
+      "sha256": "0163e8c247fe987e14fe87ee0a77a1923f4ca80e66cb012f956ec843072d6b0b"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/tables.json",
+      "sha256": "5d5f7b119d8663fc65decc8dd433892921b2a967ffdd67da2b81f7bcc0d8db5e"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/tables.json.meta",
+      "sha256": "2c0f8bf17ddb22a0ce8b6a9d8381bf646a2ab423df989f8585428e9a0b85133d"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save.meta",
+      "sha256": "8798510c8d758992be07cdb6fd3a4d341275f0e05755db01fb1f456051c17aae"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/living_dungeon_qualification_profile.json",
+      "sha256": "7a424f236b9af83cae4eb553a20a1506af7f8f6bc63d744cdbc0a203419242fb"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/living_dungeon_qualification_profile.json.meta",
+      "sha256": "fed34bf9c0d497fd56c58704ab0f65c4e4a3a8b15e0641668ec60fc359bec15b"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/room_content_position_migration_profiles.json",
+      "sha256": "599db0c16f1b3414bb4d887ef953d2c8cb1acba03dbab68a60fd65a83e1468f1"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/room_content_position_migration_profiles.json.meta",
+      "sha256": "9e1a56583bce40a5a469ab4722be8a40cbcce36c457338bcdd83f41d2499cc25"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json",
+      "sha256": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json.meta",
+      "sha256": "5cfc0facfb85a6839d400ac84f2c166c74d88391df42261420d01e0de927ebca"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/save_spatial_migration_limits.json",
+      "sha256": "aa162762f7c437ca58f8a4f8f4cccb22e6868801269dc6f04dd3d241482a9782"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/save_spatial_migration_limits.json.meta",
+      "sha256": "e94029f05b31e38856617d0197dc979a460aaabf8ed0b0a9ab2abfea3c199685"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/structural_content_removal_policy.json",
+      "sha256": "5edad7716383b9d2689263556e4e071903d09e001fcae99c130b2d23b7a6d64a"
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/structural_content_removal_policy.json.meta",
+      "sha256": "ad47049486a8b32123e7644bac215cad197739d622362b7444ecf722311f8729"
+    },
+    {
+      "path": "Assets/_Project/Data/Schemas.meta",
+      "sha256": "d129408f3566d40120c697829bcc7a7f3cefb0dd3318b29439ecbe1c1a037959"
+    },
+    {
+      "path": "Assets/_Project/Data/Schemas/heat_modifiers.schema.json",
+      "sha256": "a1e5e81c71b5bc0a7d8ea079c8a75ba78d8cd2d1bdaf81fddaf75ffe336a6f59"
+    },
+    {
+      "path": "Assets/_Project/Data/Schemas/heat_modifiers.schema.json.meta",
+      "sha256": "c3eace85652ce9ce02415f9966dcb27b67094c1c1c00c9a32bfae729fea855ae"
+    },
+    {
+      "path": "Assets/_Project/Data/Schemas/mana_modifiers.schema.json",
+      "sha256": "9ecdc73b4235710cd988045b148f8c6a4dee8cd1b4d06b8716dbe731738cae30"
+    },
+    {
+      "path": "Assets/_Project/Data/Schemas/mana_modifiers.schema.json.meta",
+      "sha256": "fb0bb0f19868a75be853ffd3fe45a57a6f790c74cf9868277ff0febfebb58a97"
+    },
+    {
+      "path": "Assets/_Project/Data/Schemas/research_modifiers.schema.json",
+      "sha256": "3321a1269ee2e190839d182bb109e8b05c8975cb896ab48cea1ebc2a35323615"
+    },
+    {
+      "path": "Assets/_Project/Data/Schemas/research_modifiers.schema.json.meta",
+      "sha256": "c794f90af5325c3e068fafaf41c558413316dc686697a0b638a21e1a982f5c99"
+    },
+    {
+      "path": "Assets/_Project/Data/Schemas/schema_bundle.json",
+      "sha256": "14e2a462387ddbabdfa6c9164fd442f27333a3793956edf3b889a2f09aefcfbb"
+    },
+    {
+      "path": "Assets/_Project/Data/Schemas/schema_bundle.json.meta",
+      "sha256": "dca109f6100aed3cf58b3f264d8cbbdeac24b7db2ddb29db6fbf46cb8beb47e6"
+    },
+    {
+      "path": "Assets/_Project/Resources/content_acquisition_economy.json",
+      "sha256": "2761a84ccc358cdb053c6cba6631e86900fd158b51fc91885b33d4bb7ac9c39f"
+    },
+    {
+      "path": "Assets/_Project/Resources/content_acquisition_economy.json.meta",
+      "sha256": "59dbc705618ea88a49ca889867f72315b96c9a5bb05ad29556074912b673ff7d"
+    },
+    {
+      "path": "Assets/_Project/Resources/floor_construction_profiles.json",
+      "sha256": "a890300afe306035a43fbbc60e10f94f7ba6b1f8f9b018ce5d513a3a522f0117"
+    },
+    {
+      "path": "Assets/_Project/Resources/floor_construction_profiles.json.meta",
+      "sha256": "faebdef7ab4c8b0e1989e99263e59120d5a0fe8cfa957288c34ea07cfe8275aa"
+    },
+    {
+      "path": "Assets/_Project/Resources/monster_recovery.json",
+      "sha256": "5d82724b0673c3ef1a2053b47c9282489857b67e5f4767910c8a5d6b9157c892"
+    },
+    {
+      "path": "Assets/_Project/Resources/monster_recovery.json.meta",
+      "sha256": "91c973edb94d516beb294d0b1b88c2466cfdd905219e3493d27c5dd31bf8a724"
+    },
+    {
+      "path": "Assets/_Project/Resources/passive_online_mana.json",
+      "sha256": "2848ccfa6ffde744ade883edb0171bfbe993bbee5c32758a70d8ee4b690e6639"
+    },
+    {
+      "path": "Assets/_Project/Resources/passive_online_mana.json.meta",
+      "sha256": "04a8721135507cbfb5d85e59ae5d4db699d727cc92bc5261a60df6947edce01a"
+    },
+    {
+      "path": "Assets/_Project/Resources/save_spatial_migration_limits_schema13.json",
+      "sha256": "e3ba04771aea8955afec08f52f67b7b5f124aec46d2803802d66208435c750ea"
+    },
+    {
+      "path": "Assets/_Project/Resources/save_spatial_migration_limits_schema13.json.meta",
+      "sha256": "20a5046929205fa237cc80b1ba92a8c9bbe25b7a6849df59ade374a31f1db223"
+    },
+    {
+      "path": "Assets/_Project/Resources/save_spatial_migration_limits_schema14.json",
+      "sha256": "f535a0f7ba406916eb088dc499e58630e95eac340e88f18ce47227914bde642f"
+    },
+    {
+      "path": "Assets/_Project/Resources/save_spatial_migration_limits_schema14.json.meta",
+      "sha256": "0bd34ca9bd997826fabb86299637b4a2e8a9feadb02692715464e456f4bdebee"
+    },
+    {
+      "path": "Assets/_Project/Resources/structural_economy.json",
+      "sha256": "a285ddafcb4f430472f691fb4c25225a132feadaa6bc13feb74d430df33d2803"
+    },
+    {
+      "path": "Assets/_Project/Resources/structural_economy.json.meta",
+      "sha256": "f4e69161fa0c8624e5741cd5dbb62c65fb084e943643e5e47bf57ede0550f362"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonLayout.meta",
+      "sha256": "5a831ccfa657c1053486c9d1a9be1037f9f3fbba9546453d9e86b0e44c68129e"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonLayout/DungeonLayoutState.cs",
+      "sha256": "69009ed3068f9aa20e8b164de1b7f096019ce461fd3b3a94dff78ea151c2f000"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonLayout/DungeonLayoutState.cs.meta",
+      "sha256": "8cdc7d5a65fb15cf4ca39fd25d97e7f591a773be612269f2a94adf72a2413185"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonLayout/DungeonSlot.cs",
+      "sha256": "9e2b854dda57b646c66e4e88f6815e141a4ef6f4d73520d5e4fc3a6da07b00a8"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonLayout/DungeonSlot.cs.meta",
+      "sha256": "fffe4edad27b38b0084f62dbd736eb42a0d8dbec9fd17f918f3f59efa65d9bd8"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonLayout/PlacementService.cs",
+      "sha256": "203dc2e6f783e5978a5d77229925acc1532d1af7adcdad4f96344380807f0820"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonLayout/PlacementService.cs.meta",
+      "sha256": "1023040cd31a2eb0ad03e426904e6360deb44053ff26d0e771c014bafc67b4f1"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial.meta",
+      "sha256": "0c878eff501541a64b09511d249ca3a4aea854bf2451de4e4421f249dfb97030"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/BasicBranchingResearchAuthority.cs",
+      "sha256": "d436661663cd73755453b49d73c976a447de0eba9e3ed1ff8704d0d8a32b2dd9"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/BasicBranchingResearchAuthority.cs.meta",
+      "sha256": "14ace4b4a4e749259d77bbfcc881be2fc61adbb498f0823172169ecf00d42e6a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSaveSchemaVersions.cs",
+      "sha256": "64b2791a6e305234de6d3c2855d0c82a6f414865a8993b9802bb4e7b69fd1c80"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSaveSchemaVersions.cs.meta",
+      "sha256": "82c15488c5cbcf813984cb6650fe9a109e12461ab9feb8697b2af9c348bf4b7d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSpatialSaveContracts.cs",
+      "sha256": "92930c0f5a85d778ba1bee2d7e2ec3e79e846590fa7994363bcb2fe9cb43c0d8"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSpatialSaveContracts.cs.meta",
+      "sha256": "28c393afae59889e2a3e298765b7200a0c82fdaee7d03f2a7fa01c5e8d6c70b8"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSpatialSaveSerializer.cs",
+      "sha256": "2003f9ead8085ec8092f2f13be3017d8e5d79fa9dbf7f2d4a65b8b0de8ffff63"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSpatialSaveSerializer.cs.meta",
+      "sha256": "5f08ea83616aa4bcdff4be0487b1f7c85722f8745a7d16fe3d2386f357b3674d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CorridorContentMutationService.cs",
+      "sha256": "b83ab6365d3bb7e2f36051179c27d445685a2dcc07ff59d8aa841c4895b046f2"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CorridorContentMutationService.cs.meta",
+      "sha256": "6f2382b9f13ed49f7304a78f4a718244d09a4d8b4691e1a8306494bfd3262716"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalProductionSemanticValidation.cs",
+      "sha256": "015483a7e2c08695cf84aad37d8d09e6683588cab2b8024eb32ee2dcc94b9a0e"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalProductionSemanticValidation.cs.meta",
+      "sha256": "d7922790a907dc1f6a1a07a8f5369ab47b5811c40a25c933653c61a048a00227"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalSaveSession.cs",
+      "sha256": "7c536a1507c58579f77d869de23aa6cc73f2d0baca89422b38bc40c6dcdb5fcc"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalSaveSession.cs.meta",
+      "sha256": "3582e2b42e464578d1cc1d43d9f370e16c09c868ce3a321e9d9edd3f62bb893e"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalSpatialMutation.cs",
+      "sha256": "e018b775f72d346e6c1172aade87022ebbadce593163797a90ddcc2139aa93c3"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalSpatialMutation.cs.meta",
+      "sha256": "e4a26c35aca7f2a0e0681004ebecd7222f7230ab8f36aaab57cd93bcbb19be33"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalWriteAuthority.cs",
+      "sha256": "f44b883a38fad7d6cfa6adefc97d93c136cd3e7f66d16f21be1d397fe8cfe267"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalWriteAuthority.cs.meta",
+      "sha256": "1d965060b8105f75a735cfb5ae11be9bd095f7957bf660c92c28c54038ef2187"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCompleteSaveContract.cs",
+      "sha256": "645bdab9c486605c7b74809c9be82db83550889dcb4d63eb99236170bf8c9008"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCompleteSaveContract.cs.meta",
+      "sha256": "b53d68b821e500f3eb3eb8c4e7084f82282e9ea463a181ae522ab54ec3a932a5"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedMigrationAssemblyInfo.cs",
+      "sha256": "77ca3c578db91f96341b3ab46e139e51f5836438ed55700e24dbf44ae3dfb4c6"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedMigrationAssemblyInfo.cs.meta",
+      "sha256": "978cfabd812a3d56be7bff0a80938ac185e11aab82e8f6465a62b78122431b0d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialMigrationPreparation.cs",
+      "sha256": "8faacc2d4a1c9bbae28a092ec7b5323475fc2159127e5b970e99a077db963ac9"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialMigrationPreparation.cs.meta",
+      "sha256": "97d4ebc2ed34c206c040ff6622c586bd734163195f2c2e0a9bb7684d9f2d119f"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialMigrationSidecarContracts.cs",
+      "sha256": "1c40cf1170b5d67489d4c4186437eaa34f6e55e3cc4c8826bb9bc26c8d630ddd"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialMigrationSidecarContracts.cs.meta",
+      "sha256": "06b863c4e5d2c01b6257ad49c251abe49aa1e9a1fd28567c76f7f6db83d488bf"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialMigrationTransaction.cs",
+      "sha256": "d478dd2e2aec49e3991febc372594e474dd247fcbb410ac97755055986c4121a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialMigrationTransaction.cs.meta",
+      "sha256": "0b771855bbd15304180e7fec427d966f696b40c07cafabd5eb7e38578fe447c7"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialSaveLoadCoordinator.cs",
+      "sha256": "f4018c4e9dfa1e258606eec1f0cb918af086a9a23a85073b70f45b28ac4408fc"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialSaveLoadCoordinator.cs.meta",
+      "sha256": "40b5e2cf912b4535abfefb0096eb62eb49b7d725c74386b1e827ef40361f5859"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedWholeSaveCandidate.cs",
+      "sha256": "9e5ba738a7ed65c873c26e7f76af8f40952d664a23daee3df7bba0e7671cf205"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedWholeSaveCandidate.cs.meta",
+      "sha256": "4585687529b2959f4d2ba4e73675e05a17225a18464079c334cc9d939b5a761d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftFormat.cs",
+      "sha256": "9eeb3948a668377a1a0ac860422fe6b4861ab50cdf6d8eafb7de563cddaf3e81"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftFormat.cs.meta",
+      "sha256": "e641ffa50abb7ebc0653b2dd03f7f3d0817a6d901ea0cd660e232d2c47c90222"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftHistoricalFormat4.cs",
+      "sha256": "66468775672e2723ee7f5ead3a110551b84ba3a64e2e5eb87e5237a07914c583"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftHistoricalFormat4.cs.meta",
+      "sha256": "48c73ab51be14f42265b69b48aa44cdb382305e6eb55f9167d1d221d40a267a1"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftRuleIdentity.cs",
+      "sha256": "aed111829aca7573103194f27361a6ebb0930ea2025356625e58787702122413"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DungeonDraftRuleIdentity.cs.meta",
+      "sha256": "73cb8b4d2d8eadcb286bd089b9a3b4edac08dff120b668bb586ebe1ece886922"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/ExactCompleteSaveAtomicPersistence.cs",
+      "sha256": "3c22ba37178ad3b77c04580d4893bfd7d0e3e49722f5ca2d5d21f67f1bdb4f8c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/ExactCompleteSaveAtomicPersistence.cs.meta",
+      "sha256": "64c3db6a7772096532c716b819d68f40b200377f53000fdaa50aa1b3a91e71e1"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FileDungeonDraftStore.cs",
+      "sha256": "239ad1f08cc9f942a45d4ed8b3014fa66752dd98b4a98d34db4d4d8a8006103f"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FileDungeonDraftStore.cs.meta",
+      "sha256": "2ea38710b550cd431877b34b329a6f171ea8e320e19092c448aa5d3cb9ef8ffa"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorActivationEligibilityAuthority.cs",
+      "sha256": "ab1ad8696ea593e0d8aa195ad390e4041ffba8c5a24e1316bb4e45e281fd87b3"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorActivationEligibilityAuthority.cs.meta",
+      "sha256": "083330ef29a505f6ac23531724dee8d5219dd8a431b3c0ab09aed6170a2f2661"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorConstructionAuthority.cs",
+      "sha256": "1d24e88724fdecb83da985d21f729ffd5e89c6b2ee49a04315f2738bfdc6865d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorConstructionAuthority.cs.meta",
+      "sha256": "4d7d03253f4c56843a93a51dfc737cbca592f627629c7b37addc06bb29167ea2"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorLayoutValidation.cs",
+      "sha256": "72007ce28bcc60881fd736a5f72287e9790a6580e4e01e7099c580748ec17c60"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorLayoutValidation.cs.meta",
+      "sha256": "042455ef6037e3a379f9f79ffda6d5523cbe30219837fea0910ebf3107205b37"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorLifecycleAuthority.cs",
+      "sha256": "9ca5d56598efad291e7107223e608cfce4192be63eb083b5948c6d0384e76899"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorLifecycleAuthority.cs.meta",
+      "sha256": "e46b73a73e784952a957c29adba9668d11a02091bf772ff8ca93754f225827f6"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorRouteGraph.cs",
+      "sha256": "b33a546b46eac10822eecc4d82785e0e200b341f3f578cb60553deb37de1806c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorRouteGraph.cs.meta",
+      "sha256": "116ec22f0e2efd392733be1c7c9f75957358865cf1c979493b0407f6f47c0c1c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/Gd66MigrationReasonRegistry.cs",
+      "sha256": "8b116c3f75d8e6eae488b68f398bcb32197a91bcea9fb7d834fb9c89fb8d18e3"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/Gd66MigrationReasonRegistry.cs.meta",
+      "sha256": "519811240bd8150f3b9cbc609737910b566c9ab467150403ccd812e8d593ca9a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LegacyNarrowHallRepair.cs",
+      "sha256": "40f59fb466037b1feed60e178d193e42a590d5c551785f2ee2547831ac2caaf7"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LegacyNarrowHallRepair.cs.meta",
+      "sha256": "9e354c85d35c41fc89697e729dac0178998ad953a7a71e6fdf841ed0343284df"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonContracts.cs",
+      "sha256": "2432c3cc0cb8cccf70a5c23278b5eda1bd297036dac9cd8ea694c07f3c88a061"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonContracts.cs.meta",
+      "sha256": "3862d41ce632f7b47f244abd77d19d1ca1daa0bef671445f8ab80def7b4e7b86"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonScheduling.cs",
+      "sha256": "d9b28691643371b6d38515ac3fb539ad4d0a8a00ae8a9c2fad34521b9309fd9d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonScheduling.cs.meta",
+      "sha256": "8d600ca6561bdfbe93fa5da505d8f0e62cb0bbcb8e709c120c272f098622f08e"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/MonsterContinuity.cs",
+      "sha256": "8a342c67cc213c5e07eef0582c0070d3de60b191797f881181de35901b907ca0"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/MonsterContinuity.cs.meta",
+      "sha256": "c87b5f67f51ed22a9da738da091ce695358415f37f6d8c4ddbd95b6df10d6e5a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/NativeCanonicalSaveCreator.cs",
+      "sha256": "db773b32f69cd951f22d244c1511840fb96a2e3bf27a343e7ca0366c3d45987b"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/NativeCanonicalSaveCreator.cs.meta",
+      "sha256": "f5fbb8bd798088448a4fdff56786623162d908976ba4aad2c4716ddb5805ef50"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/NativeStructuralIdentity.cs",
+      "sha256": "2020fb5749fb0cd463e8746edf3225b0b22ab821f2f722b3dc978ca580db2207"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/NativeStructuralIdentity.cs.meta",
+      "sha256": "52d43823142fbbf0c535d06f1ff4253618fcc3928c59a6223b1b64dd331d01a6"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/OptionalBranchStructuralEditService.cs",
+      "sha256": "f4865efc239e818e06e94a5dc0ba56dffbe3c18aaea7f22241b2cc1d657c7c13"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/OptionalBranchStructuralEditService.cs.meta",
+      "sha256": "09915059ec8b33b9e176810c81e84769c9beb09b5cbb4ac53dafc51901e04d38"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/PhaseFiveSaveContracts.cs",
+      "sha256": "f9a76eb3330b609230bd3cad6f0acac0c40ab1319fa1b910c2cc9a7e9a48bc1c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/PhaseFiveSaveContracts.cs.meta",
+      "sha256": "47993f68859bf5b8329fc403003597c6eb1fc8a929e58fffa1f7573cb0f19aa2"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/PhaseSixFloorKnowledge.cs",
+      "sha256": "bcf0dcb83619984d991bedc731acf66ffdab24cf5af58f5501c8dd2edd4c6dd2"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/PhaseSixFloorKnowledge.cs.meta",
+      "sha256": "9817a5fdbe3874bf3062c92ab271e71618508d12e2fa0f26dfc61f5c89defc1c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/ProductionSpatialContentLoader.cs",
+      "sha256": "e2e1b0b27f278ee87639f89dbaa2beb54cec6e3f7fa6e02f3c6d509119066914"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/ProductionSpatialContentLoader.cs.meta",
+      "sha256": "675c1c6d2d1ebea972843feb2142e91423b7b74cfcdc1a871e7a247469ce8779"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/ProductionSpatialContentWorkloadLimitParser.cs",
+      "sha256": "9a176f5473f15d785660d0ed332940941b1f0048895f4bf01d92aad4b59bedb1"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/ProductionSpatialContentWorkloadLimitParser.cs.meta",
+      "sha256": "239e938c62a56ce6596c8bad132da83ec70cbd657c8d37a4e34c9bb9e2fbf870"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/ProductionSpatialGeneratedSet.cs",
+      "sha256": "a23d128d038e003e03f0e5e5f691d46d34cb5ffb9ba76c9df694be107bff5845"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/ProductionSpatialGeneratedSet.cs.meta",
+      "sha256": "54af53db7d129db969342d02fe0cc64cefd10ffad865aa48905bc86c24995bbd"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RawSavePayloadClassifier.cs",
+      "sha256": "9b01be89686a32c84df5cf1ae6f2659f2070273f811370ddaf0d6078fb716626"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RawSavePayloadClassifier.cs.meta",
+      "sha256": "36a186ec944ad1578ccd6244d250d76a55019001970ebaa274eb7e37ba5da826"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RequiredFloorTraversal.cs",
+      "sha256": "a38404663ef078422a17aa6c4d6a4ff84250fd76dc778d331d76af18fb131570"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RequiredFloorTraversal.cs.meta",
+      "sha256": "74c46333547bc61319001b92320e405751c1351cd4fb55e590b8923acc80b6da"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RoomContentPositionMigrationProfiles.cs",
+      "sha256": "964ae3242e73aa316b128d8f8e1342610766f6ad80364eb95ce1b0a6b3666694"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RoomContentPositionMigrationProfiles.cs.meta",
+      "sha256": "41c25294fa9b892d77ffa015bd6f81504f8c8f5cfd61c9e2eeefab4ed84f8e14"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RoomContentSpatialOccupancyAuthority.cs",
+      "sha256": "22048e39819956040e0d98ab318fa5195acbb60b29446b0d2a1fb48d2420d5e4"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RoomContentSpatialOccupancyAuthority.cs.meta",
+      "sha256": "8271432ea7b015f16ea85ede5b81a5e3ea308c3839a213a6c0cd999da241ca60"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SaveSpatialMigrationLimits.cs",
+      "sha256": "9478fbb45f8bb0d9661626f37c529b296b19c1fe88a4e866421cca5831a5c1e2"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SaveSpatialMigrationLimits.cs.meta",
+      "sha256": "d304fe717720e2bd7fe4ad2e64f829868293dfa63de5302891b8ca947afb4e07"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaEightToNineUpgrade.cs",
+      "sha256": "2acb038585af88fb5364b7e68fdfbf36347b7fc70777cf5bb5f17c70a85d5927"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaEightToNineUpgrade.cs.meta",
+      "sha256": "6c39a8f84ae0079a37647cb587375c603487a25e890c1e99f63ff81543b32fda"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaElevenToTwelveUpgrade.cs",
+      "sha256": "49c7999607913c988ba79be7e94819d6ab09ca85f28833ac2faf30703dccb950"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaElevenToTwelveUpgrade.cs.meta",
+      "sha256": "49f6593522d7d28dd9ca8620b18eacf449efa23824bce5ff3ffbc2ecde9fa25f"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaFourteenToFifteenUpgrade.cs",
+      "sha256": "b1447115a0ce9d40041c61cfc213c451afd549bbd8c8d1535182b6462c571b13"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaFourteenToFifteenUpgrade.cs.meta",
+      "sha256": "e68659bd6100ce6d4553a38e448cee7f4bbcc0bbbc8d65a456aa48afd4be2042"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaNineToTenUpgrade.cs",
+      "sha256": "59f0c80ca7ed8440fc475f76ddf6dae807e2d28d6721b33998d8e08d041b942d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaNineToTenUpgrade.cs.meta",
+      "sha256": "8c656b6e5c581fca934a03a0c88c245395b17251f02ad6572159ac153197f19e"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaSevenToEightUpgrade.cs",
+      "sha256": "7568fd0586dc3ca6b3465c08dea97e0f6f56e8bc82e9448954f45e0ff69fee3d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaSevenToEightUpgrade.cs.meta",
+      "sha256": "29eb47c7469c77504776944676bd2d160715be0d7ff9ac83d8dd41ab7e8fbad7"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaTenToElevenUpgrade.cs",
+      "sha256": "0b53cb4a22ab97f358b907a787d5cba3a3a945065f0169a607f0d1839f89b8cb"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaTenToElevenUpgrade.cs.meta",
+      "sha256": "a0d42f45fed9244a507f0885c6db25f6c5baadafdd1068b8622cca302615ee43"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaThirteenToFourteenUpgrade.cs",
+      "sha256": "db4dd451df47dc41586d89556095665c5464a8a3919d6420f69fbf1a19b0072a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaThirteenToFourteenUpgrade.cs.meta",
+      "sha256": "bf893583df0d93a1d18b4e955944044e652567e94a60571c3e717b916f868f64"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaTwelveToThirteenUpgrade.cs",
+      "sha256": "c998d79aa8ee01bc0b590962ebfe101a55a7637cc10060fa9ed7997156ffd673"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaTwelveToThirteenUpgrade.cs.meta",
+      "sha256": "1736f2859050d3e76079efa0ac240baa44c3457f9c0940920b45e6f1e2674a7f"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentContracts.cs",
+      "sha256": "eb45f1273746e8e5cd746569c21d89f77c98494dad7d91095b5fa98f47499fc3"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentContracts.cs.meta",
+      "sha256": "85704f978cf2c724e335cb6f672e7d87fb8ba4680fdf5c1848c83293957ecf51"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentValidation.cs",
+      "sha256": "566e2981b985e4f659dc4516b872092cd8543a2521840491b7e11ee7c1710951"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialContentValidation.cs.meta",
+      "sha256": "0cc0effe0df295c68cd51fdd16105bde5fbc982d7fdf5885977693f2235901a8"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialLayoutCompatibilityProfiles.cs",
+      "sha256": "ad7c328a27e413ff7920524461e3434dccea0dee2ec0ac076090728ae7d7dee0"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialLayoutCompatibilityProfiles.cs.meta",
+      "sha256": "ba1cddeed803e0f42ee7da38a784383ca572021ce4c82afb365d30b2147e963c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialLayoutContracts.cs",
+      "sha256": "b338867969b93c1033f236bfa7634bd5e1d2e79b283684c5b2097db77dd6282b"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialLayoutContracts.cs.meta",
+      "sha256": "b65f719f8795175e8d95cfa77e40df57d57f00f38886acf9f4f16d54fd6116f1"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialMigrationContractPrimitives.cs",
+      "sha256": "9969d8ab39d7d03384d881ba8883d0685756586d0894d4187546983e8e96e903"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialMigrationContractPrimitives.cs.meta",
+      "sha256": "0da5805447057db96b6f0f8caa64ad96cf75afc56a866f99e4d55ea4a0ae72ad"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialMigrationDescriptor.cs",
+      "sha256": "769ff753978a0e3acaf9785ed0aa08de83e2b2c820f47161a32769205d3e606f"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialMigrationDescriptor.cs.meta",
+      "sha256": "e088ed3564b2df5775a08f4423db08710bfe30f997d6fa8b8e1d0a7e41dad1bb"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialMigrationJournalContracts.cs",
+      "sha256": "5fc7577d15ad26810e06e3194c0bf9125972ee34d7c157516ebb1345aa753689"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialMigrationJournalContracts.cs.meta",
+      "sha256": "326ee65238c5165d9b1284045ad3e46fdabf9723736149c08db5411eb5944abd"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialMigrationRecoveryEvidenceProbe.cs",
+      "sha256": "7b2581c0f1c4ac9f85d2cf6a6465ac1edc3fc0a75387158390cea836483f92eb"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialMigrationRecoveryEvidenceProbe.cs.meta",
+      "sha256": "e411379da9365527786a750059e0236be429c2c0d57238f86846b038703ed46e"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialMigrationSidecarPaths.cs",
+      "sha256": "3fa4d0cb532d8056c67b14051c404e5640f205684e9064932fc3171b1edbfe01"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialMigrationSidecarPaths.cs.meta",
+      "sha256": "65deb10acfe037b050e9408eca8a28cd5405f9ff3448c8d4cf5107d7d8494649"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralContentRemovalPolicyAuthority.cs",
+      "sha256": "c44bfedf3b7120193fb5bd2e5e09e1f2662445daddb897df825a081b06bf34a1"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralContentRemovalPolicyAuthority.cs.meta",
+      "sha256": "9ec4a35ef0e03baed6c0394b721ae5d0e71db0f7db335a67c9912bb596ebec55"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralDeletionService.cs",
+      "sha256": "d4cd18dd780aee63d8f36083906df7e67de6c33899cf0b620a9ab1daa5fe8420"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralDeletionService.cs.meta",
+      "sha256": "b0f47f0349d87a18ddba7d452d633caae1806d5a7c2e8f1ce4ee11dce0567585"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralEditService.cs",
+      "sha256": "66a0382eff3e9c4e17082e897536437927316055167319a4861a4d8ae92798df"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralEditService.cs.meta",
+      "sha256": "15ab391a3f791dba96b7278a63007672fa5ec648dd0392d170c61d06c66e10b7"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralInvestment.cs",
+      "sha256": "75ab646565f6eb3c53ebffa423d96d4bbc255704328186252cc2d066b6efa853"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralInvestment.cs.meta",
+      "sha256": "0252dea3087112b99a5512d61db797d5fc077556b89dd264ea85cac658dabc0b"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralRenovationService.cs",
+      "sha256": "8f061d37540dd643fc9af9d401d1fb6a964dcd8f8ce496f23f58388a2d7a0af5"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/StructuralRenovationService.cs.meta",
+      "sha256": "824a86b548ff5a321554a867ffdc5bc54c97e55762f6b9c959d21e0d85068530"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TileGeometry.cs",
+      "sha256": "3c897736f5051c90bda6c1693bc4551d74b90284b62241246fd9319b90aded91"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TileGeometry.cs.meta",
+      "sha256": "b377666768db70ff6e75e0f3e9b127198d109b7f577b80347feed0436155019a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraft.cs",
+      "sha256": "ee5c41a41ad6f57fa0157de325fb1ce79006dadcf68952d82476ed17f65eb1c2"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraft.cs.meta",
+      "sha256": "c1f6898ec69b7cff47654f575661128d57405e2c4dd1643f4d594abbb6a097e9"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftCommit.cs",
+      "sha256": "fd657e77962e90ecbde7edcf45a12f62090496b8262a623fea5cd99716c1698b"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftCommit.cs.meta",
+      "sha256": "fdccd21b265a44dd9c6505a15f5c01774117415056f86b662822208c2c5d1d37"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftContent.cs",
+      "sha256": "87885e7d96db8fcf55ca56bbccc787873c36d88cc7b20b4dcd68ee576864733e"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TransactionalDungeonDraftContent.cs.meta",
+      "sha256": "177b33611fea64e9e1717248e88074ef1a37d15e494ccbba94a76daf4176c4be"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/WindowsSpatialMigrationFileSystem.cs",
+      "sha256": "05ccc0f7e96f270db570e303602c1a6bc4ce1a3db15eb4a43766688f20d4b95d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/WindowsSpatialMigrationFileSystem.cs.meta",
+      "sha256": "d71c6cd7097edc260c5b16ebb3cb51a11766a37d479dd7bfd753d4db2d34fffe"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements.meta",
+      "sha256": "190afa9b55c9a4de1903f9311337db07c20677ff97347ca0399ad19aa6c53601"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/CanonicalMvpRouteProjection.cs",
+      "sha256": "fbafc995d8d049a6cc77b1f91e86dbea92c66083d1ecced06f90aded42854d04"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/CanonicalMvpRouteProjection.cs.meta",
+      "sha256": "49ecfc6d5a97017a9e86ddebc05d6d3efe9f9cea98755afac6592e683c33a361"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/CanonicalRunnableFloorProjection.cs",
+      "sha256": "dec4cb569a6b985f12ec64d1c62d630f9ea20bd3b8c0141838eecd964c90f9fa"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/CanonicalRunnableFloorProjection.cs.meta",
+      "sha256": "aef9ad84bfda26a435c3c1dd3fe3cae45209a433aec882afd4a3be85fd08a691"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/MvpDungeonFloorLayout.cs",
+      "sha256": "c52854a4585361743bf7a65d81d08992df0d97069c2a72da271883397f3ef8e4"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/MvpDungeonFloorLayout.cs.meta",
+      "sha256": "233f7121bccf0a9a6e500dbc15b55448fe20c3a9e47177c6d182e5d283ac245c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/MvpDungeonPlacement.cs",
+      "sha256": "522e084606e8321beb7bad2f166a8424a105a4a7b475ef77cfe6f697235cb144"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/MvpDungeonPlacement.cs.meta",
+      "sha256": "5004a8916456a1c032de24786eed2265254369d61a7daa6a0dd55383b42dbdca"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/MvpOrderedRoomRouteResolver.cs",
+      "sha256": "01c24ad29d1fc3e60f8e4ec274fbfb3fff1340e6411caa4629a9facb506d24fa"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/MvpOrderedRoomRouteResolver.cs.meta",
+      "sha256": "e5215f883760cefbfc4c65e6e38810e83e50b971c353c0003504f61a63428bf1"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/MvpRoomSlotLayout.cs",
+      "sha256": "fcd68577ae60e722d594ca3dc80147ac4057789df62dff3667af9a16d0266d84"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/MvpDungeonPlacements/MvpRoomSlotLayout.cs.meta",
+      "sha256": "2623e6b65c512e1dcd7f3c4582fbc957458d5cc89304a7515157998e474d38bf"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation.meta",
+      "sha256": "8105696b076bb8cb89c684a2517e0586fb5b2ed3692d7b7d96a089d8e538e574"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/ActiveFloorRunSnapshot.cs",
+      "sha256": "ef5625dbdb700d4ba1cd94fb1c11d68af52e1e733bf58a5ca649cfcd2cbe6f85"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/ActiveFloorRunSnapshot.cs.meta",
+      "sha256": "826354ee973d1297568571fcf3869ad1d702ec2a7817be2524caf03ceb11a3ba"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/BranchDecisionResolver.cs",
+      "sha256": "eeb789c5f976e55de01d45850e31d2f8a34aa8b6c6bfb2508228650f9ea67517"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/BranchDecisionResolver.cs.meta",
+      "sha256": "5d40cc8d19f89a8c7229932b387e0a8d3f8b569c9c47964fd3337a71cccf42ae"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/BranchRunEvidence.cs",
+      "sha256": "f0025fc28cacd8f5589c0c2f4a8abab0d9173994c597d2999867e16d5f43a59d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/BranchRunEvidence.cs.meta",
+      "sha256": "6b56da7398eccc11ab14f23507bb1a9844cfd7674027c273648def135671a77c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0Config.cs",
+      "sha256": "e62be2ac49546959752733c3c43f3e110b00306b5a53c6b84f88f2ade7a8fbb7"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0Config.cs.meta",
+      "sha256": "39acfca848e7d17d030c3435e2acdfb80451e3672631dfafe0cc04f6c6bc4b27"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0Evidence.cs",
+      "sha256": "9b3e4e904fb21d0cd38f54eb204b11da237592e6cd94654b7fca20c07e541c3f"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0Evidence.cs.meta",
+      "sha256": "1e3f4b267b34411eda00523a6091877d43816bc59aeb4175c85302ad3903217a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0ExecutionState.cs",
+      "sha256": "fceaa36ae242c3496e82c015ad492a18dadd1020bc994a8647babf0d1396b3ef"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0ExecutionState.cs.meta",
+      "sha256": "1a1f9eaf9f244a44df9e5d936345e8063d68b0964ff6b6f899d4cc648a0e4a77"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0Geometry.cs",
+      "sha256": "cee8dfb1a8d4da1d9ce0cae032eec7ff2107ce175e67cff9fe0a2d937895ae29"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0Geometry.cs.meta",
+      "sha256": "c6fe2a3f358bf0f37db31516faa3be2f3d0b2992b738eb2e26e74111b264d33d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0Kernel.cs",
+      "sha256": "8a6e67c6f8c80503dec8c40796626cb181cbf3325e93d164a73a0eb204b105ff"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0Kernel.cs.meta",
+      "sha256": "2fedf07241a383b67332a36b2c255e45574e1c03619b547383d84ab270961684"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0QualificationConfig.cs",
+      "sha256": "068346710a8a7367200624bf92975a18a54c1a07bfc2ac08e044fd2e3488ee2f"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0QualificationConfig.cs.meta",
+      "sha256": "7626f05eed6d1ad164c4aa4dc065a6bb06fc3eb7d5ca736be831ea77e54d0468"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/FloorKnowledgeLearning.cs",
+      "sha256": "02aa8d6d2ad8bb473528ce290072bde32a9f95544e4f5219a3c7ab153154fe49"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/FloorKnowledgeLearning.cs.meta",
+      "sha256": "9b43dfa4ebb767eb4268be03440f191322b58cc0ae77934902569cab5970fd9d"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/FloorTransitionDecision.cs",
+      "sha256": "c0b1e157a1096c2ffdd7568297cc141cf48b6912ed1e7681b1d162a62cc686ee"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/FloorTransitionDecision.cs.meta",
+      "sha256": "b4a4a1209e29b9804f4c25c9b910297593907496495479cdbc52648b5b79d85b"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/FloorTransitionPerceptionResolver.cs",
+      "sha256": "aa2e9f69adb3e90bca9d249a7f4d2c139f07a59be8e23282d6a3612d2ddacf9b"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/FloorTransitionPerceptionResolver.cs.meta",
+      "sha256": "c677732264d36f3f560aa1b5509ba1b038c2544e7007eb6b7881d67f06e445b8"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/IntraroomSnapshot.cs",
+      "sha256": "7d81598097a8c6b689328e5a4f4fd6041befd9f08d616e26f1a681465e7a0e8b"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/IntraroomSnapshot.cs.meta",
+      "sha256": "9394b09dbbfd0333e5e2b6a1ebb23789e49d5fadfaa41d0b08caa0d368bfe91c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/IntraroomTraversal.cs",
+      "sha256": "1e27ad6510ebb2d373234ac941edf7e1613c957aa70897fde8883612357ccd93"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/IntraroomTraversal.cs.meta",
+      "sha256": "5140db6269154c943f4ea8d34c8879db1d5885b144f67989062196b4f0c989b9"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/PhaseFiveBConfig.cs",
+      "sha256": "701d19ed10b72f5ca4dd62372d13f40599b3f17531f38caddfc6a985faba057e"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/PhaseFiveBConfig.cs.meta",
+      "sha256": "58b9f10aa5cd4ffa0b3ed32b2dbd82a2e45c274a46005c5633cbff5c202c6c75"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/PhaseFiveBRouteProjection.cs",
+      "sha256": "99eff6c55c4ca45946983c538de21b04c25aaca0e5af877116803d47264c14fe"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/PhaseFiveBRouteProjection.cs.meta",
+      "sha256": "2b1a6c0ee760efbb07d6044c699ae99e690adc5edbc001443f58e8ccdbe7dc0a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/PhaseSixRunConfig.cs",
+      "sha256": "70b9aae6907c8dee6e0832df8219480c224df86ba430e3def9ba0c2476b3c2c0"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/PhaseSixRunConfig.cs.meta",
+      "sha256": "0e8be3401e61793813879e1b67e2b7785868a7b80c49c557f3e777a6de7a9da7"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunCheckpoint.cs",
+      "sha256": "951e50f1b026902e939b65cc028c74cbbea2158915aeef4faa61b8e5af103414"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunCheckpoint.cs.meta",
+      "sha256": "76b53e6be59e5d21228441f5360ddc162999d0d51f0cdf9337befd6775c80822"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunConnectionSnapshot.cs",
+      "sha256": "7331498cfb9f36c1d0a3270b6899294fd3611c6c98a7b90b7eea2fb37308cd2c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunConnectionSnapshot.cs.meta",
+      "sha256": "549b79abf62edc473054dc1ace093075e12c245a43bb38b6cc05492b04d4634a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunEncounterResolver.cs",
+      "sha256": "6ca54dd1ef0ffe2924a1edf8531319ca20d81d97f15500484adf0b2330c19407"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunEncounterResolver.cs.meta",
+      "sha256": "d6925fe644d01747de3efa39365107deba047d3d89a0616d6b96bc96ea4267cf"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunExecution.cs",
+      "sha256": "a2b7335f783f3c63cba1444645493de526a1faff8c32dcc82e2b5d27252d84a6"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunExecution.cs.meta",
+      "sha256": "7de849b2bec0d285af8f40c03717973690e122e468e3f110aec05a2e564f6361"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunParty.cs",
+      "sha256": "fe1f73e9698119911fba7acfbb53536b0859b29afa97d84f6cfee53a890b84f4"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunParty.cs.meta",
+      "sha256": "b994d7fa9c5f3dd441741a9b4d9a94afaa885d9c3d5ba24245c53b76b15a8a97"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Branches.cs",
+      "sha256": "97287d44588a4dd8c7cbf443466a1a23fea56c6db0bfcdbfd56b174488fe880c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Branches.cs.meta",
+      "sha256": "358bcab1a49344befdc301b3747e433ec973a426e908b489b6b4940f08bc5607"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.CombatC0.cs",
+      "sha256": "476a2180397d7f87d4f7f9107556b3e537273a40085e5ec7e458edc719edcf31"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.CombatC0.cs.meta",
+      "sha256": "306fe0a07ca47a805d8d9604775a0ed5d35c91cd5c15c65a98f3e3a6591ffc7a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Execution.cs",
+      "sha256": "56e64c3960b4a4a548bc341ff68546139e18db11457c580de54a0117e954097f"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Execution.cs.meta",
+      "sha256": "2b069b730a0de05ac0c948c1f2cd8cb2e362557a283fec1b11ff3e631133ca0b"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Floors.cs",
+      "sha256": "0a892c6c2fdc43e6ae18652b8803c2e3293b2baaedb154d2e589e806c5c5c0d8"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Floors.cs.meta",
+      "sha256": "2be07cfc6a0b58c319218211b813f85f5f12ab909e888aed96515960d7784e71"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Spatial.cs",
+      "sha256": "1b646356e1ed403d412405f33e9e9966d2a477a2eaeb67854b7cbce5dada4f68"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Spatial.cs.meta",
+      "sha256": "f2e15465574573e8fd3c8ada1a6bba96c59b334275ee5aedfc23cb8bc7ca78f4"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.cs",
+      "sha256": "b7bd8b11d577576d079d69d90608126b8629f72a09f3bec76ea6840a36ccc114"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.cs.meta",
+      "sha256": "112961e2b3cebb049e98e74ed88ce9086beacee2362d31645c58db5a0b279314"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunStartCapture.cs",
+      "sha256": "680937b7a19c31280f676b7ed629bcf21753c69cae0ecd06c0e441334c7f7e05"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunStartCapture.cs.meta",
+      "sha256": "3ba766b607563cb1f409968c7f5a598eb140896779694e2928ec6e1da7cd02a0"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunTransientEvidence.cs",
+      "sha256": "1e916f81d0827d8c9a73953051ed06e97802c756b7716e0ec11f1d7c3cb56509"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunTransientEvidence.cs.meta",
+      "sha256": "c20faeb4f7cf39f5d51f11b6009a7c77bff2a827dee70890a101d384ad8e003a"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/Structures.meta",
+      "sha256": "a1edbd699b8e9b3b5b0fdce828f24e7b04fdced09feebb1fcd104eebae233c05"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/Structures/StructureSimulation.cs",
+      "sha256": "6d637f8c86f3c0ed0cb912a980620c6b6f2f3c1f04e09f88c97640857da0c6e1"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/Structures/StructureSimulation.cs.meta",
+      "sha256": "80e51e3166a5b69330cc96cd6ce2c104de0894c0be9d9a79ae5952b96d512e5e"
+    }
+  ],
+  "original_c2_evidence": [
+    {
+      "path": "Docs/testing/evidence/combat-c2/implementation-and-qualification.md",
+      "sha256": "3f4a4d5a57d20816e1df5a1f1449ad6897e7718e39a050b5883da68acd0c8bb5"
+    },
+    {
+      "path": "Docs/testing/evidence/combat-c2/qualification-manifest.json",
+      "sha256": "660558d63284628c2070a56d2d0b5965854446e1c45d8d0530844cbb030f8992"
+    },
+    {
+      "path": "Docs/testing/evidence/combat-c2/qualification-reports.zip",
+      "sha256": "5c67d6c7b899a3d131256e9e659532708934266d023f14d9c780d8a41887cc7d"
+    },
+    {
+      "path": "Docs/testing/evidence/combat-c2/changed-files.md",
+      "sha256": "3ceeec5fd7b4978ebf7a8a4bc7dd8f39ea4525e70ee22e52b05e1121dd2a3664"
+    }
+  ],
+  "preservation": {
+    "checked": 15957,
+    "changed": 0
+  },
+  "owner_environment": {
+    "checked": 1312,
+    "changed": 0
+  },
+  "protected_owner_save": {
+    "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\combat-c0-diagnostics-validation-20261015.json",
+    "sha256": "54c7744e7ee92b1597daa88df995ef07c120e34667398377be78591f7fb7aa13"
+  },
+  "screenshots": [
+    {
+      "path": "Docs\\testing\\evidence\\combat-c2\\reserve-affordability\\screenshots\\combat-c2-reserve-ui-1920-Default.png",
+      "sha256": "1a32513185343f30d4879d968762722adc7b023a97ecb5272e32d144d9550f5d"
+    },
+    {
+      "path": "Docs\\testing\\evidence\\combat-c2\\reserve-affordability\\screenshots\\combat-c2-reserve-ui-1920-Large.png",
+      "sha256": "8a89bfb5e406780eaee16d82de16f5e4fe1b1276a0874a34a68d7529ff504ef0"
+    },
+    {
+      "path": "Docs\\testing\\evidence\\combat-c2\\reserve-affordability\\screenshots\\combat-c2-reserve-ui-720-Default.png",
+      "sha256": "433d53383890e497b7b28fba6f4e588c83c449ef84d1b53bafe208035d0c3066"
+    },
+    {
+      "path": "Docs\\testing\\evidence\\combat-c2\\reserve-affordability\\screenshots\\combat-c2-reserve-ui-720-Large.png",
+      "sha256": "bb659d6293b0db54bbb053c6cd6aa4f15c6e8f879a05f3e17e92267a717e844b"
+    },
+    {
+      "path": "Docs\\testing\\evidence\\combat-c2\\reserve-affordability\\screenshots\\combat-c2-reserve-ui-placement-1920.png",
+      "sha256": "e162067aad66b08c14b394fd5dac5bbcafe228443cb95eb00c3700689b101ebe"
+    },
+    {
+      "path": "Docs\\testing\\evidence\\combat-c2\\reserve-affordability\\screenshots\\combat-c2-reserve-ui-placement-720.png",
+      "sha256": "a39a5079e313785b0091a9d6096953f27199ea99d7f15bd54e49c2c00d8ce0d8"
+    }
+  ]
+}

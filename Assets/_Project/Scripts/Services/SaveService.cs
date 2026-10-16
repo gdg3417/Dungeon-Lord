@@ -49,9 +49,10 @@ namespace DungeonBuilder.M0
         public void ConfigureFloorConstruction(FloorConstructionProfileSnapshot profiles,
             FloorConstructionResearchSnapshot research)
         { _floorConstructionProfiles = profiles; _floorConstructionResearch = research; }
-        public string PresentContentAcquisition(string categoryId, string optionId, SaveData current, Func<string, string> text) =>
+        public string PresentContentAcquisition(string categoryId, string optionId, SaveData current, Func<string, string> text,
+            StructuralEconomyPreview preview = null) =>
             ContentAcquisitionEconomyPresenter.Present(_acquisition, categoryId, optionId,
-                current?.structureRuntime?.ManaReserve ?? double.NaN, text);
+                current?.structureRuntime?.ManaReserve ?? double.NaN, text, preview);
         internal DetachedCanonicalWriteResult SetQaMana(SaveData current, bool fillToCapacity)
         {
             if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)

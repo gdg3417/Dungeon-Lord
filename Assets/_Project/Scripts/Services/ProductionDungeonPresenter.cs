@@ -23,12 +23,12 @@ namespace DungeonBuilder.M0
             string.IsNullOrWhiteSpace(capturedNameOrTitle) ? Format(text,culture,"ui.dungeon.replay.party_row",className,currentHealth,maximumHealth) :
                 Format(text,culture,"ui.dungeon.replay.party_named_row",capturedNameOrTitle,className,currentHealth,maximumHealth);
         public static DungeonHudPresentation Hud(SaveData save, RunSimulationConfig configuration,
-            double manaPerHour, Func<string, string> text, IFormatProvider culture)
+            double manaPerHour, Func<string, string> text, IFormatProvider culture, MonsterRecoveryRules recoveryRules = null)
         {
             double wallet = save?.structureRuntime?.ManaReserve ?? double.NaN;
             string amount = double.IsFinite(wallet) ? PlayerManaPresentationFormatter.FormatLiveBalance(wallet,
                 manaPerHour, culture) : text("ui.dungeon.unavailable");
-            long reserve = save?.validatedCanonicalSpatialState == null ? 0 : MonsterContinuity.RequiredReserve(save.validatedCanonicalSpatialState, MonsterRecoveryRules.Capture(configuration));
+            long reserve = save?.validatedCanonicalSpatialState == null ? 0 : MonsterContinuity.RequiredReserve(save.validatedCanonicalSpatialState, recoveryRules ?? MonsterRecoveryRules.Capture(configuration));
             string usable = double.IsFinite(wallet) ? PlayerManaPresentationFormatter.FormatLiveBalance(Math.Max(0, wallet - reserve), manaPerHour, culture) : text("ui.dungeon.unavailable");
             var tier = CurrentHeatTierResolver.Resolve(configuration, save?.structureRuntime?.Heat ?? double.NaN);
             return new DungeonHudPresentation {

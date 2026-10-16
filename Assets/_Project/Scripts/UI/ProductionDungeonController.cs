@@ -29,6 +29,7 @@ namespace DungeonBuilder.M0
         private IDungeonDraftStore store;
         private DungeonDraftContext draftContext;
         private SpatialContentValidationWorkloadLimits floorPresentationLimits;
+        private MonsterRecoveryRules recoveryPresentationRules;
         private TransactionalDungeonDraft draft, recovery;
         private byte[] recoveryBytes;
         private string recoveryReason, feedback;
@@ -75,6 +76,7 @@ namespace DungeonBuilder.M0
                 // normalization. Edit/recovery/review boundaries recalculate configured cost.
                 PresentHud(); PresentEconomy();
                 if (IsConstructing) PresentConstructionInformation();
+                if (IsPlacingContent) PresentAcquisitionInformation();
             }
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
             if (!legacy) ReadInput();
@@ -104,6 +106,7 @@ namespace DungeonBuilder.M0
             var floorLimits = ProductionSpatialContentWorkloadLimitParser.Parse(root.productionSpatialValidationLimits);
             if (!floorLimits.Success) throw new InvalidOperationException(StructuralEditService.WorkloadReason);
             floorPresentationLimits = floorLimits.Limits;
+            recoveryPresentationRules = MonsterRecoveryRules.Capture(root.RunSimulationConfig);
             document = GetComponent<UIDocument>();
             if (presentationPolicy == null || presentationPolicy.Visuals?.IsComplete!=true || document.visualTreeAsset == null || document.panelSettings == null)
                 throw new InvalidOperationException("production.dungeon.assets_missing");
@@ -442,9 +445,9 @@ namespace DungeonBuilder.M0
             if (!HasCanonicalRuntime()) return;
             lastWallet = root.Save.structureRuntime.ManaReserve; lastHeat = root.Save.structureRuntime.Heat; lastTick = root.Save.totalTicks;
             var ui = document.rootVisualElement;
-            var hud = ProductionDungeonPresenter.Hud(root.Save, root.RunSimulationConfig, root.PassiveManaPerHourForPresentation, Text, Culture);
+            var hud = ProductionDungeonPresenter.Hud(root.Save, root.RunSimulationConfig, root.PassiveManaPerHourForPresentation, Text, Culture, recoveryPresentationRules);
             ui.Q<Label>("totalMana").text = hud.TotalMana; ui.Q<Label>("usableMana").text = hud.UsableMana;
-            ui.Q<Label>("usableMana").tooltip = hud.Reserve;
+            ui.Q<Label>("manaReserve").text = hud.Reserve;
             ui.Q<Label>("manaRate").text = hud.ManaPerHour; ui.Q<Label>("heat").text = hud.Heat;
         }
         private void RefreshEconomy()

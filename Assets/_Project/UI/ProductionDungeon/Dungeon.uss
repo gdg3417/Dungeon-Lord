@@ -63,6 +63,7 @@
 .floor-button { min-height: 74px; border-left-width: 3px; }
 .floor-blocked { border-color: rgb(230,144,116); }
 .hud { flex-direction: row; }
+.reserve-information { white-space: normal; flex-shrink: 0; color: var(--cool); }
 .metric-card { flex-basis: 24%; flex-grow: 1; flex-shrink: 1; flex-direction: row; background-color: rgba(6,14,20,0.85); border-width: 1px; border-color: rgb(49,67,77); border-radius: 5px; padding: 6px; margin: 2px; }
 .large-text .metric-card { flex-direction: column; }
 .large-text .metric-icon { height: 18px; margin-right: 0; }
@@ -141,6 +142,8 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .content-card-icon { width: 48px; height: 48px; -unity-background-scale-mode: scale-to-fit; }
 .content-card Label { white-space: normal; }
 .placing-content .bottom-chrome { max-height: 54%; }
+.placing-content .map-area { min-height: 25%; }
+.placing-content .top-chrome { max-height: 22%; }
 .landscape.placing-content .bottom-chrome { max-height: 46%; }
 .landscape.placing-content .top-content { flex-direction: column; align-items: stretch; }
 .landscape.placing-content .hud { flex-basis: auto; min-width: 0; }
