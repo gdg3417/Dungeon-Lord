@@ -36,6 +36,9 @@ namespace DungeonBuilder.M0
         public float ReplayPartyMaximumGap = 96;
         public float ReplayDamageRise = 12, ReplayDamageFloatSeconds = .9f, ReplayDamageEndOpacity = .45f;
         public Color ReplayCombatDamageColor = new Color(1,.3f,.35f);
+        public float ReplayDeathMarkerSize = .48f, ReplayCasualtyCountTextSize = 16;
+        public Vector2 ReplayMonsterDefeatOffset = new Vector2(.4f,.05f);
+        public Color ReplayDefeatedMonsterColor = new Color(.32f,.32f,.4f,.65f);
         public float ReferenceShortSide = 720;
         public Color SelectionColor = new Color(.96f,.76f,.37f);
         public float SmallText = 16, DefaultText = 20, LargeText = 26;

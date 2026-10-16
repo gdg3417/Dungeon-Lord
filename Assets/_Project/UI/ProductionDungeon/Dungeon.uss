@@ -10,6 +10,8 @@
 .replay-party-row, .replay-party-health { white-space: nowrap; margin: 0; padding: 0; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }
 .replay-party-row { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .replay-party-health { flex-shrink: 0; margin-left: 4px; }
+.replay-party-defeated .replay-party-row, .replay-party-defeated .replay-party-health { -unity-font-style: bold; }
+.replay-casualty-count { position: absolute; white-space: nowrap; margin: 0; padding: 0; -unity-font-style: bold; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }
 #replayAvailability { display: none; }
 .top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/panel.png"); -unity-slice-left: 14; -unity-slice-right: 14; -unity-slice-top: 14; -unity-slice-bottom: 14; }
 .top-chrome { flex-shrink: 0; }

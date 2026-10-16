@@ -31,6 +31,8 @@
     {"key":"ui.dungeon.replay.damage_number","text":"−{0}"},
     {"key":"ui.dungeon.replay.damage_zero","text":"0"},
     {"key":"ui.dungeon.replay.damage_defeat","text":"−{0}\nDefeated"},
+    {"key":"ui.dungeon.replay.casualty_count","text":"×{0}"},
+    {"key":"ui.dungeon.replay.casualty_count_detail","text":"{0} adventurers defeated here."},
     {"key":"ui.dungeon.replay.combat_hit","text":"{0} −{1}\n{2} HP"},
     {"key":"ui.dungeon.replay.combat_zero","text":"{0} · {1} damage\n{2} HP"},
     {"key":"ui.dungeon.replay.combat_fallen","text":"{0} −{1}\n{2} HP · defeated"},

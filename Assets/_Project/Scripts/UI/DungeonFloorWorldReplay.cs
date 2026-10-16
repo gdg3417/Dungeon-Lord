@@ -12,6 +12,8 @@ namespace DungeonBuilder.M0
         private readonly List<SpriteRenderer> replayContentPool = new List<SpriteRenderer>();
         private readonly List<SpriteRenderer> replayBadgePool = new List<SpriteRenderer>();
         private readonly List<SpriteRenderer> replayCasualtyPool = new List<SpriteRenderer>();
+        private readonly List<SpriteRenderer> replayDefeatPool = new List<SpriteRenderer>();
+        private readonly List<CombatCasualtyBinding> combatCasualties = new List<CombatCasualtyBinding>();
         private readonly List<ReplayBinding> replayBindings = new List<ReplayBinding>();
         private DungeonRunReplay boundReplay;
         private readonly List<CombatBinding> combatBindings = new List<CombatBinding>();
@@ -54,7 +56,30 @@ namespace DungeonBuilder.M0
             bounds=new Rect(point-Vector2.one*.5f,Vector2.one); return true;
         }
         private sealed class CombatBinding
-        { internal int Actor; internal SpriteRenderer View; internal Vector3 Position; internal Color Color; internal int Order; }
+        { internal int Actor; internal SpriteRenderer View, Defeat; internal Vector3 Position; internal Color Color; internal int Order; }
+        private sealed class CombatCasualtyBinding
+        {
+            internal SpriteRenderer View;
+            internal readonly List<int> Frames = new List<int>();
+            internal int Count;
+        }
+        public int ReplayCasualtySites => combatCasualties.Count;
+        public int ReplayDefeatedMonsterCount { get; private set; }
+        public bool TryReplayCasualtyBounds(int site,out Bounds bounds,out int count)
+        {
+            bounds=default; count=0;
+            if(site<0 || site>=combatCasualties.Count) return false;
+            var binding=combatCasualties[site]; count=binding.Count;
+            if(count==0 || !binding.View.gameObject.activeSelf) return false;
+            bounds=binding.View.bounds; return true;
+        }
+        public bool TryReplayDefeatBounds(int actor,out Bounds bounds)
+        {
+            bounds=default;
+            foreach(var binding in combatBindings)
+                if(binding.Actor==actor && binding.Defeat.gameObject.activeSelf) { bounds=binding.Defeat.bounds; return true; }
+            return false;
+        }
         public bool ReplayAttackVisible => replayAttack != null && replayAttack.gameObject.activeSelf;
         public int ReplayDefenderCount => combatBindings.Count;
         public bool TryReplayCombatantBounds(DungeonRunReplay replay, int actor, out Bounds bounds)
@@ -86,6 +111,9 @@ namespace DungeonBuilder.M0
             foreach (var binding in combatBindings)
             { binding.View.transform.localPosition=binding.Position; binding.View.color=binding.Color; binding.View.sortingOrder=binding.Order; }
             combatBindings.Clear();
+            combatCasualties.Clear(); ReplayDefeatedMonsterCount=0;
+            foreach(var view in replayCasualtyPool) view.gameObject.SetActive(false);
+            foreach(var view in replayDefeatPool) view.gameObject.SetActive(false);
             if (replayAttack != null) replayAttack.gameObject.SetActive(false);
             foreach (var binding in replayBindings)
             {
@@ -114,9 +142,16 @@ namespace DungeonBuilder.M0
                     if (!actor.IsMonster || actor.FloorId!=FloorInstanceId) continue;
                     for (int i=0;i<identities.Count;i++)
                         if (identities[i].AssignmentId==actor.AssignmentId)
-                        { var view=pool[i]; combatBindings.Add(new CombatBinding { Actor=a, View=view,
-                            Position=view.transform.localPosition, Color=view.color, Order=view.sortingOrder }); break; }
+                        {
+                            var view=pool[i]; var defeat=ReplayView(replayDefeatPool,combatBindings.Count,"RecordedMonsterDefeat",6);
+                            defeat.sprite=policy.Visuals!=null ? policy.Visuals.Invalid : anchorSprite;
+                            defeat.color=policy.ReplayCasualtyColor; defeat.transform.localScale=Vector3.one*policy.ReplayDeathMarkerSize;
+                            defeat.gameObject.SetActive(false);
+                            combatBindings.Add(new CombatBinding { Actor=a, View=view, Defeat=defeat,
+                                Position=view.transform.localPosition, Color=view.color, Order=view.sortingOrder }); break;
+                        }
                 }
+            if(replay.Combat!=null) BindCombatCasualties(replay);
             int added = 0, casualties = 0;
             foreach (int index in replay.InteractionIndices)
             {
@@ -139,7 +174,7 @@ namespace DungeonBuilder.M0
                     Badge = ReplayView(replayBadgePool, replayBindings.Count, "RecordedInteractionState", 4) };
                 binding.Badge.sprite = anchorSprite;
                 binding.Badge.transform.localScale = Vector3.one * policy.ReplayStateBadgeSize;
-                if (frame.Step.Encounter?.HealthBefore > 0 && frame.Step.Encounter.HealthAfter == 0)
+                if (replay.Combat==null && frame.Step.Encounter?.HealthBefore > 0 && frame.Step.Encounter.HealthAfter == 0)
                 {
                     binding.Casualty = ReplayView(replayCasualtyPool, casualties++, "RecordedAdventurerCasualty", 6);
                     binding.Casualty.sprite = anchorSprite;
@@ -166,6 +201,30 @@ namespace DungeonBuilder.M0
                     Color = Color.white, Order = 2 });
             }
         }
+        private void BindCombatCasualties(DungeonRunReplay replay)
+        {
+            var sites=new Dictionary<Vector2,CombatCasualtyBinding>(); var members=new HashSet<int>();
+            for(int i=0;i<replay.FrameCount;i++)
+            {
+                var frame=replay.Frames[i];
+                if(frame.FloorId!=FloorInstanceId || !frame.HasPosition) continue;
+                int member=-1;
+                if(frame.Combat?.Defeated==true && !replay.Combat.Actors[frame.TargetIndex].IsMonster) member=frame.TargetIndex;
+                else if(frame.Combat==null && frame.Step.Encounter?.HealthBefore>0 && frame.Step.Encounter.HealthAfter==0)
+                    for(int a=0;a<replay.Combat.Actors.Count;a++)
+                        if(!replay.Combat.Actors[a].IsMonster && replay.Combat.Actors[a].Ordinal==frame.Step.Encounter.MemberOrdinal) { member=a; break; }
+                if(member<0 || !members.Add(member)) continue;
+                if(!sites.TryGetValue(frame.Position,out var site))
+                {
+                    var view=ReplayView(replayCasualtyPool,combatCasualties.Count,"RecordedAdventurerCasualty",6);
+                    view.sprite=policy.Visuals!=null ? policy.Visuals.Invalid : anchorSprite;
+                    view.color=policy.ReplayCasualtyColor; view.transform.localPosition=frame.Position;
+                    view.transform.localScale=Vector3.one*policy.ReplayDeathMarkerSize; view.gameObject.SetActive(false);
+                    site=new CombatCasualtyBinding { View=view }; sites.Add(frame.Position,site); combatCasualties.Add(site);
+                }
+                site.Frames.Add(i);
+            }
+        }
         public void PresentReplay(DungeonRunReplay replay, bool editing)
         {
             if (editing || replay == null || replay.Closed) { HideReplay(); return; }
@@ -185,8 +244,8 @@ namespace DungeonBuilder.M0
             replayMarker.gameObject.SetActive(onFloor && current.HasMarker);
             if (onFloor) replayMarker.transform.localPosition = current.MarkerPosition;
             replayMarker.color = policy.ReplayEngagingColor;
-            PresentCombat(replay,onFloor);
             ReplayCasualtyCount = 0;
+            PresentCombat(replay,onFloor);
             foreach (var binding in replayBindings)
             {
                 if (binding.FrameIndex < 0) { binding.Content.gameObject.SetActive(true); continue; }
@@ -217,12 +276,22 @@ namespace DungeonBuilder.M0
         private void PresentCombat(DungeonRunReplay replay, bool onFloor)
         {
             if (replay.Combat==null) return;
+            ReplayDefeatedMonsterCount=0;
             foreach (var binding in combatBindings)
             {
                 var actor=replay.Combat.Actors[binding.Actor]; var state=actor.At(replay.Index);
                 binding.View.transform.localPosition=state.Position;
-                binding.View.color=state.Health==0 ? policy.ReplayResolvedColor : binding.Color;
+                binding.View.color=state.Health==0 ? policy.ReplayDefeatedMonsterColor : binding.Color;
                 binding.View.sortingOrder=state.Health==0 ? binding.Order : 3;
+                binding.Defeat.gameObject.SetActive(state.Health==0);
+                binding.Defeat.transform.localPosition=state.Position+policy.ReplayMonsterDefeatOffset;
+                if(state.Health==0) ReplayDefeatedMonsterCount++;
+            }
+            foreach(var site in combatCasualties)
+            {
+                site.Count=0;
+                foreach(int frame in site.Frames) { if(frame>replay.Index) break; site.Count++; }
+                site.View.gameObject.SetActive(site.Count>0); ReplayCasualtyCount+=site.Count;
             }
             var e=replay.Current.Combat;
             bool attack=onFloor && e?.Kind==CombatC0EventKind.Attack && replay.DamageVisible;
