@@ -89,6 +89,7 @@ namespace DungeonBuilder.M0.Tests
         [UnityTest]
         public IEnumerator CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers()
         {
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720,1280);
             var root=GameRoot.Instance; root.Save.structureRuntime.ManaReserve=1000;
             root.Save.completedResearch=new CompletedResearchState { ProjectIds=new[]{"ac_100"} };
             Assert.That(root.SaveService.CommitFloorConstruction(root.Save,root.SaveService.PreviewFloorConstruction(root.Save)).IsSuccess,Is.True);
