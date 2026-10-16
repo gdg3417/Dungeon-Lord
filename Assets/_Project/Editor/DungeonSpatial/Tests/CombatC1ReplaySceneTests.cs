@@ -94,6 +94,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.SaveService.CommitFloorConstruction(root.Save,root.SaveService.PreviewFloorConstruction(root.Save)).IsSuccess,Is.True);
             string other=root.Save.validatedCanonicalSpatialState.Floors.Single(f=>f.FloorIndex==1).FloorInstanceId;
             Assert.That(root.SimulateRunOnce(),Is.True); Assert.That(controller.StartReplay(),Is.True); controller.ToggleReplayPause();
+            controller.SelectFloor(root.Save.validatedCanonicalSpatialState.Floors[0].FloorInstanceId);
             var replay=controller.Replay;
             while(replay.Current.Combat?.Kind!=CombatC0EventKind.Attack) controller.NextReplay();
             for(int i=0;i<3;i++) yield return null;
