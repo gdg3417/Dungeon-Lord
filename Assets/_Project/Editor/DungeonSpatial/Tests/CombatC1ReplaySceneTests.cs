@@ -164,7 +164,8 @@ namespace DungeonBuilder.M0.Tests
             var replay=controller.Replay; var group=ui.Q("replayPartyInfo");
             controller.World.TryReplayLocationBounds(replay,out var location);
             Assert.That(group.resolvedStyle.display,Is.EqualTo(DisplayStyle.Flex),"Party roster must be usable: "+replay.Current.Step.Kind+" "+replay.DisplayPosition+" area="+location+" viewport="+controller.Viewport.ScreenRect);
-            var rows=group.Query<Label>(className:"replay-party-row").ToList().Where(l=>l.resolvedStyle.display==DisplayStyle.Flex).ToArray();
+            // A pooled row's parent is hidden when the next captured party is smaller.
+            var rows=group.Query<Label>(className:"replay-party-row").ToList().Where(l=>l.parent.resolvedStyle.display==DisplayStyle.Flex).ToArray();
             var members=replay.Combat.Actors.Where(a=>!a.IsMonster).ToArray(); Assert.That(rows.Length,Is.EqualTo(members.Length));
             var root=GameRoot.Instance;
             foreach(var member in members)
@@ -266,9 +267,14 @@ namespace DungeonBuilder.M0.Tests
                     if(controller.World.FloorInstanceId!=frame.FloorId) controller.SelectFloor(frame.FloorId);
                     for(int i=0;i<4;i++) yield return null;
                     AssertRpgParty(ui); floors.Add(frame.FloorId); positions.Add(ui.Q("replayPartyInfo").worldBound.position);
-                    corridor|=frame.Step.PositionSpace==RunPositionSpace.Floor;
-                    if(frame.Step.PositionSpace==RunPositionSpace.Floor&&!captured)
-                    { yield return CompositionCapture("combat-c1-rpg-corridor",new Vector2Int(1920,1080)); captured=true; }
+                    bool onCorridorTrap=frame.Step.PositionSpace==RunPositionSpace.Floor&&frame.Step.Kind==RunStepKind.TrapTrigger;
+                    corridor|=onCorridorTrap;
+                    if(onCorridorTrap&&!captured)
+                    {
+                        Assert.That(frame.Step.Position,Is.EqualTo(tiles[0]),"Capture the actual assigned corridor trap, not initial Floor-space movement inside a room");
+                        Assert.That(controller.Replay.DisplayPosition,Is.EqualTo(new Vector2(tiles[0].X+.5f,tiles[0].Y+.5f)));
+                        yield return CompositionCapture("combat-c1-rpg-corridor",new Vector2Int(1920,1080)); captured=true;
+                    }
                 }
                 else { yield return null; Assert.That(ui.Q("replayPartyInfo").resolvedStyle.display,Is.EqualTo(DisplayStyle.None)); }
                 if(controller.Replay.Complete) break;
