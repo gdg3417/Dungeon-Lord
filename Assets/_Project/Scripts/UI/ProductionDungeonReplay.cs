@@ -126,7 +126,8 @@ namespace DungeonBuilder.M0
             start.SetEnabled(replayReason == null && recoveryBytes == null && recoveryReason == null);
             start.tooltip = Text(replayReason ?? "ui.dungeon.replay.start");
             ui.Q<Label>("replayAvailability").text = Text(replayReason ?? "ui.dungeon.replay.ready");
-            ui.Q("replayAvailability").style.display = !IsEditing && replay == null ? DisplayStyle.Flex : DisplayStyle.None;
+            ui.Q("replayAvailability").style.display = !IsEditing && replay == null &&
+                !string.IsNullOrEmpty(replayAvailableOutcome?.RunId) ? DisplayStyle.Flex : DisplayStyle.None;
             if (replay == null) return;
             var frame = replay.Current;
             var pause = ui.Q<Button>("pauseReplay");
