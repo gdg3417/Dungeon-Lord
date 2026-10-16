@@ -1,0 +1,68 @@
+[
+  {
+    "file": "combat-c1-death-editmode.xml",
+    "sha256": "25c634b45f34f6465ddf2f4570d2f5216687e4f07db58894bb5a254681b498d4",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "138",
+      "result": "Passed",
+      "total": "138",
+      "passed": "138",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 16:15:49Z",
+      "end-time": "2026-10-16 16:16:06Z",
+      "duration": "16.9099902"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-death-focused01.xml",
+    "sha256": "d26ea88c8a55f2ddd5b1b7287fb69dc96318db12f88f15596e5238dd0bd8195d",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "4",
+      "result": "Passed",
+      "total": "4",
+      "passed": "4",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 16:12:43Z",
+      "end-time": "2026-10-16 16:12:55Z",
+      "duration": "11.4558615"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-death-playmode.xml",
+    "sha256": "f0e80f295949b2a818427cdb52b2d10606740a282cf31fdcddd56da9c3010e16",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "80",
+      "result": "Passed",
+      "total": "80",
+      "passed": "80",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 16:16:58Z",
+      "end-time": "2026-10-16 16:17:28Z",
+      "duration": "30.0076147"
+    },
+    "failures": [],
+    "skips": []
+  }
+]

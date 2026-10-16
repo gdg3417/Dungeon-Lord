@@ -1,6 +1,6 @@
 # Combat C1 authoritative graphical replay
 
-Current RPG presentation correction (2026-10-16): owner Editor UAT requested natural monster names, persistent HP, lightweight damage numbers and a contextual party roster following the recorded room/corridor. The [RPG correction and final-source qualification](rpg-20261016/qualification.md) supersede the initial and first [readability correction](readability-20261016/qualification.md) presentation choices below. Historical reports retain their original source applicability. Independent ChatGPT review precedes the short owner retest; acceptance of this correction is unclaimed.
+Current death visibility correction (2026-10-16): the owner confirmed the previous RPG improvements and identified insufficient death visibility. The [death correction and final-source qualification](death-20261016/qualification.md) add persistent recorded casualty sites/counts, clearly subdued defeated monsters with cross indicators, and red/bold zero-HP party rows. The [RPG correction](rpg-20261016/qualification.md) and first [readability correction](readability-20261016/qualification.md) retain their historical source applicability. Independent ChatGPT review precedes the short owner retest; acceptance of this death correction is unclaimed.
 
 Historical initial implementation status (2026-10-16): implementation and required automated qualification complete. Independent ChatGPT PR review is next. Owner UAT has not started and acceptance is not claimed. Do not merge. The current correction status is linked above.
 

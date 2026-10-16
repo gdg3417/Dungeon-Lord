@@ -1,0 +1,44 @@
+[
+  {
+    "file": "inputs-build-exact.json",
+    "sha256": "09a659c1b10c96f31bd8f4f9ffd80e41e291498b437ad8472676d1ce1679f08d",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "inputs-editmode-exact.json",
+    "sha256": "39b59ed62b7bd2a508687e2f3efcc8f341bd861fa5dee6d7228b6b1795d6b8d9",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "inputs-focused01-exact.json",
+    "sha256": "266ca771e443f896c8fb8c020e0c5027e176f48985f30d05c96abbb3c74b155f",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "inputs-playmode-exact.json",
+    "sha256": "39b59ed62b7bd2a508687e2f3efcc8f341bd861fa5dee6d7228b6b1795d6b8d9",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "owner-prepare-exact.json",
+    "sha256": "09a659c1b10c96f31bd8f4f9ffd80e41e291498b437ad8472676d1ce1679f08d",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "prepare-exact.json",
+    "sha256": "266ca771e443f896c8fb8c020e0c5027e176f48985f30d05c96abbb3c74b155f",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  }
+]
