@@ -253,6 +253,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(reason,Is.EqualTo(DungeonRunReplay.NoRun));
             var f=Completed(); f.Reopen(); Reject(f,DungeonRunReplay.Missing);
         }
+        [TestCase(false)] [TestCase(true)]
+        public void MalformedFloorGlobalMovementCannotEscapeCapturedFloorBounds(bool secondFloor)
+        {
+            var f=Completed(secondFloor); var r=f.Runtime.runHistory.LatestOutcome;
+            Assert.That(Create(f),Is.Not.Null);
+            int at=Array.FindIndex(r.PresentationSteps,s=>s.Kind==RunStepKind.Movement&&s.FloorIndex==(secondFloor?1:0));
+            Assert.That(at,Is.GreaterThanOrEqualTo(0)); var s=r.PresentationSteps[at];
+            r.PresentationSteps[at]=new RunStep(s.Kind,s.FloorIndex,s.RoomId,s.AssignmentId,new TileCoordinate(int.MaxValue,int.MaxValue),
+                s.Distance,s.Encounter,s.RunId,s.Ordinal,s.LogicalTime,RunPositionSpace.Floor,s.ContinueChosen,s.CarriedLootValueAfter,combatEvents:s.CombatEvents);
+            Reject(f);
+        }
+        [TestCase(RunStepKind.TrapTrigger)] [TestCase(RunStepKind.LootInteraction)]
+        public void CorridorInteractionPositionMustMatchItsCapturedAssignment(RunStepKind kind)
+        {
+            var f=PhaseFiveBBranchIntegrationTests.Fixture(); f.Configuration.CombatC0=CombatC0IntegrationTests.Config().CombatC0;
+            f.Accept(PhaseFiveBBranchIntegrationTests.Run(f)); var r=f.Runtime.runHistory.LatestOutcome;
+            Assert.That(Create(f),Is.Not.Null);
+            int at=Array.FindIndex(r.PresentationSteps,s=>s.Kind==kind&&s.PositionSpace==RunPositionSpace.Floor);
+            Assert.That(at,Is.GreaterThan(0)); var s=r.PresentationSteps[at];
+            r.PresentationSteps[at]=new RunStep(s.Kind,s.FloorIndex,s.RoomId,s.AssignmentId,new TileCoordinate(s.Position.X+1,s.Position.Y),
+                s.Distance,s.Encounter,s.RunId,s.Ordinal,s.LogicalTime,s.PositionSpace,s.ContinueChosen,s.CarriedLootValueAfter,combatEvents:s.CombatEvents);
+            Reject(f);
+        }
     }
 }
 #endif

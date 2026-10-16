@@ -110,6 +110,8 @@ namespace DungeonBuilder.M0
                 policy.MaximumReplayCombatStateChanges <= 0) return false;
             var floors = state.Floors.ToDictionary(f => f.FloorIndex);
             var floorIds = state.Floors.ToDictionary(f => f.FloorInstanceId, StringComparer.Ordinal);
+            var floorBounds = state.Floors.ToDictionary(f => f.FloorIndex, f => catalog.Floors.Single(d =>
+                d.FloorDefinitionId == f.FloorDefinitionId && d.FloorIndex == f.FloorIndex).Bounds);
             var actors = new List<ActorCapture>();
             foreach (var m in outcome.Party.Members.OrderBy(m => m.MemberOrdinal))
             {
@@ -140,6 +142,7 @@ namespace DungeonBuilder.M0
                 else if (e.AssignmentId != null && !spatial.TryAdd((e.FloorIndex,e.RoomInstanceId,e.AssignmentId),e)) return false;
             var traps = new HashSet<RunEncounterEvent>();
             var corridorOptions = new Dictionary<(int,string),string>();
+            var corridorPositions = new Dictionary<(int,string),TileCoordinate>();
             var corridor = new List<DungeonReplayCorridorContent>();
             foreach (var branch in outcome.BranchOutcomes ?? Array.Empty<BranchOutcomeEvidence>())
                 if (branch.Traversed && branch.Fork != null)
@@ -148,6 +151,7 @@ namespace DungeonBuilder.M0
                         if (!floors.TryGetValue(branch.Fork.FloorIndex, out var floor) || floor.FloorInstanceId != a.FloorInstanceId ||
                             !corridorOptions.TryAdd((branch.Fork.FloorIndex,a.AssignmentId),a.OptionId)) return false;
                         if (corridor.Count >= policy.MaximumReplayMarkers) { reason=Capacity; return false; }
+                        corridorPositions.Add((branch.Fork.FloorIndex,a.AssignmentId),a.Tile);
                         corridor.Add(new DungeonReplayCorridorContent(a));
                     }
             if ((long)corridor.Count + spatial.Count > policy.MaximumReplayMarkers)
@@ -166,6 +170,8 @@ namespace DungeonBuilder.M0
                 string floorId = floor?.FloorInstanceId;
                 bool located = step.PositionSpace != RunPositionSpace.None;
                 Vector2 position = default;
+                if (step.PositionSpace == RunPositionSpace.Floor && (floor == null ||
+                    floorBounds[step.FloorIndex]?.Contains(step.Position) != true)) return false;
                 if (located && (floor == null || !TryProject(step.Position,step.PositionSpace,step.RoomId,floor,catalog,out position))) return false;
                 if (!located && step.Kind != RunStepKind.FloorTransfer) { floorId = lastFloor; position = lastPosition; located = lastLocated; }
                 var attached = step.CombatEvents;
@@ -307,6 +313,10 @@ namespace DungeonBuilder.M0
                 else
                 {
                     if (step.Kind == RunStepKind.MonsterEngagement || cursor < events.Length && events[cursor].RunOrdinal == s) return false;
+                    if (step.PositionSpace == RunPositionSpace.Floor &&
+                        (step.Kind == RunStepKind.TrapTrigger || step.Kind == RunStepKind.LootInteraction) &&
+                        (!corridorPositions.TryGetValue((step.FloorIndex,step.AssignmentId),out var recordedTile) ||
+                         !recordedTile.Equals(step.Position))) return false;
                     spatial.TryGetValue((step.FloorIndex,step.RoomId,step.AssignmentId ?? string.Empty),out var evidence);
                     if (evidence != null && (!seenSpatial.Add((step.FloorIndex,step.RoomId,step.AssignmentId)) ||
                         evidence.FloorInstanceId!=floorId || !evidence.Position.Equals(step.Position))) return false;
