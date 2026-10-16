@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using UnityEngine;
@@ -16,6 +17,42 @@ namespace DungeonBuilder.M0
         private readonly List<CombatBinding> combatBindings = new List<CombatBinding>();
         private LineRenderer replayAttack;
         private Material replayAttackMaterial;
+        private readonly List<Rect> replayOccupiedRegions=new List<Rect>();
+        private readonly Dictionary<string,Rect> replayLocationRegions=new Dictionary<string,Rect>();
+        public IReadOnlyList<Rect> ReplayOccupiedRegions => replayOccupiedRegions;
+        private void CacheReplayRegions(Dictionary<string,HashSet<TileCoordinate>> locations,HashSet<TileCoordinate> visible)
+        {
+            replayOccupiedRegions.Clear(); replayLocationRegions.Clear();
+            foreach(var location in locations)
+            {
+                var tiles=location.Value;
+                replayLocationRegions.Add(location.Key,Rect.MinMaxRect(tiles.Min(t=>t.X),tiles.Min(t=>t.Y),tiles.Max(t=>t.X)+1f,tiles.Max(t=>t.Y)+1f));
+            }
+            // Compress the already bounded rendered footprint once; no geometry/path work during playback.
+            foreach(var row in visible.GroupBy(t=>t.Y).OrderBy(g=>g.Key))
+            {
+                int start=0,last=0; bool first=true;
+                foreach(var tile in row.OrderBy(t=>t.X))
+                {
+                    if(first) { start=last=tile.X; first=false; }
+                    else if((long)tile.X==(long)last+1) last=tile.X;
+                    else { replayOccupiedRegions.Add(new Rect(start,row.Key,last-start+1,1)); start=last=tile.X; }
+                }
+                if(!first) replayOccupiedRegions.Add(new Rect(start,row.Key,last-start+1,1));
+            }
+        }
+        public bool TryReplayLocationBounds(DungeonRunReplay replay,out Rect bounds)
+        {
+            bounds=default;
+            if(replay==null || replay.Current.FloorId!=FloorInstanceId || !replay.Current.HasPosition) return false;
+            var point=replay.DisplayPosition;
+            if(replay.Current.Step.PositionSpace!=RunPositionSpace.Floor)
+            {
+                if(replay.Current.Step.RoomId!=null && replayLocationRegions.TryGetValue(replay.Current.Step.RoomId,out bounds) && bounds.Contains(point)) return true;
+            }
+            foreach(var area in replayLocationRegions.Values) if(area.Contains(point)) { bounds=area; return true; }
+            bounds=new Rect(point-Vector2.one*.5f,Vector2.one); return true;
+        }
         private sealed class CombatBinding
         { internal int Actor; internal SpriteRenderer View; internal Vector3 Position; internal Color Color; internal int Order; }
         public bool ReplayAttackVisible => replayAttack != null && replayAttack.gameObject.activeSelf;
@@ -23,10 +60,9 @@ namespace DungeonBuilder.M0
         public bool TryReplayCombatantBounds(DungeonRunReplay replay, int actor, out Bounds bounds)
         {
             bounds=default;
-            if (boundReplay!=replay || replay?.Combat==null || actor<0 || actor>=replay.Combat.Actors.Count ||
-                replay.Current.FloorId!=FloorInstanceId) return false;
+            if (boundReplay!=replay || replay?.Combat==null || actor<0 || actor>=replay.Combat.Actors.Count) return false;
             if (!replay.Combat.Actors[actor].IsMonster)
-            { if (replayParty==null) return false; bounds=replayParty.bounds; return true; }
+            { if (replayParty==null || replay.Current.FloorId!=FloorInstanceId) return false; bounds=replayParty.bounds; return true; }
             foreach (var binding in combatBindings)
                 if (binding.Actor==actor && binding.View.gameObject.activeSelf)
                 { bounds=binding.View.bounds; return true; }

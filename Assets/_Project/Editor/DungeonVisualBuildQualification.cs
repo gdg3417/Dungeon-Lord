@@ -45,6 +45,8 @@ namespace DungeonBuilder.M0.EditorTools
             => BuildWindowsAt("Builds/Development/Windows-combat-c1/Dungeon Lord.exe");
         public static void BuildCombatC1ReadabilityWindows()
             => BuildWindowsAt("Builds/Development/Windows-combat-c1-readability-20261016/Dungeon Lord.exe");
+        public static void BuildCombatC1RpgWindows()
+            => BuildWindowsAt("Builds/Development/Windows-combat-c1-rpg-20261016/Dungeon Lord.exe");
         private static void BuildWindowsAt(string outputPath)
         {
             DevelopmentBuildUtility.BuildDevelopment(BuildTarget.StandaloneWindows64, outputPath);

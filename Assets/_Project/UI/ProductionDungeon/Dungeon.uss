@@ -2,7 +2,12 @@
 .safe-root { position: absolute; color: var(--ink); }
 .replay-panel { display: none; flex-shrink: 0; }
 .replay-details { flex-shrink: 1; }
-.replay-actor { position: absolute; background-color: rgba(18, 22, 30, 0.65); border-radius: 3px; padding: 1px 3px; white-space: nowrap; -unity-text-align: middle-center; }
+.replay-actor { position: absolute; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -unity-text-align: middle-center; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }
+.replay-party-info { position: absolute; display: none; }
+.replay-party-line { flex-direction: row; flex-shrink: 0; }
+.replay-party-row, .replay-party-health { white-space: nowrap; margin: 0; padding: 0; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }
+.replay-party-row { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.replay-party-health { flex-shrink: 0; margin-left: 4px; }
 #replayAvailability { display: none; }
 .top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/panel.png"); -unity-slice-left: 14; -unity-slice-right: 14; -unity-slice-top: 14; -unity-slice-bottom: 14; }
 .top-chrome { flex-shrink: 0; }
@@ -150,4 +155,4 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 #contentBrowserSelector > Button { flex-grow: 1; }
 .content-card { flex-shrink: 0; }
 .replay-damage { position: absolute; display: none; background-color: rgba(18, 22, 30, 0.96); border-radius: 6px; padding: 6px; white-space: normal; -unity-text-align: middle-center; -unity-font-style: bold; }
-.replay-combat-damage { padding: 3px 6px; border-radius: 4px; }
+.replay-combat-damage { padding: 0; background-color: rgba(0,0,0,0); white-space: nowrap; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }

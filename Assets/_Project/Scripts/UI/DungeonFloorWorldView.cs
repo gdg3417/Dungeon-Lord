@@ -131,6 +131,7 @@ namespace DungeonBuilder.M0
             ClearMoveGuidance(); GridTileCount = 0;
             perimeter.ClearAllTiles(); surrounding.ClearAllTiles(); identities.Clear();
             roomPassages.Clear();
+            replayOccupiedRegions.Clear(); replayLocationRegions.Clear();
             ClearPreview();
             foreach (var view in pool) view.gameObject.SetActive(false);
             foreach (var view in fixedPool) view.gameObject.SetActive(false);
@@ -185,6 +186,7 @@ namespace DungeonBuilder.M0
             // Canonical tile centers are integer cells plus one half presentation unit.
             Bounds = visible.Count == 0 ? new Rect(0, 0, 1, 1) : new Rect(visible.Min(t => t.X), visible.Min(t => t.Y),
                 visible.Max(t => t.X) - visible.Min(t => t.X) + 1, visible.Max(t => t.Y) - visible.Min(t => t.Y) + 1);
+            CacheReplayRegions(roomFootprints,visible);
             var configured = production.Catalog.Floors.Single(d => d.FloorDefinitionId == selected.FloorDefinitionId && d.FloorIndex == selected.FloorIndex).Bounds;
             if (configured == null || !configured.IsValid || maximumGridTiles <= 0 || configured.TileCount > maximumGridTiles)
                 throw new InvalidOperationException(StructuralEditService.WorkloadReason);

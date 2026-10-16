@@ -18,13 +18,22 @@ MonoBehaviour:
   MaximumReplayCombatActors: 64
   MaximumReplayCombatStateChanges: 131072
   ReplayAttackWidth: 0.08
-  ReplayActorLabelWidth: 42
+  ReplayActorLabelWidth: 140
   ReplayActorLabelOffset: 6
   ReplayActorTextSize: 14
   ReplayActorTextScale: 0.65
-  ReplayCombatFeedbackWidth: 180
-  ReplayCombatFeedbackTextSize: 18
+  ReplayCombatFeedbackWidth: 110
+  ReplayCombatFeedbackTextSize: 20
   ReplayCombatFeedbackTextScale: 0.85
+  ReplayPartyInfoWidth: 210
+  ReplayPartyTextSize: 16
+  ReplayPartyTextScale: 0.8
+  ReplayPartyPlacementPasses: 4
+  ReplayPartyMaximumGap: 96
+  ReplayDamageRise: 12
+  ReplayDamageFloatSeconds: 0.9
+  ReplayDamageEndOpacity: 0.45
+  ReplayCombatDamageColor: {r: 1, g: 0.3, b: 0.35, a: 1}
   ReferenceShortSide: 720
   SelectionColor: {r: 0.96, g: 0.76, b: 0.37, a: 1}
   SmallText: 16

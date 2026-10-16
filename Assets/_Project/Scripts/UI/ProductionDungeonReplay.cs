@@ -18,6 +18,16 @@ namespace DungeonBuilder.M0
         private readonly List<Label> replayActorLabels = new List<Label>();
         private readonly List<Rect> replayActorRects = new List<Rect>(), replayTagRects = new List<Rect>();
         private Rect replayFeedbackRect;
+        private VisualElement replayPartyInfo;
+        private readonly List<Label> replayPartyRows=new List<Label>();
+        private readonly List<Label> replayPartyHealth=new List<Label>();
+        private readonly List<Rect> replayRegionRects=new List<Rect>();
+        private Rect replayPartyInfoRect;
+        private int partyTextIndex=-1,feedbackTarget=-1;
+        private int replayRegionRender=-1;
+        private Vector3 replayRegionCamera;
+        private float replayRegionSize,replayRegionScale;
+        private Rect replayRegionViewport;
         private bool showReplayPositions;
         private int actorTextIndex = -1;
         public DungeonRunReplay Replay => replay;
@@ -29,6 +39,7 @@ namespace DungeonBuilder.M0
             Button("nextReplay", NextReplay);
             Button("replayPositions", () => { showReplayPositions = !showReplayPositions; PresentReplayControls(); Layout(); });
             replayDamage = document.rootVisualElement.Q<Label>("replayDamage");
+            replayPartyInfo = document.rootVisualElement.Q("replayPartyInfo");
             RefreshReplayAvailability();
         }
         private void RefreshReplayAvailability()
@@ -68,6 +79,7 @@ namespace DungeonBuilder.M0
             replay?.Close(); replay = created; replayOutcome = root.Save.runHistory.LatestOutcome;
             damageTextIndex = -1;
             actorTextIndex = -1;
+            partyTextIndex = -1;
             CloseSheet(); PresentReplayControls(); world.PresentReplay(replay, IsEditing); Layout(); return true;
         }
         public void ToggleReplayPause()
@@ -87,18 +99,23 @@ namespace DungeonBuilder.M0
         }
         private void HideReplayFeedback()
         { if (replayDamage != null) replayDamage.style.display = DisplayStyle.None;
+          if (replayPartyInfo!=null) replayPartyInfo.style.display=DisplayStyle.None;
           foreach (var label in replayActorLabels) label.style.display = DisplayStyle.None; }
         private void PresentReplayFeedback()
         {
             if (replay?.Combat!=null)
             {
                 CaptureReplayCombatantRects();
-                PresentCombatFeedback();
+                replayTagRects.Clear(); replayFeedbackRect=default;
+                PresentReplayPartyInfo();
                 PresentCombatActorLabels();
+                PresentCombatFeedback();
                 return;
             }
             foreach (var label in replayActorLabels) label.style.display=DisplayStyle.None;
+            if(replayPartyInfo!=null) replayPartyInfo.style.display=DisplayStyle.None;
             replayDamage?.EnableInClassList("replay-combat-damage",false);
+            if(replayDamage!=null) replayDamage.style.opacity=1;
             if (replay == null || IsEditing || legacy || !replay.DamageVisible || replay.Current.FloorId != selectedFloor)
             { if (replayDamage != null) replayDamage.style.display = DisplayStyle.None; return; }
             var encounter = replay.Current.Step.Encounter;
@@ -176,8 +193,7 @@ namespace DungeonBuilder.M0
         {
             if (index < 0) return Text("ui.run.combat.none");
             var actor = replay.Combat.Actors[index];
-            return Format(actor.IsMonster ? "ui.dungeon.replay.defender" : "ui.dungeon.replay.member", actor.Ordinal + 1,
-                actor.IsMonster ? ContentName(actor.ContentId) : AdventurerPartyCompositionResolver.ResolveClassLabel(actor.ContentId, root.Content.GetString));
+            return actor.IsMonster ? ContentName(actor.ContentId) : AdventurerPartyCompositionResolver.ResolveClassLabel(actor.ContentId, root.Content.GetString);
         }
         private string CombatDescription(DungeonReplayFrame frame)
         {
@@ -216,23 +232,21 @@ namespace DungeonBuilder.M0
         }
         private void PresentCombatActorLabels()
         {
-            if (replay?.Combat == null || IsEditing || legacy || replay.Current.FloorId != selectedFloor)
+            if (replay?.Combat == null || IsEditing || legacy)
             { foreach (var label in replayActorLabels) label.style.display = DisplayStyle.None; return; }
             bool changed = actorTextIndex != replay.Index; actorTextIndex = replay.Index;
-            replayTagRects.Clear();
             for (int i=0;i<replay.Combat.Actors.Count;i++)
             {
                 if (replayActorLabels.Count == i)
-                { var label=new Label { pickingMode=PickingMode.Ignore }; label.AddToClassList("replay-actor");
+                { var label=new Label { pickingMode=PickingMode.Ignore,enableRichText=false }; label.AddToClassList("replay-actor");
                   document.rootVisualElement.Q("mapArea").Add(label); replayActorLabels.Add(label); changed=true; }
                 var view=replayActorLabels[i]; var actor=replay.Combat.Actors[i]; var state=actor.At(replay.Index);
-                bool visible=actor.IsMonster ? actor.FloorId==selectedFloor && actor.RoomId==replay.Current.Step.RoomId :
-                    i==replay.Current.ActorIndex || i==replay.Current.TargetIndex;
-                if (changed) { view.text=ActorAlias(i); view.userData=actor.Id; view.tooltip=ActorName(i); }
+                bool visible=actor.IsMonster && actor.FloorId==selectedFloor;
+                if (changed) { view.text=Format("ui.dungeon.replay.monster_hp",ActorName(i),state.Health,actor.MaxHealth); view.userData=actor.Id; view.tooltip=view.text; }
                 float font=Mathf.Max(presentationPolicy.ReplayActorTextSize,presentationPolicy.Text(textSize)*presentationPolicy.ReplayActorTextScale);
                 view.style.fontSize=font;
                 var measured=view.MeasureTextSize(view.text,0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined);
-                var size=new Vector2(Mathf.Max(presentationPolicy.ReplayActorLabelWidth,measured.x+view.resolvedStyle.paddingLeft+view.resolvedStyle.paddingRight),
+                var size=new Vector2(Mathf.Min(presentationPolicy.ReplayActorLabelWidth,measured.x+view.resolvedStyle.paddingLeft+view.resolvedStyle.paddingRight),
                     measured.y+view.resolvedStyle.paddingTop+view.resolvedStyle.paddingBottom);
                 Rect placed=default;
                 visible &= i<replayActorRects.Count && TryPlaceCombatOverlay(replayActorRects[i],size,true,out placed);
@@ -243,11 +257,6 @@ namespace DungeonBuilder.M0
             }
             for (int i=replay.Combat.Actors.Count;i<replayActorLabels.Count;i++) replayActorLabels[i].style.display=DisplayStyle.None;
         }
-        private string ActorAlias(int index)
-        {
-            var actor=replay.Combat.Actors[index];
-            return Format(actor.IsMonster ? "ui.run.combat.defender_alias" : "ui.run.combat.member_alias",actor.Ordinal+1);
-        }
         private Vector2 ReplayPanelPoint(Vector3 point)
         {
             var screen=worldCamera.WorldToScreenPoint(point);
@@ -256,6 +265,14 @@ namespace DungeonBuilder.M0
         private void CaptureReplayCombatantRects()
         {
             replayActorRects.Clear();
+            if(replayRegionRender!=world.ReconstructionCount || replayRegionCamera!=worldCamera.transform.position ||
+                replayRegionSize!=worldCamera.orthographicSize || replayRegionViewport!=worldCamera.pixelRect || replayRegionScale!=document.panelSettings.scale)
+            {
+                replayRegionRects.Clear(); var regions=world.ReplayOccupiedRegions; var viewport=ReplayViewportRect();
+                for(int i=0;i<regions.Count;i++) { var projected=ReplayPanelRect(regions[i]); if(projected.Overlaps(viewport)) replayRegionRects.Add(projected); }
+                replayRegionRender=world.ReconstructionCount; replayRegionCamera=worldCamera.transform.position;
+                replayRegionSize=worldCamera.orthographicSize; replayRegionViewport=worldCamera.pixelRect; replayRegionScale=document.panelSettings.scale;
+            }
             for (int i=0;i<replay.Combat.Actors.Count;i++)
             {
                 if (!world.TryReplayCombatantBounds(replay,i,out var bounds)) { replayActorRects.Add(default); continue; }
@@ -267,53 +284,139 @@ namespace DungeonBuilder.M0
         {
             replayFeedbackRect=default;
             var e=replay.Current.Combat;
-            if (IsEditing || legacy || replay.Current.FloorId!=selectedFloor || !replay.DamageVisible || e?.Kind!=CombatC0EventKind.Attack)
+            var trap=replay.Current.Step.Encounter;
+            if (IsEditing || legacy || replay.Current.FloorId!=selectedFloor || !replay.DamageVisible ||
+                (e?.Kind!=CombatC0EventKind.Attack && trap==null))
             { replayDamage.style.display=DisplayStyle.None; return; }
             replayDamage.EnableInClassList("replay-combat-damage",true);
             if (damageTextIndex!=replay.Index)
             {
                 damageTextIndex=replay.Index;
-                replayDamage.text=Format(e.Defeated ? "ui.dungeon.replay.combat_fallen" :
-                    e.Damage==0 ? "ui.dungeon.replay.combat_zero" : "ui.dungeon.replay.combat_hit",
-                    ActorAlias(replay.Current.TargetIndex),e.Damage,e.HealthAfter);
-                replayDamage.style.color=e.Defeated ? presentationPolicy.ReplayCasualtyColor :
-                    e.Damage==0 ? presentationPolicy.ReplayMitigatedColor : presentationPolicy.ReplayDamageColor;
+                int damage=e?.Damage ?? trap.Damage,after=e?.HealthAfter ?? trap.HealthAfter;
+                feedbackTarget=e!=null ? replay.Current.TargetIndex : replay.Combat.ActorIndex(replayOutcome.RunId+"/member/"+trap.MemberOrdinal.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                replayDamage.text=Format(after==0 ? "ui.dungeon.replay.damage_defeat" :
+                    damage==0 ? "ui.dungeon.replay.damage_zero" : "ui.dungeon.replay.damage_number",damage);
+                replayDamage.style.color=damage==0 ? presentationPolicy.ReplayMitigatedColor : presentationPolicy.ReplayCombatDamageColor;
             }
             replayDamage.style.fontSize=Mathf.Max(presentationPolicy.ReplayCombatFeedbackTextSize,
                 presentationPolicy.Text(textSize)*presentationPolicy.ReplayCombatFeedbackTextScale);
-            float width=Mathf.Min(presentationPolicy.ReplayCombatFeedbackWidth,replayDamage.parent.contentRect.width);
-            var measured=replayDamage.MeasureTextSize(replayDamage.text,width,VisualElement.MeasureMode.Exactly,0,VisualElement.MeasureMode.Undefined);
+            var measured=replayDamage.MeasureTextSize(replayDamage.text,0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined);
+            float width=Mathf.Min(presentationPolicy.ReplayCombatFeedbackWidth,measured.x);
             var size=new Vector2(width,measured.y+replayDamage.resolvedStyle.paddingTop+replayDamage.resolvedStyle.paddingBottom);
-            bool visible=TryPlaceCombatOverlay(replayActorRects[replay.Current.TargetIndex],size,false,out replayFeedbackRect);
+            bool visible=feedbackTarget>=0 && TryPlaceCombatOverlay(replayActorRects[feedbackTarget],size,false,out replayFeedbackRect);
             replayDamage.style.display=visible ? DisplayStyle.Flex : DisplayStyle.None;
-            if (visible) { replayDamage.style.width=width; replayDamage.style.left=replayFeedbackRect.x; replayDamage.style.top=replayFeedbackRect.y; }
+            float progress=Mathf.Clamp01(replay.Elapsed/Mathf.Max(float.Epsilon,presentationPolicy.ReplayDamageFloatSeconds));
+            replayDamage.style.opacity=Mathf.Lerp(1,presentationPolicy.ReplayDamageEndOpacity,progress);
+            if (visible)
+            {
+                var floated=replayFeedbackRect; floated.y-=presentationPolicy.ReplayDamageRise*progress;
+                if(ReplayViewportRect().Contains(floated.min) && ReplayViewportRect().Contains(floated.max) && !CombatOverlayBlocked(floated)) replayFeedbackRect=floated;
+                replayDamage.style.width=width; replayDamage.style.left=replayFeedbackRect.x; replayDamage.style.top=replayFeedbackRect.y;
+            }
+        }
+        private Rect ReplayPanelRect(Rect worldRect)
+        {
+            var min=ReplayPanelPoint(new Vector3(worldRect.xMin,worldRect.yMin));
+            var max=ReplayPanelPoint(new Vector3(worldRect.xMax,worldRect.yMax));
+            return Rect.MinMaxRect(Mathf.Min(min.x,max.x),Mathf.Min(min.y,max.y),Mathf.Max(min.x,max.x),Mathf.Max(min.y,max.y));
+        }
+        private Rect ReplayViewportRect()
+        {
+            var layer=replayDamage.parent; var pixels=worldCamera.pixelRect;
+            var topLeft=layer.WorldToLocal(new Vector2(pixels.xMin,Screen.height-pixels.yMax)/document.panelSettings.scale);
+            var bottomRight=layer.WorldToLocal(new Vector2(pixels.xMax,Screen.height-pixels.yMin)/document.panelSettings.scale);
+            return Rect.MinMaxRect(topLeft.x,topLeft.y,bottomRight.x,bottomRight.y);
+        }
+        private bool CombatOverlayBlocked(Rect candidate)
+        {
+            var rail=document.rootVisualElement.Q("floorRail");
+            if(rail.resolvedStyle.display!=DisplayStyle.None && candidate.Overlaps(replayDamage.parent.WorldToLocal(rail.worldBound))) return true;
+            if(replayPartyInfoRect.width>0 && candidate.Overlaps(replayPartyInfoRect)) return true;
+            foreach(var other in replayActorRects) if(other.width>0 && candidate.Overlaps(other)) return true;
+            foreach(var other in replayTagRects) if(candidate.Overlaps(other)) return true;
+            return false;
+        }
+        private void PresentReplayPartyInfo()
+        {
+            replayPartyInfoRect=default;
+            if(IsEditing || legacy || replay.Current.FloorId!=selectedFloor || !replay.Current.HasPosition ||
+                !world.TryReplayLocationBounds(replay,out var location)) { replayPartyInfo.style.display=DisplayStyle.None; return; }
+            bool changed=partyTextIndex!=replay.Index; partyTextIndex=replay.Index;
+            float font=Mathf.Max(presentationPolicy.ReplayPartyTextSize,presentationPolicy.Text(textSize)*presentationPolicy.ReplayPartyTextScale);
+            float width=Mathf.Min(presentationPolicy.ReplayPartyInfoWidth,ReplayViewportRect().width),height=0;
+            int row=0;
+            for(int i=0;i<replay.Combat.Actors.Count;i++)
+            {
+                var actor=replay.Combat.Actors[i]; if(actor.IsMonster) continue;
+                if(row==replayPartyRows.Count)
+                {
+                    var line=new VisualElement { pickingMode=PickingMode.Ignore }; line.AddToClassList("replay-party-line"); replayPartyInfo.Add(line);
+                    var label=new Label { pickingMode=PickingMode.Ignore,enableRichText=false,displayTooltipWhenElided=false }; label.AddToClassList("replay-party-row"); line.Add(label); replayPartyRows.Add(label);
+                    var health=new Label { pickingMode=PickingMode.Ignore,enableRichText=false }; health.AddToClassList("replay-party-health"); line.Add(health); replayPartyHealth.Add(health); changed=true;
+                }
+                var view=replayPartyRows[row++]; var state=actor.At(replay.Index);
+                var hp=replayPartyHealth[row-1];
+                if(changed)
+                {
+                    view.text=ProductionDungeonPresenter.ReplayPartyIdentity(Text,Culture,ActorName(i));
+                    hp.text=Format("ui.dungeon.replay.party_health",state.Health,actor.MaxHealth);
+                    view.tooltip=ProductionDungeonPresenter.ReplayPartyRow(Text,Culture,ActorName(i),state.Health,actor.MaxHealth); view.userData=actor.Id;
+                }
+                view.parent.style.display=DisplayStyle.Flex; view.style.fontSize=hp.style.fontSize=font;
+                view.style.color=hp.style.color=state.Health==0 ? presentationPolicy.ReplayResolvedColor : replay.Current.ActorIndex==i ? presentationPolicy.ReplayEngagingColor : presentationPolicy.ReplayPartyColor;
+                var measured=view.MeasureTextSize(view.text,0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined);
+                height+=Mathf.Max(measured.y,hp.MeasureTextSize(hp.text,0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined).y);
+            }
+            for(int i=row;i<replayPartyRows.Count;i++) replayPartyRows[i].parent.style.display=DisplayStyle.None;
+            var area=ReplayPanelRect(location); var anchor=ReplayPanelPoint(replay.DisplayPosition);
+            var viewport=ReplayViewportRect(); float gap=presentationPolicy.ReplayActorLabelOffset;
+            bool found=false;
+            for(int side=0;side<4&&!found;side++)
+                for(int shift=0;shift<3&&!found;shift++)
+                {
+                    float x=side==0 ? area.xMax+gap : side==1 ? area.xMin-gap-width : anchor.x-width*.5f;
+                    float y=side<2 ? anchor.y-height*.5f : side==2 ? area.yMin-gap-height : area.yMax+gap;
+                    if(side<2) y+=(shift==0?0:shift==1?-1:1)*height*.5f;
+                    else x+=(shift==0?0:shift==1?-1:1)*width*.5f;
+                    for(int pass=0;pass<presentationPolicy.ReplayPartyPlacementPasses&&!found;pass++)
+                    {
+                        var candidate=new Rect(Mathf.Clamp(x,viewport.xMin,Mathf.Max(viewport.xMin,viewport.xMax-width)),Mathf.Clamp(y,viewport.yMin,Mathf.Max(viewport.yMin,viewport.yMax-height)),width,height);
+                        if(height>viewport.height) break;
+                        float gapX=Mathf.Max(0,Mathf.Max(area.xMin-candidate.xMax,candidate.xMin-area.xMax));
+                        float gapY=Mathf.Max(0,Mathf.Max(area.yMin-candidate.yMax,candidate.yMin-area.yMax));
+                        if(gapX>presentationPolicy.ReplayPartyMaximumGap || gapY>presentationPolicy.ReplayPartyMaximumGap) break;
+                        bool blocked=CombatOverlayBlocked(candidate); float nextX=x,nextY=y;
+                        foreach(var region in replayRegionRects)
+                            if(candidate.Overlaps(region))
+                            {
+                                blocked=true;
+                                if(side==0) nextX=Mathf.Max(nextX,region.xMax+gap);
+                                else if(side==1) nextX=Mathf.Min(nextX,region.xMin-gap-width);
+                                else if(side==2) nextY=Mathf.Min(nextY,region.yMin-gap-height);
+                                else nextY=Mathf.Max(nextY,region.yMax+gap);
+                            }
+                        if(!blocked) { replayPartyInfoRect=candidate; found=true; }
+                        if(nextX==x&&nextY==y) break;
+                        x=nextX;y=nextY;
+                    }
+                }
+            replayPartyInfo.style.display=found?DisplayStyle.Flex:DisplayStyle.None;
+            if(found) { replayPartyInfo.style.left=replayPartyInfoRect.x; replayPartyInfo.style.top=replayPartyInfoRect.y; replayPartyInfo.style.width=width; }
         }
         private bool TryPlaceCombatOverlay(Rect body, Vector2 size, bool tag, out Rect placed)
         {
             placed=default;
             if (body.width<=0 || body.height<=0 || !float.IsFinite(size.x) || !float.IsFinite(size.y)) return false;
-            var layer=replayDamage.parent;
-            var pixels=worldCamera.pixelRect;
-            var topLeft=layer.WorldToLocal(new Vector2(pixels.xMin,Screen.height-pixels.yMax)/document.panelSettings.scale);
-            var bottomRight=layer.WorldToLocal(new Vector2(pixels.xMax,Screen.height-pixels.yMin)/document.panelSettings.scale);
-            var viewport=Rect.MinMaxRect(topLeft.x,topLeft.y,bottomRight.x,bottomRight.y);
+            var viewport=ReplayViewportRect();
             if (!viewport.Overlaps(body) || size.x>viewport.width || size.y>viewport.height) return false;
             float gap=presentationPolicy.ReplayActorLabelOffset;
             for (int side=0;side<4;side++)
             {
-                float x=side<2 ? body.center.x-size.x*.5f : side==2 ? body.xMax+gap : body.xMin-gap-size.x;
-                float y=side==0 ? body.yMin-gap-size.y : side==1 ? body.yMax+gap : body.center.y-size.y*.5f;
+                int edge=tag ? (side==1?3:side==3?1:side) : side;
+                float x=edge<2 ? body.center.x-size.x*.5f : edge==2 ? body.xMax+gap : body.xMin-gap-size.x;
+                float y=edge==0 ? body.yMin-gap-size.y : edge==1 ? body.yMax+gap : body.center.y-size.y*.5f;
                 var candidate=new Rect(Mathf.Clamp(x,viewport.xMin,viewport.xMax-size.x),Mathf.Clamp(y,viewport.yMin,viewport.yMax-size.y),size.x,size.y);
-                bool blocked=false;
-                var rail=document.rootVisualElement.Q("floorRail");
-                if (rail.resolvedStyle.display!=DisplayStyle.None && candidate.Overlaps(layer.WorldToLocal(rail.worldBound))) blocked=true;
-                foreach (var other in replayActorRects) if (other.width>0 && candidate.Overlaps(other)) { blocked=true; break; }
-                if (tag)
-                {
-                    if (replayFeedbackRect.width>0 && candidate.Overlaps(replayFeedbackRect)) blocked=true;
-                    foreach (var other in replayTagRects) if (candidate.Overlaps(other)) { blocked=true; break; }
-                }
-                if (!blocked) { placed=candidate; return true; }
+                if (!CombatOverlayBlocked(candidate)) { placed=candidate; return true; }
             }
             return false;
         }

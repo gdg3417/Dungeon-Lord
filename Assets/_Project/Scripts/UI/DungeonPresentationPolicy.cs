@@ -28,9 +28,14 @@ namespace DungeonBuilder.M0
         public float ReplayCombatActionSeconds = 1.2f;
         public int MaximumReplayCombatEvents = 32768, MaximumReplayCombatActors = 64;
         public int MaximumReplayCombatStateChanges = 131072;
-        public float ReplayAttackWidth = .08f, ReplayActorLabelWidth = 42, ReplayActorLabelOffset = 6;
+        public float ReplayAttackWidth = .08f, ReplayActorLabelWidth = 140, ReplayActorLabelOffset = 6;
         public float ReplayActorTextSize = 14, ReplayActorTextScale = .65f;
-        public float ReplayCombatFeedbackWidth = 180, ReplayCombatFeedbackTextSize = 18, ReplayCombatFeedbackTextScale = .85f;
+        public float ReplayCombatFeedbackWidth = 110, ReplayCombatFeedbackTextSize = 20, ReplayCombatFeedbackTextScale = .85f;
+        public float ReplayPartyInfoWidth = 210, ReplayPartyTextSize = 16, ReplayPartyTextScale = .8f;
+        public int ReplayPartyPlacementPasses = 4;
+        public float ReplayPartyMaximumGap = 96;
+        public float ReplayDamageRise = 12, ReplayDamageFloatSeconds = .9f, ReplayDamageEndOpacity = .45f;
+        public Color ReplayCombatDamageColor = new Color(1,.3f,.35f);
         public float ReferenceShortSide = 720;
         public Color SelectionColor = new Color(.96f,.76f,.37f);
         public float SmallText = 16, DefaultText = 20, LargeText = 26;

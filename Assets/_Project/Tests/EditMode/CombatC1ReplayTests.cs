@@ -15,6 +15,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         private DungeonPresentationPolicy policy;
         [SetUp] public void SetUp() => policy=ScriptableObject.CreateInstance<DungeonPresentationPolicy>();
+        [TestCase(null)] [TestCase("")] [TestCase(" ")] [TestCase("Aric")] [TestCase("Elara the Wise - Очень длинное имя <size=100> 名称")]
+        public void PartyRowFormatterUsesOnlySuppliedIdentityAndLocalizedTemplates(string identity)
+        {
+            string Text(string key)=>key.EndsWith("party_named_row")?"{0} - {1} - {2}/{3}":"{0} - {1}/{2}";
+            var value=ProductionDungeonPresenter.ReplayPartyRow(Text,System.Globalization.CultureInfo.GetCultureInfo("de-DE"),"Warrior",7,8,identity);
+            Assert.That(value,Is.EqualTo(string.IsNullOrWhiteSpace(identity)?"Warrior - 7/8":identity+" - Warrior - 7/8"));
+        }
         [TearDown] public void TearDown() => UnityEngine.Object.DestroyImmediate(policy);
         internal static Fixture Completed(bool two=false, bool wipe=false)
         {
