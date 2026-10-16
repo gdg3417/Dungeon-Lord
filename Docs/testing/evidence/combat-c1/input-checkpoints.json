@@ -1,0 +1,86 @@
+[
+  {
+    "file": "inputs-art-import-exact.json",
+    "sha256": "2294e25df1cf534a2bfd5ad70a4d75d479dd7eb22c1bde0f3ad84e6680d175a4",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-build-gates-exact.json",
+    "sha256": "2294e25df1cf534a2bfd5ad70a4d75d479dd7eb22c1bde0f3ad84e6680d175a4",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-focused-final-exact.json",
+    "sha256": "2294e25df1cf534a2bfd5ad70a4d75d479dd7eb22c1bde0f3ad84e6680d175a4",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-owner-final-build-exact.json",
+    "sha256": "6db83a7c2b6dc0730edee0e028451efbdf71cd3c953a6be8fb0fecafe282e268",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-production-final-exact.json",
+    "sha256": "2294e25df1cf534a2bfd5ad70a4d75d479dd7eb22c1bde0f3ad84e6680d175a4",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-r2-before-full-exact.json",
+    "sha256": "9c52222ee4661caf9f7262ec9536b6fd1ffb3d192ff89ed026af2e6e17a8eb00",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-r2-corrected-focused-exact.json",
+    "sha256": "403df6eaaa44ad4a6f818a3b5b415ec6c8ba3b136c725fa944e42007ac74fb7f",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-r2-final-head-editmode-exact.json",
+    "sha256": "641fb9af52514d081b072f5732a8ec008ef026a6e1ac105feca9ef33ca5cecbb",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-r2-final-head-playmode-exact.json",
+    "sha256": "641fb9af52514d081b072f5732a8ec008ef026a6e1ac105feca9ef33ca5cecbb",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-r2-final-source-exact.json",
+    "sha256": "8a543168dbcfa8cbd3729661a70631d60ec2ea454c4cb7453e12940bf105dc48",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-r2-full-editmode-exact.json",
+    "sha256": "8a543168dbcfa8cbd3729661a70631d60ec2ea454c4cb7453e12940bf105dc48",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  },
+  {
+    "file": "inputs-r2-full-playmode-exact.json",
+    "sha256": "8a543168dbcfa8cbd3729661a70631d60ec2ea454c4cb7453e12940bf105dc48",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": []
+  }
+]

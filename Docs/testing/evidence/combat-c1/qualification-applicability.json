@@ -1,0 +1,109 @@
+{
+  "final_unity_source_commit": "a4211d7435139feb6146fb7c5dcb8e9b226b496a",
+  "previous_full_suite_source": "f501344b4900a2bc70731acd7fa24fa53c85dd38",
+  "unity_changes_since_full": [
+    "Assets/_Project/Scripts/UI/DungeonCombatReplay.cs",
+    "Assets/_Project/Tests/EditMode/CombatC1ReplayTests.cs"
+  ],
+  "decision": "Carry forward unchanged-area full-suite results with affected final-source follow-up. The only runtime change is fail-closed detached C0 position validation; all C1/C0/B1 focused cases, production scenes and 65 production gates passed afterward. No full-suite result is relabeled as a final-source rerun.",
+  "reports": [
+    {
+      "report": "combat-c1-full-editmode.xml",
+      "source_commit": "f501344b4900a2bc70731acd7fa24fa53c85dd38",
+      "passed": 2034,
+      "failed": 0,
+      "skipped": 1,
+      "duration": "40.9395553",
+      "skips": [
+        {
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+          "reason": "gd66.test.windows_only_inverse"
+        }
+      ]
+    },
+    {
+      "report": "combat-c1-full-playmode.xml",
+      "source_commit": "f501344b4900a2bc70731acd7fa24fa53c85dd38",
+      "passed": 3460,
+      "failed": 0,
+      "skipped": 10,
+      "duration": "589.8149949",
+      "skips": [
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+          "reason": "gd66.test.synchronous_edit_mode_fixture"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+          "reason": "gd66.test.windows_only_inverse"
+        },
+        {
+          "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+          "reason": "gd66.test.windows_player_only"
+        }
+      ]
+    },
+    {
+      "report": "combat-c1-corrected-focused.xml",
+      "source_commit": "uncommitted initial correction; two cases before expanded test variants",
+      "passed": 160,
+      "failed": 0,
+      "skipped": 0,
+      "duration": "21.3213535",
+      "skips": []
+    },
+    {
+      "report": "combat-c1-final-head-editmode.xml",
+      "source_commit": "a4211d7435139feb6146fb7c5dcb8e9b226b496a",
+      "passed": 227,
+      "failed": 0,
+      "skipped": 0,
+      "duration": "21.5057173",
+      "skips": []
+    },
+    {
+      "report": "combat-c1-final-head-playmode.xml",
+      "source_commit": "a4211d7435139feb6146fb7c5dcb8e9b226b496a",
+      "passed": 163,
+      "failed": 0,
+      "skipped": 0,
+      "duration": "26.529636",
+      "skips": []
+    }
+  ],
+  "strict_input_helper_tests": {
+    "passed": 12,
+    "source_unchanged": true,
+    "report": "combat-c1-input-helper-tests.txt"
+  },
+  "windows_build_attempts": 1,
+  "owner_uat": "Not started. Independent ChatGPT PR review precedes owner Editor/Windows testing."
+}

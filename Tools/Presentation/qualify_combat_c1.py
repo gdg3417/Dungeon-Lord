@@ -51,6 +51,49 @@ def owner_prepare():
     audit.write('owner-inputs-refreshed.json',audit.inputs.prepare(audit.ROOT,audit.NAME))
     print('Owner source refreshed with unchanged disposable namespace; no save opened')
 
+def alternate_prepare():
+    audit.NAME='ui-composition-combat-c0-diagnostics-validation-r2'
+    result=audit.inputs.compare(audit.ROOT,audit.NAME)
+    if result['unexpected']: raise ValueError('Unexpected alternate inputs; preserve and inspect: '+str(result['unexpected']))
+    with zipfile.ZipFile(audit.OUT/'r2-inputs-before-refresh.zip','x',zipfile.ZIP_DEFLATED) as saved:
+        for r in result['files']:
+            path=audit.ROOT/'Temp'/audit.NAME/r['path']
+            if not r['equal'] and path.exists(): saved.write(path,r['path'])
+    audit.write('r2-inputs-before.json',result)
+    audit.write('r2-inputs-refreshed.json',audit.inputs.prepare(audit.ROOT,audit.NAME))
+    print('Existing r2 project refreshed to isolated automated namespace; no save opened')
+
+def audit_preserved():
+    # Owner-authorized housekeeping may retire copied projects after preserving every
+    # non-cache byte. Missing originals count only with a verified, exact archive entry.
+    archives={}
+    for manifest in (audit.OUT/'retired-projects').glob('*-manifest.json'):
+        row=json.loads(manifest.read_text(encoding='utf-8-sig'))
+        if not row.get('removed'): continue
+        path=Path(row['archive'])
+        if path.resolve().parent!=(audit.OUT/'retired-projects').resolve() or audit.sha(path)!=row['archive_sha256']:
+            raise ValueError('Retired archive changed')
+        archives[row['project']]=(zipfile.ZipFile(path),path)
+    rows=json.loads((audit.OUT/'preservation-before.json').read_text())
+    for row in rows:
+        p=Path(row['path']); row['original_path_exists']=p.exists()
+        row['current_sha256']=audit.sha(p) if p.exists() else None
+        if not p.exists() and p.is_relative_to(audit.ROOT/'Temp'):
+            relative=p.relative_to(audit.ROOT/'Temp')
+            if relative.parts[0] in archives:
+                archive,path=archives[relative.parts[0]]
+                entry=Path(*relative.parts[1:]).as_posix()
+                import hashlib
+                row['current_sha256']=hashlib.sha256(archive.read(entry)).hexdigest()
+                row['preserved_in_archive']=str(path)+'!'+entry
+        row['equal']=row['sha256']==row['current_sha256']
+    for archive,_ in archives.values(): archive.close()
+    audit.write('preservation-after.json',rows)
+    changed=[r for r in rows if not r['equal']]
+    print(len(rows),'protected files;',len(changed),'changed;',sum('preserved_in_archive' in r for r in rows),'archived originals')
+    for row in changed: print(row['path'])
+    return bool(changed)
+
 if __name__ == '__main__':
     mode=sys.argv[1]
     if mode=='inventory': inventory()
@@ -72,8 +115,15 @@ if __name__ == '__main__':
     elif mode=='check': sys.exit(audit.check())
     elif mode=='checkpoint': audit.checkpoint(sys.argv[2])
     elif mode=='restore-fixtures': audit.restore_test_fixtures()
-    elif mode=='audit': sys.exit(audit.audit())
+    elif mode=='audit': sys.exit(audit_preserved())
     elif mode=='owner-prepare': owner_prepare()
+    elif mode=='alternate-prepare': alternate_prepare()
+    elif mode=='alternate-refresh':
+        audit.NAME='ui-composition-combat-c0-diagnostics-validation-r2'
+        audit.write('r2-inputs-refreshed-after-correction.json',audit.inputs.prepare(audit.ROOT,audit.NAME))
+    elif mode=='alternate-checkpoint':
+        audit.NAME='ui-composition-combat-c0-diagnostics-validation-r2'
+        audit.checkpoint('r2-'+sys.argv[2])
     elif mode=='owner-checkpoint':
         audit.NAME=OWNER
         audit.inputs.NAMESPACE='combat-c0-diagnostics-validation-20261015.json'

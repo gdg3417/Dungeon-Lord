@@ -1,0 +1,307 @@
+[
+  {
+    "project": "room-construction-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "phase7-room-construction-uat-b681ebc8e4664312a1feb2a471ebd4f2.json",
+    "builds": [
+      "Builds\\Development\\Windows\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "room-construction-validation-bounds-186ba37",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "phase7-room-construction-uat-b681ebc8e4664312a1feb2a471ebd4f2.json",
+    "builds": [
+      "Builds\\Development\\Windows\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-b2-alias-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "living-dungeon-phase-b2-alias-validation.json",
+    "builds": [
+      "Builds\\Development\\Windows-living-dungeon-phase-b2\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-b2\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-combat-c0-access-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "combat-c0-access-validation-20261015.json",
+    "builds": [],
+    "c0_evidence_reference": true,
+    "disposition": "removed after complete non-cache archival",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c1\\retired-projects\\ui-composition-combat-c0-access-validation.zip",
+    "archive_sha256": "12842b238f9d994ef2dcabcc7afdd54194147f77fc7f6184e5169d7aad55661e",
+    "exists_after_housekeeping": false
+  },
+  {
+    "project": "ui-composition-combat-c0-b1-baseline",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "combat-c0-b1-baseline-20261014.json",
+    "builds": [],
+    "c0_evidence_reference": true,
+    "disposition": "retain pending provenance of extra golden-capture scripts",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-combat-c0-diagnostics-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "combat-c0-diagnostics-validation-20261015.json",
+    "builds": [],
+    "c0_evidence_reference": true,
+    "disposition": "retain pending provenance of four source differences from documented qualification commit",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-combat-c0-diagnostics-validation-r2",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "combat-c0-access-validation-20261015.json",
+    "builds": [],
+    "c0_evidence_reference": false,
+    "disposition": "retain final C1 automated qualification environment",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "cache_preservation": "Original Library retained as Library-before-combat-c1-20261015; warm cache copied read-only",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-combat-c0-diagnostics-validation-warm",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "combat-c0-diagnostics-validation-20261015.json",
+    "builds": [
+      "Builds\\Development\\Windows-combat-c0-final-20261015\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-combat-c0-final-20261015\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-combat-c0-integration\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-combat-c0-integration\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": true,
+    "disposition": "retain protected owner environment",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-combat-c0-integration-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "combat-c0-integration-validation-20261014.json",
+    "builds": [
+      "Builds\\Development\\Windows-combat-c0-integration\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-combat-c0-integration\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": true,
+    "disposition": "removed after complete non-cache archival",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c1\\retired-projects\\ui-composition-combat-c0-integration-validation.zip",
+    "archive_sha256": "aeafbbe6a30041636f854bda381d8956c46adee86ae5b2bb5424477a331f9387",
+    "exists_after_housekeeping": false
+  },
+  {
+    "project": "ui-composition-combat-c0-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "combat-c0-prerequisite-validation-20261014.json",
+    "builds": [
+      "Builds\\Development\\Windows-combat-c0-prerequisite\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-combat-c0-prerequisite\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": true,
+    "disposition": "removed after complete non-cache archival",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c1\\retired-projects\\ui-composition-combat-c0-validation.zip",
+    "archive_sha256": "15c121fb5ae6a9d14a98f3b8a4f3b4dd95edce9a6e054fedabbe43a194758053",
+    "exists_after_housekeeping": false
+  },
+  {
+    "project": "ui-composition-final-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "phase7-ui-composition-validation-01a11d08.json",
+    "builds": [
+      "Builds\\Development\\Windows\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-floorhud-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "dungeon-lord-phase-b2-manual-uat.json",
+    "builds": [
+      "Builds\\Development\\Windows\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-content-multiplicity\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-content-multiplicity\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-living-dungeon-b1-manual-uat\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-living-dungeon-b1-manual-uat\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-a\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-a\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-a-review\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-a-review\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-b1\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-b1\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-b1-export-limit\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-b1-export-limit\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-b2\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-b2\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-b2-manual-uat\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-living-dungeon-phase-b2-manual-uat\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-loot-reassignment\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-loot-reassignment\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-map-reassignment\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-map-reassignment\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-placement-compact\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-placement-compact\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-room-content-uat\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-room-content-uat\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-overlay-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "phase7-ui-composition-validation-01a11d08.json",
+    "builds": [
+      "Builds\\Development\\Windows\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-review-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "phase7-ui-composition-validation-01a11d08.json",
+    "builds": [
+      "Builds\\Development\\Windows\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-uat-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "phase7-ui-composition-validation-01a11d08.json",
+    "builds": [
+      "Builds\\Development\\Windows\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "phase7-ui-composition-validation-01a11d08.json",
+    "builds": [],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-visual-replay-owner-uat",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "dungeon-lord-visual-run-manual-uat-20261014.json",
+    "builds": [
+      "Builds\\Development\\Windows-visual-run-feedback\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-visual-run-feedback\\UnityCrashHandler64.exe",
+      "Builds\\Development\\Windows-visual-run-replay\\Dungeon Lord.exe",
+      "Builds\\Development\\Windows-visual-run-replay\\UnityCrashHandler64.exe"
+    ],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  },
+  {
+    "project": "ui-composition-visual-replay-validation",
+    "linked": false,
+    "nested_git": [],
+    "checkout_status": null,
+    "independent_checkout": false,
+    "namespace": "phase7-visual-feedback-validation.json",
+    "builds": [],
+    "c0_evidence_reference": false,
+    "disposition": "retain pending ownership and unique historical build/evidence audit; outside verified C0 copies",
+    "dependency": "Keep all saves/recovery, prior builds and evidence. Input differences are not proof of uncommitted work.",
+    "exists_after_housekeeping": true
+  }
+]
