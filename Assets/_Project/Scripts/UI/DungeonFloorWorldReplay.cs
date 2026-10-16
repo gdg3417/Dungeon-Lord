@@ -20,6 +20,18 @@ namespace DungeonBuilder.M0
         { internal int Actor; internal SpriteRenderer View; internal Vector3 Position; internal Color Color; internal int Order; }
         public bool ReplayAttackVisible => replayAttack != null && replayAttack.gameObject.activeSelf;
         public int ReplayDefenderCount => combatBindings.Count;
+        public bool TryReplayCombatantBounds(DungeonRunReplay replay, int actor, out Bounds bounds)
+        {
+            bounds=default;
+            if (boundReplay!=replay || replay?.Combat==null || actor<0 || actor>=replay.Combat.Actors.Count ||
+                replay.Current.FloorId!=FloorInstanceId) return false;
+            if (!replay.Combat.Actors[actor].IsMonster)
+            { if (replayParty==null) return false; bounds=replayParty.bounds; return true; }
+            foreach (var binding in combatBindings)
+                if (binding.Actor==actor && binding.View.gameObject.activeSelf)
+                { bounds=binding.View.bounds; return true; }
+            return false;
+        }
         private sealed class ReplayBinding
         {
             internal int FrameIndex;
@@ -173,8 +185,7 @@ namespace DungeonBuilder.M0
             {
                 var actor=replay.Combat.Actors[binding.Actor]; var state=actor.At(replay.Index);
                 binding.View.transform.localPosition=state.Position;
-                binding.View.color=state.Health==0 ? policy.ReplayResolvedColor :
-                    replay.Current.ActorIndex==binding.Actor || replay.Current.TargetIndex==binding.Actor ? policy.ReplayEngagingColor : binding.Color;
+                binding.View.color=state.Health==0 ? policy.ReplayResolvedColor : binding.Color;
                 binding.View.sortingOrder=state.Health==0 ? binding.Order : 3;
             }
             var e=replay.Current.Combat;

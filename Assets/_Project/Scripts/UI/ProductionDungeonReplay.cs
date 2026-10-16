@@ -16,6 +16,8 @@ namespace DungeonBuilder.M0
         private Label replayDamage;
         private int damageTextIndex = -1;
         private readonly List<Label> replayActorLabels = new List<Label>();
+        private readonly List<Rect> replayActorRects = new List<Rect>(), replayTagRects = new List<Rect>();
+        private Rect replayFeedbackRect;
         private bool showReplayPositions;
         private int actorTextIndex = -1;
         public DungeonRunReplay Replay => replay;
@@ -88,8 +90,16 @@ namespace DungeonBuilder.M0
           foreach (var label in replayActorLabels) label.style.display = DisplayStyle.None; }
         private void PresentReplayFeedback()
         {
-            PresentCombatActorLabels();
-            if (replay == null || replay.Combat != null || IsEditing || legacy || !replay.DamageVisible || replay.Current.FloorId != selectedFloor)
+            if (replay?.Combat!=null)
+            {
+                CaptureReplayCombatantRects();
+                PresentCombatFeedback();
+                PresentCombatActorLabels();
+                return;
+            }
+            foreach (var label in replayActorLabels) label.style.display=DisplayStyle.None;
+            replayDamage?.EnableInClassList("replay-combat-damage",false);
+            if (replay == null || IsEditing || legacy || !replay.DamageVisible || replay.Current.FloorId != selectedFloor)
             { if (replayDamage != null) replayDamage.style.display = DisplayStyle.None; return; }
             var encounter = replay.Current.Step.Encounter;
             if (damageTextIndex != replay.Index)
@@ -209,26 +219,103 @@ namespace DungeonBuilder.M0
             if (replay?.Combat == null || IsEditing || legacy || replay.Current.FloorId != selectedFloor)
             { foreach (var label in replayActorLabels) label.style.display = DisplayStyle.None; return; }
             bool changed = actorTextIndex != replay.Index; actorTextIndex = replay.Index;
+            replayTagRects.Clear();
             for (int i=0;i<replay.Combat.Actors.Count;i++)
             {
                 if (replayActorLabels.Count == i)
                 { var label=new Label { pickingMode=PickingMode.Ignore }; label.AddToClassList("replay-actor");
                   document.rootVisualElement.Q("mapArea").Add(label); replayActorLabels.Add(label); changed=true; }
                 var view=replayActorLabels[i]; var actor=replay.Combat.Actors[i]; var state=actor.At(replay.Index);
-                bool visible=actor.IsMonster && actor.FloorId==selectedFloor && actor.RoomId==replay.Current.Step.RoomId;
-                var screen=worldCamera.WorldToScreenPoint(state.Position);
-                var local=view.parent.WorldToLocal(new Vector2(screen.x,Screen.height-screen.y)/document.panelSettings.scale);
-                visible &= worldCamera.pixelRect.Contains(new Vector2(screen.x,screen.y));
-                float width=Mathf.Min(presentationPolicy.ReplayActorLabelWidth,view.parent.contentRect.width);
-                view.style.width=width;
-                view.style.left=Mathf.Clamp(local.x-width*.5f,0,Mathf.Max(0,view.parent.contentRect.width-width));
-                view.style.top=Mathf.Max(0,local.y-presentationPolicy.ReplayActorLabelOffset);
-                view.style.fontSize=Mathf.Max(presentationPolicy.ReplayActorTextSize,presentationPolicy.Text(textSize));
+                bool visible=actor.IsMonster ? actor.FloorId==selectedFloor && actor.RoomId==replay.Current.Step.RoomId :
+                    i==replay.Current.ActorIndex || i==replay.Current.TargetIndex;
+                if (changed) { view.text=ActorAlias(i); view.userData=actor.Id; view.tooltip=ActorName(i); }
+                float font=Mathf.Max(presentationPolicy.ReplayActorTextSize,presentationPolicy.Text(textSize)*presentationPolicy.ReplayActorTextScale);
+                view.style.fontSize=font;
+                var measured=view.MeasureTextSize(view.text,0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined);
+                var size=new Vector2(Mathf.Max(presentationPolicy.ReplayActorLabelWidth,measured.x+view.resolvedStyle.paddingLeft+view.resolvedStyle.paddingRight),
+                    measured.y+view.resolvedStyle.paddingTop+view.resolvedStyle.paddingBottom);
+                Rect placed=default;
+                visible &= i<replayActorRects.Count && TryPlaceCombatOverlay(replayActorRects[i],size,true,out placed);
                 view.style.display=visible ? DisplayStyle.Flex : DisplayStyle.None;
-                if (changed) view.text=Format("ui.run.combat.defender_alias",actor.Ordinal+1);
+                if (visible)
+                { view.style.width=placed.width; view.style.left=placed.x; view.style.top=placed.y; replayTagRects.Add(placed); }
                 view.style.color=state.Health==0 ? presentationPolicy.ReplayCasualtyColor : presentationPolicy.ReplayPartyColor;
             }
             for (int i=replay.Combat.Actors.Count;i<replayActorLabels.Count;i++) replayActorLabels[i].style.display=DisplayStyle.None;
+        }
+        private string ActorAlias(int index)
+        {
+            var actor=replay.Combat.Actors[index];
+            return Format(actor.IsMonster ? "ui.run.combat.defender_alias" : "ui.run.combat.member_alias",actor.Ordinal+1);
+        }
+        private Vector2 ReplayPanelPoint(Vector3 point)
+        {
+            var screen=worldCamera.WorldToScreenPoint(point);
+            return replayDamage.parent.WorldToLocal(new Vector2(screen.x,Screen.height-screen.y)/document.panelSettings.scale);
+        }
+        private void CaptureReplayCombatantRects()
+        {
+            replayActorRects.Clear();
+            for (int i=0;i<replay.Combat.Actors.Count;i++)
+            {
+                if (!world.TryReplayCombatantBounds(replay,i,out var bounds)) { replayActorRects.Add(default); continue; }
+                var min=ReplayPanelPoint(bounds.min); var max=ReplayPanelPoint(bounds.max);
+                replayActorRects.Add(Rect.MinMaxRect(Mathf.Min(min.x,max.x),Mathf.Min(min.y,max.y),Mathf.Max(min.x,max.x),Mathf.Max(min.y,max.y)));
+            }
+        }
+        private void PresentCombatFeedback()
+        {
+            replayFeedbackRect=default;
+            var e=replay.Current.Combat;
+            if (IsEditing || legacy || replay.Current.FloorId!=selectedFloor || !replay.DamageVisible || e?.Kind!=CombatC0EventKind.Attack)
+            { replayDamage.style.display=DisplayStyle.None; return; }
+            replayDamage.EnableInClassList("replay-combat-damage",true);
+            if (damageTextIndex!=replay.Index)
+            {
+                damageTextIndex=replay.Index;
+                replayDamage.text=Format(e.Defeated ? "ui.dungeon.replay.combat_fallen" :
+                    e.Damage==0 ? "ui.dungeon.replay.combat_zero" : "ui.dungeon.replay.combat_hit",
+                    ActorAlias(replay.Current.TargetIndex),e.Damage,e.HealthAfter);
+                replayDamage.style.color=e.Defeated ? presentationPolicy.ReplayCasualtyColor :
+                    e.Damage==0 ? presentationPolicy.ReplayMitigatedColor : presentationPolicy.ReplayDamageColor;
+            }
+            replayDamage.style.fontSize=Mathf.Max(presentationPolicy.ReplayCombatFeedbackTextSize,
+                presentationPolicy.Text(textSize)*presentationPolicy.ReplayCombatFeedbackTextScale);
+            float width=Mathf.Min(presentationPolicy.ReplayCombatFeedbackWidth,replayDamage.parent.contentRect.width);
+            var measured=replayDamage.MeasureTextSize(replayDamage.text,width,VisualElement.MeasureMode.Exactly,0,VisualElement.MeasureMode.Undefined);
+            var size=new Vector2(width,measured.y+replayDamage.resolvedStyle.paddingTop+replayDamage.resolvedStyle.paddingBottom);
+            bool visible=TryPlaceCombatOverlay(replayActorRects[replay.Current.TargetIndex],size,false,out replayFeedbackRect);
+            replayDamage.style.display=visible ? DisplayStyle.Flex : DisplayStyle.None;
+            if (visible) { replayDamage.style.width=width; replayDamage.style.left=replayFeedbackRect.x; replayDamage.style.top=replayFeedbackRect.y; }
+        }
+        private bool TryPlaceCombatOverlay(Rect body, Vector2 size, bool tag, out Rect placed)
+        {
+            placed=default;
+            if (body.width<=0 || body.height<=0 || !float.IsFinite(size.x) || !float.IsFinite(size.y)) return false;
+            var layer=replayDamage.parent;
+            var pixels=worldCamera.pixelRect;
+            var topLeft=layer.WorldToLocal(new Vector2(pixels.xMin,Screen.height-pixels.yMax)/document.panelSettings.scale);
+            var bottomRight=layer.WorldToLocal(new Vector2(pixels.xMax,Screen.height-pixels.yMin)/document.panelSettings.scale);
+            var viewport=Rect.MinMaxRect(topLeft.x,topLeft.y,bottomRight.x,bottomRight.y);
+            if (!viewport.Overlaps(body) || size.x>viewport.width || size.y>viewport.height) return false;
+            float gap=presentationPolicy.ReplayActorLabelOffset;
+            for (int side=0;side<4;side++)
+            {
+                float x=side<2 ? body.center.x-size.x*.5f : side==2 ? body.xMax+gap : body.xMin-gap-size.x;
+                float y=side==0 ? body.yMin-gap-size.y : side==1 ? body.yMax+gap : body.center.y-size.y*.5f;
+                var candidate=new Rect(Mathf.Clamp(x,viewport.xMin,viewport.xMax-size.x),Mathf.Clamp(y,viewport.yMin,viewport.yMax-size.y),size.x,size.y);
+                bool blocked=false;
+                var rail=document.rootVisualElement.Q("floorRail");
+                if (rail.resolvedStyle.display!=DisplayStyle.None && candidate.Overlaps(layer.WorldToLocal(rail.worldBound))) blocked=true;
+                foreach (var other in replayActorRects) if (other.width>0 && candidate.Overlaps(other)) { blocked=true; break; }
+                if (tag)
+                {
+                    if (replayFeedbackRect.width>0 && candidate.Overlaps(replayFeedbackRect)) blocked=true;
+                    foreach (var other in replayTagRects) if (candidate.Overlaps(other)) { blocked=true; break; }
+                }
+                if (!blocked) { placed=candidate; return true; }
+            }
+            return false;
         }
     }
 }

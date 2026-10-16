@@ -19,8 +19,12 @@ MonoBehaviour:
   MaximumReplayCombatStateChanges: 131072
   ReplayAttackWidth: 0.08
   ReplayActorLabelWidth: 42
-  ReplayActorLabelOffset: 24
-  ReplayActorTextSize: 16
+  ReplayActorLabelOffset: 6
+  ReplayActorTextSize: 14
+  ReplayActorTextScale: 0.65
+  ReplayCombatFeedbackWidth: 180
+  ReplayCombatFeedbackTextSize: 18
+  ReplayCombatFeedbackTextScale: 0.85
   ReferenceShortSide: 720
   SelectionColor: {r: 0.96, g: 0.76, b: 0.37, a: 1}
   SmallText: 16
