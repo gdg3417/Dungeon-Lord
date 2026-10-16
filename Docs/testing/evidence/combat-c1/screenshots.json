@@ -1,0 +1,47 @@
+[
+  {
+    "file": "composition-combat-c1-attack-Default-1280x720.png",
+    "sha256": "5a565b664c141551ae4682de482e938f67c8df86786d039dd045e80ff37c4049",
+    "bytes": 358347
+  },
+  {
+    "file": "composition-combat-c1-attack-Default-1920x1080.png",
+    "sha256": "97a880d876a3d5279a032c2a9435feaa97cac56c65400a480224900afbe5fc83",
+    "bytes": 674011
+  },
+  {
+    "file": "composition-combat-c1-attack-Default-720x1280.png",
+    "sha256": "e77c7eb0747708b627555c3f8c3f6d6c5192d3ba33af48c5d5710d501fe81194",
+    "bytes": 542935
+  },
+  {
+    "file": "composition-combat-c1-attack-Large-1280x720.png",
+    "sha256": "3f22cb807ee1bf8d23e6705fb63fa11ae3529b386be0bcc081954e7ff18cc4c4",
+    "bytes": 345321
+  },
+  {
+    "file": "composition-combat-c1-attack-Large-1920x1080.png",
+    "sha256": "db80d6686904177e87c995e09d9db15973ee9c1117ffcf313244a31d71dfc261",
+    "bytes": 632497
+  },
+  {
+    "file": "composition-combat-c1-attack-Large-720x1280.png",
+    "sha256": "0bfe17509c9d4440de66dfbc23242815b707dbbd8ad6e90420d2c25b33cf873b",
+    "bytes": 468526
+  },
+  {
+    "file": "composition-combat-c1-attack-Small-1280x720.png",
+    "sha256": "2b6400d1b22eb866e0ed18065f77ab0073ed603c562ebe7403c5e5fc476cef90",
+    "bytes": 361815
+  },
+  {
+    "file": "composition-combat-c1-attack-Small-1920x1080.png",
+    "sha256": "184294aeda789e9e038b15dd712fc0f211c4267ebd851946fc33b4077f646c0a",
+    "bytes": 677704
+  },
+  {
+    "file": "composition-combat-c1-attack-Small-720x1280.png",
+    "sha256": "36db6afe4b010b50220cee5388497aa4c13cb85cbde7c3a958d4f478619612a6",
+    "bytes": 563562
+  }
+]

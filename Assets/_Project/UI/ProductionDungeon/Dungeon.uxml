@@ -20,6 +20,7 @@
         <ui:VisualElement name="mapArea" class="map-area" picking-mode="Ignore">
             <ui:VisualElement name="viewport" class="viewport" />
             <ui:Label name="replayDamage" class="replay-damage" picking-mode="Ignore" />
+            <ui:VisualElement name="replayPartyInfo" class="replay-party-info" picking-mode="Ignore" />
             <ui:VisualElement name="floorRail" class="floor-rail" picking-mode="Ignore">
                 <ui:Button name="collapseFloors" tooltip="ui.dungeon.floors.collapse" />
                 <ui:ScrollView name="floorList" mode="Vertical" class="floor-list"><ui:VisualElement name="floors" /></ui:ScrollView>
@@ -42,8 +43,11 @@
                 <ui:ScrollView name="replayDetails" mode="Vertical" class="replay-details">
                 <ui:Label name="replayEvent" />
                 <ui:Label name="replayFloor" />
+                <ui:Label name="replayActors" />
+                <ui:Button name="replayPositions" tooltip="ui.dungeon.replay.positions" />
+                <ui:Label name="replayEligibility" />
                 </ui:ScrollView>
-                <ui:VisualElement class="row"><ui:Button name="pauseReplay" tooltip="ui.dungeon.replay.pause" /><ui:Button name="closeReplay" tooltip="ui.dungeon.replay.close" /></ui:VisualElement>
+                <ui:VisualElement class="row"><ui:Button name="pauseReplay" tooltip="ui.dungeon.replay.pause" /><ui:Button name="nextReplay" tooltip="ui.dungeon.replay.next" /><ui:Button name="closeReplay" tooltip="ui.dungeon.replay.close" /></ui:VisualElement>
             </ui:VisualElement>
             <ui:ScrollView name="blockerScroll" mode="Horizontal"><ui:VisualElement name="constructionBlockers" class="category-row" /></ui:ScrollView>
             <ui:VisualElement name="placementContext" class="placement-context">

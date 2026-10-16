@@ -26,18 +26,26 @@ namespace DungeonBuilder.M0
         public readonly Vector2 MarkerPosition;
         public readonly bool HasMarker;
         public readonly IReadOnlyList<Vector2> MonsterPath;
+        public readonly CombatC0Event Combat;
+        public readonly int ActorIndex, TargetIndex;
         internal DungeonReplayFrame(RunStep step, string floor, Vector2 position, bool hasPosition,
-            int survivors, string category, string option, Vector2 marker, bool hasMarker, Vector2[] monsterPath)
+            int survivors, string category, string option, Vector2 marker, bool hasMarker, Vector2[] monsterPath,
+            CombatC0Event combat = null, int actor = -1, int target = -1)
         { Step = step; FloorId = floor; Position = position; HasPosition = hasPosition;
           Survivors = survivors; Category = category; Option = option; MarkerPosition = marker; HasMarker = hasMarker;
-          MonsterPath = Array.AsReadOnly(monsterPath); }
+          MonsterPath = Array.AsReadOnly(monsterPath); Combat = combat; ActorIndex = actor; TargetIndex = target; }
     }
 
     // A detached display sequence of already committed evidence. No simulation/service/save reference.
-    public sealed class DungeonRunReplay
+    public sealed partial class DungeonRunReplay
     {
         public const string Missing = "ui.dungeon.replay.unavailable";
+        public const string NoRun = "ui.dungeon.replay.no_run";
         public const string Historical = "ui.dungeon.replay.historical";
+        public const string Invalid = "ui.dungeon.replay.invalid_evidence";
+        public const string Capacity = "ui.dungeon.replay.capacity";
+        public const string Layout = "ui.dungeon.replay.layout_changed";
+        public DungeonCombatReplay Combat { get; private set; }
         private readonly DungeonReplayFrame[] frames;
         private readonly DungeonPresentationPolicy policy;
         private float elapsed;
@@ -57,7 +65,7 @@ namespace DungeonBuilder.M0
         public float Elapsed => elapsed;
         public float CurrentDuration => Duration(Current);
         public float ApproachSeconds => Mathf.Max(0, Current.MonsterPath.Count - 1) * policy.ReplayMonsterTileSeconds;
-        public bool DamageApplied => Current.Step.Encounter != null && elapsed >= ApproachSeconds;
+        public bool DamageApplied => Current.Combat?.Kind == CombatC0EventKind.Attack || Current.Step.Encounter != null && elapsed >= ApproachSeconds;
         public bool DamageVisible => !Closed && !Complete && DamageApplied && elapsed < ApproachSeconds + policy.ReplayDamageSeconds;
         public int DisplaySurvivors => Current.Survivors + (!DamageApplied && Current.Step.Encounter?.HealthAfter == 0 ? 1 : 0);
         public Vector2 MonsterPosition
@@ -88,12 +96,14 @@ namespace DungeonBuilder.M0
         { this.frames = frames; this.policy = policy; Frames = Array.AsReadOnly(frames);
           CorridorContents = Array.AsReadOnly(corridorContents);
           InteractionIndices = Array.AsReadOnly(Enumerable.Range(0, frames.Length).Where(i => frames[i].HasMarker).ToArray()); }
-        private float Duration(DungeonReplayFrame frame) => frame.Step.Kind == RunStepKind.Movement ?
+        private float Duration(DungeonReplayFrame frame) => frame.Combat != null ? policy.ReplayCombatActionSeconds : frame.Step.Kind == RunStepKind.Movement ?
             policy.ReplayMovementSeconds : Mathf.Max(0, frame.MonsterPath.Count - 1) * policy.ReplayMonsterTileSeconds +
             (frame.Step.Encounter != null ? Mathf.Max(policy.ReplayInteractionSeconds, policy.ReplayDamageSeconds) : policy.ReplayInteractionSeconds);
         public void TogglePause() { if (!Closed && !Complete) Paused = !Paused; }
         public void Suspend() { if (!Closed && !Complete) Paused = true; }
         public void Close() { Closed = true; }
+        public void Next()
+        { if (!Closed && !Complete) { Paused = true; elapsed = 0; Index++; } }
         public bool Advance(float seconds)
         {
             if (Closed || Paused || Complete || !float.IsFinite(seconds) || seconds <= 0) return false;
@@ -109,7 +119,10 @@ namespace DungeonBuilder.M0
             out DungeonRunReplay replay, out string reason)
         {
             replay = null; reason = Missing;
-            if (CombatC0Diagnostics.IsCombatC0(outcome)) { reason = "ui.dungeon.replay.combat_c0"; return false; }
+            if (outcome == null) { reason = NoRun; return false; }
+            if (CombatC0Diagnostics.IsCombatC0(outcome))
+                return TryCreateCombat(outcome, state, catalog, fingerprint, corridorFingerprint, policy, out replay, out reason);
+            if (outcome?.CombatExecutable != null || outcome?.CombatEvents?.Length > 0) { reason = Invalid; return false; }
             var steps = outcome?.PresentationSteps;
             if (steps == null || steps.Length == 0 || steps.Length > policy.MaximumReplaySteps ||
                 outcome.Party == null || policy.ReplayMovementSeconds <= 0 || policy.ReplayInteractionSeconds <= 0 ||

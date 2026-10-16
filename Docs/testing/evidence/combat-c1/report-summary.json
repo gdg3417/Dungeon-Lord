@@ -1,0 +1,547 @@
+[
+  {
+    "file": "combat-c1-art-import.xml",
+    "sha256": "571a361c52f1da33928fd97a515f3475c22752294b29207b472f1ba33255ca1f",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "12",
+      "result": "Passed",
+      "total": "12",
+      "passed": "12",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 23:47:07Z",
+      "end-time": "2026-10-15 23:47:09Z",
+      "duration": "2.2658942"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-build-gates.xml",
+    "sha256": "76c9f256ccda36268b94a770991aea52b662a81e2a6b8c67064af0eb33fd1d76",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "65",
+      "result": "Passed",
+      "total": "65",
+      "passed": "65",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 23:32:42Z",
+      "end-time": "2026-10-15 23:32:47Z",
+      "duration": "5.6821866"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-bypass-debug.xml",
+    "sha256": "a8b86fe635ec8063a5d075fad37332ac8726a2cc5953cc30eba9ff1591f5608e",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Failed(Child)",
+      "total": "1",
+      "passed": "0",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 23:11:19Z",
+      "end-time": "2026-10-15 23:11:19Z",
+      "duration": "0.4829604"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.BypassHasItsOwnRecordedPositionAndNoInventedAttack",
+        "message": "  ui.dungeon.replay.invalid_evidence\n  Expected: True\n  But was:  False\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-corrected-focused.xml",
+    "sha256": "afb8ee8b598794e480eb24075dc3c3e76f43f096e83e0095c90af06a7881bd12",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "160",
+      "result": "Passed",
+      "total": "160",
+      "passed": "160",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 03:00:39Z",
+      "end-time": "2026-10-16 03:01:01Z",
+      "duration": "21.3213535"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-editmode-remainder.xml",
+    "sha256": "13e280ed8a3e0dc4eb082c9830ddabb4f0c535070c0196ab38d4f65e7d837d8f",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1958",
+      "result": "Failed(Child)",
+      "total": "1958",
+      "passed": "1956",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 00:01:36Z",
+      "end-time": "2026-10-16 00:02:17Z",
+      "duration": "40.6902544"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.UatContentHeightCardsDisplayAndSafeActions",
+        "message": "  Normal sheet must recover the former fixed 32% allocation\n  Expected: less than 409.599976f\n  But was:  423.0f\n"
+      }
+    ],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ]
+  },
+  {
+    "file": "combat-c1-final-head-editmode.xml",
+    "sha256": "e94a20d7e48ada47030350f92fc07dddeafb085cf0c2a9377e9a8407a583d979",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "227",
+      "result": "Passed",
+      "total": "227",
+      "passed": "227",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 03:03:16Z",
+      "end-time": "2026-10-16 03:03:38Z",
+      "duration": "21.5057173"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-final-head-playmode.xml",
+    "sha256": "1f15b4105bc93987b3c4c9d10cd16de9f06f20b4ae01c7a2d6f34c8d61f3ca44",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "163",
+      "result": "Passed",
+      "total": "163",
+      "passed": "163",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 03:43:17Z",
+      "end-time": "2026-10-16 03:43:44Z",
+      "duration": "26.529636"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-floor-integrity-reproduction.xml",
+    "sha256": "5f99b48bd23a0ea7b3b7c5a6414e0f60591b843cf9c4d21244399ca310705d02",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "2",
+      "result": "Failed(Child)",
+      "total": "2",
+      "passed": "0",
+      "failed": "2",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 01:13:19Z",
+      "end-time": "2026-10-16 01:13:19Z",
+      "duration": "0.9012339"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.CorridorInteractionPositionMustMatchItsCapturedAssignment",
+        "message": "  Expected: False\n  But was:  True\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.MalformedFloorGlobalMovementCannotEscapeCapturedFloorBounds",
+        "message": "  Expected: greater than 0\n  But was:  0\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-focused-final.xml",
+    "sha256": "073b96945308bcd30a0d14e1532761b00762b0ab2cfbf93cd3ff01c587c34171",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "158",
+      "result": "Passed",
+      "total": "158",
+      "passed": "158",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 23:16:05Z",
+      "end-time": "2026-10-15 23:16:26Z",
+      "duration": "20.8641299"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-focused02.xml",
+    "sha256": "92e31c8a48c68b1622c5c0e789f2209498b7083d30d916b0427960d58e33531d",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "28",
+      "result": "Failed(Child)",
+      "total": "28",
+      "passed": "25",
+      "failed": "3",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 22:51:19Z",
+      "end-time": "2026-10-15 22:51:25Z",
+      "duration": "6.0960706"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.ChronologicalRouteRoundsStableActorsAndExactRecordedHealth(True)",
+        "message": "  floor.lifecycle.invalid_state\n  Expected: True\n  But was:  False\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.InconsistentEvidenceFailsClosedWithoutMutation(\"final\")",
+        "message": "  Expected: False\n  But was:  True\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.RetainedEvidenceReprojectsIdenticallyAndPlaybackHasNoAuthority",
+        "message": "  floor.lifecycle.invalid_state\n  Expected: True\n  But was:  False\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-focused03.xml",
+    "sha256": "cf7210c31df13835349215bbeae5a0f549a3ca7b27f8e69aca38b5428d817f8d",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "90",
+      "result": "Passed",
+      "total": "90",
+      "passed": "90",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 23:00:13Z",
+      "end-time": "2026-10-15 23:00:33Z",
+      "duration": "19.479329"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-focused04.xml",
+    "sha256": "c9960e7b000651f31e76228ae29bbac2f5ab7128b6d069d311f67982bde3095d",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "47",
+      "result": "Failed(Child)",
+      "total": "47",
+      "passed": "40",
+      "failed": "7",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 23:04:45Z",
+      "end-time": "2026-10-15 23:04:52Z",
+      "duration": "7.3823972"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.BypassHasItsOwnRecordedPositionAndNoInventedAttack",
+        "message": "  ui.dungeon.replay.layout_changed\n  Expected: True\n  But was:  False\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.MultipleSameRoomEncountersRetainMonsterDefeatsAndRouteOrder",
+        "message": "  ui.dungeon.replay.layout_changed\n  Expected: True\n  But was:  False\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.RecordedDenialIsPresentedWithoutRecheckingCurrentTuningOrGeometry(OutOfRange)",
+        "message": "  ui.dungeon.replay.layout_changed\n  Expected: True\n  But was:  False\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.RecordedDenialIsPresentedWithoutRecheckingCurrentTuningOrGeometry(LineOfSightBlocked)",
+        "message": "  ui.dungeon.replay.layout_changed\n  Expected: True\n  But was:  False\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.RecordedDenialIsPresentedWithoutRecheckingCurrentTuningOrGeometry(MeleePositionUnavailable)",
+        "message": "  ui.dungeon.replay.layout_changed\n  Expected: True\n  But was:  False\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.RecordedDenialIsPresentedWithoutRecheckingCurrentTuningOrGeometry(PartyAnchorConflict)",
+        "message": "  ui.dungeon.replay.layout_changed\n  Expected: True\n  But was:  False\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.TrapDamageJoinsPartyLedgerBetweenCombatAndTerminal",
+        "message": "  ui.dungeon.replay.layout_changed\n  Expected: True\n  But was:  False\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-focused05.xml",
+    "sha256": "218a0f678a8ee0555c07b8ea7891a7f995293e0869253d44fb3ac865856ee971",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "109",
+      "result": "Failed(Child)",
+      "total": "109",
+      "passed": "108",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 23:07:00Z",
+      "end-time": "2026-10-15 23:07:20Z",
+      "duration": "20.0241622"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.BypassHasItsOwnRecordedPositionAndNoInventedAttack",
+        "message": "  ui.dungeon.replay.invalid_evidence\n  Expected: True\n  But was:  False\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-focused06.xml",
+    "sha256": "a80188449a4405b78195f69937884a80e98ad9cd063060956f2fceadebeee70f",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "35",
+      "result": "Failed(Child)",
+      "total": "35",
+      "passed": "34",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 23:09:44Z",
+      "end-time": "2026-10-15 23:09:51Z",
+      "duration": "7.0575285"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.Tests.CombatC1ReplayEditModeFixtures.BypassHasItsOwnRecordedPositionAndNoInventedAttack",
+        "message": "  ui.dungeon.replay.invalid_evidence\n  Expected: True\n  But was:  False\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-full-editmode.xml",
+    "sha256": "f38eba7dd86fa4b672bd7d7c7c60624870b3701ff1519ae4a88cdfa4a3b13f21",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "2035",
+      "result": "Skipped:Ignored",
+      "total": "2035",
+      "passed": "2034",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 00:59:33Z",
+      "end-time": "2026-10-16 01:00:14Z",
+      "duration": "40.9395553"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ]
+  },
+  {
+    "file": "combat-c1-full-playmode.xml",
+    "sha256": "dd94a2127fd1e69cdad48f1b5687108a44108d375996c52450033d20db439531",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3470",
+      "result": "Skipped:Ignored",
+      "total": "3470",
+      "passed": "3460",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "10",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 01:00:34Z",
+      "end-time": "2026-10-16 01:10:24Z",
+      "duration": "589.8149949"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+        "reason": "gd66.test.synchronous_edit_mode_fixture"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+        "reason": "gd66.test.windows_player_only"
+      }
+    ]
+  },
+  {
+    "file": "combat-c1-production-final.xml",
+    "sha256": "cccfda2b7ab1c3472cea9fada3b352088729aceb847fbece202d02935af0a516",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "5",
+      "result": "Passed",
+      "total": "5",
+      "passed": "5",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 23:18:07Z",
+      "end-time": "2026-10-15 23:18:17Z",
+      "duration": "9.8208273"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-production01.xml",
+    "sha256": "0e16a693949e6fa9ed897c87951406d0e1a8228cd5023b6651fb536b4facb583",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "33",
+      "result": "Failed(Child)",
+      "total": "33",
+      "passed": "32",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-15 23:01:52Z",
+      "end-time": "2026-10-15 23:02:07Z",
+      "duration": "15.1388534"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence",
+        "message": "  edit\n  Expected: less than or equal to 721.0f\n  But was:  722.0f\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-ui-correction.xml",
+    "sha256": "1bd4b41bb97e971dd03fc4ed8e9b64e5b08974bdd68cb51f4522f5452c7b501a",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "7",
+      "result": "Passed",
+      "total": "7",
+      "passed": "7",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 00:43:57Z",
+      "end-time": "2026-10-16 00:44:02Z",
+      "duration": "5.1716254"
+    },
+    "failures": [],
+    "skips": []
+  }
+]

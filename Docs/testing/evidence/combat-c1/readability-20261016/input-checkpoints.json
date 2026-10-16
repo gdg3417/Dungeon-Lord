@@ -1,0 +1,58 @@
+[
+  {
+    "file": "inputs-editmode-exact.json",
+    "sha256": "38aaac6c0b64d048d362f8424c41545afc74294167a8dc62e6bed1f81a2527b4",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "inputs-floor-diagnostic-exact.json",
+    "sha256": "962afeb73b2cbade670c50b5acfc88f985ececf93309a8c0713bdb33ced0734c",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "inputs-focused-exact.json",
+    "sha256": "57da837b1d8b767943619c39e5c61743090f1b29d939f2e5990dd800dcebd306",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "inputs-playmode-second-attempt-exact.json",
+    "sha256": "10e45c3db13ac343f2d91654573ec4592c34175d8310dd76afb975e74215d631",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "inputs-production-final-exact.json",
+    "sha256": "27e04b50bb056303d63592422d0f33be3bdb5434faf4ed74dc807b826dfa8ca0",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "inputs-readability-build-exact.json",
+    "sha256": "ee6a4f1210d68900f9e2039a748cdf67bd13b3e14578ccd6ceb440d1d3e6fe73",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "owner-prepare-exact.json",
+    "sha256": "ee6a4f1210d68900f9e2039a748cdf67bd13b3e14578ccd6ceb440d1d3e6fe73",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  },
+  {
+    "file": "prepare-exact.json",
+    "sha256": "dafcacf6c0df1f7bc8d1762c1c89f99e6019e438639e53879dbe540c3d0b8ff9",
+    "expected": 1306,
+    "actual": 1306,
+    "failures": 0
+  }
+]

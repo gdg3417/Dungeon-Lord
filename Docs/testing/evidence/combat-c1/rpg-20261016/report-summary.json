@@ -1,0 +1,255 @@
+[
+  {
+    "file": "combat-c1-rpg-editmode-final.xml",
+    "sha256": "65bcb0f333bc59556936cab0f5d35fc56e11217deae90135c682372be43bacb0",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "233",
+      "result": "Passed",
+      "total": "233",
+      "passed": "233",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 15:39:15Z",
+      "end-time": "2026-10-16 15:39:37Z",
+      "duration": "21.4092521"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-rpg-editmode.xml",
+    "sha256": "91d46b88ccb128fbad4038a016dacefd290589ae50809a92b348871a15efd581",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "233",
+      "result": "Passed",
+      "total": "233",
+      "passed": "233",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 15:29:06Z",
+      "end-time": "2026-10-16 15:29:27Z",
+      "duration": "20.884833"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-rpg-focused01.xml",
+    "sha256": "f339080d852fec8ed70fa521ad6ae9e0c1bfe0fe85343fc721917435b36843a3",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "2",
+      "result": "Passed",
+      "total": "2",
+      "passed": "2",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 15:09:27Z",
+      "end-time": "2026-10-16 15:09:33Z",
+      "duration": "6.1158622"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-rpg-focused02.xml",
+    "sha256": "1c48cdc28aa077f045c6fdad320e046733cb1a29417b2d9c0671f58655931594",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3",
+      "result": "Failed(Child)",
+      "total": "3",
+      "passed": "0",
+      "failed": "3",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 15:16:56Z",
+      "end-time": "2026-10-16 15:16:59Z",
+      "duration": "3.6383517"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1LocalizedNamesKeepHealthVisibleWithoutOverflow",
+        "message": "  Expected string length 84 but was 80. Strings differ at index 80.\n  Expected: \"...ame that must remain safely bounded in the dungeon view - 7/7\"\n  But was:  \"...ame that must remain safely bounded in the dungeon view -\"\n  -----------------------------------------------------------------------^\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertRpgParty (UnityEngine.UIElements.VisualElement ui) [0x00126] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:170\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCombatMapReadability (UnityEngine.UIElements.VisualElement ui) [0x0012c] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:138\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1LocalizedNamesKeepHealthVisibleWithoutOverflow>d__8.MoveNext () [0x001b3] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:286\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence",
+        "message": "  Party roster must be usable at normal gameplay sizes\n  Expected: Flex\n  But was:  None\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertRpgParty (UnityEngine.UIElements.VisualElement ui) [0x00019] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:162\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence>d__1.MoveNext () [0x00a50] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:69\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+        "message": "  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1PartyFollowsRoomsCorridorsAndFloors>d__7.MoveNext () [0x004a2] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:242\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-rpg-focused03.xml",
+    "sha256": "c33f7185dac3343aef26fd7e38bc6533312622dde84ed09b4fce9ff2c227b496",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "3",
+      "result": "Failed(Child)",
+      "total": "3",
+      "passed": "1",
+      "failed": "2",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 15:19:41Z",
+      "end-time": "2026-10-16 15:19:46Z",
+      "duration": "4.4888796"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence",
+        "message": "  Party roster must be usable: Terminal (1.50, 6.50) area=(x:1.00, y:6.00, width:2.00, height:2.00) viewport=(x:0.00, y:475.00, width:1920.00, height:428.00)\n  Expected: Flex\n  But was:  None\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertRpgParty (UnityEngine.UIElements.VisualElement ui) [0x0002d] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:163\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence>d__1.MoveNext () [0x00a50] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:69\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+        "message": "  Party roster must be usable: FloorDecision (1.50, 6.50) area=(x:1.00, y:6.00, width:2.00, height:2.00) viewport=(x:0.00, y:475.00, width:1920.00, height:477.00)\n  Expected: Flex\n  But was:  None\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertRpgParty (UnityEngine.UIElements.VisualElement ui) [0x0002d] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:163\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1PartyFollowsRoomsCorridorsAndFloors>d__7.MoveNext () [0x007ef] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:264\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-rpg-focused04.xml",
+    "sha256": "1c60065fd0e25510cf65c2ac9e9c12c9739e95d49149034cd94848eaf5c8a7d1",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "2",
+      "result": "Passed",
+      "total": "2",
+      "passed": "2",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 15:22:33Z",
+      "end-time": "2026-10-16 15:22:38Z",
+      "duration": "5.0216951"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-rpg-health-line-focused.xml",
+    "sha256": "70f3401ed7a46a88cae04417965968c2020ebe1c141cac4a87f14b078610ed65",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "4",
+      "result": "Passed",
+      "total": "4",
+      "passed": "4",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 15:37:46Z",
+      "end-time": "2026-10-16 15:37:54Z",
+      "duration": "8.4483031"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-rpg-playmode-final.xml",
+    "sha256": "d5163ce9715654ebc15fd1010ee0a608ecbe6ce641019e29895c711161d8be29",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "171",
+      "result": "Passed",
+      "total": "171",
+      "passed": "171",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 15:41:05Z",
+      "end-time": "2026-10-16 15:41:37Z",
+      "duration": "31.8834067"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-rpg-playmode.xml",
+    "sha256": "4e223a3792083d7be100efaab8812915e1fe593a8c88856455d124ada8c2b485",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "171",
+      "result": "Failed(Child)",
+      "total": "171",
+      "passed": "170",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 15:30:10Z",
+      "end-time": "2026-10-16 15:30:40Z",
+      "duration": "30.5636916"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats",
+        "message": "  Expected: 4\n  But was:  5\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertRpgParty (UnityEngine.UIElements.VisualElement ui) [0x0015d] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:168\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCombatMapReadability (UnityEngine.UIElements.VisualElement ui) [0x0012c] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:141\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1TargetFeedbackTracksRecordedHitsAndDefeats>d__6.MoveNext () [0x0024c] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:209\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-rpg-production-final.xml",
+    "sha256": "6d08ad5a98e60212c2eed25143393b2a95037bb7f53f01be475bfea185f2ba7b",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "9",
+      "result": "Passed",
+      "total": "9",
+      "passed": "9",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 15:33:40Z",
+      "end-time": "2026-10-16 15:33:56Z",
+      "duration": "16.1745911"
+    },
+    "failures": [],
+    "skips": []
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "file": "combat-c1-readable-editmode.xml",
+    "sha256": "53221187f0c8382b4e218dfe895d4729ce5d8dbc622aa51bd74837a51650bbb0",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "228",
+      "result": "Passed",
+      "total": "228",
+      "passed": "228",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 14:26:19Z",
+      "end-time": "2026-10-16 14:26:40Z",
+      "duration": "20.9401301"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-readable-floor-diagnostic.xml",
+    "sha256": "21ab85574a69731c90dc276b9d98a40124e3ee662be3e3db23c967a2d6b533e9",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Failed(Child)",
+      "total": "1",
+      "passed": "0",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 14:32:14Z",
+      "end-time": "2026-10-16 14:32:16Z",
+      "duration": "1.5700558"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers",
+        "message": "  Expected: Flex\n  But was:  None\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCombatMapReadability (UnityEngine.UIElements.VisualElement ui) [0x000af] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:123\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers>d__3.MoveNext () [0x003d4] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:106\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-readable-focused02.xml",
+    "sha256": "b16fe70fc9a49a48d4d2a5402d7c4f0f6da874e89b0f9fa75f9d544d5e75b7b6",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "2",
+      "result": "Passed",
+      "total": "2",
+      "passed": "2",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 14:16:05Z",
+      "end-time": "2026-10-16 14:16:10Z",
+      "duration": "5.693573"
+    },
+    "failures": [],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-readable-playmode-final.xml",
+    "sha256": "b21052c2286a5123e3618347c02e627274dd4f2cebf95dc4760f0449f235f966",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "164",
+      "result": "Failed(Child)",
+      "total": "164",
+      "passed": "163",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 14:30:05Z",
+      "end-time": "2026-10-16 14:30:34Z",
+      "duration": "29.3658685"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers",
+        "message": "  Expected: Flex\n  But was:  None\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCombatMapReadability (UnityEngine.UIElements.VisualElement ui) [0x000af] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:119\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers>d__3.MoveNext () [0x001fb] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:102\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-readable-playmode.xml",
+    "sha256": "8344b97151b050ead4b05f527f45c9b9991de01dd7a6addc5f1f2d386fac06a4",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "164",
+      "result": "Failed(Child)",
+      "total": "164",
+      "passed": "163",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 14:27:33Z",
+      "end-time": "2026-10-16 14:28:02Z",
+      "duration": "29.2189942"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers",
+        "message": "  Expected: Flex\n  But was:  None\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCombatMapReadability (UnityEngine.UIElements.VisualElement ui) [0x000af] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:118\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers>d__3.MoveNext () [0x001d4] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-combat-c0-diagnostics-validation-r2\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:101\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skips": []
+  },
+  {
+    "file": "combat-c1-readable-production-final.xml",
+    "sha256": "44fb52ccb2f81a65990309bb8db60a157e02e0ab415d92483f6479ba29cc7bd2",
+    "attributes": {
+      "id": "2",
+      "testcasecount": "7",
+      "result": "Passed",
+      "total": "7",
+      "passed": "7",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-16 14:33:52Z",
+      "end-time": "2026-10-16 14:34:05Z",
+      "duration": "12.9043222"
+    },
+    "failures": [],
+    "skips": []
+  }
+]

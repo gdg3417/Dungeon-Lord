@@ -1,0 +1,12 @@
+{
+  "branch": "codex/combat-c1-graphical-replay",
+  "implementation_commit": "a4211d7435139feb6146fb7c5dcb8e9b226b496a",
+  "baseline": "22e7ce1b08ae17391bfd3542a45821a46f02bbe1",
+  "unity_input_trees": {
+    "Assets": "29dbd4e535fb721d447f50409e362adc79f65d65",
+    "Packages": "e3fec9b0c4018adde155b4d8cd05cac3217df206",
+    "ProjectSettings": "c55e5632c33401052e04e4c9172dfadc312686f3",
+    "ContentAuthoring": "41a73986b5c781df4f2ad2ab83a6cd792d31a70c"
+  },
+  "b1_fixture_sha256": "197793b3b6f4dd127b0e96ce3003f3bee58138e58a81ee1d7dec13b2374dc8fb"
+}

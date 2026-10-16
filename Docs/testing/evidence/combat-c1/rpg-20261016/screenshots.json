@@ -1,0 +1,72 @@
+[
+  {
+    "file": "composition-combat-c1-rpg-attack-Default-1280x720.png",
+    "sha256": "191b3a86c49f82ec5c40357a6d003eb17c56ec538f4d57b6c319cf04dcae7e06",
+    "bytes": 369533
+  },
+  {
+    "file": "composition-combat-c1-rpg-attack-Default-1920x1080.png",
+    "sha256": "4ebe4a8f04be59fe1ed56223e3bcb9247fb5299ef59ddc20391905551a1f47ed",
+    "bytes": 687565
+  },
+  {
+    "file": "composition-combat-c1-rpg-attack-Default-720x1280.png",
+    "sha256": "d429e767d1a7fc8ceb50029ccff2a682f18bc088f25e40d01d53a202faa05de6",
+    "bytes": 549382
+  },
+  {
+    "file": "composition-combat-c1-rpg-attack-Large-1280x720.png",
+    "sha256": "f212002db279ab8ad4ca4426d16394d24f09bc1aeb37a6b0053ecaa7894c814d",
+    "bytes": 360671
+  },
+  {
+    "file": "composition-combat-c1-rpg-attack-Large-1920x1080.png",
+    "sha256": "609cb4f339100ff9b288e84332d500da919e5daca0a28eac516a8e3ec302b513",
+    "bytes": 664693
+  },
+  {
+    "file": "composition-combat-c1-rpg-attack-Large-720x1280.png",
+    "sha256": "1ced6dbed06a1022459eb4e3d071f672d9ca48c51e067972fb7e72d81ec26967",
+    "bytes": 484668
+  },
+  {
+    "file": "composition-combat-c1-rpg-attack-Small-1280x720.png",
+    "sha256": "d11bedfa8e5237db6a24121e67b3e1b0b61ad9a8e2eea98e2e47b86794ec23b6",
+    "bytes": 368870
+  },
+  {
+    "file": "composition-combat-c1-rpg-attack-Small-1920x1080.png",
+    "sha256": "586a643eb80e3e2ec639bf2d87ac33026a7dd68eaa5bbd425182840e999f0f6c",
+    "bytes": 691168
+  },
+  {
+    "file": "composition-combat-c1-rpg-attack-Small-720x1280.png",
+    "sha256": "ca4e37e23e5fddd9d0bac40d74044e0c241a9b56d59d0a9f6cbc39056bd7021a",
+    "bytes": 580917
+  },
+  {
+    "file": "composition-combat-c1-rpg-completed-720x1280.png",
+    "sha256": "f3fce2c5e1630be2b435b1945e90eba5c74d9598bab639742b115b306a82590d",
+    "bytes": 482159
+  },
+  {
+    "file": "composition-combat-c1-rpg-corridor-1920x1080.png",
+    "sha256": "be703910378e89bf4551139f943c1ec7d1b3d08989784a5efdebe3f616fc5dc8",
+    "bytes": 703615
+  },
+  {
+    "file": "composition-combat-c1-rpg-localized-long-720x1280.png",
+    "sha256": "7c9565a261310a60cc241ff42d68c2581089abe710e92ea93c3251c6546cdbda",
+    "bytes": 489953
+  },
+  {
+    "file": "composition-combat-c1-rpg-member-defeat-720x1280.png",
+    "sha256": "b794cc6a9d7708694dd6cc96738bc190a9abd22b1d262c94e3d3d8f7ed7a78dc",
+    "bytes": 548810
+  },
+  {
+    "file": "composition-combat-c1-rpg-monster-defeat-720x1280.png",
+    "sha256": "608ad7bdbb6f0888e3a64b51f652773f0f2687637ccccdb26c8527392322f05e",
+    "bytes": 547645
+  }
+]

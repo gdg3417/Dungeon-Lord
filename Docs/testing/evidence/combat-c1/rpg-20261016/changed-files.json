@@ -1,0 +1,15 @@
+[
+  "Assets/_Project/Data/Bootstrap/string_table_en.json",
+  "Assets/_Project/Editor/DungeonSpatial/Tests/CombatC1ReplaySceneTests.cs",
+  "Assets/_Project/Editor/DungeonVisualBuildQualification.cs",
+  "Assets/_Project/Scripts/Services/ProductionDungeonPresenter.cs",
+  "Assets/_Project/Scripts/UI/DungeonFloorWorldReplay.cs",
+  "Assets/_Project/Scripts/UI/DungeonFloorWorldView.cs",
+  "Assets/_Project/Scripts/UI/DungeonPresentationPolicy.cs",
+  "Assets/_Project/Scripts/UI/ProductionDungeonReplay.cs",
+  "Assets/_Project/Tests/EditMode/CombatC1ReplayTests.cs",
+  "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs",
+  "Assets/_Project/UI/ProductionDungeon/Dungeon.uss",
+  "Assets/_Project/UI/ProductionDungeon/Dungeon.uxml",
+  "Assets/_Project/UI/ProductionDungeon/Presentation.asset"
+]

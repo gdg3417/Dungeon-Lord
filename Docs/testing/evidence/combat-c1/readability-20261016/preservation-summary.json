@@ -1,0 +1,20 @@
+{
+  "files": 663,
+  "changed": 0,
+  "saves_restored": false,
+  "owner_and_primary": [
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\combat-c0-diagnostics-validation-20261015.json",
+      "sha256": "d7fbca67e4d4de84803794b56679ddb533d883f40fd173c2035279ae6efaa708",
+      "after_sha256": "d7fbca67e4d4de84803794b56679ddb533d883f40fd173c2035279ae6efaa708",
+      "equal": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\save_primary.json",
+      "sha256": "39224b12446ec30990d043385e77634e45cc7da1dc5e50e75237b33f25c79df2",
+      "after_sha256": "39224b12446ec30990d043385e77634e45cc7da1dc5e50e75237b33f25c79df2",
+      "equal": true
+    }
+  ],
+  "complete_inventory": "qualification-support.zip: preservation-before.json and preservation-after.json"
+}

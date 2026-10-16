@@ -14,6 +14,13 @@ namespace DungeonBuilder.M0
 
     public static class ProductionDungeonPresenter
     {
+        public static string ReplayPartyIdentity(Func<string,string> text,IFormatProvider culture,string className,string capturedNameOrTitle=null) =>
+            string.IsNullOrWhiteSpace(capturedNameOrTitle) ? Format(text,culture,"ui.dungeon.replay.party_identity",className) :
+                Format(text,culture,"ui.dungeon.replay.party_named_identity",capturedNameOrTitle,className);
+        public static string ReplayPartyRow(Func<string,string> text,IFormatProvider culture,string className,
+            int currentHealth,int maximumHealth,string capturedNameOrTitle=null) =>
+            string.IsNullOrWhiteSpace(capturedNameOrTitle) ? Format(text,culture,"ui.dungeon.replay.party_row",className,currentHealth,maximumHealth) :
+                Format(text,culture,"ui.dungeon.replay.party_named_row",capturedNameOrTitle,className,currentHealth,maximumHealth);
         public static DungeonHudPresentation Hud(SaveData save, RunSimulationConfig configuration,
             double manaPerHour, Func<string, string> text, IFormatProvider culture)
         {

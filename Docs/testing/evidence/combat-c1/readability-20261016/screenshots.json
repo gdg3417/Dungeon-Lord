@@ -1,0 +1,62 @@
+[
+  {
+    "file": "composition-combat-c1-readable-attack-Default-1280x720.png",
+    "sha256": "ac4c2ef29ade442c9b9d4e972fefb83be13bbbbfc4f7c89cdc345feaaa7c73e0",
+    "bytes": 356120
+  },
+  {
+    "file": "composition-combat-c1-readable-attack-Default-1920x1080.png",
+    "sha256": "91ca4ea3841d01f51e8924d2f764e1f56922411f7b99bffa68525f9ed8e0d0c0",
+    "bytes": 673536
+  },
+  {
+    "file": "composition-combat-c1-readable-attack-Default-720x1280.png",
+    "sha256": "8b79507415ca0b719f894a81c07186a1daabd4d365a0e3179fbfe9ad925120fd",
+    "bytes": 544277
+  },
+  {
+    "file": "composition-combat-c1-readable-attack-Large-1280x720.png",
+    "sha256": "3496fa639702caa2296b5dd59eb8a5bd25e541675cb5c1a2dc83733cd7307188",
+    "bytes": 344002
+  },
+  {
+    "file": "composition-combat-c1-readable-attack-Large-1920x1080.png",
+    "sha256": "e71111452cd62d4e90b452301498176a623e890f9c7fe5cad4686097a02efcbd",
+    "bytes": 630172
+  },
+  {
+    "file": "composition-combat-c1-readable-attack-Large-720x1280.png",
+    "sha256": "b0bd4084f622a72b3db6c0d14e8e562cd0802d7c11d82cef081a2849e9091e7e",
+    "bytes": 472472
+  },
+  {
+    "file": "composition-combat-c1-readable-attack-Small-1280x720.png",
+    "sha256": "70c816b7bf902fd010e209a1edc4622d5408db8f96d60a3825b4c464077a4888",
+    "bytes": 360693
+  },
+  {
+    "file": "composition-combat-c1-readable-attack-Small-1920x1080.png",
+    "sha256": "93660bc82c09f85cdb1742a0e54edf6caf639f8c5aff4351ded95c2ee0b75961",
+    "bytes": 661124
+  },
+  {
+    "file": "composition-combat-c1-readable-attack-Small-720x1280.png",
+    "sha256": "f4b5d6b4fcc4c0bd0418aff183c5ee854be014a0f70294d116d7191bfc4e6bdb",
+    "bytes": 564136
+  },
+  {
+    "file": "composition-combat-c1-readable-completed-720x1280.png",
+    "sha256": "22fa70f782e7cefa577e801ac8a7556513e9e1b678737e31b9c0e726256186e4",
+    "bytes": 471757
+  },
+  {
+    "file": "composition-combat-c1-readable-member-defeat-720x1280.png",
+    "sha256": "34d0a7f8b7bc9c34be1e23ae60ac0cf352a633eb692e27e6263a10aa9597cae2",
+    "bytes": 547424
+  },
+  {
+    "file": "composition-combat-c1-readable-monster-defeat-720x1280.png",
+    "sha256": "5691a7f5dc3b12a4956c488f1eb2602c0f1f5da70b91814e9997037dfb441dbc",
+    "bytes": 547045
+  }
+]

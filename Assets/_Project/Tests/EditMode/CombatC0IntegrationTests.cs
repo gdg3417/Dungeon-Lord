@@ -283,13 +283,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Events.Any(e=>e.Kind==CombatC0EventKind.Attack&&e.ActorId.EndsWith("/ranged")),Is.True);
             Assert.That(result.Events.Where(e=>e.Kind==CombatC0EventKind.Attack).All(e=>!Nullable.Equals(e.SourcePosition,e.TargetPosition)),Is.True);
         }
-        [Test] public void ReplayRetainsHistoricalSupportedEventsAndRejectsC0WithLocalizedExplanation()
+        [Test] public void ReplayRetainsHistoricalSupportedEventsAndRejectsMismatchedC0Layout()
         {
             var policy=ScriptableObject.CreateInstance<DungeonPresentationPolicy>();
             try { var old=VisualRunReplayTests.Completed(); Assert.That(VisualRunReplayTests.Create(old,policy),Is.Not.Null);
                 var f=Canonical(); f.Accept(PhaseFiveBBranchIntegrationTests.Run(f));
                 Assert.That(DungeonRunReplay.TryCreate(f.Runtime.runHistory.LatestOutcome,f.State,f.Production.Catalog,"unused","unused",policy,out _,out var reason),Is.False);
-                Assert.That(reason,Is.EqualTo("ui.dungeon.replay.combat_c0")); }
+                Assert.That(reason,Is.EqualTo(DungeonRunReplay.Layout)); }
             finally { UnityEngine.Object.DestroyImmediate(policy); }
         }
         [Test] public void EnabledC0CannotChangeInjectedB2OpportunityExecutionOrItsDurableCheckpoint()
