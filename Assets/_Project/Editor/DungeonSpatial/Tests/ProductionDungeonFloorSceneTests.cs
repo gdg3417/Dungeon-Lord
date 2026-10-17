@@ -280,19 +280,34 @@ namespace DungeonBuilder.M0.Tests
             string second = root.Save.validatedCanonicalSpatialState.Floors.Single(f => f.FloorIndex == 1).FloorInstanceId;
             controller.SelectFloor(second);
             // Synthetic preview tests the future cascade presentation without adding unsupported production floors.
+            var deeper = new SavedSpatialFloor { FloorInstanceId = "test.only.deeper", FloorIndex = 2 };
             var preview = new FloorLifecyclePreview { IsCommittable = true, Action = FloorLifecycleAction.Deactivate,
                 FloorInstanceId = second, Changes = Array.AsReadOnly(new[] {
-                    new FloorLifecycleChange(new SavedSpatialFloor { FloorInstanceId = second, FloorIndex = 1 }),
-                    new FloorLifecycleChange(new SavedSpatialFloor { FloorInstanceId = "test.only.deeper", FloorIndex = 2 }) }) };
+                    new FloorLifecycleChange(deeper),
+                    new FloorLifecycleChange(new SavedSpatialFloor { FloorInstanceId = second, FloorIndex = 1 }) }) };
             typeof(ProductionDungeonController).GetField("floorLifecycle", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(controller, preview);
             var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
             typeof(ProductionDungeonController).GetMethod("ShowFloorLifecycleConfirmation", BindingFlags.NonPublic | BindingFlags.Instance)
                 .Invoke(controller, new object[] { preview });
             Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex));
-            Assert.That(ui.Q<Label>("modalText").text, Does.Contain("Floor 2").And.Contain("Floor 3"));
+            string englishConfirmation = ui.Q<Label>("modalText").text;
+            Assert.That(englishConfirmation, Does.Contain("Floor 2, Floor 3"), "English list is readable and follows canonical floor order");
             Click(ui.Q<Button>("cancel"));
             Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.None));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
+
+            var strings = (System.Collections.IDictionary)typeof(ContentService)
+                .GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root.Content);
+            string separatorKey = "ui.dungeon.floors.list_separator";
+            string englishSeparator = (string)strings[separatorKey];
+            strings[separatorKey] = " · ";
+            typeof(ProductionDungeonController).GetMethod("ShowFloorLifecycleConfirmation", BindingFlags.NonPublic | BindingFlags.Instance)
+                .Invoke(controller, new object[] { preview });
+            Assert.That(ui.Q<Label>("modalText").text, Does.Contain("Floor 2 · Floor 3"),
+                "The presenter uses the supplied localized separator");
+            Click(ui.Q<Button>("cancel"));
+            strings[separatorKey] = englishSeparator;
+
             typeof(ProductionDungeonController).GetField("floorLifecycle", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(controller, preview);
             typeof(ProductionDungeonController).GetMethod("ShowFloorLifecycleConfirmation", BindingFlags.NonPublic | BindingFlags.Instance)
                 .Invoke(controller, new object[] { preview });

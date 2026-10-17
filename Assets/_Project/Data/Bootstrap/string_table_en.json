@@ -198,6 +198,7 @@
     {"key": "floor.lifecycle.stale_preview", "text": "The floor selection or dungeon changed. Review the floor action again."},
     {"key": "ui.dungeon.floors.manage", "text": "Manage floors"},
     {"key": "ui.dungeon.floors.deactivate", "text": "Deactivate floor"},
+    {"key": "ui.dungeon.floors.list_separator", "text": ", "},
     {"key": "ui.dungeon.floors.lifecycle_ready", "text": "Ready. Floor activity changes affect future runs and passive mana."},
     {"key": "ui.dungeon.floors.opportunity", "text": "Next construction: {0}\nShell cost: {1} mana\n{2}\nThe shell starts Inactive. Build a valid route before activation."},
     {"key": "ui.dungeon.floors.permit_met", "text": "Required floor permit research: complete."},

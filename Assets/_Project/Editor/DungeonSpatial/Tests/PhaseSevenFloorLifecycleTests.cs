@@ -182,7 +182,8 @@ namespace DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests
             Assert.That(table.entries.GroupBy(e => e.key).Any(g => g.Count() != 1), Is.False);
             var keys = new[] { "floor.lifecycle.stale_preview", "ui.dungeon.floors.manage", "ui.dungeon.floors.deactivate",
                 "ui.dungeon.floors.lifecycle_ready", "ui.dungeon.floors.opportunity", "ui.dungeon.floors.permit_met",
-                "ui.dungeon.floors.permit_missing", "ui.dungeon.floors.no_opportunity", "ui.dungeon.floors.cascade" };
+                "ui.dungeon.floors.permit_missing", "ui.dungeon.floors.no_opportunity", "ui.dungeon.floors.cascade",
+                "ui.dungeon.floors.list_separator" };
             foreach (var key in keys)
             {
                 string text = table.entries.Single(e => e.key == key).text;

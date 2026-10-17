@@ -116,7 +116,9 @@ namespace DungeonBuilder.M0
         {
             ShowModal("ui.dungeon.floors.cascade", () => CommitFloorLifecycle(preview), "ui.dungeon.floors.deactivate");
             document.rootVisualElement.Q<Label>("modalText").text = Format("ui.dungeon.floors.cascade",
-                string.Join(", ", preview.Changes.Select(f => Format("ui.dungeon.floor", f.FloorIndex + 1))));
+                string.Join(Text("ui.dungeon.floors.list_separator"), preview.Changes
+                    .OrderBy(f => f.FloorIndex)
+                    .Select(f => Format("ui.dungeon.floor", f.FloorIndex + 1))));
             document.rootVisualElement.Q<Button>("cancel").text = Text("ui.dungeon.construction.cancel");
         }
 
