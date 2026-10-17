@@ -83,6 +83,8 @@ Schema 15, migration chains, monster continuity, recovery priority/readiness/cos
 
 Keep PR #240 draft. Independent ChatGPT review and blocking-finding resolution remain required. Owner Editor and this corrected Windows player must verify:
 
+**Prepared Windows save prerequisite:** New native saves contain zero floors, and the player does not include the owner's existing dungeon. The isolated `combat-c2-reserve-ui-20261016.json` has now been safely seeded and migrated with the verified **two-floor** owner dungeon. Verify filename/floor count before launch; preserve subsequent UAT progress. Use [the existing player and preparation evidence](../windows-uat-save-preparation/owner-uat.md). Reuse existing Unity projects; additional project copies require explicit owner approval.
+
 1. Goblin 24 rejects with visible reserve 6; 26 accepts and leaves 6. Skeleton 31 rejects / 32 accepts.
 2. Existing-defender obligations restrict traps/loot; funding updates the open quote, and offline/pending verification remains a separate gate.
 3. After recovery causes a deficit, total/usable/required mana and shortage are readable without hover. Free unassignment remains possible; custody/inactive floors do not add deployed obligations.

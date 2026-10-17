@@ -1,0 +1,186 @@
+{
+  "source": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\combat-c0-diagnostics-validation-20261015.json",
+  "destination": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\combat-c2-reserve-ui-20261016.json",
+  "source_before": {
+    "schema": 14,
+    "floor_count": 2,
+    "floor_ids": [
+      "compat.floor.00",
+      "canonical.floor.01"
+    ],
+    "rooms": 2,
+    "assignments": 10,
+    "returned": 4,
+    "deployed_monsters": 4,
+    "owned_monsters": 6,
+    "wallet": 1000.0,
+    "next_run": 79,
+    "research": [
+      "ac_100",
+      "ac_300"
+    ],
+    "sha256": "54c7744e7ee92b1597daa88df995ef07c120e34667398377be78591f7fb7aa13"
+  },
+  "destination_before": {
+    "schema": 15,
+    "floor_count": 0,
+    "floor_ids": [],
+    "rooms": 0,
+    "assignments": 0,
+    "returned": 0,
+    "deployed_monsters": 0,
+    "owned_monsters": 0,
+    "wallet": 42.33333333333335,
+    "next_run": 1,
+    "research": [],
+    "sha256": "b0cdc750e9501191ed63ae9d2f03a48b8e41796de33d07506ddc8dacf76456ba"
+  },
+  "sidecars_before": [
+    {
+      "name": "combat-c2-reserve-ui-20261016.json.editor-draft.draft-956f7686d74741deaa6d86d68ce49202.000000.candidate",
+      "sha256": "eb45f2d038caa8284050c89f04e3ffeb7cd684f1921fb1f737912660fab2e20b"
+    },
+    {
+      "name": "combat-c2-reserve-ui-20261016.json.editor-draft.draft-956f7686d74741deaa6d86d68ce49202.000000.commit",
+      "sha256": "9357483d17e879149e39800a4771554ed44d86dd54bc74000b1d722af756f743"
+    }
+  ],
+  "copy_readback_exact": true,
+  "source_after_copy_sha256": "54c7744e7ee92b1597daa88df995ef07c120e34667398377be78591f7fb7aa13",
+  "destination_after_copy": {
+    "schema": 14,
+    "floor_count": 2,
+    "floor_ids": [
+      "compat.floor.00",
+      "canonical.floor.01"
+    ],
+    "rooms": 2,
+    "assignments": 10,
+    "returned": 4,
+    "deployed_monsters": 4,
+    "owned_monsters": 6,
+    "wallet": 1000.0,
+    "next_run": 79,
+    "research": [
+      "ac_100",
+      "ac_300"
+    ],
+    "sha256": "54c7744e7ee92b1597daa88df995ef07c120e34667398377be78591f7fb7aa13"
+  },
+  "source_after_smoke_sha256": "54c7744e7ee92b1597daa88df995ef07c120e34667398377be78591f7fb7aa13",
+  "destination_after_smoke_sha256": "4c453dcee2c55e181feaf899fd864b31a327049362026eedac7ff5c7d47bc33f",
+  "resulting_schema": 15,
+  "floors": 2,
+  "rooms": 2,
+  "deployed_assignments": 10,
+  "returned_items": 4,
+  "continuity_records": [
+    {
+      "AssignmentId": "canonical.floor.01.room.player.0000.content.monster.0000",
+      "Level": 1,
+      "Health": 10,
+      "RevivalRequired": false
+    },
+    {
+      "AssignmentId": "canonical.floor.01.room.player.0000.content.monster.0004",
+      "Level": 1,
+      "Health": 8,
+      "RevivalRequired": false
+    },
+    {
+      "AssignmentId": "canonical.floor.01.room.player.0000.content.monster.0006",
+      "Level": 1,
+      "Health": 10,
+      "RevivalRequired": false
+    },
+    {
+      "AssignmentId": "compat.floor.00.legacy-room.00.content.monster.0002",
+      "Level": 1,
+      "Health": 10,
+      "RevivalRequired": false
+    },
+    {
+      "AssignmentId": "compat.floor.00.legacy-room.00.content.monster.0003",
+      "Level": 1,
+      "Health": 10,
+      "RevivalRequired": false
+    },
+    {
+      "AssignmentId": "compat.floor.00.legacy-room.00.content.monster.0006",
+      "Level": 1,
+      "Health": 10,
+      "RevivalRequired": false
+    }
+  ],
+  "preserved_primary_members": [
+    "saveVersion",
+    "contentVersion",
+    "createdUtcUnix",
+    "lastPausedUtcUnix",
+    "lastResumedUtcUnix",
+    "lastKnownAppState",
+    "dungeonLayout",
+    "mvpSelectedRoomSlotIndex",
+    "structureRuntime",
+    "runHistory",
+    "researchPending",
+    "researchProgress",
+    "completedResearch",
+    "completedObjectives",
+    "lastOfflineSummary",
+    "integrityFlags",
+    "canonicalSpatialAuthority",
+    "spatialFloors",
+    "structuralLifecycleAndOwnership",
+    "structuralInvestment",
+    "corridorContent",
+    "sharedBranchKnowledge",
+    "sharedFloorKnowledge",
+    "livingDungeon"
+  ],
+  "normal_lifecycle_changed_members": [
+    "lastSavedUtcUnix",
+    "totalTicks"
+  ],
+  "no_run_consumed": true,
+  "automated_native_ui_smoke": {
+    "startup": true,
+    "both_floors": true,
+    "rooms_and_content": true,
+    "reserve": 27,
+    "usable": 973,
+    "total": 1000,
+    "skeleton_inspection": "Level 1, HP 10/10, Ready at 7 HP, Living/combat eligible",
+    "manual_control": "Observe Dungeon",
+    "close_reopen_retained": true,
+    "invalid_save_banner": false,
+    "owner_gameplay_uat": "Pending"
+  },
+  "new_unity_projects": 0,
+  "rebuilds": 0,
+  "runtime_changes": 0,
+  "player_overwrites": 0,
+  "qualified_player_files_unchanged": 303,
+  "qualified_build_source": "62929c35c6300fcc8af9b29e7d9dd8ac9f6d9896",
+  "warm_owner_files_unchanged": 1312,
+  "qualified_repository_inputs_unchanged": 1324,
+  "backups": "C:\\Dev\\Dungeon-Lord\\TestResults\\combat-c2-uat-save-preparation",
+  "screenshots": [
+    {
+      "path": "floor-two.png",
+      "sha256": "aaf7ea055562e6e1444bb7cf2a84dd75a424fdb4aa69920ceffddd43cfc60015"
+    },
+    {
+      "path": "manual-run-control.png",
+      "sha256": "3d31da75beea70fa94e2063e5e87d4fb06c18a43f6a398440dc51e9ae800ebb0"
+    },
+    {
+      "path": "reopened-dungeon.png",
+      "sha256": "8ddc2664cd3efa778bf985301d1d4fe55b4bee4ba7cbcc9ee090ff6bff30cbf7"
+    },
+    {
+      "path": "skeleton-inspection.png",
+      "sha256": "e595b1ea1be56db4d12032e67e7dd184c42bc44fd869536ff72261b06e5f7f68"
+    }
+  ]
+}

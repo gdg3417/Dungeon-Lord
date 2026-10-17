@@ -95,13 +95,17 @@ All commands, filters, XML counts, source applicability, final full suites, buil
 
 ## Owner manual testing after independent review
 
-1. Prepare a separately authorized preserved UAT copy/save namespace using the existing manual-UAT instructions. Verify branch/head, configured namespace and Windows packed configuration. Do not open Editor and player against the same save. Do not overwrite or migrate the protected C0 owner save as a destructive test.
+**Windows UAT save prerequisite:** A newly generated native canonical save contains **zero floors**. A qualified Windows player does not bundle or automatically select the owner's dungeon save. Before asking the owner to launch, verify the packed filename and the actual destination's expected floor count. Reuse existing Unity projects; creating additional Unity project copies requires explicit owner approval. Never use `save_primary.json` or migrate an original protected save for this test.
+
+The existing reserve-UI Windows player has now been prepared with an exact copy of the verified two-floor C0 owner dungeon, migrated only in `combat-c2-reserve-ui-20261016.json`, and smoke checked through close/reopen. See [source/destination hashes, migration and launch instructions](windows-uat-save-preparation/owner-uat.md). This preparation is complete; do not reseed over subsequent meaningful C2 UAT progress.
+
+1. Use the prepared isolated UAT save described above. Verify branch/head, configured namespace and expected **two floors** before launch. Do not open Editor and player against the same save. Do not overwrite or migrate the protected C0 owner save as a destructive test. For future preparation, copy only an explicitly authorized, hash-verified existing dungeon, preserve the disposable destination/sidecars, and migrate only the copy through the normal loader; stop if either source integrity or destination disposability is uncertain.
 2. Acquire two duplicate monsters and verify distinct identities with healthy configured HP/level. Observe total, required reserve and usable mana, including Goblin 6 and Skeleton 7 obligations.
 3. Run manually twice. Compare the second replay's starting HP/revival with the first run's post-settlement state. Replay must retain original combat final HP even when recovery has already changed canonical HP.
 4. Exhaust recovery funding in the isolated UAT save. Verify living injured monsters recover first; a partially revived positive-HP monster remains inactive. Add passive mana and observe canonical retries, whole-HP costs and revival clearing exactly at readiness, with no healing above it.
 5. Move, unassign, delete a room to returned custody and redeploy a monster. Check identity, HP and level persistence. Custody releases obligations without a refund; redeployment/activation must fund an increased requirement. Free relief remains available during shortage.
 6. Inspect per-floor behavior on the supported two-floor layout: inactive floors retain state without obligations; active vacant floors share one global reserve. Confirm no automated arrivals or background parties appear.
-7. Verify affordability during construction, content purchase and draft commit; purchases cannot consume protected funds. Inspect localized HP/readiness/revival text, required-reserve tooltip and shortage explanation at desktop and portrait sizes.
+7. Verify affordability during construction, content purchase and draft commit; purchases cannot consume protected funds. Inspect localized HP/readiness/revival text and the visible required-reserve/shortage information at desktop and portrait sizes.
 8. Close/reopen Editor and Windows player separately. Continuity and wallet must survive; detailed replay must be unavailable after restart. Observe one-time offline grant plus separately reported recovery debit, including fractional mana.
 
 Owner UAT and independent review are not claimed by this implementation packet.
