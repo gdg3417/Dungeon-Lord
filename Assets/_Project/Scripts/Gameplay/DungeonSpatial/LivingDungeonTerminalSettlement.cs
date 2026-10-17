@@ -95,7 +95,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (prior != null) floors.Remove(prior); floors.Add(learned);
             }
             candidate.sharedFloorKnowledge = PhaseSixFloorKnowledge.Canonicalize(new SharedFloorKnowledgeAuthority { Records = floors.ToArray() });
-            candidate.runHistory.AppendOutcome(outcome, config.MaxRunHistoryEntries);
+            candidate.runHistory.AppendOutcome(outcome, currentConfig.MaxRunHistoryEntries);
             // Only the existing first-session objective has an applicable verified rule.
             // Evaluate that one configured objective; no broad completion/research helper.
             var objective = Unchanged(currentConfig.MvpFirstSessionObjective, config.MvpFirstSessionObjective)
@@ -244,7 +244,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 owned.LivingDungeon.Parties.Remove(selected);
                 owned.LivingDungeon.Revision = checked(owned.LivingDungeon.Revision + 1);
                 var history = DurableSettlementHistory.Create(session.GetCurrentBytes(), owned.LivingDungeon,
-                    candidate.runHistory, execution.Snapshot.Configuration.MaxRunHistoryEntries, limits.Canonical.Serialized);
+                    candidate.runHistory, configuration.MaxRunHistoryEntries, limits.Canonical.Serialized);
                 var captured = DetachedRecognizedSaveStateSnapshot.Capture(candidate, limits);
                 return PrepareAndPersist(path, fs, session, session.PrepareDurableSettlementReplacement(captured,
                     owned, owned.LivingDungeon, candidate.sharedBranchKnowledge, candidate.sharedFloorKnowledge, history), false, recover: true);

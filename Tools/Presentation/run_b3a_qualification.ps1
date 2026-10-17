@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('focused','regression','full-edit','full-play','build')][string]$Stage = 'focused',
+    [ValidateSet('focused','regression','full-edit','full-play','build','baseline-ui')][string]$Stage = 'focused',
     [ValidatePattern('^[a-z0-9-]+$')][string]$Attempt = '01'
 )
 $ErrorActionPreference = 'Stop'
@@ -13,6 +13,7 @@ foreach ($path in @($xml,$log,$recordPath)) { if (Test-Path -LiteralPath $path) 
 $cliArgs = @('test',$taskRoot,'--mode','EditMode')
 if ($Stage -eq 'focused') { $cliArgs += @('--filter','LivingDungeonPhaseB3A') }
 if ($Stage -eq 'regression') { $cliArgs += @('--filter','LivingDungeonPhaseA;LivingDungeonPhaseB1;LivingDungeonPhaseB2;RunHeat;LootHeat;BranchKnowledge;FloorKnowledge;PhaseFiveBBranchIntegration;PhaseSix;CombatC2;DetachedCanonical;SaveSpatialMigration;Gd66Windows;RunHistory') }
+if ($Stage -eq 'baseline-ui') { $cliArgs += @('--filter','RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated;TransactionalRoomConstructionLayoutsLocalizationAndResume') }
 if ($Stage -eq 'full-play') { $cliArgs = @('test',$taskRoot,'--mode','PlayMode') }
 $cliArgs += @('--output',$xml,'--timeout','1800','--no-color','--','-logFile',$log)
 if ($Stage -eq 'build') {

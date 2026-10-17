@@ -206,6 +206,40 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Json(outcome.LootExtractionSummary), Is.EqualTo(Json(historical.LootExtractionSummary)));
             Assert.That(outcome.RunHeatApplicationSummary.HeatBefore, Is.Not.EqualTo(historical.RunHeatApplicationSummary.HeatBefore));
         }
+        [Test] public void SettlementUsesCurrentHistoryRetentionRatherThanTheOlderStartBound()
+        {
+            var h = Terminal(retention: 3); h.Manual();
+            h.F.Configuration.MaxRunHistoryEntries = 1;
+            int next = h.F.Runtime.runHistory.NextRunSequence;
+            h.F.Accept(h.Settle());
+            Assert.That(h.F.Runtime.runHistory.RecentOutcomes.Select(o => o.RunId), Is.EqualTo(new[] { "run-1" }));
+            Assert.That(h.F.Runtime.runHistory.NextRunSequence, Is.EqualTo(next));
+        }
+        [Test] public void OnlyTheIndividuallyVerifiedConfiguredFirstSessionObjectiveIsCompleted()
+        {
+            var h = new Harness(); var f = h.F; var objective = f.Configuration.MvpFirstSessionObjective;
+            // Test-owned qualification thresholds; production configuration is unchanged.
+            objective.RequiredRunCount = 1; objective.RequiredRecoveredLootValue = 1;
+            objective.RequiredCompletePath = true; objective.RequireResearchAnalysisUnlocked = false;
+            objective.AllowedMaxHeatTierId = CurrentHeatTierResolver.ConcernTierId;
+            string room = f.State.Floors[0].Layout.Rooms[0].RoomInstanceId;
+            foreach (var item in new[] {
+                (MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId, new TileCoordinate(1,1)),
+                (MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, new TileCoordinate(1,2)),
+                (MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId, new TileCoordinate(0,0)) })
+                f.Accept(h.Q.Edit(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                    DetachedCanonicalMutationRequest.Place(item.Item1, item.Item2, room, null, item.Item3)));
+            f.Runtime.completedObjectives = new CompletedObjectiveState { ObjectiveIds = new[] { "test.b3a.unrelated" },
+                LastCompletedObjectiveId = "test.b3a.unrelated", LastCompletionRuleSourceId = "test.b3a.previous" };
+            h.Save(); string research = Json(f.Runtime.completedResearch);
+            h.Admit(); h.Complete(); double mana = f.Runtime.structureRuntime.ManaReserve;
+            f.Accept(h.Settle());
+            CollectionAssert.AreEquivalent(new[] { "test.b3a.unrelated", objective.ObjectiveId }, f.Runtime.completedObjectives.ObjectiveIds);
+            Assert.That(f.Runtime.completedObjectives.LastCompletionRuleSourceId,
+                Is.EqualTo(CompletedObjectiveStateResolver.FirstSessionObjectiveCompletionRuleSourceId));
+            Assert.That(Json(f.Runtime.completedResearch), Is.EqualTo(research));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana));
+        }
         [Test] public void CompatibleSurvivorLearningUsesCanonicalRecordsAndNoFabricatedC2State()
         {
             var h = Terminal(); var f = h.F;
