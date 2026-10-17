@@ -63,7 +63,17 @@
             </ui:VisualElement>
             <ui:ScrollView name="contextDetails" mode="Vertical" class="context-details">
             <ui:Label name="replayLegend" />
-            <ui:VisualElement name="floorSummary" class="summary-card"><ui:Label name="floorName" class="mode" /><ui:Label name="floorInfo" /></ui:VisualElement>
+            <ui:VisualElement name="floorSummary" class="summary-card">
+                <ui:VisualElement class="row floor-summary-heading"><ui:Label name="floorName" class="mode" /><ui:Button name="manageFloors" tooltip="ui.dungeon.floors.manage" /></ui:VisualElement>
+                <ui:Label name="floorInfo" />
+            </ui:VisualElement>
+            <ui:VisualElement name="floorManagement" class="floor-management">
+                    <ui:Label name="floorLifecycleReason" />
+                    <ui:VisualElement class="row"><ui:Button name="activateFloor" tooltip="ui.floor.activate" /><ui:Button name="deactivateFloor" tooltip="ui.dungeon.floors.deactivate" /></ui:VisualElement>
+                    <ui:Label name="floorConstructionInfo" />
+                    <ui:Label name="floorConstructionReason" />
+                    <ui:Button name="constructFloor" tooltip="ui.floor.construct" />
+            </ui:VisualElement>
             <ui:Label name="replayAvailability" />
             <ui:Label name="economics" />
             <ui:VisualElement name="roomContentPanel">

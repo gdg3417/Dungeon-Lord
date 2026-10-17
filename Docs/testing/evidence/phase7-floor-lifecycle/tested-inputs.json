@@ -1,0 +1,46 @@
+[
+  {
+    "Path": "Assets/_Project/Data/Bootstrap/build_config.json",
+    "SHA256": "7CFE23A4CB58FAD19CD651710D4632FCE8E96DCB0CA7EEE8B998B4017428EBD3"
+  },
+  {
+    "Path": "Assets/_Project/Data/Bootstrap/string_table_en.json",
+    "SHA256": "0068176124DA45CF4A775F5AA26E0F4AFC297DF0389A9BE374A1F503A60D2A02"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorLifecycleAuthority.cs",
+    "SHA256": "B1AD8471BD5F598699EE24B8FAFF10DF0A520B28E1526A8EBBD89725BED042BD"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Services/SaveService.cs",
+    "SHA256": "B51472C0CD0E30F1B852B605F4EE5A48510B3A961B98BBFD6F4FD271E0DCDA18"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/UI/ProductionDungeonController.cs",
+    "SHA256": "018F5B36FF785D1B61055654A14067844EF524704B11F5329FFB0AC56CEE0EA2"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/UI/ProductionDungeonFloors.cs",
+    "SHA256": "C60A43182A905D5F639359A1AA5C1A1328B4B44A8CEB777BD1B22EAF395BB3EC"
+  },
+  {
+    "Path": "Assets/_Project/UI/ProductionDungeon/Dungeon.uxml",
+    "SHA256": "B42DEF318B5C740B40BA4E50FF43DE106F983F66AE96919F838E978186975F18"
+  },
+  {
+    "Path": "Assets/_Project/UI/ProductionDungeon/Dungeon.uss",
+    "SHA256": "927A96F65AB33C91D8A4809DEFE933B17C2E7A2A6D3EB63CE53EF34278AAC7D0"
+  },
+  {
+    "Path": "Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenFloorLifecycleTests.cs",
+    "SHA256": "4E941C25C5B4767DC842DFD616208B2B5863661463F45BEA502251F33531F3C9"
+  },
+  {
+    "Path": "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonFloorSceneTests.cs",
+    "SHA256": "DBB68BCC21E331A4A92E4D2F62A5F7337D341AD500FC847E5354CDA4A7736B58"
+  },
+  {
+    "Path": "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs",
+    "SHA256": "8A0D5CA047FB2C92235B90D1A33F026ACE05395493F29D983BD093D13041DCBE"
+  }
+]

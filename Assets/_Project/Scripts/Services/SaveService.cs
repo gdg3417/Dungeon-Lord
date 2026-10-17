@@ -25,6 +25,9 @@ namespace DungeonBuilder.M0
         private BasicBranchingResearchSnapshot _branchingResearch;
         private FloorConstructionProfileSnapshot _floorConstructionProfiles;
         private FloorConstructionResearchSnapshot _floorConstructionResearch;
+        internal int FloorPreviewConfigurationVersion { get; private set; }
+        internal bool HasFloorConstructionPermission(SaveData current) =>
+            CompletedResearchStateResolver.HasCompletedProject(current?.completedResearch, _floorConstructionResearch?.ResearchId);
         private FormulaModifier[] _economyModifiers = Array.Empty<FormulaModifier>();
         private Func<double> _monotonicSeconds = () => (double)System.Diagnostics.Stopwatch.GetTimestamp() / System.Diagnostics.Stopwatch.Frequency;
         private ITimeSource _timeSource = new SystemTimeSource();
@@ -48,7 +51,7 @@ namespace DungeonBuilder.M0
             _branchingResearch = research;
         public void ConfigureFloorConstruction(FloorConstructionProfileSnapshot profiles,
             FloorConstructionResearchSnapshot research)
-        { _floorConstructionProfiles = profiles; _floorConstructionResearch = research; }
+        { _floorConstructionProfiles = profiles; _floorConstructionResearch = research; FloorPreviewConfigurationVersion++; }
         public string PresentContentAcquisition(string categoryId, string optionId, SaveData current, Func<string, string> text,
             StructuralEconomyPreview preview = null) =>
             ContentAcquisitionEconomyPresenter.Present(_acquisition, categoryId, optionId,
@@ -215,6 +218,7 @@ namespace DungeonBuilder.M0
             RoomContentPositionMigrationProfilesSnapshot positionMigrationProfiles = null,
             RoomContentSpatialOccupancySnapshot roomContentOccupancy = null)
         {
+            FloorPreviewConfigurationVersion++;
             _canonicalConfigured = true;
             _limits = limits; _production = production; _compatibility = compatibility;
             _legacyGameplayConfiguration = legacyGameplayConfiguration;
@@ -487,10 +491,11 @@ namespace DungeonBuilder.M0
         public FloorLifecyclePreview PreviewFloorLifecycle(SaveData current, FloorLifecycleAction action, string floorId) =>
             CreateWriteAuthority().PreviewFloorLifecycle(_canonicalSession, current, action, floorId);
 
-        public DetachedCanonicalWriteResult CommitFloorLifecycle(SaveData current, FloorLifecycleAction action, string floorId)
+        public DetachedCanonicalWriteResult CommitFloorLifecycle(SaveData current, FloorLifecycleAction action, string floorId,
+            FloorLifecyclePreview expectedPreview = null)
         {
             var result = CreateWriteAuthority().CommitFloorLifecycle(SavePath, _canonicalFileSystem,
-                _canonicalSession, current, action, floorId);
+                _canonicalSession, current, action, floorId, expectedPreview);
             if (result.IsSuccess && !result.IsNoOp)
             {
                 _undo = null; _canonicalSession = result.Session;
@@ -510,6 +515,30 @@ namespace DungeonBuilder.M0
                 MonsterContinuity.RequiredReserve(state, _validationContext.MonsterRecovery))
             { preview.IsAffordable = false; preview.Reason = MonsterRecoveryRules.Insufficient; }
             return preview;
+        }
+
+        // Resource-only changes need full validation only when they change an existing
+        // authoritative quote's eligibility. No clone, parsing or run snapshot here.
+        internal bool FloorPreviewAffordabilityChanged(SaveData current, FloorConstructionPreview construction,
+            FloorLifecyclePreview lifecycle)
+        {
+            double mana = current?.structureRuntime?.ManaReserve ?? double.NaN;
+            if (construction?.Candidate != null)
+            {
+                long reserve = MonsterContinuity.RequiredReserve(current.validatedCanonicalSpatialState, _validationContext.MonsterRecovery);
+                bool affordable = StructuralEconomySnapshot.Nonnegative(mana) && mana >= construction.Profile.ConstructionMana &&
+                    mana - construction.Profile.ConstructionMana >= reserve;
+                string reason = !StructuralEconomySnapshot.Nonnegative(mana) || mana < construction.Profile.ConstructionMana
+                    ? FloorConstructionService.InsufficientManaReason
+                    : mana - construction.Profile.ConstructionMana < reserve ? MonsterRecoveryRules.Insufficient : null;
+                if (affordable != construction.IsAffordable || reason != construction.Reason) return true;
+            }
+            if (lifecycle?.HasReserveQuote == true)
+            {
+                bool affordable = lifecycle.RequiredReserveAfter <= lifecycle.RequiredReserveBefore || mana >= lifecycle.RequiredReserveAfter;
+                if (affordable != lifecycle.IsCommittable) return true;
+            }
+            return false;
         }
 
         public DetachedCanonicalWriteResult CommitFloorConstruction(SaveData current,
@@ -640,7 +669,7 @@ namespace DungeonBuilder.M0
         }
 
         private LootConfig _runLoot;
-        public void ConfigureRunLoot(LootConfig value) => _runLoot = value;
+        public void ConfigureRunLoot(LootConfig value) { _runLoot = value; FloorPreviewConfigurationVersion++; }
 
         private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
             new DetachedCanonicalWriteAuthority(_production, _compatibility,

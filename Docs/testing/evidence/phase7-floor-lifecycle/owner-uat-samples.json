@@ -1,0 +1,64 @@
+[
+  {
+    "Name": "phase7-floor-insufficient-uat.json",
+    "SHA256": "3E34B406CBE87E7C1F659F1330FFF066B42351752544D6B075B5FC2B399EF324",
+    "Schema": 15,
+    "Floors": 1,
+    "FloorIdentities": [
+      {
+        "FloorInstanceId": "compat.floor.00",
+        "FloorIndex": 0,
+        "ActivationState": 1
+      }
+    ]
+  },
+  {
+    "Name": "phase7-floor-lifecycle-uat.json",
+    "SHA256": "CE645727A9AFAC7298B228E483A54FEBBD5DB526BE536C80CF689A6E3FD256F7",
+    "Schema": 15,
+    "Floors": 2,
+    "FloorIdentities": [
+      {
+        "FloorInstanceId": "compat.floor.00",
+        "FloorIndex": 0,
+        "ActivationState": 1
+      },
+      {
+        "FloorInstanceId": "canonical.floor.01",
+        "FloorIndex": 1,
+        "ActivationState": 2
+      }
+    ]
+  },
+  {
+    "Name": "phase7-floor-ready-uat.json",
+    "SHA256": "CC999FD6DF273612D7241BA916464D2520CC9F1FA9DC165EBCFF54AB70C12698",
+    "Schema": 15,
+    "Floors": 1,
+    "FloorIdentities": [
+      {
+        "FloorInstanceId": "compat.floor.00",
+        "FloorIndex": 0,
+        "ActivationState": 1
+      }
+    ]
+  },
+  {
+    "Name": "phase7-floor-shell-uat.json",
+    "SHA256": "94E2B7E0FEA00C85A5D28ED91F8FA6EBC7DF1A7C1A7339410B8C5231CB9F3403",
+    "Schema": 15,
+    "Floors": 2,
+    "FloorIdentities": [
+      {
+        "FloorInstanceId": "compat.floor.00",
+        "FloorIndex": 0,
+        "ActivationState": 1
+      },
+      {
+        "FloorInstanceId": "canonical.floor.01",
+        "FloorIndex": 1,
+        "ActivationState": 2
+      }
+    ]
+  }
+]
