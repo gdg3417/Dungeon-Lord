@@ -487,10 +487,11 @@ namespace DungeonBuilder.M0
         public FloorLifecyclePreview PreviewFloorLifecycle(SaveData current, FloorLifecycleAction action, string floorId) =>
             CreateWriteAuthority().PreviewFloorLifecycle(_canonicalSession, current, action, floorId);
 
-        public DetachedCanonicalWriteResult CommitFloorLifecycle(SaveData current, FloorLifecycleAction action, string floorId)
+        public DetachedCanonicalWriteResult CommitFloorLifecycle(SaveData current, FloorLifecycleAction action, string floorId,
+            FloorLifecyclePreview expectedPreview = null)
         {
             var result = CreateWriteAuthority().CommitFloorLifecycle(SavePath, _canonicalFileSystem,
-                _canonicalSession, current, action, floorId);
+                _canonicalSession, current, action, floorId, expectedPreview);
             if (result.IsSuccess && !result.IsNoOp)
             {
                 _undo = null; _canonicalSession = result.Session;

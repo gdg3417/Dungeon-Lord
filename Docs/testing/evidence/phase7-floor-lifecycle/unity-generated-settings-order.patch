@@ -1,0 +1,14 @@
+diff --git a/ProjectSettings/ProjectSettings.asset b/ProjectSettings/ProjectSettings.asset
+index c7cbcbc..f879f00 100644
+--- a/ProjectSettings/ProjectSettings.asset
++++ b/ProjectSettings/ProjectSettings.asset
+@@ -166,8 +166,8 @@ PlayerSettings:
+   androidMaxAspectRatio: 2.4
+   androidMinAspectRatio: 1
+   applicationIdentifier:
+-    Standalone: com.gdg3417.dungeonlord
+     Android: com.gdg3417.dungeonlord
++    Standalone: com.gdg3417.dungeonlord
+   buildNumber:
+     Standalone: 0
+     VisionOS: 0
