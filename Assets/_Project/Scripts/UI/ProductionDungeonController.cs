@@ -78,6 +78,7 @@ namespace DungeonBuilder.M0
                 if (IsConstructing) PresentConstructionInformation();
                 if (IsPlacingContent) PresentAcquisitionInformation();
             }
+            RefreshFloorManagementIfNeeded();
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
             if (!legacy) ReadInput();
             UpdateReplay();
@@ -148,6 +149,7 @@ namespace DungeonBuilder.M0
             InitializeConstruction();
             InitializeRoomContent();
             InitializeReplay();
+            InitializeFloorManagement();
             Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
             Button("default", () => SetTextSize(DungeonTextSize.Default));
@@ -358,6 +360,7 @@ namespace DungeonBuilder.M0
         private void CanonicalPublished(SaveData save)
         {
             if (!HasCanonicalRuntime()) return;
+            floorPreviewSession = null;
             if (!IsEditing && draftContext.Fingerprint(renderState) != draftContext.Fingerprint(save.validatedCanonicalSpatialState))
             {
                 renderState = draftContext.Copy(save.validatedCanonicalSpatialState);
@@ -434,6 +437,7 @@ namespace DungeonBuilder.M0
             world.SetEdit(IsEditing);
             PresentConstruction();
             PresentComposition();
+            PresentFloorManagement();
             PresentRoomContent();
             if (IsEditing) replay?.Suspend();
             world.PresentReplay(replay, IsEditing || legacy);

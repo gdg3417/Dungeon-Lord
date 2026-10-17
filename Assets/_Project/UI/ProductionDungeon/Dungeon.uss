@@ -124,6 +124,13 @@
 #editActions { flex-grow: 1; }
 #editActions > Button { flex-grow: 1; }
 Label { white-space: normal; flex-shrink: 1; }
+.floor-management { display: none; flex-shrink: 0; padding: var(--space); border-left-width: 2px; border-left-color: var(--cool); }
+.floor-management > Label { margin-top: 6px; }
+#floorLifecycleReason, #floorConstructionReason { color: var(--cool); }
+#floorName { flex-grow: 1; }
+#manageFloors { align-self: flex-start; }
+.floor-summary-heading { flex-shrink: 0; }
+.landscape .floor-summary-heading { margin-right: 12px; }
 Button { white-space: normal; flex-shrink: 1; margin: 2px; padding: 7px 12px; color: var(--ink); border-width: 1px; border-color: rgb(115,110,91); border-radius: 5px; background-color: rgb(30,44,54); background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/action.png"); -unity-slice-left: 14; -unity-slice-right: 14; -unity-slice-top: 14; -unity-slice-bottom: 14; }
 Button:hover { border-color: var(--cool); }
 Button:active { background-color: rgb(54,64,62); }

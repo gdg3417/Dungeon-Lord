@@ -1,0 +1,106 @@
+{
+  "Baseline": "7a664efc5e38e0d3522e1ddbe6cd3747b14e61ce",
+  "Branch": "codex/phase7-production-floor-lifecycle",
+  "Project": "C:/Dev/Dungeon-Lord",
+  "Unity": "6000.3.2f1",
+  "Schema": 15,
+  "Stages": [
+    {
+      "Attempt": "01",
+      "Report": "TestResults/phase7-floor-lifecycle-editmode-01.xml",
+      "Result": "Infrastructure blocked: sandbox licensing hardware access; cancelled",
+      "Exit": 1,
+      "Log": "Temp/phase7-floor-lifecycle-editmode-01.log",
+      "Filter": "PhaseSevenFloorLifecycleTests;PhaseSixA2;PhaseSixA3;PhaseSixA4;ProductionSpatialContentBuildGateTests",
+      "Mode": "EditMode"
+    },
+    {
+      "Attempt": "02",
+      "Report": "TestResults/phase7-floor-lifecycle-editmode-02.xml",
+      "Result": "Compilation failed: test-only SaveData.schemaVersion assertion",
+      "Exit": 1,
+      "Log": "Temp/phase7-floor-lifecycle-editmode-02.log",
+      "Filter": "PhaseSevenFloorLifecycleTests;PhaseSixA2;PhaseSixA3;PhaseSixA4;ProductionSpatialContentBuildGateTests",
+      "Mode": "EditMode"
+    },
+    {
+      "Result": "Passed",
+      "Log": "Temp/phase7-floor-lifecycle-editmode-03.log",
+      "Passed": 230,
+      "Skipped": 0,
+      "Filter": "PhaseSevenFloorLifecycleTests;PhaseSixA2;PhaseSixA3;PhaseSixA4;ProductionSpatialContentBuildGateTests",
+      "Mode": "EditMode",
+      "Attempt": "03",
+      "Failed": 0,
+      "Exit": 0,
+      "Report": "TestResults/phase7-floor-lifecycle-editmode-03.xml"
+    },
+    {
+      "Result": "Failed: normal large-text landscape height and unset inline modal style assertion",
+      "Log": "Temp/phase7-floor-lifecycle-playmode-01.log",
+      "Passed": 5,
+      "Skipped": 0,
+      "Filter": "GraphicalFloors;UatContentHeight;OverlayFullWidth;CombatC2ReserveAffordabilityVisibleWithoutHover",
+      "Mode": "PlayMode",
+      "Attempt": "01",
+      "Failed": 2,
+      "Exit": 1,
+      "Report": "TestResults/phase7-floor-lifecycle-playmode-01.xml",
+      "PreservedLog": "Logs/phase7-floor-lifecycle/playmode-01.log"
+    },
+    {
+      "Attempt": "02",
+      "Report": "TestResults/phase7-floor-lifecycle-playmode-02.xml",
+      "Result": "No tests: batch scene-backup recovery dialog; cancelled",
+      "Exit": 1,
+      "Log": "Logs/phase7-floor-lifecycle/playmode-02.log",
+      "Filter": "GraphicalFloors;UatContentHeight;OverlayFullWidth;CombatC2ReserveAffordabilityVisibleWithoutHover",
+      "Mode": "PlayMode"
+    },
+    {
+      "Attempt": "03",
+      "Report": "TestResults/phase7-floor-lifecycle-playmode-03.xml",
+      "Result": "No tests: recovery dialog also triggers on empty backup folder; cancelled",
+      "Exit": 1,
+      "Log": "Logs/phase7-floor-lifecycle/playmode-03.log",
+      "Filter": "GraphicalFloors;UatContentHeight;OverlayFullWidth;CombatC2ReserveAffordabilityVisibleWithoutHover",
+      "Mode": "PlayMode"
+    },
+    {
+      "Result": "Passed",
+      "Log": "Logs/phase7-floor-lifecycle/playmode-04.log",
+      "Passed": 7,
+      "Skipped": 0,
+      "Filter": "GraphicalFloors;UatContentHeight;OverlayFullWidth;CombatC2ReserveAffordabilityVisibleWithoutHover",
+      "Mode": "PlayMode",
+      "Attempt": "04",
+      "Failed": 0,
+      "Exit": 0,
+      "Report": "TestResults/phase7-floor-lifecycle-playmode-04.xml"
+    },
+    {
+      "Result": "Passed",
+      "Log": "Logs/phase7-floor-lifecycle/editmode-04.log",
+      "Passed": 11,
+      "Skipped": 0,
+      "Filter": "PhaseSevenFloorLifecycleTests",
+      "Mode": "EditMode",
+      "Attempt": "04",
+      "Failed": 0,
+      "Exit": 0,
+      "Report": "TestResults/phase7-floor-lifecycle-editmode-04.xml"
+    },
+    {
+      "Attempt": "05",
+      "Report": "TestResults/phase7-floor-lifecycle-playmode-05.xml",
+      "Result": "Passed",
+      "Log": "Logs/phase7-floor-lifecycle/playmode-05.log",
+      "Filter": "GraphicalFloors",
+      "Mode": "PlayMode",
+      "Exit": 0,
+      "Passed": 4,
+      "Failed": 0,
+      "Skipped": 0
+    }
+  ]
+}

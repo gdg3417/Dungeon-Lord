@@ -215,6 +215,15 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         [UnityTest] public IEnumerator CombatC1PartyFollowsRoomsCorridorsAndFloors() { yield return Invoke("CombatC1PartyFollowsRoomsCorridorsAndFloors"); }
         [UnityTest] public IEnumerator CombatC1LocalizedNamesKeepHealthVisibleWithoutOverflow() { yield return Invoke("CombatC1LocalizedNamesKeepHealthVisibleWithoutOverflow"); }
 
+        [UnityTest] public IEnumerator GraphicalFloorsConstructionRequirementsBlockersRefreshAndReopen() { yield return Invoke("GraphicalFloorsConstructionRequirementsBlockersRefreshAndReopen"); }
+        [UnityTest] public IEnumerator GraphicalFloorsLifecycleUsesProductionSelectionAndRefreshesInPlace() { yield return Invoke("GraphicalFloorsLifecycleUsesProductionSelectionAndRefreshesInPlace"); }
+        [UnityTest] public IEnumerator GraphicalFloorsConfirmationCancellationAndChangedSelectionAreSafe() { yield return Invoke("GraphicalFloorsConfirmationCancellationAndChangedSelectionAreSafe"); }
+        [UnityTest] public IEnumerator GraphicalFloorsControlsRemainReachableAtSupportedSizes() { yield return Invoke("GraphicalFloorsControlsRemainReachableAtSupportedSizes"); }
+
+        [UnityTest] public IEnumerator GraphicalFloorReviewTickProbe() { yield return Invoke("GraphicalFloorReviewTickProbe"); }
+        [UnityTest] public IEnumerator GraphicalFloorReviewMeaningfulInvalidations() { yield return Invoke("GraphicalFloorReviewMeaningfulInvalidations"); }
+        [UnityTest] public IEnumerator GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges() { yield return Invoke("GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges"); }
+
         private IEnumerator Invoke(string method) => (IEnumerator)fixtureType.GetMethod(method,
             BindingFlags.Public | BindingFlags.Instance).Invoke(fixture, null);
     }

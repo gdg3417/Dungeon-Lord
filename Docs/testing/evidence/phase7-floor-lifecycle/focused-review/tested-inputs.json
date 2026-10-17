@@ -1,0 +1,34 @@
+[
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/FloorLifecycleAuthority.cs",
+    "SHA256": "7BC452A9DD6584916B1CB5CACFB63FA6220B6EA6BF9297E9303A4E0A67D15FE1"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Services/SaveService.cs",
+    "SHA256": "F6D3A0AAD500C7E7BAAE07CD75865B7BAC99D31EE8DC4EAE079386FBA8A11798"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/UI/ProductionDungeonController.cs",
+    "SHA256": "33633E7EC8280FC462CF7DFAE23A7C0BC93F2450A0C62778E921BADF8CD432AA"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/UI/ProductionDungeonFloors.cs",
+    "SHA256": "01101DEFEAF658741C638F2FB8581D0C7EB426E08BE686E35FC7CF569D227EDE"
+  },
+  {
+    "Path": "Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenFloorLifecycleTests.cs",
+    "SHA256": "80DE95C437C7FDB642A63DE46421565D10E96365D20E627F5BC75DF3F1751EE7"
+  },
+  {
+    "Path": "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonFloorSceneTests.cs",
+    "SHA256": "BB54953067F896E5052CF2470EE4AF89C187D7EB82D7E2F500BDFF5C5E13E724"
+  },
+  {
+    "Path": "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs",
+    "SHA256": "6EF0501E02CD6B454D446D3C2355078797BB595A827D54BFF91CCC2C6290F633"
+  },
+  {
+    "Path": "Assets/_Project/Data/Bootstrap/build_config.json",
+    "SHA256": "9C90E9F057F45CB8DA05E487DE6E62C9AE451C3805A867D2393BEB0D6689C455"
+  }
+]
