@@ -292,6 +292,8 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex));
             string englishConfirmation = ui.Q<Label>("modalText").text;
             Assert.That(englishConfirmation, Does.Contain("Floor 2, Floor 3"), "English list is readable and follows canonical floor order");
+            Assert.That(englishConfirmation, Is.EqualTo(root.Content.GetString("ui.dungeon.floors.cascade", null)
+                .Replace("{0}", "Floor 2, Floor 3")), "The localized cascade consequences remain visible");
             Click(ui.Q<Button>("cancel"));
             Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.None));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
