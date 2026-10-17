@@ -15,6 +15,142 @@ namespace DungeonBuilder.M0.Tests
 {
     public abstract partial class PhaseSevenA4ProductionSceneTests
     {
+        private object FloorReviewField(string name) => typeof(ProductionDungeonController)
+            .GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(controller);
+
+        [UnityTest]
+        public IEnumerator GraphicalFloorReviewTickProbe()
+        {
+            OpenFloorManagement(); Assert.That(controller.ConstructFloor(), Is.True);
+            var root = GameRoot.Instance;
+            controller.SelectFloor(root.Save.validatedCanonicalSpatialState.Floors[1].FloorInstanceId);
+            controller.EnterEdit(); Assert.That(controller.SelectConstructionRoom("spatial.room.basic"), Is.True);
+            controller.TapWorld(new TileCoordinate(1, 2)); Assert.That(controller.ConfirmConstructionPlacement(), Is.True);
+            yield return null; yield return null; Assert.That(controller.Commit(), Is.True);
+            var update = typeof(ProductionDungeonController).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic);
+            int lifecycleCalls = 0, constructionCalls = 0;
+            var lifecycle = FloorReviewField("floorLifecycle"); var construction = FloorReviewField("floorConstruction");
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            long allocated = GC.GetAllocatedBytesForCurrentThread();
+            for (int i = 0; i < 12; i++)
+            {
+                root.Save.totalTicks++; root.Save.structureRuntime.Heat += 1; root.Save.structureRuntime.ManaReserve += .5;
+                update.Invoke(controller, null);
+                var nextLifecycle = FloorReviewField("floorLifecycle"); var nextConstruction = FloorReviewField("floorConstruction");
+                if (!ReferenceEquals(lifecycle, nextLifecycle)) lifecycleCalls++;
+                if (!ReferenceEquals(construction, nextConstruction)) constructionCalls++;
+                lifecycle = nextLifecycle; construction = nextConstruction;
+            }
+            allocated = GC.GetAllocatedBytesForCurrentThread() - allocated; watch.Stop();
+            TestContext.WriteLine($"Floor review 12 simulated foreground ticks: lifecycle previews={lifecycleCalls}; construction previews={constructionCalls}; Update ms={watch.Elapsed.TotalMilliseconds:F3}; thread allocations={allocated}");
+            Assert.That(lifecycleCalls, Is.Zero, "Unchanged eligibility must reuse the lifecycle preview");
+            Assert.That(constructionCalls, Is.Zero, "Unchanged eligibility must reuse the construction preview");
+        }
+
+        [UnityTest]
+        public IEnumerator GraphicalFloorReviewMeaningfulInvalidations()
+        {
+            OpenFloorManagement(); var root = GameRoot.Instance;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var update = typeof(ProductionDungeonController).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic);
+            var quote = (FloorConstructionPreview)FloorReviewField("floorConstruction");
+            long reserve = MonsterContinuity.RequiredReserve(root.Save.validatedCanonicalSpatialState,
+                (MonsterRecoveryRules)FloorReviewField("recoveryPresentationRules"));
+            root.Save.structureRuntime.ManaReserve = quote.Profile.ConstructionMana + reserve - 1;
+            update.Invoke(controller, null);
+            Assert.That(ui.Q<Button>("constructFloor").enabledSelf, Is.False);
+            root.Save.structureRuntime.ManaReserve = quote.Profile.ConstructionMana - 1;
+            update.Invoke(controller, null);
+            Assert.That(ui.Q<Label>("floorConstructionReason").text, Is.EqualTo(root.Content.GetString(FloorConstructionService.InsufficientManaReason, null)));
+            root.Save.structureRuntime.ManaReserve = quote.Profile.ConstructionMana;
+            update.Invoke(controller, null);
+            Assert.That(ui.Q<Label>("floorConstructionReason").text, Is.EqualTo(root.Content.GetString(MonsterRecoveryRules.Insufficient, null)),
+                "The authoritative blocker changes even though both resource ranges are unaffordable");
+            root.Save.structureRuntime.ManaReserve = quote.Profile.ConstructionMana + reserve - 1;
+            update.Invoke(controller, null);
+            var blocked = FloorReviewField("floorConstruction");
+            root.Save.structureRuntime.ManaReserve -= 1; update.Invoke(controller, null);
+            Assert.That(FloorReviewField("floorConstruction"), Is.SameAs(blocked), "Same affordability range is lightweight");
+            root.Save.structureRuntime.ManaReserve = quote.Profile.ConstructionMana + reserve;
+            update.Invoke(controller, null);
+            Assert.That(ui.Q<Button>("constructFloor").enabledSelf, Is.True, "Cost plus current reserve, without publication or a tick");
+            root.Save.completedResearch.ProjectIds = Array.Empty<string>(); update.Invoke(controller, null);
+            Assert.That(ui.Q<Button>("constructFloor").enabledSelf, Is.False);
+            root.Save.completedResearch.ProjectIds = new[] { FloorConstructionResearchAuthority.ResearchId };
+            root.Save.structureRuntime.ManaReserve = 1000; update.Invoke(controller, null);
+            Assert.That(ui.Q<Button>("constructFloor").enabledSelf, Is.True);
+            var beforeClose = FloorReviewField("floorConstruction");
+            Click(ui.Q<Button>("manageFloors")); Click(ui.Q<Button>("manageFloors"));
+            Assert.That(FloorReviewField("floorConstruction"), Is.Not.SameAs(beforeClose));
+            Assert.That(controller.ConstructFloor(), Is.True);
+            string second = root.Save.validatedCanonicalSpatialState.Floors[1].FloorInstanceId;
+            controller.SelectFloor(second);
+            Assert.That(((FloorLifecyclePreview)FloorReviewField("floorLifecycle")).FloorInstanceId, Is.EqualTo(second));
+            controller.EnterEdit(); controller.SelectConstructionRoom("spatial.room.basic"); controller.TapWorld(new TileCoordinate(1, 2));
+            Assert.That(controller.ConfirmConstructionPlacement(), Is.True); yield return null; yield return null;
+            Assert.That(controller.Commit(), Is.True);
+            var shell = root.Save.validatedCanonicalSpatialState.Floors[1];
+            var deployed = root.SaveService.ExecuteCanonicalMutation(root.Save, DetachedCanonicalMutationRequest.Place(
+                "placement.category.monster", "placement.option.monster.skeleton", shell.Layout.Rooms[0].RoomInstanceId,
+                second, new TileCoordinate(0, 0)));
+            Assert.That(deployed.IsSuccess, Is.True, deployed.Reason);
+            var lifecycle = (FloorLifecyclePreview)FloorReviewField("floorLifecycle");
+            Assert.That(lifecycle.RequiredReserveAfter, Is.GreaterThan(lifecycle.RequiredReserveBefore));
+            root.Save.structureRuntime.ManaReserve = lifecycle.RequiredReserveAfter - 1; update.Invoke(controller, null);
+            Assert.That(ui.Q<Button>("activateFloor").enabledSelf, Is.False);
+            root.Save.structureRuntime.ManaReserve = lifecycle.RequiredReserveAfter; update.Invoke(controller, null);
+            Assert.That(ui.Q<Button>("activateFloor").enabledSelf, Is.True);
+            var funded = FloorReviewField("floorLifecycle");
+            var monster = root.Save.monsterContinuity.Records[0]; int health = monster.Health;
+            monster.Health--; update.Invoke(controller, null);
+            Assert.That(FloorReviewField("floorLifecycle"), Is.SameAs(funded), "HP is not the reserve obligation");
+            monster.Health = health;
+            root.SaveService.ConfigureRunLoot(DungeonBuilder.M0.Tests.EditMode.PhaseSixA4Tests.Loot());
+            update.Invoke(controller, null);
+            Assert.That(FloorReviewField("floorLifecycle"), Is.Not.SameAs(funded), "Configuration invalidates without publication");
+            var beforePublish = FloorReviewField("floorLifecycle");
+            Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.True);
+            Assert.That(FloorReviewField("floorLifecycle"), Is.Not.SameAs(beforePublish));
+            controller.SelectFloor(root.Save.validatedCanonicalSpatialState.Floors[0].FloorInstanceId);
+            Assert.That(((FloorLifecyclePreview)FloorReviewField("floorLifecycle")).Reason, Is.EqualTo("floor.lifecycle.first_floor_required"));
+            controller.SelectFloor(second); controller.EnterEdit(); Assert.That(controller.Discard(), Is.True);
+            Assert.That(ui.Q<Button>("activateFloor").enabledSelf, Is.True);
+            root.Save.structureRuntime.ManaReserve += 1; // Fresh direct click binds this value even within the same affordability range.
+            Assert.That(controller.ChangeFloorLifecycle(FloorLifecycleAction.Activate), Is.True);
+            Assert.That(controller.ChangeFloorLifecycle(FloorLifecycleAction.Deactivate), Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges()
+        {
+            OpenFloorManagement(); Assert.That(controller.ConstructFloor(), Is.True);
+            var root = GameRoot.Instance; var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            string second = root.Save.validatedCanonicalSpatialState.Floors[1].FloorInstanceId;
+            controller.SelectFloor(second); controller.EnterEdit(); controller.SelectConstructionRoom("spatial.room.basic");
+            controller.TapWorld(new TileCoordinate(1, 2)); Assert.That(controller.ConfirmConstructionPlacement(), Is.True);
+            yield return null; yield return null; Assert.That(controller.Commit(), Is.True);
+            Assert.That(controller.ChangeFloorLifecycle(FloorLifecycleAction.Activate), Is.True);
+            foreach (bool research in new[] { false, true })
+            {
+                var preview = root.SaveService.PreviewFloorLifecycle(root.Save, FloorLifecycleAction.Deactivate, second);
+                Assert.That(preview.IsCommittable, Is.True);
+                // Force the existing presenter for a real preview to exercise an open
+                // confirmation delegate; current two-floor content has no real cascade.
+                typeof(ProductionDungeonController).GetMethod("ShowFloorLifecycleConfirmation", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .Invoke(controller, new object[] { preview });
+                byte[] before = root.SaveService.CanonicalSession.GetCurrentBytes();
+                if (research) root.Save.completedResearch.ProjectIds = Array.Empty<string>();
+                else root.Save.structureRuntime.ManaReserve += 1;
+                string live = JsonUtility.ToJson(root.Save);
+                yield return null; // The panel may refresh, but the modal must keep its captured binding.
+                Click(ui.Q<Button>("confirm"));
+                Assert.That(ui.Q<Label>("status").text, Is.EqualTo(root.Content.GetString("floor.lifecycle.stale_preview", null)));
+                CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
+                Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(live));
+                Assert.That(root.Save.validatedCanonicalSpatialState.Floors[1].ActivationState, Is.EqualTo(FloorActivationState.Active));
+            }
+        }
+
         private void OpenFloorManagement()
         {
             var root = GameRoot.Instance;
@@ -27,7 +163,7 @@ namespace DungeonBuilder.M0.Tests
         {
             var root = GameRoot.Instance;
             Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.True);
-            string directory = Path.GetFullPath("TestResults/phase7-floor-lifecycle-uat");
+            string directory = Path.GetFullPath("TestResults/phase7-floor-lifecycle-uat/" + filename);
             Directory.CreateDirectory(directory);
             File.WriteAllBytes(Path.Combine(directory, name + ".json"), root.SaveService.CanonicalSession.GetCurrentBytes());
         }
@@ -150,14 +286,16 @@ namespace DungeonBuilder.M0.Tests
                     new FloorLifecycleChange(new SavedSpatialFloor { FloorInstanceId = "test.only.deeper", FloorIndex = 2 }) }) };
             typeof(ProductionDungeonController).GetField("floorLifecycle", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(controller, preview);
             var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
-            Assert.That(controller.ChangeFloorLifecycle(FloorLifecycleAction.Deactivate), Is.False);
+            typeof(ProductionDungeonController).GetMethod("ShowFloorLifecycleConfirmation", BindingFlags.NonPublic | BindingFlags.Instance)
+                .Invoke(controller, new object[] { preview });
             Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex));
             Assert.That(ui.Q<Label>("modalText").text, Does.Contain("Floor 2").And.Contain("Floor 3"));
             Click(ui.Q<Button>("cancel"));
             Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.None));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
             typeof(ProductionDungeonController).GetField("floorLifecycle", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(controller, preview);
-            controller.ChangeFloorLifecycle(FloorLifecycleAction.Deactivate);
+            typeof(ProductionDungeonController).GetMethod("ShowFloorLifecycleConfirmation", BindingFlags.NonPublic | BindingFlags.Instance)
+                .Invoke(controller, new object[] { preview });
             controller.SelectFloor(root.SelectedCanonicalFloorInstanceId);
             Click(ui.Q<Button>("confirm"));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
@@ -188,7 +326,7 @@ namespace DungeonBuilder.M0.Tests
                     TestContext.WriteLine("Floor controls " + size + " " + text + " action=" + button.worldBound + " map=" + controller.Viewport.ScreenRect);
                     if (text == DungeonTextSize.Large)
                     {
-                        string captures = Path.GetFullPath("TestResults/phase7-floor-lifecycle-screenshots");
+                        string captures = Path.GetFullPath("TestResults/phase7-floor-lifecycle-screenshots/" + filename);
                         Directory.CreateDirectory(captures);
                         ScreenCapture.CaptureScreenshot(Path.Combine(captures, "floors-" + size.x + "x" + size.y + ".png"));
                         yield return null; yield return null;

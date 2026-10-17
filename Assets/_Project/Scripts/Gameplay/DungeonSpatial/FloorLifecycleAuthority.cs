@@ -20,6 +20,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public IReadOnlyList<FloorLifecycleChange> Changes { get; internal set; } = Array.Empty<FloorLifecycleChange>();
         public bool RequiresConfirmation => Action == FloorLifecycleAction.Deactivate && Changes.Count > 1;
         internal byte[] BaselineBytes;
+        internal DetachedCanonicalWriteAuthority.LifecyclePreviewBinding Binding;
+        internal bool HasReserveQuote;
+        internal long RequiredReserveBefore, RequiredReserveAfter;
     }
 
     public sealed class FloorLifecycleChange
@@ -32,6 +35,28 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
     public sealed partial class DetachedCanonicalWriteAuthority
     {
+        // Transient input binding, never a save owner. Capture all recognized runtime
+        // inputs conservatively, including changes not yet published to the session.
+        internal sealed class LifecyclePreviewBinding
+        {
+            private readonly string runtime, configuration, combat, loot;
+            private readonly DetachedCanonicalWriteAuthority source;
+            internal LifecyclePreviewBinding(DetachedCanonicalWriteAuthority source, SaveData current)
+            {
+                this.source = source;
+                runtime = JsonUtility.ToJson(current);
+                configuration = JsonUtility.ToJson(source.configuration);
+                combat = JsonUtility.ToJson(source.configuration?.CombatC0);
+                loot = JsonUtility.ToJson(source.runLoot);
+            }
+            internal bool Matches(DetachedCanonicalWriteAuthority writer, SaveData current) =>
+                ReferenceEquals(source.context, writer.context) && ReferenceEquals(source.production, writer.production) &&
+                ReferenceEquals(source.floorConstructionProfiles, writer.floorConstructionProfiles) &&
+                ReferenceEquals(source.floorConstructionResearch, writer.floorConstructionResearch) &&
+                runtime == JsonUtility.ToJson(current) && configuration == JsonUtility.ToJson(writer.configuration) &&
+                combat == JsonUtility.ToJson(writer.configuration?.CombatC0) && loot == JsonUtility.ToJson(writer.runLoot);
+        }
+
         public FloorLifecyclePreview PreviewFloorLifecycle(DetachedCanonicalSaveSession session,
             SaveData current, FloorLifecycleAction action, string floorId)
         {
@@ -48,6 +73,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     (string.IsNullOrWhiteSpace(floorId) || !CanonicalEditFloorTarget.TryResolve(owned.State, floorId, out _)))
                     return result;
                 result.BaselineBytes = session.GetCurrentBytes();
+                result.Binding = new LifecyclePreviewBinding(this, current);
                 var candidate = JsonUtility.FromJson<DetachedCanonicalSpatialSaveState>(JsonUtility.ToJson(owned.State));
                 if (action == FloorLifecycleAction.Deactivate)
                 {
@@ -79,9 +105,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 result.Changes = DescribeChanges(owned.State, candidate);
                 var recognized = DetachedRecognizedSaveStateSnapshot.Capture(current, limits);
                 long required = MonsterContinuity.RequiredReserve(candidate, context.MonsterRecovery);
-                if (required > MonsterContinuity.RequiredReserve(owned.State, context.MonsterRecovery) &&
+                result.RequiredReserveBefore = MonsterContinuity.RequiredReserve(owned.State, context.MonsterRecovery);
+                result.RequiredReserveAfter = required;
+                if (required > result.RequiredReserveBefore &&
                     current.structureRuntime.ManaReserve < required)
-                { result.Reason = MonsterRecoveryRules.Insufficient; return result; }
+                { result.Reason = MonsterRecoveryRules.Insufficient; result.HasReserveQuote = true; return result; }
                 var prepared = session.PrepareLiveReplacement(recognized, candidate, owned.Investment,
                     owned.CorridorContent, owned.BranchKnowledge);
                 if (!prepared.IsSuccess) { result.Reason = prepared.Reason; return result; }
@@ -90,7 +118,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 // branch plans, damage profiles and the entire Active prefix.
                 result.RunSnapshot = ActiveFloorRunSnapshot.Create(validated, production, configuration, limits.Canonical, runLoot);
                 result.IsNoOp = result.Changes.Count == 0;
-                result.Prepared = prepared; result.IsCommittable = true; result.Reason = null;
+                result.Prepared = prepared; result.IsCommittable = true; result.HasReserveQuote = true; result.Reason = null;
                 return result;
             }
             catch { return result; }
@@ -121,7 +149,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 if (expectedPreview != null && (!expectedPreview.IsCommittable || expectedPreview.Action != action ||
                     expectedPreview.FloorInstanceId != floorId || expectedPreview.BaselineBytes == null ||
-                    !expectedPreview.BaselineBytes.SequenceEqual(session.GetCurrentBytes())))
+                    !expectedPreview.BaselineBytes.SequenceEqual(session.GetCurrentBytes()) ||
+                    expectedPreview.Binding?.Matches(this, current) != true))
                     return Failure("floor.lifecycle.stale_preview");
                 if (!session.GetCurrentBytes().SequenceEqual(fileSystem.ReadAllBytes(activePath)))
                     return Failure("floor.lifecycle.stale_session");
@@ -131,6 +160,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             // complete runtime materialization are repeated against the current session.
             var preview = PreviewFloorLifecycle(session, current, action, floorId);
             if (!preview.IsCommittable) return Failure(preview.Reason);
+            if (expectedPreview != null && (preview.IsNoOp != expectedPreview.IsNoOp ||
+                !preview.Changes.Select(c => (c.FloorInstanceId, c.FloorIndex))
+                    .SequenceEqual(expectedPreview.Changes.Select(c => (c.FloorInstanceId, c.FloorIndex)))))
+                return Failure("floor.lifecycle.stale_preview");
             if (preview.IsNoOp)
                 return new DetachedCanonicalWriteResult(true, null, true, false,
                     session.GetCurrentBytes(), session, ValidateSession(session), current);

@@ -10,27 +10,61 @@ namespace DungeonBuilder.M0
         private bool floorManagementOpen;
         private FloorConstructionPreview floorConstruction;
         private FloorLifecyclePreview floorLifecycle;
+        private DetachedCanonicalSaveSession floorPreviewSession;
+        private DetachedCanonicalSpatialSaveState floorPreviewState;
+        private string floorPreviewSelection;
+        private int floorPreviewConfigurationVersion;
+        private bool floorPreviewPermit;
+        private double floorPreviewMana;
         private bool CanManageFloors => initialized && HasCanonicalRuntime() && !IsEditing &&
             recoveryBytes == null && recoveryReason == null;
 
         private void InitializeFloorManagement()
         {
-            Button("manageFloors", () => { floorManagementOpen = !floorManagementOpen; Present(); });
+            Button("manageFloors", () => { floorManagementOpen = !floorManagementOpen; floorPreviewSession = null; Present(); });
             Button("constructFloor", () => ConstructFloor());
             Button("activateFloor", () => ChangeFloorLifecycle(FloorLifecycleAction.Activate));
             Button("deactivateFloor", () => ChangeFloorLifecycle(FloorLifecycleAction.Deactivate));
         }
 
-        private void PresentFloorManagement()
+        private bool FloorPreviewsNeedRefresh()
+        {
+            var service = root.SaveService;
+            bool changed = floorPreviewSession != service.CanonicalSession || floorPreviewState != root.Save.validatedCanonicalSpatialState ||
+                floorPreviewSelection != selectedFloor || floorPreviewConfigurationVersion != service.FloorPreviewConfigurationVersion ||
+                floorPreviewPermit != service.HasFloorConstructionPermission(root.Save);
+            double mana = root.Save.structureRuntime.ManaReserve;
+            if (!changed && !mana.Equals(floorPreviewMana))
+                changed = service.FloorPreviewAffordabilityChanged(root.Save, floorConstruction, floorLifecycle);
+            floorPreviewMana = mana;
+            return changed;
+        }
+
+        private void RefreshFloorManagementIfNeeded()
+        {
+            if (floorManagementOpen && CanManageFloors && FloorPreviewsNeedRefresh()) PresentFloorManagement(true);
+        }
+
+        private void PresentFloorManagement(bool refresh = false)
         {
             var ui = document.rootVisualElement;
             ui.Q("manageFloors").style.display = IsEditing ? DisplayStyle.None : DisplayStyle.Flex;
             ui.Q<Button>("manageFloors").SetEnabled(CanManageFloors);
             ui.Q("floorManagement").style.display = floorManagementOpen && !IsEditing ? DisplayStyle.Flex : DisplayStyle.None;
-            if (!floorManagementOpen || !CanManageFloors) return;
+            if (!floorManagementOpen || !CanManageFloors) { floorPreviewSession = null; return; }
             var floor = root.Save.validatedCanonicalSpatialState.Floors.SingleOrDefault(f => f.FloorInstanceId == selectedFloor);
             var action = floor?.ActivationState == FloorActivationState.Active ? FloorLifecycleAction.Deactivate : FloorLifecycleAction.Activate;
-            floorLifecycle = root.SaveService.PreviewFloorLifecycle(root.Save, action, selectedFloor);
+            if (refresh || FloorPreviewsNeedRefresh())
+            {
+                floorLifecycle = root.SaveService.PreviewFloorLifecycle(root.Save, action, selectedFloor);
+                floorConstruction = root.SaveService.PreviewFloorConstruction(root.Save);
+                floorPreviewSession = root.SaveService.CanonicalSession;
+                floorPreviewState = root.Save.validatedCanonicalSpatialState;
+                floorPreviewSelection = selectedFloor;
+                floorPreviewConfigurationVersion = root.SaveService.FloorPreviewConfigurationVersion;
+                floorPreviewPermit = root.SaveService.HasFloorConstructionPermission(root.Save);
+                floorPreviewMana = root.Save.structureRuntime.ManaReserve;
+            }
             ui.Q("activateFloor").style.display = floor?.ActivationState == FloorActivationState.Inactive ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q("deactivateFloor").style.display = floor?.ActivationState == FloorActivationState.Active ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("activateFloor").SetEnabled(floorLifecycle.IsCommittable);
@@ -38,7 +72,6 @@ namespace DungeonBuilder.M0
             ui.Q<Label>("floorLifecycleReason").text = floor == null ? Text("floor.lifecycle.invalid_state") :
                 floorLifecycle.Reason != null ? Text(floorLifecycle.Reason) : Text("ui.dungeon.floors.lifecycle_ready");
 
-            floorConstruction = root.SaveService.PreviewFloorConstruction(root.Save);
             bool opportunity = floorConstruction.Profile != null && floorConstruction.Reason != FloorConstructionService.AlreadyConstructedReason;
             ui.Q("constructFloor").style.display = opportunity ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("constructFloor").SetEnabled(opportunity && floorConstruction.IsCommittable);
@@ -52,6 +85,7 @@ namespace DungeonBuilder.M0
 
         public bool ConstructFloor()
         {
+            RefreshFloorManagementIfNeeded();
             if (!CanManageFloors || !floorManagementOpen || floorConstruction?.IsCommittable != true ||
                 modal.style.display == DisplayStyle.Flex) return false;
             var result = root.SaveService.CommitFloorConstruction(root.Save, floorConstruction);
@@ -61,9 +95,14 @@ namespace DungeonBuilder.M0
 
         public bool ChangeFloorLifecycle(FloorLifecycleAction action)
         {
+            RefreshFloorManagementIfNeeded();
             if (!CanManageFloors || !floorManagementOpen || floorLifecycle?.IsCommittable != true ||
                 floorLifecycle.Action != action || floorLifecycle.FloorInstanceId != selectedFloor ||
                 modal.style.display == DisplayStyle.Flex) return false;
+            // A direct click gets current runtime inputs. A modal keeps this exact
+            // captured preview and must fail closed if inputs change while it is open.
+            PresentFloorManagement(true);
+            if (!floorLifecycle.IsCommittable || floorLifecycle.Action != action) return false;
             var preview = floorLifecycle;
             if (preview.RequiresConfirmation)
             {

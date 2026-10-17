@@ -77,8 +77,8 @@ namespace DungeonBuilder.M0
                 PresentHud(); PresentEconomy();
                 if (IsConstructing) PresentConstructionInformation();
                 if (IsPlacingContent) PresentAcquisitionInformation();
-                if (floorManagementOpen) PresentFloorManagement();
             }
+            RefreshFloorManagementIfNeeded();
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
             if (!legacy) ReadInput();
             UpdateReplay();
@@ -360,6 +360,7 @@ namespace DungeonBuilder.M0
         private void CanonicalPublished(SaveData save)
         {
             if (!HasCanonicalRuntime()) return;
+            floorPreviewSession = null;
             if (!IsEditing && draftContext.Fingerprint(renderState) != draftContext.Fingerprint(save.validatedCanonicalSpatialState))
             {
                 renderState = draftContext.Copy(save.validatedCanonicalSpatialState);

@@ -11,6 +11,81 @@ namespace DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests
 {
     public sealed class PhaseSevenFloorLifecycleTests
     {
+        [TestCase("mana")][TestCase("research")][TestCase("heat")][TestCase("tick")]
+        [TestCase("recognized")][TestCase("configuration")][TestCase("combat")][TestCase("loot")]
+        public void UnpublishedInputsRejectCapturedPreviewWithoutMutation(string change)
+        {
+            var f = PhaseSixA4Tests.Eligible();
+            if (change == "combat")
+            {
+                Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                    File.ReadAllText("Assets/_Project/Data/Bootstrap/run_simulation_config.json"), out var config), Is.True);
+                f.Configuration.CombatC0 = config.CombatC0;
+            }
+            var writer = PhaseSixA4Tests.Writer(f); string id = PhaseSixA4Tests.FloorTwo(f);
+            var preview = writer.PreviewFloorLifecycle(f.Session, f.Runtime, FloorLifecycleAction.Activate, id);
+            Assert.That(preview.IsCommittable, Is.True, preview.Reason);
+            switch (change)
+            {
+                case "mana": f.Runtime.structureRuntime.ManaReserve += 1; break;
+                case "research": f.Runtime.completedResearch.ProjectIds = Array.Empty<string>(); break;
+                case "heat": f.Runtime.structureRuntime.Heat += 1; break;
+                case "tick": f.Runtime.totalTicks++; break;
+                case "recognized": f.Runtime.lastPausedUtcUnix++; break;
+                case "configuration": f.Configuration.SuccessThreshold += .01; break;
+                case "combat": f.Configuration.CombatC0.MaximumRounds++; break;
+                case "loot":
+                    var loot = (LootConfig)typeof(DetachedCanonicalWriteAuthority).GetField("runLoot",
+                        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(writer);
+                    loot.tables[0].id += ".test.changed"; break;
+            }
+            byte[] before = f.Session.GetCurrentBytes(); string live = JsonUtility.ToJson(f.Runtime);
+            var result = writer.CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                FloorLifecycleAction.Activate, id, preview);
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.Reason, Is.EqualTo("floor.lifecycle.stale_preview"));
+            CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            Assert.That(JsonUtility.ToJson(f.Runtime), Is.EqualTo(live));
+        }
+
+        [Test]
+        public void ReconfiguredReserveContextRejectsOldPreviewAndFreshBootstrapPathStillWorks()
+        {
+            var f = PhaseSixA4Tests.Eligible();
+            var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
+            service.ConfigureRunLoot(PhaseSixA4Tests.Loot());
+            service.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
+                PhaseSixA3FloorActivationEligibilityTests.Research(f));
+            string id = PhaseSixA4Tests.FloorTwo(f);
+            var preview = service.PreviewFloorLifecycle(f.Runtime, FloorLifecycleAction.Activate, id);
+            Assert.That(preview.IsCommittable, Is.True, preview.Reason);
+            int oldVersion = service.FloorPreviewConfigurationVersion;
+            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
+                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.PositionProfiles, f.Occupancy);
+            Assert.That(service.FloorPreviewConfigurationVersion, Is.GreaterThan(oldVersion));
+            var bytes = f.Session.GetCurrentBytes();
+            var rejected = service.CommitFloorLifecycle(f.Runtime, FloorLifecycleAction.Activate, id, preview);
+            Assert.That(rejected.Reason, Is.EqualTo("floor.lifecycle.stale_preview"));
+            CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath));
+            Assert.That(service.CommitFloorLifecycle(f.Runtime, FloorLifecycleAction.Activate, id).IsSuccess, Is.True,
+                "The existing Bootstrap path intentionally revalidates current inputs without a captured confirmation");
+        }
+
+        [Test]
+        public void ChangedPresentedConsequencesAreRejectedBeforePersistence()
+        {
+            var f = PhaseSixA4Tests.Eligible(); var writer = PhaseSixA4Tests.Writer(f);
+            string id = PhaseSixA4Tests.FloorTwo(f);
+            var preview = writer.PreviewFloorLifecycle(f.Session, f.Runtime, FloorLifecycleAction.Activate, id);
+            preview.Changes = Array.AsReadOnly(new[] { new FloorLifecycleChange(f.State.Floors[0]) });
+            byte[] before = f.Session.GetCurrentBytes();
+            var result = writer.CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                FloorLifecycleAction.Activate, id, preview);
+            Assert.That(result.Reason, Is.EqualTo("floor.lifecycle.stale_preview"));
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+        }
+
         [Test]
         public void ExplicitPreviewAndCommitTargetFloorTwoAndRetainCanonicalOrderingOnReopen()
         {
