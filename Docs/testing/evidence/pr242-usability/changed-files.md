@@ -1,0 +1,28 @@
+# Exact owner-usability correction files
+
+- `Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs`
+- `Assets/_Project/Scripts/UI/ProductionDungeonComposition.cs`
+- `Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs`
+- `Assets/_Project/Scripts/UI/ProductionDungeonController.cs`
+- `Assets/_Project/Scripts/UI/ProductionDungeonRoomContent.cs`
+- `Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs`
+- `Assets/_Project/UI/ProductionDungeon/Dungeon.uss`
+- `Assets/_Project/UI/ProductionDungeon/Dungeon.uxml`
+- `Docs/testing/evidence/pr242-graphics/manual-uat.md`
+- `Docs/testing/evidence/pr242-usability/changed-files.md`
+- `Docs/testing/evidence/pr242-usability/plan.md`
+- `Docs/testing/evidence/pr242-usability/qualification.json`
+- `Docs/testing/evidence/pr242-usability/qualification.md`
+- `Docs/testing/evidence/pr242-usability/reports.zip`
+- `Docs/testing/evidence/pr242-usability/screenshots.zip`
+- `Docs/testing/evidence/pr242-usability/screenshots/after-construction-1280-Large.png`
+- `Docs/testing/evidence/pr242-usability/screenshots/after-construction-expanded-1280-Large.png`
+- `Docs/testing/evidence/pr242-usability/screenshots/after-options-scrolled-1280-Large.png`
+- `Docs/testing/evidence/pr242-usability/screenshots/after-trap-browser-1280-Large.png`
+- `Docs/testing/evidence/pr242-usability/screenshots/before-construction-1280-Large.png`
+- `Docs/testing/evidence/pr242-usability/screenshots/before-trap-browser-1280-Large.png`
+- `Docs/testing/evidence/pr242-usability/screenshots/index.json`
+- `Docs/testing/evidence/pr242-usability/visual-review.md`
+- `Tools/Presentation/collect_pr242_usability.py`
+- `Tools/Presentation/prepare_pr242_usability_owner.py`
+- `Tools/Presentation/qualify_pr242_usability.py`
