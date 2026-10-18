@@ -77,13 +77,14 @@ def run(stage, attempt):
     cli = 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe'
     args = ['test', str(ROOT), '--mode', 'PlayMode' if stage in ('integration-play', 'full-play') else 'EditMode']
     if stage in filters: args += ['--filter', filters[stage]]
-    elif stage not in ('full-edit', 'full-play', 'build'): raise ValueError('Unknown stage')
+    elif stage not in ('full-edit', 'full-play', 'build', 'build-smoke-fix'): raise ValueError('Unknown stage')
     args += ['--output', str(paths[0]), '--timeout', '1800', '--no-color', '--', '-logFile', str(paths[1])]
-    if stage == 'build':
-        target = ROOT/'Builds/Development/Windows-living-dungeon-b3b1-20261018'
+    if stage in ('build', 'build-smoke-fix'):
+        suffix = '-smoke-fix' if stage == 'build-smoke-fix' else ''
+        target = ROOT/('Builds/Development/Windows-living-dungeon-b3b1-20261018'+suffix)
         if target.exists(): raise ValueError('Preserve existing build')
         args = ['build', str(ROOT), '--target', 'StandaloneWindows64', '--execute-method',
-            'DungeonBuilder.M0.EditorTools.DungeonVisualBuildQualification.BuildLivingDungeonB3B1Windows',
+            'DungeonBuilder.M0.EditorTools.DungeonVisualBuildQualification.'+('BuildLivingDungeonB3B1SmokeFixWindows' if suffix else 'BuildLivingDungeonB3B1Windows'),
             '--allow-dirty-build', '--timeout', '1800', '--no-tail', '--log-file', str(paths[1]), '--no-color']
     import datetime
     record = dict(executable=cli, arguments=args, commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(), startedUtc=datetime.datetime.now(datetime.timezone.utc).isoformat())

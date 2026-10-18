@@ -11,6 +11,10 @@ namespace DungeonBuilder.M0.BuildTools
     // Inputs are detached test artifacts; this capability has no canonical writer.
     internal static class CombatCheckpointDevelopmentSmoke
     {
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        private static extern void ExitProcess(uint exitCode);
+#endif
         [Serializable] internal sealed class Input
         { public int MaximumBytes; public long MaximumReplayEvents, MaximumCombatWork; public Row[] Rows; }
         [Serializable] internal sealed class Row
@@ -52,7 +56,13 @@ namespace DungeonBuilder.M0.BuildTools
             }
             catch (Exception error) { Debug.LogException(error); }
             // Immediate exit prevents subsequent Bootstrap initialization/save publication.
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+            // Mono Environment.Exit can stall in native shutdown on this qualified
+            // host. Exit only this read-only technical player, after closing the report.
+            ExitProcess((uint)exit);
+#else
             Environment.Exit(exit);
+#endif
         }
     }
 }
