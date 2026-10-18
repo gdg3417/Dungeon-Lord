@@ -858,12 +858,14 @@ namespace DungeonBuilder.M0.Tests
             var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var room=floor.Layout.Rooms[0];
             controller.EnterEdit(); controller.TapWorld(new TileCoordinate(room.Anchor.X+1,room.Anchor.Y+1));
             Assert.That(controller.OpenContentCategory("placement.category.trap"),Is.True); Assert.That(controller.SelectNewContent("placement.option.trap.spike"),Is.True);
-            controller.FocusRoom(); yield return null; yield return null;
+            controller.FocusRoom(); yield return WaitForViewportGeometry();
             var camera=controller.GetComponentInChildren<Camera>(); var definition=root.ProductionSpatialContent.Catalog.Rooms.Single(r=>r.RoomDefinitionId==room.RoomDefinitionId);
             Assert.That(definition.TryResolveGrossTiles(room.Anchor,room.Orientation,new SpatialValidationWorkloadLimits(root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles),out var footprint),Is.True);
             var candidates=footprint.OccupiedTiles.Where(c=>controller.World.Select(c)==null).OrderBy(c=>c).Select(c=>new { Cell=c,Screen=(Vector2)camera.WorldToScreenPoint(new Vector3(c.X+.5f,c.Y+.5f,0)) })
                 .Where(c=>camera.pixelRect.Contains(c.Screen) && !controller.IsChrome(c.Screen,1)).ToArray();
             Assert.That(candidates.Length,Is.GreaterThan(1));
+            Rect beforeMouseViewport=controller.Viewport.ScreenRect;
+            Vector3 beforeMouseCamera=camera.transform.position; float beforeMouseSize=camera.orthographicSize;
             var mouse=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
             try
             {
@@ -873,10 +875,48 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(controller.ContentPreview?.IsValid,Is.True); Assert.That(controller.Draft.CommandCount,Is.Zero);
             }
             finally { UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse); }
+            yield return WaitForViewportGeometry();
+            var touchCell=candidates[1].Cell;
+            var touchWorld=new Vector3(touchCell.X+.5f,touchCell.Y+.5f,0);
+            Vector2 touchPoint=camera.WorldToScreenPoint(touchWorld);
+            Vector2 roundTrip=controller.Viewport.ScreenToWorld(touchPoint);
+            TestContext.WriteLine("Content pointer geometry beforeMouse="+beforeMouseViewport+" afterMouse="+controller.Viewport.ScreenRect+
+                " cameraBefore="+beforeMouseCamera+" cameraAfter="+camera.transform.position+" sizeBefore="+beforeMouseSize+" sizeAfter="+camera.orthographicSize+
+                " cachedTouch="+candidates[1].Screen+" cachedResolvesTo="+controller.Viewport.ScreenToWorld(candidates[1].Screen)+
+                " currentTouch="+touchPoint+" intendedCell="+touchCell.X+","+touchCell.Y);
+            Assert.That(roundTrip.x,Is.EqualTo(touchWorld.x).Within(.001f),"Current camera/viewport X round-trip");
+            Assert.That(roundTrip.y,Is.EqualTo(touchWorld.y).Within(.001f),"Current camera/viewport Y round-trip");
+            Assert.That(camera.pixelRect.Contains(touchPoint),Is.True);
+            Assert.That(controller.IsChrome(touchPoint,1),Is.False,"Current touch target must reach the world viewport");
             simulatedTouch=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Touchscreen>();
-            Touch(1,candidates[1].Screen,UnityEngine.InputSystem.TouchPhase.Began); yield return null; yield return null;
-            Touch(1,candidates[1].Screen,UnityEngine.InputSystem.TouchPhase.Ended); yield return null; yield return null;
-            Assert.That(controller.ContentPreview?.IsValid,Is.True); Assert.That(controller.Draft.CommandCount,Is.Zero); AssertCanonicalUnchanged(before,mana);
+            yield return null; yield return null;
+            Assert.That(simulatedTouch.enabled,Is.True,"Simulated touchscreen must be active before queuing input");
+            int observedTouchId=0; bool observedCurrent=false; Vector2 observedPosition=default;
+            System.Action observeTouch=()=>
+            {
+                // EditMode coroutines can read the Editor buffer after yielding.
+                // Observe the same player update/state buffer as the controller.
+                if(UnityEngine.InputSystem.LowLevel.InputState.currentUpdateType!=UnityEngine.InputSystem.LowLevel.InputUpdateType.Dynamic) return;
+                var active=simulatedTouch.touches.FirstOrDefault(t=>t.press.isPressed);
+                if(active==null) return;
+                observedTouchId=active.touchId.ReadValue(); observedPosition=active.position.ReadValue();
+                observedCurrent=UnityEngine.InputSystem.Touchscreen.current==simulatedTouch;
+            };
+            UnityEngine.InputSystem.InputSystem.onAfterUpdate+=observeTouch;
+            try
+            {
+                Touch(1,touchPoint,UnityEngine.InputSystem.TouchPhase.Began); yield return null; yield return null;
+                TestContext.WriteLine("Content touch coroutineBuffer="+UnityEngine.InputSystem.LowLevel.InputState.currentUpdateType+
+                    " playerId="+observedTouchId+" playerPosition="+observedPosition+" currentDevice="+observedCurrent);
+                Assert.That(observedCurrent,Is.True); Assert.That(observedTouchId,Is.EqualTo(1));
+                Assert.That(Vector2.Distance(observedPosition,touchPoint),Is.LessThan(.001f));
+                Touch(1,touchPoint,UnityEngine.InputSystem.TouchPhase.Ended); yield return null; yield return null;
+            }
+            finally { UnityEngine.InputSystem.InputSystem.onAfterUpdate-=observeTouch; }
+            Assert.That(controller.ContentPreview?.IsValid,Is.True,controller.ContentPreview?.Reason); Assert.That(controller.Draft.CommandCount,Is.Zero); AssertCanonicalUnchanged(before,mana);
+            Assert.That(controller.World.TryRoomLocal(room.RoomInstanceId,touchCell,out var expectedLocal),Is.True);
+            Assert.That(controller.ContentPreview.Assignment.RoomLocalPosition,Is.EqualTo(expectedLocal),"Touch must preview the intended current map cell");
+            yield return WaitForViewportGeometry();
             var ui=controller.GetComponent<UIDocument>().rootVisualElement; AssertReachable(ui.Q<Button>("confirmContent"));
             var screen=CompositionButtonScreen(ui.Q<Button>("confirmContent"));
             Touch(1,screen,UnityEngine.InputSystem.TouchPhase.Began); yield return null; yield return null;

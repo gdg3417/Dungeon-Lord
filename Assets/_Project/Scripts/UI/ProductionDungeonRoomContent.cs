@@ -65,7 +65,7 @@ namespace DungeonBuilder.M0
             string id = room.RoomInstanceId;
             ClearConstructionSelection(); ClearContentSelection(); selected = null; selectedRoomId = id; selectedEdgeId = null; moveMode = false;
             contentCategory = category; detailsCollapsed = false; OpenSheet(); world.SelectRoomFootprint(id);
-            feedback = "ui.dungeon.content.choose"; Present(); return true;
+            feedback = "ui.dungeon.content.choose"; Present(); FocusRoom(); return true;
         }
         public bool SelectNewContent(string option)
         {

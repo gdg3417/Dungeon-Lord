@@ -42,7 +42,33 @@
 .landscape .metric-icon { height: 24px; }
 .landscape Button { padding-top: 0; padding-bottom: 0; }
 .map-area { flex-grow: 1; flex-shrink: 1; min-height: 64px; }
+.constructing .map-area { flex-shrink: 0; min-height: 26%; }
+.landscape.constructing .metric-icon { display: none; }
+.landscape.constructing .metric-card { padding-top: 0; padding-bottom: 0; }
+.landscape.constructing .reserve-information { margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
+.landscape.constructing .capacity-bar { padding-top: 0; padding-bottom: 0; }
+.landscape.constructing #draftSummary { flex-basis: 50%; }
+.landscape.constructing #editActions { flex-basis: 48%; }
+.display-popover .legacy { flex-basis: auto; align-self: stretch; }
 .viewport { flex-grow: 1; min-width: 0; }
+.workspace { flex-grow: 1; flex-shrink: 1; min-height: 0; }
+.landscape.working-sheet .workspace { flex-direction: row; }
+.landscape.working-sheet .map-area { min-width: 0; min-height: 0; flex-basis: 40%; }
+.landscape.working-sheet .bottom-chrome { flex-basis: 60%; max-height: 100%; min-width: 0; align-self: flex-end; border-left-width: 2px; border-left-color: var(--gold); }
+.landscape.working-sheet .sheet-top { flex-direction: column; align-items: stretch; }
+.landscape.working-sheet .sheet-header, .landscape.working-sheet #constructionCategories { flex-basis: auto; }
+.landscape.working-sheet .placement-context { flex-direction: column; }
+.landscape.working-sheet .placement-information, .landscape.working-sheet .placement-controls { flex-basis: auto; min-width: 0; }
+.landscape.working-sheet #draftSummary { flex-basis: 100%; }
+.landscape.working-sheet #editActions { flex-basis: auto; }
+.landscape.working-sheet .session-actions .legacy { flex-basis: 100%; }
+.landscape.working-sheet .session-actions { padding-top: 0; }
+.landscape.constructing .placement-information Label { margin-top: 0; margin-bottom: 0; }
+.landscape.working-sheet #constructionOptions { flex-shrink: 0; }
+.landscape.constructing .sheet-top { flex-direction: row; }
+.landscape.constructing .sheet-header { flex-basis: 45%; }
+.landscape.constructing .sheet-header > Label { display: none; }
+.landscape.constructing #constructionCategories { flex-basis: 55%; min-width: 0; }
 .floor-rail { position: absolute; left: 4px; top: 4px; max-height: 100%; width: 128px; padding: 4px; }
 .floor-rail Button { background-image: none; background-color: rgba(8,17,23,0.56); border-width: 0; border-left-width: 1px; border-left-color: rgba(157,175,177,0.35); border-radius: 3px; margin: 1px 0; padding-left: 10px; padding-right: 6px; }
 .floor-rail .selected-floor { background-color: rgba(32,36,28,0.68); border-left-width: 3px; border-left-color: var(--gold); color: rgb(250,222,155); -unity-font-style: bold; }
@@ -151,7 +177,7 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .placing-content .bottom-chrome { max-height: 54%; }
 .placing-content .map-area { min-height: 25%; }
 .placing-content .top-chrome { max-height: 22%; }
-.landscape.placing-content .bottom-chrome { max-height: 46%; }
+.landscape.placing-content .bottom-chrome { max-height: 100%; }
 .landscape.placing-content .top-content { flex-direction: column; align-items: stretch; }
 .landscape.placing-content .hud { flex-basis: auto; min-width: 0; }
 .landscape.placing-content .top-chrome { padding-top: 0; padding-bottom: 0; }
@@ -159,14 +185,12 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .landscape.placing-content .top-chrome Label { padding-top: 0; padding-bottom: 0; }
 .landscape.placing-content #navigation { flex-basis: auto; flex-wrap: nowrap; }
 .landscape.placing-content #mode { flex-basis: auto; }
-.landscape.placing-content #draftSummary { flex-basis: 38%; min-width: 0; }
-.landscape.placing-content #editActions { flex-basis: 38%; min-width: 0; flex-wrap: nowrap; }
-.landscape.placing-content .legacy { flex-basis: 20%; }
 .placing-content #contentCapacity, .placing-content #contentPlacementInfo { padding-top: 0; padding-bottom: 0; }
 #contentPlacementActions { flex-shrink: 0; flex-wrap: nowrap; }
 #contentPlacementActions > Button { flex-grow: 1; min-width: 0; }
 #contentBrowserSelector { flex-shrink: 0; }
 #contentBrowserSelector > Button { flex-grow: 1; }
 .content-card { flex-shrink: 0; }
+.content-choices { flex-shrink: 0; }
 .replay-damage { position: absolute; display: none; background-color: rgba(18, 22, 30, 0.96); border-radius: 6px; padding: 6px; white-space: normal; -unity-text-align: middle-center; -unity-font-style: bold; }
 .replay-combat-damage { padding: 0; background-color: rgba(0,0,0,0); white-space: nowrap; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }

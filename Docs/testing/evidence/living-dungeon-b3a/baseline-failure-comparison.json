@@ -1,0 +1,29 @@
+{
+  "productionBaseline": "e5abe082a8a51a00845dfff5c735fbb3eb9edb8d",
+  "featureRuntime": "b5502291e9da3d229bbcc3d152f8bd56954d84eb",
+  "sameNamesAndMessages": true,
+  "baselineFailures": [
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated",
+      "message": "  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated>d__120.MoveNext () [0x0051b] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:879\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionLayoutsLocalizationAndResume",
+      "message": "  Expected: greater than 150.0f\n  But was:  122.0f\n",
+      "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionLayoutsLocalizationAndResume>d__25.MoveNext () [0x00820] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:341\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    }
+  ],
+  "featureFailures": [
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated",
+      "message": "  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated>d__120.MoveNext () [0x0051b] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:879\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionLayoutsLocalizationAndResume",
+      "message": "  Expected: greater than 150.0f\n  But was:  122.0f\n",
+      "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionLayoutsLocalizationAndResume>d__25.MoveNext () [0x00820] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:341\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    }
+  ]
+}

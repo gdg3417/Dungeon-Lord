@@ -162,6 +162,10 @@ namespace DungeonBuilder.M0
             foreach (var button in ui.Query<Button>().ToList()) { button.text = Text(button.tooltip); button.tooltip = button.text; }
             foreach(var scroll in ui.Query<ScrollView>().ToList())
             { scroll.verticalScrollerVisibility=ScrollerVisibility.Hidden; scroll.horizontalScrollerVisibility=ScrollerVisibility.Hidden; }
+            foreach (var strip in new[] { ui.Q("constructionOptions").GetFirstAncestorOfType<ScrollView>(),
+                ui.Q("contentChoices").GetFirstAncestorOfType<ScrollView>(), ui.Q<ScrollView>("roomChoicesScroll") })
+                strip.horizontalScrollerVisibility = ScrollerVisibility.Auto;
+            ui.Q<ScrollView>("contextDetails").verticalScrollerVisibility = ScrollerVisibility.Auto;
             ui.Q<Button>("legacy").style.display = DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(
                 DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), root.DevPanelEnabled) ? DisplayStyle.Flex : DisplayStyle.None;
             SetLegacy(false);
@@ -385,7 +389,7 @@ namespace DungeonBuilder.M0
         private void RebuildFloor(bool reset)
         {
             if (!initialized || !HasCanonicalRuntime()) return;
-            if (reset) autoFit = true;
+            if (reset) { autoFit = true; interactionFocus = null; }
             if (IsEditing) renderState = draft.ReadModel;
             var selectedValue = renderState.Floors.SingleOrDefault(f => f.FloorInstanceId == selectedFloor);
             if (selectedValue == null) { selectedValue = renderState.Floors.FirstOrDefault(); selectedFloor = selectedValue?.FloorInstanceId; }
@@ -515,6 +519,7 @@ namespace DungeonBuilder.M0
             document.panelSettings.scale = Mathf.Max(1, Mathf.Min(Screen.width,Screen.height) / presentationPolicy.ReferenceShortSide);
             ApplySafeArea(lastSafe, lastResolution); SetTextSize(textSize);
             safe.EnableInClassList("landscape", Screen.width > Screen.height);
+            PlaceDevelopmentAction();
             PresentComposition();
             viewportElement.UnregisterCallback<GeometryChangedEvent>(ViewportGeometry);
             viewportElement.RegisterCallback<GeometryChangedEvent>(ViewportGeometry);
@@ -525,7 +530,9 @@ namespace DungeonBuilder.M0
             var rect = new Rect(panelRect.x * scale, Screen.height - panelRect.yMax * scale,
                 panelRect.width * scale, panelRect.height * scale);
             if (rect.width < 1 || rect.height < 1) return;
-            worldCamera.pixelRect = rect; viewport.Configure(world.Bounds, rect, autoFit); ApplyCamera();
+            worldCamera.pixelRect = rect; viewport.Configure(world.Bounds, rect, autoFit);
+            if (interactionFocus.HasValue) viewport.Focus(interactionFocus.Value);
+            ApplyCamera();
         }
         private void ApplyCamera()
         { worldCamera.orthographicSize = viewport.Size; worldCamera.transform.position = new Vector3(viewport.Center.x, viewport.Center.y, presentationPolicy.CameraDepth); }
@@ -573,7 +580,7 @@ namespace DungeonBuilder.M0
                 {
                     bool nativeWindowsRange = InputSystem.settings.scrollDeltaBehavior == InputSettings.ScrollDeltaBehavior.KeepPlatformSpecificInputRange &&
                         (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor);
-                    autoFit = false; viewport.Zoom(presentationPolicy.WheelZoomRatio(wheel, nativeWindowsRange), point); ApplyCamera();
+                    autoFit = false; interactionFocus = null; viewport.Zoom(presentationPolicy.WheelZoomRatio(wheel, nativeWindowsRange), point); ApplyCamera();
                 }
             }
             if (pressed && !pointerDown)
@@ -583,7 +590,7 @@ namespace DungeonBuilder.M0
                 var beforeCenter = viewport.Center; float beforeSize = viewport.Size;
                 gesture.Update(viewport, point, second, second.HasValue && IsChrome(second.Value, secondId),
                     presentationPolicy.TapSlopPhysicalUnits * pixelsPerPhysicalUnit);
-                if (beforeCenter != viewport.Center || beforeSize != viewport.Size) autoFit = false;
+                if (beforeCenter != viewport.Center || beforeSize != viewport.Size) { autoFit = false; interactionFocus = null; }
                 ApplyCamera();
             }
             if (!pressed && pointerDown)
@@ -594,12 +601,22 @@ namespace DungeonBuilder.M0
             }
         }
         private void ToggleLegacy() { SetLegacy(!legacy); }
+        private void PlaceDevelopmentAction()
+        {
+            if (legacy) return;
+            var ui = document.rootVisualElement;
+            var button = ui.Q<Button>("legacy");
+            var host = IsEditing ? ui.Q("displayPopover") : ui.Q("sessionActions");
+            if (button.parent != host) host.Add(button);
+        }
         private void SetLegacy(bool value)
         {
             legacy = value;
+            document.rootVisualElement.Q("displayPopover").style.display = DisplayStyle.None;
             var legacyButton=document.rootVisualElement.Q<Button>("legacy");
             if(value) safe.Add(legacyButton);
             else document.rootVisualElement.Q("sessionActions").Add(legacyButton);
+            PlaceDevelopmentAction();
             legacyButton.EnableInClassList("legacy-overlay",value);
             if (root.overlay != null)
             { root.overlay.enabled = value; if (root.overlay.overlayText != null) root.overlay.overlayText.gameObject.SetActive(value); }

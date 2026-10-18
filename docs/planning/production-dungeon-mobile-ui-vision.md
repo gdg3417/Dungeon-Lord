@@ -85,3 +85,11 @@ Implementation PRs should only be blocked by the **capability-relevant** accepta
 ## Maintenance
 
 Treat this guide and the linked image as a **versioned repository reference**. When the owner approves a substantive change, update this document, date the change, and retain or replace visual references deliberately. Future Codex prompts and chat handoffs working on production Dungeon UI should explicitly read this guide **alongside** the current A0 design lock, relevant current specs, AGENTS.md, and latest merged PR evidence. Do not assume the UI image or document alone determines the next PR.
+
+## Owner-approved responsive editing clarification — PR #242 (2026-10-18)
+
+The earlier concept and bottom-sheet descriptions above remain the historical portrait-first direction. After actual UAT, the owner approved the existing contextual editing surface on the **right during active landscape construction/content work**, and **at the bottom in portrait, which remains preferred**. The [dated Phase 7A0 addendum](phase-7a0-graphical-dungeon-editor-design-lock.md#owner-approved-responsive-editing-clarification--pr-242-2026-10-18) explicitly refines Decision 5; this is not an implied change inferred from the concept image.
+
+One responsive information architecture, configured Large text, reachable scrollable choices, distinct placement/whole-draft actions, safe areas and canonical gameplay ownership remain required. This does not authorize a general-purpose side inspector or changes to Normal mode, ordinary inspection, floor management, room movement or replay. Historical PR #231 exclusions of a future side inspector remain accurate for that packet; the narrow PR #242 owner approval is the later decision for active construction/content editing.
+
+Editor and requested Windows standalone owner usability checks passed at **1280×720/Large**. Broader automated coverage is recorded separately; physical touch, native mobile/performance and further hardware/resolution usability are not established by this approval. [Final qualification and preservation closeout](../../Docs/testing/evidence/pr242-usability/final-closeout.md). PR remains Draft pending independent final merge review.

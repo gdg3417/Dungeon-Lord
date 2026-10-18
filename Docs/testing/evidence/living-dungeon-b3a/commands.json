@@ -1,0 +1,281 @@
+[
+  {
+    "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+    "arguments": [
+      "test",
+      "C:\\Dev\\Dungeon-Lord",
+      "--mode",
+      "EditMode",
+      "--filter",
+      "LivingDungeonPhaseB3A",
+      "--output",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\01-focused.xml",
+      "--timeout",
+      "1800",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\01-focused.log"
+    ],
+    "startedUtc": "2026-10-17T22:43:30.1969275Z",
+    "sourceCommit": "e5abe082a8a51a00845dfff5c735fbb3eb9edb8d",
+    "exitCode": 8,
+    "finishedUtc": "2026-10-17T22:45:00.9726769Z",
+    "verdict": {
+      "total": "29",
+      "passed": "28",
+      "failed": "1",
+      "skipped": "0"
+    }
+  },
+  {
+    "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+    "arguments": [
+      "test",
+      "C:\\Dev\\Dungeon-Lord",
+      "--mode",
+      "EditMode",
+      "--filter",
+      "LivingDungeonPhaseB3A",
+      "--output",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\02-focused.xml",
+      "--timeout",
+      "1800",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\02-focused.log"
+    ],
+    "startedUtc": "2026-10-17T22:46:49.8788654Z",
+    "sourceCommit": "e5abe082a8a51a00845dfff5c735fbb3eb9edb8d",
+    "exitCode": 8,
+    "finishedUtc": "2026-10-17T22:48:22.4395706Z",
+    "verdict": {
+      "total": "35",
+      "passed": "32",
+      "failed": "3",
+      "skipped": "0"
+    }
+  },
+  {
+    "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+    "arguments": [
+      "test",
+      "C:\\Dev\\Dungeon-Lord",
+      "--mode",
+      "EditMode",
+      "--filter",
+      "LivingDungeonPhaseB3A",
+      "--output",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\03-focused.xml",
+      "--timeout",
+      "1800",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\03-focused.log"
+    ],
+    "startedUtc": "2026-10-17T23:00:37.1160123Z",
+    "sourceCommit": "e5abe082a8a51a00845dfff5c735fbb3eb9edb8d",
+    "exitCode": 0,
+    "finishedUtc": "2026-10-17T23:02:19.8951882Z",
+    "verdict": {
+      "total": "38",
+      "passed": "38",
+      "failed": "0",
+      "skipped": "0"
+    }
+  },
+  {
+    "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+    "arguments": [
+      "test",
+      "C:\\Dev\\Dungeon-Lord",
+      "--mode",
+      "EditMode",
+      "--filter",
+      "LivingDungeonPhaseB3A",
+      "--output",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\04-focused.xml",
+      "--timeout",
+      "1800",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\04-focused.log"
+    ],
+    "startedUtc": "2026-10-17T23:04:54.9996669Z",
+    "sourceCommit": "2fa5a30c117cbcfdeea8121e1a8396642e8e65e8",
+    "exitCode": 0,
+    "finishedUtc": "2026-10-17T23:06:37.6521269Z",
+    "verdict": {
+      "total": "39",
+      "passed": "39",
+      "failed": "0",
+      "skipped": "0"
+    }
+  },
+  {
+    "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+    "arguments": [
+      "test",
+      "C:\\Dev\\Dungeon-Lord",
+      "--mode",
+      "EditMode",
+      "--output",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\05-full-edit.xml",
+      "--timeout",
+      "1800",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\05-full-edit.log"
+    ],
+    "startedUtc": "2026-10-17T23:07:34.9128193Z",
+    "sourceCommit": "2fa5a30c117cbcfdeea8121e1a8396642e8e65e8",
+    "exitCode": 8,
+    "finishedUtc": "2026-10-17T23:26:38.7325203Z",
+    "verdict": {
+      "total": "2176",
+      "passed": "2173",
+      "failed": "2",
+      "skipped": "1"
+    }
+  },
+  {
+    "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+    "arguments": [
+      "test",
+      "C:\\Dev\\Dungeon-Lord",
+      "--mode",
+      "EditMode",
+      "--filter",
+      "LivingDungeonPhaseB3A",
+      "--output",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\06-focused.xml",
+      "--timeout",
+      "1800",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\06-focused.log"
+    ],
+    "startedUtc": "2026-10-17T23:33:46.8139491Z",
+    "sourceCommit": "b5502291e9da3d229bbcc3d152f8bd56954d84eb",
+    "exitCode": 0,
+    "finishedUtc": "2026-10-17T23:35:30.2203952Z",
+    "verdict": {
+      "total": "41",
+      "passed": "41",
+      "failed": "0",
+      "skipped": "0"
+    }
+  },
+  {
+    "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+    "arguments": [
+      "test",
+      "C:\\Dev\\Dungeon-Lord",
+      "--mode",
+      "EditMode",
+      "--output",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\07-full-edit.xml",
+      "--timeout",
+      "1800",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\07-full-edit.log"
+    ],
+    "startedUtc": "2026-10-17T23:37:22.1231793Z",
+    "sourceCommit": "b5502291e9da3d229bbcc3d152f8bd56954d84eb",
+    "exitCode": 8,
+    "finishedUtc": "2026-10-17T23:56:22.5100408Z",
+    "verdict": {
+      "total": "2178",
+      "passed": "2175",
+      "failed": "2",
+      "skipped": "1"
+    }
+  },
+  {
+    "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+    "arguments": [
+      "test",
+      "C:\\Dev\\Dungeon-Lord",
+      "--mode",
+      "PlayMode",
+      "--filter",
+      "LivingDungeonPhaseAPlayModeTests;LivingDungeonPhaseB1PlayModeTests;LivingDungeonPhaseB2PlayModeTests;LivingDungeonPhaseB3APlayModeTests;CombatC2PlayModeTests",
+      "--output",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\08-integration-play.xml",
+      "--timeout",
+      "1800",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\08-integration-play.log"
+    ],
+    "startedUtc": "2026-10-17T23:56:56.2698111Z",
+    "sourceCommit": "b5502291e9da3d229bbcc3d152f8bd56954d84eb",
+    "exitCode": 0,
+    "finishedUtc": "2026-10-17T23:57:25.7567062Z",
+    "verdict": {
+      "total": "7",
+      "passed": "7",
+      "failed": "0",
+      "skipped": "0"
+    }
+  },
+  {
+    "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+    "arguments": [
+      "build",
+      "C:\\Dev\\Dungeon-Lord",
+      "--target",
+      "StandaloneWindows64",
+      "--execute-method",
+      "DungeonBuilder.M0.EditorTools.DungeonVisualBuildQualification.BuildLivingDungeonB3AWindows",
+      "--allow-dirty-build",
+      "--timeout",
+      "1800",
+      "--no-tail",
+      "--log-file",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\09-build.log",
+      "--no-color"
+    ],
+    "startedUtc": "2026-10-17T23:59:57.0932250Z",
+    "sourceCommit": "b5502291e9da3d229bbcc3d152f8bd56954d84eb",
+    "exitCode": 0,
+    "finishedUtc": "2026-10-18T00:00:34.3407993Z"
+  },
+  {
+    "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+    "arguments": [
+      "test",
+      "C:\\Dev\\Dungeon-Lord",
+      "--mode",
+      "EditMode",
+      "--filter",
+      "RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated;TransactionalRoomConstructionLayoutsLocalizationAndResume",
+      "--output",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\10-baseline-ui.xml",
+      "--timeout",
+      "1800",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\10-baseline-ui.log"
+    ],
+    "startedUtc": "2026-10-17T23:35:58.7791911Z",
+    "sourceCommit": "b5502291e9da3d229bbcc3d152f8bd56954d84eb",
+    "exitCode": 8,
+    "finishedUtc": "2026-10-17T23:36:31.4402256Z",
+    "verdict": {
+      "total": "2",
+      "passed": "0",
+      "failed": "2",
+      "skipped": "0"
+    }
+  }
+]

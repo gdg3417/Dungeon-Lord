@@ -1,0 +1,133 @@
+{
+  "recordedUtc": "2026-10-18T20:22:44.800881+00:00",
+  "evidenceHead": "d33d0c04d85e8e008c307a4a7e349d31bbcc4146",
+  "qualifiedUnityCommit": "0997d553ada69d54c4f53891932edd8df9b4cee7",
+  "qualifiedB3ACommit": "b5502291e9da3d229bbcc3d152f8bd56954d84eb",
+  "ownerEditorUatPassed": true,
+  "ownerWindowsUatPassed": true,
+  "WindowsOwnerReportedConfiguration": {
+    "resolution": [
+      1280,
+      720
+    ],
+    "textSize": "Large"
+  },
+  "ownerWindowsReportedChecks": [
+    "construction controls",
+    "room placement options",
+    "trap targeting",
+    "saving",
+    "reopening",
+    "persistence"
+  ],
+  "ownerApprovedLayout": {
+    "activeLandscapeConstructionAndContent": "right-side working sheet",
+    "portrait": "preferred bottom editing controls"
+  },
+  "independentReviewComplete": false,
+  "readyForIndependentFinalMergeReview": true,
+  "draft": true,
+  "GitHubReviewSnapshot": {
+    "head": "d33d0c04d85e8e008c307a4a7e349d31bbcc4146",
+    "threads": 0,
+    "reviews": 0,
+    "discussionComments": 0,
+    "commitStatuses": 0,
+    "pullRequestWorkflowRuns": 0
+  },
+  "existingAutomatedResults": {
+    "focused": [
+      3,
+      0,
+      0
+    ],
+    "affectedEditMode": [
+      224,
+      0,
+      0
+    ],
+    "affectedPlayMode": [
+      72,
+      0,
+      0
+    ],
+    "WindowsBuild": {
+      "succeeded": true,
+      "errors": 0,
+      "warnings": 1
+    }
+  },
+  "historicalFullEditMode": {
+    "passed": 2175,
+    "failed": 2,
+    "skipped": 1,
+    "currentFullSuitePassClaimed": false
+  },
+  "closeout": {
+    "utc": "2026-10-18T20:20:42.391368+00:00",
+    "sourceCommit": "d33d0c04d85e8e008c307a4a7e349d31bbcc4146",
+    "closed": true,
+    "normalShutdownLog": true,
+    "noInputRestorationNeeded": true,
+    "originalInputsUnchanged": 1340,
+    "ownerBaselineTotal": 14401,
+    "ownerBaselineUnchanged": 14400,
+    "authorizedIsolatedSave": {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord PR242 Graphics usability-build-01\\pr242-usability-20261018-usability-build-01.json",
+      "beforeSha256": "f9004a81971e5c7e60009048eb2dd1c868c1cb639d8bf4a0d505f312a992b743",
+      "afterSha256": "ef4fb9e121867168cb2aaad2e89ede47e3358a1735d9044480327988848f498c"
+    },
+    "originalSavePlayerFiles": 6839,
+    "originalSavePlayerUnchanged": true,
+    "historicalTotal": 1991,
+    "historicalMatching": 1986,
+    "acceptedMissingOriginals": [
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-1920-Default.png",
+        "sha256": "0957c9196f7202c68bb3d69b69315256d6089892d1e5cbd2c702d0b77b91f1d3"
+      },
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-1920-Large.png",
+        "sha256": "ffe861491f8d09c2599416334b4b7d3871997cf592b75cae432aee299e1ca69f"
+      },
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-720-Default.png",
+        "sha256": "5f812a2668e34ebb3a72e6aeb208edb17ee6c1ef6c15fde87682a108ef774881"
+      },
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-720-Large.png",
+        "sha256": "fcf284148832be7a8d858a65b83ab12d7babb2cb202ebf8f72aff85a15694a03"
+      },
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-placement-1920.png",
+        "sha256": "c6f15c1d0b3c65140ad4b6d0419572a302e31928682201e2bb248f6b09b5434e"
+      }
+    ],
+    "sessionArtifacts": 14,
+    "sessionArchiveSha256": "6897da7e026938290c7dfcfe926ac634896b7482b8fa93cbaa7877cce5f48ac1",
+    "playerLogSha256": "2352222c331e951dc1d7518ec7e59c9b2814f96ec453ba23ea57f52bb78525d4",
+    "qualifiedUnityInputsUnchanged": true,
+    "B3AProtectedSourcesUnchanged": true,
+    "automatedTestsRun": false,
+    "rebuilt": false
+  },
+  "records": {
+    "closedJsonSha256": "d612990d763b50bc788fa5e7b7e3addbef5621f8a3cf384e53e79d0b8ad96098",
+    "artifactIndexSha256": "07369b71439ff36048fbfa3a1812997fbe7449ca8b68d58aa20987656784b2a2",
+    "indexedFinalArtifacts": 16
+  },
+  "acceptedLimits": [
+    "five unrecovered historical screenshot originals",
+    "scrolling for long details",
+    "collapsible floor overlay",
+    "legal-floor Fit overview",
+    "deferred graphical starter-room onboarding",
+    "native mobile/performance and physical touch unqualified",
+    "no production B3A activation",
+    "historical full suite not rerun"
+  ],
+  "knownDiagnostics": [
+    "existing Unity native-symbol upload URI warning",
+    "existing ComputeBuffer disposal diagnostic at player shutdown"
+  ]
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "source": "C:/Dev/Dungeon-Lord/TestResults/pr242-usability-20261018/before-01/screens/phase7a4-screenshots/827a1a9734fc41c792887036c8c09813-owner-browser-1280x720-Large.png",
+    "destination": "C:\\Dev\\Dungeon-Lord\\Docs\\testing\\evidence\\pr242-usability\\screenshots\\before-trap-browser-1280-Large.png",
+    "sha256": "E7EE7178BF15867FB67EE731374937833F71EEFD6ED526DB078C26F7BE1ADE4A"
+  },
+  {
+    "source": "C:/Dev/Dungeon-Lord/TestResults/pr242-usability-20261018/usability-focused-07/screens/phase7a4-screenshots/d7cd17e0851a4a0dbd33dbe60880c20d-owner-browser-1280x720-Large.png",
+    "destination": "C:\\Dev\\Dungeon-Lord\\Docs\\testing\\evidence\\pr242-usability\\screenshots\\after-trap-browser-1280-Large.png",
+    "sha256": "F10BC59C36A4B4FE2C38E26D95C0F2CCFCF484E5DF623B827532E99B1C5E0AC2"
+  },
+  {
+    "source": "C:/Dev/Dungeon-Lord/TestResults/pr242-usability-20261018/before-01/screens/phase7a4-screenshots/965e4bd83f1b4ef6ad9f83b7f7332cb8-construction-ui-layout-1280x720-Large.png",
+    "destination": "C:\\Dev\\Dungeon-Lord\\Docs\\testing\\evidence\\pr242-usability\\screenshots\\before-construction-1280-Large.png",
+    "sha256": "3F50D859EBC5B16F8E5E5186801EC04CFE94027C87A27D10D787A9C28E36CAE8"
+  },
+  {
+    "source": "C:/Dev/Dungeon-Lord/TestResults/pr242-usability-20261018/usability-focused-07/screens/phase7a4-screenshots/f8e4a564724c4e95a076c246f31f0a39-construction-ui-layout-1280x720-Large.png",
+    "destination": "C:\\Dev\\Dungeon-Lord\\Docs\\testing\\evidence\\pr242-usability\\screenshots\\after-construction-1280-Large.png",
+    "sha256": "A149411CEF467A944BD610EF695745CA8C29C15B6EAF02CBF671EF130A8FC729"
+  },
+  {
+    "source": "C:/Dev/Dungeon-Lord/TestResults/pr242-usability-20261018/usability-focused-07/screens/phase7a4-screenshots/5748c77546844871a1778f5e19849b47-construction-expanded-1280x720-Large.png",
+    "destination": "C:\\Dev\\Dungeon-Lord\\Docs\\testing\\evidence\\pr242-usability\\screenshots\\after-construction-expanded-1280-Large.png",
+    "sha256": "6CFBD2F670B83D3B6D68C0077B02DEE22E1879BF74738DD0504D43F18094F19B"
+  },
+  {
+    "source": "C:/Dev/Dungeon-Lord/TestResults/pr242-usability-20261018/usability-focused-07/screens/phase7a4-screenshots/b43c633ed18d4809bfb7348181f0b7a0-owner-options-end-1280x720-Large.png",
+    "destination": "C:\\Dev\\Dungeon-Lord\\Docs\\testing\\evidence\\pr242-usability\\screenshots\\after-options-scrolled-1280-Large.png",
+    "sha256": "095680FE52EAB096EA16D47EB410B9943C9821FA64CAD09B81DB3375F78ABC4A"
+  }
+]

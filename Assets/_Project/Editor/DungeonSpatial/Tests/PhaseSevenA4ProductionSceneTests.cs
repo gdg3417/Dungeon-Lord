@@ -341,6 +341,12 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(ui.Q("viewport").worldBound.height, Is.GreaterThan(controller.SafeRoot.worldBound.height * 0.25f));
                     Click(ui.Q<Button>("collapseDetails")); for (int i = 0; i < 8; i++) yield return null;
                     Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+                    Assert.That(ui.Q("viewport").worldBound.height, Is.GreaterThan(controller.SafeRoot.worldBound.height * 0.25f), "Expanded construction details retain usable map");
+                    float informationLineHeight=ui.Q<Label>("constructionInfo").MeasureTextSize("Ag建",0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined).y;
+                    Assert.That(ui.Q<ScrollView>("contextDetails").contentViewport.worldBound.height, Is.GreaterThanOrEqualTo(informationLineHeight), "Expanded information retains at least one complete text line");
+                    TestContext.WriteLine("Construction expanded " + size + " " + textSize + " viewport=" + ui.Q("viewport").worldBound + " details=" + ui.Q<ScrollView>("contextDetails").contentViewport.worldBound);
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("construction-expanded-" + size.x + "x" + size.y + "-" + textSize + ".png");
+                    yield return null; yield return null;
                     ui.Q<ScrollView>("contextDetails").scrollOffset = new Vector2(0, 10000); yield return null;
                     Assert.That(ui.Q<Button>("confirmPlacement").worldBound.yMax, Is.LessThanOrEqualTo(controller.SafeRoot.worldBound.yMax + 1));
                     AssertReachable(ui.Q<Button>("confirmPlacement")); AssertReachable(ui.Q<Button>("cancelPlacement"));
@@ -348,6 +354,20 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.None));
                     AssertReachable(ui.Q<Button>("confirmPlacement")); AssertReachable(ui.Q<Button>("cancelPlacement"));
                     Assert.That(ui.Q<Label>("constructionInfo").text, Does.Contain("建設"));
+                    if(size.x>size.y)
+                    {
+                        Assert.That(ui.Q<Button>("legacy").parent,Is.SameAs(ui.Q("displayPopover")),"Optional development action moves out of construction's required action row");
+                        Click(ui.Q<Button>("displaySettings")); yield return null; yield return null;
+                        AssertReachable(ui.Q<Button>("legacy")); Click(ui.Q<Button>("closeDisplay")); yield return null; yield return null;
+                        Click(ui.Q<Button>("displaySettings")); yield return null; yield return null;
+                        Click(ui.Q<Button>("legacy")); yield return null; yield return null;
+                        Assert.That(ui.Q("displayPopover").style.display.value,Is.EqualTo(DisplayStyle.None));
+                        Assert.That(ui.Q<Button>("legacy").parent,Is.SameAs(controller.SafeRoot));
+                        Click(ui.Q<Button>("legacy")); yield return null; yield return null;
+                        Assert.That(ui.Q("displayPopover").style.display.value,Is.EqualTo(DisplayStyle.None));
+                        Assert.That(ui.Q<Button>("legacy").parent,Is.SameAs(ui.Q("displayPopover")));
+                        Assert.That(controller.IsConstructing,Is.True); Assert.That(controller.ConstructionPreview.IsValid,Is.True);
+                    }
                     Assert.That(controller.World.GridTileCount, Is.EqualTo(root.ProductionSpatialContent.Catalog.Floors[0].Bounds.TileCount));
                 }
                 DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("construction-ui-corrected-large-" + size.x + "x" + size.y + ".png");
@@ -1095,6 +1115,115 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(draft.Move(floor.FloorInstanceId, assignment.RoomInstanceId, assignment.AssignmentId, new TileCoordinate(1, 1)), Is.True);
             Assert.That(draft.FlushNext(), Is.True);
         }
+        [UnityTest]
+        public IEnumerator OwnerUsabilityConstructionAndContentReachability()
+        {
+            var root = GameRoot.Instance;
+            Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+            // Preserve the complete save produced by the existing starter mutation
+            // and QA funding authority for the later isolated owner handoff.
+            // No save JSON is authored or imported from an owner/normal save.
+            string starter = Path.Combine(Application.persistentDataPath,"owner-uat-starter.json");
+            File.Copy(root.SaveService.SavePath,starter,false);
+            TestContext.WriteLine("Owner starter artifact: "+starter);
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var room = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];
+            foreach (var size in new[] { new Vector2Int(1280,720), new Vector2Int(720,1280), new Vector2Int(1080,1920), new Vector2Int(1920,1080) })
+            {
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x,size.y);
+                for (int frame=0;frame<12;frame++) yield return null;
+                foreach (var text in new[] { DungeonTextSize.Large, DungeonTextSize.Default, DungeonTextSize.Small })
+                {
+                    controller.SetTextSize(text);
+                    controller.EnterEdit();
+                    controller.TapWorld(new TileCoordinate(room.Anchor.X+1,room.Anchor.Y+1));
+                    Assert.That(controller.OpenContentCategory("placement.category.trap"),Is.True);
+                    yield return WaitForViewportGeometry();
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("owner-browser-"+size.x+"x"+size.y+"-"+text+".png");
+                    yield return null; yield return null;
+                    var browser = ui.Q("contentChoices");
+                    var card = browser.Query<Button>().ToList().Single(b=>b.userData as string=="placement.option.trap.spike");
+                    var details = ui.Q<ScrollView>("contextDetails");
+                    card.GetFirstAncestorOfType<ScrollView>().ScrollTo(card); yield return null; yield return null;
+                    details.ScrollTo(card); yield return null; yield return null;
+                    TestContext.WriteLine("Owner browser "+size+" "+text+" card="+card.worldBound+" details="+details.contentViewport.worldBound);
+                    AssertReachable(card);
+                    Assert.That(details.contentViewport.worldBound.yMax,Is.GreaterThanOrEqualTo(card.worldBound.yMax-1),"Whole card is visible, not just its center");
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("owner-browser-scrolled-"+size.x+"x"+size.y+"-"+text+".png");
+                    yield return null; yield return null;
+                    Assert.That(controller.SelectNewContent("placement.option.trap.spike"),Is.True);
+                    yield return WaitForViewportGeometry();
+                    var camera=controller.GetComponentInChildren<Camera>();
+                    float tilePixels=camera.pixelHeight/(camera.orthographicSize*2);
+                    TestContext.WriteLine("Owner content "+size+" "+text+" viewport="+camera.pixelRect+" size="+camera.orthographicSize+" tilePixels="+tilePixels);
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("owner-trap-"+size.x+"x"+size.y+"-"+text+".png");
+                    yield return null; yield return null;
+                    // The same native target policy used for UI buttons also provides a useful
+                    // lower bound for the selected room's high-frequency tile interaction.
+                    Assert.That(tilePixels,Is.GreaterThanOrEqualTo(controller.presentationPolicy.DesktopMinimumPixels),"Entering content placement must frame the selected room without a hidden extra Focus action");
+                    AssertReachable(ui.Q<Button>("cancelContent")); AssertReachable(ui.Q<Button>("confirmContent"));
+                    var pointer=InputSystem.AddDevice<Mouse>();
+                    try
+                    {
+                        foreach(var cell in new[] {new TileCoordinate(room.Anchor.X+1,room.Anchor.Y+1),new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+1)})
+                        {
+                            yield return WaitForViewportGeometry();
+                            Vector2 point=camera.WorldToScreenPoint(new Vector3(cell.X+.5f,cell.Y+.5f,0));
+                            Assert.That(controller.IsChrome(point,pointer.deviceId),Is.False);
+                            Assert.That(controller.Viewport.ScreenToWorld(point).x,Is.EqualTo(cell.X+.5f).Within(.001));
+                            InputSystem.QueueStateEvent(pointer,new MouseState {position=point}.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                            yield return null; yield return null;
+                            InputSystem.QueueStateEvent(pointer,new MouseState {position=point});
+                            yield return null; yield return null;
+                            Assert.That(controller.ContentPreview?.IsValid,Is.True);
+                            Assert.That(controller.World.TryRoomLocal(room.RoomInstanceId,cell,out var local),Is.True);
+                            Assert.That(controller.ContentPreview.Assignment.RoomLocalPosition,Is.EqualTo(local));
+                            Assert.That(controller.Draft.CommandCount,Is.Zero,"Moving a preview never confirms it");
+                            Click(ui.Q<Button>("collapseDetails"));
+                        }
+                    }
+                    finally { InputSystem.RemoveDevice(pointer); }
+                    controller.TapWorld(new TileCoordinate(-1,-1));
+                    Assert.That(controller.ContentPreview.IsValid,Is.False);
+                    Click(ui.Q<Button>("cancelContent")); yield return null;
+                    Assert.That(controller.Draft.CommandCount,Is.Zero);
+                    Assert.That(controller.Discard(),Is.True); yield return null;
+                    controller.EnterEdit(); Assert.That(controller.SelectConstructionRoom("spatial.room.rectangle"),Is.True);
+                    controller.SelectConstructionOrientation(CardinalOrientation.Ninety);
+                    Assert.That(controller.World.MoveGuidanceAnchors,Is.Not.Empty);
+                    controller.TapWorld(controller.World.MoveGuidanceAnchors.First());
+                    yield return WaitForViewportGeometry();
+                    TestContext.WriteLine("Owner construction "+size+" "+text+" camera="+camera.pixelRect+" size="+camera.orthographicSize+
+                        " tilePixels="+camera.pixelHeight/(camera.orthographicSize*2));
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("owner-options-"+size.x+"x"+size.y+"-"+text+".png");
+                    yield return null; yield return null;
+                    var options=ui.Q("constructionOptions"); var strip=options.GetFirstAncestorOfType<ScrollView>();
+                    var buttons=options.Query<Button>().ToList();
+                    Assert.That(buttons.Count,Is.GreaterThan(2));
+                    foreach(var option in buttons)
+                    {
+                        strip.ScrollTo(option); yield return null; yield return null;
+                        AssertReachable(option);
+                        Assert.That(option.worldBound.xMin,Is.GreaterThanOrEqualTo(strip.contentViewport.worldBound.xMin-1));
+                        Assert.That(option.worldBound.xMax,Is.LessThanOrEqualTo(strip.contentViewport.worldBound.xMax+1));
+                    }
+                    if(options.worldBound.width>strip.contentViewport.worldBound.width+1)
+                        Assert.That(strip.horizontalScroller.resolvedStyle.display,Is.EqualTo(DisplayStyle.Flex),"Overflow must expose a discoverable scroll control");
+                    AssertReachable(ui.Q<Button>("confirmPlacement")); AssertReachable(ui.Q<Button>("cancelPlacement"));
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("owner-options-end-"+size.x+"x"+size.y+"-"+text+".png");
+                    yield return null; yield return null;
+                    Click(buttons.Last()); yield return null; yield return null;
+                    Assert.That(controller.ConstructionPreview,Is.Null,"Reachable terminal choice dispatches its real UI action");
+                    Assert.That(controller.Draft.CommandCount,Is.Zero);
+                    Click(ui.Q<Button>("collapseDetails")); yield return WaitForViewportGeometry();
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("owner-funded-expanded-"+size.x+"x"+size.y+"-"+text+".png");
+                    yield return null; yield return null;
+                    AssertReachable(ui.Q<Button>("cancelPlacement"));
+                    Assert.That(controller.Discard(),Is.True); yield return null;
+                }
+            }
+        }
+
         private IEnumerator WaitForViewportGeometry()
         {
             var document = controller.GetComponent<UIDocument>();

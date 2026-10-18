@@ -203,7 +203,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SharedBranchKnowledgeAuthority branchKnowledge,
             SharedFloorKnowledgeAuthority floorKnowledge,
             LivingDungeonState livingDungeon = null, bool manualRun = false,
-            MonsterContinuityState monsterContinuity = null)
+            MonsterContinuityState monsterContinuity = null, DurableSettlementHistory settlement = null)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -216,6 +216,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out ContractJsonNode root))
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 ContractJsonNode primary = root.Fields[2].Value;
+                if (settlement != null && !settlement.Matches(currentBytes, livingDungeon, limits.Canonical.Serialized))
+                    return Failure("living.settlement.history_invalid");
                 var retainedOwner = primary.Fields[primary.Fields.Count - 2].Value;
                 bool activated = retainedOwner.Fields[2].Value.Kind != ContractJsonKind.Null;
                 bool unfinished = activated && retainedOwner.Fields[2].Value.Fields[2].Value.Text !=
@@ -252,6 +254,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         valueBytes = SerializeNode(retained);
                     }
                     else if (!recognizedState.TryGet(name, out valueBytes)) continue;
+                    if (settlement != null && name != "runHistory")
+                    {
+                        if (TryFind(primary, name, out var settlementPrior))
+                            valueBytes = settlement.MergeRecognized(name, settlementPrior, valueBytes, limits.Canonical.Serialized);
+                        else if (name != "completedObjectives" || !settlement.HasObjective(valueBytes)) continue;
+                    }
                     if (recognizedState != null && (activated || livingDungeon?.IsDormant == false) && name == "runHistory" && TryFind(primary, name, out var priorHistory))
                     {
                         var historyIssues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
@@ -262,7 +270,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             nextValue < oldValue) return Failure(LivingDungeonScheduling.Invalid);
                         if (manualRun && (oldValue == int.MaxValue || nextValue != checked(oldValue + 1)))
                             return Failure(LivingDungeonScheduling.Invalid);
-                        if (!manualRun)
+                        if (settlement != null)
+                        {
+                            if (manualRun || nextValue != oldValue || !settlement.MatchesHistory(valueBytes))
+                                return Failure("living.settlement.history_invalid");
+                        }
+                        else if (!manualRun)
                         {
                             var expected = JsonUtility.FromJson<RunHistoryState>(Encoding.UTF8.GetString(SerializeNode(priorHistory)));
                             expected.NextRunSequence = nextValue;
@@ -270,7 +283,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                 JsonUtility.ToJson(expected) != Encoding.UTF8.GetString(valueBytes)) return Failure(LivingDungeonScheduling.Invalid);
                         }
                         // Scheduling changes only the allocator. Preserve the other historical fields, nulls and extensions.
-                        valueBytes = MergeHistory(priorHistory, nextHistory, manualRun);
+                        valueBytes = settlement != null ? settlement.Merge(priorHistory, nextHistory, limits.Canonical.Serialized)
+                            : MergeHistory(priorHistory, nextHistory, manualRun);
                     }
                     if (unfinished && livingDungeon == null && !LifecycleMember(name) &&
                         (!TryFind(primary, name, out var priorValue) || !SerializeNode(priorValue).AsSpan().SequenceEqual(valueBytes)))
@@ -382,6 +396,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             MonsterContinuityState monsters = null) => recognized?.IsSuccess == true
                 ? PrepareReplacement(recognized.Snapshot, spatial, investment, corridor, branch, floor, null, true, monsters)
                 : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+
+#if UNITY_EDITOR
+        internal DetachedCanonicalSaveSessionResult PrepareDurableSettlementReplacement(
+            DetachedRecognizedSaveStateSnapshotResult recognized, DetachedCompleteSaveValidationResult owned,
+            LivingDungeonState livingDungeon, SharedBranchKnowledgeAuthority branch,
+            SharedFloorKnowledgeAuthority floor, DurableSettlementHistory settlement) =>
+            recognized?.IsSuccess == true && settlement != null
+                ? PrepareReplacement(recognized.Snapshot, owned.State, null, null, branch, floor,
+                    livingDungeon, settlement: settlement)
+                : Failure("living.settlement.history_invalid");
+#endif
 
         private static void WriteField(ContractJsonWriter writer, string key,
             ContractJsonNode value, bool first)

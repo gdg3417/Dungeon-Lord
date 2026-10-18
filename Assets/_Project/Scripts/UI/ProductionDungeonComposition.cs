@@ -10,6 +10,7 @@ namespace DungeonBuilder.M0
     {
         private bool railCollapsed;
         private string selectedEdgeId;
+        private Rect? interactionFocus;
         public bool DetailsCollapsed => detailsCollapsed;
         public bool FloorRailCollapsed => railCollapsed;
         public string SelectedFloorInstanceId => selectedFloor;
@@ -18,14 +19,18 @@ namespace DungeonBuilder.M0
         public void FitFloor()
         {
             if (!initialized || !HasCanonicalRuntime()) return;
-            autoFit=true; viewport.Reset(); ApplyCamera();
+            autoFit=true; interactionFocus=null; viewport.Reset(); ApplyCamera();
         }
         public void FocusRoom()
         {
             if (!initialized || !HasCanonicalRuntime()) return;
             string id=selectedRoomId ?? selected?.RoomInstanceId;
             if(id==null || !world.TryRoomBounds(id,out var bounds)) return;
-            autoFit=false; viewport.Focus(bounds); ApplyCamera();
+            FocusInteraction(bounds);
+        }
+        private void FocusInteraction(Rect bounds)
+        {
+            interactionFocus=bounds; autoFit=false; viewport.Focus(bounds); ApplyCamera();
         }
         public void ToggleFloorRail()
         {
@@ -69,6 +74,17 @@ namespace DungeonBuilder.M0
             var ui=document.rootVisualElement;
             bool inspecting=selected!=null || selectedRoomId!=null || selectedEdgeId!=null;
             safe.EnableInClassList("editing",IsEditing);
+            bool working=Screen.width>Screen.height && IsEditing &&
+                (IsConstructing || contentCategory!=null && ContextRoomId!=null);
+            safe.EnableInClassList("working-sheet",working);
+            var workspace=ui.Q("workspace"); var map=ui.Q("mapArea");
+            workspace.style.display=working ? DisplayStyle.Flex : DisplayStyle.None;
+            if(working && map.parent!=workspace) { workspace.Add(map); workspace.Add(bottom); }
+            else if(!working && map.parent!=safe)
+            {
+                int index=safe.IndexOf(workspace);
+                safe.Insert(index,map); safe.Insert(index+1,bottom);
+            }
             safe.EnableInClassList("normal-mode",!IsEditing);
             safe.EnableInClassList("details-collapsed",detailsCollapsed);
             safe.EnableInClassList("blocked-state",IsEditing && (!draft.IsStructurallyValid || draft.Durability!=DraftDurability.Acknowledged));
