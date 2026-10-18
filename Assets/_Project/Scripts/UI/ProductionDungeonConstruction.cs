@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace DungeonBuilder.M0
@@ -67,7 +68,23 @@ namespace DungeonBuilder.M0
             constructionIntentId = Guid.NewGuid().ToString("N");
             constructionRequest = new StructuralConstructionRequest { FloorInstanceId = selectedFloor, RoomDefinitionId = definitionId,
                 Orientation = definition.AllowedOrientations.First(), TerminalConnectionPointId = definition.ConnectionPoints.First().ConnectionPointId };
-            RefreshConstructionGuidance(); Present(); return true;
+            RefreshConstructionGuidance(); Present(); FocusConstructionArea(); return true;
+        }
+
+        private void FocusConstructionArea()
+        {
+            var floor=renderState.Floors.Single(f=>f.FloorInstanceId==selectedFloor);
+            var rooms=floor.Layout.Rooms.Select(r=>world.TryRoomBounds(r.RoomInstanceId,out var bounds) ? bounds : default)
+                .Where(b=>b.width>0 && b.height>0).ToArray();
+            if(rooms.Length==0 || world.MoveGuidanceAnchors.Length==0) return;
+            var current=rooms.OrderBy(b=>(b.center-viewport.Center).sqrMagnitude).First();
+            var anchor=world.MoveGuidanceAnchors.OrderBy(c=>(new Vector2(c.X,c.Y)-current.center).sqrMagnitude).ThenBy(c=>c).First();
+            var definition=ConstructionRooms().Single(r=>r.RoomDefinitionId==constructionRequest.RoomDefinitionId);
+            if(!definition.TryResolveGrossTiles(anchor,constructionRequest.Orientation,
+                new SpatialValidationWorkloadLimits(draftContext.Limits.Canonical.Spatial.MaximumMaterializedTiles),out var footprint)) return;
+            FocusInteraction(Rect.MinMaxRect(Mathf.Min(current.xMin,footprint.OccupiedTiles.Min(c=>c.X)),
+                Mathf.Min(current.yMin,footprint.OccupiedTiles.Min(c=>c.Y)),Mathf.Max(current.xMax,footprint.OccupiedTiles.Max(c=>c.X)+1),
+                Mathf.Max(current.yMax,footprint.OccupiedTiles.Max(c=>c.Y)+1)));
         }
 
         public bool SelectConstructionOrientation(CardinalOrientation orientation)

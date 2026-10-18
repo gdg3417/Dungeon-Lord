@@ -51,6 +51,19 @@
 .landscape.constructing #editActions { flex-basis: 48%; }
 .display-popover .legacy { flex-basis: auto; align-self: stretch; }
 .viewport { flex-grow: 1; min-width: 0; }
+.workspace { flex-grow: 1; flex-shrink: 1; min-height: 0; }
+.landscape.editing .workspace { flex-direction: row; }
+.landscape.editing .map-area { min-width: 0; min-height: 0; flex-basis: 50%; }
+.landscape.editing .bottom-chrome { flex-basis: 50%; max-height: 100%; min-width: 0; border-left-width: 2px; border-left-color: var(--gold); }
+.landscape.editing .sheet-top { flex-direction: column; align-items: stretch; }
+.landscape.editing .sheet-header, .landscape.editing #constructionCategories { flex-basis: auto; }
+.landscape.editing .placement-context { flex-direction: column; }
+.landscape.editing .placement-information, .landscape.editing .placement-controls { flex-basis: auto; min-width: 0; }
+.landscape.editing .context-details { flex-grow: 1; }
+.landscape.editing #draftSummary { flex-basis: 100%; }
+.landscape.editing #editActions { flex-basis: auto; }
+.landscape.editing .session-actions .legacy { flex-basis: 100%; }
+.landscape.editing #constructionOptions { flex-shrink: 0; }
 .floor-rail { position: absolute; left: 4px; top: 4px; max-height: 100%; width: 128px; padding: 4px; }
 .floor-rail Button { background-image: none; background-color: rgba(8,17,23,0.56); border-width: 0; border-left-width: 1px; border-left-color: rgba(157,175,177,0.35); border-radius: 3px; margin: 1px 0; padding-left: 10px; padding-right: 6px; }
 .floor-rail .selected-floor { background-color: rgba(32,36,28,0.68); border-left-width: 3px; border-left-color: var(--gold); color: rgb(250,222,155); -unity-font-style: bold; }

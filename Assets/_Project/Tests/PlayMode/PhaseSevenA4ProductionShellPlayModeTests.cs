@@ -35,6 +35,9 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator OwnerUsabilityConstructionAndContentReachability()
+        { yield return Invoke("OwnerUsabilityConstructionAndContentReachability"); }
+        [UnityTest]
         public IEnumerator TransactionalRoomConstructionProductionParity()
         { yield return Invoke("TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery"); }
         [UnityTest]

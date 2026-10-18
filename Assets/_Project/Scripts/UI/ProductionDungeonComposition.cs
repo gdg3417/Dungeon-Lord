@@ -10,6 +10,7 @@ namespace DungeonBuilder.M0
     {
         private bool railCollapsed;
         private string selectedEdgeId;
+        private Rect? interactionFocus;
         public bool DetailsCollapsed => detailsCollapsed;
         public bool FloorRailCollapsed => railCollapsed;
         public string SelectedFloorInstanceId => selectedFloor;
@@ -18,14 +19,18 @@ namespace DungeonBuilder.M0
         public void FitFloor()
         {
             if (!initialized || !HasCanonicalRuntime()) return;
-            autoFit=true; viewport.Reset(); ApplyCamera();
+            autoFit=true; interactionFocus=null; viewport.Reset(); ApplyCamera();
         }
         public void FocusRoom()
         {
             if (!initialized || !HasCanonicalRuntime()) return;
             string id=selectedRoomId ?? selected?.RoomInstanceId;
             if(id==null || !world.TryRoomBounds(id,out var bounds)) return;
-            autoFit=false; viewport.Focus(bounds); ApplyCamera();
+            FocusInteraction(bounds);
+        }
+        private void FocusInteraction(Rect bounds)
+        {
+            interactionFocus=bounds; autoFit=false; viewport.Focus(bounds); ApplyCamera();
         }
         public void ToggleFloorRail()
         {
