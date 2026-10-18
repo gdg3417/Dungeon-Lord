@@ -71,10 +71,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TestContext.WriteLine("Variant=" + outcome.CombatExecutable + " floors=" + snapshot.Floors.Count +
                 " checkpointBytes=" + original.ExportCheckpoint(Limits).GetBytes().Length + " events=" + original.NextOrdinal + " work=" + original.CommittedCombatWork);
         }
-        [TestCase(false)] [TestCase(true)]
-        public void RepeatedLookaheadInsufficientDeadlineExportReopenAndEventualCommitChargeExactlyOnce(bool persistent)
+        [TestCase(false, false)] [TestCase(true, false)] [TestCase(false, true)] [TestCase(true, true)]
+        public void RepeatedLookaheadInsufficientDeadlineExportReopenAndEventualCommitChargeExactlyOnce(bool persistent, bool twoFloors)
         {
-            var s = PhaseSixA4Tests.Snapshot(Dungeon()); var e = Start(s, persistent); var control = Start(s, persistent);
+            var s = PhaseSixA4Tests.Snapshot(Dungeon(twoFloors)); var e = Start(s, persistent); var control = Start(s, persistent);
             var steps = Drain(control, 1); var expected = control.TakeOutcome();
             foreach (var step in steps) {
                 var committed = CombatCheckpointCodec.Inspection(e); var checkpoint = e.ExportCheckpoint(Limits);
@@ -163,7 +163,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.Throws<ArgumentException>(() => e.AdvanceThrough(-1, 1, e.NextOrdinal));
             CollectionAssert.AreEqual(c.GetBytes(), e.ExportCheckpoint(Limits).GetBytes());
         }
-        public static void VerifyForPlayMode() => new LivingDungeonB3B1Tests().RepeatedLookaheadInsufficientDeadlineExportReopenAndEventualCommitChargeExactlyOnce(true);
+        public static void VerifyForPlayMode() => new LivingDungeonB3B1Tests().RepeatedLookaheadInsufficientDeadlineExportReopenAndEventualCommitChargeExactlyOnce(true, true);
 
         [TestCase("wipe")] [TestCase("retreat")] [TestCase("multiple")] [TestCase("repeated")]
         public void CombatCasualtyRetreatAndStableMultipleMonsterReceiptsMatchManual(string mode)
@@ -284,10 +284,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void PendingGeometryWorkExhaustionIsTheSameBeforeAndAfterReopen()
         {
-            var f = Dungeon(); var s = PhaseSixA4Tests.Snapshot(f); var reference = Start(s);
-            Drain(reference, 1); long work = reference.CommittedCombatWork;
+            var f = Dungeon(); var s = PhaseSixA4Tests.Snapshot(f); var steps = Drain(Start(s), 1);
+            int encounter = steps.FindIndex(step => step.Kind == RunStepKind.MonsterEngagement);
+            Assert.That(encounter, Is.GreaterThan(0));
+            var reference = Start(s); for (int i = 0; i < encounter; i++) reference.Advance(1, reference.NextOrdinal);
+            long committed = reference.CommittedCombatWork; reference.NextDueTime(); long work = reference.Combat.Kernel.WorkCount;
+            Assert.That(work, Is.GreaterThan(committed));
             f.Configuration.CombatC0.MaximumWork = work - 1;
-            var limited = PhaseSixA4Tests.Snapshot(f); var e = Start(limited); var restored = Restore(e);
+            var limited = PhaseSixA4Tests.Snapshot(f); var e = Start(limited);
+            for (int i = 0; i < encounter; i++) e.Advance(1, e.NextOrdinal);
+            var restored = Restore(e);
             string Failure(RunExecution run, bool probe) {
                 try { while (!run.IsTerminal) { if (probe) { run.NextDueTime(); run.NextDueTime(); } run.Advance(1, run.NextOrdinal); } }
                 catch (InvalidOperationException error) { Assert.Throws<InvalidOperationException>(() => run.ExportCheckpoint(Limits)); return error.Message + ":" + run.NextOrdinal; }
