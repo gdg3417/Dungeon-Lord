@@ -2,6 +2,8 @@ What is the smallest version of Dungeon Builder that proves the fantasy is fun?
 
 **MVP gameplay scope**
 
+> **Owner scope amendment (2026-10-18):** No sub-dungeons, including the Mana Farm, are in the five-floor MVP or initial public release. See the [dated scope decision](planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md). Earlier sub-dungeon MVP or release statements are superseded.
+
 Include
 
 - Dungeon core
@@ -22,7 +24,6 @@ Include
 
 - Idle offline mana calculation
 
-- One sub dungeon type (Mana Farm)
 
 Explicitly exclude for MVP
 
@@ -34,7 +35,7 @@ Explicitly exclude for MVP
 
 - Hero adventurers
 
-- More than 1 sub dungeon
+- All sub-dungeons, including Mana Farm, through initial public release
 
 - Advanced diplomacy
 

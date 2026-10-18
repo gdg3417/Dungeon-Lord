@@ -612,7 +612,7 @@ Skipping Sprint 4 may ship a technically stable but confusing first-session expe
 - Full political/economic/guild reputation depth (Spec 07): Needs clear MVP boundary and ownership.
 - Event framework broad override system (Spec 32 complete vision): Defer full player-facing event framework; keep internal override subset only.
 - External world economy full simulation depth (Spec 16 advanced behaviors): Needs balancing model + telemetry targets.
-- MVP-MF01: Mana Farm Sub Dungeon Placeholder and Scope Gate: MVP scope retained, but deferred until main dungeon core loop stability is validated.
+- MVP-MF01: Mana Farm Sub Dungeon Placeholder and Scope Gate: historical identifier retained for traceability; no longer an MVP delivery dependency. All sub-dungeons are excluded through initial public release. Mana Farm is only a possible post-launch expansion with progression undecided; see the [owner scope amendment](../../Docs/planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md).
 - Prestige/seasonal resets (Spec 22), social/competitive (Spec 24), live-ops events (Spec 13), monetization implementation (Spec 12): Deferred by MVP scope.
 
 ## Conflicts and Duplicates

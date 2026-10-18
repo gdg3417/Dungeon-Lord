@@ -64,9 +64,10 @@ MVP includes:
 7. Loot tiers up to Steel
 8. One research slot
 9. Offline idle mana calculation
-10. One sub dungeon type: Mana Farm
 
 MVP excludes:
+
+All sub-dungeons, including the Mana Farm, are excluded from both the five-floor MVP and initial public release. Do not implement or scaffold sub-dungeon systems during either scope. See the [owner scope amendment](../Docs/planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md).
 
 1. Prestige
 2. Seasonal events
@@ -74,7 +75,7 @@ MVP excludes:
 4. Leaderboards
 5. Hero adventurers
 6. Advanced diplomacy
-7. More than one sub dungeon type
+7. All sub-dungeon types, including Mana Farm, through initial public release
 8. Expanded boss sets
 9. Real monetization
 10. Social or competitive systems

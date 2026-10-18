@@ -25,7 +25,7 @@
 | Boss-set constraint | Locked MVP exclusion | Optional; no completion evidence claimed | No boss-set requirement inferred from GD history | Any requirement must come from another authoritative content spec | Capped at no more than one set per family; not independently required |
 | Loot progression through Steel | Locked MVP source / S2-T06 | Partial; loot systems exist | GD14 and later loot/spoils work | Tier breadth requires confirmation | Required Phase 8; validate Phase 9 |
 | One research slot | Locked MVP source / S2-T01 | Implemented at prototype scope; final integration remaining | GD15 and GD59 | Research/save/presentation tests | Required; Architecture/UI work Phases 5/8/9 |
-| One Mana Farm sub-dungeon | Locked MVP source / MVP-MF01 | Remaining | No completion claimed | None asserted | Required Phase 8 after main spatial/economy contracts; validate Phase 9 |
+| Mana Farm / sub-dungeons | Historical MVP source / MVP-MF01 | Deferred; no completion claimed | Owner scope amendment (2026-10-18) | None asserted | Excluded from five-floor MVP and initial public release; possible post-launch only, progression undecided |
 | Peace, Notice and Concern heat states | Locked MVP source / S2-T03 | Partial; heat foundation exists | Earlier core-loop work | Exact three-state journey evidence requires confirmation | Required Phase 8/9; more than three excluded |
 | Five adventurer classes | Locked MVP source / S2-T05 | Partial or requires confirmation | Encounter/adventurer work through GD60 | Exact class breadth requires confirmation | Required Phase 8; validate Phase 9 |
 
@@ -84,7 +84,7 @@ Exact closure of old offline progression, verification reconciliation, content-C
 | Docs/20 - Tutorial_Onboarding_and_Unlock_Sequencing.md | First-session guidance sequence | MVP Vertical Slice Polish | S4-T02 | Sprint 4 | Modified | Converted to testable onboarding ticket. |
 | Docs/26 - Accessibility_and_Cognitive_Load_Targets.md | Accessibility pass targets | MVP Vertical Slice Polish | S4-T03 | Sprint 4 | Existing | Checklist evidence required. |
 | Docs/32 - Event_Framework_and_Rule_Overrides.md | Internal test override support only | MVP Vertical Slice Polish | S4-T04 | Sprint 4 | Modified | Internal-only test override hooks; not player-facing live-ops events. |
-| Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md; Docs/What is the smallest version of Dungeon Builder that proves the fantasy is fun.md | One sub dungeon type in MVP: Mana Farm, gated until core loop stability | Deferred MVP Scope Management | MVP-MF01 (Deferred MVP) | Post-Sprint 2A | Added | MVP scope retained but deferred until deterministic core loop validation is stable. |
+| Docs/00 - All Design Specs_AUDITED_AND_LOCKED.md; Docs/What is the smallest version of Dungeon Builder that proves the fantasy is fun.md | Historical claim: one sub dungeon type in MVP (Mana Farm), gated until core-loop stability; superseded 2026-10-18 | Deferred post-launch scope management | MVP-MF01 (historical trace; no longer MVP delivery) | Post-launch only, if separately approved | Added historically | Superseded by the [owner scope amendment](../../Docs/planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md): no sub-dungeons in five-floor MVP or initial public release; milestone undecided. |
 | Docs/07,12,13,22,24 | Non-MVP features | Deferred Scope Management | N/A (Deferred) | Deferred | Deferred | Diplomacy depth, monetization impl, live-ops, prestige, social excluded. |
 
 ## Existing Sprint Reconciliation
