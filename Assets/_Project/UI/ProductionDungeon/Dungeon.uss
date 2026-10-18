@@ -18,8 +18,7 @@
 .bottom-chrome { flex-shrink: 1; max-height: 42%; border-top-width: 2px; border-top-color: var(--gold); }
 .normal-mode .bottom-chrome { height: auto; }
 .normal-mode.details-collapsed .bottom-chrome { height: auto; }
-.editing .bottom-chrome { max-height: 65%; }
-.constructing .bottom-chrome { max-height: 65%; }
+.constructing .bottom-chrome { max-height: 54%; }
 .landscape .bottom-chrome { max-height: 44%; }
 .landscape .top-content { flex-direction: row; align-items: center; }
 .landscape .hud { flex-grow: 1; flex-basis: 64%; }
@@ -53,20 +52,19 @@
 .display-popover .legacy { flex-basis: auto; align-self: stretch; }
 .viewport { flex-grow: 1; min-width: 0; }
 .workspace { flex-grow: 1; flex-shrink: 1; min-height: 0; }
-.landscape.editing .workspace { flex-direction: row; }
-.landscape.editing .map-area { min-width: 0; min-height: 0; flex-basis: 40%; }
-.landscape.editing .bottom-chrome { flex-basis: 60%; max-height: 100%; min-width: 0; border-left-width: 2px; border-left-color: var(--gold); }
-.landscape.editing .sheet-top { flex-direction: column; align-items: stretch; }
-.landscape.editing .sheet-header, .landscape.editing #constructionCategories { flex-basis: auto; }
-.landscape.editing .placement-context { flex-direction: column; }
-.landscape.editing .placement-information, .landscape.editing .placement-controls { flex-basis: auto; min-width: 0; }
-.landscape.editing .context-details { flex-grow: 1; }
-.landscape.editing #draftSummary { flex-basis: 100%; }
-.landscape.editing #editActions { flex-basis: auto; }
-.landscape.editing .session-actions .legacy { flex-basis: 100%; }
-.landscape.editing .session-actions { padding-top: 0; }
+.landscape.working-sheet .workspace { flex-direction: row; }
+.landscape.working-sheet .map-area { min-width: 0; min-height: 0; flex-basis: 40%; }
+.landscape.working-sheet .bottom-chrome { flex-basis: 60%; max-height: 100%; min-width: 0; align-self: flex-end; border-left-width: 2px; border-left-color: var(--gold); }
+.landscape.working-sheet .sheet-top { flex-direction: column; align-items: stretch; }
+.landscape.working-sheet .sheet-header, .landscape.working-sheet #constructionCategories { flex-basis: auto; }
+.landscape.working-sheet .placement-context { flex-direction: column; }
+.landscape.working-sheet .placement-information, .landscape.working-sheet .placement-controls { flex-basis: auto; min-width: 0; }
+.landscape.working-sheet #draftSummary { flex-basis: 100%; }
+.landscape.working-sheet #editActions { flex-basis: auto; }
+.landscape.working-sheet .session-actions .legacy { flex-basis: 100%; }
+.landscape.working-sheet .session-actions { padding-top: 0; }
 .landscape.constructing .placement-information Label { margin-top: 0; margin-bottom: 0; }
-.landscape.editing #constructionOptions { flex-shrink: 0; }
+.landscape.working-sheet #constructionOptions { flex-shrink: 0; }
 .landscape.constructing .sheet-top { flex-direction: row; }
 .landscape.constructing .sheet-header { flex-basis: 45%; }
 .landscape.constructing .sheet-header > Label { display: none; }
@@ -176,7 +174,7 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .content-card { min-width: 180px; max-width: 260px; flex-direction: column; align-items: flex-start; white-space: normal; }
 .content-card-icon { width: 48px; height: 48px; -unity-background-scale-mode: scale-to-fit; }
 .content-card Label { white-space: normal; }
-.placing-content .bottom-chrome { max-height: 65%; }
+.placing-content .bottom-chrome { max-height: 54%; }
 .placing-content .map-area { min-height: 25%; }
 .placing-content .top-chrome { max-height: 22%; }
 .landscape.placing-content .bottom-chrome { max-height: 100%; }

@@ -74,6 +74,17 @@ namespace DungeonBuilder.M0
             var ui=document.rootVisualElement;
             bool inspecting=selected!=null || selectedRoomId!=null || selectedEdgeId!=null;
             safe.EnableInClassList("editing",IsEditing);
+            bool working=Screen.width>Screen.height && IsEditing &&
+                (IsConstructing || contentCategory!=null && ContextRoomId!=null);
+            safe.EnableInClassList("working-sheet",working);
+            var workspace=ui.Q("workspace"); var map=ui.Q("mapArea");
+            workspace.style.display=working ? DisplayStyle.Flex : DisplayStyle.None;
+            if(working && map.parent!=workspace) { workspace.Add(map); workspace.Add(bottom); }
+            else if(!working && map.parent!=safe)
+            {
+                int index=safe.IndexOf(workspace);
+                safe.Insert(index,map); safe.Insert(index+1,bottom);
+            }
             safe.EnableInClassList("normal-mode",!IsEditing);
             safe.EnableInClassList("details-collapsed",detailsCollapsed);
             safe.EnableInClassList("blocked-state",IsEditing && (!draft.IsStructurallyValid || draft.Durability!=DraftDurability.Acknowledged));
