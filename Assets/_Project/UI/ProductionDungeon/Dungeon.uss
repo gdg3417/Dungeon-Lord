@@ -18,7 +18,7 @@
 .bottom-chrome { flex-shrink: 1; max-height: 42%; border-top-width: 2px; border-top-color: var(--gold); }
 .normal-mode .bottom-chrome { height: auto; }
 .normal-mode.details-collapsed .bottom-chrome { height: auto; }
-.constructing .bottom-chrome { max-height: 54%; }
+.constructing .bottom-chrome { max-height: 65%; }
 .landscape .bottom-chrome { max-height: 44%; }
 .landscape .top-content { flex-direction: row; align-items: center; }
 .landscape .hud { flex-grow: 1; flex-basis: 64%; }
@@ -169,10 +169,10 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .content-card { min-width: 180px; max-width: 260px; flex-direction: column; align-items: flex-start; white-space: normal; }
 .content-card-icon { width: 48px; height: 48px; -unity-background-scale-mode: scale-to-fit; }
 .content-card Label { white-space: normal; }
-.placing-content .bottom-chrome { max-height: 54%; }
+.placing-content .bottom-chrome { max-height: 65%; }
 .placing-content .map-area { min-height: 25%; }
 .placing-content .top-chrome { max-height: 22%; }
-.landscape.placing-content .bottom-chrome { max-height: 46%; }
+.landscape.placing-content .bottom-chrome { max-height: 100%; }
 .landscape.placing-content .top-content { flex-direction: column; align-items: stretch; }
 .landscape.placing-content .hud { flex-basis: auto; min-width: 0; }
 .landscape.placing-content .top-chrome { padding-top: 0; padding-bottom: 0; }

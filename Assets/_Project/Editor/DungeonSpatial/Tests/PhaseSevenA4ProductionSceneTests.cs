@@ -1138,10 +1138,13 @@ namespace DungeonBuilder.M0.Tests
                     var browser = ui.Q("contentChoices");
                     var card = browser.Query<Button>().ToList().Single(b=>b.userData as string=="placement.option.trap.spike");
                     var details = ui.Q<ScrollView>("contextDetails");
+                    card.GetFirstAncestorOfType<ScrollView>().ScrollTo(card); yield return null; yield return null;
                     details.ScrollTo(card); yield return null; yield return null;
                     TestContext.WriteLine("Owner browser "+size+" "+text+" card="+card.worldBound+" details="+details.contentViewport.worldBound);
                     AssertReachable(card);
                     Assert.That(details.contentViewport.worldBound.yMax,Is.GreaterThanOrEqualTo(card.worldBound.yMax-1),"Whole card is visible, not just its center");
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("owner-browser-scrolled-"+size.x+"x"+size.y+"-"+text+".png");
+                    yield return null; yield return null;
                     Assert.That(controller.SelectNewContent("placement.option.trap.spike"),Is.True);
                     yield return WaitForViewportGeometry();
                     var camera=controller.GetComponentInChildren<Camera>();

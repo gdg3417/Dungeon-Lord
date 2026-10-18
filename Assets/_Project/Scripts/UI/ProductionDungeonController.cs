@@ -606,7 +606,7 @@ namespace DungeonBuilder.M0
             if (legacy) return;
             var ui = document.rootVisualElement;
             var button = ui.Q<Button>("legacy");
-            var host = IsConstructing && Screen.width > Screen.height ? ui.Q("displayPopover") : ui.Q("sessionActions");
+            var host = IsEditing ? ui.Q("displayPopover") : ui.Q("sessionActions");
             if (button.parent != host) host.Add(button);
         }
         private void SetLegacy(bool value)
