@@ -28,12 +28,16 @@ def protected():
     for folder in [ROOT/'Builds', *ROOT.glob('Temp/*/Builds')]:
         paths.update(p for p in folder.rglob('*') if p.is_file())
     return sorted(paths)
+def require_metadata(root):
+    missing = [str(p.relative_to(root))+'.meta' for p in root.glob('Assets/**/*.cs')
+               if not Path(str(p)+'.meta').is_file()]
+    if missing:
+        raise ValueError('Missing reviewed Unity metadata; preparation will not create it: '+str(missing))
+
 def prepare():
     if (OUT/'baseline.json').exists(): raise ValueError('Preserve the existing baseline')
+    require_metadata(ROOT)
     OUT.mkdir(parents=True, exist_ok=True)
-    for p in ROOT.glob('Assets/**/*.cs'):
-        if not Path(str(p)+'.meta').exists():
-            Path(str(p)+'.meta').write_text('fileFormatVersion: 2\nguid: '+uuid.uuid4().hex+'\nMonoImporter:\n  externalObjects: {}\n  serializedVersion: 2\n  defaultReferences: []\n  executionOrder: 0\n  icon: {instanceID: 0}\n  userData:\n  assetBundleName:\n  assetBundleVariant:\n', encoding='utf-8')
     inventory = inputs.source_inventory(ROOT)
     with zipfile.ZipFile(OUT/'root-inputs-before.zip', 'x', zipfile.ZIP_DEFLATED) as z:
         for name in inventory: z.write(ROOT/name, name)
@@ -237,7 +241,14 @@ def finish():
         print(len(rows),'historical evidence files preserved')
 if __name__=='__main__':
     mode=sys.argv[1]
-    if mode=='prepare': prepare()
+    if mode=='preflight':
+        import b3a_preservation_preflight
+        try:
+            print(json.dumps(b3a_preservation_preflight.validate(ROOT, OUT, SAVE, sys.argv[2], sys.argv[3])))
+        except (ValueError, OSError, KeyError, zipfile.BadZipFile, subprocess.CalledProcessError) as error:
+            print('B3A preservation preflight rejected: '+str(error), file=sys.stderr)
+            sys.exit(2)
+    elif mode=='prepare': prepare()
     elif mode=='checkpoint': checkpoint(sys.argv[2])
     elif mode=='finish': finish()
     elif mode=='isolate-evidence': isolate_evidence()

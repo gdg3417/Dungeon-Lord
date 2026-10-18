@@ -4,6 +4,10 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $taskRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$python = 'C:/Users/gdg34/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe'
+# Read-only: never install substitutions, create evidence, or launch Unity on rejection.
+& $python -B (Join-Path $PSScriptRoot 'qualify_b3a.py') preflight $Stage $Attempt
+if ($LASTEXITCODE -ne 0) { throw 'B3A isolation is not proven. Resolve the preflight diagnostic before running Unity; preflight does not prepare sources.' }
 $unity = 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe'
 $evidence = Join-Path $taskRoot 'TestResults/living-dungeon-b3a-20261017'
 $xml = Join-Path $evidence ($Attempt+'-'+$Stage+'.xml')
@@ -25,14 +29,17 @@ if ($Stage -eq 'build') {
         'DungeonBuilder.M0.EditorTools.DungeonVisualBuildQualification.BuildLivingDungeonB3AWindows',
         '--allow-dirty-build','--timeout','1800','--no-tail','--log-file',$log,'--no-color')
 }
-$record = [ordered]@{ executable=$unity; arguments=$cliArgs; startedUtc=[DateTime]::UtcNow.ToString('O'); sourceCommit=(git rev-parse HEAD) }
-& $unity @cliArgs
+$record = [ordered]@{ executable=$unity; arguments=$cliArgs; startedUtc=[DateTime]::UtcNow.ToString('O'); sourceCommit=(git -C $taskRoot rev-parse HEAD) }
+Push-Location -LiteralPath $taskRoot
+try { & $unity @cliArgs } finally { Pop-Location }
 $record.exitCode = $LASTEXITCODE
 $record.finishedUtc = [DateTime]::UtcNow.ToString('O')
 if (Test-Path -LiteralPath $xml) {
     [xml]$report = Get-Content -Raw -LiteralPath $xml
     $record.verdict = $report.'test-run' | Select-Object total,passed,failed,skipped
 }
-$record | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $recordPath -Encoding utf8
+$recordBytes = [Text.Encoding]::UTF8.GetBytes(($record | ConvertTo-Json -Depth 8))
+$recordFile = [IO.File]::Open($recordPath, [IO.FileMode]::CreateNew)
+try { $recordFile.Write($recordBytes, 0, $recordBytes.Length) } finally { $recordFile.Dispose() }
 Write-Output ($record | ConvertTo-Json -Depth 8)
 exit $record.exitCode

@@ -1,0 +1,154 @@
+{
+  "complete": false,
+  "prRemainsDraft": true,
+  "reviewedHead": "36da2f80ef31febbd01e63d8ee5c5ffa2fd38532",
+  "qualifiedRuntimeCommit": "b5502291e9da3d229bbcc3d152f8bd56954d84eb",
+  "toolingTests": {
+    "passed": 24,
+    "failed": 0,
+    "exitCode": 0,
+    "unityLaunched": false,
+    "fixtures": "disposable synthetic text files only"
+  },
+  "inactiveRunner": {
+    "exitCode": 1,
+    "filesAudited": 11036,
+    "newFiles": 0,
+    "removedFiles": 0,
+    "changedFiles": 0,
+    "unityInvocationExecuted": false,
+    "actionableRejection": true
+  },
+  "protected": {
+    "total": 6839,
+    "equal": 6839,
+    "mismatches": []
+  },
+  "historical": {
+    "total": 1991,
+    "equal": 1986,
+    "mismatches": [
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-1920-Default.png",
+        "expected": "0957c9196f7202c68bb3d69b69315256d6089892d1e5cbd2c702d0b77b91f1d3",
+        "actual": "95b2cb48958520a43686e389d33109b760e13054843df62066c8076fde7fee2e"
+      },
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-1920-Large.png",
+        "expected": "ffe861491f8d09c2599416334b4b7d3871997cf592b75cae432aee299e1ca69f",
+        "actual": "83a61dc946fb631d63d60ce0dfe2523eda03b5be85a67cd7690b8481e117b0dd"
+      },
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-720-Default.png",
+        "expected": "5f812a2668e34ebb3a72e6aeb208edb17ee6c1ef6c15fde87682a108ef774881",
+        "actual": "58a0191b7632ff2ec1b2b36715d0dadce727b6b7b18b0cde00519232f7ca7527"
+      },
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-720-Large.png",
+        "expected": "fcf284148832be7a8d858a65b83ab12d7babb2cb202ebf8f72aff85a15694a03",
+        "actual": "d35346f5163f2361797e42dee6f37b095a495f0916348c17f96f666bd67d2b94"
+      },
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-placement-1920.png",
+        "expected": "c6f15c1d0b3c65140ad4b6d0419572a302e31928682201e2bb248f6b09b5434e",
+        "actual": "8d532c118629fcf8efd165d3352d5080f226e37b4e4f429c0d3e9352cc75873a"
+      }
+    ]
+  },
+  "unityInputs": {
+    "total": 1340,
+    "mismatches": []
+  },
+  "runtimeTestsApplicable": true,
+  "recoveredThisFollowup": 0,
+  "priorExactRestorationsReverified": 5,
+  "missingOriginals": [
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-1920-Default.png",
+      "sha256": "0957c9196f7202c68bb3d69b69315256d6089892d1e5cbd2c702d0b77b91f1d3",
+      "source": null,
+      "restored": false
+    },
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-1920-Large.png",
+      "sha256": "ffe861491f8d09c2599416334b4b7d3871997cf592b75cae432aee299e1ca69f",
+      "source": null,
+      "restored": false
+    },
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-720-Default.png",
+      "sha256": "5f812a2668e34ebb3a72e6aeb208edb17ee6c1ef6c15fde87682a108ef774881",
+      "source": null,
+      "restored": false
+    },
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-720-Large.png",
+      "sha256": "fcf284148832be7a8d858a65b83ab12d7babb2cb202ebf8f72aff85a15694a03",
+      "source": null,
+      "restored": false
+    },
+    {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-placement-1920.png",
+      "sha256": "c6f15c1d0b3c65140ad4b6d0419572a302e31928682201e2bb248f6b09b5434e",
+      "source": null,
+      "restored": false
+    }
+  ],
+  "search": {
+    "pngFiles": 834,
+    "zipFiles": 233,
+    "archivedPngFiles": 1222,
+    "matches": 0,
+    "restorationWrites": 0,
+    "errors": [],
+    "unsupportedArchives": []
+  },
+  "graphicalFailuresPreserved": [
+    "RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated",
+    "TransactionalRoomConstructionLayoutsLocalizationAndResume"
+  ],
+  "fullEditModeRemainsNonGreen": true,
+  "ownerExceptionGranted": false,
+  "reportsZip": {
+    "path": "safety-closeout-reports.zip",
+    "sha256": "f61df3c6ab0942a7d2207c7623591f512351743068f718092bba54c18ae7d6a6"
+  },
+  "originalQualificationRecords": [
+    {
+      "path": "qualification-reports.zip",
+      "workingSha256": "167d4ebe24e11d2d43ce561eff2e5ff692996f872c80ff6c848b30c18e5ec2f8",
+      "gitBlobSha256": "167d4ebe24e11d2d43ce561eff2e5ff692996f872c80ff6c848b30c18e5ec2f8",
+      "matchesReviewedGitBlobWithCheckoutFilters": true
+    },
+    {
+      "path": "report-summary.json",
+      "workingSha256": "4988f6a7b040724e73e074a0fbdd765a2118fdee62ef111434921394c3796b09",
+      "gitBlobSha256": "a3477aae622303ee3200e07f3f322d5811438506d7c8906a0f53da6e17f6d67b",
+      "matchesReviewedGitBlobWithCheckoutFilters": true
+    },
+    {
+      "path": "commands.json",
+      "workingSha256": "ce907cb086463a73aac43a11c8a9b0314c4abfdb9b4197340d64e57fbd794349",
+      "gitBlobSha256": "16d765e08d23ee2a1d286d8cd15a6b7ed7fdfee61339329773de7c2cc082be00",
+      "matchesReviewedGitBlobWithCheckoutFilters": true
+    },
+    {
+      "path": "source-applicability.json",
+      "workingSha256": "05d275d732ca4cba0108d9ab9400d329868c80b4fc32a653d8bcabab153276d5",
+      "gitBlobSha256": "1d13b896cd31dfafb61188b256358fd00875233151804dee62eeef7e0f2f706d",
+      "matchesReviewedGitBlobWithCheckoutFilters": true
+    },
+    {
+      "path": "qualification-status.json",
+      "workingSha256": "290e80606b0ea718508eb13ed076c3ab9885eeec84c5b8f8cf9296767cad28f9",
+      "gitBlobSha256": "c5da5c320c0116f996520a496dc80332287ad89a05e6feee69187e6de1c3db73",
+      "matchesReviewedGitBlobWithCheckoutFilters": true
+    }
+  ],
+  "initialToolingEnvironmentFailure": "Sandbox denied temporary fixture directory: 22 tests, 44 setup/cleanup errors, exit 1. Approved retry passed 22; final expanded run passed 24.",
+  "limitations": [
+    "Five exact screenshot originals remain missing; no regeneration or manifest amendment",
+    "Windows shadow-copy metadata unavailable (CIM initialization failure); no FileHistory configuration found",
+    "Future execution requires separately reviewed fresh campaign; current namespaces are closed/consumed"
+  ]
+}

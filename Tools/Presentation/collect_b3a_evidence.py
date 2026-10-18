@@ -10,7 +10,11 @@ BUILD = ROOT/'Builds/Development/Windows-living-dungeon-b3a-20261017'
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
 def write(name, value): (DEST/name).write_text(json.dumps(value,indent=2),encoding='utf-8')
 def collect():
-    if (DEST/'qualification-reports.zip').exists(): raise ValueError('Preserve existing qualification evidence; choose a new evidence version')
+    generated = ['qualification-reports.zip','qualification-status.json','report-summary.json','commands.json',
+                 'windows-package.json','source-applicability.json','build-report.json','build-messages.txt',
+                 'packed-dungeon-art.txt','packed-source-assets.txt']
+    if any((DEST/name).exists() for name in generated):
+        raise ValueError('Preserve all existing/partial qualification evidence; choose a separately reviewed new evidence version')
     DEST.mkdir(parents=True,exist_ok=True)
     reports=[]
     for path in sorted(OUT.glob('*.xml')):
