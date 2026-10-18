@@ -606,6 +606,7 @@ namespace DungeonBuilder.M0
         private void SetLegacy(bool value)
         {
             legacy = value;
+            document.rootVisualElement.Q("displayPopover").style.display = DisplayStyle.None;
             var legacyButton=document.rootVisualElement.Q<Button>("legacy");
             if(value) safe.Add(legacyButton);
             else document.rootVisualElement.Q("sessionActions").Add(legacyButton);

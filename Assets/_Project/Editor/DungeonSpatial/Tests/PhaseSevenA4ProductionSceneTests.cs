@@ -359,6 +359,14 @@ namespace DungeonBuilder.M0.Tests
                         Assert.That(ui.Q<Button>("legacy").parent,Is.SameAs(ui.Q("displayPopover")),"Optional development action moves out of construction's required action row");
                         Click(ui.Q<Button>("displaySettings")); yield return null; yield return null;
                         AssertReachable(ui.Q<Button>("legacy")); Click(ui.Q<Button>("closeDisplay")); yield return null; yield return null;
+                        Click(ui.Q<Button>("displaySettings")); yield return null; yield return null;
+                        Click(ui.Q<Button>("legacy")); yield return null; yield return null;
+                        Assert.That(ui.Q("displayPopover").style.display.value,Is.EqualTo(DisplayStyle.None));
+                        Assert.That(ui.Q<Button>("legacy").parent,Is.SameAs(controller.SafeRoot));
+                        Click(ui.Q<Button>("legacy")); yield return null; yield return null;
+                        Assert.That(ui.Q("displayPopover").style.display.value,Is.EqualTo(DisplayStyle.None));
+                        Assert.That(ui.Q<Button>("legacy").parent,Is.SameAs(ui.Q("displayPopover")));
+                        Assert.That(controller.IsConstructing,Is.True); Assert.That(controller.ConstructionPreview.IsValid,Is.True);
                     }
                     Assert.That(controller.World.GridTileCount, Is.EqualTo(root.ProductionSpatialContent.Catalog.Floors[0].Bounds.TileCount));
                 }
