@@ -889,7 +889,12 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(camera.pixelRect.Contains(touchPoint),Is.True);
             Assert.That(controller.IsChrome(touchPoint,1),Is.False,"Current touch target must reach the world viewport");
             simulatedTouch=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Touchscreen>();
+            yield return null; yield return null;
+            Assert.That(simulatedTouch.enabled,Is.True,"Simulated touchscreen must be active before queuing input");
             Touch(1,touchPoint,UnityEngine.InputSystem.TouchPhase.Began); yield return null; yield return null;
+            TestContext.WriteLine("Content touch focused="+Application.isFocused+" enabled="+simulatedTouch.enabled+
+                " primaryId="+simulatedTouch.primaryTouch.touchId.ReadValue()+" phase="+simulatedTouch.primaryTouch.phase.ReadValue()+
+                " slots="+string.Join(";",simulatedTouch.touches.Select(t=>t.touchId.ReadValue()+":"+t.phase.ReadValue())));
             Assert.That(UnityEngine.InputSystem.Touchscreen.current,Is.SameAs(simulatedTouch));
             Assert.That(simulatedTouch.primaryTouch.touchId.ReadValue(),Is.EqualTo(1));
             Assert.That(simulatedTouch.primaryTouch.press.isPressed,Is.True);

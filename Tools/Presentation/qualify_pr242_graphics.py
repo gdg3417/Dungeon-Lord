@@ -59,6 +59,9 @@ def verify_authored_scope():
     if set(changed)-set(SOURCE_OVERRIDES): raise ValueError('Commit reviewed UI corrections before preparation: '+str(changed))
     qualified=read(ROOT/'Docs/testing/evidence/living-dungeon-b3a/source-applicability.json')
     allowed=set(SOURCE_OVERRIDES+['Assets/_Project/UI/ProductionDungeon/Dungeon.uss',
+        'Assets/_Project/Scripts/UI/ProductionDungeonController.cs',
+        'Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs',
+        'Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs',
         'Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs',
         'Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs'])
     for row in qualified['unityInputs']:
@@ -88,6 +91,8 @@ def transformed(name,data,attempt):
     elif name in CAPTURES:
         if 'TestResults/' not in text: raise ValueError('Screenshot helper changed: '+name)
         text=text.replace('TestResults/',folder+'/screens/')
+        if name==CAPTURES[0]:
+            text=text.replace('Path.GetFileName(filename)', 'Guid.NewGuid().ToString("N") + "-" + Path.GetFileName(filename)')
     elif name in FIXTURES:
         for old,new in [('bootstrap_overlay_','bootstrap_overlay_'+attempt+'_'),('run_sim_test_','run_sim_test_'+attempt+'_'),
                         ('mvp_canonical_journey_test.json','mvp_canonical_journey_'+attempt+'.json')]: text=text.replace(old,new)

@@ -209,6 +209,7 @@ namespace DungeonBuilder.M0
         {
             var ui = document.rootVisualElement;
             safe.EnableInClassList("constructing", IsConstructing);
+            PlaceDevelopmentAction();
             ui.Q("placementContext").style.display = IsConstructing ? DisplayStyle.Flex : DisplayStyle.None;
             bool compactPreview = IsConstructing && constructionPreview?.IsValid == true && draft.Durability == DraftDurability.Acknowledged;
             bool redundantNormalStatus = !IsEditing && (feedback == null || feedback == "ui.dungeon.committed" || feedback == "ui.dungeon.discarded");

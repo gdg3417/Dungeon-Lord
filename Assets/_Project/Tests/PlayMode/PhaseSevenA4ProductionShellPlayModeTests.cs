@@ -38,6 +38,9 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator TransactionalRoomConstructionProductionParity()
         { yield return Invoke("TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery"); }
         [UnityTest]
+        public IEnumerator TransactionalRoomConstructionLayoutsLocalizationAndResume()
+        { yield return Invoke("TransactionalRoomConstructionLayoutsLocalizationAndResume"); }
+        [UnityTest]
         public IEnumerator VisualRunReplayProductionLifecycleAndResponsiveControls()
         { yield return Invoke("VisualRunReplayProductionLifecycleAndResponsiveControls"); }
         [UnityTest]

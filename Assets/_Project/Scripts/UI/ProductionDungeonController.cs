@@ -515,6 +515,7 @@ namespace DungeonBuilder.M0
             document.panelSettings.scale = Mathf.Max(1, Mathf.Min(Screen.width,Screen.height) / presentationPolicy.ReferenceShortSide);
             ApplySafeArea(lastSafe, lastResolution); SetTextSize(textSize);
             safe.EnableInClassList("landscape", Screen.width > Screen.height);
+            PlaceDevelopmentAction();
             PresentComposition();
             viewportElement.UnregisterCallback<GeometryChangedEvent>(ViewportGeometry);
             viewportElement.RegisterCallback<GeometryChangedEvent>(ViewportGeometry);
@@ -594,12 +595,21 @@ namespace DungeonBuilder.M0
             }
         }
         private void ToggleLegacy() { SetLegacy(!legacy); }
+        private void PlaceDevelopmentAction()
+        {
+            if (legacy) return;
+            var ui = document.rootVisualElement;
+            var button = ui.Q<Button>("legacy");
+            var host = IsConstructing && Screen.width > Screen.height ? ui.Q("displayPopover") : ui.Q("sessionActions");
+            if (button.parent != host) host.Add(button);
+        }
         private void SetLegacy(bool value)
         {
             legacy = value;
             var legacyButton=document.rootVisualElement.Q<Button>("legacy");
             if(value) safe.Add(legacyButton);
             else document.rootVisualElement.Q("sessionActions").Add(legacyButton);
+            PlaceDevelopmentAction();
             legacyButton.EnableInClassList("legacy-overlay",value);
             if (root.overlay != null)
             { root.overlay.enabled = value; if (root.overlay.overlayText != null) root.overlay.overlayText.gameObject.SetActive(value); }
