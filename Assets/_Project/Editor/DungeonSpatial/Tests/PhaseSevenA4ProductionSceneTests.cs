@@ -1193,6 +1193,8 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(controller.World.MoveGuidanceAnchors,Is.Not.Empty);
                     controller.TapWorld(controller.World.MoveGuidanceAnchors.First());
                     yield return WaitForViewportGeometry();
+                    TestContext.WriteLine("Owner construction "+size+" "+text+" camera="+camera.pixelRect+" size="+camera.orthographicSize+
+                        " tilePixels="+camera.pixelHeight/(camera.orthographicSize*2));
                     DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("owner-options-"+size.x+"x"+size.y+"-"+text+".png");
                     yield return null; yield return null;
                     var options=ui.Q("constructionOptions"); var strip=options.GetFirstAncestorOfType<ScrollView>();
@@ -1208,6 +1210,15 @@ namespace DungeonBuilder.M0.Tests
                     if(options.worldBound.width>strip.contentViewport.worldBound.width+1)
                         Assert.That(strip.horizontalScroller.resolvedStyle.display,Is.EqualTo(DisplayStyle.Flex),"Overflow must expose a discoverable scroll control");
                     AssertReachable(ui.Q<Button>("confirmPlacement")); AssertReachable(ui.Q<Button>("cancelPlacement"));
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("owner-options-end-"+size.x+"x"+size.y+"-"+text+".png");
+                    yield return null; yield return null;
+                    Click(buttons.Last()); yield return null; yield return null;
+                    Assert.That(controller.ConstructionPreview,Is.Null,"Reachable terminal choice dispatches its real UI action");
+                    Assert.That(controller.Draft.CommandCount,Is.Zero);
+                    Click(ui.Q<Button>("collapseDetails")); yield return WaitForViewportGeometry();
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("owner-funded-expanded-"+size.x+"x"+size.y+"-"+text+".png");
+                    yield return null; yield return null;
+                    AssertReachable(ui.Q<Button>("cancelPlacement"));
                     Assert.That(controller.Discard(),Is.True); yield return null;
                 }
             }
