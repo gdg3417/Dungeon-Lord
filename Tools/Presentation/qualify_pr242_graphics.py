@@ -55,10 +55,13 @@ def protected():
     return sorted(paths)
 def inventory(): return sorted(inputs.target_inventory(ROOT))
 def source_rows(): return [dict(path=str(ROOT/n),sha256=sha(ROOT/n)) for n in inventory()]
+def exact_inventory(expected,actual):
+    if set(expected)!=set(actual): raise ValueError('Unexpected/missing Unity input inventory')
 def verify_authored_scope():
     changed=git('diff','--name-only','HEAD','--',*inputs.INPUT_ROOTS).splitlines()
     if set(changed)-set(SOURCE_OVERRIDES): raise ValueError('Commit reviewed UI corrections before preparation: '+str(changed))
     qualified=read(ROOT/'Docs/testing/evidence/living-dungeon-b3a/source-applicability.json')
+    exact_inventory([r['path'] for r in qualified['unityInputs']],inventory())
     allowed=set(SOURCE_OVERRIDES+['Assets/_Project/UI/ProductionDungeon/Dungeon.uss',
         'Assets/_Project/Scripts/UI/ProductionDungeonController.cs',
         'Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs',
@@ -213,6 +216,10 @@ def selftest():
         except ValueError: pass
         else: raise AssertionError('Preservation mismatch accepted')
         assert before!=p.read_bytes()
+        exact_inventory(['reviewed'],['reviewed'])
+        try: exact_inventory(['reviewed'],['reviewed','untracked-extra'])
+        except ValueError: pass
+        else: raise AssertionError('Unexpected source inventory accepted')
     print('Disposable guard checks passed; actual prepared preflight must also pass before Unity')
 if __name__=='__main__':
     try:
