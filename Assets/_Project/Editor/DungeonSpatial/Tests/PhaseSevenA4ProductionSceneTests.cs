@@ -1156,6 +1156,31 @@ namespace DungeonBuilder.M0.Tests
                     // lower bound for the selected room's high-frequency tile interaction.
                     Assert.That(tilePixels,Is.GreaterThanOrEqualTo(controller.presentationPolicy.DesktopMinimumPixels),"Entering content placement must frame the selected room without a hidden extra Focus action");
                     AssertReachable(ui.Q<Button>("cancelContent")); AssertReachable(ui.Q<Button>("confirmContent"));
+                    var pointer=InputSystem.AddDevice<Mouse>();
+                    try
+                    {
+                        foreach(var cell in new[] {new TileCoordinate(room.Anchor.X+1,room.Anchor.Y+1),new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+1)})
+                        {
+                            yield return WaitForViewportGeometry();
+                            Vector2 point=camera.WorldToScreenPoint(new Vector3(cell.X+.5f,cell.Y+.5f));
+                            Assert.That(controller.IsChrome(point,pointer.deviceId),Is.False);
+                            Assert.That(controller.Viewport.ScreenToWorld(point).x,Is.EqualTo(cell.X+.5f).Within(.001));
+                            InputSystem.QueueStateEvent(pointer,new MouseState {position=point}.WithButton(MouseButton.Left));
+                            yield return null; yield return null;
+                            InputSystem.QueueStateEvent(pointer,new MouseState {position=point});
+                            yield return null; yield return null;
+                            Assert.That(controller.ContentPreview?.IsValid,Is.True);
+                            Assert.That(controller.World.TryRoomLocal(room.RoomInstanceId,cell,out var local),Is.True);
+                            Assert.That(controller.ContentPreview.Assignment.RoomLocalPosition,Is.EqualTo(local));
+                            Assert.That(controller.Draft.CommandCount,Is.Zero,"Moving a preview never confirms it");
+                            Click(ui.Q<Button>("collapseDetails"));
+                        }
+                    }
+                    finally { InputSystem.RemoveDevice(pointer); }
+                    controller.TapWorld(new TileCoordinate(-1,-1));
+                    Assert.That(controller.ContentPreview.IsValid,Is.False);
+                    Click(ui.Q<Button>("cancelContent")); yield return null;
+                    Assert.That(controller.Draft.CommandCount,Is.Zero);
                     Assert.That(controller.Discard(),Is.True); yield return null;
                     controller.EnterEdit(); Assert.That(controller.SelectConstructionRoom("spatial.room.rectangle"),Is.True);
                     controller.SelectConstructionOrientation(CardinalOrientation.Ninety);
