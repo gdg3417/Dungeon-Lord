@@ -44,6 +44,38 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             ConnectionWorkBound = r.ReadInt64();
         }
         internal static RunnableFloorSnapshot ReadCheckpoint(BinaryReader r) => new RunnableFloorSnapshot(r);
+        internal void ValidateCombatCapture(long maximumWork)
+        {
+            var floor = InspectSpatialInputs(); var route = MaterializePlan();
+            var paths = JsonUtility.FromJson<RunConnectionSnapshot>(connections);
+            if (floor.FloorInstanceId != FloorInstanceId || floor.FloorIndex != FloorIndex ||
+                floor.ActivationState != FloorActivationState.Active || route.RequiredRooms == null || route.Forks == null ||
+                paths?.Required == null || paths.BranchApproach == null || paths.Required.Length != route.RequiredRooms.Length + 1 ||
+                paths.BranchApproach.Length != route.Forks.Length || ConnectionWorkBound < 0)
+                throw new InvalidDataException("run.checkpoint.invalid_inputs");
+            long work = 0;
+            foreach (var path in paths.Required.Concat(paths.BranchApproach)) {
+                if (path == null || string.IsNullOrEmpty(path.Id) || path.Path == null || path.Path.Length == 0 || path.Path.Length > maximumWork)
+                    throw new InvalidDataException("run.checkpoint.invalid_inputs");
+                for (int i = 1; i < path.Path.Length; i++)
+                    if (Math.Abs((long)path.Path[i].X - path.Path[i - 1].X) + Math.Abs((long)path.Path[i].Y - path.Path[i - 1].Y) != 1)
+                        throw new InvalidDataException("run.checkpoint.invalid_inputs");
+                work = checked(work + path.Path.Length);
+            }
+            long expected = checked(paths.Required.Sum(p => (long)p.Path.Length) + 2 * paths.BranchApproach.Sum(p => (long)p.Path.Length));
+            if (work > maximumWork || ConnectionWorkBound != expected ||
+                paths.Required.Select(p => p.Id).Distinct(StringComparer.Ordinal).Count() != paths.Required.Length ||
+                !paths.BranchApproach.Select(p => p.Id).OrderBy(id => id, StringComparer.Ordinal).SequenceEqual(
+                    route.Forks.Select(f => f.OptionalBranchId).OrderBy(id => id, StringComparer.Ordinal)))
+                throw new InvalidDataException("run.checkpoint.invalid_inputs");
+            foreach (var required in route.RequiredRooms) {
+                var room = required.Room;
+                if (room == null || room.FloorIndex != FloorIndex || room.Spatial?.FloorInstanceId != FloorInstanceId ||
+                    room.Spatial.RoomInstanceId != room.RoomInstanceId ||
+                    !floor.Layout.Rooms.Any(r => r.RoomInstanceId == room.RoomInstanceId && r.RoomDefinitionId == room.Spatial.RoomDefinitionId))
+                    throw new InvalidDataException("run.checkpoint.invalid_inputs");
+            }
+        }
         internal IEnumerable<RunStep> TraverseConnection(int index)
         {
             var connection = JsonUtility.FromJson<RunConnectionSnapshot>(connections).Required[index];

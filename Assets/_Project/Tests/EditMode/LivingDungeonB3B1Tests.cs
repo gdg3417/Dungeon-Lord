@@ -165,7 +165,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         public static void VerifyForPlayMode() => new LivingDungeonB3B1Tests().RepeatedLookaheadInsufficientDeadlineExportReopenAndEventualCommitChargeExactlyOnce(true);
 
-        [TestCase("wipe")] [TestCase("retreat")] [TestCase("multiple")]
+        [TestCase("wipe")] [TestCase("retreat")] [TestCase("multiple")] [TestCase("repeated")]
         public void CombatCasualtyRetreatAndStableMultipleMonsterReceiptsMatchManual(string mode)
         {
             var f = Dungeon(true);
@@ -175,11 +175,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 foreach (var p in f.Configuration.CombatC0.Monsters) p.Damage = 100;
             }
             if (mode == "retreat") { f.Configuration.BaseSuccessChance = 0; f.Configuration.SuccessThreshold = 1; }
+            if (mode == "repeated") {
+                foreach (var p in f.Configuration.CombatC0.Classes) { p.AttackType = CombatC0Config.Melee; p.Range = 1; p.Damage = 10; }
+                foreach (var p in f.Configuration.CombatC0.Monsters) { p.AttackType = CombatC0Config.Ranged; p.Range = 1; }
+            }
             var s = PhaseSixA4Tests.Snapshot(f); var expected = Service.StartManualSnapshot(1, s).DrainToCompletion(); var e = Start(s);
             while (!e.IsTerminal) { e.Advance(1, e.NextOrdinal); e = Restore(e); }
             var outcome = e.TakeOutcome(); EqualOutcome(outcome, expected);
             Assert.That(CombatC0Diagnostics.Monsters(outcome).Select(m => m.AssignmentId).Distinct().Count(), Is.EqualTo(3));
             if (mode == "wipe") Assert.That(outcome.Party.IsWiped, Is.True);
+            if (mode == "repeated") Assert.That(CombatC0Diagnostics.Events(outcome).Count(x => x.Kind == CombatC0EventKind.EncounterStart), Is.GreaterThanOrEqualTo(2));
         }
         [Test] public void AfterDeadlineAndTimeOverflowRemainPreEffectAndDeterministic()
         {
@@ -215,7 +220,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var s = PhaseSixA4Tests.Snapshot(Dungeon());
             var rows = new List<DungeonBuilder.M0.BuildTools.CombatCheckpointDevelopmentSmoke.Row>();
             foreach (bool persistent in new[] { false, true }) {
-                var final = Start(s, persistent); final.AdvanceThrough(long.MaxValue, 2048, 0); final.TakeOutcome();
+                var final = Start(s, persistent); Drain(final, 7); final.TakeOutcome();
                 string finalBytes = Convert.ToBase64String(final.ExportCheckpoint(Limits).GetBytes());
                 foreach (int prefix in new[] { 0, 2 }) {
                     var e = Start(s, persistent); if (prefix > 0) e.Advance(prefix, 0);

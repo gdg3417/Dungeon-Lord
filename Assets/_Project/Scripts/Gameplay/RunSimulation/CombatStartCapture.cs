@@ -105,6 +105,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         {
             var c = snapshot?.CombatRules;
             if (c == null || !c.IsProduction || snapshot.CombatBounds == null) throw new ArgumentException(CombatC0Kernel.InvalidState);
+            for (int i = 0; i < snapshot.Floors.Count; i++) {
+                if (snapshot.Floors[i].FloorIndex != i) throw new ArgumentException(CombatC0Kernel.InvalidState);
+                snapshot.Floors[i].ValidateCombatCapture(c.MaximumWork);
+            }
             var rooms = snapshot.Floors.SelectMany(f => f.MaterializePlan().RequiredRooms.Select(r => r.Room)).ToArray();
             if (rooms.Length != snapshot.CombatBounds.Length || rooms.Length > c.MaximumWork) throw new ArgumentException(CombatC0Kernel.InvalidState);
             var bounds = snapshot.CombatBounds.ToDictionary(b => (b.FloorId, b.RoomId));
