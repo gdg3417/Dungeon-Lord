@@ -73,8 +73,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 var snapshot = ActiveFloorRunSnapshot.ReadCheckpoint(r);
                 string rules = RunCheckpointCodec.Text(r), targeting = RunCheckpointCodec.Text(r);
                 int rounds = r.ReadInt32(), participants = r.ReadInt32(), encounters = r.ReadInt32(), events = r.ReadInt32(); long work = r.ReadInt64();
-                if (rules != CombatC0Config.Executable || work <= 0 || work > limits.MaximumCombatWork ||
-                    participants > work || encounters > work || events > work || rounds > work)
+                if (rules != CombatC0Config.Executable || work <= 0 || work > limits.MaximumCombatWork)
                     throw new InvalidDataException("run.checkpoint.combat_limit");
                 var combat = new CombatC0QualificationConfig(rules, targeting, CombatC0Config.InitiativePolicy,
                     rounds, participants, encounters, events, work, Profiles(r), Profiles(r));
