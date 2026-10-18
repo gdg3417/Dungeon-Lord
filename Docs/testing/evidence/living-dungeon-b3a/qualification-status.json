@@ -1,0 +1,62 @@
+{
+  "complete": false,
+  "requiredSuites": {
+    "focused": {
+      "file": "06-focused.xml",
+      "passed": 41,
+      "failed": 0,
+      "success": true
+    },
+    "full-edit": {
+      "file": "07-full-edit.xml",
+      "passed": 2175,
+      "failed": 2,
+      "success": false
+    },
+    "integration-play": {
+      "file": "08-integration-play.xml",
+      "passed": 7,
+      "failed": 0,
+      "success": true
+    }
+  },
+  "preservation": {
+    "preservation-after.json": {
+      "total": 6839,
+      "unchanged": 6839,
+      "failures": []
+    },
+    "historical-evidence-after.json": {
+      "total": 1991,
+      "unchanged": 1986,
+      "failures": [
+        {
+          "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-1920-Default.png",
+          "sha256": "0957c9196f7202c68bb3d69b69315256d6089892d1e5cbd2c702d0b77b91f1d3",
+          "equal": false
+        },
+        {
+          "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-1920-Large.png",
+          "sha256": "ffe861491f8d09c2599416334b4b7d3871997cf592b75cae432aee299e1ca69f",
+          "equal": false
+        },
+        {
+          "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-720-Default.png",
+          "sha256": "5f812a2668e34ebb3a72e6aeb208edb17ee6c1ef6c15fde87682a108ef774881",
+          "equal": false
+        },
+        {
+          "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-720-Large.png",
+          "sha256": "fcf284148832be7a8d858a65b83ab12d7babb2cb202ebf8f72aff85a15694a03",
+          "equal": false
+        },
+        {
+          "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7a4-screenshots\\combat-c2-reserve-ui-placement-1920.png",
+          "sha256": "c6f15c1d0b3c65140ad4b6d0419572a302e31928682201e2bb248f6b09b5434e",
+          "equal": false
+        }
+      ]
+    }
+  },
+  "note": "Failing tests and preservation mismatches are retained as unresolved; this report does not waive them."
+}

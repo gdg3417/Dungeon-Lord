@@ -71,6 +71,7 @@ def checkpoint(label):
         captures.rename(retained)
     print('Archived/restored generated inputs:',changed)
 def applicability(label):
+    qualified=not (OUT/'substitutions-restored.json').exists()
     tree=subprocess.check_output(['git','ls-tree','-r','-z','HEAD','--',*inputs.INPUT_ROOTS],cwd=ROOT)
     entries=[]
     for row in filter(None,tree.split(b'\0')):
@@ -86,10 +87,10 @@ def applicability(label):
             data=expected.get(name)
             if data is None: failures.append(name+': uncommitted input'); continue
             if name in MUTABLE[2:]: data=original.read(name)
-            if name in (inputs.CONFIG,inputs.SERVICE): inputs.NAMESPACE=NAMESPACE; data=inputs.transformed(name,data)
-            if name in OUTPUT_TESTS and (OUT/'historical-evidence-before.json').exists():
+            if qualified and name in (inputs.CONFIG,inputs.SERVICE): inputs.NAMESPACE=NAMESPACE; data=inputs.transformed(name,data)
+            if qualified and name in OUTPUT_TESTS and (OUT/'historical-evidence-before.json').exists():
                 data=data.decode('utf-8-sig').replace('TestResults/','TestResults/living-dungeon-b3a-20261017/outputs/').encode()
-            if name in FIXTURE_TESTS and (OUT/'fixture-substitutions.json').exists():
+            if qualified and name in FIXTURE_TESTS and (OUT/'fixture-substitutions.json').exists():
                 text=data.decode('utf-8-sig')
                 for old,new in [('bootstrap_overlay_','bootstrap_overlay_b3a_20261017_'),('run_sim_test_','run_sim_test_b3a_20261017_'),
                                 ('mvp_canonical_journey_test.json','mvp_canonical_journey_b3a_20261017.json')]: text=text.replace(old,new)
@@ -99,7 +100,7 @@ def applicability(label):
             if left!=right: failures.append(name+': mismatch')
     failures.extend(name+': missing' for name in expected if name not in actual)
     write('applicability-'+label+'.json',dict(commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
-          files=rows,failures=failures,preservedLocalAssets=MUTABLE[2:]))
+          files=rows,failures=failures,preservedLocalAssets=MUTABLE[2:],qualificationSubstitutionsActive=qualified))
     if failures: raise ValueError(str(failures))
     print(len(rows),'Unity inputs match committed source plus documented save/evidence substitutions and five preserved local assets')
 def isolate_evidence():
@@ -211,6 +212,7 @@ def finish():
             for name in OUTPUT_TESTS: (ROOT/name).write_bytes(source.read(name))
         if (OUT/'fixture-substitutions.json').exists():
             for name in FIXTURE_TESTS: (ROOT/name).write_bytes(source.read(name))
+    write('substitutions-restored.json',dict(restored=True,files=[inputs.CONFIG,inputs.SERVICE]+OUTPUT_TESTS+FIXTURE_TESTS))
     # Only preexisting, explicitly disposable test fixtures can be restored.
     with zipfile.ZipFile(OUT/'test-fixtures-before.zip') as source:
         for row in baseline['protected']:

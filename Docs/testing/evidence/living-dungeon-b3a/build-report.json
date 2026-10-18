@@ -1,0 +1,13 @@
+{
+  "utcTimestamp": "2026-10-18T00:00:30.6511121Z",
+  "unityVersion": "6000.3.2f1",
+  "targetPlatform": "StandaloneWindows64",
+  "applicationVersion": "1.0",
+  "developmentBuild": true,
+  "includedScenes": ["Assets/_Project/Scenes/Bootstrap.unity"],
+  "outputPath": "Builds/Development/Windows-living-dungeon-b3a-20261017/Dungeon Lord.exe",
+  "buildResult": "Succeeded",
+  "totalBuildSize": 181721101,
+  "errorCount": 0,
+  "warningCount": 1
+}

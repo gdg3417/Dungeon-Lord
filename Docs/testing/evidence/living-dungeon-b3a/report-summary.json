@@ -1,0 +1,556 @@
+[
+  {
+    "file": "01-focused.xml",
+    "sha256": "79fe94f36edec62e4ab21472f04121c6f56282c152f0a4c67f4d26742ca2954c",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "29",
+      "result": "Failed(Child)",
+      "total": "29",
+      "passed": "28",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-17 22:43:50Z",
+      "end-time": "2026-10-17 22:44:58Z",
+      "duration": "68.0198587"
+    },
+    "groups": {
+      "B3A": {
+        "Passed": 28,
+        "Failed": 1,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Heat": {
+        "Passed": 1,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      }
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.UncertainRollbackBlocksTheQualificationScope",
+        "message": "  Expected string length 32 but was 29. Strings differ at index 5.\n  Expected: \"gd66.transaction.recovery_failed\"\n  But was:  \"gd66.write.atomic_save_failed\"\n  ----------------^\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB3ATests.UncertainRollbackBlocksTheQualificationScope () [0x00052] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB3ATests.cs:247\n"
+      }
+    ],
+    "skipped": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.SettlementWorkAndReleasedStorageAreMeasuredWithinProfileBounds",
+        "output": "B3A retainedBefore=2 retainedAfter=1 replayEventsBefore=50 bytesBefore=114098 bytesAfter=70961 selectionMs=25.402900000000002 atomicSettlementMs=182.6621; includesFullValidationAndReplay=true\n"
+      }
+    ]
+  },
+  {
+    "file": "02-focused.xml",
+    "sha256": "44e2a793c73f970a08b1d0a8b3608cbd05f44101c009a855048ef134bfa48910",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "35",
+      "result": "Failed(Child)",
+      "total": "35",
+      "passed": "32",
+      "failed": "3",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-17 22:47:06Z",
+      "end-time": "2026-10-17 22:48:18Z",
+      "duration": "72.0068259"
+    },
+    "groups": {
+      "B3A": {
+        "Passed": 32,
+        "Failed": 3,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Heat": {
+        "Passed": 1,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      }
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.PartialCandidateAndDurableReadbackFailuresDoNotRetireOrPublish(\"readback\")",
+        "message": "  living.settlement.recovery_required\n  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1554\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB3ATests.PartialCandidateAndDurableReadbackFailuresDoNotRetireOrPublish (System.String mode) [0x000dc] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB3ATests.cs:323\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.PartyWipeRetainsHistoricalExtractionButPublishesNoSurvivorLearning",
+        "message": "  living.scheduler.invalid_state\n  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1554\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB3ATests+Harness.Admit (System.Int64 ordinal, System.Int64 time) [0x00071] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB3ATests.cs:56\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB3ATests.PartyWipeRetainsHistoricalExtractionButPublishesNoSurvivorLearning () [0x00009] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB3ATests.cs:304\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.UnknownHistoryAndRetainedOutcomeExtensionsSurviveAlongsideCompatibleNulls",
+        "message": "  Expected: String containing \"\"RuntimeExtra\":1.00\"\n  But was:  \"{\"schema\":\"save_root\",\"schemaVersion\":15,\"primary\":{\"saveVersion\":1,\"contentVersion\":\"0.0.0\",\"createdUtcUnix\":0,\"lastSavedUtcUnix\":1,\"lastPausedUtcUnix\":0,\"lastResumedUtcUnix\":0,\"totalTicks\":0,\"lastKnownAppState\":\"None\",\"dungeonLayout\":{\"FloorCount\":0,\"SlotsPerFloor\":0,\"Slots\":[]},\"mvpSelectedRoomSlotIndex\":0,\"structureRuntime\":{\"ManaReserve\":960.0,\"Heat\":0.0,\"IsHeatCrisisActive\":false,\"LastProcessedTick\":0,\"HeatCrisisEnterStreak\":0,\"HeatCrisisRecoveryStreak\":0,\"RiskLabPaused\":false,\"PlacementLocked\":false},\"runHistory\":{\"HistoryExtra\":null,\"HistoryLexical\":1.00,\"NextRunSequence\":3,\"LatestOutcome\":{\"RunId\":\"run-2\",\"TickStarted\":0,\"Success\":true,\"Score\":2020,\"ReasonKey\":\"run.reason.success\",\"HeatAtStart\":0.0,\"ManaAtStart\":960.0,\"CrisisActiveAtStart\":false,\"HasBreakdown\":true,\"BaseChance\":1.0,\"HeatPenaltyApplied\":0.0,\"ManaBonusApplied\":0.0,\"CrisisPenaltyApplied\":0.0,\"FinalChance\":1.0,\"SuccessThresholdUsed\":0.0,\"FeedbackTagKeys\":[\"run.feedback.success\",\"run.feedback.strong_mana_reserve\"],\"LootSummary\":{\"LootTableId\":\"loot.table.run.basic\",\"ResolverSeed\":508369,\"ResolverSuccess\":true,\"ResolverErrorCode\":0,\"RollCount\":2,\"GeneratedItemIds\":[\"loot.item.salvage.trap\",\"loot.item.salvage.trap\"],\"TotalGeneratedWorldValue\":9,\"TotalGeneratedReserveCost\":2,\"TotalGeneratedTradeableWorldValue\":9},\"SurvivalSummary\":{\"PartySize\":5,\"SurvivorCount\":5,\"DeathCount\":0,\"SurvivorRatio\":1.0,\"CasualtyPressure\":0.16,\"CasualtyLootExtractionPenalty\":0.0,\"CasualtyHeatDelta\":0.0,\"DeterministicSeed\":640554794,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"RuleSourceId\":\"run.party.phase5b.v1\",\"SuccessAtResolution\":true},\"LootExtractionSummary\":{\"RuleSourceId\":\"run.loot_extraction.rule.v1\",\"DeterministicSeed\":508369,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"SurvivorRatioUsed\":1.0,\"GeneratedItemCount\":2,\"ExtractedItemIds\":[\"loot.item.salvage.trap\",\"loot.item.salvage.trap\"],\"LostItemIds\":[],\"TotalExtractedWorldValue\":9,\"TotalExtractedReserveCost\":2,\"TotalExtractedTradeableWorldValue\":9},\"LootBreakdown\":[{\"LootId\":\"loot.item.salvage.trap\",\"NameKey\":\"loot.item.salvage.trap.name\",\"Quantity\":2,\"TotalWorldValue\":8,\"TotalTradeableWorldValue\":8}],\"LootHeatCoolingSummary\":{\"RuleSourceId\":\"run.loot_heat_cooling.rule.v1\",\"DeterministicSeed\":508369,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"ExtractedTradeableWorldValueUsed\":9.0,\"CoolingPerTradeableWorldValueUsed\":0.1,\"UnclampedHeatDelta\":-0.9,\"AppliedHeatDelta\":0.0,\"HeatBeforeCooling\":0.0,\"HeatAfterCooling\":0.0},\"AdventurerAttractionSummary\":{\"RuleSourceId\":\"run.adventurer_attraction.rule.v1\",\"DeterministicSeed\":508369,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"ExtractedWorldValueUsed\":9.0,\"AttractionPerExtractedWorldValueUsed\":1.0,\"AttractionSignalValue\":10.0},\"AdventurerInterestForecastSummary\":{\"RuleSourceId\":\"run.adventurer_interest_forecast.rule.v1\",\"DeterministicSeed\":508369,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"AttractionSignalUsed\":10.0,\"ForecastInterestScore\":10.0,\"ForecastBandId\":\"adventurer_interest.medium\"},\"AdventurerDemandBudgetSummary\":{\"RuleSourceId\":\"run.adventurer_demand_budget.rule.v1\",\"DeterministicSeed\":508369,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"ForecastBandIdUsed\":\"adventurer_interest.medium\",\"ForecastInterestScoreUsed\":10.0,\"DemandBudgetScore\":10.0,\"DemandBudgetBandId\":\"adventurer_demand.medium\"},\"RunHeatDeltaSummary\":{\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"DeathHeatDelta\":0.0,\"EliteDeathHeatDelta\":0.0,\"MultipleDeathBonusDelta\":0.0,\"SurvivorCoolingDelta\":-2.5,\"LootCoolingDelta\":-0.9,\"FinalHeatDelta\":-2.9,\"RuleSourceIdUsed\":\"run.heat_delta.rule.v1\",\"DeterministicSeed\":508369},\"RunHeatApplicationSummary\":{\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"HeatBefore\":0.0,\"AppliedDelta\":0.0,\"HeatAfter\":0.0,\"TierBefore\":\"heat_tier.peace\",\"TierAfter\":\"heat_tier.peace\",\"TierChanged\":false,\"RuleSourceIdUsed\":\"run.heat_application.rule.v1\"},\"CompositionOutcomeSummary\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.composition_outcome.rule.gd11.v1\",\"PlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"\",\"PathCapacity\":0,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":0,\"Attraction\":0,\"ContributingOptionIds\":[],\"EffectLocalizationKeys\":[]},\"SuccessChanceDelta\":0.0,\"EffectiveManaReserve\":960.0,\"ManaReservePressureCost\":0.0,\"SurvivorRatioDelta\":0.0,\"GeneratedLootMultiplier\":1.0,\"ExtractedLootMultiplier\":1.0,\"HeatDeltaOffset\":0.0,\"AttractionSignalBonus\":0.0},\"RunPostureId\":\"run.posture.balanced\",\"RoomResolutions\":[{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\",\"Reached\":true,\"Cleared\":true,\"PartyEntering\":5,\"SurvivorsLeaving\":5,\"Deaths\":0,\"StoppedRoute\":false,\"StopReasonKey\":\"\",\"LocalPlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":2,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":0,\"Attraction\":0,\"ContributingOptionIds\":[\"placement.option.room.basic\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.room.basic\"]},\"GeneratedLootValue\":0,\"CarriedLootValueAfterRoom\":0,\"LootLostInRoom\":0,\"LocalHeatPressureDelta\":0.0,\"CasualtyPressureHeatDelta\":0.0,\"CasualtyPressure\":0.0,\"CasualtyLootExtractionPenalty\":0.0,\"ManaPressureCost\":0.0,\"DeterministicSeed\":508369,\"RuleSourceId\":\"\"}],\"HighestRoomReached\":0,\"ClearedRoomCount\":1,\"ReachedRoomCount\":1,\"ConfiguredRoomCount\":1,\"FinalRouteOutcomeKey\":\"run.route.outcome.cleared\",\"ConfiguredRoutePlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":2,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":0,\"Attraction\":0,\"ContributingOptionIds\":[\"placement.option.room.basic\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.room.basic\"]},\"ReachedRoutePlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":2,\"Danger\":2,\"ManaPressure\":0,\"HeatPressure\":1,\"LootBonus\":3,\"Attraction\":1,\"ContributingOptionIds\":[\"placement.option.room.basic\",\"placement.option.trap.spike\",\"placement.option.loot_node.hidden_cache\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.room.basic\",\"ui.mvp_placement_effects.explanation.trap.spike\",\"ui.mvp_placement_effects.explanation.loot_node.hidden_cache\"]},\"ClearedRewardPlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":0,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":3,\"Attraction\":1,\"ContributingOptionIds\":[\"placement.option.loot_node.hidden_cache\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.loot_node.hidden_cache\"]}},\"RecentOutcomes\":[{\"OutcomeExtra\":null,\"RunId\":\"run-1\",\"TickStarted\":0,\"Success\":true,\"Score\":2020,\"ReasonKey\":\"run.reason.success\",\"HeatAtStart\":0.0,\"ManaAtStart\":960.0,\"CrisisActiveAtStart\":false,\"HasBreakdown\":true,\"BaseChance\":1.0,\"HeatPenaltyApplied\":0.0,\"ManaBonusApplied\":0.0,\"CrisisPenaltyApplied\":0.0,\"FinalChance\":1.0,\"SuccessThresholdUsed\":0.0,\"FeedbackTagKeys\":[\"run.feedback.success\",\"run.feedback.strong_mana_reserve\"],\"LootSummary\":{\"LootTableId\":\"loot.table.run.basic\",\"ResolverSeed\":507408,\"ResolverSuccess\":true,\"ResolverErrorCode\":0,\"RollCount\":2,\"GeneratedItemIds\":[\"loot.item.salvage.trap\",\"loot.item.relic.bronze\"],\"TotalGeneratedWorldValue\":14,\"TotalGeneratedReserveCost\":3,\"TotalGeneratedTradeableWorldValue\":5},\"SurvivalSummary\":{\"PartySize\":5,\"SurvivorCount\":5,\"DeathCount\":0,\"SurvivorRatio\":1.0,\"CasualtyPressure\":0.16,\"CasualtyLootExtractionPenalty\":0.0,\"CasualtyHeatDelta\":0.0,\"DeterministicSeed\":1056921074,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"RuleSourceId\":\"run.party.phase5b.v1\",\"SuccessAtResolution\":true},\"LootExtractionSummary\":{\"RuleSourceId\":\"run.loot_extraction.rule.v1\",\"DeterministicSeed\":507408,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"SurvivorRatioUsed\":1.0,\"GeneratedItemCount\":2,\"ExtractedItemIds\":[\"loot.item.salvage.trap\",\"loot.item.relic.bronze\"],\"LostItemIds\":[],\"TotalExtractedWorldValue\":14,\"TotalExtractedReserveCost\":3,\"TotalExtractedTradeableWorldValue\":5},\"LootBreakdown\":[{\"LootId\":\"loot.item.salvage.trap\",\"NameKey\":\"loot.item.salvage.trap.name\",\"Quantity\":1,\"TotalWorldValue\":4,\"TotalTradeableWorldValue\":4},{\"LootId\":\"loot.item.relic.bronze\",\"NameKey\":\"loot.item.relic.bronze.name\",\"Quantity\":1,\"TotalWorldValue\":8,\"TotalTradeableWorldValue\":0}],\"LootHeatCoolingSummary\":{\"RuleSourceId\":\"run.loot_heat_cooling.rule.v1\",\"DeterministicSeed\":507408,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"ExtractedTradeableWorldValueUsed\":5.0,\"CoolingPerTradeableWorldValueUsed\":0.1,\"UnclampedHeatDelta\":-0.5,\"AppliedHeatDelta\":0.0,\"HeatBeforeCooling\":0.0,\"HeatAfterCooling\":0.0},\"AdventurerAttractionSummary\":{\"RuleSourceId\":\"run.adventurer_attraction.rule.v1\",\"DeterministicSeed\":507408,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"ExtractedWorldValueUsed\":14.0,\"AttractionPerExtractedWorldValueUsed\":1.0,\"AttractionSignalValue\":15.0},\"AdventurerInterestForecastSummary\":{\"RuleSourceId\":\"run.adventurer_interest_forecast.rule.v1\",\"DeterministicSeed\":507408,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"AttractionSignalUsed\":15.0,\"ForecastInterestScore\":15.0,\"ForecastBandId\":\"adventurer_interest.medium\"},\"AdventurerDemandBudgetSummary\":{\"RuleSourceId\":\"run.adventurer_demand_budget.rule.v1\",\"DeterministicSeed\":507408,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"ForecastBandIdUsed\":\"adventurer_interest.medium\",\"ForecastInterestScoreUsed\":15.0,\"DemandBudgetScore\":15.0,\"DemandBudgetBandId\":\"adventurer_demand.medium\"},\"RunHeatDeltaSummary\":{\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"DeathHeatDelta\":0.0,\"EliteDeathHeatDelta\":0.0,\"MultipleDeathBonusDelta\":0.0,\"SurvivorCoolingDelta\":-2.5,\"LootCoolingDelta\":-0.5,\"FinalHeatDelta\":-2.5,\"RuleSourceIdUsed\":\"run.heat_delta.rule.v1\",\"DeterministicSeed\":507408},\"RunHeatApplicationSummary\":{\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"HeatBefore\":0.0,\"AppliedDelta\":0.0,\"HeatAfter\":0.0,\"TierBefore\":\"heat_tier.peace\",\"TierAfter\":\"heat_tier.peace\",\"TierChanged\":false,\"RuleSourceIdUsed\":\"run.heat_application.rule.v1\"},\"CompositionOutcomeSummary\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.composition_outcome.rule.gd11.v1\",\"PlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"\",\"PathCapacity\":0,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":0,\"Attraction\":0,\"ContributingOptionIds\":[],\"EffectLocalizationKeys\":[]},\"SuccessChanceDelta\":0.0,\"EffectiveManaReserve\":960.0,\"ManaReservePressureCost\":0.0,\"SurvivorRatioDelta\":0.0,\"GeneratedLootMultiplier\":1.0,\"ExtractedLootMultiplier\":1.0,\"HeatDeltaOffset\":0.0,\"AttractionSignalBonus\":0.0},\"RunPostureId\":\"run.posture.balanced\",\"RoomResolutions\":[{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\",\"Reached\":true,\"Cleared\":true,\"PartyEntering\":5,\"SurvivorsLeaving\":5,\"Deaths\":0,\"StoppedRoute\":false,\"StopReasonKey\":\"\",\"LocalPlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":2,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":0,\"Attraction\":0,\"ContributingOptionIds\":[\"placement.option.room.basic\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.room.basic\"]},\"GeneratedLootValue\":0,\"CarriedLootValueAfterRoom\":0,\"LootLostInRoom\":0,\"LocalHeatPressureDelta\":0.0,\"CasualtyPressureHeatDelta\":0.0,\"CasualtyPressure\":0.0,\"CasualtyLootExtractionPenalty\":0.0,\"ManaPressureCost\":0.0,\"DeterministicSeed\":507408,\"RuleSourceId\":\"\"}],\"HighestRoomReached\":0,\"ClearedRoomCount\":1,\"ReachedRoomCount\":1,\"ConfiguredRoomCount\":1,\"FinalRouteOutcomeKey\":\"run.route.outcome.cleared\",\"ConfiguredRoutePlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":2,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":0,\"Attraction\":0,\"ContributingOptionIds\":[\"placement.option.room.basic\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.room.basic\"]},\"ReachedRoutePlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":2,\"Danger\":2,\"ManaPressure\":0,\"HeatPressure\":1,\"LootBonus\":3,\"Attraction\":1,\"ContributingOptionIds\":[\"placement.option.room.basic\",\"placement.option.trap.spike\",\"placement.option.loot_node.hidden_cache\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.room.basic\",\"ui.mvp_placement_effects.explanation.trap.spike\",\"ui.mvp_placement_effects.explanation.loot_node.hidden_cache\"]},\"ClearedRewardPlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":0,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":3,\"Attraction\":1,\"ContributingOptionIds\":[\"placement.option.loot_node.hidden_cache\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.loot_node.hidden_cache\"]}},{\"RunId\":\"run-2\",\"TickStarted\":0,\"Success\":true,\"Score\":2020,\"ReasonKey\":\"run.reason.success\",\"HeatAtStart\":0.0,\"ManaAtStart\":960.0,\"CrisisActiveAtStart\":false,\"HasBreakdown\":true,\"BaseChance\":1.0,\"HeatPenaltyApplied\":0.0,\"ManaBonusApplied\":0.0,\"CrisisPenaltyApplied\":0.0,\"FinalChance\":1.0,\"SuccessThresholdUsed\":0.0,\"FeedbackTagKeys\":[\"run.feedback.success\",\"run.feedback.strong_mana_reserve\"],\"LootSummary\":{\"LootTableId\":\"loot.table.run.basic\",\"ResolverSeed\":508369,\"ResolverSuccess\":true,\"ResolverErrorCode\":0,\"RollCount\":2,\"GeneratedItemIds\":[\"loot.item.salvage.trap\",\"loot.item.salvage.trap\"],\"TotalGeneratedWorldValue\":9,\"TotalGeneratedReserveCost\":2,\"TotalGeneratedTradeableWorldValue\":9},\"SurvivalSummary\":{\"PartySize\":5,\"SurvivorCount\":5,\"DeathCount\":0,\"SurvivorRatio\":1.0,\"CasualtyPressure\":0.16,\"CasualtyLootExtractionPenalty\":0.0,\"CasualtyHeatDelta\":0.0,\"DeterministicSeed\":640554794,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"RuleSourceId\":\"run.party.phase5b.v1\",\"SuccessAtResolution\":true},\"LootExtractionSummary\":{\"RuleSourceId\":\"run.loot_extraction.rule.v1\",\"DeterministicSeed\":508369,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"SurvivorRatioUsed\":1.0,\"GeneratedItemCount\":2,\"ExtractedItemIds\":[\"loot.item.salvage.trap\",\"loot.item.salvage.trap\"],\"LostItemIds\":[],\"TotalExtractedWorldValue\":9,\"TotalExtractedReserveCost\":2,\"TotalExtractedTradeableWorldValue\":9},\"LootBreakdown\":[{\"LootId\":\"loot.item.salvage.trap\",\"NameKey\":\"loot.item.salvage.trap.name\",\"Quantity\":2,\"TotalWorldValue\":8,\"TotalTradeableWorldValue\":8}],\"LootHeatCoolingSummary\":{\"RuleSourceId\":\"run.loot_heat_cooling.rule.v1\",\"DeterministicSeed\":508369,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"ExtractedTradeableWorldValueUsed\":9.0,\"CoolingPerTradeableWorldValueUsed\":0.1,\"UnclampedHeatDelta\":-0.9,\"AppliedHeatDelta\":0.0,\"HeatBeforeCooling\":0.0,\"HeatAfterCooling\":0.0},\"AdventurerAttractionSummary\":{\"RuleSourceId\":\"run.adventurer_attraction.rule.v1\",\"DeterministicSeed\":508369,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"ExtractedWorldValueUsed\":9.0,\"AttractionPerExtractedWorldValueUsed\":1.0,\"AttractionSignalValue\":10.0},\"AdventurerInterestForecastSummary\":{\"RuleSourceId\":\"run.adventurer_interest_forecast.rule.v1\",\"DeterministicSeed\":508369,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"AttractionSignalUsed\":10.0,\"ForecastInterestScore\":10.0,\"ForecastBandId\":\"adventurer_interest.medium\"},\"AdventurerDemandBudgetSummary\":{\"RuleSourceId\":\"run.adventurer_demand_budget.rule.v1\",\"DeterministicSeed\":508369,\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"ForecastBandIdUsed\":\"adventurer_interest.medium\",\"ForecastInterestScoreUsed\":10.0,\"DemandBudgetScore\":10.0,\"DemandBudgetBandId\":\"adventurer_demand.medium\"},\"RunHeatDeltaSummary\":{\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"DeathHeatDelta\":0.0,\"EliteDeathHeatDelta\":0.0,\"MultipleDeathBonusDelta\":0.0,\"SurvivorCoolingDelta\":-2.5,\"LootCoolingDelta\":-0.9,\"FinalHeatDelta\":-2.9,\"RuleSourceIdUsed\":\"run.heat_delta.rule.v1\",\"DeterministicSeed\":508369},\"RunHeatApplicationSummary\":{\"RuleResolved\":true,\"DeterministicErrorCode\":0,\"HeatBefore\":0.0,\"AppliedDelta\":0.0,\"HeatAfter\":0.0,\"TierBefore\":\"heat_tier.peace\",\"TierAfter\":\"heat_tier.peace\",\"TierChanged\":false,\"RuleSourceIdUsed\":\"run.heat_application.rule.v1\"},\"CompositionOutcomeSummary\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.composition_outcome.rule.gd11.v1\",\"PlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"\",\"PathCapacity\":0,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":0,\"Attraction\":0,\"ContributingOptionIds\":[],\"EffectLocalizationKeys\":[]},\"SuccessChanceDelta\":0.0,\"EffectiveManaReserve\":960.0,\"ManaReservePressureCost\":0.0,\"SurvivorRatioDelta\":0.0,\"GeneratedLootMultiplier\":1.0,\"ExtractedLootMultiplier\":1.0,\"HeatDeltaOffset\":0.0,\"AttractionSignalBonus\":0.0},\"RunPostureId\":\"run.posture.balanced\",\"RoomResolutions\":[{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\",\"Reached\":true,\"Cleared\":true,\"PartyEntering\":5,\"SurvivorsLeaving\":5,\"Deaths\":0,\"StoppedRoute\":false,\"StopReasonKey\":\"\",\"LocalPlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":2,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":0,\"Attraction\":0,\"ContributingOptionIds\":[\"placement.option.room.basic\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.room.basic\"]},\"GeneratedLootValue\":0,\"CarriedLootValueAfterRoom\":0,\"LootLostInRoom\":0,\"LocalHeatPressureDelta\":0.0,\"CasualtyPressureHeatDelta\":0.0,\"CasualtyPressure\":0.0,\"CasualtyLootExtractionPenalty\":0.0,\"ManaPressureCost\":0.0,\"DeterministicSeed\":508369,\"RuleSourceId\":\"\"}],\"HighestRoomReached\":0,\"ClearedRoomCount\":1,\"ReachedRoomCount\":1,\"ConfiguredRoomCount\":1,\"FinalRouteOutcomeKey\":\"run.route.outcome.cleared\",\"ConfiguredRoutePlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":2,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":0,\"Attraction\":0,\"ContributingOptionIds\":[\"placement.option.room.basic\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.room.basic\"]},\"ReachedRoutePlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":2,\"Danger\":2,\"ManaPressure\":0,\"HeatPressure\":1,\"LootBonus\":3,\"Attraction\":1,\"ContributingOptionIds\":[\"placement.option.room.basic\",\"placement.option.trap.spike\",\"placement.option.loot_node.hidden_cache\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.room.basic\",\"ui.mvp_placement_effects.explanation.trap.spike\",\"ui.mvp_placement_effects.explanation.loot_node.hidden_cache\"]},\"ClearedRewardPlacementEffects\":{\"RuleResolved\":true,\"RuleSourceId\":\"mvp.placement_effects.rule.gd10.v1\",\"PathCapacity\":0,\"Danger\":0,\"ManaPressure\":0,\"HeatPressure\":0,\"LootBonus\":3,\"Attraction\":1,\"ContributingOptionIds\":[\"placement.option.loot_node.hidden_cache\"],\"EffectLocalizationKeys\":[\"ui.mvp_placement_effects.explanation.loot_node.hidden_cache\"]}}]},\"researchPending\":{\"SlotId\":\"\",\"ProjectId\":\"\"},\"researchProgress\":{\"SlotId\":\"\",\"ProjectId\":\"\",\"ProgressUnits\":0.0,\"CompletionPending\":false,\"RuleSourceIdUsed\":\"\"},\"completedResearch\":{\"ProjectIds\":[\"ac_300\"],\"LastCompletedProjectId\":\"\",\"LastCompletionRuleSourceId\":\"\"},\"completedObjectives\":{\"ObjectiveIds\":[],\"LastCompletedObjectiveId\":\"\",\"LastCompletionRuleSourceId\":\"\"},\"lastOfflineSummary\":{\"RuleResolved\":false,\"DeterministicErrorCode\":0,\"OfflineSecondsObserved\":0,\"OfflineWindowClamped\":false,\"ResearchPending\":false,\"ResearchSlotId\":\"\",\"ResearchProjectId\":\"\",\"WouldProcessOfflineProgress\":false,\"RuleSourceIdUsed\":\"\"},\"integrityFlags\":[],\"canonicalSpatialAuthority\":{\"CanonicalLayoutContractVersion\":1,\"CreationKind\":2,\"MigrationTransactionId\":\"gd66-5aaec9d494f4803d470441f5bbb6c135f6fdf732dfd7b8b2046eca512dda395b\",\"MigrationDescriptorFingerprint\":\"f520434943866d424f141c6f31c90af4bc706a1ed2530a48d082e456b1e0c44a\"},\"spatialFloors\":[{\"FloorInstanceId\":\"compat.floor.00\",\"FloorDefinitionId\":\"spatial.floor.01\",\"FloorIndex\":0,\"ActivationState\":1,\"Layout\":{\"FloorId\":\"compat.floor.00\",\"Rooms\":[{\"RoomInstanceId\":\"compat.floor.00.legacy-room.00\",\"RoomDefinitionId\":\"spatial.room.basic\",\"FloorId\":\"compat.floor.00\",\"Anchor\":{\"X\":0,\"Y\":2},\"Orientation\":0}],\"Nodes\":[{\"NodeId\":\"compat.floor.00.node.entrance\",\"FloorId\":\"compat.floor.00\",\"Kind\":1,\"RoomInstanceId\":\"\"},{\"NodeId\":\"compat.floor.00.node.legacy-room.00\",\"FloorId\":\"compat.floor.00\",\"Kind\":2,\"RoomInstanceId\":\"compat.floor.00.legacy-room.00\"},{\"NodeId\":\"compat.floor.00.node.completion\",\"FloorId\":\"compat.floor.00\",\"Kind\":5,\"RoomInstanceId\":\"\"},{\"NodeId\":\"compat.floor.00.edge.native.00000000.dead-end\",\"FloorId\":\"compat.floor.00\",\"Kind\":6,\"RoomInstanceId\":\"\"}],\"Edges\":[{\"EdgeId\":\"compat.floor.00.edge.direct.entrance.legacy-room.00\",\"CorridorDefinitionId\":\"\",\"FloorId\":\"compat.floor.00\",\"SourceNodeId\":\"compat.floor.00.node.entrance\",\"DestinationNodeId\":\"compat.floor.00.node.legacy-room.00\",\"Footprint\":null,\"Classification\":1,\"OptionalBranchId\":\"\",\"ConnectionKind\":1},{\"EdgeId\":\"compat.floor.00.edge.direct.legacy-room.00.completion\",\"CorridorDefinitionId\":\"\",\"FloorId\":\"compat.floor.00\",\"SourceNodeId\":\"compat.floor.00.node.legacy-room.00\",\"DestinationNodeId\":\"compat.floor.00.node.completion\",\"Footprint\":null,\"Classification\":1,\"OptionalBranchId\":\"\",\"ConnectionKind\":1},{\"EdgeId\":\"compat.floor.00.edge.native.00000000\",\"CorridorDefinitionId\":\"spatial.corridor.straight_stone\",\"FloorId\":\"compat.floor.00\",\"SourceNodeId\":\"compat.floor.00.node.legacy-room.00\",\"DestinationNodeId\":\"compat.floor.00.edge.native.00000000.dead-end\",\"Footprint\":{\"OccupiedTiles\":[{\"X\":4,\"Y\":3},{\"X\":5,\"Y\":3}]},\"Classification\":2,\"OptionalBranchId\":\"compat.floor.00.edge.native.00000000.branch\",\"ConnectionKind\":2}]},\"FixedStructures\":[{\"FixedStructureInstanceId\":\"compat.floor.00.fixed.completion\",\"FixedStructureDefinitionId\":\"spatial.fixed.completion_terminal\",\"FloorInstanceId\":\"compat.floor.00\",\"Anchor\":{\"X\":1,\"Y\":6},\"Orientation\":0,\"Kind\":2},{\"FixedStructureInstanceId\":\"compat.floor.00.fixed.entrance\",\"FixedStructureDefinitionId\":\"spatial.fixed.entrance_hall\",\"FloorInstanceId\":\"compat.floor.00\",\"Anchor\":{\"X\":0,\"Y\":0},\"Orientation\":0,\"Kind\":1}],\"RoomContents\":{\"Assignments\":[],\"RoomSemantics\":[{\"RoomInstanceId\":\"compat.floor.00.legacy-room.00\",\"LegacyRoomOriginKind\":3}],\"NextSequence\":2}}],\"structuralLifecycleAndOwnership\":{\"Floors\":[{\"FloorInstanceId\":\"compat.floor.00\",\"NextNativeRoomOrdinal\":0,\"NextNativeEdgeOrdinal\":1}],\"ReturnedContents\":[]},\"structuralInvestment\":[{\"StructureId\":\"compat.floor.00.edge.direct.entrance.legacy-room.00\",\"ConstructionMana\":0,\"RenovationMana\":0},{\"StructureId\":\"compat.floor.00.edge.direct.legacy-room.00.completion\",\"ConstructionMana\":0,\"RenovationMana\":0},{\"StructureId\":\"compat.floor.00.edge.native.00000000\",\"ConstructionMana\":10,\"RenovationMana\":0},{\"StructureId\":\"compat.floor.00.legacy-room.00\",\"ConstructionMana\":0,\"RenovationMana\":0}],\"corridorContent\":{\"Assignments\":[{\"AssignmentId\":\"compat.floor.00.edge.native.00000000.content.trap.0000\",\"CategoryId\":\"placement.category.trap\",\"OptionId\":\"placement.option.trap.spike\",\"Sequence\":0,\"FloorInstanceId\":\"compat.floor.00\",\"OptionalBranchId\":\"compat.floor.00.edge.native.00000000.branch\",\"EdgeId\":\"compat.floor.00.edge.native.00000000\",\"Tile\":{\"X\":4,\"Y\":3}},{\"AssignmentId\":\"compat.floor.00.edge.native.00000000.content.loot.0001\",\"CategoryId\":\"placement.category.loot_node\",\"OptionId\":\"placement.option.loot_node.hidden_cache\",\"Sequence\":1,\"FloorInstanceId\":\"compat.floor.00\",\"OptionalBranchId\":\"compat.floor.00.edge.native.00000000.branch\",\"EdgeId\":\"compat.floor.00.edge.native.00000000\",\"Tile\":{\"X\":5,\"Y\":3}}]},\"sharedBranchKnowledge\":{\"Records\":[{\"FloorInstanceId\":\"compat.floor.00\",\"OptionalBranchId\":\"compat.floor.00.edge.native.00000000.branch\",\"EdgeId\":\"compat.floor.00.edge.native.00000000\",\"TopologyFingerprint\":\"7761693b9cd68fd402b4accf79635c4e3cd5fd440bf91de01b6ae4123a75dede\",\"TopologyKnown\":true,\"IncentiveKnown\":true,\"PerceivedIncentive\":0.5,\"DangerKnown\":true,\"PerceivedDanger\":0.66666666666666663,\"ConfidenceKnown\":true,\"Confidence\":0.875,\"HasLastConfirmedRun\":true,\"LastConfirmedRunId\":\"run-2\"}]},\"sharedFloorKnowledge\":{\"Records\":[{\"FloorInstanceId\":\"compat.floor.00\",\"ApplicabilityFingerprint\":\"b1e8c0bc93be75af9690d1b238b3ebddfce4f1946a94b059242587e44af4f24d\",\"RewardKnown\":true,\"PerceivedRewardScore\":3,\"DangerKnown\":true,\"PerceivedDangerScore\":2,\"ConfidenceKnown\":true,\"Confidence\":0.875,\"HasLastConfirmedRun\":true,\"LastConfirmedRunId\":\"run-2\"}]},\"livingDungeon\":{\"FormatVersion\":1,\"Revision\":33,\"Scheduler\":{\"ProfileId\":\"living.qualification.profile_a.v1\",\"MinimumOpportunitySpacingUnits\":1,\"AcceptedThrough\":10000,\"ClosedThrough\":10000,\"NextOpportunityOrdinal\":1,\"NextOpportunityTime\":null,\"LastOpportunityTime\":0},\"Parties\":[]},\"monsterContinuity\":{\"FormatVersion\":1,\"Records\":[]}}}\"\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB3ATests.UnknownHistoryAndRetainedOutcomeExtensionsSurviveAlongsideCompatibleNulls () [0x00100] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseB3ATests.cs:299\n"
+      }
+    ],
+    "skipped": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.SettlementWorkAndReleasedStorageAreMeasuredWithinProfileBounds",
+        "output": "B3A retainedBefore=2 retainedAfter=1 replayEventsBefore=50 bytesBefore=114098 bytesAfter=70961 selectionMs=30.690900000000003 atomicSettlementMs=165.21800000000002; includesFullValidationAndReplay=true\n"
+      }
+    ]
+  },
+  {
+    "file": "03-focused.xml",
+    "sha256": "fec3bd2c0a80efe27ffff5fe819ec072b065ab8be23687cf56de7c33a1dee7bd",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "38",
+      "result": "Passed",
+      "total": "38",
+      "passed": "38",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-17 23:00:55Z",
+      "end-time": "2026-10-17 23:02:15Z",
+      "duration": "79.9366238"
+    },
+    "groups": {
+      "B3A": {
+        "Passed": 38,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Heat": {
+        "Passed": 1,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      }
+    },
+    "failures": [],
+    "skipped": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.RealWindowsAtomicReplacementRollbackRetryAndReopenAreExactlyOnce",
+        "output": "B3A Windows NTFS actual replacement+rollback+retry+reopen bytes=18668; path=C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\windows\\03f91226ca7841bcae6f3702905a2f47\\qualified.json\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.SettlementWorkAndReleasedStorageAreMeasuredWithinProfileBounds",
+        "output": "B3A retainedBefore=2 retainedAfter=1 replayEventsBefore=50 bytesBefore=114098 bytesAfter=70961 selectionMs=43.3209 atomicSettlementMs=173.68550000000002; includesFullValidationAndReplay=true\n"
+      }
+    ]
+  },
+  {
+    "file": "04-focused.xml",
+    "sha256": "63568b696757f687a8bbe51125156544bc43da6337a562f2facfbcc8994649c6",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "39",
+      "result": "Passed",
+      "total": "39",
+      "passed": "39",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-17 23:05:13Z",
+      "end-time": "2026-10-17 23:06:35Z",
+      "duration": "81.7334141"
+    },
+    "groups": {
+      "B3A": {
+        "Passed": 39,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Heat": {
+        "Passed": 1,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      }
+    },
+    "failures": [],
+    "skipped": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.RealWindowsAtomicReplacementRollbackRetryAndReopenAreExactlyOnce",
+        "output": "B3A Windows NTFS actual replacement+rollback+retry+reopen bytes=18668; path=C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\windows\\7487181e89b6439cb2e476bcedd60e1c\\qualified.json\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.SettlementWorkAndReleasedStorageAreMeasuredWithinProfileBounds",
+        "output": "B3A retainedBefore=2 retainedAfter=1 replayEventsBefore=50 bytesBefore=114098 bytesAfter=70961 selectionMs=26.113300000000002 atomicSettlementMs=187.7135; includesFullValidationAndReplay=true\n"
+      }
+    ]
+  },
+  {
+    "file": "05-full-edit.xml",
+    "sha256": "53bc2014cdad65b68f489d527807d5f1c3d69be77cbbb4dac62cceab76c1ecee",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "2176",
+      "result": "Failed(Child)",
+      "total": "2176",
+      "passed": "2173",
+      "failed": "2",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-17 23:25:32Z",
+      "end-time": "2026-10-17 23:26:30Z",
+      "duration": "57.8109669"
+    },
+    "groups": {
+      "B3A": {
+        "Passed": 39,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "B1": {
+        "Passed": 37,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "B2": {
+        "Passed": 82,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "PhaseA": {
+        "Passed": 42,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "C2": {
+        "Passed": 42,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Heat": {
+        "Passed": 20,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Knowledge": {
+        "Passed": 33,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Manual": {
+        "Passed": 14,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Migration": {
+        "Passed": 83,
+        "Failed": 0,
+        "Skipped": 1,
+        "Inconclusive": 0
+      },
+      "ProductionGates": {
+        "Passed": 65,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      }
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated",
+        "message": "  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated>d__120.MoveNext () [0x0051b] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:879\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionLayoutsLocalizationAndResume",
+        "message": "  Expected: greater than 150.0f\n  But was:  122.0f\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionLayoutsLocalizationAndResume>d__25.MoveNext () [0x00820] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:341\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skipped": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.RealWindowsAtomicReplacementRollbackRetryAndReopenAreExactlyOnce",
+        "output": "B3A Windows NTFS actual replacement+rollback+retry+reopen bytes=18668; path=C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\windows\\13d0408739b84e29acdfce4b8eb71807\\qualified.json\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.SettlementWorkAndReleasedStorageAreMeasuredWithinProfileBounds",
+        "output": "B3A retainedBefore=2 retainedAfter=1 replayEventsBefore=50 bytesBefore=114098 bytesAfter=70961 selectionMs=26.273300000000003 atomicSettlementMs=184.42190000000002; includesFullValidationAndReplay=true\n"
+      }
+    ]
+  },
+  {
+    "file": "06-focused.xml",
+    "sha256": "c972458ffa4370cd6370f2e57654eb188fc194039a58ae7eae0d1d4e7c06ce7a",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "41",
+      "result": "Passed",
+      "total": "41",
+      "passed": "41",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-17 23:34:05Z",
+      "end-time": "2026-10-17 23:35:28Z",
+      "duration": "83.1067208"
+    },
+    "groups": {
+      "B3A": {
+        "Passed": 41,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Heat": {
+        "Passed": 1,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      }
+    },
+    "failures": [],
+    "skipped": [],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.RealWindowsAtomicReplacementRollbackRetryAndReopenAreExactlyOnce",
+        "output": "B3A Windows NTFS actual replacement+rollback+retry+reopen bytes=18668; path=C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\windows\\1a9f8f3954b84fcb874fd9e24ce9016f\\qualified.json\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.SettlementWorkAndReleasedStorageAreMeasuredWithinProfileBounds",
+        "output": "B3A retainedBefore=2 retainedAfter=1 replayEventsBefore=50 bytesBefore=114098 bytesAfter=70961 selectionMs=84.7737 atomicSettlementMs=165.3432; includesFullValidationAndReplay=true\n"
+      }
+    ]
+  },
+  {
+    "file": "07-full-edit.xml",
+    "sha256": "8a6dd044625f8d84ac7b25f2887bbf3d7c09d93a72e2c673d40cb9cc366066dd",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "2178",
+      "result": "Failed(Child)",
+      "total": "2178",
+      "passed": "2175",
+      "failed": "2",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-17 23:55:15Z",
+      "end-time": "2026-10-17 23:56:15Z",
+      "duration": "59.2999909"
+    },
+    "groups": {
+      "B3A": {
+        "Passed": 41,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "B1": {
+        "Passed": 37,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "B2": {
+        "Passed": 82,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "PhaseA": {
+        "Passed": 42,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "C2": {
+        "Passed": 42,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Heat": {
+        "Passed": 20,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Knowledge": {
+        "Passed": 33,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Manual": {
+        "Passed": 14,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Migration": {
+        "Passed": 83,
+        "Failed": 0,
+        "Skipped": 1,
+        "Inconclusive": 0
+      },
+      "ProductionGates": {
+        "Passed": 65,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      }
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated",
+        "message": "  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated>d__120.MoveNext () [0x0051b] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:879\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionLayoutsLocalizationAndResume",
+        "message": "  Expected: greater than 150.0f\n  But was:  122.0f\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionLayoutsLocalizationAndResume>d__25.MoveNext () [0x00820] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:341\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skipped": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "measurements": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.RealWindowsAtomicReplacementRollbackRetryAndReopenAreExactlyOnce",
+        "output": "B3A Windows NTFS actual replacement+rollback+retry+reopen bytes=18668; path=C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3a-20261017\\windows\\149fde384e8340d88580167cc5ef063e\\qualified.json\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB3A.SettlementWorkAndReleasedStorageAreMeasuredWithinProfileBounds",
+        "output": "B3A retainedBefore=2 retainedAfter=1 replayEventsBefore=50 bytesBefore=114098 bytesAfter=70961 selectionMs=26.1156 atomicSettlementMs=183.91; includesFullValidationAndReplay=true\n"
+      }
+    ]
+  },
+  {
+    "file": "08-integration-play.xml",
+    "sha256": "96954215b5483b9c3cc8534772f6b2955430544ff47a4c4dd4f0426c4718e300",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "7",
+      "result": "Passed",
+      "total": "7",
+      "passed": "7",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-17 23:57:13Z",
+      "end-time": "2026-10-17 23:57:19Z",
+      "duration": "5.9713953"
+    },
+    "groups": {
+      "B3A": {
+        "Passed": 1,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "B1": {
+        "Passed": 1,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "B2": {
+        "Passed": 2,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "PhaseA": {
+        "Passed": 2,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "C2": {
+        "Passed": 1,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      }
+    },
+    "failures": [],
+    "skipped": [],
+    "measurements": []
+  },
+  {
+    "file": "10-baseline-ui.xml",
+    "sha256": "1aa23dfdf612cdcb79bf0fccf6090985b23686502269d41d9fb8c24c7dddb67c",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "2",
+      "result": "Failed(Child)",
+      "total": "2",
+      "passed": "0",
+      "failed": "2",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-17 23:36:24Z",
+      "end-time": "2026-10-17 23:36:27Z",
+      "duration": "2.8792517"
+    },
+    "groups": {},
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated",
+        "message": "  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated>d__120.MoveNext () [0x0051b] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:879\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.TransactionalRoomConstructionLayoutsLocalizationAndResume",
+        "message": "  Expected: greater than 150.0f\n  But was:  122.0f\n",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<TransactionalRoomConstructionLayoutsLocalizationAndResume>d__25.MoveNext () [0x00820] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:341\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+      }
+    ],
+    "skipped": [],
+    "measurements": []
+  }
+]

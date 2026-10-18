@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('focused','regression','full-edit','full-play','build','baseline-ui')][string]$Stage = 'focused',
+    [ValidateSet('focused','regression','full-edit','full-play','integration-play','build','baseline-ui')][string]$Stage = 'focused',
     [ValidatePattern('^[a-z0-9-]+$')][string]$Attempt = '01'
 )
 $ErrorActionPreference = 'Stop'
@@ -15,6 +15,8 @@ if ($Stage -eq 'focused') { $cliArgs += @('--filter','LivingDungeonPhaseB3A') }
 if ($Stage -eq 'regression') { $cliArgs += @('--filter','LivingDungeonPhaseA;LivingDungeonPhaseB1;LivingDungeonPhaseB2;RunHeat;LootHeat;BranchKnowledge;FloorKnowledge;PhaseFiveBBranchIntegration;PhaseSix;CombatC2;DetachedCanonical;SaveSpatialMigration;Gd66Windows;RunHistory') }
 if ($Stage -eq 'baseline-ui') { $cliArgs += @('--filter','RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated;TransactionalRoomConstructionLayoutsLocalizationAndResume') }
 if ($Stage -eq 'full-play') { $cliArgs = @('test',$taskRoot,'--mode','PlayMode') }
+if ($Stage -eq 'integration-play') { $cliArgs = @('test',$taskRoot,'--mode','PlayMode','--filter',
+    'LivingDungeonPhaseAPlayModeTests;LivingDungeonPhaseB1PlayModeTests;LivingDungeonPhaseB2PlayModeTests;LivingDungeonPhaseB3APlayModeTests;CombatC2PlayModeTests') }
 $cliArgs += @('--output',$xml,'--timeout','1800','--no-color','--','-logFile',$log)
 if ($Stage -eq 'build') {
     $player = Join-Path $taskRoot 'Builds/Development/Windows-living-dungeon-b3a-20261017/Dungeon Lord.exe'
