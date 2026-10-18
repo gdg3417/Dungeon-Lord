@@ -42,6 +42,12 @@
 .landscape .metric-icon { height: 24px; }
 .landscape Button { padding-top: 0; padding-bottom: 0; }
 .map-area { flex-grow: 1; flex-shrink: 1; min-height: 64px; }
+.constructing .map-area { flex-shrink: 0; min-height: 26%; }
+.landscape.constructing .metric-icon { display: none; }
+.landscape.constructing .metric-card { padding-top: 0; padding-bottom: 0; }
+.landscape.constructing .reserve-information { margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
+.landscape.constructing .capacity-bar { padding-top: 0; padding-bottom: 0; }
+.landscape.constructing .placement-actions > Button { padding-left: 6px; padding-right: 6px; }
 .viewport { flex-grow: 1; min-width: 0; }
 .floor-rail { position: absolute; left: 4px; top: 4px; max-height: 100%; width: 128px; padding: 4px; }
 .floor-rail Button { background-image: none; background-color: rgba(8,17,23,0.56); border-width: 0; border-left-width: 1px; border-left-color: rgba(157,175,177,0.35); border-radius: 3px; margin: 1px 0; padding-left: 10px; padding-right: 6px; }

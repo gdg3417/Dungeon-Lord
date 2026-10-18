@@ -341,6 +341,11 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(ui.Q("viewport").worldBound.height, Is.GreaterThan(controller.SafeRoot.worldBound.height * 0.25f));
                     Click(ui.Q<Button>("collapseDetails")); for (int i = 0; i < 8; i++) yield return null;
                     Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+                    Assert.That(ui.Q("viewport").worldBound.height, Is.GreaterThan(controller.SafeRoot.worldBound.height * 0.25f), "Expanded construction details retain usable map");
+                    Assert.That(ui.Q<ScrollView>("contextDetails").contentViewport.worldBound.height, Is.GreaterThan(0), "Expanded information remains visible and scrollable");
+                    TestContext.WriteLine("Construction expanded " + size + " " + textSize + " viewport=" + ui.Q("viewport").worldBound + " details=" + ui.Q<ScrollView>("contextDetails").contentViewport.worldBound);
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("construction-expanded-" + size.x + "x" + size.y + "-" + textSize + ".png");
+                    yield return null; yield return null;
                     ui.Q<ScrollView>("contextDetails").scrollOffset = new Vector2(0, 10000); yield return null;
                     Assert.That(ui.Q<Button>("confirmPlacement").worldBound.yMax, Is.LessThanOrEqualTo(controller.SafeRoot.worldBound.yMax + 1));
                     AssertReachable(ui.Q<Button>("confirmPlacement")); AssertReachable(ui.Q<Button>("cancelPlacement"));
