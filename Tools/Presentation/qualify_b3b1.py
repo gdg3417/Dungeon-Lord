@@ -12,9 +12,27 @@ source = (Path(__file__).with_name('qualify_b3a.py')).read_text(encoding='utf-8'
 source = source.replace('living-dungeon-b3a-20261017', 'living-dungeon-b3b1-20261018')
 source = source.replace('living-dungeon-b3a-qualification-20261017', 'living-dungeon-b3b1-qualification-20261018')
 source = source.replace('b3a_20261017', 'b3b1_20261018')
+STARTER_TEST = 'Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs'
+STARTER_NAME = 'living-dungeon-b3b1-owner-uat-starter-"+System.Guid.NewGuid().ToString("N")+".json'
+fixture_tail = "('mvp_canonical_journey_test.json','mvp_canonical_journey_b3b1_20261018.json')"
+if source.count(fixture_tail) != 2: raise ValueError('Reviewed fixture substitution helpers changed')
+source = source.replace(fixture_tail, fixture_tail+', '+repr(('owner-uat-starter.json', STARTER_NAME)))
 q = types.ModuleType('b3b1_campaign')
 q.__file__ = str(Path(__file__).with_name('qualify_b3a.py'))
 exec(compile(source, q.__file__, 'exec'), q.__dict__)
+if (q.OUT/'starter-substitution.json').exists(): q.FIXTURE_TESTS.append(STARTER_TEST)
+
+def isolate_starter():
+    if (q.OUT/'starter-substitution.json').exists(): raise ValueError('Starter output isolation already installed')
+    with zipfile.ZipFile(q.OUT/'root-inputs-before.zip') as z: original=z.read(STARTER_TEST)
+    if (ROOT/STARTER_TEST).read_bytes()!=original: raise ValueError('Unexpected starter test source change')
+    text=original.decode('utf-8-sig')
+    if text.count('owner-uat-starter.json')!=1: raise ValueError('Starter output owner changed')
+    (ROOT/STARTER_TEST).write_bytes(text.replace('owner-uat-starter.json',STARTER_NAME).encode('utf-8'))
+    q.FIXTURE_TESTS.append(STARTER_TEST)
+    q.write('starter-substitution.json',dict(path=STARTER_TEST,sha256=q.sha(ROOT/STARTER_TEST),
+        reason='Unchanged PR #242 test uses a fixed no-overwrite starter artifact; qualification copies need unused names.'))
+    q.applicability('starter-isolated')
 
 def preflight(label):
     if (q.OUT/'substitutions-restored.json').exists(): raise ValueError('Isolation is inactive')
@@ -54,6 +72,7 @@ def run(stage, attempt):
         'focused': 'LivingDungeonB3B1',
         'regression': 'LivingDungeonPhaseA;LivingDungeonPhaseB1;LivingDungeonPhaseB2;LivingDungeonPhaseB3A;CombatC0;CombatC2;DetachedCanonical;SaveSpatialMigration;Gd66Windows;RunHistory;RunHeat;LootHeat',
         'integration-play': 'LivingDungeonB3B1PlayModeTests;LivingDungeonPhaseAPlayModeTests;LivingDungeonPhaseB1PlayModeTests;LivingDungeonPhaseB2PlayModeTests;LivingDungeonPhaseB3APlayModeTests;CombatC2PlayModeTests',
+        'starter': 'OwnerUsabilityConstructionAndContentReachability',
     }
     cli = 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe'
     args = ['test', str(ROOT), '--mode', 'PlayMode' if stage in ('integration-play', 'full-play') else 'EditMode']
@@ -77,11 +96,12 @@ if __name__ == '__main__':
     mode = sys.argv[1]
     if mode == 'prepare':
         if list(q.SAVE.glob(q.NAMESPACE+'*')): raise ValueError('Save namespace already exists; preserve it and select a fresh campaign')
-        q.prepare(); q.isolate_evidence(); q.isolate_fixtures()
+        q.prepare(); q.isolate_evidence(); q.isolate_fixtures(); isolate_starter()
         with zipfile.ZipFile(q.OUT/'historical-evidence-preserved.zip', 'x', zipfile.ZIP_DEFLATED) as z:
             for row in json.loads((q.OUT/'historical-evidence-before.json').read_text()):
                 p = Path(row['path']); z.write(p, p.relative_to(ROOT/'TestResults').as_posix())
     elif mode == 'checkpoint': q.checkpoint(sys.argv[2])
+    elif mode == 'isolate-starter': isolate_starter()
     elif mode == 'finish': q.finish()
     elif mode == 'preflight': preflight(sys.argv[2])
     elif mode == 'run': sys.exit(run(sys.argv[2], sys.argv[3]))
