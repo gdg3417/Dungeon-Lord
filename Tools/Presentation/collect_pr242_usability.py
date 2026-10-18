@@ -79,6 +79,7 @@ def collect(required):
                 archive.write(path, name+'/'+path.relative_to(OUT/name/'screens').as_posix())
     with zipfile.ZipFile(DEST/'reports.zip', 'x', zipfile.ZIP_DEFLATED) as archive:
         archive.write(OUT/'baseline.json','baseline.json')
+        archive.write(ROOT/'Docs/testing/evidence/pr242-graphics/manual-uat.md','manual-uat-before-owner-failure.md')
         archive.write(Path(__file__), 'collect_pr242_usability.py')
         for a in attempts:
             folder = OUT/a['attempt']
@@ -88,6 +89,7 @@ def collect(required):
         archive.writestr('log-hashes.json',json.dumps([{k:a[k] for k in ['attempt','logSha256']} for a in attempts],indent=2))
     result = dict(automationPassed=True, ownerUsabilityApproved=False, independentReviewComplete=False, draft=True,
                   startCommit=START, qualifiedUISourceCommit=selected[0]['sourceCommit'], qualifiedB3ACommit=QUALIFIED,
+                  priorManualUatSha256=q.sha(ROOT/'Docs/testing/evidence/pr242-graphics/manual-uat.md'),
                   attempts=attempts, finalAttempts=required,
                   build=dict(report=report, artwork=len(art), isolatedProduct=identities['product'], isolatedSave=identities['namespace'],
                              path=str(build), files=sum(p.is_file() for p in build.rglob('*')),
@@ -100,7 +102,8 @@ def collect(required):
     q.write(DEST/'qualification.json', result)
     changed = sorted(set(git('diff','--name-only',START,'HEAD').splitlines()+[
         'Docs/testing/evidence/pr242-usability/'+n for n in ['qualification.json','qualification.md','reports.zip','screenshots.zip','changed-files.md']]+[
-        'Docs/testing/evidence/pr242-graphics/manual-uat.md','Tools/Presentation/collect_pr242_usability.py']))
+        'Docs/testing/evidence/pr242-graphics/manual-uat.md','Tools/Presentation/collect_pr242_usability.py',
+        'Tools/Presentation/prepare_pr242_usability_owner.py']))
     with (DEST/'changed-files.md').open('x',encoding='utf-8') as stream:
         stream.write('# Exact owner-usability correction files\n\n'+'\n'.join('- `'+n+'`' for n in changed)+'\n')
     print(json.dumps(dict(automationPassed=True, finalTests=[a.get('tests') for a in selected], build=report, preservation=result['preservation'])))
