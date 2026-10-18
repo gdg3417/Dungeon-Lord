@@ -5,7 +5,7 @@
 
 No sub-dungeons, including the Mana Farm, are included in the five-floor MVP proof-of-fun scope or the initial public release. The existing maximum of five floors in the main dungeon and all other approved MVP and release requirements remain unchanged.
 
-The Mana Farm remains a possible post-launch expansion. Its progression milestone is undecided. Previously mentioned floor counts (including 10 or 20), schedules, research gates, and launch plans were examples only and are not approved. Mana Farm design details and Decisions 56–58 are reference material, not current delivery authorization; Decisions 56–58 are suspended and unapproved.
+The Mana Farm remains a possible post-launch expansion. Its progression milestone is undecided. Previously mentioned floor counts (including 10 or 20), schedules, research gates, and launch plans were examples only and are not approved. Preliminary Mana Farm design options discussed during Phase 8 planning remain unapproved and do not authorize implementation. This deferral does not alter the approved Phase 7 graphical-editor Decisions 56–58 (run camera, editing during active runs, and graphical fidelity) in the [Phase 7 design lock](../../../docs/planning/phase-7a0-graphical-dungeon-editor-design-lock.md).
 
 This decision adds no substitute mana source and changes no current mana earning, Heat, research, loot, combat, spatial, or other playable behavior. It does not authorize a sub-dungeon framework or implementation work during MVP or initial release.
 
