@@ -1,0 +1,37 @@
+# PR #242 graphical correction qualification
+
+Status: automated correction qualified; independent ChatGPT review and owner UI qualification remain pending. PR remains Draft and must not merge. Actual model GPT-6.1 Sol High, explicitly escalated from Medium for fresh preservation isolation and input/layout frame correctness. No fallback, delegation, new branch, project copy or Editor installation.
+
+Reviewed head: `0635337a1918032b925685534e8b8309f520170e`. Final tested UI source: `2ba9368eda0c6e91d4c57a9afef25026fa959fc2`. B3A runtime/test baseline: `b5502291e9da3d229bbcc3d152f8bd56954d84eb`. Subsequent evidence documentation does not change the qualified Unity inputs. See [exact changed files](changed-files.md), [machine-readable results](qualification.json), [archived reports](reports.zip) and [matrix captures](matrix-screenshots.zip).
+
+The old failure occurs after touch, not mouse. Actual measurements prove the successful mouse preview changes the viewport from `(0,360,1920,473)` to `(0,433,1920,400)` with unchanged camera center/orthographic size. The cached touch pixel resolves to `(-0.50,4.17)` instead of intended cell `(0,4)`. The test now waits for existing viewport stability and reprojects the intended cell, checks camera/viewport round-trip and interception, observes touch ID 1/current device in the player Dynamic update, and asserts the actual preview cell. All original mouse/touch, draft, confirmation and resume assertions remain. No production input dispatch changed.
+
+Attempts 01/02 exposed an overly strict new diagnostic: an EditMode coroutine reads the Editor input buffer, where touch ID was 0. The player-update observer records ID 1 at the intended screen point; the diagnostic was corrected to observe the same buffer as the controller. Both failed reports are retained. Attempt 02 additionally showed that a 14-pixel expanded details strip was not readable despite passing the old assertion; the correction was extended and the test strengthened to require a complete measured text line.
+
+Construction-only responsive chrome is compacted without reducing Large text: decorative landscape HUD icons/vertical spacing are removed; the map gets a proportional minimum; optional Development Tools moves into the existing Display popover during landscape construction, leaving required draft actions in place. The action returns outside construction. Normal/content/floor/replay presentation retains its established path. At 1280×720/Large with 600 safe-panel height, the collapsed viewport increases from 122 to 195; expanded viewport is 156 with 39 pixels of readable scrolling detail. The unchanged requirement is greater than 150. Twelve resolution/text combinations and both details states pass; Japanese/expanded localization, required action reachability and save/resume/discard remain asserted. A PlayMode wrapper runs the construction matrix through the actual scene.
+
+Final review added the actual Development Tools round trip to every landscape matrix case and closes Display on that transition, preventing a popover remaining over the development view. The first passing packet/source (b211993d) is retained locally under `provisional-b211-packet`, with all original report/capture bytes preserved. Focused, EditMode, PlayMode and build checks were repeated against the final correction using new attempts. The frozen initial plan is retained as history; its narrow initial candidate was extended only by the minimal UI host routing and PlayMode wrapper necessary to retain readable expanded information.
+
+| Attempt | Source SHA | Passed | Failed | Skipped | CLI exit |
+| --- | --- | ---: | ---: | ---: | ---: |
+| build-01 | b211993d | — | — | — | 6 |
+| build-02 | 6bdc8f82 | — | — | — | 0 |
+| build-03 | 2ba9368e | — | — | — | 0 |
+| focused-01 | d49de596 | 1 | 1 | 0 | 8 |
+| focused-02 | 542f6ef7 | 1 | 1 | 0 | 8 |
+| focused-03 | b211993d | 2 | 0 | 0 | 0 |
+| focused-04 | 2ba9368e | 2 | 0 | 0 | 0 |
+| ui-edit-01 | b211993d | 223 | 0 | 0 | 0 |
+| ui-edit-02 | 2ba9368e | 223 | 0 | 0 | 0 |
+| ui-play-01 | b211993d | 71 | 0 | 0 | 0 |
+| ui-play-02 | 2ba9368e | 71 | 0 | 0 | 0 |
+
+Every run used the existing Unity 6000.3.2f1/CLI workflow, sequentially. Exact commands/filters and NUnit timestamps are archived. The broad UI filters are recorded rather than described as a full EditMode/PlayMode suite. The passing focused source is the same as the broad UI/build source. No old failure report was edited or assertion weakened. Licensing-client diagnostic noise in failed attempts did not replace their actual NUnit verdicts.
+
+Fresh campaign `TestResults/pr242-graphics-20261018` uses separate per-attempt Unity product/save identities, config/static fixture namespaces, GUID-qualified shared screenshot names, direct capture paths, report/log/build destinations and exact source manifests. Read-only preflight validates baseline/script/commit, every prepared input/backup/transformation and protected file before each launch. A disposable guard check passed and an inactive preflight rejected without launching Unity. Every attempt restores exact authored inputs and the five original local Unity overrides, archives known generated overrides and indexes outputs for preservation checks before later attempts. No unexpected source change is accepted. Raw Editor logs/source backups remain local; public evidence contains report output and raw-log hashes, not licensing logs.
+
+All 10650 fresh protected files remain unchanged, including XML/logs and previous builds/results. All 6839 original protected save/player files match. Original historical evidence remains 1986/1991; the five original missing screenshot hashes and incident are preserved, with the owner's accepted permanent-loss exception explicitly recorded. This does not claim restoration or retroactively successful original preservation. Historical B3A reports/status/incident records remain unchanged. B3A Gameplay/Services/Core and its EditMode/PlayMode/bridge fixtures have an empty diff against the qualified commit; strict input hashes verify other unchanged authorities. No settlement, scheduling, schema, checkpoint, history, C2, mana, Heat or recovery logic changed.
+
+Build attempt 01 correctly rejected the temporary product name through the existing exact project-identity guard (CLI 6); no player was produced. Build attempts 02/03 retain all strict identity conditions and temporarily substitute only the expected product-name constant to the same reviewed isolation alias. Attempt 03 qualifies the final UI revision. This is an explicit qualification input, not a committed production guard change. Company/application ID/template checks remain intact. The original utility and settings are restored byte-for-byte. Only tooling/evidence changed between qualification-profile commits; all required final checks use identical committed Unity inputs, verified during collection.
+
+The Windows Development build succeeded with 0 errors. Its report/warnings, 52 packed artwork assets, package inventory and excluded qualification capabilities are recorded in qualification.json. The packaged product/save identity and corrected UI code are checked in the actual player. It is an isolated qualification player, not a release-identity build. It has not established owner-confirmed usability. Follow [the sequential Editor and standalone owner procedure](manual-uat.md); report unavailable touch hardware and any untested scenario. Independent review and owner evidence remain the blockers to Ready/merge.
