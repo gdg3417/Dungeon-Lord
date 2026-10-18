@@ -1162,7 +1162,7 @@ namespace DungeonBuilder.M0.Tests
                         foreach(var cell in new[] {new TileCoordinate(room.Anchor.X+1,room.Anchor.Y+1),new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+1)})
                         {
                             yield return WaitForViewportGeometry();
-                            Vector2 point=camera.WorldToScreenPoint(new Vector3(cell.X+.5f,cell.Y+.5f));
+                            Vector2 point=camera.WorldToScreenPoint(new Vector3(cell.X+.5f,cell.Y+.5f,0));
                             Assert.That(controller.IsChrome(point,pointer.deviceId),Is.False);
                             Assert.That(controller.Viewport.ScreenToWorld(point).x,Is.EqualTo(cell.X+.5f).Within(.001));
                             InputSystem.QueueStateEvent(pointer,new MouseState {position=point}.WithButton(MouseButton.Left));
