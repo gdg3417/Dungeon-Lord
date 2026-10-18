@@ -21,7 +21,8 @@ FIXTURES = ['Assets/_Project/Tests/EditMode/BootstrapOverlayPagingTests.cs',
     'Assets/_Project/Tests/EditMode/MvpCanonicalJourneyIntegrationTests.cs',
     'Assets/_Project/Tests/EditMode/RunSimulationTests.cs']
 BUILD_HELPER = 'Assets/_Project/Editor/DungeonVisualBuildQualification.cs'
-SUBSTITUTED = [inputs.CONFIG, inputs.SERVICE, SOURCE_OVERRIDES[0], BUILD_HELPER]+CAPTURES+FIXTURES
+BUILD_UTILITY = 'Assets/_Project/Scripts/BuildTools/DevelopmentBuildUtility.cs'
+SUBSTITUTED = [inputs.CONFIG, inputs.SERVICE, SOURCE_OVERRIDES[0], BUILD_HELPER, BUILD_UTILITY]+CAPTURES+FIXTURES
 FILTERS = {
     'focused': ('EditMode','RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated;TransactionalRoomConstructionLayoutsLocalizationAndResume'),
     'ui-edit': ('EditMode','PhaseSevenA4;ProductionDungeon;BootstrapOverlay;DungeonPresentation;CombatC1;CombatC2'),
@@ -75,7 +76,7 @@ def destinations(attempt):
     product='Dungeon Lord PR242 Graphics '+attempt
     return dict(folder=folder,save=OWNER/product,build=ROOT/'Builds/Development'/(NAME+'-'+attempt),
                 product=product,namespace=NAME+'-'+attempt+'.json')
-def transformed(name,data,attempt):
+def transformed(name,data,attempt,stage):
     dest=destinations(attempt); folder=dest['folder'].relative_to(ROOT).as_posix()
     if name in [inputs.CONFIG,inputs.SERVICE]:
         if name==inputs.CONFIG:
@@ -83,6 +84,7 @@ def transformed(name,data,attempt):
             if config['save']['fileName']!='save_primary.json': raise ValueError('Unexpected config save')
             config['save']['fileName']=dest['namespace']; return json.dumps(config,indent=2).encode()
         return data.decode('utf-8-sig').replace('save_primary.json',dest['namespace']).encode()
+    if name==BUILD_UTILITY and stage!='build': return data
     text=data.decode('utf-8-sig')
     if name==SOURCE_OVERRIDES[0]:
         if text.count('  productName: Dungeon Lord\n')!=1 and text.count('  productName: Dungeon Lord\r\n')!=1:
@@ -99,6 +101,12 @@ def transformed(name,data,attempt):
     elif name==BUILD_HELPER:
         text=text.replace('Builds/Development/Windows-living-dungeon-b3a-20261017/Dungeon Lord.exe',
                           dest['build'].relative_to(ROOT).as_posix()+'/Dungeon Lord.exe')
+    elif name==BUILD_UTILITY:
+        expected='public const string ProductName = "Dungeon Lord";'
+        if text.count(expected)!=1: raise ValueError('Build identity policy changed; review before qualification')
+        # Preserve the strict identity condition; only the explicitly isolated
+        # build's expected product value changes. This source is restored exactly.
+        text=text.replace(expected,'public const string ProductName = "'+dest['product']+'";')
     return text.encode()
 def init():
     unused(OUT)
@@ -124,7 +132,7 @@ def prepare(attempt,stage):
     dest=destinations(attempt)
     for key in ['folder','save','build']: unused(dest[key])
     names=inventory(); originals={n:(ROOT/n).read_bytes() for n in names}
-    prepared={n:transformed(n,data,attempt) if n in SUBSTITUTED else data for n,data in originals.items()}
+    prepared={n:transformed(n,data,attempt,stage) if n in SUBSTITUTED else data for n,data in originals.items()}
     dest['folder'].mkdir()
     with zipfile.ZipFile(dest['folder']/'original-inputs.zip','x',zipfile.ZIP_DEFLATED) as archive:
         for n,data in originals.items(): archive.writestr(n,data)
@@ -150,7 +158,7 @@ def preflight(attempt):
     # Recompute every reviewed transformation, not just a caller-provided stamp.
     with zipfile.ZipFile(folder/'original-inputs.zip') as archive:
         for name in SUBSTITUTED:
-            if (ROOT/name).read_bytes()!=transformed(name,archive.read(name),attempt): raise ValueError('Isolation mismatch: '+name)
+            if (ROOT/name).read_bytes()!=transformed(name,archive.read(name),attempt,plan['stage']): raise ValueError('Isolation mismatch: '+name)
     print('PREFLIGHT PASS:',attempt,'exact inputs',len(plan['prepared']),'protected',len(baseline['protected']))
     return plan
 def run(attempt):
