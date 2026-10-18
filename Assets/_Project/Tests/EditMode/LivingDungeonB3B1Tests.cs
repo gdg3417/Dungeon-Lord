@@ -164,8 +164,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void MixedB1C0C2RecordsReopenOnlyWithExplicitCompatibleProfileAndCannotSettleB3A()
         {
             var f = Dungeon(); var snapshot = PhaseSixA4Tests.Snapshot(f);
+            f.Profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
             var profile = new LivingDungeonProfile("test.b3b1.compatible.v1", 2, 4, 65536, 2048, 8192, 262144, 357996,
-                Timing, RunPostureResolver.BalancedId, maximumCombatWork: 1000000);
+                Timing, RunPostureResolver.BalancedId, f.Profile.Canonical.ForSchema(13).Serialized, maximumCombatWork: 1000000);
             var b1 = new LivingDungeonProfile(profile.Id, 2, 4, 65536, 2048, 8192, 262144, 357996,
                 Timing, RunPostureResolver.BalancedId);
             var owner = LivingDungeonState.Empty(); LivingDungeonScheduling.Activate(owner, profile, 1, f.Runtime.runHistory);

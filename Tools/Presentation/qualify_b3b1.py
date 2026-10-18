@@ -43,7 +43,8 @@ def run(stage, attempt):
         q.inputs.no_redirect(p)
         if p.exists(): raise ValueError('Preserve existing output '+str(p))
     processes = subprocess.run(['powershell', '-NoProfile', '-Command',
-        "Get-Process Unity,'Dungeon Lord' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id"], capture_output=True, text=True)
+        "Get-CimInstance Win32_Process -Filter \"name = 'Unity.exe' OR name = 'Dungeon Lord.exe'\" | "
+        "Where-Object { $_.CommandLine -ne '\"C:\\Program Files\\Unity Hub\\resources\\unity.exe\" serve' } | Select-Object -ExpandProperty ProcessId"], capture_output=True, text=True)
     if processes.stderr.strip() or processes.returncode not in (0, 1): raise ValueError('Cannot inspect Unity processes')
     if processes.stdout.strip():
         raise ValueError('Unity or player is active')

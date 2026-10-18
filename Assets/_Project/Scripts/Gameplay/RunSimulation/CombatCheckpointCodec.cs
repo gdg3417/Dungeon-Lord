@@ -108,7 +108,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     return new RunCheckpointRestoreResult(candidate, null);
                 }
             }
-            catch (Exception e) when (e is ArgumentException || e is IOException || e is InvalidOperationException ||
+            catch (Exception e) when (e is ArgumentException || e is IOException || e is InvalidDataException || e is InvalidOperationException ||
                 e is OverflowException || e is NullReferenceException || e is IndexOutOfRangeException || e is System.Collections.Generic.KeyNotFoundException)
             { return Failed("run.checkpoint.invalid_inputs", candidate); }
         }

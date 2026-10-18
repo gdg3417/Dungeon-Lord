@@ -113,7 +113,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 var s = room.Spatial;
                 if (s == null || !bounds.TryGetValue((s.FloorInstanceId, room.RoomInstanceId), out var b) ||
                     b.Width <= 0 || b.Height <= 0 || s.MaximumMaterializedTiles <= 0 ||
-                    s.MaximumMaterializedTiles > c.MaximumWork || (long)b.Width * b.Height > s.MaximumMaterializedTiles ||
+                    (long)b.Width * b.Height > s.MaximumMaterializedTiles ||
                     s.TraversableTiles == null || s.TraversableTiles.Length > s.MaximumMaterializedTiles ||
                     s.TraversableTiles.Any(t => t.X < 0 || t.Y < 0 || t.X >= b.Width || t.Y >= b.Height))
                     throw new ArgumentException(CombatC0Kernel.InvalidState);
