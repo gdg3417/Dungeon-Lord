@@ -2522,7 +2522,7 @@ Tutorial steps\
 5 craft your first loot item\
 6 adjust your loot table\
 7 respond to your first heat warning\
-8 unlock a sub dungeon
+8 unlock a sub dungeon *(historical tutorial concept; superseded for MVP and initial public release by the [2026-10-18 owner scope amendment](planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md))*
 
 Each step is short and interactive.
 
@@ -2533,6 +2533,8 @@ Dungeon Builder is designed as a long term service game. This section outlines t
 ------------------------------------------------------------------------
 
 ## 9.1 Launch content scope
+
+> **Superseded for MVP and initial public release (2026-10-18):** This historical GDD checklist's “one sub dungeon unlocked through research” item is not current launch scope. All sub-dungeons are excluded from the five-floor MVP and initial public release. See the [owner scope amendment](planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md). The remaining GDD concepts below are retained as design reference, not a replacement scope approval.
 
 The launch version must feel complete but not overloaded. It should introduce core systems and give players at least one to two months of progression.
 
@@ -2553,7 +2555,7 @@ Launch content includes
 
 - full mana system
 
-- one sub dungeon unlocked through research
+- one sub dungeon unlocked through research *(superseded for MVP and initial public release; see note above)*
 
 - heat system including first three heat states\
   peace\

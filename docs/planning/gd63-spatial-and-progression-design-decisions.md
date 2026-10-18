@@ -195,7 +195,7 @@ Each required MVP family budgets one base unit, two basic specialty units, one s
 
 - Offline mana uses a configured percentage of the applicable online passive generation rate, integrated with Spec 29's locked single-grant calculation from the last known mana-per-hour rate.
 - There is no offline time cap for mana credit. Mana storage capacity clamps the output.
-- Research may improve offline efficiency percentage, mana storage capacity, or Mana Farm production. Under the current locked specification it does not extend eligible offline duration.
+- Research may improve offline efficiency percentage or mana storage capacity. The reference to Mana Farm production is a future-design possibility only; the owner scope amendment (2026-10-18) excludes Mana Farm from the five-floor MVP and initial public release and suspends Decisions 56–58 as unapproved. Under the current locked specification, research does not extend eligible offline duration. See [owner scope amendment](../../Docs/planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md).
 - Offline accumulation should support continued expansion without replacing active play. A normal overnight absence funding roughly one meaningful construction or renovation decision rather than a whole floor is a **non-authoritative Phase 4 balance hypothesis to test**, not locked tuning or an approved target.
 - Merged PR #207 implements the configuration-owned base efficiency, exact elapsed-time and fractional calculation, durable timestamp boundary, no-duration-cap rule, storage-cap clamp, and localization-backed result presentation. Authoritative clock-cheat enforcement remains deferred.
 

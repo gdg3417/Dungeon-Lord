@@ -39,12 +39,14 @@
 - Mitigation: Define temporary policy contract for Sprint 2, with explicit backlog carryover to Sprint 3 if needed.
 - Start status: Ready (non-blocking clarification).
 
-### R-06: Mana Farm is MVP scope but intentionally delayed
+### R-06: Mana Farm was MVP scope but intentionally delayed (historical; superseded)
 - Description: Mana Farm sub dungeon is in MVP scope, but starting it before core loop stabilization risks scope churn.
 - Impact: Capacity fragmentation and reduced chance of Sprint 2 deterministic loop closure.
 - Affected issues: Deferred MVP-MF01 placeholder and post-core-loop planning.
 - Mitigation: Keep Mana Farm as deferred MVP item gated by core loop stability evidence.
 - Start status: Deferred by sequencing policy.
+
+**Superseding owner decision (2026-10-18):** R-06's claim that Mana Farm is MVP scope and its core-loop sequencing mitigation are historical, not binding. No sub-dungeons are in the five-floor MVP or initial public release; Mana Farm is only a possible post-launch expansion, with progression undecided. See the [scope amendment](../../../../Docs/planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md).
 
 ## Clarification Risks
 

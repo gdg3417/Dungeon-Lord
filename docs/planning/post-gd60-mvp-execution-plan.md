@@ -199,7 +199,7 @@ Phase 3B2B leaf deletion is the deterministic inverse of tail construction. It i
 1. Data-author room/corridor build, renovation, removal/refund and expansion policies.
 2. Apply transactional mana spending and Architecture/floor/theme modifiers through the formula framework.
 3. Add localized cost, remaining-capacity, consequence and affordability previews before commit.
-4. **Merged and qualified in PR #207:** canonical idle/offline mana uses Spec 29’s locked single-grant calculation with no offline time cap and mana storage capacity as the output clamp; external UAT validation passed. Research may improve efficiency percentage, storage capacity, or Mana Farm production, not eligible duration. The player-facing result explains elapsed time, effective rate, storage-cap clamp and awarded mana; the overnight-one-edit statement remains only a non-authoritative balance hypothesis.
+4. **Merged and qualified in PR #207:** canonical idle/offline mana uses Spec 29’s locked single-grant calculation with no offline time cap and mana storage capacity as the output clamp; external UAT validation passed. Research may improve efficiency percentage or storage capacity under current behavior. Mana Farm production is only a possible post-launch design; it is not MVP or initial-release work under the [owner scope amendment](../../Docs/planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md). Neither research nor this scope decision changes eligible duration. The player-facing result explains elapsed time, effective rate, storage-cap clamp and awarded mana; the overnight-one-edit statement remains only a non-authoritative balance hypothesis.
 
 **Exit:** every structural edit previews and atomically applies the configured cost/policy; insufficient mana cannot partially mutate layout. **Technical gate:** formula order, affordability, rollback, migration and localization tests. **Fantasy gate:** observe whether spatial growth competes meaningfully with monsters, traps, loot and research.
 
@@ -260,7 +260,7 @@ Room effects are reached at entry. Content effects are reached at actual engagem
 
 ### Phase 8 — Content and research expansion
 
-Use small vertical content packets: Floors 3 through the locked maximum of 5; additional rooms and environmental blocked-area features; Undead and Goblinoid launch-family breadth with no more than one boss set per family; five adventurer classes; loot progression through Steel; Architecture nodes and research interface; and the one Mana Farm sub-dungeon after main-dungeon spatial and construction-economy contracts stabilize. Every packet includes authoring validation, balance hypothesis and a player-observable choice. Exact current coverage for these requirements requires confirmation rather than inference.
+Use small vertical content packets: Floors 3 through the locked maximum of 5; additional rooms and environmental blocked-area features; Undead and Goblinoid launch-family breadth with no more than one boss set per family; five adventurer classes; loot progression through Steel; and Architecture nodes and research interface. No sub-dungeon, including the Mana Farm, is MVP or initial-release work. Every packet includes authoring validation, balance hypothesis and a player-observable choice. Exact current coverage for these requirements requires confirmation rather than inference. See the [owner scope amendment](../../Docs/planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md); post-launch progression is undecided.
 
 **Exit:** enough combinations exist to form multiple viable archetypes without one dominant layout; content limits remain configured. **Technical gate:** content integrity, modifier, save and performance tests. **Fantasy gate:** large boss room versus several small rooms and environmental placement tradeoffs are legible and meaningful.
 
@@ -268,9 +268,11 @@ Use small vertical content packets: Floors 3 through the locked maximum of 5; ad
 
 1. Instrumented internal fun tests and balance passes; onboarding/accessibility iteration.
 2. Save migration/content-integrity hardening and low-end mobile profiling.
-3. Android device tests, external-test build, evidence and release decision.
+3. Android device tests, external-test build, evidence and release decision. Verify the release candidate against the approved scope without requiring or introducing any sub-dungeon.
 
 **MVP completion exit:** the core fantasy is technically stable **and** observed as understandable and replayable; a player can build, run, inspect, revise and rerun without instruction. Passing automation alone is insufficient. **Technical gate:** clean journey, migration, deterministic replay, content, performance, accessibility, Android and build evidence. **Fantasy gate:** external participants demonstrate meaningful choices and voluntary experimentation.
+
+**Initial public release scope:** all sub-dungeons, including Mana Farm, are excluded. Their absence is not a release blocker or Phase 9 deliverable. The five-floor main-dungeon cap and all other approved MVP/release requirements remain in force. See the [dated owner scope amendment](../../Docs/planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md).
 
 ## 5. Fun-validation question set
 
@@ -309,9 +311,9 @@ Source authority: [What is the smallest version of Dungeon Builder that proves t
 | Five adventurer classes | Partial or requires confirmation | Complete/validate exactly five MVP classes in content and runs | 8, 9 | Required |
 | Loot progression through Steel | Partial; deterministic loot/spoils exist but tier breadth requires confirmation | Author/validate progression through Steel | 8, 9 | Required |
 | One research slot | Implemented at prototype scope through the single-slot lifecycle/research bridge and GD59; final integration still required | Architecture progression/UI and final journey evidence | 5, 8, 9 | Required; retain one slot |
-| One Mana Farm sub-dungeon | Remaining; historical planning deferred it until core-loop stability | Implement one type after main spatial and construction economy stabilize | 8, 9 | Required; more than one excluded |
+| Mana Farm / sub-dungeons | Historical MVP claim superseded by owner decision (2026-10-18); no completion claim | No sub-dungeon work in MVP or initial release; possible post-launch expansion only, milestone undecided | Post-launch, if separately approved | Excluded from MVP and initial public release |
 
-**Locked explicit MVP exclusions:** prestige; seasonal events; PvP or leaderboards; hero adventurers; more than one sub-dungeon; advanced diplomacy; more than three heat states; and boss sets beyond one per family. GD61 does not amend these exclusions.
+**Locked explicit MVP exclusions:** prestige; seasonal events; PvP or leaderboards; hero adventurers; all sub-dungeons; advanced diplomacy; more than three heat states; and boss sets beyond one per family. All sub-dungeons remain excluded through initial public release under the [owner scope amendment](../../Docs/planning/decisions/mvp-mana-farm-post-launch-scope-amendment.md).
 
 **Boss-set constraint:** The MVP may include no more than one boss set per monster family. A boss set is not independently required unless another authoritative content specification explicitly requires it.
 
