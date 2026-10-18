@@ -29,7 +29,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (string.IsNullOrEmpty(id) || id.Length > 64 || active <= 0 || retained < active ||
                 checkpointBytes <= 0 || partyReplay <= 0 || totalReplay < partyReplay ||
-                baseSaveBytes <= 0 || ownerBytes <= 0 || maximumCombatWork < 0) throw new ArgumentException("living.profile.invalid");
+                baseSaveBytes <= 0 || ownerBytes <= 0 || maximumCombatWork < 0 ||
+                maximumCombatWork != 0 && id == "living.qualification.profile_a.v1") throw new ArgumentException("living.profile.invalid");
             Id = id; MaximumActive = active; MaximumRetained = retained;
             MaximumCheckpointBytes = checkpointBytes; MaximumPartyReplay = partyReplay;
             MaximumTotalReplay = totalReplay; MaximumBaseSaveBytes = baseSaveBytes; MaximumOwnerBytes = ownerBytes;

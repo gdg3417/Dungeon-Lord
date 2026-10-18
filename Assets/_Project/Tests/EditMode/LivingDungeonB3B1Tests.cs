@@ -68,6 +68,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
             Assert.That(outcome.CombatExecutable, Is.EqualTo(persistent ? MonsterRecoveryRules.Executable : CombatC0Config.Executable));
+            TestContext.WriteLine("Variant=" + outcome.CombatExecutable + " floors=" + snapshot.Floors.Count +
+                " checkpointBytes=" + original.ExportCheckpoint(Limits).GetBytes().Length + " events=" + original.NextOrdinal + " work=" + original.CommittedCombatWork);
         }
         [TestCase(false)] [TestCase(true)]
         public void RepeatedLookaheadInsufficientDeadlineExportReopenAndEventualCommitChargeExactlyOnce(bool persistent)
@@ -153,6 +155,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(result.IsValid, Is.False); Assert.That(result.Execution, Is.Null);
             }
             var watch = Stopwatch.StartNew(); var restored = Restore(e); watch.Stop();
+            var exact = new RunCheckpointLimits(c.GetBytes().Length, c.NextOrdinal, Limits.MaximumCombatWork);
+            Assert.That(Service.RestoreCheckpoint(c.GetBytes(), c.Identity, c.StartIdentity, c.NextOrdinal, exact).IsValid, Is.True);
             TestContext.WriteLine("B3B1 checkpoint bytes=" + c.GetBytes().Length + " events=" + c.NextOrdinal +
                 " combatWork=" + e.CommittedCombatWork + " restoreAndVerifyMs=" + watch.Elapsed.TotalMilliseconds);
             Assert.Throws<InvalidOperationException>(() => e.Advance(1, e.NextOrdinal - 1));
@@ -160,6 +164,78 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(c.GetBytes(), e.ExportCheckpoint(Limits).GetBytes());
         }
         public static void VerifyForPlayMode() => new LivingDungeonB3B1Tests().RepeatedLookaheadInsufficientDeadlineExportReopenAndEventualCommitChargeExactlyOnce(true);
+
+        [TestCase("wipe")] [TestCase("retreat")] [TestCase("multiple")]
+        public void CombatCasualtyRetreatAndStableMultipleMonsterReceiptsMatchManual(string mode)
+        {
+            var f = Dungeon(true);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            if (mode == "wipe") {
+                foreach (var p in f.Configuration.PhaseFiveB.Classes) p.LevelOneMaxHealth = 1;
+                foreach (var p in f.Configuration.CombatC0.Monsters) p.Damage = 100;
+            }
+            if (mode == "retreat") { f.Configuration.BaseSuccessChance = 0; f.Configuration.SuccessThreshold = 1; }
+            var s = PhaseSixA4Tests.Snapshot(f); var expected = Service.StartManualSnapshot(1, s).DrainToCompletion(); var e = Start(s);
+            while (!e.IsTerminal) { e.Advance(1, e.NextOrdinal); e = Restore(e); }
+            var outcome = e.TakeOutcome(); EqualOutcome(outcome, expected);
+            Assert.That(CombatC0Diagnostics.Monsters(outcome).Select(m => m.AssignmentId).Distinct().Count(), Is.EqualTo(3));
+            if (mode == "wipe") Assert.That(outcome.Party.IsWiped, Is.True);
+        }
+        [Test] public void AfterDeadlineAndTimeOverflowRemainPreEffectAndDeterministic()
+        {
+            var s = PhaseSixA4Tests.Snapshot(Dungeon()); var e = Start(s);
+            while (e.NextDueTime() == e.Inspect().LogicalTime) e.Advance(1, e.NextOrdinal);
+            long due = e.NextDueTime().Value; e.AdvanceThrough(due + 1, 1, e.NextOrdinal);
+            var resumed = Restore(e); EqualOutcome(resumed.DrainToCompletion(), Start(s).DrainToCompletion());
+            var overflow = Service.StartTimedCombatSnapshot(1, s, new RunLogicalTiming(long.MaxValue, long.MaxValue, long.MaxValue, long.MaxValue, long.MaxValue));
+            Assert.Throws<OverflowException>(() => { while (!overflow.IsTerminal) overflow.Advance(1, overflow.NextOrdinal); });
+            Assert.Throws<InvalidOperationException>(() => overflow.ExportCheckpoint(Limits));
+        }
+        [Test] public void CombatCausalityDigestBindsTargetingEvenWhenHpCountsAndInspectionMatch()
+        {
+            var e = Start(PhaseSixA4Tests.Snapshot(Dungeon())); RunStep step;
+            do { step = e.AdvanceToNextEvent(e.NextOrdinal); } while (step.CombatEvents == null);
+            var receipts = step.CombatEvents.ToArray(); var a = receipts.First(x => x.Kind == CombatC0EventKind.Attack);
+            receipts[Array.IndexOf(receipts, a)] = new CombatC0Event(a.RunId, a.EncounterId, a.Ordinal, a.ActionOrdinal,
+                a.Round, a.FloorId, a.RoomId, a.Kind, a.Reason, a.ActorId, a.TargetId, a.AttackId, a.SourcePosition,
+                a.TargetPosition, a.HealthBefore, a.HealthAfter, a.ExecutableId, "test.contradictory.targeting", a.RunOrdinal);
+            var contradictory = new RunStep(step.Kind, step.FloorIndex, step.RoomId, step.AssignmentId, step.Position,
+                step.Distance, step.Encounter, step.RunId, step.Ordinal, step.LogicalTime, step.PositionSpace,
+                step.ContinueChosen, step.CarriedLootValueAfter, combatEvents: receipts);
+            Assert.That(CombatCheckpointCodec.Fold(e.PrefixDigest, contradictory, e),
+                Is.Not.EqualTo(CombatCheckpointCodec.Fold(e.PrefixDigest, step, e)));
+        }
+        [Test] public void FrozenProfileARejectsCombatOptInUnderItsHistoricalIdentity()
+        {
+            Assert.Throws<ArgumentException>(() => new LivingDungeonProfile("living.qualification.profile_a.v1",
+                2, 4, 65536, 2048, 8192, 262144, 357996, maximumCombatWork: 1000000));
+        }
+        [Test] public void ExportStandaloneTechnicalFixturesAndMeasurements()
+        {
+            var s = PhaseSixA4Tests.Snapshot(Dungeon());
+            var rows = new List<DungeonBuilder.M0.BuildTools.CombatCheckpointDevelopmentSmoke.Row>();
+            foreach (bool persistent in new[] { false, true }) {
+                var final = Start(s, persistent); final.AdvanceThrough(long.MaxValue, 2048, 0); final.TakeOutcome();
+                string finalBytes = Convert.ToBase64String(final.ExportCheckpoint(Limits).GetBytes());
+                foreach (int prefix in new[] { 0, 2 }) {
+                    var e = Start(s, persistent); if (prefix > 0) e.Advance(prefix, 0);
+                    // Smoke uses event due deadlines, so its final accepted deadline is the terminal time.
+                    var expected = Start(s, persistent);
+                    while (!expected.IsTerminal) expected.AdvanceThrough(expected.NextDueTime().Value, 1, expected.NextOrdinal);
+                    expected.TakeOutcome(); finalBytes = Convert.ToBase64String(expected.ExportCheckpoint(Limits).GetBytes());
+                    var c = e.ExportCheckpoint(Limits);
+                    rows.Add(new DungeonBuilder.M0.BuildTools.CombatCheckpointDevelopmentSmoke.Row { Bytes = Convert.ToBase64String(c.GetBytes()),
+                        Identity = c.Identity, StartIdentity = c.StartIdentity, Ordinal = c.NextOrdinal, FinalBytes = finalBytes });
+                }
+                TestContext.WriteLine("Combat variant=" + (persistent ? "C2" : "C0") + " terminalBytes=" + final.ExportCheckpoint(Limits).GetBytes().Length +
+                    " events=" + final.NextOrdinal + " work=" + final.CommittedCombatWork);
+            }
+            string folder = "TestResults/living-dungeon-b3b1-20261018/smoke-input-" + Guid.NewGuid().ToString("N");
+            Directory.CreateDirectory(folder);
+            File.WriteAllText(folder + "/input.json", UnityEngine.JsonUtility.ToJson(new DungeonBuilder.M0.BuildTools.CombatCheckpointDevelopmentSmoke.Input {
+                MaximumBytes = Limits.MaximumBytes, MaximumReplayEvents = Limits.MaximumReplayEvents, MaximumCombatWork = Limits.MaximumCombatWork, Rows = rows.ToArray() }));
+            TestContext.WriteLine("Standalone input=" + Path.GetFullPath(folder + "/input.json"));
+        }
 
         [Test] public void MixedB1C0C2RecordsReopenOnlyWithExplicitCompatibleProfileAndCannotSettleB3A()
         {
