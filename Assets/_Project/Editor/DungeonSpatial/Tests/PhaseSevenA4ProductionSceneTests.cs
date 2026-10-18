@@ -1120,6 +1120,12 @@ namespace DungeonBuilder.M0.Tests
         {
             var root = GameRoot.Instance;
             Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+            // Preserve the complete save produced by the existing starter mutation
+            // and QA funding authority for the later isolated owner handoff.
+            // No save JSON is authored or imported from an owner/normal save.
+            string starter = Path.Combine(Application.persistentDataPath,"owner-uat-starter.json");
+            File.Copy(root.SaveService.SavePath,starter,false);
+            TestContext.WriteLine("Owner starter artifact: "+starter);
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             var room = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];
             foreach (var size in new[] { new Vector2Int(1280,720), new Vector2Int(720,1280), new Vector2Int(1080,1920), new Vector2Int(1920,1080) })
@@ -1165,7 +1171,7 @@ namespace DungeonBuilder.M0.Tests
                             Vector2 point=camera.WorldToScreenPoint(new Vector3(cell.X+.5f,cell.Y+.5f,0));
                             Assert.That(controller.IsChrome(point,pointer.deviceId),Is.False);
                             Assert.That(controller.Viewport.ScreenToWorld(point).x,Is.EqualTo(cell.X+.5f).Within(.001));
-                            InputSystem.QueueStateEvent(pointer,new MouseState {position=point}.WithButton(MouseButton.Left));
+                            InputSystem.QueueStateEvent(pointer,new MouseState {position=point}.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
                             yield return null; yield return null;
                             InputSystem.QueueStateEvent(pointer,new MouseState {position=point});
                             yield return null; yield return null;
