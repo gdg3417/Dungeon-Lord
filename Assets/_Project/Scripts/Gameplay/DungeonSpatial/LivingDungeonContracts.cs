@@ -21,22 +21,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public RunLogicalTiming QualificationTiming { get; }
         public string QualificationPostureId { get; }
         public SpatialSerializedInputLimits BaseBudget { get; }
+        public long MaximumCombatWork { get; }
         public LivingDungeonProfile(string id, int active, int retained, int checkpointBytes,
             long partyReplay, long totalReplay, int baseSaveBytes, int ownerBytes,
             RunLogicalTiming qualificationTiming = null, string qualificationPostureId = null,
-            SpatialSerializedInputLimits baseBudget = default)
+            SpatialSerializedInputLimits baseBudget = default, long maximumCombatWork = 0)
         {
             if (string.IsNullOrEmpty(id) || id.Length > 64 || active <= 0 || retained < active ||
                 checkpointBytes <= 0 || partyReplay <= 0 || totalReplay < partyReplay ||
-                baseSaveBytes <= 0 || ownerBytes <= 0) throw new ArgumentException("living.profile.invalid");
+                baseSaveBytes <= 0 || ownerBytes <= 0 || maximumCombatWork < 0) throw new ArgumentException("living.profile.invalid");
             Id = id; MaximumActive = active; MaximumRetained = retained;
             MaximumCheckpointBytes = checkpointBytes; MaximumPartyReplay = partyReplay;
             MaximumTotalReplay = totalReplay; MaximumBaseSaveBytes = baseSaveBytes; MaximumOwnerBytes = ownerBytes;
             QualificationTiming = qualificationTiming; QualificationPostureId = qualificationPostureId;
             if (baseBudget.IsValid && baseBudget.MaximumInputBytes != baseSaveBytes) throw new ArgumentException("living.profile.invalid");
             BaseBudget = baseBudget;
+            MaximumCombatWork = maximumCombatWork;
         }
-        internal RunCheckpointLimits Checkpoints => new RunCheckpointLimits(MaximumCheckpointBytes, MaximumPartyReplay);
+        internal RunCheckpointLimits Checkpoints => new RunCheckpointLimits(MaximumCheckpointBytes, MaximumPartyReplay, MaximumCombatWork);
         public static LivingDungeonProfile ParseQualificationProfile(byte[] bytes, SpatialSerializedInputLimits limits,
             RunLogicalTiming qualificationTiming = null, string qualificationPostureId = null,
             SpatialSerializedInputLimits baseBudget = default)
@@ -199,7 +201,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             profiles?.SingleOrDefault(p => p.Id == state.Scheduler?.ProfileId);
         internal static RunExecution Restore(LivingDungeonParty p, LivingDungeonProfile profile)
         {
-            var restored = RunCheckpointCodec.Restore(p.Checkpoint, p.CheckpointIdentity, p.StartIdentity, p.NextOrdinal, profile.Checkpoints);
+            var restored = CombatCheckpointCodec.RestoreSupported(p.Checkpoint, p.CheckpointIdentity, p.StartIdentity, p.NextOrdinal, profile.Checkpoints);
             if (!restored.IsValid) throw new InvalidOperationException(restored.FailureReason);
             return restored.Execution;
         }

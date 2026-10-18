@@ -29,6 +29,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var execution = LivingDungeonContracts.Restore(party, profile);
                 try
                 {
+                    if (execution.Combat != null) throw new InvalidOperationException(Ineligible);
                     if (!execution.IsTerminal) continue;
                     var view = execution.Inspect(); var last = view.LastStep;
                     if (execution.OutcomeTaken || !last.HasValue || last.Value.Kind != RunStepKind.Terminal ||
@@ -53,7 +54,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             var snapshot = execution.Snapshot ?? throw new InvalidOperationException(Invalid);
             var config = snapshot.Configuration;
-            if (outcome.RunId != execution.Inspect().RunId || outcome.Party == null ||
+            if (execution.Combat != null || outcome.RunId != execution.Inspect().RunId || outcome.Party == null ||
                 CombatC0Diagnostics.IsCombatC2(outcome)) throw new InvalidOperationException(Invalid);
             var heat = RunHeatStateApplyResolver.Resolve(config, candidate.structureRuntime.Heat, outcome.RunHeatDeltaSummary);
             if (!heat.RuleResolved) throw new InvalidOperationException(Invalid);

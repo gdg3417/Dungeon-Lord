@@ -11,10 +11,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     {
         public int MaximumBytes { get; }
         public long MaximumReplayEvents { get; }
-        public RunCheckpointLimits(int maximumBytes, long maximumReplayEvents)
+        public long MaximumCombatWork { get; }
+        public RunCheckpointLimits(int maximumBytes, long maximumReplayEvents, long maximumCombatWork = 0)
         {
-            if (maximumBytes <= 0 || maximumReplayEvents < 0) throw new ArgumentException("run.checkpoint.invalid_limits");
-            MaximumBytes = maximumBytes; MaximumReplayEvents = maximumReplayEvents;
+            if (maximumBytes <= 0 || maximumReplayEvents < 0 || maximumCombatWork < 0) throw new ArgumentException("run.checkpoint.invalid_limits");
+            MaximumBytes = maximumBytes; MaximumReplayEvents = maximumReplayEvents; MaximumCombatWork = maximumCombatWork;
         }
     }
 

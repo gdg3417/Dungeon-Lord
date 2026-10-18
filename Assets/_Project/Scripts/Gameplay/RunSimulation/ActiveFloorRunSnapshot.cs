@@ -73,6 +73,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal CombatC0RoomBounds[] CombatBounds { get; private set; }
         private MonsterContinuityState monsterStarts;
         internal MonsterContinuityState MonsterStarts => monsterStarts?.Copy();
+        internal int MonsterStartLevel { get; private set; }
+        internal int MonsterReadinessNumerator { get; private set; }
+        internal int MonsterReadinessDenominator { get; private set; }
         public long TickStarted { get; }
         public string PostureId { get; }
         public DungeonBuilder.M0.Gameplay.Structures.StructureRuntimeState InitialRuntime =>
@@ -102,6 +105,13 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             Floors = Array.AsReadOnly(floors);
         }
         internal static ActiveFloorRunSnapshot ReadCheckpoint(BinaryReader r) => new ActiveFloorRunSnapshot(r);
+        // Used only by the separate format-2 reader on newly owned snapshot bytes.
+        internal void RestoreCombatInputs(CombatC0QualificationConfig rules, CombatC0RoomBounds[] bounds, MonsterContinuityState starts,
+            int level, int numerator, int denominator)
+        {
+            CombatRules = rules; CombatBounds = (CombatC0RoomBounds[])bounds.Clone(); monsterStarts = starts?.Copy();
+            MonsterStartLevel = level; MonsterReadinessNumerator = numerator; MonsterReadinessDenominator = denominator;
+        }
         private ActiveFloorRunSnapshot(RunnableFloorSnapshot[] floors, RunSimulationConfig config, LootConfig lootConfig, string lootTableId, SharedBranchKnowledgeAuthority branchKnowledge, SharedFloorKnowledgeAuthority sharedFloorKnowledge, SaveData executionInputs, string postureId)
         { Floors = Array.AsReadOnly(floors); configuration = JsonUtility.ToJson(config);
           knowledge = JsonUtility.ToJson(branchKnowledge);
@@ -168,6 +178,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             snapshot.monsterStarts = owned.MonsterContinuity?.Copy();
             if (snapshot.CombatRules != null)
             {
+                var recovery = MonsterRecoveryRules.Capture(config);
+                snapshot.MonsterStartLevel = recovery.InitialLevel;
+                snapshot.MonsterReadinessNumerator = recovery.ReadinessNumerator;
+                snapshot.MonsterReadinessDenominator = recovery.ReadinessDenominator;
                 var catalog = production.Catalog;
                 snapshot.CombatBounds = floors.SelectMany(f => f.MaterializePlan().RequiredRooms.Select(r => {
                     var spatial = r.Room.Spatial;
