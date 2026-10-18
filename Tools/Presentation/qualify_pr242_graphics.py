@@ -120,6 +120,7 @@ def prepare(attempt,stage):
     for folder in OUT.iterdir():
         if folder.is_dir() and (folder/'prepared.json').exists() and not (folder/'restored.json').exists():
             raise ValueError('Restore prior attempt first: '+str(folder))
+        if folder.is_dir() and (folder/'artifact-index.json').exists(): verify(read(folder/'artifact-index.json'))
     dest=destinations(attempt)
     for key in ['folder','save','build']: unused(dest[key])
     names=inventory(); originals={n:(ROOT/n).read_bytes() for n in names}
@@ -183,7 +184,14 @@ def finish(attempt):
             (ROOT/name).write_bytes(data)
     verify(plan['original']); verify(read(OUT/'baseline.json')['protected'])
     write(folder/'restored.json',dict(restored=True,exactOriginalInputs=len(originals),protectedFilesUnchanged=True,generatedPreserved=generated))
+    index_attempt(attempt)
     print('Restored exact authored inputs/local overrides; all original saves/evidence/builds unchanged')
+def index_attempt(attempt):
+    dest=destinations(attempt); folder=dest['folder']; unused(folder/'artifact-index.json')
+    paths=[]
+    for base in [folder,dest['save'],dest['build']]:
+        if base.exists(): paths.extend(p for p in base.rglob('*') if p.is_file())
+    write(folder/'artifact-index.json',[dict(path=str(p),sha256=sha(p)) for p in sorted(paths)])
 def selftest():
     import tempfile
     with tempfile.TemporaryDirectory(prefix='pr242-gate-') as name:
@@ -206,6 +214,7 @@ if __name__=='__main__':
         elif mode=='preflight': preflight(sys.argv[2])
         elif mode=='run': sys.exit(run(sys.argv[2]))
         elif mode=='finish': finish(sys.argv[2])
+        elif mode=='index': index_attempt(sys.argv[2])
         elif mode=='selftest': selftest()
         else: raise ValueError(mode)
     except (ValueError,OSError,KeyError,zipfile.BadZipFile) as error:

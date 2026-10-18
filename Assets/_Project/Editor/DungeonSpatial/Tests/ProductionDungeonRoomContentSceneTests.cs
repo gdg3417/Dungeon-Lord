@@ -891,14 +891,28 @@ namespace DungeonBuilder.M0.Tests
             simulatedTouch=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Touchscreen>();
             yield return null; yield return null;
             Assert.That(simulatedTouch.enabled,Is.True,"Simulated touchscreen must be active before queuing input");
-            Touch(1,touchPoint,UnityEngine.InputSystem.TouchPhase.Began); yield return null; yield return null;
-            TestContext.WriteLine("Content touch focused="+Application.isFocused+" enabled="+simulatedTouch.enabled+
-                " primaryId="+simulatedTouch.primaryTouch.touchId.ReadValue()+" phase="+simulatedTouch.primaryTouch.phase.ReadValue()+
-                " slots="+string.Join(";",simulatedTouch.touches.Select(t=>t.touchId.ReadValue()+":"+t.phase.ReadValue())));
-            Assert.That(UnityEngine.InputSystem.Touchscreen.current,Is.SameAs(simulatedTouch));
-            Assert.That(simulatedTouch.primaryTouch.touchId.ReadValue(),Is.EqualTo(1));
-            Assert.That(simulatedTouch.primaryTouch.press.isPressed,Is.True);
-            Touch(1,touchPoint,UnityEngine.InputSystem.TouchPhase.Ended); yield return null; yield return null;
+            int observedTouchId=0; bool observedCurrent=false; Vector2 observedPosition=default;
+            System.Action observeTouch=()=>
+            {
+                // EditMode coroutines can read the Editor buffer after yielding.
+                // Observe the same player update/state buffer as the controller.
+                if(UnityEngine.InputSystem.LowLevel.InputState.currentUpdateType!=UnityEngine.InputSystem.LowLevel.InputUpdateType.Dynamic) return;
+                var active=simulatedTouch.touches.FirstOrDefault(t=>t.press.isPressed);
+                if(active==null) return;
+                observedTouchId=active.touchId.ReadValue(); observedPosition=active.position.ReadValue();
+                observedCurrent=UnityEngine.InputSystem.Touchscreen.current==simulatedTouch;
+            };
+            UnityEngine.InputSystem.InputSystem.onAfterUpdate+=observeTouch;
+            try
+            {
+                Touch(1,touchPoint,UnityEngine.InputSystem.TouchPhase.Began); yield return null; yield return null;
+                TestContext.WriteLine("Content touch coroutineBuffer="+UnityEngine.InputSystem.LowLevel.InputState.currentUpdateType+
+                    " playerId="+observedTouchId+" playerPosition="+observedPosition+" currentDevice="+observedCurrent);
+                Assert.That(observedCurrent,Is.True); Assert.That(observedTouchId,Is.EqualTo(1));
+                Assert.That(Vector2.Distance(observedPosition,touchPoint),Is.LessThan(.001f));
+                Touch(1,touchPoint,UnityEngine.InputSystem.TouchPhase.Ended); yield return null; yield return null;
+            }
+            finally { UnityEngine.InputSystem.InputSystem.onAfterUpdate-=observeTouch; }
             Assert.That(controller.ContentPreview?.IsValid,Is.True,controller.ContentPreview?.Reason); Assert.That(controller.Draft.CommandCount,Is.Zero); AssertCanonicalUnchanged(before,mana);
             Assert.That(controller.World.TryRoomLocal(room.RoomInstanceId,touchCell,out var expectedLocal),Is.True);
             Assert.That(controller.ContentPreview.Assignment.RoomLocalPosition,Is.EqualTo(expectedLocal),"Touch must preview the intended current map cell");

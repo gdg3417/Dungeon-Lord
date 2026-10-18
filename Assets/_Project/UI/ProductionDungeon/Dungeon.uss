@@ -47,7 +47,6 @@
 .landscape.constructing .metric-card { padding-top: 0; padding-bottom: 0; }
 .landscape.constructing .reserve-information { margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
 .landscape.constructing .capacity-bar { padding-top: 0; padding-bottom: 0; }
-.landscape.constructing .placement-actions > Button { padding-left: 6px; padding-right: 6px; }
 .landscape.constructing #draftSummary { flex-basis: 50%; }
 .landscape.constructing #editActions { flex-basis: 48%; }
 .display-popover .legacy { flex-basis: auto; align-self: stretch; }

@@ -342,7 +342,8 @@ namespace DungeonBuilder.M0.Tests
                     Click(ui.Q<Button>("collapseDetails")); for (int i = 0; i < 8; i++) yield return null;
                     Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.Flex));
                     Assert.That(ui.Q("viewport").worldBound.height, Is.GreaterThan(controller.SafeRoot.worldBound.height * 0.25f), "Expanded construction details retain usable map");
-                    Assert.That(ui.Q<ScrollView>("contextDetails").contentViewport.worldBound.height, Is.GreaterThanOrEqualTo(ui.Q<Label>("constructionInfo").resolvedStyle.fontSize), "Expanded information retains at least one readable text line");
+                    float informationLineHeight=ui.Q<Label>("constructionInfo").MeasureTextSize("Ag建",0,VisualElement.MeasureMode.Undefined,0,VisualElement.MeasureMode.Undefined).y;
+                    Assert.That(ui.Q<ScrollView>("contextDetails").contentViewport.worldBound.height, Is.GreaterThanOrEqualTo(informationLineHeight), "Expanded information retains at least one complete text line");
                     TestContext.WriteLine("Construction expanded " + size + " " + textSize + " viewport=" + ui.Q("viewport").worldBound + " details=" + ui.Q<ScrollView>("contextDetails").contentViewport.worldBound);
                     DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("construction-expanded-" + size.x + "x" + size.y + "-" + textSize + ".png");
                     yield return null; yield return null;
@@ -353,6 +354,12 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.None));
                     AssertReachable(ui.Q<Button>("confirmPlacement")); AssertReachable(ui.Q<Button>("cancelPlacement"));
                     Assert.That(ui.Q<Label>("constructionInfo").text, Does.Contain("建設"));
+                    if(size.x>size.y)
+                    {
+                        Assert.That(ui.Q<Button>("legacy").parent,Is.SameAs(ui.Q("displayPopover")),"Optional development action moves out of construction's required action row");
+                        Click(ui.Q<Button>("displaySettings")); yield return null; yield return null;
+                        AssertReachable(ui.Q<Button>("legacy")); Click(ui.Q<Button>("closeDisplay")); yield return null; yield return null;
+                    }
                     Assert.That(controller.World.GridTileCount, Is.EqualTo(root.ProductionSpatialContent.Catalog.Floors[0].Bounds.TileCount));
                 }
                 DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("construction-ui-corrected-large-" + size.x + "x" + size.y + ".png");
