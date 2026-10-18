@@ -20,6 +20,7 @@ def preflight(label):
     if (q.OUT/'substitutions-restored.json').exists(): raise ValueError('Isolation is inactive')
     for name in ['baseline.json', 'historical-evidence-before.json', 'fixture-substitutions.json']:
         if not (q.OUT/name).is_file(): raise ValueError('Missing preservation prerequisite '+name)
+    if not zipfile.is_zipfile(q.OUT/'historical-evidence-preserved.zip'): raise ValueError('Historical backup is incomplete')
     q.applicability(label)
     for name, key in [('baseline.json', 'protected'), ('historical-evidence-before.json', None)]:
         rows = json.loads((q.OUT/name).read_text())
@@ -75,6 +76,7 @@ def run(stage, attempt):
 if __name__ == '__main__':
     mode = sys.argv[1]
     if mode == 'prepare':
+        if list(q.SAVE.glob(q.NAMESPACE+'*')): raise ValueError('Save namespace already exists; preserve it and select a fresh campaign')
         q.prepare(); q.isolate_evidence(); q.isolate_fixtures()
         with zipfile.ZipFile(q.OUT/'historical-evidence-preserved.zip', 'x', zipfile.ZIP_DEFLATED) as z:
             for row in json.loads((q.OUT/'historical-evidence-before.json').read_text()):

@@ -28,7 +28,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (timing == null) throw new ArgumentNullException(nameof(timing));
             CombatStartCapture.Validate(snapshot, persistentMonsters);
             var execution = StartCapturedSnapshot(sequence, snapshot, timing, eventLimit, true, persistentMonsters);
-            execution.StartInputs = CombatStartCapture.Capture(sequence, snapshot, timing, eventLimit, persistentMonsters);
+            execution.StartInputs = CombatStartCapture.Capture(sequence, snapshot, timing, execution.MaximumEvents, persistentMonsters);
             execution.PrefixDigest = RunCheckpointCodec.Hash(execution.StartInputs);
             execution.CommittedCombatWork = execution.Combat.Kernel.WorkCount;
             return execution;

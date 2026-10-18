@@ -31,7 +31,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (starts != null) {
                     w.Write(snapshot.MonsterStartLevel); w.Write(snapshot.MonsterReadinessNumerator); w.Write(snapshot.MonsterReadinessDenominator);
                     w.Write(starts.Length);
-                    foreach (var m in starts) { RunCheckpointCodec.Text(w, m.AssignmentId); w.Write(m.Level); w.Write(m.Health); w.Write(m.RevivalRequired); }
+                    var options = snapshot.MonsterStartOptions;
+                    for (int i = 0; i < starts.Length; i++) {
+                        var m = starts[i]; RunCheckpointCodec.Text(w, m.AssignmentId); RunCheckpointCodec.Text(w, options[i]);
+                        w.Write(m.Level); w.Write(m.Health); w.Write(m.RevivalRequired);
+                    }
                 }
             });
 
@@ -81,18 +85,22 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 for (int i = 0; i < bounds.Length; i++) bounds[i] = new CombatC0RoomBounds(
                     RunCheckpointCodec.Text(r), RunCheckpointCodec.Text(r), r.ReadInt32(), r.ReadInt32());
                 MonsterContinuityState starts = null;
+                string[] options = null;
                 int level = 0, numerator = 0, denominator = 0;
                 if (RunCheckpointCodec.Flag(r)) {
                     level = r.ReadInt32(); numerator = r.ReadInt32(); denominator = r.ReadInt32();
                     var records = new MonsterContinuityRecord[Count(r, work)];
-                    for (int i = 0; i < records.Length; i++) records[i] = new MonsterContinuityRecord(
-                        RunCheckpointCodec.Text(r), r.ReadInt32(), r.ReadInt32(), RunCheckpointCodec.Flag(r));
+                    options = new string[records.Length];
+                    for (int i = 0; i < records.Length; i++) {
+                        string id = RunCheckpointCodec.Text(r); options[i] = RunCheckpointCodec.Text(r);
+                        records[i] = new MonsterContinuityRecord(id, r.ReadInt32(), r.ReadInt32(), RunCheckpointCodec.Flag(r));
+                    }
                     starts = new MonsterContinuityState(records);
                 }
                 RunCheckpointCodec.End(r);
                 bool persistent = executable == MonsterRecoveryRules.Executable;
                 if (persistent != (starts != null)) throw new InvalidDataException("run.checkpoint.invalid_inputs");
-                snapshot.RestoreCombatInputs(combat, bounds, starts, level, numerator, denominator);
+                snapshot.RestoreCombatInputs(combat, bounds, starts, level, numerator, denominator, options);
                 Validate(snapshot, persistent);
                 var engine = new RunSimulationService(snapshot.Configuration, snapshot.LootConfiguration, snapshot.LootTableId);
                 var execution = engine.StartTimedCombatSnapshot(sequence, snapshot, timing, persistent, limit);
@@ -133,10 +141,18 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     !starts.Select(m => m.AssignmentId).SequenceEqual(starts.Select(m => m.AssignmentId).Distinct(StringComparer.Ordinal).OrderBy(id => id, StringComparer.Ordinal)))
                     throw new ArgumentException(CombatC0Kernel.InvalidState);
                 var states = starts.ToDictionary(m => m.AssignmentId, StringComparer.Ordinal);
+                var options = snapshot.MonsterStartOptions;
+                if (options == null || options.Length != starts.Length) throw new ArgumentException(CombatC0Kernel.InvalidState);
+                for (int i = 0; i < starts.Length; i++) {
+                    var profile = c.Monsters.SingleOrDefault(p => p.Id == options[i]);
+                    if (profile == null || starts[i].Health > profile.MonsterHealth || starts[i].RevivalRequired &&
+                        starts[i].Health >= checked(((long)profile.MonsterHealth * snapshot.MonsterReadinessNumerator +
+                            snapshot.MonsterReadinessDenominator - 1) / snapshot.MonsterReadinessDenominator))
+                        throw new ArgumentException(CombatC0Kernel.InvalidState);
+                }
+                var optionById = starts.Select((m, i) => (m.AssignmentId, Option: options[i])).ToDictionary(m => m.AssignmentId, m => m.Option, StringComparer.Ordinal);
                 foreach (var a in rooms.SelectMany(r => r.OrderedAssignments()).Where(a => a.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId))
-                    if (!states.TryGetValue(a.AssignmentId, out var m) || m.Health > c.Monsters.Single(p => p.Id == a.OptionId).MonsterHealth ||
-                        m.RevivalRequired && m.Health >= checked(((long)c.Monsters.Single(p => p.Id == a.OptionId).MonsterHealth *
-                            snapshot.MonsterReadinessNumerator + snapshot.MonsterReadinessDenominator - 1) / snapshot.MonsterReadinessDenominator))
+                    if (!states.ContainsKey(a.AssignmentId) || optionById[a.AssignmentId] != a.OptionId)
                         throw new ArgumentException(CombatC0Kernel.InvalidState);
             }
         }

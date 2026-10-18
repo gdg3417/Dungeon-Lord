@@ -124,6 +124,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public bool IsTerminal { get; private set; }
         public long NextOrdinal => ordinal;
         internal bool OutcomeTaken => taken;
+        internal long MaximumEvents => maximumEvents;
+        internal long AcceptedDeadline => acceptedDeadline;
         internal RunExecution(RunParty party, RunLogicalTiming timing, long maximumEvents)
         {
             Party = party; this.timing = timing;

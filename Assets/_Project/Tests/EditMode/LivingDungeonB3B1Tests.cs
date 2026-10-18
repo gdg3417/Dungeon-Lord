@@ -106,11 +106,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void CapturedInputsSurviveConfigAssignmentsAndContinuityEditsWithoutCanonicalPublication()
         {
             var f = Dungeon(); var s = PhaseSixA4Tests.Snapshot(f); var e = Start(s); var expected = Start(s).DrainToCompletion();
-            e.Advance(2, 0); f.Configuration.CombatC0.Monsters[0].Damage = int.MaxValue;
+            e.Advance(2, 0);
+            string id = f.Runtime.monsterContinuity.Records.Single().AssignmentId;
+            var draft = TransactionalDungeonDraft.Create(f.State, PhaseSevenA4TransactionalEditorTests.Context(f), new PhaseSevenA4TransactionalEditorTests.Store());
+            Assert.That(draft.Move(f.State.Floors[0].FloorInstanceId, f.State.Floors[0].Layout.Rooms[0].RoomInstanceId, id, new TileCoordinate(3, 2)), Is.True);
+            while (draft.Durability == DraftDurability.Pending) Assert.That(draft.FlushNext(), Is.True);
+            f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, draft)); f.Reopen();
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(id)));
+            CombatC2Tests.SetState(f, 2, true, 0);
+            byte[] edited = f.Session.GetCurrentBytes();
+            f.Configuration.CombatC0.Monsters[0].Damage = int.MaxValue;
             f.Runtime.monsterContinuity.Records[0].Health = 0; f.Runtime.monsterContinuity.Records[0].RevivalRequired = true;
             f.Runtime.structureRuntime.Heat = 99; f.Runtime.structureRuntime.ManaReserve = 99;
             f.Runtime.spatialFloors[0].RoomContents.Assignments[0].RoomLocalPosition = new TileCoordinate(999, 999);
             e = Restore(e); EqualOutcome(e.DrainToCompletion(), expected);
+            CollectionAssert.AreEqual(edited, f.Session.GetCurrentBytes());
         }
         [TestCase("identity")] [TestCase("start")] [TestCase("ordinal")] [TestCase("format")]
         [TestCase("rules")] [TestCase("evidence")] [TestCase("length")] [TestCase("prefix")]
@@ -215,6 +225,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.Throws<ArgumentException>(() => new LivingDungeonProfile("living.qualification.profile_a.v1",
                 2, 4, 65536, 2048, 8192, 262144, 357996, maximumCombatWork: 1000000));
         }
+        [TestCase("level")] [TestCase("health")] [TestCase("revival")] [TestCase("option")]
+        public void InvalidRetainedMonsterInputsCannotExposeAUsableExecution(string kind)
+        {
+            var s = PhaseSixA4Tests.Snapshot(Dungeon()); var starts = s.MonsterStarts; var m = starts.Records[0];
+            var options = s.MonsterStartOptions;
+            starts.Records[0] = new MonsterContinuityRecord(m.AssignmentId, kind == "level" ? 2 : m.Level,
+                kind == "health" ? int.MaxValue : m.Health, kind == "revival" || m.RevivalRequired);
+            if (kind == "option") options[0] = MvpDungeonPlacementIds.SkeletonOptionId;
+            s.RestoreCombatInputs(s.CombatRules, s.CombatBounds, starts, s.MonsterStartLevel,
+                s.MonsterReadinessNumerator, s.MonsterReadinessDenominator, options);
+            Assert.Throws<ArgumentException>(() => Start(s));
+        }
+        [Test] public void ExactTechnicalByteCeilingIsIndependentOfReplayCeiling()
+        {
+            var f = Dungeon(); var first = Start(PhaseSixA4Tests.Snapshot(f)).ExportCheckpoint(Limits);
+            int padding = Limits.MaximumBytes - first.GetBytes().Length;
+            // Test-only unused rule-name padding qualifies bytes, not production content size.
+            f.Configuration.PhaseFiveB.EncounterRuleSourceId += new string('x', padding);
+            var exact = Start(PhaseSixA4Tests.Snapshot(f)).ExportCheckpoint(Limits);
+            Assert.That(exact.GetBytes().Length, Is.EqualTo(65536));
+            Assert.That(Service.RestoreCheckpoint(exact.GetBytes(), exact.Identity, exact.StartIdentity, 0, Limits).IsValid, Is.True);
+            f.Configuration.PhaseFiveB.EncounterRuleSourceId += "x";
+            Assert.Throws<InvalidOperationException>(() => Start(PhaseSixA4Tests.Snapshot(f)).ExportCheckpoint(Limits));
+        }
         [Test] public void ExportStandaloneTechnicalFixturesAndMeasurements()
         {
             var s = PhaseSixA4Tests.Snapshot(Dungeon());
@@ -261,6 +295,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             Assert.That(owner.Parties.Count, Is.EqualTo(3));
             Assert.That(LivingDungeonContracts.Validate(owner, new[] { profile }), Is.True);
+            var limitedAggregate = new LivingDungeonProfile(profile.Id, 2, 4, 65536, 2048, 2048, 262144, 357996,
+                Timing, RunPostureResolver.BalancedId, profile.BaseBudget, maximumCombatWork: 1000000);
+            long originalOrdinal = owner.Parties[0].NextOrdinal; owner.Parties[0].NextOrdinal = 2048;
+            Assert.That(LivingDungeonContracts.Validate(owner, new[] { limitedAggregate }), Is.False);
+            owner.Parties[0].NextOrdinal = originalOrdinal;
+            var terminal = LivingDungeonContracts.Restore(owner.Parties[1], profile);
+            terminal.AdvanceThrough(long.MaxValue, 1, terminal.NextOrdinal);
+            var excessiveDeadline = terminal.ExportCheckpoint(Limits);
+            var savedBytes = owner.Parties[1].Checkpoint; string savedIdentity = owner.Parties[1].CheckpointIdentity;
+            owner.Parties[1].Checkpoint = excessiveDeadline.GetBytes(); owner.Parties[1].CheckpointIdentity = excessiveDeadline.Identity;
+            Assert.That(LivingDungeonContracts.Validate(owner, new[] { profile }), Is.False);
+            owner.Parties[1].Checkpoint = savedBytes; owner.Parties[1].CheckpointIdentity = savedIdentity;
             Assert.That(LivingDungeonContracts.Validate(owner, new[] { b1 }), Is.False);
             Assert.Throws<InvalidOperationException>(() => LivingDungeonTerminalSettlement.Select(owner, profile));
             var original = owner.Parties.Select(p => p.Checkpoint).ToArray();

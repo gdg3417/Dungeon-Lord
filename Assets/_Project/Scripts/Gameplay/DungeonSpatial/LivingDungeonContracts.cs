@@ -237,6 +237,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     var view = e.Inspect();
                     if (view.RunId != "run-" + Number(p.Sequence) || !view.HasTiming || e.OutcomeTaken ||
                         checked(p.AdmittedAt + view.LogicalTime) > s.AcceptedThrough) return false;
+                    if (e.Combat != null && e.AcceptedDeadline >= 0 &&
+                        checked(p.AdmittedAt + e.AcceptedDeadline) > s.AcceptedThrough) return false;
                     var due = e.NextDueTime();
                     if (due.HasValue && checked(p.AdmittedAt + due.Value) <= s.ClosedThrough) return false;
                     if (!e.IsTerminal) active++;
