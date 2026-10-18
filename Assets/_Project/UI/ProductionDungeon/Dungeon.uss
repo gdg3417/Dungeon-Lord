@@ -54,8 +54,8 @@
 .viewport { flex-grow: 1; min-width: 0; }
 .workspace { flex-grow: 1; flex-shrink: 1; min-height: 0; }
 .landscape.editing .workspace { flex-direction: row; }
-.landscape.editing .map-area { min-width: 0; min-height: 0; flex-basis: 50%; }
-.landscape.editing .bottom-chrome { flex-basis: 50%; max-height: 100%; min-width: 0; border-left-width: 2px; border-left-color: var(--gold); }
+.landscape.editing .map-area { min-width: 0; min-height: 0; flex-basis: 40%; }
+.landscape.editing .bottom-chrome { flex-basis: 60%; max-height: 100%; min-width: 0; border-left-width: 2px; border-left-color: var(--gold); }
 .landscape.editing .sheet-top { flex-direction: column; align-items: stretch; }
 .landscape.editing .sheet-header, .landscape.editing #constructionCategories { flex-basis: auto; }
 .landscape.editing .placement-context { flex-direction: column; }
@@ -64,6 +64,8 @@
 .landscape.editing #draftSummary { flex-basis: 100%; }
 .landscape.editing #editActions { flex-basis: auto; }
 .landscape.editing .session-actions .legacy { flex-basis: 100%; }
+.landscape.editing .session-actions { padding-top: 0; }
+.landscape.constructing .placement-information Label { margin-top: 0; margin-bottom: 0; }
 .landscape.editing #constructionOptions { flex-shrink: 0; }
 .landscape.constructing .sheet-top { flex-direction: row; }
 .landscape.constructing .sheet-header { flex-basis: 45%; }
