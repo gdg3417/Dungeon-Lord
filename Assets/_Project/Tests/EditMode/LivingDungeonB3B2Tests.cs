@@ -118,6 +118,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void MalformedProductionConfigurationRejectsOverflowAndUnsupportedProfile()
         {
+            string invalidMovement = File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json")
+                .Replace("\"UnitsPerTileEdge\": 1000", "\"UnitsPerTileEdge\": 0");
+            Assert.Throws<ArgumentException>(() => LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(invalidMovement)));
             string json = File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json");
             Assert.Throws<ArgumentException>(() => LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(json.Replace("1000", "2147483648"))));
             Assert.Throws<ArgumentException>(() => LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(json.Replace(LivingDungeonForegroundConfig.ProfileId, "unknown"))));
@@ -177,7 +180,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var second = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot()).StartTimedCombatSnapshot(2, existing.Snapshot, Policy.Timing);
             var other = new LivingDungeonParty { Sequence = 2, AdmittedAt = f.Runtime.livingDungeon.Parties.Single().AdmittedAt };
             try {
-                second.AdvanceThrough(0, Policy.MaximumBoundaryEvents);
+                second.AdvanceThrough(0, Policy.MaximumBoundaryEvents, second.NextOrdinal);
                 var profile = Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized);
                 LivingDungeonScheduling.Pin(other, second, profile); f.Runtime.livingDungeon.Parties.Add(other);
                 Assert.That(LivingDungeonContracts.Validate(f.Runtime.livingDungeon, new[] { profile }), Is.False);
