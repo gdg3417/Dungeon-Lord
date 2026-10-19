@@ -165,6 +165,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(p.CreateProfile(default).Id, Is.Not.EqualTo("living.qualification.profile_a.v1"));
         }
 
+        [Test] public void QualifiedProductionLifetimeMeasuresCheckpointReplayAndBoundaryWork()
+        {
+            var f = Dungeon(); var watch = System.Diagnostics.Stopwatch.StartNew(); Admitted(f);
+            var p = f.Runtime.livingDungeon.Parties.Single(); var profile = Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized);
+            var e = LivingDungeonContracts.Restore(p, profile); int maximumBytes = 0, sameTimeEvents = 0, maximumSameTimeEvents = 0;
+            long previous = -1;
+            try {
+                while (!e.IsTerminal) {
+                    long due = e.NextDueTime().Value;
+                    sameTimeEvents = due == previous ? sameTimeEvents + 1 : 1; previous = due;
+                    maximumSameTimeEvents = Math.Max(maximumSameTimeEvents, sameTimeEvents);
+                    e.AdvanceThrough(due, 1, e.NextOrdinal);
+                    maximumBytes = Math.Max(maximumBytes, e.ExportCheckpoint(profile.Checkpoints).GetBytes().Length);
+                }
+                var outcome = e.TakeOutcome();
+                TestContext.WriteLine("B3B2 measured bytes=" + maximumBytes + " replay=" + e.NextOrdinal +
+                    " sameTimeEvents=" + maximumSameTimeEvents + " combatWork=" + CombatC0Diagnostics.ChargedWork(outcome) +
+                    " logicalDuration=" + e.Inspect().LogicalTime + " admissionAndReplayMs=" + watch.ElapsedMilliseconds);
+                Assert.That(maximumBytes, Is.LessThanOrEqualTo(profile.MaximumCheckpointBytes));
+                Assert.That(e.NextOrdinal, Is.LessThanOrEqualTo(profile.MaximumPartyReplay));
+                Assert.That(maximumSameTimeEvents, Is.LessThanOrEqualTo(Policy.MaximumBoundaryEvents));
+            } finally { e.Abandon(); }
+        }
+
         [Test] public void ActualAdmissionRetainsAnUnfinishedTimedC2PrefixThenSettlesAndRetiresExactlyOnce()
         {
             var f = Dungeon(); Through(f, 0);
