@@ -292,13 +292,19 @@ namespace DungeonBuilder.M0
                 if (!created.IsSuccess)
                 { banner = created.Reason == ContentAcquisitionEconomySnapshot.InvalidReason ? created.Reason :
                     Gd66MigrationReasonRegistry.PlayerLocalizationKey(created.Reason); return null; }
-                _canonicalSession = created.Session;
+                // The creator emits a dormant owner. Bind its session to this
+                // application's explicitly supported executable profiles before
+                // any foreground activation can prepare a replacement.
+                var supported = DetachedCanonicalSaveSession.Open(created.Session.GetCurrentBytes(), _validationContext, _limits);
+                if (!supported.IsSuccess) { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(supported.Reason); return null; }
+                _canonicalSession = supported.Session;
                 return created.RuntimeProjection;
             }
             var coordinator = new DetachedSpatialSaveLoadCoordinator(_limits, _compatibility, _production,
                 _legacyConfiguration, new Dictionary<string, byte[]>(),
                 new RawSaveEnvelopeVersionContract(1, 6), CreateBlankFloorContract(),
-                _positionMigrationProfiles, _roomContentOccupancy, monsterRecovery: _validationContext.MonsterRecovery);
+                _positionMigrationProfiles, _roomContentOccupancy,
+                livingDungeonProfiles: _validationContext.LivingDungeonProfiles, monsterRecovery: _validationContext.MonsterRecovery);
             DetachedSpatialSaveLoadResult loaded = coordinator.Load(SavePath, preflight);
             if (!loaded.IsSuccess)
             {

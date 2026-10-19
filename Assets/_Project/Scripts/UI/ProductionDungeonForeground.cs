@@ -26,8 +26,10 @@ namespace DungeonBuilder.M0
                             view.Step?.FloorIndex + 1 ?? 1, Text("ui.living.action." + (view.Step?.Kind.ToString() ?? "RoomEntry")), view.Ordinal);
                         if (view.RunId != null && (IsEditing || observingReplay || !view.GeometryCompatible))
                             label.text += "\n" + Text(IsEditing ? "ui.living.editing" : observingReplay ? "ui.living.replay_hidden" : "ui.living.geometry_unavailable");
-                        if (view.RunId == null && latest?.SurvivalSummary?.RuleResolved == true)
+                        if (view.RunId == null && latest?.SurvivalSummary?.RuleResolved == true) {
                             label.text += "\n" + Format("ui.living.latest", latest.RunId, latest.SurvivalSummary.SurvivorCount);
+                            if (!string.IsNullOrEmpty(latest.FinalRouteOutcomeKey)) label.text += "\n" + Text(latest.FinalRouteOutcomeKey);
+                        }
                     }
                 }
             }

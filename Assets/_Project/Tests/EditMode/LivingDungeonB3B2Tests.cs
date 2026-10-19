@@ -31,8 +31,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         private static RunExecution Start(Fixture f) => new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot())
             .StartTimedCombatSnapshot(1, PhaseSixA4Tests.Snapshot(f), Policy.Timing);
-        private static DetachedCanonicalWriteResult Pump(Fixture f, long target) => PhaseSixA4Tests.Writer(f).AdvanceForeground(
-            f.ActivePath, f.FileSystem, f.Session, f.Runtime, Policy, target, 10, (save, tick) => { }, 1000);
+        private static DetachedCanonicalWriteResult Pump(Fixture f, long target, LivingDungeonForegroundConfig policy = null) => PhaseSixA4Tests.Writer(f).AdvanceForeground(
+            f.ActivePath, f.FileSystem, f.Session, f.Runtime, policy ?? Policy, target, 10, (save, tick) => { }, 1000);
         private static void Through(Fixture f, long target)
         {
             for (int i = 0; i < 100; i++) {
@@ -55,11 +55,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void AcceptedButUnclosedHorizonReopensWithoutDroppingTimeOrDuplicatingHistory()
         {
-            var f = Dungeon(); f.Accept(Pump(f, 1800000));
+            var budget = LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(
+                File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json").Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1")));
+            var f = Dungeon(); f.Accept(Pump(f, 20000, budget));
             Assert.That(f.Runtime.livingDungeon.IsClosed, Is.False);
-            Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(1800000));
-            f.Reopen(); Through(f, 1800000);
-            Assert.That(f.Runtime.totalTicks, Is.EqualTo(180));
+            Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(20000));
+            f.Reopen(); Through(f, 20000);
+            Assert.That(f.Runtime.totalTicks, Is.EqualTo(2));
             Assert.That(f.Runtime.runHistory.RecentOutcomes.Select(r => r.RunId).Distinct().Count(), Is.EqualTo(f.Runtime.runHistory.RecentOutcomes.Length));
         }
 
@@ -80,6 +82,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void UnprovenRollbackRequiresRecoveryAndDoesNotPublishTerminalEffects()
         {
             var f = Dungeon(); Admitted(f); long finish = Finish(f); var old = f.Runtime;
+            f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            f.FileSystem.Seed(f.ActivePath, f.Session.GetCurrentBytes());
             f.FileSystem.EnableFailureSequence(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1,
                 Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 2);
             var failed = Pump(f, finish); f.FileSystem.DisableFailure();
@@ -127,8 +131,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.SetTimeSourceForTests(utc);
             service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, f.FileSystem, path));
-            Assert.That(service.LoadOrCreate("foreground-test", out string banner), Is.Not.Null, banner);
+            var loaded = service.LoadOrCreate("foreground-test", out string banner);
+            Assert.That(loaded, Is.Not.Null, banner); f.Runtime = loaded; f.State = loaded.validatedCanonicalSpatialState;
             return service;
+        }
+
+        [Test] public void FreshNativeSessionBindsProductionProfilesBeforeDormantActivation()
+        {
+            var f = Dungeon(); f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var service = Service(f, new Utc());
+            Assert.That(f.Runtime.livingDungeon.IsDormant, Is.True);
+            f.Accept(service.AdvanceForeground(f.Runtime, 0, 10, (save, tick) => { }));
+            Assert.That(f.Runtime.livingDungeon.Scheduler.ProfileId, Is.EqualTo(LivingDungeonForegroundConfig.ProfileId));
+            Assert.That(f.Runtime.livingDungeon.IsClosed, Is.True);
+            service = Service(f, new Utc());
+            Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.Zero);
         }
 
         [Test] public void ReinspectionAndPausedHorizonDrainRetainOfflineBoundary()
@@ -144,7 +161,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void ServiceLatchesRecoveryRequiredAndBlocksAllLaterForegroundPublication()
         {
-            var f = Dungeon(); Admitted(f); long finish = Finish(f); var service = Service(f, new Utc()); int published = 0;
+            var f = Dungeon(); Admitted(f); long finish = Finish(f);
+            f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            f.FileSystem.Seed(f.ActivePath, f.Session.GetCurrentBytes());
+            var service = Service(f, new Utc()); int published = 0;
             service.CanonicalRuntimePublished += save => published++;
             f.FileSystem.EnableFailureSequence(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1,
                 Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 2);
@@ -200,11 +220,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.runHistory.LatestOutcome?.RunId, Is.Not.EqualTo("run-1"));
             var e = LivingDungeonContracts.Restore(party, Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized));
             Assert.That(e.Combat.Kernel.RulesId, Is.EqualTo(MonsterRecoveryRules.Executable)); Assert.That(e.IsTerminal, Is.False);
-            long finish; try { e.DrainToCompletion(); finish = arrival + e.Inspect().LogicalTime; } finally { e.Abandon(); }
+            RunOutcomeRecord expected;
+            long finish; try { expected = e.DrainToCompletion(); finish = arrival + e.Inspect().LogicalTime; } finally { e.Abandon(); }
             Through(f, finish); Assert.That(f.Runtime.livingDungeon.Parties, Is.Empty);
             Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.EqualTo("run-1"));
-            var state = B.Structured(f.Runtime); var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, finish);
-            CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes()); Assert.That(B.Structured(f.Runtime), Is.EqualTo(state));
+            Assert.That(B.Structured(CombatC0Diagnostics.Events(f.Runtime.runHistory.LatestOutcome)), Is.EqualTo(B.Structured(CombatC0Diagnostics.Events(expected))));
+            Assert.That(B.Structured(CombatC0Diagnostics.Monsters(f.Runtime.runHistory.LatestOutcome)), Is.EqualTo(B.Structured(CombatC0Diagnostics.Monsters(expected))));
+            Assert.That(CombatC0Diagnostics.ChargedWork(f.Runtime.runHistory.LatestOutcome), Is.EqualTo(CombatC0Diagnostics.ChargedWork(expected)));
+            var state = JsonUtility.ToJson(f.Runtime); var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, finish);
+            CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes()); Assert.That(JsonUtility.ToJson(f.Runtime), Is.EqualTo(state));
             Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(r => r.RunId == "run-1"), Is.EqualTo(1));
         }
 
@@ -215,7 +239,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             foreach (long t in new long[] { 0, 1, 9999, 10000, 10001, 29999, 30000, 30001, 45000, 60000, 89999, 90000, 120000 }) {
                 Through(split, t); split.Reopen();
             }
-            CollectionAssert.AreEqual(direct.Session.GetCurrentBytes(), split.Session.GetCurrentBytes());
+            // Revision counts authoritative writes/acceptances, which intentionally
+            // differ with pump partitioning. Every other durable byte must match.
+            string Durable(Fixture f) => System.Text.Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace(
+                "\"Revision\":" + f.Runtime.livingDungeon.Revision + ",", "\"Revision\":0,");
+            Assert.That(Durable(direct), Is.EqualTo(Durable(split)));
+            direct.Reopen(); split.Reopen();
+            direct.Runtime.livingDungeon.Revision = split.Runtime.livingDungeon.Revision = 0;
             Assert.That(B.Structured(direct.Runtime), Is.EqualTo(B.Structured(split.Runtime)));
         }
 

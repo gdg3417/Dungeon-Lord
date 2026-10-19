@@ -1,6 +1,6 @@
 # B3B2 preimplementation inspection
 
-Status: preimplementation only; owner decisions A/B in the [contract](../../../planning/living-dungeon-phase-b3b2-implementation-contract.md#owner-decision-gate) remain pending. No production qualification or runtime-change claim.
+Historical status at the preimplementation gate: decisions A/B were pending; this record did not claim production qualification or runtime changes. **Superseded by the owner's subsequent approval** of configuration-owned 30–90-second pacing and the additional movement/interaction/unit values, and explicit rejection of an occupied-floor edit restriction. The current [contract](../../../planning/living-dungeon-phase-b3b2-implementation-contract.md#active-run-editing-and-c2-current-state-reconciliation) records the accepted stable-identity net-damage policy. Preserve the inspection and unrun qualification table below as historical evidence; later implementation results are recorded separately.
 
 ## Repository evidence
 
