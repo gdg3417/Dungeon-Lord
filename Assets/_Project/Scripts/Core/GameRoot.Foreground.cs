@@ -8,7 +8,7 @@ namespace DungeonBuilder.M0
     public partial class GameRoot
     {
         private bool foregroundApplicationPaused, foregroundApplicationFocused = true;
-        private bool foregroundDirty = true, foregroundPumping, foregroundResumePending;
+        private bool foregroundDirty = true, foregroundPumping, foregroundResumePending, foregroundRetryPending;
         private string foregroundFailure;
         public LivingDungeonForegroundInspection ForegroundActivity { get; private set; }
 
@@ -54,7 +54,7 @@ namespace DungeonBuilder.M0
 
         private void UpdateForeground()
         {
-            if (_explicitSaveDeleteQuiesced || foregroundFailure != null || foregroundPumping || Save == null) return;
+            if (_explicitSaveDeleteQuiesced || foregroundFailure != null || foregroundRetryPending || foregroundPumping || Save == null) return;
             try {
                 long now = TimeService.SampleForeground();
                 if (foregroundDirty || ForegroundActivity == null || now >= ForegroundActivity.NextBoundary || Save.livingDungeon?.IsClosed == false)
@@ -78,7 +78,18 @@ namespace DungeonBuilder.M0
                 long beforeTicks = Save.totalTicks;
                 var result = SaveService.AdvanceForeground(Save, through, _configuredSimulationTickSeconds, ApplyForegroundPassiveTick,
                     TimeService.IsPaused ? Save.lastPausedUtcUnix : (long?)null);
-                if (!result.IsSuccess) { ForegroundFault(result.Reason); return false; }
+                if (!result.IsSuccess) {
+                    if (result.Reason == DetachedCanonicalWriteAuthority.AtomicSaveFailedReason) {
+                        // The writer proved the original bytes remain authoritative.
+                        // Keep that session/prefix; retry only at an explicit action
+                        // or lifecycle barrier, never in a per-frame storage loop.
+                        foregroundRetryPending = true;
+                        ForegroundActivity = new LivingDungeonForegroundInspection { StateKey = "ui.living.retryable", NextBoundary = long.MaxValue };
+                        Logger?.Warn(result.Reason);
+                    } else ForegroundFault(result.Reason);
+                    return false;
+                }
+                foregroundRetryPending = false;
                 foregroundDirty = false;
                 // A bounded pause flush can finish in later suspended pumps.
                 // This successful complete-save transaction includes lastPaused
@@ -108,7 +119,7 @@ namespace DungeonBuilder.M0
             try {
                 long target = TimeService.SampleForeground();
                 int pumps = SaveService.ForegroundConfiguration.MaximumBoundaries;
-                while (pumps-- > 0 && (Save.livingDungeon.IsDormant ||
+                while (pumps-- > 0 && (foregroundRetryPending || Save.livingDungeon.IsDormant ||
                     !Save.livingDungeon.IsClosed || target > Save.livingDungeon.Scheduler.AcceptedThrough))
                     if (!PumpForeground(target)) return false;
                 return Save.livingDungeon.IsClosed && target <= Save.livingDungeon.Scheduler.AcceptedThrough;

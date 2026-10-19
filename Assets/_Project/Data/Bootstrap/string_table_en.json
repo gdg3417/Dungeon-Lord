@@ -8,6 +8,7 @@
     {"key":"ui.living.unsupported_layout","text":"Automatic visitors require one active first floor."},
     {"key":"ui.living.unsupported_profile","text":"This saved run uses a different scheduling contract. Automatic visitors are unavailable."},
     {"key":"ui.living.blocked","text":"Visitor progress could not be saved safely. Existing run evidence is preserved."},
+    {"key":"ui.living.retryable","text":"Visitor progress could not be saved. Save changes or pause and resume to retry. Existing progress is preserved."},
     {"key":"ui.living.active","text":"Visitors exploring the dungeon."},
     {"key":"ui.living.active_format","text":"{0} · Floor {1} · {2}"},
     {"key":"ui.living.editing","text":"Original layout. Live map hidden."},

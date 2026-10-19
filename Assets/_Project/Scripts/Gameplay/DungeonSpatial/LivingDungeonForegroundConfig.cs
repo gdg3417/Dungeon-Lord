@@ -30,7 +30,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             data = value;
             if (data == null || data.FormatVersion != 1 || data.Profile != ProfileId || data.UnitsPerSecond <= 0 ||
-                data.GameplayPartyCapacity != 1 || data.MaximumBoundariesPerPump <= 0 || data.MaximumEventsPerBoundary <= 0 ||
+                data.GameplayPartyCapacity != 1 || data.MaximumCombatWork <= 0 || data.MaximumBoundariesPerPump <= 0 || data.MaximumEventsPerBoundary <= 0 ||
                 data.MaximumRetained < data.GameplayPartyCapacity || data.MinimumArrivalUnits <= 0 || data.MaximumArrivalUnits < data.MinimumArrivalUnits ||
                 data.LowInterval < data.BuildingInterval || data.BuildingInterval < data.SteadyInterval || data.SteadyInterval < data.HeavyInterval ||
                 new[] { data.LowInterval, data.BuildingInterval, data.SteadyInterval, data.HeavyInterval, data.ChurnInterval }
