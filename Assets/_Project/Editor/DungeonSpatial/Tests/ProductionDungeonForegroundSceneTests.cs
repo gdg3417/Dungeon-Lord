@@ -78,9 +78,9 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(root.Save, Is.SameAs(original)); Assert.That(service.CanonicalSession, Is.SameAs(session));
                 Assert.That(EditMode.LivingDungeonPhaseABaselineTests.Structured(root.Save), Is.EqualTo(state));
                 if (!uncertain) CollectionAssert.AreEqual(before, fs.ReadAllBytes(service.SavePath));
-                int operations = fs.Operations.Count;
+                int operations = fs.Operations.Count();
                 for (int frame = 0; frame < 120; frame++) update();
-                Assert.That(fs.Operations.Count, Is.EqualTo(operations), "Do not busy-retry storage each render frame");
+                Assert.That(fs.Operations.Count(), Is.EqualTo(operations), "Do not busy-retry storage each render frame");
                 if (uncertain) {
                     fs.DisableFailure(); Assert.That(service.BeforeForegroundAction(), Is.False);
                     Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root),
@@ -91,7 +91,7 @@ namespace DungeonBuilder.M0.Tests
                 } else {
                     fs.EnableTargetedFailure(flush, paths => true, 1, false);
                     Assert.That(service.BeforeForegroundAction(), Is.False);
-                    Assert.That(fs.Operations.Count, Is.GreaterThan(operations), "An explicit barrier must attempt a safe retry");
+                    Assert.That(fs.Operations.Count(), Is.GreaterThan(operations), "An explicit barrier must attempt a safe retry");
                     Assert.That(root.ForegroundActivity.StateKey, Is.EqualTo("ui.living.retryable"));
                     Assert.That(published, Is.Zero); CollectionAssert.AreEqual(before, fs.ReadAllBytes(service.SavePath));
                     fs.DisableFailure(); bool closed = false;
