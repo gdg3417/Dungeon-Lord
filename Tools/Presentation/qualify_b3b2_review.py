@@ -1,5 +1,9 @@
 """PR #245 correction: reuse the B3B2 campaign with unused identities/outputs."""
 from pathlib import Path
+import sys
+
+if any(arg in ('build-smoke-fix', 'smoke-fix') for arg in sys.argv[1:]):
+    raise ValueError('This correction campaign supports only its separate plain build/smoke paths')
 
 source_path = Path(__file__).with_name('qualify_b3b2.py')
 source = source_path.read_text(encoding='utf-8')
