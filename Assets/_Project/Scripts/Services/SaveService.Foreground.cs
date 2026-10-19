@@ -59,6 +59,9 @@ namespace DungeonBuilder.M0
             if (owner.Scheduler.NextOpportunityTime.HasValue) view.NextBoundary = Math.Min(view.NextBoundary, owner.Scheduler.NextOpportunityTime.Value);
             if (!owner.IsClosed) view.NextBoundary = 0;
             if (!owner.Scheduler.NextOpportunityTime.HasValue) view.StateKey = "ui.living.not_eligible";
+            var activeFloors = current.validatedCanonicalSpatialState.Floors.Where(f => f.ActivationState == FloorActivationState.Active).ToArray();
+            if (activeFloors.Length > 1 || activeFloors.Length == 1 && activeFloors[0].FloorIndex != 0)
+                view.StateKey = "ui.living.unsupported_layout";
             var profile = _validationContext.LivingDungeonProfiles.Single(p => p.Id == LivingDungeonForegroundConfig.ProfileId);
             foreach (var p in owner.Parties) {
                 var e = LivingDungeonContracts.Restore(p, profile);

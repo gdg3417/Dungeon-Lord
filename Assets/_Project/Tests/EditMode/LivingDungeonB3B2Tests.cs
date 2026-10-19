@@ -372,6 +372,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(activateTarget ? 100 - (ready - 3) - ready : 100));
             var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, finish);
             CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes());
+            if (activateTarget) Assert.That(Service(f, new Utc()).InspectForeground(f.Runtime, 10).StateKey, Is.EqualTo("ui.living.unsupported_layout"));
         }
 
         [Test] public void RetiredCapturedIdentityIsNeverRecreatedAndReplacementIsUntouched()

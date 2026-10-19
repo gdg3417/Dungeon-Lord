@@ -5,6 +5,7 @@
   "entries": [
     {"key":"ui.living.awaiting","text":"Waiting for the next arrival."},
     {"key":"ui.living.not_eligible","text":"No arrival opportunity yet."},
+    {"key":"ui.living.unsupported_layout","text":"Automatic visitors require one active first floor."},
     {"key":"ui.living.unsupported_profile","text":"This saved run uses a different scheduling contract. Automatic visitors are unavailable."},
     {"key":"ui.living.blocked","text":"Visitor progress could not be saved safely. Existing run evidence is preserved."},
     {"key":"ui.living.active","text":"Visitors exploring the dungeon."},
