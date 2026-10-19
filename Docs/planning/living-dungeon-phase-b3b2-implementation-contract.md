@@ -1,0 +1,118 @@
+# Living Dungeon B3B2: first autonomous foreground C2 run
+
+Status: **owner decisions accepted; implementation authorized, qualification pending** (2026-10-18 America/Chicago). The owner approved 30–90 eligible foreground seconds as configuration-owned initial playtesting pacing and explicitly approved 1 second/tile edge, 3 seconds/atomic monster interaction, 1 second/trap and loot interaction and 1,000 logical units/second. The owner rejected an occupied-floor edit restriction and supplied the net-damage reconciliation contract below. This is one integrated B3B2 PR, not a separate planning/balancing phase or a passing qualification claim.
+
+Recommended configuration: GPT-6.1 Sol, High. Classification: Complex, specified integration of foreground lifecycle, deterministic scheduling, immutable C2 checkpoints, canonical settlement and production UI. Fallback only if unavailable and explicitly selected: GPT-6 Sol High, then GPT-5.6 Sol High. No automatic model switch or delegation.
+
+## Verified baseline and precedence
+
+Local `main` and freshly fetched `origin/main` both resolve to `5fbaa5f5d845c1341ee4cc4f52b706a8ba586d0d`. Initial checkout `codex/living-dungeon-b3b1-durable-combat` was clean at `f44d10f85a1812a045b3fcb28f018b5ace8fc263`; its tree exactly matches the merged main tree. New branch: `codex/living-dungeon-b3b2-autonomous-foreground-c2`, created from `origin/main`. Nothing was reset or discarded.
+
+GitHub inspection confirms #242 B3A, #243 Mana Farm deferral, #244 B3B1, #240 Combat C2 and #241 graphical floor controls are merged; there are no open PRs at inspection. Dated statements calling those packets unmerged in older contracts/evidence are historical. In particular, C2 has already approved and implemented schema 15, readiness 66/100, initial level 1, one mana per HP, living-first recovery and protected reserve. They are not new B3B2 decisions. #243 preserves Phase 7 Decisions 56–58; it does not revoke active-run editing.
+
+Read with: repository AGENTS, model policy, development rules, execution roadmap, Living Dungeon and Combat/Recovery owner locks, B2/B3A/B3B1 contracts, cross-spec glossary, Phase 7A0 Decisions 54–63 and responsive-editing amendment, production composition/replay implementation records, C2 implementation/qualification, and B3B1 workload review. Source findings and qualification status are indexed in [the evidence record](../testing/evidence/living-dungeon-b3b2/preimplementation.md).
+
+## Selected integration architecture
+
+Keep one canonical complete-save writer and one simulation engine. A production service reached through `GameRoot` / `SaveService` will use `DetachedCanonicalWriteAuthority`, its session and exact atomic persistence. It must not call `SimulateRunOnce` to generate autonomous outcomes. UI and rendering receive read-only committed inspection.
+
+The initial production admission contract supports exactly one active Floor 1 and one party. Other constructed inactive floors remain valid/editable. If a wider active layout is unsupported, suppress new autonomous admission with a localized reason; retain the layout, old saves and otherwise-valid manual gameplay. Do not deactivate floors or rewrite routes to fit the slice. No descending autonomous party or waiting queue is introduced.
+
+Install a distinct immutable supported production profile; never modify `living.qualification.profile_a.v1` or reinterpret its technical `MaximumActive` as gameplay capacity. Production registration must carry an explicit C2 combat-work envelope and executable validation. Historical B1 format 1, format-2 compatibility, manual C0/C2, historical readers and explicit qualification contexts retain their contracts. An existing qualification party does not acquire production foreground eligibility by loading it.
+
+### Foreground time and persistence
+
+The current `TimeService` / `SimulationClock` path is the integration point, but is insufficient unchanged: `GameRoot.Update` passes scaled frame delta, only application-pause is handled, the clock consumes at most one tick per call, and its fractional accumulator is not saved. Bootstrap owns the existing 10-second tick and 30-second active-save interval. `totalTicks` also has manual callers; it alone is not trusted foreground provenance.
+
+Use a shared monotonic foreground source under `TimeService` with explicit application-pause and focus suspension. Simulation/render speed and UTC do not establish elapsed foreground play. Keep passive tick/research rates and the separate existing offline passive-mana transaction unchanged. Do not create another writable elapsed-time owner.
+
+Approved mapping: 1,000 logical units per foreground second. Convert absolute monotonic samples to integer units before subtraction, rather than rounding every frame delta. The representable quantum is one millisecond; retain all accepted whole units in existing scheduler horizons, including sub-10-second progress. A transient sampler/pump cursor is not restart authority. Flush newly observed eligible time through canonical acceptance at ordinary save/lifecycle boundaries; preserve an unfinished accepted horizon and resume it before installing further opportunities. On restart, resume from the committed horizon with a fresh monotonic anchor: no elapsed time is inferred between processes, from `lastSavedUtcUnix`, or from pause UTC timestamps.
+
+Before enabling, prove integer-sample frame partition equivalence, partial-tick save/reopen, focus/pause callback combinations, accepted-but-unclosed restart, and bounded lifecycle flushing. Do not silently drop a partial tick or persist a second remainder field. If implementation cannot represent a required fact under these semantics, stop for a specific reviewed save-contract change; this gate authorizes no schema transition. A crash recovers the proven committed prefix, not uncommitted process memory.
+
+### Opportunities, capacity and demand
+
+`AdventurerArrivalPressureResolver` already combines configured loot/attraction/danger/Heat-pressure, current Heat tier and recent outcome evidence. `AdventurerTrafficPressureResolver` produces configured traffic bands and an **estimated** concurrent party count. Both are pure summaries; neither currently authorizes arrivals. Keep all existing coefficients/thresholds and forecasts unchanged. The estimate is not a capacity counter.
+
+The production admission policy is: validated supported active geometry, a complete path, positive loot signal, at least one assigned monster, resolved arrival/traffic summaries and a non-`none` traffic band. Injured/revival-pending defenders do not by themselves invalidate admission: the owner lock permits incompletely recovered vacant floors to receive parties. Admission still requires actual vacancy and the independent checkpoint/storage/work preflight.
+
+The first opportunity is at activation eligibility time plus that band's configured interval. Subsequent opportunities are spaced from the consumed opportunity time, with existing ordinal identity and minimum-spacing checks. Reevaluate eligibility at the due timestamp using canonical conditions. A full/ineligible opportunity is consumed without RunId allocation; there is no queue or accumulated admission debt. Already installed opportunity time/identity is immutable. Current demand changes affect due-time eligibility and scheduling of later opportunities. When no eligible demand exists, install no new opportunity; a later canonical condition change can establish the next one. Do not inject opportunities retroactively into an accepted horizon.
+
+Only admission increments `runHistory.NextRunSequence`; settlement uses the reserved identity without incrementing it. Preserve allocator validation, numeric sequence ordering, checkpoint/start pins, checked time arithmetic and deterministic throttling.
+
+### Event, edit and settlement ordering
+
+Process chronological boundaries, never a whole party to completion under a future deadline. At equal time retain numeric RunSequence then local event ordinal; existing party work precedes an arrival opportunity. At a terminal boundary, stage its C2 consequences and retirement before any same-time admission can capture new monster state. Passive tick effects at a shared boundary must have one explicit tested order (proposed: passive tick publication, existing party events/terminal settlement, vacancy recovery, opportunity, newborn events). Never spend passive mana from a later boundary on earlier recovery. Canonical edits occur after earlier accepted work and before future opportunities; draft commands remain noncanonical.
+
+Refactor/reuse B3A's consequence composition and guarded history authorization with the manual C2 condition checks. The Editor-only `SyntheticForegroundQualification` must remain excluded from production eligibility. Production provenance derives from the distinct supported foreground-only admission/progression path and trusted canonical predecessor, including restart; an app-state boolean or a caller-supplied checkpoint is insufficient.
+
+One atomic candidate must include: final HP/revival for affected stable identities; current-state run Heat then separate loot cooling; existing eligible extraction/resource effects; survivor-gated compatible branch/floor learning; the allocated RunId's history record; only the existing individually verified first-session objective; party retirement; and eligible vacancy recovery with its actual mana debit. Do not reroll extraction or manufacture new mana/reward grants. Preserve unrelated recognized state, current monster records and newer knowledge.
+
+Protect immutable history and atomic terminal publication without locking spatial edits. Current `OccupiedFloors` skips terminal records and `PrepareAndPersist` recovers only at closed horizons; these cannot simply be reused unchanged for production terminal publication. The production scheduler transaction must settle at the causal terminal boundary before exposing vacancy or capturing another party. Intermediate staging may use validated detached sessions, but no intermediate generic save may persist partial consequences or heal captured condition first.
+
+Condition application follows the owner-approved current-state net-damage algorithm below. Current HP/revival need not equal captured starting condition. Verify captured identity/option/level and HP causality against immutable execution, then verify each still-owned current identity against current canonical ownership and recovery rules. No occupied-floor edit-commit restriction is introduced. A contradictory identity, option, level, condition or damage chain fails closed and preserves the party. Failed/stale writes, readback, proven rollback and recovery-required handling continue through `ExactCompleteSaveAtomicPersistence`; no separate outcome journal or wallet.
+
+### Save representation
+
+Keep writable schema **15**. Existing `livingDungeon.Scheduler` fields own immutable profile identity, spacing, accepted/closed horizons and next/last opportunity identity/time. Party records own allocated sequence/admission time and pinned format-2 checkpoint. The checkpoint owns immutable geometry/config/party/C2 starting condition and committed execution prefix. `monsterContinuity` owns final persistent monster condition; recognized history/Heat/mana/objectives and shared knowledge keep their existing owners. Occupancy and recovery need are derived. No new durable field has been identified as necessary; no unknown extension is repurposed.
+
+The production profile definition must remain supported while a saved party depends on it. Unsupported or inconsistent profiles/checkpoints fail closed without discarding source bytes. Frozen schema 13/14 readers and 13→14→15 migration mappings remain unchanged. Enabling a dormant owner uses the canonical activation transaction, not a migration or implicit adoption of a qualification prefix.
+
+### Production UI
+
+Extend the existing UI Toolkit Dungeon controller/presenter/world view with compact localized arrival/activity/result states and the existing floor indicator pattern. Show actual committed RunId/floor/action and completed/retreated/defeated consequences. Reuse geometry projection and pooled marker primitives against the captured, committed prefix only. No renderer invokes `RunExecution` or the kernel. Presentation interpolation never reveals an uncommitted consequence.
+
+Hide live geometry in Edit Mode while simulation continues. On compatible geometry, show the committed party position; when evidence/layout projection is missing or incompatible, retain the localized activity summary and explain unavailable geometry. Manual Replay Run remains a separate completed-run observer. Do not claim that historical detailed replay becomes durable merely because an active checkpoint can be reconstructed.
+
+## Accepted owner decisions and exact production pacing
+
+The owner approved the following initial playtesting timings, not permanent balance. All values live in one validated versioned production configuration resource. No runtime defaults, random resets or frame/animation-derived durations are allowed.
+
+| Configured input | Approved initial value |
+| --- | ---: |
+| Logical units per eligible foreground second | 1,000 |
+| Movement per actual traversed tile edge | 1,000 units (1 second) |
+| Atomic monster interaction | 3,000 units (3 seconds) |
+| Trap interaction | 1,000 units (1 second) |
+| Loot interaction | 1,000 units (1 second) |
+| Floor transfer | No production descent; timing remains unused and cannot authorize descent |
+| Traffic `low` opportunity interval | 90,000 units (90 seconds) |
+| Traffic `building` opportunity interval | 60,000 units (60 seconds) |
+| Traffic `steady` opportunity interval | 45,000 units (45 seconds) |
+| Traffic `heavy` opportunity interval | 30,000 units (30 seconds) |
+| Traffic `dangerous_churn` opportunity interval | 60,000 units (60 seconds), retained death-caution band |
+| Traffic `none` | No new opportunity |
+| Posture | Existing balanced default |
+| Gameplay occupancy | One party on the supported active Floor 1 |
+
+Eligibility and cadence use the existing configured arrival and traffic resolvers unchanged. Arrival score includes canonical attraction/loot/danger/Heat and recent outcome inputs; traffic bands include its configured score weights and death/Heat caution. The ordered ordinary bands low→building→steady→heavy have nonincreasing intervals; dangerous churn retains its explicit caution interval. Forecast concurrency never sets real capacity. A due opportunity is rechecked against current eligibility/vacancy and consumed without allocation when blocked. Installed identities/times remain fixed, with no retroactive catch-up arrivals. No other production timing number is approved by implication. Existing 10-second passive ticks and 30-second save policy remain their existing configuration-owned rates; technical pump budgets will be documented from measurements, separately from balance.
+
+## Active-run editing and C2 current-state reconciliation
+
+Phase 7 Decisions 57 and 63 remain intact: enter Edit Mode, draft, and commit otherwise valid/affordable changes during an active run, including the captured floor. An existing execution retains its immutable start snapshot; later admissions capture the newly committed dungeon. Drafting is noncanonical; committing never rewrites historical combat. No blanket occupied-floor Save Changes restriction and no deferred mixed-draft rule is introduced.
+
+Terminal settlement must perform these steps on one detached complete-save candidate:
+
+1. Restore the pinned production C2 execution under its exact supported executable, start identity, committed ordinal and combat prefix evidence. Require terminal/unconsumed state and the reserved RunId, not an arbitrary caller-supplied outcome. Check the history/allocator against the exact predecessor; reject duplicate settlement.
+2. For every captured assigned monster output, match `AssignmentId` to captured option, level, initial HP and initial revival state. Validate final HP, ordered attack receipts and their HP chain. The sum of applied incoming attack damage must equal `D = InitialHealth - FinalHealth`, with `0 <= D <= InitialHealth`; no combat healing is inferred. Unchanged/bypassed/revival-pending monsters have zero damage. Inconsistent or missing relationships fail closed with `living.foreground.condition_conflict`.
+3. Resolve current canonical ownership using assigned contents plus returned custody. If neither current ownership nor a continuity record exists, the identity was retired: retain its historical result and do not recreate it, debit recovery, or affect a replacement identity. If only one of ownership/continuity exists, fail closed. The existing monotonic identity allocators and complete-save validation remain authority; no tombstone owner is added.
+4. For a still-owned identity, require the same option and compatible initial level under current continuity rules. Validate the current record. Preserve its current location/custody/sequence and all other fields. Apply `Hnew = max(0, Hcurrent - D)` using checked arithmetic. Do not assign historical final HP and do not use historical defeat as a current-state overwrite.
+5. Set `Rnew = (Hnew == 0) || (Rcurrent && Hnew < CurrentReadiness(option))`. This preserves a legitimate current revival-pending condition until readiness, introduces revival only when the reconciled current HP reaches zero, and cannot create a revival flag at/above readiness. A captured defeat remains in history even if authorized intervening recovery means current HP stays positive. Revalidate the entire continuity owner against current spatial/custody ownership, maximum HP, level and readiness after reconciliation.
+6. Compose the existing current-state Heat/cooling, extraction evidence, compatible survivor learning, history and applicable first-session objective. Retire the selected party in that same candidate. Only then derive vacancy and call the existing living-first recovery resolver. Recovery applies only to currently assigned monsters on currently active, proven-vacant floors; custody/inactive/occupied identities do not heal. Debit actual restored HP exactly once through the existing wallet and reserve rules. Do not invent a recovery cost for a missing identity.
+7. Serialize/validate the complete predecessor-to-candidate transition and persist/read back atomically before publishing. Damage, recovery debit, history and retirement share the same transaction. Retry from the unchanged predecessor after a proven rollback; recovery-required failures prohibit further progression. Reopening a retired owner cannot reapply damage or recovery.
+
+Canonical order is serialized before mutation: finish earlier accepted foreground work, then commit the edit/manual/recovery action, then process later foreground boundaries. At a shared boundary publish the existing passive tick/research effects first, then existing parties by numeric RunSequence/local ordinal and terminal settlement, then currently eligible vacancy recovery, then the opportunity and newborn zero-time prefix. An edit requested at the sampled time runs after due gameplay at that time; a committed earlier edit is preserved when a later terminal reconciles. Simultaneous settlements use that same order and apply each party's own verified net damage once to the result of the previous transaction. An overlapping authorized manual run remains a separate existing transaction; its legitimate HP/economy/history effects are inputs to later reconciliation, not silently discarded or repeated.
+
+The closed horizon advances only after all equal-time work is staged, so passive tick application and same-time event ordering remain reconstructible without a second elapsed-time/remainder owner. An accepted but unfinished horizon can restart; no generic save/repair path may publish partial boundary consequences. Existing edits may wait for bounded accepted work to close as a transaction prerequisite, but may not be rejected merely because a floor is occupied.
+
+Targeted cases: moved identity; unassignment to custody; redeployment on the same/another floor; retirement and a newly allocated replacement; recovery while active/occupied and after movement to a proven-vacant eligible floor; living and revival-pending starts; manual injury/recovery between admission and settlement; damage clamped at zero; captured defeat after intervening healing; option/level/HP/receipt contradictions; equal-time and repeated settlement requests; failed persistence/readback, proven rollback, recovery-required failure, save/reopen and exact-once retry; edits of unrelated floors/content; changed second autonomous admission and unchanged manual runs.
+
+Writable schema remains 15. No existing C2 canonical invariant contradicts this rule: records already permit positive injured living HP below readiness and require zero HP to be revival-pending; recovery clears revival at readiness; ownership reconciliation already retains stable identities across moves/custody and removes retired records. The former proposal to require equality with captured current HP or block occupied-floor edits is superseded, not implemented.
+
+## Qualification and completion gate
+
+Implement one integrated PR targeting main and leave it unmerged. Update this contract from proposed to actual with source applicability. Required qualification remains all 19 requested categories: foreground partition/lifecycle; deterministic demand/opportunities/allocator; exact timed C2/work boundaries; occupancy and unrestricted valid active-run edits; every applicable consequence/exact-once recovery; restart/failure/stale/rollback; B1/manual and schema 13/14/15 compatibility; localized live UI/fail-closed geometry/resolutions; changed second run; and measured bounds/allocations.
+
+Use the installed local root Unity project and established Windows workflow with fresh campaign, save, fixture, product and output identities. Inventory/protect real saves, prior builds, Unity inputs/config and historical evidence before any Unity process or player launch. Native product isolation must occur before startup; Bootstrap-only save-name substitution does not protect native caches. Preserve existing reports and known historical exceptions. Record actual commands, per-suite counts/failures, source/build identities, standalone automatic admission/progress/settlement/reopen and second-run evidence under `Docs/testing/evidence/living-dungeon-b3b2/`.
+
+Current status: owner decisions reconciled and implementation authorized. EditMode/PlayMode/build/standalone qualification **not yet run for B3B2**. No player-visible autonomous completion or passing PR claim is made until the integrated runtime and technical qualification finish.

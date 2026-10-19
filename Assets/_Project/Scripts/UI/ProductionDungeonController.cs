@@ -82,6 +82,7 @@ namespace DungeonBuilder.M0
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
             if (!legacy) ReadInput();
             UpdateReplay();
+            PresentForegroundActivity();
         }
 
         private bool HasCanonicalRuntime()

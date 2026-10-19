@@ -408,6 +408,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 : Failure("living.settlement.history_invalid");
 #endif
 
+        internal DetachedCanonicalSaveSessionResult PrepareForegroundReplacement(
+            DetachedRecognizedSaveStateSnapshotResult recognized, DetachedCompleteSaveValidationResult owned,
+            LivingDungeonState livingDungeon, MonsterContinuityState monsters,
+            SharedBranchKnowledgeAuthority branch = null, SharedFloorKnowledgeAuthority floor = null,
+            DurableSettlementHistory settlement = null) => recognized?.IsSuccess == true
+                ? PrepareReplacement(recognized.Snapshot, owned.State, null, null, branch, floor,
+                    livingDungeon, monsterContinuity: monsters, settlement: settlement)
+                : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+
         private static void WriteField(ContractJsonWriter writer, string key,
             ContractJsonNode value, bool first)
         {

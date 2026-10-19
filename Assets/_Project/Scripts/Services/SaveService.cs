@@ -10,7 +10,7 @@ using DungeonBuilder.M0.Economy;
 
 namespace DungeonBuilder.M0
 {
-    public class SaveService
+    public partial class SaveService
     {
         private readonly SimpleLogger _logger;
         private readonly SaveConfig _saveConfig;
@@ -58,6 +58,7 @@ namespace DungeonBuilder.M0
                 current?.structureRuntime?.ManaReserve ?? double.NaN, text, preview);
         internal DetachedCanonicalWriteResult SetQaMana(SaveData current, bool fillToCapacity)
         {
+            if (!PrepareForegroundAction(ref current)) return ForegroundBlocked();
             if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
                 return new DetachedCanonicalWriteResult(false,
                     DetachedCanonicalSpatialMutation.ValidationFailedReason, false, false,
@@ -122,6 +123,7 @@ namespace DungeonBuilder.M0
         }
         public DetachedCanonicalWriteResult UndoStructuralRenovation(SaveData current)
         {
+            if (!PrepareForegroundAction(ref current)) return ForegroundBlocked();
             if (RenovationUndoRemainingSeconds <= 0)
             { _undo = null; return new DetachedCanonicalWriteResult(false, StructuralEconomyService.UndoUnavailableReason,
                 false, false, null, null, null, null); }
@@ -181,6 +183,7 @@ namespace DungeonBuilder.M0
             ? new FileDungeonDraftStore(SavePath + ".editor-draft", _canonicalFileSystem, _limits) : null;
         public DetachedCanonicalWriteResult CommitDungeonDraft(SaveData current, TransactionalDungeonDraft draft, GateEvaluationInput? purchaseInput = null)
         {
+            if (!PrepareForegroundAction(ref current)) return ForegroundBlocked();
             if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
                 return new DetachedCanonicalWriteResult(false, TransactionalDungeonDraft.InvalidReason,
                     false, false, null, null, null, null);
@@ -225,11 +228,15 @@ namespace DungeonBuilder.M0
             _legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
             _positionMigrationProfiles = positionMigrationProfiles;
             _roomContentOccupancy = roomContentOccupancy;
+            try { ForegroundConfiguration = LivingDungeonForegroundConfig.Load(); }
+            catch { ForegroundConfiguration = null; }
             _validationContext = limits == null || production == null || compatibility == null ||
                 legacyConfiguration == null || positionMigrationProfiles == null ||
                 roomContentOccupancy == null ? null : new DetachedCurrentTargetValidationContext(
                     compatibility, production, legacyConfiguration, limits.Canonical,
-                    roomContentOccupancy, monsterRecovery: MonsterRecoveryRules.Capture(legacyGameplayConfiguration));
+                    roomContentOccupancy, livingDungeonProfiles: ForegroundConfiguration == null ? null : new[] {
+                        ForegroundConfiguration.CreateProfile(limits.Canonical.ForSchema(13).Serialized) },
+                    monsterRecovery: MonsterRecoveryRules.Capture(legacyGameplayConfiguration));
         }
 
         public void ConfigureStructuralRemovalPolicy(StructuralContentRemovalPolicySnapshot policy) =>
@@ -388,6 +395,7 @@ namespace DungeonBuilder.M0
 
         public bool Save(SaveData data, SaveReason reason)
         {
+            if (!PrepareForegroundAction(ref data)) return false;
             if (data == null)
             {
                 _logger.Error("Save called with null data.");
@@ -451,6 +459,7 @@ namespace DungeonBuilder.M0
         public DetachedCanonicalWriteResult CommitPhaseFiveBRun(SaveData current,
             Gameplay.RunSimulation.RunSimulationService simulation, string postureId)
         {
+            if (!PrepareForegroundAction(ref current)) return ForegroundBlocked();
             if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null || current == null)
                 return new DetachedCanonicalWriteResult(false, "branch.run.invalid_state", false, false, null, null, null, null);
             var result = CreateWriteAuthority().CommitPhaseFiveBRun(SavePath, _canonicalFileSystem,
@@ -466,6 +475,7 @@ namespace DungeonBuilder.M0
         public DetachedCanonicalWriteResult ExecuteCanonicalMutation(SaveData current,
             DetachedCanonicalMutationRequest request)
         {
+            if (!PrepareForegroundAction(ref current)) return ForegroundBlocked();
             if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
                 return new DetachedCanonicalWriteResult(false,
                     DetachedCanonicalSpatialMutation.ValidationFailedReason, false, false,
@@ -494,6 +504,7 @@ namespace DungeonBuilder.M0
         public DetachedCanonicalWriteResult CommitFloorLifecycle(SaveData current, FloorLifecycleAction action, string floorId,
             FloorLifecyclePreview expectedPreview = null)
         {
+            if (!PrepareForegroundAction(ref current)) return ForegroundBlocked();
             var result = CreateWriteAuthority().CommitFloorLifecycle(SavePath, _canonicalFileSystem,
                 _canonicalSession, current, action, floorId, expectedPreview);
             if (result.IsSuccess && !result.IsNoOp)
@@ -544,6 +555,7 @@ namespace DungeonBuilder.M0
         public DetachedCanonicalWriteResult CommitFloorConstruction(SaveData current,
             FloorConstructionPreview preview)
         {
+            if (!PrepareForegroundAction(ref current)) return ForegroundBlocked();
             if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
                 return new DetachedCanonicalWriteResult(false,
                     FloorConstructionService.InvalidContextReason, false, false,

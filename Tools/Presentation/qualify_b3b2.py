@@ -1,0 +1,33 @@
+"""B3B2 isolated campaign; reuse the committed B3B1 preservation adapter."""
+from pathlib import Path
+import hashlib,json,sys,types,zipfile
+ROOT=Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/'Tools/Presentation'))
+source=(ROOT/'Tools/Presentation/qualify_b3b1.py').read_text(encoding='utf-8')
+replacements={
+ 'living-dungeon-b3b1-20261018':'living-dungeon-b3b2-20261018',
+ 'living-dungeon-b3b1-qualification-20261018':'living-dungeon-b3b2-qualification-20261018',
+ 'b3b1_20261018':'b3b2_20261018',
+ 'Dungeon Lord B3B1 Smoke 20261018':'Dungeon Lord B3B2 Smoke 20261018',
+ 'living-dungeon-b3b1-owner-uat-starter-':'living-dungeon-b3b2-owner-uat-starter-',
+ "'focused': 'LivingDungeonB3B1'":"'focused': 'LivingDungeonB3B2'",
+ "'integration-play': 'LivingDungeonB3B1PlayModeTests;":"'integration-play': 'LivingDungeonB3B2PlayModeTests;LivingDungeonB3B1PlayModeTests;",
+ 'BuildLivingDungeonB3B1Windows':'BuildLivingDungeonB3B2Windows',
+}
+for old,new in replacements.items(): source=source.replace(old,new)
+m=types.ModuleType('b3b2_campaign');m.__file__=str(ROOT/'Tools/Presentation/qualify_b3b1.py')
+exec(compile(source,m.__file__,'exec'),m.__dict__)
+mode=sys.argv[1]
+if mode=='prepare':
+    if list(m.q.SAVE.glob(m.q.NAMESPACE+'*')): raise ValueError('Save namespace already used')
+    m.q.prepare();m.q.isolate_evidence();m.q.isolate_fixtures();m.isolate_starter()
+    with zipfile.ZipFile(m.q.OUT/'historical-evidence-preserved.zip','x',zipfile.ZIP_DEFLATED) as z:
+        for row in json.loads((m.q.OUT/'historical-evidence-before.json').read_text()):
+            p=Path(row['path']);z.write(p,p.relative_to(ROOT/'TestResults').as_posix())
+    m.isolate_product()
+    m.q.write('adapter.json',dict(source='Tools/Presentation/qualify_b3b1.py',
+        sha256=hashlib.sha256((ROOT/'Tools/Presentation/qualify_b3b1.py').read_bytes()).hexdigest(),replacements=replacements))
+elif mode=='run': sys.exit(m.run(sys.argv[2],sys.argv[3]))
+elif mode=='checkpoint': m.checkpoint(sys.argv[2])
+elif mode=='finish': m.finish()
+else: raise ValueError(mode)

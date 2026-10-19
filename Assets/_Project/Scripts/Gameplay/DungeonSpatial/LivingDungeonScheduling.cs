@@ -210,6 +210,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DetachedCanonicalWriteResult ConfigureLivingDungeon(string path, ISpatialMigrationFileSystem fs,
             DetachedCanonicalSaveSession session, string profileId, long minimumSpacingUnits)
             => MutateLivingDungeon(path, fs, session, (owned, runtime) => {
+                if (profileId == LivingDungeonForegroundConfig.ProfileId)
+                    throw new InvalidOperationException("living.foreground.provenance_required");
                 var profile = context.LivingDungeonProfiles?.SingleOrDefault(p => p.Id == profileId)
                     ?? throw new InvalidOperationException(LivingDungeonScheduling.Invalid);
                 if (profile.QualificationTiming == null || string.IsNullOrEmpty(profile.QualificationPostureId) ||
@@ -260,6 +262,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 if (!session.GetCurrentBytes().SequenceEqual(fs.ReadAllBytes(path))) return Failure("living.scheduler.stale_session");
                 var owned = ValidateSession(session);
+                if (owned?.LivingDungeon?.Scheduler?.ProfileId == LivingDungeonForegroundConfig.ProfileId)
+                    return Failure("living.foreground.provenance_required");
                 if (owned?.CurrentTargetValidated != true || !owned.IsValid || owned.LivingDungeon == null ||
                     !MvpDungeonPlacements.CanonicalMvpRouteProjection.TryPublishValidated(owned, production, out var runtime, out var reason))
                     return Failure(LivingDungeonScheduling.Invalid);

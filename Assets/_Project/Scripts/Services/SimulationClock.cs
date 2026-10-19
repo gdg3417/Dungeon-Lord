@@ -27,17 +27,20 @@ namespace DungeonBuilder.M0
         private readonly int _tickSeconds;
         private readonly int _clockSkewThresholdSeconds;
         private readonly ITimeSource _timeSource;
+        private readonly Func<double> _monotonicSeconds;
+        internal double MonotonicSeconds => _monotonicSeconds();
 
         private float _accum;
         private long _lastPausedUtc;
 
         public ClockAuthority Authority { get; private set; } = ClockAuthority.OfflineLocal;
 
-        public SimulationClock(int tickSeconds, int clockSkewThresholdSeconds, ITimeSource timeSource)
+        public SimulationClock(int tickSeconds, int clockSkewThresholdSeconds, ITimeSource timeSource, Func<double> monotonicSeconds = null)
         {
             _tickSeconds = Mathf.Max(1, tickSeconds);
             _clockSkewThresholdSeconds = Mathf.Max(1, clockSkewThresholdSeconds);
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
+            _monotonicSeconds = monotonicSeconds ?? (() => (double)System.Diagnostics.Stopwatch.GetTimestamp() / System.Diagnostics.Stopwatch.Frequency);
         }
 
         public void SetAuthority(ClockAuthority authority)

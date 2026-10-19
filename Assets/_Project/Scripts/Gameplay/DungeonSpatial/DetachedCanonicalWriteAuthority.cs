@@ -28,6 +28,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DetachedCompleteSaveValidationResult Validation { get; }
         public SaveData RuntimeProjection { get; }
         public double RecoveryManaSpent { get; }
+        public string ForegroundAdmissionReason { get; internal set; }
         public byte[] GetPersistedBytes() => persistedBytes == null ? null : (byte[])persistedBytes.Clone();
     }
 
@@ -478,13 +479,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             foreach (var party in owned.LivingDungeon.Parties)
             {
                 var execution = LivingDungeonContracts.Restore(party, profile);
-                if (execution.IsTerminal) continue;
+                if (execution.IsTerminal && profile.Id != LivingDungeonForegroundConfig.ProfileId) { execution.Abandon(); continue; }
                 var last = execution.Inspect().LastStep;
                 // Qualification-only route checkpoints can lack canonical floor identity.
                 // Vacancy cannot be proven for these inputs, so recovery is ineligible.
-                if (execution.Snapshot == null) return owned.State.Floors.Select(f => f.FloorInstanceId).ToHashSet(StringComparer.Ordinal);
+                if (execution.Snapshot == null) { execution.Abandon(); return owned.State.Floors.Select(f => f.FloorInstanceId).ToHashSet(StringComparer.Ordinal); }
                 int index = last?.FloorIndex ?? execution.Snapshot.Floors[0].FloorIndex;
                 foreach (var floor in execution.Snapshot.Floors.Where(f => f.FloorIndex == index)) occupied.Add(floor.FloorInstanceId);
+                execution.Abandon();
             }
             return occupied;
         }

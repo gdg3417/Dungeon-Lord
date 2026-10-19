@@ -2,7 +2,7 @@ using System;
 
 namespace DungeonBuilder.M0
 {
-    public class TimeService
+    public partial class TimeService
     {
         public const string ClockAnomalyMessageKey = "ui.time.clock_anomaly_detected";
         private readonly SimpleLogger _logger;
@@ -23,9 +23,12 @@ namespace DungeonBuilder.M0
         }
 
         public TimeService(SimpleLogger logger, int tickSeconds, int detectClockSkewSeconds, ITimeSource timeSource)
+            : this(logger, tickSeconds, detectClockSkewSeconds, timeSource, null) { }
+
+        public TimeService(SimpleLogger logger, int tickSeconds, int detectClockSkewSeconds, ITimeSource timeSource, Func<double> monotonicSeconds)
         {
             _logger = logger;
-            _clock = new SimulationClock(tickSeconds, detectClockSkewSeconds, timeSource);
+            _clock = new SimulationClock(tickSeconds, detectClockSkewSeconds, timeSource, monotonicSeconds);
         }
 
         public void AttachSave(SaveData save)
@@ -35,6 +38,7 @@ namespace DungeonBuilder.M0
 
         public void Update(float deltaTime)
         {
+            if (HasForegroundClock) return; // one clock/owner, no duplicate passive ticks
             if (_save == null || _isPaused)
             {
                 return;
@@ -51,6 +55,7 @@ namespace DungeonBuilder.M0
 
         public void OnPause()
         {
+            if (HasForegroundClock) SampleForeground();
             if (_save == null || _isPaused)
             {
                 return;
@@ -62,6 +67,7 @@ namespace DungeonBuilder.M0
 
         public string OnResume()
         {
+            if (HasForegroundClock) SampleForeground(); // suspended sample reanchors without elapsed credit
             if (_save == null || !_isPaused)
             {
                 return string.Empty;

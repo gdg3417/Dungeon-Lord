@@ -126,6 +126,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal bool OutcomeTaken => taken;
         internal long MaximumEvents => maximumEvents;
         internal long AcceptedDeadline => acceptedDeadline;
+        internal bool TimingMatches(RunLogicalTiming other) => timing != null && other != null &&
+            timing.UnitsPerTileEdge == other.UnitsPerTileEdge && timing.MonsterInteractionUnits == other.MonsterInteractionUnits &&
+            timing.TrapInteractionUnits == other.TrapInteractionUnits && timing.LootInteractionUnits == other.LootInteractionUnits &&
+            timing.FloorTransferUnits == other.FloorTransferUnits;
         internal RunExecution(RunParty party, RunLogicalTiming timing, long maximumEvents)
         {
             Party = party; this.timing = timing;

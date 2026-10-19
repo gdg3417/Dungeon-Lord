@@ -204,6 +204,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             var restored = CombatCheckpointCodec.RestoreSupported(p.Checkpoint, p.CheckpointIdentity, p.StartIdentity, p.NextOrdinal, profile.Checkpoints);
             if (!restored.IsValid) throw new InvalidOperationException(restored.FailureReason);
+            if (profile.Id == LivingDungeonForegroundConfig.ProfileId &&
+                (restored.Execution.Combat?.Kernel.RulesId != MonsterRecoveryRules.Executable ||
+                 restored.Execution.Snapshot?.Floors.Count != 1 || restored.Execution.Snapshot.Floors[0].FloorIndex != 0 ||
+                 restored.Execution.Snapshot.PostureId != RunPostureResolver.BalancedId ||
+                 !restored.Execution.TimingMatches(profile.QualificationTiming)))
+            { restored.Execution.Abandon(); throw new InvalidOperationException("living.foreground.provenance_required"); }
             return restored.Execution;
         }
         internal static bool Validate(LivingDungeonState state, IReadOnlyList<LivingDungeonProfile> profiles)
