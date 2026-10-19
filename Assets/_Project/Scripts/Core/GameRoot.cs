@@ -347,12 +347,14 @@ namespace DungeonBuilder.M0
                 bool wasPaused = TimeService != null && TimeService.IsPaused;
                 if (TimeService != null && !wasPaused)
                 {
+                    _resumeOfflineBoundaryPersisted = false;
                     TimeService.OnPause();
                 }
 
                 if (!wasPaused && SaveService != null && Save != null)
                 {
-                    _resumeOfflineBoundaryPersisted = SaveService.Save(Save, SaveReason.AppPause);
+                    bool saved = SaveService.Save(Save, SaveReason.AppPause);
+                    _resumeOfflineBoundaryPersisted = _resumeOfflineBoundaryPersisted || saved;
                     SaveLine = "Save: AppPause";
                 }
             }

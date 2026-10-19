@@ -109,7 +109,7 @@ namespace DungeonBuilder.M0
                 ShowFloorLifecycleConfirmation(preview);
                 return false;
             }
-            return CommitFloorLifecycle(preview);
+            return CommitFloorLifecycle(preview, false);
         }
 
         private void ShowFloorLifecycleConfirmation(FloorLifecyclePreview preview)
@@ -122,11 +122,14 @@ namespace DungeonBuilder.M0
             document.rootVisualElement.Q<Button>("cancel").text = Text("ui.dungeon.construction.cancel");
         }
 
-        private bool CommitFloorLifecycle(FloorLifecyclePreview preview)
+        private bool CommitFloorLifecycle(FloorLifecyclePreview preview, bool capturedConfirmation = true)
         {
             if (!CanManageFloors || selectedFloor != preview.FloorInstanceId)
             { feedback = "floor.lifecycle.stale_preview"; Present(); return false; }
-            var result = root.SaveService.CommitFloorLifecycle(root.Save, preview.Action, preview.FloorInstanceId, preview);
+            // Direct clicks request current eligibility after the elapsed-time
+            // barrier. A modal retains its exact captured predecessor and inputs.
+            var result = root.SaveService.CommitFloorLifecycle(root.Save, preview.Action, preview.FloorInstanceId,
+                capturedConfirmation ? preview : null);
             feedback = result.IsSuccess ? "ui.floor.lifecycle_success" : result.Reason;
             Present(); return result.IsSuccess;
         }

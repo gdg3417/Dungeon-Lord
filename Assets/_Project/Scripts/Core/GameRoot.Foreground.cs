@@ -80,6 +80,12 @@ namespace DungeonBuilder.M0
                     TimeService.IsPaused ? Save.lastPausedUtcUnix : (long?)null);
                 if (!result.IsSuccess) { ForegroundFault(result.Reason); return false; }
                 foregroundDirty = false;
+                // A bounded pause flush can finish in later suspended pumps.
+                // This successful complete-save transaction includes lastPaused
+                // and the capped saved UTC, so the existing offline guard may
+                // recognize it even when the initial AppPause save was pending.
+                if (TimeService.IsPaused && Save.livingDungeon.IsClosed)
+                    _resumeOfflineBoundaryPersisted = true;
                 ForegroundActivity = SaveService.InspectForeground(Save, _configuredSimulationTickSeconds);
                 if (result.ForegroundAdmissionReason != null && ForegroundActivity.RunId == null)
                     ForegroundActivity.StateKey = "ui.living.admission_unavailable";
