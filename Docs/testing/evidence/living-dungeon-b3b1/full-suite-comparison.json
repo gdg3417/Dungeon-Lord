@@ -1,0 +1,43 @@
+{
+  "before": "277388d1",
+  "after": "52152590",
+  "removedOrChanged": [
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.OwnerUsabilityConstructionAndContentReachability",
+      "result": "Passed",
+      "count": 1
+    }
+  ],
+  "addedOrChanged": [
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1.ExactTechnicalByteCeilingIsIndependentOfReplayCeiling",
+      "result": "Passed",
+      "count": 1
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1.InvalidRetainedMonsterInputsCannotExposeAUsableExecution(\"level\")",
+      "result": "Passed",
+      "count": 1
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1.InvalidRetainedMonsterInputsCannotExposeAUsableExecution(\"health\")",
+      "result": "Passed",
+      "count": 1
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1.InvalidRetainedMonsterInputsCannotExposeAUsableExecution(\"revival\")",
+      "result": "Passed",
+      "count": 1
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1.InvalidRetainedMonsterInputsCannotExposeAUsableExecution(\"option\")",
+      "result": "Passed",
+      "count": 1
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.OwnerUsabilityConstructionAndContentReachability",
+      "result": "Failed",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "preservation-after.json": {
+    "total": 8051,
+    "equal": 8050,
+    "exceptions": [
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\Unity\\ShaderVariantAnalytics\\ShaderRuntimeInfoEvent.json",
+        "sha256": "9cfa67716db34eba24c61af645d4d144a1f1daec6bb7108168d52300b837710a",
+        "fixture": false,
+        "equal": false
+      }
+    ]
+  },
+  "historical-evidence-after.json": {
+    "total": 5349,
+    "equal": 5349,
+    "exceptions": []
+  },
+  "scope": "Recorded save/build files and repository historical evidence; transient Unity logs/default LocalLow TestResults.xml excluded.",
+  "historicalException": "Five accepted PR #242 screenshot originals were already missing; this campaign preserves its current baseline.",
+  "acceptedCampaignException": {
+    "ownerApproved": true,
+    "ownerAnswer": "Accept this cache exception; continue with isolated product",
+    "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\Unity\\ShaderVariantAnalytics\\ShaderRuntimeInfoEvent.json",
+    "originalSha256": "9cfa67716db34eba24c61af645d4d144a1f1daec6bb7108168d52300b837710a",
+    "reason": "Native Unity player startup consumed this auxiliary shader analytics cache before Bootstrap. Exact backup searches found no match. Game saves were not used by the read-only smoke hook. All other baseline files remain protected.",
+    "requiredIsolation": "Separate native product identity for remaining standalone qualification"
+  }
+}

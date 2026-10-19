@@ -1,0 +1,10 @@
+{
+  "finalCommitAtCollection": "d5359f680747ba3c350c476858faaf64879844f4",
+  "testedSource": "52152590c454bc822d3db775ce94cfdcf646cab0",
+  "mainBaseline": "ce39ca44759f1f7d2338d9ec73aab9ea95b95534",
+  "inputDifferencesSinceTestedSource": [
+    "Assets/_Project/Editor/DungeonVisualBuildQualification.cs",
+    "Assets/_Project/Scripts/BuildTools/CombatCheckpointDevelopmentSmoke.cs"
+  ],
+  "goldenSha256": "197793b3b6f4dd127b0e96ce3003f3bee58138e58a81ee1d7dec13b2374dc8fb"
+}

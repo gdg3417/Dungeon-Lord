@@ -1,0 +1,37 @@
+# Changed files and purpose
+
+- `Assets/_Project/Editor/DungeonSpatial/Tests/LivingDungeonB3B1EditModeFixtures.cs` — Existing EditMode bridge pattern.
+- `Assets/_Project/Editor/DungeonSpatial/Tests/LivingDungeonB3B1EditModeFixtures.cs.meta` — Unity source metadata.
+- `Assets/_Project/Editor/DungeonVisualBuildQualification.cs` — Preserving unused Windows Development build output.
+- `Assets/_Project/Scripts/BuildTools/CombatCheckpointDevelopmentSmoke.cs` — Development-only detached reconstruction smoke before Bootstrap save access.
+- `Assets/_Project/Scripts/BuildTools/CombatCheckpointDevelopmentSmoke.cs.meta` — Unity source metadata.
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonContracts.cs` — Explicit compatible-profile work envelope, mixed supported dispatch and deadline/horizon guard.
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonScheduling.cs` — Prevent compatible-profile upgrades from reducing combat-work support.
+- `Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonTerminalSettlement.cs` — Keep B3A strictly B1-only.
+- `Assets/_Project/Scripts/Gameplay/RunSimulation/ActiveFloorRunSnapshot.cs` — Capture and validate immutable bounds/options/condition policies and connection inputs.
+- `Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0ExecutionState.cs` — Correct ownership comment for detached timed executions.
+- `Assets/_Project/Scripts/Gameplay/RunSimulation/CombatCheckpointCodec.cs` — Format 2 and separately versioned combat causality/condition/work evidence.
+- `Assets/_Project/Scripts/Gameplay/RunSimulation/CombatCheckpointCodec.cs.meta` — Unity source metadata.
+- `Assets/_Project/Scripts/Gameplay/RunSimulation/CombatStartCapture.cs` — Explicit versioned bounded combat start encoding and reconstruction.
+- `Assets/_Project/Scripts/Gameplay/RunSimulation/CombatStartCapture.cs.meta` — Unity source metadata.
+- `Assets/_Project/Scripts/Gameplay/RunSimulation/RunCheckpoint.cs` — Add independently injected combat-work envelope; historical codec body stays frozen.
+- `Assets/_Project/Scripts/Gameplay/RunSimulation/RunExecution.cs` — Track committed combat work; route combat export/folding; expose retained technical bounds internally.
+- `Assets/_Project/Scripts/Gameplay/RunSimulation/RunSimulationService.Execution.cs` — Add explicit timed C0/C2 starts and supported checkpoint dispatch; existing starts retain selection.
+- `Assets/_Project/Tests/EditMode/LivingDungeonB3B1Tests.cs` — Focused durable/deterministic/corruption/workload/save compatibility tests.
+- `Assets/_Project/Tests/EditMode/LivingDungeonB3B1Tests.cs.meta` — Unity source metadata.
+- `Assets/_Project/Tests/PlayMode/LivingDungeonB3B1PlayModeTests.cs` — Existing reflection bridge verifies PlayMode reconstruction.
+- `Assets/_Project/Tests/PlayMode/LivingDungeonB3B1PlayModeTests.cs.meta` — Unity source metadata.
+- `Docs/planning/living-dungeon-phase-b3b1-implementation-contract.md` — Record implementation, ownership and non-activation contract.
+- `Docs/testing/evidence/living-dungeon-b3b1/build-reports.zip` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Docs/testing/evidence/living-dungeon-b3b1/changed-files.md` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Docs/testing/evidence/living-dungeon-b3b1/commands.json` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Docs/testing/evidence/living-dungeon-b3b1/full-suite-comparison.json` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Docs/testing/evidence/living-dungeon-b3b1/log-index.json` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Docs/testing/evidence/living-dungeon-b3b1/preservation-summary.json` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Docs/testing/evidence/living-dungeon-b3b1/qualification-reports.zip` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Docs/testing/evidence/living-dungeon-b3b1/qualification.md` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Docs/testing/evidence/living-dungeon-b3b1/report-summary.json` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Docs/testing/evidence/living-dungeon-b3b1/source-applicability.json` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Docs/testing/evidence/living-dungeon-b3b1/windows-package.json` — Qualification evidence, exact commands, source applicability, preservation or package/report inventory.
+- `Tools/Presentation/qualify_b3b1.py` — Reuse established preservation helpers with fresh namespaces and read-only launch checks.
+- `docs/planning/post-gd60-mvp-execution-plan.md` — Record exact scope and remaining automatic foreground C2 dependencies.
