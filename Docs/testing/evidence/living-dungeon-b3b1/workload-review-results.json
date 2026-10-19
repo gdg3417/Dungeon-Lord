@@ -1,0 +1,646 @@
+{
+  "reviewedHead": "4e05a3c4d6c7a7e6125471029f8423276246f4ca",
+  "testedSource": "6217995eb63f8df00283235f34ccbfa5d34f0538",
+  "collectedAtHead": "6217995eb63f8df00283235f34ccbfa5d34f0538",
+  "runtimeChanges": [],
+  "beforeAfterCorrection": "Not applicable: no runtime defect reproduced and no production code corrected.",
+  "reports": [
+    {
+      "file": "01-focused.xml",
+      "sha256": "60680064c0bfd9d190944da2fbf54947e023704422ebce11c8b2a9863c9dc65a",
+      "verdict": {
+        "id": "2",
+        "testcasecount": "50",
+        "result": "Passed",
+        "total": "50",
+        "passed": "50",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-19 00:31:14Z",
+        "end-time": "2026-10-19 00:32:02Z",
+        "duration": "48.8950923"
+      },
+      "failures": [],
+      "skips": [],
+      "groups": {
+        "LivingDungeonB3B1": {
+          "passed": 50,
+          "failed": 0
+        },
+        "LivingDungeonPhaseB1": {
+          "passed": 0,
+          "failed": 0
+        },
+        "LivingDungeonPhaseB2": {
+          "passed": 0,
+          "failed": 0
+        },
+        "CombatC0": {
+          "passed": 0,
+          "failed": 0
+        },
+        "CombatC2": {
+          "passed": 0,
+          "failed": 0
+        },
+        "Migration": {
+          "passed": 0,
+          "failed": 0
+        },
+        "DetachedCanonical": {
+          "passed": 0,
+          "failed": 0
+        },
+        "RunHistory": {
+          "passed": 0,
+          "failed": 0
+        },
+        "RunHeat": {
+          "passed": 0,
+          "failed": 0
+        },
+        "LootHeat": {
+          "passed": 0,
+          "failed": 0
+        }
+      }
+    },
+    {
+      "file": "02-regression.xml",
+      "sha256": "d44e9710a8a1876a9c1d6bb5cb28d1654837ff8a02a4c9ac7307113bdb793467",
+      "verdict": {
+        "id": "2",
+        "testcasecount": "340",
+        "result": "Passed",
+        "total": "340",
+        "passed": "340",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-10-19 00:40:42Z",
+        "end-time": "2026-10-19 00:40:56Z",
+        "duration": "13.9968105"
+      },
+      "failures": [],
+      "skips": [],
+      "groups": {
+        "LivingDungeonB3B1": {
+          "passed": 0,
+          "failed": 0
+        },
+        "LivingDungeonPhaseB1": {
+          "passed": 37,
+          "failed": 0
+        },
+        "LivingDungeonPhaseB2": {
+          "passed": 82,
+          "failed": 0
+        },
+        "CombatC0": {
+          "passed": 95,
+          "failed": 0
+        },
+        "CombatC2": {
+          "passed": 42,
+          "failed": 0
+        },
+        "Migration": {
+          "passed": 7,
+          "failed": 0
+        },
+        "DetachedCanonical": {
+          "passed": 0,
+          "failed": 0
+        },
+        "RunHistory": {
+          "passed": 1,
+          "failed": 0
+        },
+        "RunHeat": {
+          "passed": 4,
+          "failed": 0
+        },
+        "LootHeat": {
+          "passed": 0,
+          "failed": 0
+        }
+      }
+    }
+  ],
+  "measurements": [
+    {
+      "persistent": "False",
+      "floors": "1",
+      "point": "pending",
+      "limit": "1480",
+      "ordinal": "2",
+      "committed": "1343",
+      "charged": "1480",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "1",
+      "point": "pending",
+      "limit": "1481",
+      "ordinal": "2",
+      "committed": "1343",
+      "charged": "1481",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "1",
+      "point": "pending",
+      "limit": "1482",
+      "ordinal": "2",
+      "committed": "1343",
+      "charged": "1481",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "1",
+      "point": "commit",
+      "limit": "1880",
+      "ordinal": "2",
+      "committed": "1343",
+      "charged": "1481",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "1",
+      "point": "commit",
+      "limit": "1881",
+      "ordinal": "3",
+      "committed": "1881",
+      "charged": "1881",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "1",
+      "point": "commit",
+      "limit": "1882",
+      "ordinal": "3",
+      "committed": "1881",
+      "charged": "1882",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "1",
+      "point": "terminal",
+      "limit": "2048",
+      "ordinal": "9",
+      "committed": "2021",
+      "charged": "2022",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "1",
+      "point": "terminal",
+      "limit": "2049",
+      "ordinal": "13",
+      "committed": "2049",
+      "charged": "2049",
+      "failure": ""
+    },
+    {
+      "persistent": "False",
+      "floors": "1",
+      "point": "terminal",
+      "limit": "2050",
+      "ordinal": "13",
+      "committed": "2049",
+      "charged": "2049",
+      "failure": ""
+    },
+    {
+      "persistent": "True",
+      "floors": "1",
+      "point": "pending",
+      "limit": "1482",
+      "ordinal": "2",
+      "committed": "1345",
+      "charged": "1482",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "1",
+      "point": "pending",
+      "limit": "1483",
+      "ordinal": "2",
+      "committed": "1345",
+      "charged": "1483",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "1",
+      "point": "pending",
+      "limit": "1484",
+      "ordinal": "2",
+      "committed": "1345",
+      "charged": "1483",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "1",
+      "point": "commit",
+      "limit": "1882",
+      "ordinal": "2",
+      "committed": "1345",
+      "charged": "1483",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "1",
+      "point": "commit",
+      "limit": "1883",
+      "ordinal": "3",
+      "committed": "1883",
+      "charged": "1883",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "1",
+      "point": "commit",
+      "limit": "1884",
+      "ordinal": "3",
+      "committed": "1883",
+      "charged": "1884",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "1",
+      "point": "terminal",
+      "limit": "2050",
+      "ordinal": "9",
+      "committed": "2023",
+      "charged": "2024",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "1",
+      "point": "terminal",
+      "limit": "2051",
+      "ordinal": "13",
+      "committed": "2051",
+      "charged": "2051",
+      "failure": ""
+    },
+    {
+      "persistent": "True",
+      "floors": "1",
+      "point": "terminal",
+      "limit": "2052",
+      "ordinal": "13",
+      "committed": "2051",
+      "charged": "2051",
+      "failure": ""
+    },
+    {
+      "persistent": "False",
+      "floors": "2",
+      "point": "pending",
+      "limit": "1958",
+      "ordinal": "2",
+      "committed": "1821",
+      "charged": "1958",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "2",
+      "point": "pending",
+      "limit": "1959",
+      "ordinal": "2",
+      "committed": "1821",
+      "charged": "1959",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "2",
+      "point": "pending",
+      "limit": "1960",
+      "ordinal": "2",
+      "committed": "1821",
+      "charged": "1959",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "2",
+      "point": "commit",
+      "limit": "2358",
+      "ordinal": "2",
+      "committed": "1821",
+      "charged": "1959",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "2",
+      "point": "commit",
+      "limit": "2359",
+      "ordinal": "3",
+      "committed": "2359",
+      "charged": "2359",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "2",
+      "point": "commit",
+      "limit": "2360",
+      "ordinal": "3",
+      "committed": "2359",
+      "charged": "2360",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "2",
+      "point": "terminal",
+      "limit": "3749",
+      "ordinal": "20",
+      "committed": "3722",
+      "charged": "3723",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "False",
+      "floors": "2",
+      "point": "terminal",
+      "limit": "3750",
+      "ordinal": "25",
+      "committed": "3750",
+      "charged": "3750",
+      "failure": ""
+    },
+    {
+      "persistent": "False",
+      "floors": "2",
+      "point": "terminal",
+      "limit": "3751",
+      "ordinal": "25",
+      "committed": "3750",
+      "charged": "3750",
+      "failure": ""
+    },
+    {
+      "persistent": "True",
+      "floors": "2",
+      "point": "pending",
+      "limit": "1962",
+      "ordinal": "2",
+      "committed": "1825",
+      "charged": "1962",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "2",
+      "point": "pending",
+      "limit": "1963",
+      "ordinal": "2",
+      "committed": "1825",
+      "charged": "1963",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "2",
+      "point": "pending",
+      "limit": "1964",
+      "ordinal": "2",
+      "committed": "1825",
+      "charged": "1963",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "2",
+      "point": "commit",
+      "limit": "2362",
+      "ordinal": "2",
+      "committed": "1825",
+      "charged": "1963",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "2",
+      "point": "commit",
+      "limit": "2363",
+      "ordinal": "3",
+      "committed": "2363",
+      "charged": "2363",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "2",
+      "point": "commit",
+      "limit": "2364",
+      "ordinal": "3",
+      "committed": "2363",
+      "charged": "2364",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "2",
+      "point": "terminal",
+      "limit": "3753",
+      "ordinal": "20",
+      "committed": "3726",
+      "charged": "3727",
+      "failure": "combat.c0.workload_exceeded"
+    },
+    {
+      "persistent": "True",
+      "floors": "2",
+      "point": "terminal",
+      "limit": "3754",
+      "ordinal": "25",
+      "committed": "3754",
+      "charged": "3754",
+      "failure": ""
+    },
+    {
+      "persistent": "True",
+      "floors": "2",
+      "point": "terminal",
+      "limit": "3755",
+      "ordinal": "25",
+      "committed": "3754",
+      "charged": "3754",
+      "failure": ""
+    }
+  ],
+  "preservation": {
+    "preservation-after.json": {
+      "total": 8658,
+      "equal": 8658,
+      "exceptions": []
+    },
+    "historical-evidence-after.json": {
+      "total": 6138,
+      "equal": 6138,
+      "exceptions": []
+    }
+  },
+  "restoredSources": [
+    {
+      "path": "Assets/_Project/Data/Bootstrap/build_config.json",
+      "equal": true,
+      "sha256": "edf2b29d6ffa3f3cecfd03d1607acd4370742719d316cf2889e43c3e5ac26828"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Services/SaveService.cs",
+      "equal": true,
+      "sha256": "f6d3a0aad500c7e7baae07cd75865b7bac99d31ee8dc4eae079386fba8a11798"
+    },
+    {
+      "path": "Assets/_Project/Scripts/BuildTools/DevelopmentBuildUtility.cs",
+      "equal": true,
+      "sha256": "c4c66b7dcee5f5d56ef37841196291b7e9e17a2eb36b3b0044a3fb7add9323f3"
+    },
+    {
+      "path": "ProjectSettings/ProjectSettings.asset",
+      "equal": true,
+      "sha256": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993"
+    },
+    {
+      "path": "ProjectSettings/UnityConnectSettings.asset",
+      "equal": true,
+      "sha256": "edbc2c8b4e180ca0734f320b51d6f560342563862923509d94d15492b200ad27"
+    },
+    {
+      "path": "Assets/Settings/UniversalRP.asset",
+      "equal": true,
+      "sha256": "8115a6a750c739dcbcbf71737d1733eafe068ad9fbdc3d4ca0def2723f47311f"
+    },
+    {
+      "path": "Assets/UniversalRenderPipelineGlobalSettings.asset",
+      "equal": true,
+      "sha256": "c0c660ca9f592748753b6a409b174936f003930bd32c1bd0b07ac1c2dfca0642"
+    },
+    {
+      "path": "Assets/_Project/Editor/DungeonSpatial/Tests/CombatC0ProductionEvidenceSceneTests.cs",
+      "equal": true,
+      "sha256": "124c591675367ca5142c03b0284ad3411df680edcf87a3b1c0856579124a1834"
+    },
+    {
+      "path": "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonFloorSceneTests.cs",
+      "equal": true,
+      "sha256": "756b181adaee54ff4fbd65b257e4babb6f83ba101da80da48527c8c2660c81c4"
+    },
+    {
+      "path": "Assets/_Project/Scripts/BuildTools/ProductionDungeonScreenshots.cs",
+      "equal": true,
+      "sha256": "bd204afba3a07020b4e0f1ce9a5e095111e4d86308761e737c99dea0aa6ca0a1"
+    },
+    {
+      "path": "Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs",
+      "equal": true,
+      "sha256": "a42a467ecfee1a34bec1a2fd7d8b39eb2d07300eb0b43befac61cacbf3cfedba"
+    },
+    {
+      "path": "Assets/_Project/Tests/EditMode/BootstrapOverlayPagingTests.cs",
+      "equal": true,
+      "sha256": "0244b4eab5cf39ee3b14459de5613b3b928249b5c02284a812397e1a17a4e169"
+    },
+    {
+      "path": "Assets/_Project/Tests/EditMode/MvpCanonicalJourneyIntegrationTests.cs",
+      "equal": true,
+      "sha256": "be9ad774f17d32aa72fcd48fd62a6fe9dc9868367ff379b0553c5b2028dbb1c0"
+    },
+    {
+      "path": "Assets/_Project/Tests/EditMode/RunSimulationTests.cs",
+      "equal": true,
+      "sha256": "a5c593f7636b3075df0e6f03652058a04f9feb8123a8f8f57a4a651094deafae"
+    }
+  ],
+  "commands": [
+    {
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "arguments": [
+        "test",
+        "C:\\Dev\\Dungeon-Lord",
+        "--mode",
+        "EditMode",
+        "--filter",
+        "LivingDungeonB3B1",
+        "--output",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3b1-review-20261018\\01-focused.xml",
+        "--timeout",
+        "1800",
+        "--no-color",
+        "--",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3b1-review-20261018\\01-focused.log"
+      ],
+      "commit": "6217995eb63f8df00283235f34ccbfa5d34f0538",
+      "startedUtc": "2026-10-19T00:30:30.513884+00:00",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-19T00:32:06.946571+00:00"
+    },
+    {
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "arguments": [
+        "test",
+        "C:\\Dev\\Dungeon-Lord",
+        "--mode",
+        "EditMode",
+        "--filter",
+        "LivingDungeonPhaseA;LivingDungeonPhaseB1;LivingDungeonPhaseB2;LivingDungeonPhaseB3A;CombatC0;CombatC2;DetachedCanonical;SaveSpatialMigration;Gd66Windows;RunHistory;RunHeat;LootHeat",
+        "--output",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3b1-review-20261018\\02-regression.xml",
+        "--timeout",
+        "1800",
+        "--no-color",
+        "--",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-b3b1-review-20261018\\02-regression.log"
+      ],
+      "commit": "6217995eb63f8df00283235f34ccbfa5d34f0538",
+      "startedUtc": "2026-10-19T00:34:14.638732+00:00",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-19T00:41:02.946131+00:00"
+    }
+  ],
+  "logs": [
+    {
+      "path": "TestResults\\living-dungeon-b3b1-review-20261018\\01-focused.log",
+      "sha256": "69d5cf885b2a34ca667bda6d1ff365bff71d03526f9d779e838444069bb5e25b"
+    },
+    {
+      "path": "TestResults\\living-dungeon-b3b1-review-20261018\\02-regression.log",
+      "sha256": "cb7a2998b9bf4ae29ae96b04d8f08a28ec2461823a56af730355306544459f97"
+    }
+  ],
+  "goldenSha256": "197793b3b6f4dd127b0e96ce3003f3bee58138e58a81ee1d7dec13b2374dc8fb",
+  "limits": "Existing 65536-byte/2048-partyReplay/8192-aggregateReplay/1000000-combatWork qualification envelope unchanged. Ceilings are derived tighter test configurations.",
+  "historicalException": "Earlier accepted auxiliary shader-analytics cache loss and five PR #242 screenshots remain absent in current baseline; no new exception in this review.",
+  "scope": "Recorded original save/build and TestResults inventories; existing transient LocalLow logs/default test XML exclusion retained; no broader preservation claim.",
+  "extraValidation": "No production runtime change: new PlayMode/player build/full-suite repetition not required. Original runtime build evidence remains applicable; no new platform qualification claimed."
+}
