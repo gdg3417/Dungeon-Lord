@@ -44,7 +44,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             foreach (var m in monsters) {
                 var exact = verified.SingleOrDefault(v => v.AssignmentId == m.AssignmentId);
-                if (exact == null || !starts.TryGetValue(m.AssignmentId, out var initial) || initialOptions[m.AssignmentId] != m.OptionId ||
+                starts.TryGetValue(m.AssignmentId, out var initial);
+                if (exact == null || initial == null || initialOptions[m.AssignmentId] != m.OptionId ||
                     m.InitialHealth != initial.Health || m.InitialRevivalRequired != initial.RevivalRequired ||
                     m.Health != exact.Health || m.InitialHealth != exact.InitialHealth || m.MaxHealth != exact.MaxHealth ||
                     m.InitialRevivalRequired != exact.InitialRevivalRequired || m.RevivalRequired != exact.RevivalRequired ||
