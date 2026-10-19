@@ -2,8 +2,11 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
@@ -25,6 +28,67 @@ namespace DungeonBuilder.M0.Tests
         {
             public long Now;
             public long UtcNowUnixSeconds() => Now;
+        }
+
+        [UnityTest]
+        public IEnumerator LivingDungeonB3B2AutomaticSceneLoopSettlesAndAdmitsAgainstCommittedEdit()
+        {
+            var root = GameRoot.Instance;
+            Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+            var floor = root.Save.validatedCanonicalSpatialState.Floors[0];
+            var room = floor.Layout.Rooms[0];
+            var placed = root.SaveService.ExecuteCanonicalMutation(root.Save,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId,
+                    room.RoomInstanceId, floor.FloorInstanceId, new TileCoordinate(1, 1)));
+            Assert.That(placed.IsSuccess, Is.True, placed.Reason);
+            var advance = InstallForegroundBoundaryTestClock();
+            var update = (Action)Delegate.CreateDelegate(typeof(Action), root,
+                typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.Instance | BindingFlags.NonPublic));
+            var profile = root.SaveService.ForegroundConfiguration.CreateProfile(root.SaveSpatialMigrationLimits.Canonical.ForSchema(13).Serialized);
+            string oldGeometry = null; RunOutcomeRecord expected = null; bool edited = false;
+            int maximumBytes = 0; long replay = 0;
+            for (int frame = 0; frame < 1600; frame++) {
+                root.TimeService.SetForegroundFocus(true); advance(.25); update(); yield return null;
+                Assert.That(typeof(GameRoot).GetField("foregroundFailure", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root), Is.Null);
+                if (!edited && root.Save.livingDungeon.Parties.Count == 1 && controller.World.ForegroundPartyVisible) {
+                    var party = root.Save.livingDungeon.Parties.Single();
+                    var bytes = root.SaveService.CanonicalSession.GetCurrentBytes();
+                    var execution = LivingDungeonContracts.Restore(party, profile);
+                    try {
+                        oldGeometry = execution.Snapshot.Floors[0].KnowledgeFingerprint;
+                        while (!execution.IsTerminal) {
+                            Assert.That(execution.NextOrdinal, Is.LessThan(profile.MaximumPartyReplay));
+                            execution.Advance(1, execution.NextOrdinal);
+                            maximumBytes = Math.Max(maximumBytes, execution.ExportCheckpoint(profile.Checkpoints).GetBytes().Length);
+                        }
+                        replay = execution.NextOrdinal; expected = execution.TakeOutcome();
+                    } finally { execution.Abandon(); }
+                    CollectionAssert.AreEqual(bytes, root.SaveService.CanonicalSession.GetCurrentBytes(), "Private reconstruction cannot publish");
+                    Assert.That(CombatC0Diagnostics.Events(expected).Count(e => e.Kind == CombatC0EventKind.Attack), Is.GreaterThan(0));
+                    controller.EnterEdit(); yield return null;
+                    Assert.That(controller.World.ForegroundPartyVisible, Is.False);
+                    var monster = root.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.Single(a => a.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId);
+                    var checkpoint = (byte[])party.Checkpoint.Clone();
+                    Assert.That(controller.Draft.Move(floor.FloorInstanceId, monster.RoomInstanceId, monster.AssignmentId, new TileCoordinate(3, 2)), Is.True);
+                    while (controller.Draft.Durability == DraftDurability.Pending) { Assert.That(controller.Draft.FlushNext(), Is.True); yield return null; }
+                    Assert.That(controller.Commit(), Is.True);
+                    CollectionAssert.AreEqual(checkpoint, root.Save.livingDungeon.Parties.Single().Checkpoint);
+                    edited = true;
+                }
+                if (edited && root.Save.runHistory.LatestOutcome?.RunId == "run-1" && root.Save.livingDungeon.Parties.Any(p => p.Sequence == 2)) {
+                    Assert.That(root.Save.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
+                    Assert.That(EditMode.LivingDungeonPhaseABaselineTests.Structured(CombatC0Diagnostics.Events(root.Save.runHistory.LatestOutcome)),
+                        Is.EqualTo(EditMode.LivingDungeonPhaseABaselineTests.Structured(CombatC0Diagnostics.Events(expected))));
+                    Assert.That(CombatC0Diagnostics.ChargedWork(root.Save.runHistory.LatestOutcome), Is.EqualTo(CombatC0Diagnostics.ChargedWork(expected)));
+                    var second = LivingDungeonContracts.Restore(root.Save.livingDungeon.Parties.Single(), profile);
+                    try { Assert.That(second.Snapshot.Floors[0].KnowledgeFingerprint, Is.Not.EqualTo(oldGeometry)); }
+                    finally { second.Abandon(); }
+                    TestContext.WriteLine("Loaded production config: checkpointBytes=" + maximumBytes + " replay=" + replay +
+                        " combatWork=" + CombatC0Diagnostics.ChargedWork(expected) + " receipts=" + CombatC0Diagnostics.Events(expected).Count);
+                    yield break;
+                }
+            }
+            Assert.Fail("Automatic scene loop did not settle and capture the edited second run within its bounded test horizon");
         }
 
         [UnityTest]
