@@ -30,8 +30,13 @@ namespace DungeonBuilder.M0
                 return ForegroundBlocked();
             ForegroundWriting = true;
             try {
+                // Closing/reinspecting already accepted time while suspended must
+                // retain the existing offline passive-mana boundary. Only newly
+                // observed eligible time advances it; ordinary Save owns pause UTC.
+                long savedBoundary = through > (current.livingDungeon?.Scheduler?.AcceptedThrough ?? -1)
+                    && current.livingDungeon?.IsClosed != false ? CaptureMonotonicSaveBoundary(current.lastSavedUtcUnix) : current.lastSavedUtcUnix;
                 var result = CreateWriteAuthority().AdvanceForeground(SavePath, _canonicalFileSystem, _canonicalSession, current,
-                    ForegroundConfiguration, through, tickSeconds, passiveTick, CaptureMonotonicSaveBoundary(current.lastSavedUtcUnix));
+                    ForegroundConfiguration, through, tickSeconds, passiveTick, savedBoundary);
                 if (result.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason) foregroundRecoveryRequired = true;
                 if (result.IsSuccess) {
                     _canonicalSession = result.Session; _undo = null;
