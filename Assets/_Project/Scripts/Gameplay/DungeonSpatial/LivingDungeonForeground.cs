@@ -177,7 +177,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                 } finally { probe.Abandon(); }
                                 owner.Parties.Add(newborn); runtime.runHistory.NextRunSequence = checked(runtime.runHistory.NextRunSequence + 1);
                             } finally { execution.Abandon(); }
-                            } catch (Exception error) when (error is ArgumentException || error is InvalidOperationException || error is OverflowException) {
+                            } catch (Exception error) when (error is ArgumentException || error is InvalidOperationException ||
+                                error is OverflowException || error is System.IO.InvalidDataException) {
                                 // Unsupported starts consume an opportunity without allocation,
                                 // retaining time/passive progress and the editable dungeon.
                                 admissionReason = "living.foreground.admission_unavailable";
@@ -206,10 +207,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return result;
             }
             catch (Exception error) {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                if (!error.Message.StartsWith("living.", StringComparison.Ordinal) && !error.Message.StartsWith("combat.", StringComparison.Ordinal))
-                    UnityEngine.Debug.LogWarning("living.foreground.transaction_failed: " + error);
-#endif
                 return Failure(error.Message.StartsWith("living.", StringComparison.Ordinal) || error.Message.StartsWith("combat.", StringComparison.Ordinal)
                     ? error.Message : invalid);
             }

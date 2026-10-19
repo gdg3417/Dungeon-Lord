@@ -411,6 +411,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.EqualTo("run-1"));
         }
 
+        [Test] public void ManualC2CanFinishBeforeAnOlderAutomaticReservationWithoutDiscardingEitherResult()
+        {
+            var f = Dungeon(); Admitted(f); long finish = Finish(f);
+            var pinned = f.Runtime.livingDungeon.Parties.Single().Checkpoint;
+            double wallet = f.Runtime.structureRuntime.ManaReserve;
+            f.Accept(PhaseSixA4Tests.Writer(f).CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot()), RunPostureResolver.BalancedId, 1000));
+            Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.EqualTo("run-2"));
+            CollectionAssert.AreEqual(pinned, f.Runtime.livingDungeon.Parties.Single().Checkpoint);
+            Assert.That(f.Runtime.monsterContinuity.Records.Single().Health, Is.Zero, "Occupied floor cannot recover between the two results");
+            Through(f, finish);
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Select(o => o.RunId), Is.EqualTo(new[] { "run-2", "run-1" }));
+            Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(3));
+            int ready = MonsterRecoveryRules.Capture(f.Configuration).Readiness(MvpDungeonPlacementIds.GoblinOptionId);
+            Assert.That(f.Runtime.monsterContinuity.Records.Single().Health, Is.EqualTo(ready));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(wallet - ready));
+            var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, finish);
+            CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes());
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void ContradictoryTerminalReceiptsOrMonsterSetRejectWithoutCanonicalPublication(bool receipts)
+        {
+            var f = Dungeon(); var e = Start(f); var outcome = e.DrainToCompletion(); var bytes = f.Session.GetCurrentBytes();
+            if (receipts) outcome.CombatEvents = outcome.CombatEvents.Reverse().ToArray();
+            else outcome.CombatMonsters = Array.Empty<CombatC0MonsterState>();
+            Assert.That(Assert.Throws<InvalidOperationException>(() => LivingDungeonForegroundReconciliation.Apply(e, outcome,
+                f.Runtime.monsterContinuity, f.State, MonsterRecoveryRules.Capture(f.Configuration))).Message,
+                Is.EqualTo(LivingDungeonForegroundReconciliation.Conflict));
+            CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath)); e.Abandon();
+        }
+
         private sealed class Utc : ITimeSource { public long UtcNowUnixSeconds() => 1000; }
         [Test] public void ForegroundClockIsIndependentOfFramePartitionAndRejectsOverflowWithoutElapsedCredit()
         {
