@@ -20,8 +20,10 @@ namespace DungeonBuilder.M0
         }
         private void OnEnable()
         {
-            if (TimeService?.HasForegroundClock == true)
+            if (TimeService?.HasForegroundClock == true) {
                 TimeService.SetForegroundFocus(foregroundApplicationFocused && !foregroundApplicationPaused);
+                ApplyPauseState(foregroundApplicationPaused || !foregroundApplicationFocused);
+            }
         }
 
         private void InitializeForeground()
@@ -74,7 +76,8 @@ namespace DungeonBuilder.M0
             foregroundPumping = true;
             try {
                 long beforeTicks = Save.totalTicks;
-                var result = SaveService.AdvanceForeground(Save, through, _configuredSimulationTickSeconds, ApplyForegroundPassiveTick);
+                var result = SaveService.AdvanceForeground(Save, through, _configuredSimulationTickSeconds, ApplyForegroundPassiveTick,
+                    TimeService.IsPaused ? Save.lastPausedUtcUnix : (long?)null);
                 if (!result.IsSuccess) { ForegroundFault(result.Reason); return false; }
                 foregroundDirty = false;
                 ForegroundActivity = SaveService.InspectForeground(Save, _configuredSimulationTickSeconds);
@@ -99,7 +102,7 @@ namespace DungeonBuilder.M0
             try {
                 long target = TimeService.SampleForeground();
                 int pumps = SaveService.ForegroundConfiguration.MaximumBoundaries;
-                while (pumps-- > 0 && (foregroundDirty || Save.livingDungeon.IsDormant ||
+                while (pumps-- > 0 && (Save.livingDungeon.IsDormant ||
                     !Save.livingDungeon.IsClosed || target > Save.livingDungeon.Scheduler.AcceptedThrough))
                     if (!PumpForeground(target)) return false;
                 return Save.livingDungeon.IsClosed && target <= Save.livingDungeon.Scheduler.AcceptedThrough;

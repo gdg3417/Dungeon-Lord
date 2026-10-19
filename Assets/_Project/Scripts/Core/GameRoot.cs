@@ -285,7 +285,7 @@ namespace DungeonBuilder.M0
         private void OnApplicationPause(bool pause)
         {
             foregroundApplicationPaused = pause;
-            ApplyPauseState(pause || !foregroundApplicationFocused);
+            if (isActiveAndEnabled) ApplyPauseState(pause || !foregroundApplicationFocused);
         }
 
         private void OnApplicationQuit()

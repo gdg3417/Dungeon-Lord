@@ -24,7 +24,8 @@ namespace DungeonBuilder.M0
             foregroundRecoveryRequired ? DetachedCanonicalWriteAuthority.RecoveryRequiredReason : "living.foreground.boundary_pending",
             false, false, null, null, null, null);
 
-        internal DetachedCanonicalWriteResult AdvanceForeground(SaveData current, long through, int tickSeconds, Action<SaveData, long> passiveTick)
+        internal DetachedCanonicalWriteResult AdvanceForeground(SaveData current, long through, int tickSeconds, Action<SaveData, long> passiveTick,
+            long? suspendedSaveUtc = null)
         {
             if (foregroundRecoveryRequired || ForegroundWriting || _canonicalSession == null || ForegroundConfiguration == null)
                 return ForegroundBlocked();
@@ -35,6 +36,11 @@ namespace DungeonBuilder.M0
                 // observed eligible time advances it; ordinary Save owns pause UTC.
                 long savedBoundary = through > (current.livingDungeon?.Scheduler?.AcceptedThrough ?? -1)
                     && current.livingDungeon?.IsClosed != false ? CaptureMonotonicSaveBoundary(current.lastSavedUtcUnix) : current.lastSavedUtcUnix;
+                // Draining an older accepted horizon may defer admission of the
+                // final pre-pause sample. Preserve the pause UTC boundary even
+                // when that sample is accepted by a later suspended pump.
+                if (suspendedSaveUtc.HasValue)
+                    savedBoundary = Math.Max(current.lastSavedUtcUnix, Math.Min(savedBoundary, suspendedSaveUtc.Value));
                 var result = CreateWriteAuthority().AdvanceForeground(SavePath, _canonicalFileSystem, _canonicalSession, current,
                     ForegroundConfiguration, through, tickSeconds, passiveTick, savedBoundary);
                 if (result.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason) foregroundRecoveryRequired = true;

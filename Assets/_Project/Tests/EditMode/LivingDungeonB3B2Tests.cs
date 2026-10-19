@@ -209,6 +209,53 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(9000));
         }
 
+        [Test] public void DirtyClosedActionBarrierRetainsSessionAndDisabledPauseDoesNotPublish()
+        {
+            var f = Dungeon(); var service = Service(f, new Utc());
+            f.Accept(service.AdvanceForeground(f.Runtime, 0, 10, (save, tick) => { }));
+            double now = 0;
+            var time = new TimeService(new SimpleLogger(false), 10, 300, new Utc(), () => now);
+            time.AttachSave(f.Runtime); time.BeginForeground(1000, 0);
+            var host = new GameObject("foreground-disabled-root-test"); host.SetActive(false);
+            var root = host.AddComponent<GameRoot>();
+            try {
+                typeof(GameRoot).GetProperty(nameof(GameRoot.Save)).SetValue(root, f.Runtime);
+                typeof(GameRoot).GetProperty(nameof(GameRoot.SaveService)).SetValue(root, service);
+                typeof(GameRoot).GetProperty(nameof(GameRoot.TimeService)).SetValue(root, time);
+                var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+                var before = f.Session.GetCurrentBytes(); int published = 0;
+                service.CanonicalRuntimePublished += save => published++;
+                Assert.That(typeof(GameRoot).GetMethod("FlushForeground", flags).Invoke(root, null), Is.True);
+                typeof(GameRoot).GetMethod("OnApplicationPause", flags).Invoke(root, new object[] { true });
+                Assert.That(time.IsPaused, Is.False); Assert.That(published, Is.Zero);
+                CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+                time.OnPause();
+                typeof(GameRoot).GetField("foregroundApplicationPaused", flags).SetValue(root, false);
+                typeof(GameRoot).GetMethod("OnEnable", flags).Invoke(root, null);
+                Assert.That(time.IsPaused, Is.False); Assert.That(time.SampleForeground(), Is.Zero);
+            } finally { UnityEngine.Object.DestroyImmediate(host); }
+        }
+
+        [Test] public void DeferredPrePauseSampleDoesNotConsumeLaterOfflineInterval()
+        {
+            var f = Dungeon(); var utc = new MutableUtc(); var service = Service(f, utc);
+            var budget = LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(
+                File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json").Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1")));
+            typeof(SaveService).GetProperty(nameof(SaveService.ForegroundConfiguration)).SetValue(service, budget);
+            f.Accept(service.AdvanceForeground(f.Runtime, 20000, 10, (save, tick) => { }));
+            Assert.That(f.Runtime.livingDungeon.IsClosed, Is.False);
+            Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(2000));
+            utc.Now = 9000;
+            f.Accept(service.AdvanceForeground(f.Runtime, 30000, 10, (save, tick) => { }, 3000));
+            Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(20000));
+            Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(2000));
+            f.Accept(service.AdvanceForeground(f.Runtime, 30000, 10, (save, tick) => { }, 3000));
+            Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(30000));
+            Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(3000));
+            f.Accept(service.AdvanceForeground(f.Runtime, 30000, 10, (save, tick) => { }, 3000));
+            Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(3000));
+        }
+
         [Test] public void ServiceLatchesRecoveryRequiredAndBlocksAllLaterForegroundPublication()
         {
             var f = Dungeon(); Admitted(f); long finish = Finish(f);

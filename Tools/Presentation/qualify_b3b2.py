@@ -11,6 +11,7 @@ replacements={
  'Dungeon Lord B3B1 Smoke 20261018':'Dungeon Lord B3B2 Smoke 20261018',
  'living-dungeon-b3b1-owner-uat-starter-':'living-dungeon-b3b2-owner-uat-starter-',
  "'focused': 'LivingDungeonB3B1'":"'focused': 'LivingDungeonB3B2'",
+ "'regression':":"'ui-regression': 'GraphicalFloorReview;RoomContentProductionPreviewCustodySaveDiscardAndLayouts;TransactionalRoomConstructionLayoutsLocalizationAndResume',\n        'regression':",
  "'integration-play': 'LivingDungeonB3B1PlayModeTests;":"'integration-play': 'LivingDungeonB3B2PlayModeTests;LivingDungeonB3B1PlayModeTests;",
  'BuildLivingDungeonB3B1Windows':'BuildLivingDungeonB3B2Windows',
 }
