@@ -84,6 +84,19 @@ elif mode=='run':
     if sys.argv[2]=='build': build_namespace()
     sys.exit(m.run(sys.argv[2],sys.argv[3]))
 elif mode=='smoke': smoke(sys.argv[2])
+elif mode=='all-required':
+    for stage in ('full-edit','full-play','build'):
+        if stage=='build': build_namespace()
+        result=m.run(stage,sys.argv[2])
+        if result: sys.exit(result)
+        checkpoint(sys.argv[2]+'-'+stage+'-passed')
+    # A later smoke invocation verifies the ordinary isolated Editor sources;
+    # the built player's separately recorded native save namespace stays packed.
+    m.q.NAMESPACE='living-dungeon-b3b2-qualification-20261018.json'
+    m.q.inputs.NAMESPACE=m.q.NAMESPACE
+    data=subprocess.check_output(['git','show','HEAD:'+m.q.inputs.CONFIG],cwd=ROOT)
+    (ROOT/m.q.inputs.CONFIG).write_bytes(m.q.inputs.transformed(m.q.inputs.CONFIG,data))
+    current_service(True)
 elif mode=='checkpoint': checkpoint(sys.argv[2])
 elif mode=='resubstitute-service': current_service(True)
 elif mode=='finish':
