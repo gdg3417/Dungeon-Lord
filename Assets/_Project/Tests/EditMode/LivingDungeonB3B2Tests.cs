@@ -152,6 +152,39 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.Zero);
         }
 
+        [Test] public void UnsupportedCombatWorkConsumesOpportunityWithoutRunAllocationOrGameplayDamage()
+        {
+            var f = Dungeon(); f.Configuration.CombatC0.MaximumWork = 1; Support(f);
+            Through(f, 0); long due = f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value;
+            string monsters = B.Structured(f.Runtime.monsterContinuity); int sequence = f.Runtime.runHistory.NextRunSequence;
+            f.Accept(Pump(f, due));
+            Assert.That(f.Runtime.livingDungeon.Parties, Is.Empty);
+            Assert.That(f.Runtime.livingDungeon.Scheduler.NextOpportunityOrdinal, Is.EqualTo(1));
+            Assert.That(f.Runtime.livingDungeon.Scheduler.LastOpportunityTime, Is.EqualTo(due));
+            Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(sequence));
+            Assert.That(f.Runtime.runHistory.LatestOutcome?.RunId, Is.Null.Or.Empty);
+            Assert.That(B.Structured(f.Runtime.monsterContinuity), Is.EqualTo(monsters));
+        }
+
+        [Test] public void QualificationCannotConfigureProductionProfileAndTwoValidActivePrefixesCannotBypassCapacity()
+        {
+            var f = Dungeon(); var before = f.Session.GetCurrentBytes();
+            var q = new DetachedCanonicalWriteAuthority.SyntheticForegroundQualification(PhaseSixA4Tests.Writer(f), f.Session);
+            Assert.That(q.Configure(f.ActivePath, f.FileSystem, f.Session, LivingDungeonForegroundConfig.ProfileId, Policy.MinimumArrival).IsSuccess, Is.False);
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            Admitted(f); before = f.Session.GetCurrentBytes();
+            var existing = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties.Single(), Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized));
+            var second = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot()).StartTimedCombatSnapshot(2, existing.Snapshot, Policy.Timing);
+            var other = new LivingDungeonParty { Sequence = 2, AdmittedAt = f.Runtime.livingDungeon.Parties.Single().AdmittedAt };
+            try {
+                second.AdvanceThrough(0, Policy.MaximumBoundaryEvents);
+                var profile = Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized);
+                LivingDungeonScheduling.Pin(other, second, profile); f.Runtime.livingDungeon.Parties.Add(other);
+                Assert.That(LivingDungeonContracts.Validate(f.Runtime.livingDungeon, new[] { profile }), Is.False);
+            } finally { existing.Abandon(); second.Abandon(); f.Runtime.livingDungeon.Parties.Remove(other); }
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+        }
+
         [Test] public void ReinspectionAndPausedHorizonDrainRetainOfflineBoundary()
         {
             var f = Dungeon(); var utc = new MutableUtc(); var service = Service(f, utc);
@@ -311,7 +344,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Support(f); Admitted(f); long finish = Finish(f);
             string id = f.Runtime.monsterContinuity.Records.Single().AssignmentId;
             string second = PhaseSixA4Tests.FloorTwo(f); var room = f.State.Floors.Single(floor => floor.FloorInstanceId == second).Layout.Rooms[0];
-            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(id)));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(id, f.State.Floors[0].FloorInstanceId)));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(id, room.RoomInstanceId, second, new TileCoordinate(1, 1))));
             if (activateTarget) f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
             CombatC2Tests.SetState(f, 3, false, 100);
@@ -366,6 +399,25 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private sealed class Utc : ITimeSource { public long UtcNowUnixSeconds() => 1000; }
+        [Test] public void ForegroundClockIsIndependentOfFramePartitionAndRejectsOverflowWithoutElapsedCredit()
+        {
+            long Sample(bool partitioned) {
+                double now = 100;
+                var time = new TimeService(new SimpleLogger(false), 10, 300, new Utc(), () => now);
+                time.AttachSave(new SaveData()); time.BeginForeground(1000, 0);
+                if (partitioned) for (int i = 1; i <= 10000; i++) { now = 100 + i / 10000d; time.SampleForeground(); }
+                else now = 101;
+                return time.SampleForeground();
+            }
+            Assert.That(Sample(true), Is.EqualTo(Sample(false))); Assert.That(Sample(true), Is.EqualTo(1000));
+            double sample = 100;
+            var overflow = new TimeService(new SimpleLogger(false), 10, 300, new Utc(), () => sample);
+            overflow.AttachSave(new SaveData()); overflow.BeginForeground(1000, long.MaxValue - 5);
+            sample = 101; Assert.Throws<OverflowException>(() => overflow.SampleForeground());
+            Assert.That(overflow.ForegroundThrough, Is.EqualTo(long.MaxValue - 5));
+            sample = double.NaN; Assert.Throws<InvalidOperationException>(() => overflow.SampleForeground());
+            sample = 99; Assert.Throws<InvalidOperationException>(() => overflow.SampleForeground());
+        }
         [Test] public void SharedMonotonicClockPreservesWholeUnitsAcrossPartitionFocusPauseAndRestart()
         {
             double now = 100;
