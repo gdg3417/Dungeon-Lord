@@ -11,7 +11,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     {
         public RunCheckpointRestoreResult RestoreCheckpoint(byte[] bytes, string expectedCheckpointIdentity, string expectedStartIdentity,
             long expectedOrdinal, RunCheckpointLimits limits) =>
-            RunCheckpointCodec.Restore(bytes, expectedCheckpointIdentity, expectedStartIdentity, expectedOrdinal, limits);
+            CombatCheckpointCodec.RestoreSupported(bytes, expectedCheckpointIdentity, expectedStartIdentity, expectedOrdinal, limits);
         public RunExecution StartSnapshot(int sequence, ActiveFloorRunSnapshot snapshot,
             RunLogicalTiming timing = null, long? eventLimit = null)
             => StartCapturedSnapshot(sequence, snapshot, timing, eventLimit, false);
@@ -20,6 +20,19 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             => StartCapturedSnapshot(sequence, snapshot, null, null, true);
         internal RunExecution StartHistoricalCombatC0Snapshot(int sequence, ActiveFloorRunSnapshot snapshot)
             => StartCapturedSnapshot(sequence, snapshot, null, null, true, false);
+
+        // Explicit technical entry point. Existing manual/B2 callers retain their executables.
+        public RunExecution StartTimedCombatSnapshot(int sequence, ActiveFloorRunSnapshot snapshot,
+            RunLogicalTiming timing, bool persistentMonsters = true, long? eventLimit = null)
+        {
+            if (timing == null) throw new ArgumentNullException(nameof(timing));
+            CombatStartCapture.Validate(snapshot, persistentMonsters);
+            var execution = StartCapturedSnapshot(sequence, snapshot, timing, eventLimit, true, persistentMonsters);
+            execution.StartInputs = CombatStartCapture.Capture(sequence, snapshot, timing, execution.MaximumEvents, persistentMonsters);
+            execution.PrefixDigest = RunCheckpointCodec.Hash(execution.StartInputs);
+            execution.CommittedCombatWork = execution.Combat.Kernel.WorkCount;
+            return execution;
+        }
 
         private RunExecution StartCapturedSnapshot(int sequence, ActiveFloorRunSnapshot snapshot,
             RunLogicalTiming timing, long? eventLimit, bool manual, bool persistent = true)
@@ -103,7 +116,6 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 eventLimit ?? bound) { Traversal = traversal, Snapshot = snapshot };
             if (combatRules != null)
             {
-                if (timing != null) throw new ArgumentException("combat.c0.manual_only");
                 state.Combat = new CombatC0ExecutionState(state.Party, combatRules,
                     plans.SelectMany(p => p.RequiredRooms.Select(r => r.Room)).ToArray(), combatBounds, monsterStarts);
                 state.Combat.Kernel.ChargeGeometry(combatPlanningWork);

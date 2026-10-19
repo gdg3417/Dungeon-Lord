@@ -1,0 +1,82 @@
+[
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\02-focused.log",
+    "sha256": "90bf638cc63ad2faca3966e038ba58e55d6ad3b06c5b589941a55732aa2f8c7b",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\03-focused.log",
+    "sha256": "c57b8382c6ea48e1747303fc2f96f7a0bd5284d79aa07eaff7a7ec167cb6bc8a",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\04-focused.log",
+    "sha256": "b43a1f288d223e6f638eb12498073e7b603b7f97998f229e00d692e35670e423",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\06-focused.log",
+    "sha256": "ff414a56f04742ed5a8a8fda94d4b4039420ba86c2b5a9b0bc3e34fb0d6c2baf",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\07-full-edit.log",
+    "sha256": "58cf41a4306bb87217502a40bc15d6e7ef90da174c273037369da017d425e8c9",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\08-focused.log",
+    "sha256": "255ab3d1414221a99753fa8e7bffb82608913c6802dcddf5a7d47b123ec8a3b0",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\09-full-edit.log",
+    "sha256": "e299b0c54b8432afca18a213ba281ff87923896fdeada639139d8cd676888892",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\10-baseline-copy.log",
+    "sha256": "daa8c4d972c4a979b151c67f7240213dd023659b536b9a53df53ac293a75fbf0",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\11-starter.log",
+    "sha256": "6c3b1763f89f0d732cc139bc5e6ba4ccff036d23c15933feb4798f3da4ff1094",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\12-integration-play.log",
+    "sha256": "64778b1176f15abed729fc80909e081c68ef174051e49f6a61d75ddcf802caf6",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\13-build.log",
+    "sha256": "68bf645ebf03a08b9711d217f6d7cfd3063cc9c7bacc4e7726e2b1d12d349dec",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\16-build-smoke-fix.log",
+    "sha256": "b3cc851b2d9afc8f9f05d3d0365d412442efe0b7fd3479ab5f255b9975d5477b",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\standalone-smoke-final.log",
+    "sha256": "c9450fd2a20f4a5797408d925bae175d86a20ff9683ff876f041dd31bebe9908",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\standalone-smoke.log",
+    "sha256": "f971a6f8089a49e783c7a8386a077b822c2c7c1c20226cdcfc94b028a16df594",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\static-inputs-final.log",
+    "sha256": "f5905c75c8f92fc3a2762915662ccdfedbe1ff9ae35ea70e5bcf20f984eefe4c",
+    "compilerDiagnostics": []
+  },
+  {
+    "file": "TestResults\\living-dungeon-b3b1-20261018\\static-preservation-final.log",
+    "sha256": "718f67acf1af7c69477c4641d198f55c65f9f79bd78cdc08fdedff5768f75b2f",
+    "compilerDiagnostics": []
+  }
+]

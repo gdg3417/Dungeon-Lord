@@ -114,6 +114,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public string StartIdentity => StartInputs == null ? null : RunCheckpointCodec.Identity(StartInputs);
         internal RunParty Party { get; }
         internal CombatC0ExecutionState Combat;
+        // Geometry lookahead can charge work, but only a committed boundary enters evidence.
+        internal long CommittedCombatWork;
         internal RunOutcomeRecord Outcome;
         internal RunSimulationService.BranchTraversal Traversal;
         internal ActiveFloorRunSnapshot Snapshot;
@@ -122,6 +124,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public bool IsTerminal { get; private set; }
         public long NextOrdinal => ordinal;
         internal bool OutcomeTaken => taken;
+        internal long MaximumEvents => maximumEvents;
+        internal long AcceptedDeadline => acceptedDeadline;
         internal RunExecution(RunParty party, RunLogicalTiming timing, long maximumEvents)
         {
             Party = party; this.timing = timing;
@@ -197,7 +201,12 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                         if (Outcome == null) throw new InvalidOperationException("run.execution.invalid_cursor");
                         IsTerminal = true; cursor.Dispose();
                     }
-                    if (StartInputs != null) PrefixDigest = RunCheckpointCodec.Fold(PrefixDigest, last.Value, Inspect());
+                    if (StartInputs != null)
+                    {
+                        if (Combat != null) CommittedCombatWork = Combat.Kernel.WorkCount;
+                        PrefixDigest = Combat == null ? RunCheckpointCodec.Fold(PrefixDigest, last.Value, Inspect()) :
+                            CombatCheckpointCodec.Fold(PrefixDigest, last.Value, this);
+                    }
                 }
                 return batch?.ToArray() ?? Array.Empty<RunStep>();
             }
@@ -232,10 +241,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         }
         public RunCheckpoint ExportCheckpoint(RunCheckpointLimits limits)
         {
-            if (Combat != null) throw new InvalidOperationException("combat.c0.checkpoint_contract_unapproved");
+            if (Combat != null && StartInputs == null) throw new InvalidOperationException("combat.c0.checkpoint_contract_unapproved");
             if (failure != null || advancing || StartInputs == null)
                 throw new InvalidOperationException("run.checkpoint.unavailable");
-            return RunCheckpointCodec.Export(this, acceptedDeadline, taken, PrefixDigest, limits);
+            return Combat == null ? RunCheckpointCodec.Export(this, acceptedDeadline, taken, PrefixDigest, limits) :
+                CombatCheckpointCodec.Export(this, acceptedDeadline, taken, limits);
         }
         internal void RestoreMetadata(long deadline, bool consumed)
         { acceptedDeadline = deadline; taken = consumed; }

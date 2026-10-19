@@ -1,0 +1,691 @@
+[
+  {
+    "file": "02-focused.xml",
+    "sha256": "622b0e27df777294df908e167d0ddeac2a5bc176a33d8cf04811f6b78535c39d",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "25",
+      "result": "Failed(Child)",
+      "total": "25",
+      "passed": "21",
+      "failed": "4",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-18 22:04:05Z",
+      "end-time": "2026-10-18 22:04:14Z",
+      "duration": "8.8079232"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1.ContradictoryAndMalformedBytesNeverExposeAnExecution(\"length\")",
+        "message": "System.IO.InvalidDataException : run.checkpoint.encoding",
+        "stack": "  at DungeonBuilder.M0.Gameplay.RunSimulation.RunCheckpointCodec.Blob (System.IO.BinaryReader reader, System.Boolean nullable) [0x0003a] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunCheckpoint.cs:64 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.CombatCheckpointCodec.RestoreSupported (System.Byte[] source, System.String checkpointIdentity, System.String startIdentity, System.Int64 expectedOrdinal, DungeonBuilder.M0.Gameplay.RunSimulation.RunCheckpointLimits limits) [0x0014a] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\CombatCheckpointCodec.cs:89 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService.RestoreCheckpoint (System.Byte[] bytes, System.String expectedCheckpointIdentity, System.String expectedStartIdentity, System.Int64 expectedOrdinal, DungeonBuilder.M0.Gameplay.RunSimulation.RunCheckpointLimits limits) [0x00000] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunSimulationService.Execution.cs:14 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B1Tests.ContradictoryAndMalformedBytesNeverExposeAnExecution (System.String mode) [0x00264] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B1Tests.cs:143 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1.MixedB1C0C2RecordsReopenOnlyWithExplicitCompatibleProfileAndCannotSettleB3A",
+        "message": "  gd66.payload.workload_exceeded\n  Expected: True\n  But was:  False\n",
+        "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B1Tests.MixedB1C0C2RecordsReopenOnlyWithExplicitCompatibleProfileAndCannotSettleB3A () [0x00357] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B1Tests.cs:194\n"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1.PendingGeometryWorkExhaustionIsTheSameBeforeAndAfterReopen",
+        "message": "System.ArgumentException : combat.c0.invalid_state",
+        "stack": "  at DungeonBuilder.M0.Gameplay.RunSimulation.CombatStartCapture.Validate (DungeonBuilder.M0.Gameplay.RunSimulation.ActiveFloorRunSnapshot snapshot, System.Boolean persistent) [0x00476] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\CombatStartCapture.cs:138 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService.StartTimedCombatSnapshot (System.Int32 sequence, DungeonBuilder.M0.Gameplay.RunSimulation.ActiveFloorRunSnapshot snapshot, DungeonBuilder.M0.Gameplay.RunSimulation.RunLogicalTiming timing, System.Boolean persistentMonsters, System.Nullable`1[T] eventLimit) [0x0000e] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunSimulationService.Execution.cs:29 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B1Tests.Start (DungeonBuilder.M0.Gameplay.RunSimulation.ActiveFloorRunSnapshot snapshot, System.Boolean persistent, System.Int32 sequence) [0x00000] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B1Tests.cs:38 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B1Tests.PendingGeometryWorkExhaustionIsTheSameBeforeAndAfterReopen () [0x0003e] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B1Tests.cs:208 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1.TechnicalEnvelopesAndExplicitExecutableOptInFailClosed",
+        "message": "System.IO.InvalidDataException : run.checkpoint.combat_limit",
+        "stack": "  at DungeonBuilder.M0.Gameplay.RunSimulation.CombatStartCapture.Recreate (System.Byte[] bytes, DungeonBuilder.M0.Gameplay.RunSimulation.RunCheckpointLimits limits, System.String executable) [0x000db] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\CombatStartCapture.cs:77 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.CombatCheckpointCodec.RestoreSupported (System.Byte[] source, System.String checkpointIdentity, System.String startIdentity, System.Int64 expectedOrdinal, DungeonBuilder.M0.Gameplay.RunSimulation.RunCheckpointLimits limits) [0x00234] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\CombatCheckpointCodec.cs:98 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunSimulationService.RestoreCheckpoint (System.Byte[] bytes, System.String expectedCheckpointIdentity, System.String expectedStartIdentity, System.Int64 expectedOrdinal, DungeonBuilder.M0.Gameplay.RunSimulation.RunCheckpointLimits limits) [0x00000] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunSimulationService.Execution.cs:14 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B1Tests.TechnicalEnvelopesAndExplicitExecutableOptInFailClosed () [0x000b9] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B1Tests.cs:152 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+      }
+    ],
+    "skips": [],
+    "categories": {
+      "LivingDungeonB3B1": {
+        "passed": 21,
+        "failed": 4
+      },
+      "LivingDungeonPhaseB1": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB3A": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseA": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC0": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Migration": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Atomic": {
+        "passed": 0,
+        "failed": 0
+      },
+      "ProductionSpatialContentBuildGate": {
+        "passed": 0,
+        "failed": 0
+      }
+    }
+  },
+  {
+    "file": "03-focused.xml",
+    "sha256": "8be4dfa3dabe5bd089d0d9950f4f15070f598f03a01658279695ba6e36a404c4",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "25",
+      "result": "Passed",
+      "total": "25",
+      "passed": "25",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-18 22:13:17Z",
+      "end-time": "2026-10-18 22:13:26Z",
+      "duration": "8.7923731"
+    },
+    "failures": [],
+    "skips": [],
+    "categories": {
+      "LivingDungeonB3B1": {
+        "passed": 25,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB1": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB3A": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseA": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC0": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Migration": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Atomic": {
+        "passed": 0,
+        "failed": 0
+      },
+      "ProductionSpatialContentBuildGate": {
+        "passed": 0,
+        "failed": 0
+      }
+    }
+  },
+  {
+    "file": "04-focused.xml",
+    "sha256": "b583918d478b0948073c2a4d98fbe63d5d45f893b5440b77229091fc7c2bbe61",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "32",
+      "result": "Failed(Child)",
+      "total": "32",
+      "passed": "31",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-18 22:16:05Z",
+      "end-time": "2026-10-18 22:16:17Z",
+      "duration": "11.5188015"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1.ExportStandaloneTechnicalFixturesAndMeasurements",
+        "message": "System.ArgumentException : run.execution.invalid_budget",
+        "stack": "  at DungeonBuilder.M0.Gameplay.RunSimulation.RunExecution.AdvanceCore (System.Int32 eventBudget, System.Int64 expectedNextOrdinal, System.Boolean observe, System.Nullable`1[T] deadline) [0x00367] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunExecution.cs:213 \n  at DungeonBuilder.M0.Gameplay.RunSimulation.RunExecution.AdvanceThrough (System.Int64 deadline, System.Int32 eventBudget, System.Int64 expectedNextOrdinal) [0x00035] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\RunSimulation\\RunExecution.cs:148 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B1Tests.ExportStandaloneTechnicalFixturesAndMeasurements () [0x00039] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B1Tests.cs:218 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+      }
+    ],
+    "skips": [],
+    "categories": {
+      "LivingDungeonB3B1": {
+        "passed": 31,
+        "failed": 1
+      },
+      "LivingDungeonPhaseB1": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB3A": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseA": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC0": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Migration": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Atomic": {
+        "passed": 0,
+        "failed": 0
+      },
+      "ProductionSpatialContentBuildGate": {
+        "passed": 0,
+        "failed": 0
+      }
+    }
+  },
+  {
+    "file": "06-focused.xml",
+    "sha256": "73d1af9467e66dee925f8624b1d15a7c970c1168f7687d9e0cace3e554b56c4c",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "33",
+      "result": "Passed",
+      "total": "33",
+      "passed": "33",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-18 22:18:42Z",
+      "end-time": "2026-10-18 22:18:55Z",
+      "duration": "12.6751469"
+    },
+    "failures": [],
+    "skips": [],
+    "categories": {
+      "LivingDungeonB3B1": {
+        "passed": 33,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB1": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB3A": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseA": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC0": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Migration": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Atomic": {
+        "passed": 0,
+        "failed": 0
+      },
+      "ProductionSpatialContentBuildGate": {
+        "passed": 0,
+        "failed": 0
+      }
+    }
+  },
+  {
+    "file": "07-full-edit.xml",
+    "sha256": "e92fae1f610d0122c03311b27772da2f948a194974ebe85b643b51ac0b4b8314",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "2214",
+      "result": "Skipped:Ignored",
+      "total": "2214",
+      "passed": "2213",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-18 22:39:57Z",
+      "end-time": "2026-10-18 22:40:54Z",
+      "duration": "57.1949959"
+    },
+    "failures": [],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "categories": {
+      "LivingDungeonB3B1": {
+        "passed": 35,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB1": {
+        "passed": 37,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB2": {
+        "passed": 82,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB3A": {
+        "passed": 41,
+        "failed": 0
+      },
+      "LivingDungeonPhaseA": {
+        "passed": 42,
+        "failed": 0
+      },
+      "CombatC0": {
+        "passed": 95,
+        "failed": 0
+      },
+      "CombatC2": {
+        "passed": 42,
+        "failed": 0
+      },
+      "Migration": {
+        "passed": 83,
+        "failed": 0
+      },
+      "Atomic": {
+        "passed": 63,
+        "failed": 0
+      },
+      "ProductionSpatialContentBuildGate": {
+        "passed": 65,
+        "failed": 0
+      }
+    }
+  },
+  {
+    "file": "08-focused.xml",
+    "sha256": "969e02b44c35d5b23849c766fc247872329bf4ddbb43de4e8ad13161557dd01b",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "40",
+      "result": "Passed",
+      "total": "40",
+      "passed": "40",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-18 22:46:43Z",
+      "end-time": "2026-10-18 22:46:59Z",
+      "duration": "15.7733257"
+    },
+    "failures": [],
+    "skips": [],
+    "categories": {
+      "LivingDungeonB3B1": {
+        "passed": 40,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB1": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB3A": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseA": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC0": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Migration": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Atomic": {
+        "passed": 0,
+        "failed": 0
+      },
+      "ProductionSpatialContentBuildGate": {
+        "passed": 0,
+        "failed": 0
+      }
+    }
+  },
+  {
+    "file": "09-full-edit.xml",
+    "sha256": "289505a73dc69e9e797dd79df52674b9383b38eb201f5032db0336eaab7f8351",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "2219",
+      "result": "Failed(Child)",
+      "total": "2219",
+      "passed": "2217",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "1",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-18 23:13:58Z",
+      "end-time": "2026-10-18 23:14:54Z",
+      "duration": "55.9304039"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.OwnerUsabilityConstructionAndContentReachability",
+        "message": "System.IO.IOException : The file 'C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\owner-uat-starter.json' already exists.",
+        "stack": "  at System.IO.FileSystem.CopyFile (System.String sourceFullPath, System.String destFullPath, System.Boolean overwrite) [0x0005f] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at System.IO.File.Copy (System.String sourceFileName, System.String destFileName, System.Boolean overwrite) [0x00062] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<OwnerUsabilityConstructionAndContentReachability>d__50.MoveNext () [0x000d2] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1127 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 "
+      }
+    ],
+    "skips": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+        "reason": "gd66.test.windows_only_inverse"
+      }
+    ],
+    "categories": {
+      "LivingDungeonB3B1": {
+        "passed": 40,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB1": {
+        "passed": 37,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB2": {
+        "passed": 82,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB3A": {
+        "passed": 41,
+        "failed": 0
+      },
+      "LivingDungeonPhaseA": {
+        "passed": 42,
+        "failed": 0
+      },
+      "CombatC0": {
+        "passed": 95,
+        "failed": 0
+      },
+      "CombatC2": {
+        "passed": 42,
+        "failed": 0
+      },
+      "Migration": {
+        "passed": 83,
+        "failed": 0
+      },
+      "Atomic": {
+        "passed": 63,
+        "failed": 0
+      },
+      "ProductionSpatialContentBuildGate": {
+        "passed": 65,
+        "failed": 0
+      }
+    }
+  },
+  {
+    "file": "10-baseline-copy.xml",
+    "sha256": "d0a555f422c8bc96df91caa3944d5324ff2e5c779fb06cf417ce6fb89b038780",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Failed(Child)",
+      "total": "1",
+      "passed": "0",
+      "failed": "1",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-18 23:17:31Z",
+      "end-time": "2026-10-18 23:17:33Z",
+      "duration": "1.8980916"
+    },
+    "failures": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.OwnerUsabilityConstructionAndContentReachability",
+        "message": "System.IO.IOException : The file 'C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\owner-uat-starter.json' already exists.",
+        "stack": "  at System.IO.FileSystem.CopyFile (System.String sourceFullPath, System.String destFullPath, System.Boolean overwrite) [0x0005f] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at System.IO.File.Copy (System.String sourceFileName, System.String destFileName, System.Boolean overwrite) [0x00062] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<OwnerUsabilityConstructionAndContentReachability>d__50.MoveNext () [0x000d2] in C:\\Dev\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1127 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 "
+      }
+    ],
+    "skips": [],
+    "categories": {
+      "LivingDungeonB3B1": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB1": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB3A": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseA": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC0": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Migration": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Atomic": {
+        "passed": 0,
+        "failed": 0
+      },
+      "ProductionSpatialContentBuildGate": {
+        "passed": 0,
+        "failed": 0
+      }
+    }
+  },
+  {
+    "file": "11-starter.xml",
+    "sha256": "15e39f6dbf08340465fc3965b0c94cb708d407b09ce8b4aa68fbd26cae9b5b31",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "1",
+      "result": "Passed",
+      "total": "1",
+      "passed": "1",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-18 23:21:02Z",
+      "end-time": "2026-10-18 23:21:17Z",
+      "duration": "15.2229103"
+    },
+    "failures": [],
+    "skips": [],
+    "categories": {
+      "LivingDungeonB3B1": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB1": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB3A": {
+        "passed": 0,
+        "failed": 0
+      },
+      "LivingDungeonPhaseA": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC0": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC2": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Migration": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Atomic": {
+        "passed": 0,
+        "failed": 0
+      },
+      "ProductionSpatialContentBuildGate": {
+        "passed": 0,
+        "failed": 0
+      }
+    }
+  },
+  {
+    "file": "12-integration-play.xml",
+    "sha256": "f9eccd6bb418bc6f4f03b71dd0272384262aa088d59675e7c99fd9d6362efc6e",
+    "verdict": {
+      "id": "2",
+      "testcasecount": "8",
+      "result": "Passed",
+      "total": "8",
+      "passed": "8",
+      "failed": "0",
+      "inconclusive": "0",
+      "skipped": "0",
+      "asserts": "0",
+      "engine-version": "3.5.0.0",
+      "clr-version": "4.0.30319.42000",
+      "start-time": "2026-10-18 23:23:03Z",
+      "end-time": "2026-10-18 23:23:10Z",
+      "duration": "7.1994117"
+    },
+    "failures": [],
+    "skips": [],
+    "categories": {
+      "LivingDungeonB3B1": {
+        "passed": 1,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB1": {
+        "passed": 1,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB2": {
+        "passed": 2,
+        "failed": 0
+      },
+      "LivingDungeonPhaseB3A": {
+        "passed": 1,
+        "failed": 0
+      },
+      "LivingDungeonPhaseA": {
+        "passed": 2,
+        "failed": 0
+      },
+      "CombatC0": {
+        "passed": 0,
+        "failed": 0
+      },
+      "CombatC2": {
+        "passed": 1,
+        "failed": 0
+      },
+      "Migration": {
+        "passed": 0,
+        "failed": 0
+      },
+      "Atomic": {
+        "passed": 1,
+        "failed": 0
+      },
+      "ProductionSpatialContentBuildGate": {
+        "passed": 0,
+        "failed": 0
+      }
+    }
+  }
+]

@@ -6,7 +6,7 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Gameplay.RunSimulation
 {
-    // Owned by one detached, untimed manual execution. Never serialized or scheduled by B2.
+    // Owned by one detached execution. Durable combat replays this state; it never serializes the kernel.
     internal sealed class CombatC0ExecutionState
     {
         internal readonly CombatC0Kernel Kernel;

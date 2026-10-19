@@ -22,7 +22,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!state.IsClosed || after.MaximumActive < before.MaximumActive || after.MaximumRetained < before.MaximumRetained ||
                 after.MaximumCheckpointBytes < before.MaximumCheckpointBytes || after.MaximumPartyReplay < before.MaximumPartyReplay ||
                 after.MaximumTotalReplay < before.MaximumTotalReplay || after.MaximumBaseSaveBytes < before.MaximumBaseSaveBytes ||
-                after.MaximumOwnerBytes < before.MaximumOwnerBytes) throw new InvalidOperationException(Invalid);
+                after.MaximumOwnerBytes < before.MaximumOwnerBytes || after.MaximumCombatWork < before.MaximumCombatWork)
+                throw new InvalidOperationException(Invalid);
             if (before.Id == after.Id) return;
             state.Scheduler.ProfileId = after.Id; Change(state);
         }
