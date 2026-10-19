@@ -14,6 +14,7 @@ replacements={
  "'regression':":"'ui-regression': 'GraphicalFloorReview;RoomContentProductionPreviewCustodySaveDiscardAndLayouts;TransactionalRoomConstructionLayoutsLocalizationAndResume',\n        'boundary-edit': 'LivingDungeonB3B2;GraphicalFloorReview;RoomContentProductionPreviewCustodySaveDiscardAndLayouts;TransactionalRoomConstructionLayoutsLocalizationAndResume;TimeService;SimulationClock;OfflinePassiveMana;PhaseSixA4',\n        'regression':",
  "'integration-play': 'LivingDungeonB3B1PlayModeTests;":"'integration-play': 'LivingDungeonB3B2PlayModeTests;LivingDungeonB3B1PlayModeTests;",
  'BuildLivingDungeonB3B1Windows':'BuildLivingDungeonB3B2Windows',
+ 'BuildLivingDungeonB3B1SmokeFixWindows':'BuildLivingDungeonB3B2SmokeFixWindows',
  "'starter':":"'identity-play': 'BuildReadinessTests',\n        'starter':",
  "stage in ('integration-play', 'full-play')":"stage in ('integration-play', 'full-play', 'identity-play')",
 }
@@ -56,9 +57,9 @@ def current_service(isolated):
 def checkpoint(label):
     m.checkpoint(label)
     current_service(True)
-def build_namespace():
+def build_namespace(smoke_fix=False):
     # Player smoke never opens the Editor qualification's default save.
-    native='living-dungeon-b3b2-qualification-20261018-native.json'
+    native='living-dungeon-b3b2-qualification-20261018-native'+('-smoke-fix' if smoke_fix else '')+'.json'
     destination=Path(json.loads((m.q.OUT/'product-isolation.json').read_text())['savePath'])/native
     m.q.inputs.no_redirect(destination)
     if destination.exists(): raise ValueError('Preserve existing native smoke save')
@@ -66,26 +67,27 @@ def build_namespace():
     for name in [m.q.inputs.CONFIG,m.q.inputs.SERVICE]:
         data=subprocess.check_output(['git','show','HEAD:'+name],cwd=ROOT)
         (ROOT/name).write_bytes(m.q.inputs.transformed(name,data))
-    m.q.write('native-namespace.json',dict(fileName=native,path=str(destination)))
-def smoke(phase):
+    m.q.write('native-namespace'+('-smoke-fix' if smoke_fix else '')+'.json',dict(fileName=native,path=str(destination)))
+def smoke(phase,smoke_fix=False):
     if phase not in ('admit','settle','finish'): raise ValueError('Unknown smoke phase')
-    label='native-'+phase
+    prefix='native-smoke-fix-' if smoke_fix else 'native-'
+    label=prefix+phase
     m.preflight(label)
     report=m.q.OUT/(label+'.json');log=m.q.OUT/(label+'.log');command=m.q.OUT/(label+'-command.json')
     for path in [report,log,command]:
         m.q.inputs.no_redirect(path)
         if path.exists(): raise ValueError('Preserve existing native output '+str(path))
-    previous=m.q.OUT/('native-admit.json' if phase=='settle' else 'native-settle.json')
+    previous=m.q.OUT/(prefix+('admit' if phase=='settle' else 'settle')+'.json')
     if phase!='admit' and not json.loads(previous.read_text()).get('Passed'): raise ValueError('Predecessor smoke did not pass')
     process=subprocess.run(['powershell','-NoProfile','-Command',
         "Get-CimInstance Win32_Process -Filter \"name = 'Unity.exe' OR name = 'Dungeon Lord.exe'\" | "
         "Where-Object { $_.CommandLine -notin @('\"C:\\Program Files\\Unity Hub\\resources\\unity.exe\" serve', "
         "'\"C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe\" --internal-auth-broker-serve') } | Select-Object -ExpandProperty ProcessId"],capture_output=True,text=True)
     if process.stderr.strip() or process.returncode not in (0,1) or process.stdout.strip(): raise ValueError('Unity/player active or process inspection unavailable')
-    player=ROOT/'Builds/Development/Windows-living-dungeon-b3b2-20261018/Dungeon Lord.exe'
+    player=ROOT/('Builds/Development/Windows-living-dungeon-b3b2-20261018'+('-smoke-fix' if smoke_fix else '')+'/Dungeon Lord.exe')
     if not player.is_file(): raise ValueError('Qualified player missing')
     commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
-    builds=[json.loads(p.read_text()) for p in m.q.OUT.glob('*-build-command.json')]
+    builds=[json.loads(p.read_text()) for p in m.q.OUT.glob('*-build*-command.json')]
     if not any(b.get('commit')==commit and b.get('exitCode')==0 for b in builds): raise ValueError('Player/source applicability requires matching successful build')
     startup=subprocess.STARTUPINFO();startup.dwFlags|=subprocess.STARTF_USESHOWWINDOW;startup.wShowWindow=subprocess.SW_HIDE
     args=[str(player),'-batchmode','-screen-width','1280','-screen-height','720','-logFile',str(log),
@@ -108,9 +110,11 @@ if mode=='prepare':
     m.q.write('adapter.json',dict(source='Tools/Presentation/qualify_b3b1.py',
         sha256=hashlib.sha256((ROOT/'Tools/Presentation/qualify_b3b1.py').read_bytes()).hexdigest(),replacements=replacements))
 elif mode=='run':
-    if sys.argv[2]=='build': build_namespace()
+    if sys.argv[2] in ('build','build-smoke-fix'): build_namespace(sys.argv[2]=='build-smoke-fix')
     sys.exit(m.run(sys.argv[2],sys.argv[3]))
-elif mode=='smoke': smoke(sys.argv[2])
+elif mode=='smoke':
+    if len(sys.argv)>3 and sys.argv[3]!='smoke-fix': raise ValueError('Unknown smoke variant')
+    smoke(sys.argv[2],len(sys.argv)>3)
 elif mode=='all-required':
     for stage in ('full-edit','full-play','build'):
         if stage=='build': build_namespace()

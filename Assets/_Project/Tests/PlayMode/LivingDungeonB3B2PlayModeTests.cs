@@ -14,7 +14,8 @@ namespace DungeonBuilder.M0.Tests.PlayMode
             var suite = Activator.CreateInstance(type);
             foreach (string method in new[] { "ActualAdmissionRetainsAnUnfinishedTimedC2PrefixThenSettlesAndRetiresExactlyOnce",
                 "ActualActiveRunAllowsSameFloorDraftCommitAndUsesSnapshotUntilSettlement",
-                "SharedMonotonicClockPreservesWholeUnitsAcrossPartitionFocusPauseAndRestart" })
+                "SharedMonotonicClockPreservesWholeUnitsAcrossPartitionFocusPauseAndRestart",
+                "DevelopmentReopenClockIsOptInAndPreservesRestoredHorizon" })
                 Assert.DoesNotThrow(() => type.GetMethod(method).Invoke(suite, null));
             yield return null;
         }

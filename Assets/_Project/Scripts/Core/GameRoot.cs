@@ -612,7 +612,14 @@ namespace DungeonBuilder.M0
                 : 300;
 
             if (TimeService != null) return false;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var qualificationClock = LivingDungeonForegroundDevelopmentSmoke.ReopenClock(
+                Environment.GetCommandLineArgs(), Application.productName, SaveService.SavePath);
+            TimeService = qualificationClock == null ? new TimeService(Logger, tickSeconds, skewSeconds) :
+                new TimeService(Logger, tickSeconds, skewSeconds, new SystemTimeSource(), qualificationClock);
+#else
             TimeService = new TimeService(Logger, tickSeconds, skewSeconds);
+#endif
             TimeService.AttachSave(Save);
             TimeService.OnTick += HandleSimulationTick;
             TimeService.OnTick += HandleTickTelemetry;

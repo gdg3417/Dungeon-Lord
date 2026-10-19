@@ -123,6 +123,17 @@ namespace DungeonBuilder.M0
     }
     internal sealed class LivingDungeonForegroundDevelopmentSmoke : MonoBehaviour
     {
+        internal static Func<double> ReopenClock(string[] args, string product, string savePath)
+        {
+            int index = Array.IndexOf(args, "-b3b2ForegroundSmoke");
+            if (index < 0 || index + 1 >= args.Length || args[index + 1] != "settle" && args[index + 1] != "finish" ||
+                product == null || !product.Contains("B3B2 Smoke") || string.IsNullOrEmpty(savePath) ||
+                !Path.GetFileName(savePath).StartsWith("living-dungeon-b3b2-qualification-", StringComparison.Ordinal)) return null;
+            // Qualification-only epoch: inspect the exact loaded prefix before
+            // startup frames accrue new eligible time. QualifyForeground then
+            // replaces this source with the existing advancing injected clock.
+            return () => 0d;
+        }
         private string phase, destination, previous;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Begin()

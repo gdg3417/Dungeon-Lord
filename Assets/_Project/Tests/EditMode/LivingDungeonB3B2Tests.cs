@@ -492,6 +492,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private sealed class Utc : ITimeSource { public long UtcNowUnixSeconds() => 1000; }
+        [Test] public void DevelopmentReopenClockIsOptInAndPreservesRestoredHorizon()
+        {
+            string product = "Dungeon Lord B3B2 Smoke 20261018";
+            string save = "living-dungeon-b3b2-qualification-20261018-native-smoke-fix.json";
+            Func<double> Source(string phase, string identity = null, string filename = null) =>
+                LivingDungeonForegroundDevelopmentSmoke.ReopenClock(new[] { "-b3b2ForegroundSmoke", phase },
+                    identity ?? product, filename ?? save);
+            Assert.That(Source("admit"), Is.Null, "Admission must retain its real monotonic source qualification");
+            Assert.That(Source("settle", "Dungeon Lord"), Is.Null);
+            Assert.That(Source("settle", filename: "save_primary.json"), Is.Null);
+            Assert.That(LivingDungeonForegroundDevelopmentSmoke.ReopenClock(Array.Empty<string>(), product, save), Is.Null);
+            foreach (string phase in new[] { "settle", "finish" }) {
+                var clock = Source(phase); Assert.That(clock, Is.Not.Null);
+                var time = new TimeService(new SimpleLogger(false), 10, 300, new Utc(), clock);
+                time.AttachSave(new SaveData()); time.BeginForeground(1000, 91629);
+                for (int frame = 0; frame < 120; frame++) {
+                    time.SetForegroundFocus(frame % 2 == 0);
+                    Assert.That(time.SampleForeground(), Is.EqualTo(91629));
+                }
+            }
+        }
+
         [Test] public void ForegroundClockIsIndependentOfFramePartitionAndRejectsOverflowWithoutElapsedCredit()
         {
             long Sample(bool partitioned) {
