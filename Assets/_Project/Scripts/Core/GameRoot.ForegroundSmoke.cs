@@ -34,10 +34,13 @@ namespace DungeonBuilder.M0
                     !TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.RoomCategoryId,
                         MvpDungeonPlacementIds.BasicRoomOptionId, out _, out _, out _)) throw new InvalidOperationException("b3b2.smoke.room");
                 foreach (var item in new[] { (MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId),
-                    (MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId) })
-                    if (!Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.Any(a => a.CategoryId == item.Item1) &&
-                        !TryMvpPlaceOrModifySelectedPlacement(item.Item1, item.Item2, out _, out _, out _))
+                    (MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId) }) {
+                    if (Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.Any(a => a.CategoryId == item.Item1)) continue;
+                    _selectedRoomLocalContentPosition = item.Item1 == MvpDungeonPlacementIds.MonsterCategoryId
+                        ? new TileCoordinate(1, 1) : new TileCoordinate(0, 0); // explicit nonoverlapping test positions
+                    if (!TryMvpPlaceOrModifySelectedPlacement(item.Item1, item.Item2, out _, out _, out _))
                         throw new InvalidOperationException("b3b2.smoke.content");
+                }
                 OnApplicationFocus(true); ApplyPauseState(false);
                 long before = TimeService.SampleForeground();
                 yield return new WaitForSecondsRealtime(1.2f);

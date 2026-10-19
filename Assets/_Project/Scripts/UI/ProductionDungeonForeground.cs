@@ -20,15 +20,16 @@ namespace DungeonBuilder.M0
                 foregroundPresentedFloor = selectedFloor; foregroundLatest = latest;
                 var label = document.rootVisualElement.Q<Label>("foregroundActivity");
                 if (label != null) {
-                    label.style.display = view == null ? DisplayStyle.None : DisplayStyle.Flex;
+                    label.style.display = view == null || observingReplay ? DisplayStyle.None : DisplayStyle.Flex;
                     if (view != null) {
                         label.text = view.RunId == null ? Text(view.StateKey) : Format("ui.living.active_format", view.RunId,
                             view.Step?.FloorIndex + 1 ?? 1, Text("ui.living.action." + (view.Step?.Kind.ToString() ?? "RoomEntry")), view.Ordinal);
                         if (view.RunId != null && (IsEditing || observingReplay || !view.GeometryCompatible))
                             label.text += "\n" + Text(IsEditing ? "ui.living.editing" : observingReplay ? "ui.living.replay_hidden" : "ui.living.geometry_unavailable");
-                        if (view.RunId == null && latest?.SurvivalSummary?.RuleResolved == true) {
-                            label.text += "\n" + Format("ui.living.latest", latest.RunId, latest.SurvivalSummary.SurvivorCount);
-                            if (!string.IsNullOrEmpty(latest.FinalRouteOutcomeKey)) label.text += "\n" + Text(latest.FinalRouteOutcomeKey);
+                        if (!IsEditing && view.RunId == null && latest?.SurvivalSummary?.RuleResolved == true &&
+                            (view.StateKey == "ui.living.awaiting" || view.StateKey == "ui.living.not_eligible")) {
+                            label.text = Format("ui.living.latest", latest.RunId, latest.SurvivalSummary.SurvivorCount);
+                            if (!string.IsNullOrEmpty(latest.FinalRouteOutcomeKey)) label.text += " " + Text(latest.FinalRouteOutcomeKey);
                         }
                     }
                 }

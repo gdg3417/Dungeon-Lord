@@ -155,6 +155,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.Zero);
         }
 
+        [Test] public void IndependentlyInjectedHistoricalLimitsDoNotAcquireProductionScheduling()
+        {
+            var f = Fixture.Create(null);
+            Assert.That(f.Profile.Canonical.ForSchema(13).Serialized.MaximumInputBytes, Is.Not.EqualTo(Policy.CreateProfile(default).MaximumBaseSaveBytes));
+            var service = Service(f, new Utc());
+            Assert.That(service.ForegroundConfiguration, Is.Null);
+            Assert.That(f.Runtime.livingDungeon.IsDormant, Is.True);
+            Assert.That(service.Save(f.Runtime, SaveReason.ManualDev), Is.True);
+        }
+
         [Test] public void UnsupportedCombatWorkConsumesOpportunityWithoutRunAllocationOrGameplayDamage()
         {
             var f = Dungeon(); f.Configuration.CombatC0.MaximumWork = 1; Support(f);
@@ -180,7 +190,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var second = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot()).StartTimedCombatSnapshot(2, existing.Snapshot, Policy.Timing);
             var other = new LivingDungeonParty { Sequence = 2, AdmittedAt = f.Runtime.livingDungeon.Parties.Single().AdmittedAt };
             try {
-                second.AdvanceThrough(0, Policy.MaximumBoundaryEvents, second.NextOrdinal);
+                while (second.NextDueTime() == 0) second.AdvanceThrough(0, 1, second.NextOrdinal);
                 var profile = Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized);
                 LivingDungeonScheduling.Pin(other, second, profile); f.Runtime.livingDungeon.Parties.Add(other);
                 Assert.That(LivingDungeonContracts.Validate(f.Runtime.livingDungeon, new[] { profile }), Is.False);

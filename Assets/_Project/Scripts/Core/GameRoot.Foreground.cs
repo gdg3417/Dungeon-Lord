@@ -12,12 +12,24 @@ namespace DungeonBuilder.M0
         private string foregroundFailure;
         public LivingDungeonForegroundInspection ForegroundActivity { get; private set; }
 
+        private void OnDisable()
+        {
+            if (TimeService?.HasForegroundClock != true) return;
+            TimeService.SetForegroundFocus(false);
+            FlushForeground(); // close eligible time before the service is suspended
+        }
+        private void OnEnable()
+        {
+            if (TimeService?.HasForegroundClock == true)
+                TimeService.SetForegroundFocus(foregroundApplicationFocused && !foregroundApplicationPaused);
+        }
+
         private void InitializeForeground()
         {
             if (SaveService?.ForegroundConfiguration == null || TimeService == null || !CanonicalMvpRouteProjection.IsCanonical(Save)) return;
             if (Save.livingDungeon?.Scheduler != null && Save.livingDungeon.Scheduler.ProfileId != LivingDungeonForegroundConfig.ProfileId) return;
             foregroundApplicationFocused = Application.isFocused;
-            TimeService.SetForegroundFocus(foregroundApplicationFocused);
+            TimeService.SetForegroundFocus(foregroundApplicationFocused && isActiveAndEnabled);
             TimeService.BeginForeground(SaveService.ForegroundConfiguration.UnitsPerSecond, Save.livingDungeon?.Scheduler?.AcceptedThrough ?? -1);
             SaveService.BeforeForegroundAction = FlushForeground;
             SaveService.ForegroundCurrent = () => Save;
@@ -34,8 +46,8 @@ namespace DungeonBuilder.M0
         private void OnApplicationFocus(bool focused)
         {
             foregroundApplicationFocused = focused;
-            TimeService?.SetForegroundFocus(focused);
-            if (TimeService?.HasForegroundClock == true) ApplyPauseState(foregroundApplicationPaused || !focused);
+            TimeService?.SetForegroundFocus(focused && isActiveAndEnabled);
+            if (isActiveAndEnabled && TimeService?.HasForegroundClock == true) ApplyPauseState(foregroundApplicationPaused || !focused);
         }
 
         private void UpdateForeground()

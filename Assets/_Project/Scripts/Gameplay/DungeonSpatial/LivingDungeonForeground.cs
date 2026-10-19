@@ -206,6 +206,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return result;
             }
             catch (Exception error) {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                if (!error.Message.StartsWith("living.", StringComparison.Ordinal) && !error.Message.StartsWith("combat.", StringComparison.Ordinal))
+                    UnityEngine.Debug.LogWarning("living.foreground.transaction_failed: " + error);
+#endif
                 return Failure(error.Message.StartsWith("living.", StringComparison.Ordinal) || error.Message.StartsWith("combat.", StringComparison.Ordinal)
                     ? error.Message : invalid);
             }

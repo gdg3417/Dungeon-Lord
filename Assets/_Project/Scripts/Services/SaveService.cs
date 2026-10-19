@@ -228,14 +228,18 @@ namespace DungeonBuilder.M0
             _legacyConfiguration = legacyConfiguration == null ? null : (byte[])legacyConfiguration.Clone();
             _positionMigrationProfiles = positionMigrationProfiles;
             _roomContentOccupancy = roomContentOccupancy;
-            try { ForegroundConfiguration = LivingDungeonForegroundConfig.Load(); }
+            LivingDungeonProfile foregroundProfile = null;
+            try {
+                var policy = LivingDungeonForegroundConfig.Load();
+                if (limits != null) foregroundProfile = policy.CreateProfile(limits.Canonical.ForSchema(13).Serialized);
+                ForegroundConfiguration = foregroundProfile == null ? null : policy;
+            }
             catch { ForegroundConfiguration = null; }
             _validationContext = limits == null || production == null || compatibility == null ||
                 legacyConfiguration == null || positionMigrationProfiles == null ||
                 roomContentOccupancy == null ? null : new DetachedCurrentTargetValidationContext(
                     compatibility, production, legacyConfiguration, limits.Canonical,
-                    roomContentOccupancy, livingDungeonProfiles: ForegroundConfiguration == null ? null : new[] {
-                        ForegroundConfiguration.CreateProfile(limits.Canonical.ForSchema(13).Serialized) },
+                    roomContentOccupancy, livingDungeonProfiles: foregroundProfile == null ? null : new[] { foregroundProfile },
                     monsterRecovery: MonsterRecoveryRules.Capture(legacyGameplayConfiguration));
         }
 
