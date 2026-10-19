@@ -100,8 +100,7 @@ namespace DungeonBuilder.M0
                         if (phase == "settle") {
                             string captured = PendingGeometry();
                             if (!FloorKnowledgeApplicability.TryCompute(Save.validatedCanonicalSpatialState, Save.corridorContent,
-                                SaveSpatialMigrationLimits.Canonical, Save.livingDungeon.Parties.Count == 1 ?
-                                    Save.validatedCanonicalSpatialState.Floors[0].FloorInstanceId : null, out string current) ||
+                                SaveSpatialMigrationLimits.Canonical, Save.validatedCanonicalSpatialState.Floors[0].FloorInstanceId, out string current) ||
                                 captured != current || captured == prior.PendingGeometry)
                                 throw new InvalidOperationException("b3b2.smoke.second_run_geometry");
                             report.SecondRunUsesEditedGeometry = true;
