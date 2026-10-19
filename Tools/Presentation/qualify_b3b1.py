@@ -53,6 +53,34 @@ def checkpoint(label):
     q.checkpoint(label)
     if (q.OUT/'product-isolation.json').exists(): apply_product()
 
+def finish():
+    # Retain the original false audit row; an owner-approved auxiliary-cache
+    # exception is not byte preservation and must never be reported as such.
+    failure = None
+    try:
+        q.finish()
+    except ValueError as error:
+        if str(error) != 'Protected files changed': raise
+        failure = error
+    finally:
+        if (q.OUT/'product-isolation.json').exists():
+            with zipfile.ZipFile(q.OUT/'root-inputs-before.zip') as z:
+                (ROOT/BUILD_UTILITY).write_bytes(z.read(BUILD_UTILITY))
+    rows = json.loads((q.OUT/'preservation-after.json').read_text())
+    changed = [row for row in rows if not row['equal']]
+    if any(not accepted_cache_exception(row) for row in changed):
+        raise failure or ValueError('Unapproved protected-file change')
+    historical = json.loads((q.OUT/'historical-evidence-before.json').read_text())
+    for row in historical:
+        p = Path(row['path']); q.inputs.no_redirect(p)
+        row['equal'] = p.is_file() and q.sha(p) == row['sha256']
+    q.write('historical-evidence-after.json', historical)
+    if any(not row['equal'] for row in historical): raise ValueError('Historical evidence changed')
+    q.write('accepted-preservation-exceptions.json', dict(unchanged=len(rows)-len(changed),
+        total=len(rows), ownerAccepted=changed, historicalUnchanged=len(historical)))
+    print(len(rows)-len(changed), '/', len(rows), 'protected files unchanged;',
+          len(changed), 'explicit owner-accepted cache exception;', len(historical), 'historical files unchanged')
+
 def isolate_product():
     if (q.OUT/'substitutions-restored.json').exists(): raise ValueError('Campaign is closed')
     if (q.OUT/'product-isolation.json').exists(): raise ValueError('Product isolation already installed')
@@ -154,7 +182,7 @@ if __name__ == '__main__':
     elif mode == 'checkpoint': checkpoint(sys.argv[2])
     elif mode == 'isolate-starter': isolate_starter()
     elif mode == 'isolate-product': isolate_product()
-    elif mode == 'finish': q.finish()
+    elif mode == 'finish': finish()
     elif mode == 'preflight': preflight(sys.argv[2])
     elif mode == 'run': sys.exit(run(sys.argv[2], sys.argv[3]))
     else: raise ValueError(mode)
