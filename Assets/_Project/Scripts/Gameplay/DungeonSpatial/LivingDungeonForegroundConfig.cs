@@ -45,7 +45,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             var budget = new SpatialSerializedInputLimits(4096, 64, 32, 2048, 8);
             var issues = new SpatialIssueCollector(8);
-            string[] names = typeof(Data).GetFields().Select(f => f.Name).ToArray();
+            // Freeze the authored format's order explicitly. Reflection declaration
+            // order is neither the JSON schema nor a cross-runtime contract.
+            string[] names = { "FormatVersion", "Profile", "UnitsPerSecond", "GameplayPartyCapacity",
+                "UnitsPerTileEdge", "MonsterInteractionUnits", "TrapInteractionUnits", "LootInteractionUnits",
+                "MinimumArrivalUnits", "MaximumArrivalUnits", "LowInterval", "BuildingInterval", "SteadyInterval",
+                "HeavyInterval", "ChurnInterval", "MaximumBoundariesPerPump", "MaximumEventsPerBoundary", "MaximumRetained",
+                "MaximumCheckpointBytes", "MaximumPartyReplay", "MaximumTotalReplay", "MaximumCombatWork", "MaximumBaseSaveBytes", "MaximumOwnerBytes" };
             if (!ContractJson.TryParse(bytes, budget, issues, out var root, true) || !ContractJson.ValidateShape(root, names, issues) ||
                 root.Fields.Any(f => f.Key == nameof(Data.Profile) ? f.Value.Kind != ContractJsonKind.String :
                     typeof(Data).GetField(f.Key).FieldType == typeof(int) ? !ContractJson.Int(f.Value, out _) : !ContractJson.Long(f.Value, out _)))
