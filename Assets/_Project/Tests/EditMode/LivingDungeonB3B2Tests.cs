@@ -22,6 +22,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+            return Support(f);
+        }
+        private static Fixture Support(Fixture f)
+        {
             f.Profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
             f.Context = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
                 LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile.Canonical, f.Occupancy,
@@ -278,6 +282,52 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(applied.Records.Single().Health, Is.EqualTo(Math.Max(0, f.Runtime.monsterContinuity.Records.Single().Health - m.InitialHealth + m.Health)));
         }
 
+        [TestCase(false)] [TestCase(true)]
+        public void ActualTerminalReconcilesCustodyOrRedeploymentAndRecoversOnlyAssignedVacantIdentity(bool redeploy)
+        {
+            var f = Dungeon(); Admitted(f); long finish = Finish(f);
+            string id = f.Runtime.monsterContinuity.Records.Single().AssignmentId;
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(id)));
+            if (redeploy) f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(id,
+                f.State.Floors[0].Layout.Rooms[0].RoomInstanceId, null, new TileCoordinate(3, 2))));
+            double wallet = f.Runtime.structureRuntime.ManaReserve; f.Reopen(); Through(f, finish);
+            var historical = f.Runtime.runHistory.LatestOutcome.CombatMonsters.Single();
+            Assert.That(historical.Health, Is.Zero);
+            var actual = f.Runtime.monsterContinuity.Records.Single();
+            int readiness = MonsterRecoveryRules.Capture(f.Configuration).Readiness(historical.OptionId);
+            Assert.That(actual.AssignmentId, Is.EqualTo(id)); Assert.That(actual.Health, Is.EqualTo(redeploy ? readiness : 0));
+            Assert.That(actual.RevivalRequired, Is.EqualTo(!redeploy));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(wallet - (redeploy ? readiness : 0)));
+            var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, finish);
+            CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes());
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void MoveToAnotherFloorPreservesIdentityAndOrdersCurrentVacantRecoveryBeforeHistoricalDamage(bool activateTarget)
+        {
+            var f = PhaseSixA4Tests.Eligible(); f.Configuration = CombatC0IntegrationTests.Config();
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+            Support(f); Admitted(f); long finish = Finish(f);
+            string id = f.Runtime.monsterContinuity.Records.Single().AssignmentId;
+            string second = PhaseSixA4Tests.FloorTwo(f); var room = f.State.Floors.Single(floor => floor.FloorInstanceId == second).Layout.Rooms[0];
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(id)));
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Redeploy(id, room.RoomInstanceId, second, new TileCoordinate(1, 1))));
+            if (activateTarget) f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
+            CombatC2Tests.SetState(f, 3, false, 100);
+            Through(f, f.Runtime.livingDungeon.Scheduler.ClosedThrough + 1);
+            int ready = MonsterRecoveryRules.Capture(f.Configuration).Readiness(MvpDungeonPlacementIds.GoblinOptionId);
+            Assert.That(f.Runtime.monsterContinuity.Records.Single().Health, Is.EqualTo(activateTarget ? ready : 3));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(activateTarget ? 100 - ready + 3 : 100));
+            f.Reopen(); Through(f, finish);
+            Assert.That(f.Runtime.runHistory.LatestOutcome.CombatMonsters.Single().Health, Is.Zero);
+            Assert.That(f.State.Floors.Single(floor => floor.FloorInstanceId == second).RoomContents.Assignments.Single().AssignmentId, Is.EqualTo(id));
+            Assert.That(f.Runtime.monsterContinuity.Records.Single().Health, Is.EqualTo(activateTarget ? ready : 0));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(activateTarget ? 100 - (ready - 3) - ready : 100));
+            var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, finish);
+            CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes());
+        }
+
         [Test] public void RetiredCapturedIdentityIsNeverRecreatedAndReplacementIsUntouched()
         {
             var f = Dungeon(); var e = Start(f); var outcome = e.DrainToCompletion(); var m = outcome.CombatMonsters.Single();
@@ -287,7 +337,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var retired = MonsterContinuity.Reconcile(f.Runtime.monsterContinuity, f.State, spatial, MonsterRecoveryRules.Capture(f.Configuration));
             Assert.That(retired.Records, Is.Empty);
             Assert.That(LivingDungeonForegroundReconciliation.Apply(e, outcome, retired, spatial, MonsterRecoveryRules.Capture(f.Configuration)).Records, Is.Empty);
-            Assert.That(f.Runtime.monsterContinuity.Records.Single().AssignmentId, Is.EqualTo(m.AssignmentId));
+            var prepared = f.Session.PrepareLiveReplacement(DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile), spatial, monsterContinuity: retired);
+            Assert.That(prepared.IsSuccess, Is.True, prepared.Reason);
+            f.FileSystem.Seed(f.ActivePath, prepared.Update.GetBytes()); f.Reopen();
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId,
+                f.State.Floors[0].Layout.Rooms[0].RoomInstanceId, null, new TileCoordinate(3, 2))));
+            var replacement = f.Runtime.monsterContinuity.Records.Single(); Assert.That(replacement.AssignmentId, Is.Not.EqualTo(m.AssignmentId));
+            var applied = LivingDungeonForegroundReconciliation.Apply(e, outcome, f.Runtime.monsterContinuity, f.State, MonsterRecoveryRules.Capture(f.Configuration));
+            Assert.That(applied.Records.Single().AssignmentId, Is.EqualTo(replacement.AssignmentId));
+            Assert.That(applied.Records.Single().Health, Is.EqualTo(replacement.Health));
         }
 
         [Test] public void ActualActiveRunAllowsSameFloorDraftCommitAndUsesSnapshotUntilSettlement()
