@@ -185,3 +185,55 @@ No owner checkpoint, command-line, technical failure-injection or build qualific
 4. Pause or close/reopen during an active party. It resumes from the committed prefix; time outside the app does not advance adventurers. Existing offline passive mana remains its separate policy.
 
 The isolated qualified Windows player can be launched without smoke arguments for these ordinary gameplay checks; its product/save namespace is separate from owner production data. Broader automatic floors/descent, offline adventurers, authenticated UTC/foreground provenance, mobile/IL2CPP performance and durable detailed historical replay remain outside this slice. These are scope limitations, not claims that the whole Living Dungeon roadmap is activated.
+
+
+## PR #245 independent-review corrections (2026-10-19)
+
+This addendum concerns the two inline findings at reviewed HEAD `53e85f0baa9e141c564c4363ab8890d075003ffa`. The original campaign and source-applicability statements above remain historical evidence; none of its failed reports is relabeled. Recommended configuration for this bounded correction: GPT-6.1 Sol Medium, Standard; fallback GPT-6 Sol Medium then GPT-5.6 Sol Medium. No model escalation or delegation. Validation status for this addendum: **technical qualification complete; ready for another independent review**. The PR remains unmerged; no owner gameplay testing is requested.
+
+### Corrected behavior
+
+`GameRoot.PumpForeground` previously passed every unsuccessful write result to `ForegroundFault`, permanently latching `foregroundFailure` even when `ExactCompleteSaveAtomicPersistence` proved that the exact original bytes had been restored. The root now recognizes only `gd66.write.atomic_save_failed` as retryable. It retains the committed save/session/checkpoint/allocator/horizon and displays `ui.living.retryable`; frame updates perform no further storage attempts while pending. An existing save/edit/lifecycle barrier may attempt the transaction again. A successful pump clears the transient retry gate. Repeated failures return after one failed attempt per explicit barrier; no retry timer or new UI control is introduced. Uncertain durability (`gd66.transaction.recovery_failed`) and invalid-state failures keep the permanent root latch; the independent SaveService recovery-required latch is unchanged. Atomic persistence and its failure classification were not modified.
+
+Production `LivingDungeonForegroundConfig` now requires `MaximumCombatWork > 0` before constructing its production profile. Zero and negative work produce `living.foreground.invalid_configuration`; malformed, fractional, quoted, null and overflowing inputs fail bounded parsing. Positive test envelopes are accepted. The authored value remains 1,000,000. Historical B1/Profile A zero-work semantics, checkpoint codecs, gameplay timings, settlement reconciliation, schema 15 and migrations are unchanged.
+
+### Correction evidence
+
+Separate campaign: `TestResults/living-dungeon-b3b2-20261019-review/`; isolated native product `Dungeon Lord B3B2 Smoke 20261019 Review`, with distinct Editor and native save names. Existing original campaign/build/save outputs are retained. Preparation inventories 1,382 Unity inputs, 9,264 protected save/build files and 7,753 historical evidence files. The existing adapter redirects every known capture/fixture output before launching Unity. Raw historical evidence is backed up; existing archive containers remain in place and are included in the immutable hash inventory rather than recursively copied into another archive.
+
+| Attempt | Exact source | Result |
+| --- | --- | --- |
+| 01 before-fix focused | `0bf8580272a6b053d14e8428ac33310d73d327f0` | Test compilation failed: the deterministic filesystem Operations enumerable requires LINQ Count(). No test success claimed; corrected only the test expressions. |
+| 02 before-fix focused | `88bfe1dd128573f8a718b05731a5a1cb693d857e` | 49 passed / 3 failed / 0 skipped. Reproduced refused explicit retry after proven rollback, accepted zero work, and negative work's generic profile diagnostic. The uncertain-rollback control and original tests passed. |
+| 03 corrected affected EditMode | `9227f78e2e9502985a87dff811fd9440c2ad7e41` | **161/161 passed / 0 skips**. All same 52 before-fix cases now pass (recorded in before-after-equivalence.json), including the real-root accepted-horizon retry, no per-frame I/O retries, exactly-once terminal receipts/resources, ordinary save after retry and permanent uncertain-rollback latch. |
+| 04 atomic/manual/legacy EditMode | `9227f78e` | **340/340 passed / 0 skips**. Existing A/B1/B2/B3A, manual C0/C2, canonical-save, migration, history/Heat/loot regression filter. |
+| 05 affected PlayMode | `9227f78e` | **10/10 passed / 0 skips**. B3B2, B3B1, A/B1/B2/B3A and C2 integration; includes cross-mode production-work validation. |
+| 06 Windows Development Build | `b582a0bdccefbba4fe8872f0f3d8fa987bfa7b44` | **Passed**; Unity 6000.3.2f1, StandaloneWindows64, Development, 181,820,680 bytes, 0 errors / 1 warning. Separate unused review output; identical tested runtime. |
+| Native admit / settle / finish | `b582a0bd` | **All three passed**. Real monotonic-source check 1,200 units; automatic admission/live marker/active edit; exact reopen/run-1 settlement/changed run-2 snapshot; second exact reopen/run-2 settlement. Final accepted/closed 146,829, zero retained parties, history run-1/run-2 exactly once, next sequence 3. |
+
+Corrected runtime source: `9227f78e2e9502985a87dff811fd9440c2ad7e41`. Build/tooling source: `b582a0bdccefbba4fe8872f0f3d8fa987bfa7b44`. Its only difference from tested runtime `9227f78e` is an adapter guard rejecting the older smoke-fix variant before loading or launching anything; all Unity inputs are identical. The guard rejection is recorded in output-guard-check.json. Build identity, standalone and preservation closeout are recorded below. Both threads may be addressed from this completed evidence.
+
+### Exact correction files relative to reviewed HEAD
+
+| File | Purpose |
+| --- | --- |
+| `Assets/_Project/Scripts/Core/GameRoot.Foreground.cs` | Gate frame retries after proven rollback; allow existing explicit barriers to retry; preserve permanent faults. |
+| `Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonForegroundConfig.cs` | Reject nonpositive production combat-work envelopes. |
+| `Assets/_Project/Data/Bootstrap/string_table_en.json` | Localize retryable save feedback. |
+| `Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonForegroundSceneTests.cs` | Real-root accepted-horizon/rollback/retry, exact-once settlement/resource and ordinary-save checks; uncertain-durability control. |
+| `Assets/_Project/Tests/EditMode/LivingDungeonB3B2Tests.cs` | Positive/nonpositive/malformed/overflow production-work cases. |
+| `Assets/_Project/Tests/PlayMode/LivingDungeonB3B2PlayModeTests.cs` | Confirm production-work validation across execution modes. |
+| `Assets/_Project/Editor/DungeonVisualBuildQualification.cs` | New unused correction Windows build output. |
+| `Tools/Presentation/qualify_b3b2_review.py` | Thin reuse of the established isolated qualification adapter with fresh identities, outputs and nonrecursive historical backup. |
+| `Docs/testing/evidence/living-dungeon-b3b2/qualification.md` | Retain original evidence and record the correction campaign/source applicability. |
+
+No owner gameplay testing is requested for this correction. Independent review remains required; do not merge.
+
+
+Correction build identity: `Builds/Development/Windows-living-dungeon-b3b2-20261019-review/Dungeon Lord.exe`; gameplay assembly SHA-256 `fdc8afc8dda7cda8e3fa3650f05d51f2daa0cf6d73e599070c9e995fb3add4f1`. Launcher and packed managers hashes are retained in `build-hashes.json`. The single build warning is the Unity Services empty-URI native-symbol-upload warning, not a compilation or gameplay failure. Cleanup diagnostics remain in the native logs without unsupported attribution.
+
+Native checkpoint sizes are 23,060 bytes (run-1 ordinal 2) and 23,063 bytes (run-2 ordinal 0); complete saves are 39,766 / 49,718 / 25,943 bytes. Exact saves, SHA-256 checks, JSON reports, logs and commands are retained separately in the correction campaign. Standalone smoke uses the existing explicit development-only clock/focus acceleration after its real monotonic check; normal gameplay clocks are unchanged. Deterministic failure injection is exercised through the real root with the established in-memory filesystem, not by disrupting owner storage. No claim of native hardware-failure injection, mobile performance or authenticated foreground provenance is made.
+
+Source applicability: all correction EditMode/PlayMode results use `9227f78e`; build and three native processes use `b582a0bd`, with no intervening Unity input changes. Later documentation-only closeout does not change runtime applicability. Earlier full-suite results above are preserved at their original source SHAs; no new full-suite run or relabeling of older failed reports is claimed.
+
+The original B3B2 isolated product has a supplemental 40-file before/after inventory (`prior-isolated-product-before/after.json`), all unchanged. Both prior canonical native saves also match their published original-campaign snapshots exactly. Final main preservation audit **passed: 9,264/9,264 protected save/build files and 7,753/7,753 historical evidence files unchanged; zero new exceptions**. Product identity, default-save, fixture/capture and generated Unity-setting substitutions were restored. Only this documentation closeout remained before its final commit; all runtime and test inputs match the qualified source. `preservation-after.json`, `historical-evidence-after.json`, `accepted-preservation-exceptions.json` and `substitutions-restored.json` retain the result. No external test/player process remains running; ordinary Unity Hub/licensing services are not terminated. No new technical blocker was found.
