@@ -347,6 +347,155 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             Assert.That(Failure(e, true), Is.EqualTo(Failure(restored, false)));
         }
+
+        // All ceilings below are measured from the unchanged qualified kernel on
+        // this exact snapshot, never production tuning or an estimated work formula.
+        [TestCase(false, false)] [TestCase(true, false)] [TestCase(false, true)] [TestCase(true, true)]
+        public void MeasuredPendingCommitAndTerminalWorkCeilingsSurviveRepeatedReconstruction(bool persistent, bool twoFloors)
+        {
+            var f = Dungeon(twoFloors); var snapshot = PhaseSixA4Tests.Snapshot(f);
+            var canonical = f.Session.GetCurrentBytes(); var runtime = B.Structured(f.Runtime);
+            var reference = Start(snapshot, persistent); var expectedSteps = Drain(reference, 1); var expected = reference.TakeOutcome();
+            int boundary = expectedSteps.FindIndex(s => s.Kind == RunStepKind.MonsterEngagement);
+            var measured = Start(snapshot, persistent);
+            for (int i = 0; i < boundary; i++) measured.Advance(1, measured.NextOrdinal);
+            long committed = measured.CommittedCombatWork;
+            measured.NextDueTime(); long pendingWork = measured.Combat.Kernel.WorkCount;
+            measured.Advance(1, measured.NextOrdinal); long encounterWork = measured.CommittedCombatWork;
+            long total = CombatC0Diagnostics.ChargedWork(expected);
+            Assert.That(pendingWork, Is.GreaterThan(committed)); Assert.That(encounterWork, Is.GreaterThan(pendingWork));
+            foreach (var point in new[] { (Name: "pending", Work: pendingWork), (Name: "commit", Work: encounterWork), (Name: "terminal", Work: total) })
+            foreach (int delta in new[] { -1, 0, 1 }) {
+                f.Configuration.CombatC0.MaximumWork = point.Work + delta;
+                var limited = PhaseSixA4Tests.Snapshot(f);
+                var direct = RunAtMeasuredCeiling(Start(limited, persistent), false);
+                var cycling = RunAtMeasuredCeiling(Start(limited, persistent), true);
+                Assert.That(cycling.Failure, Is.EqualTo(direct.Failure), point.Name + delta);
+                Assert.That(cycling.Run.NextOrdinal, Is.EqualTo(direct.Run.NextOrdinal));
+                Assert.That(cycling.Run.CommittedCombatWork, Is.EqualTo(direct.Run.CommittedCombatWork));
+                Assert.That(cycling.Run.Combat.Kernel.WorkCount, Is.EqualTo(direct.Run.Combat.Kernel.WorkCount));
+                Assert.That(B.Structured(cycling.Steps), Is.EqualTo(B.Structured(direct.Steps)));
+                CollectionAssert.AreEqual(CombatCheckpointCodec.Inspection(direct.Run), CombatCheckpointCodec.Inspection(cycling.Run));
+                if (point.Name == "pending") Assert.That(direct.Run.NextOrdinal, Is.EqualTo(boundary));
+                if (point.Name == "commit") Assert.That(direct.Run.NextOrdinal, delta < 0 ? Is.EqualTo(boundary) : Is.GreaterThan(boundary));
+                if (point.Name == "terminal" && delta >= 0) {
+                    Assert.That(direct.Failure, Is.Null); EqualOutcome(direct.Outcome, expected); EqualOutcome(cycling.Outcome, expected);
+                    Assert.That(B.Structured(cycling.Steps), Is.EqualTo(B.Structured(expectedSteps)));
+                } else Assert.That(direct.Failure, Is.EqualTo(CombatC0Kernel.Workload));
+                TestContext.WriteLine("Work boundary persistent=" + persistent + " floors=" + snapshot.Floors.Count + " point=" + point.Name +
+                    " limit=" + (point.Work + delta) + " ordinal=" + direct.Run.NextOrdinal + " committed=" + direct.Run.CommittedCombatWork +
+                    " charged=" + direct.Run.Combat.Kernel.WorkCount + " failure=" + direct.Failure);
+            }
+            CollectionAssert.AreEqual(canonical, f.Session.GetCurrentBytes()); Assert.That(B.Structured(f.Runtime), Is.EqualTo(runtime));
+        }
+
+        private static (RunExecution Run, List<RunStep> Steps, string Failure, RunOutcomeRecord Outcome) RunAtMeasuredCeiling(RunExecution run, bool reopen)
+        {
+            var steps = new List<RunStep>();
+            while (!run.IsTerminal) {
+                long ordinal = run.NextOrdinal, committed = run.CommittedCombatWork;
+                var prefix = (byte[])run.PrefixDigest.Clone(); var members = B.Structured(run.Inspect().Members);
+                var monsters = B.Structured(run.Combat.Kernel.InspectMonsters()); var receipts = B.Structured(run.Combat.Events);
+                try {
+                    if (!reopen) { steps.AddRange(run.Advance(1, ordinal)); continue; }
+                    long due = -1;
+                    for (int cycle = 0; cycle < 4; cycle++) {
+                        var inspection = CombatCheckpointCodec.Inspection(run); var bytes = run.ExportCheckpoint(Limits).GetBytes();
+                        due = run.NextDueTime().Value; long work = run.Combat.Kernel.WorkCount;
+                        for (int probe = 0; probe < 5; probe++) Assert.That(run.NextDueTime(), Is.EqualTo(due));
+                        Assert.That(run.Combat.Kernel.WorkCount, Is.EqualTo(work));
+                        CollectionAssert.AreEqual(inspection, CombatCheckpointCodec.Inspection(run));
+                        CollectionAssert.AreEqual(bytes, run.ExportCheckpoint(Limits).GetBytes());
+                        if (due > run.Inspect().LogicalTime) Assert.That(run.AdvanceThrough(due - 1, 1, ordinal), Is.Empty);
+                        var restored = Restore(run); run.Abandon(); run = restored;
+                        Assert.That(run.CommittedCombatWork, Is.EqualTo(committed));
+                    }
+                    steps.AddRange(run.AdvanceThrough(due, 1, ordinal));
+                }
+                catch (InvalidOperationException error) {
+                    while (error.InnerException is InvalidOperationException inner) error = inner;
+                    Assert.That(run.NextOrdinal, Is.EqualTo(ordinal)); Assert.That(run.CommittedCombatWork, Is.EqualTo(committed));
+                    CollectionAssert.AreEqual(prefix, run.PrefixDigest);
+                    Assert.That(B.Structured(run.Inspect().Members), Is.EqualTo(members));
+                    Assert.That(B.Structured(run.Combat.Kernel.InspectMonsters()), Is.EqualTo(monsters));
+                    Assert.That(B.Structured(run.Combat.Events), Is.EqualTo(receipts));
+                    Assert.That(run.Combat.Kernel.WorkCount, Is.LessThanOrEqualTo(run.Combat.Kernel.Configuration.MaximumWork));
+                    Assert.Throws<InvalidOperationException>(() => run.ExportCheckpoint(Limits));
+                    Assert.Throws<InvalidOperationException>(() => run.TakeOutcome());
+                    Assert.Throws<InvalidOperationException>(() => run.NextDueTime());
+                    return (run, steps, error.Message, null);
+                }
+            }
+            return (run, steps, null, run.TakeOutcome());
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void ReplayExceedingCapturedWorkCeilingRejectsWithoutHandleOrPublication(bool persistent)
+        {
+            var f = Dungeon(); var canonical = f.Session.GetCurrentBytes(); var runtime = B.Structured(f.Runtime);
+            var full = Start(PhaseSixA4Tests.Snapshot(f), persistent); full.DrainToCompletion();
+            f.Configuration.CombatC0.MaximumWork = full.CommittedCombatWork - 1;
+            var limited = Start(PhaseSixA4Tests.Snapshot(f), persistent);
+            // Independently accepted synthetic pins request the full ordinal under
+            // the smaller captured budget; replay must fail before evidence comparison.
+            full.StartInputs = limited.StartInputs;
+            var c = full.ExportCheckpoint(Limits);
+            var rejected = Service.RestoreCheckpoint(c.GetBytes(), c.Identity, c.StartIdentity, c.NextOrdinal, Limits);
+            Assert.That(rejected.Execution, Is.Null); Assert.That(rejected.FailureReason, Is.EqualTo("run.checkpoint.invalid_inputs"));
+            CollectionAssert.AreEqual(canonical, f.Session.GetCurrentBytes()); Assert.That(B.Structured(f.Runtime), Is.EqualTo(runtime));
+        }
+
+        [TestCase("floors")] [TestCase("profiles")]
+        public void UntrustedCaptureCountsRejectBeforeCountSizedAllocation(string member)
+        {
+            var f = Dungeon(); var canonical = f.Session.GetCurrentBytes(); var runtime = B.Structured(f.Runtime);
+            var e = Start(PhaseSixA4Tests.Snapshot(f)); var bytes = (byte[])e.StartInputs.Clone();
+            using (var r = new BinaryReader(new MemoryStream(bytes))) {
+                r.ReadInt32(); RunCheckpointCodec.Text(r); r.ReadInt32(); if (RunCheckpointCodec.Flag(r)) r.ReadInt64();
+                for (int i = 0; i < 5; i++) r.ReadInt64();
+                long snapshot = r.BaseStream.Position;
+                if (member == "profiles") {
+                    ActiveFloorRunSnapshot.ReadCheckpoint(r); RunCheckpointCodec.Text(r); RunCheckpointCodec.Text(r);
+                    for (int i = 0; i < 4; i++) r.ReadInt32(); r.ReadInt64();
+                } else {
+                    r.BaseStream.Position = snapshot;
+                    for (int i = 0; i < 7; i++) RunCheckpointCodec.Text(r); r.ReadInt64();
+                }
+                Array.Copy(BitConverter.GetBytes(int.MaxValue), 0, bytes, r.BaseStream.Position, sizeof(int));
+            }
+            e.StartInputs = bytes; e.PrefixDigest = RunCheckpointCodec.Hash(bytes); var c = e.ExportCheckpoint(Limits);
+            var rejected = Service.RestoreCheckpoint(c.GetBytes(), c.Identity, c.StartIdentity, 0, Limits);
+            Assert.That(rejected.Execution, Is.Null); Assert.That(rejected.FailureReason, Is.EqualTo("run.checkpoint.invalid_inputs"));
+            CollectionAssert.AreEqual(canonical, f.Session.GetCurrentBytes()); Assert.That(B.Structured(f.Runtime), Is.EqualTo(runtime));
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void OwnerValidationRejectsPrefixWhoseNextLookaheadExhaustsBudgetWithoutPublication(bool persistent)
+        {
+            var f = Dungeon(); var snapshot = PhaseSixA4Tests.Snapshot(f);
+            var canonical = f.Session.GetCurrentBytes(); var runtime = B.Structured(f.Runtime);
+            var steps = Drain(Start(snapshot, persistent), 1); int boundary = steps.FindIndex(s => s.Kind == RunStepKind.MonsterEngagement);
+            var measured = Start(snapshot, persistent);
+            for (int i = 0; i < boundary; i++) measured.Advance(1, measured.NextOrdinal);
+            measured.NextDueTime(); f.Configuration.CombatC0.MaximumWork = measured.Combat.Kernel.WorkCount - 1;
+            var limited = Start(PhaseSixA4Tests.Snapshot(f), persistent);
+            for (int i = 0; i < boundary; i++) limited.Advance(1, limited.NextOrdinal);
+            var c = limited.ExportCheckpoint(Limits);
+            var profile = new LivingDungeonProfile("test.b3b1.work.v1", 2, 4, 65536, 2048, 8192, 262144, 357996,
+                Timing, RunPostureResolver.BalancedId, maximumCombatWork: Limits.MaximumCombatWork);
+            var owner = LivingDungeonState.Empty(); LivingDungeonScheduling.Activate(owner, profile, 1, f.Runtime.runHistory);
+            LivingDungeonScheduling.Accept(owner, 10000); // synthetic horizon, comfortably beyond fixture deadlines
+            owner.Parties.Add(new LivingDungeonParty { Sequence = 1, AdmittedAt = 0, NextOrdinal = c.NextOrdinal,
+                StartIdentity = c.StartIdentity, CheckpointIdentity = c.Identity, Checkpoint = c.GetBytes() });
+            // Restoring the valid committed prefix is permitted; B2 additionally
+            // probes the next due boundary and must fail closed on its work limit.
+            var prefix = LivingDungeonContracts.Restore(owner.Parties[0], profile);
+            Assert.That(prefix.NextOrdinal, Is.EqualTo(boundary)); prefix.Abandon();
+            string before = B.Structured(owner);
+            Assert.That(LivingDungeonContracts.Validate(owner, new[] { profile }), Is.False);
+            Assert.That(B.Structured(owner), Is.EqualTo(before));
+            CollectionAssert.AreEqual(canonical, f.Session.GetCurrentBytes()); Assert.That(B.Structured(f.Runtime), Is.EqualTo(runtime));
+        }
     }
 }
 #endif
