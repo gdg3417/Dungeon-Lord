@@ -115,6 +115,45 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.Throws<ArgumentException>(() => LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(json.Replace(LivingDungeonForegroundConfig.ProfileId, "unknown"))));
         }
 
+        private sealed class MutableUtc : ITimeSource { public long Now = 2000; public long UtcNowUnixSeconds() => Now; }
+        private static SaveService Service(Fixture f, ITimeSource utc)
+        {
+            var service = new SaveService(new SimpleLogger(false, (level, message) => { }),
+                new SaveConfig { fileName = Path.GetFileName(f.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(f.ActivePath));
+            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
+                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.PositionProfiles, f.Occupancy);
+            service.ConfigureStructuralEconomy(f.Economy); service.ConfigureContentAcquisitionEconomy(f.Acquisition);
+            service.ConfigureStructuralRemovalPolicy(f.RemovalPolicy); service.ConfigureRunLoot(PhaseSixA4Tests.Loot());
+            service.SetTimeSourceForTests(utc);
+            service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
+                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, f.FileSystem, path));
+            Assert.That(service.LoadOrCreate("foreground-test", out string banner), Is.Not.Null, banner);
+            return service;
+        }
+
+        [Test] public void ReinspectionAndPausedHorizonDrainRetainOfflineBoundary()
+        {
+            var f = Dungeon(); var utc = new MutableUtc(); var service = Service(f, utc);
+            f.Accept(service.AdvanceForeground(f.Runtime, 0, 10, (save, tick) => { }));
+            long boundary = f.Runtime.lastSavedUtcUnix; Assert.That(boundary, Is.EqualTo(2000));
+            utc.Now = 9000; f.Accept(service.AdvanceForeground(f.Runtime, 0, 10, (save, tick) => { }));
+            Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(boundary));
+            f.Accept(service.AdvanceForeground(f.Runtime, 1, 10, (save, tick) => { }));
+            Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(9000));
+        }
+
+        [Test] public void ServiceLatchesRecoveryRequiredAndBlocksAllLaterForegroundPublication()
+        {
+            var f = Dungeon(); Admitted(f); long finish = Finish(f); var service = Service(f, new Utc()); int published = 0;
+            service.CanonicalRuntimePublished += save => published++;
+            f.FileSystem.EnableFailureSequence(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1,
+                Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 2);
+            var failed = service.AdvanceForeground(f.Runtime, finish, 10, (save, tick) => { }); f.FileSystem.DisableFailure();
+            Assert.That(failed.Reason, Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+            Assert.That(service.AdvanceForeground(f.Runtime, finish, 10, (save, tick) => { }).Reason, Is.EqualTo(failed.Reason));
+            Assert.That(service.Save(f.Runtime, SaveReason.AppPause), Is.False); Assert.That(published, Is.Zero);
+        }
+
         [Test] public void PublishedPacingIsExplicitApprovedAndSeparateFromQualificationProfile()
         {
             var p = Policy; Assert.That(p.UnitsPerSecond, Is.EqualTo(1000));
