@@ -41,6 +41,79 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             Assert.Fail("bounded test pump did not close");
         }
+        private static long Admitted(Fixture f)
+        {
+            Through(f, 0); long arrival = f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value;
+            Through(f, arrival); return arrival;
+        }
+        private static long Finish(Fixture f)
+        {
+            var p = f.Runtime.livingDungeon.Parties.Single();
+            var e = LivingDungeonContracts.Restore(p, Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized));
+            try { e.DrainToCompletion(); return checked(p.AdmittedAt + e.Inspect().LogicalTime); } finally { e.Abandon(); }
+        }
+
+        [Test] public void AcceptedButUnclosedHorizonReopensWithoutDroppingTimeOrDuplicatingHistory()
+        {
+            var f = Dungeon(); f.Accept(Pump(f, 1800000));
+            Assert.That(f.Runtime.livingDungeon.IsClosed, Is.False);
+            Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(1800000));
+            f.Reopen(); Through(f, 1800000);
+            Assert.That(f.Runtime.totalTicks, Is.EqualTo(180));
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Select(r => r.RunId).Distinct().Count(), Is.EqualTo(f.Runtime.runHistory.RecentOutcomes.Length));
+        }
+
+        [TestCase(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1)]
+        [TestCase(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 1)]
+        [TestCase(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 2)]
+        public void FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Gd66DetachedSpatialMigrationTransactionTests.OperationType op, int occurrence)
+        {
+            var f = Dungeon(); Admitted(f); long finish = Finish(f);
+            var before = f.Session.GetCurrentBytes(); string state = B.Structured(f.Runtime);
+            f.FileSystem.EnableFailure(op, occurrence); var result = Pump(f, finish); f.FileSystem.DisableFailure();
+            Assert.That(result.IsSuccess, Is.False); Assert.That(result.RuntimeProjection, Is.Null);
+            Assert.That(result.Session, Is.Null); CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            Assert.That(B.Structured(f.Runtime), Is.EqualTo(state)); f.Reopen(); Through(f, finish);
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(r => r.RunId == "run-1"), Is.EqualTo(1));
+        }
+
+        [Test] public void UnprovenRollbackRequiresRecoveryAndDoesNotPublishTerminalEffects()
+        {
+            var f = Dungeon(); Admitted(f); long finish = Finish(f); var old = f.Runtime;
+            f.FileSystem.EnableFailureSequence(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1,
+                Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 2);
+            var failed = Pump(f, finish); f.FileSystem.DisableFailure();
+            Assert.That(failed.IsSuccess, Is.False); Assert.That(failed.Reason, Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+            Assert.That(failed.RuntimeProjection, Is.Null); Assert.That(f.Runtime, Is.SameAs(old));
+            Assert.That(f.Runtime.runHistory.LatestOutcome?.RunId, Is.Not.EqualTo("run-1"));
+        }
+
+        [Test] public void CurrentRecoveryBeforeSettlementIsChargedOnceAndDamageIsThenAppliedToRecoveredIdentity()
+        {
+            var f = Dungeon(); CombatC2Tests.SetState(f, 2, false, 0); Admitted(f);
+            var start = f.Runtime.livingDungeon.Parties.Single().Checkpoint;
+            // Authorized condition change during occupancy, representing a completed
+            // manual action. The foreground producer cannot recover an occupied floor.
+            CombatC2Tests.SetState(f, 3, false, 100);
+            Through(f, f.Runtime.livingDungeon.Scheduler.ClosedThrough + 1);
+            CollectionAssert.AreEqual(start, f.Runtime.livingDungeon.Parties.Single().Checkpoint);
+            long finish = Finish(f); Through(f, finish);
+            var m = f.Runtime.runHistory.LatestOutcome.CombatMonsters.Single();
+            int damage = m.InitialHealth - m.Health;
+            // Vacant recovery uses the existing configured living-first resolver.
+            int ready = MonsterRecoveryRules.Capture(f.Configuration).Readiness(m.OptionId);
+            Assert.That(f.Runtime.monsterContinuity.Records.Single().Health, Is.EqualTo(ready));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(100 - (ready - Math.Max(0, 3 - damage))));
+            double wallet = f.Runtime.structureRuntime.ManaReserve; f.Reopen(); Through(f, finish);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+        }
+
+        [Test] public void MalformedProductionConfigurationRejectsOverflowAndUnsupportedProfile()
+        {
+            string json = File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json");
+            Assert.Throws<ArgumentException>(() => LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(json.Replace("1000", "2147483648"))));
+            Assert.Throws<ArgumentException>(() => LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(json.Replace(LivingDungeonForegroundConfig.ProfileId, "unknown"))));
+        }
 
         [Test] public void PublishedPacingIsExplicitApprovedAndSeparateFromQualificationProfile()
         {
