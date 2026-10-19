@@ -21,8 +21,52 @@ q = types.ModuleType('b3b1_campaign')
 q.__file__ = str(Path(__file__).with_name('qualify_b3a.py'))
 exec(compile(source, q.__file__, 'exec'), q.__dict__)
 if (q.OUT/'starter-substitution.json').exists(): q.FIXTURE_TESTS.append(STARTER_TEST)
+BUILD_UTILITY = 'Assets/_Project/Scripts/BuildTools/DevelopmentBuildUtility.cs'
+PRODUCT = 'Dungeon Lord B3B1 Smoke 20261018'
+PRODUCT_SETTINGS = 'ProjectSettings/ProjectSettings.asset'
+SHADER_RELATIVE = 'Unity/ShaderVariantAnalytics/ShaderRuntimeInfoEvent.json'
+
+def accepted_cache_exception(row):
+    approval = q.OUT/'owner-cache-exception.json'
+    if not approval.exists(): return False
+    value = json.loads(approval.read_text())
+    return value.get('ownerApproved') is True and row['path'] == str(q.SAVE/SHADER_RELATIVE) and row['sha256'] == value.get('originalSha256')
+
+def apply_product():
+    for name, old, new in [
+        (PRODUCT_SETTINGS, '  productName: Dungeon Lord', '  productName: '+PRODUCT),
+        (BUILD_UTILITY, 'public const string ProductName = "Dungeon Lord";', 'public const string ProductName = "'+PRODUCT+'";')]:
+        data=(ROOT/name).read_bytes()
+        if data.count(new.encode()) == 1: continue
+        if data.count(old.encode()) != 1: raise ValueError('Unexpected product identity source '+name)
+        (ROOT/name).write_bytes(data.replace(old.encode(),new.encode()))
+
+if (q.OUT/'product-isolation.json').exists():
+    original_normalized=q.inputs.normalized
+    def product_normalized(name, data):
+        if name in (PRODUCT_SETTINGS,BUILD_UTILITY): data=data.replace(PRODUCT.encode(),b'Dungeon Lord')
+        return original_normalized(name,data)
+    q.inputs.normalized=product_normalized
+
+def checkpoint(label):
+    if (q.OUT/'substitutions-restored.json').exists(): raise ValueError('Campaign is closed')
+    q.checkpoint(label)
+    if (q.OUT/'product-isolation.json').exists(): apply_product()
+
+def isolate_product():
+    if (q.OUT/'substitutions-restored.json').exists(): raise ValueError('Campaign is closed')
+    if (q.OUT/'product-isolation.json').exists(): raise ValueError('Product isolation already installed')
+    destination=q.SAVE.parent/PRODUCT
+    q.inputs.no_redirect(destination)
+    if destination.exists(): raise ValueError('Preserve existing product data; choose an unused identity')
+    with zipfile.ZipFile(q.OUT/'root-inputs-before.zip') as z: original=z.read(BUILD_UTILITY)
+    if (ROOT/BUILD_UTILITY).read_bytes()!=original: raise ValueError('Build identity guard changed')
+    apply_product()
+    q.write('product-isolation.json',dict(product=PRODUCT,savePath=str(destination),buildUtilityOriginalSha256=q.hashlib.sha256(original).hexdigest()))
+    print('Isolated native product identity installed; original strict identity condition retained')
 
 def isolate_starter():
+    if (q.OUT/'substitutions-restored.json').exists(): raise ValueError('Campaign is closed')
     if (q.OUT/'starter-substitution.json').exists(): raise ValueError('Starter output isolation already installed')
     with zipfile.ZipFile(q.OUT/'root-inputs-before.zip') as z: original=z.read(STARTER_TEST)
     if (ROOT/STARTER_TEST).read_bytes()!=original: raise ValueError('Unexpected starter test source change')
@@ -45,7 +89,13 @@ def preflight(label):
         if key: rows = rows[key]
         for row in rows:
             p = Path(row['path']); q.inputs.no_redirect(p)
-            if not p.is_file() or q.sha(p) != row['sha256']: raise ValueError('Protected file changed: '+str(p))
+            if not p.is_file() or q.sha(p) != row['sha256']:
+                if key and accepted_cache_exception(row): continue
+                raise ValueError('Protected file changed: '+str(p))
+    if (q.OUT/'product-isolation.json').exists():
+        if ('  productName: '+PRODUCT).encode() not in (ROOT/PRODUCT_SETTINGS).read_bytes() or \
+            ('public const string ProductName = "'+PRODUCT+'";').encode() not in (ROOT/BUILD_UTILITY).read_bytes():
+            raise ValueError('Native product identity is not isolated')
     # Independently verify every redirection; committed-source comparison alone
     # must never bless a screenshot helper still aimed at historical output.
     for name in q.OUTPUT_TESTS:
@@ -101,8 +151,9 @@ if __name__ == '__main__':
         with zipfile.ZipFile(q.OUT/'historical-evidence-preserved.zip', 'x', zipfile.ZIP_DEFLATED) as z:
             for row in json.loads((q.OUT/'historical-evidence-before.json').read_text()):
                 p = Path(row['path']); z.write(p, p.relative_to(ROOT/'TestResults').as_posix())
-    elif mode == 'checkpoint': q.checkpoint(sys.argv[2])
+    elif mode == 'checkpoint': checkpoint(sys.argv[2])
     elif mode == 'isolate-starter': isolate_starter()
+    elif mode == 'isolate-product': isolate_product()
     elif mode == 'finish': q.finish()
     elif mode == 'preflight': preflight(sys.argv[2])
     elif mode == 'run': sys.exit(run(sys.argv[2], sys.argv[3]))
