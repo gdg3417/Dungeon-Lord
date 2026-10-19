@@ -126,6 +126,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.Throws<ArgumentException>(() => LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(json.Replace(LivingDungeonForegroundConfig.ProfileId, "unknown"))));
         }
 
+        [TestCase("0", false)]
+        [TestCase("-1", false)]
+        [TestCase("1", true)]
+        [TestCase("1000000", true)]
+        [TestCase("1.5", false)]
+        [TestCase("\"1000000\"", false)]
+        [TestCase("null", false)]
+        [TestCase("9223372036854775808", false)]
+        public void ProductionCombatWorkEnvelopeMustBePositiveInteger(string value, bool valid)
+        {
+            string json = File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json")
+                .Replace("\"MaximumCombatWork\": 1000000", "\"MaximumCombatWork\": " + value);
+            var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+            if (valid) Assert.DoesNotThrow(() => LivingDungeonForegroundConfig.Parse(bytes));
+            else Assert.That(Assert.Throws<ArgumentException>(() => LivingDungeonForegroundConfig.Parse(bytes)).Message,
+                Does.StartWith(LivingDungeonForegroundConfig.Invalid));
+        }
+
         private sealed class MutableUtc : ITimeSource { public long Now = 2000; public long UtcNowUnixSeconds() => Now; }
         private static SaveService Service(Fixture f, ITimeSource utc)
         {

@@ -30,6 +30,97 @@ namespace DungeonBuilder.M0.Tests
             public long UtcNowUnixSeconds() => Now;
         }
 
+        [UnityTest] public IEnumerator LivingDungeonB3B2ProvenRollbackRetriesThroughRealSaveBarrier()
+            => ForegroundFailureRetry(false);
+
+        [UnityTest] public IEnumerator LivingDungeonB3B2UncertainRollbackKeepsRealRootRecoveryLatch()
+            => ForegroundFailureRetry(true);
+
+        private IEnumerator ForegroundFailureRetry(bool uncertain)
+        {
+            var root = GameRoot.Instance; var service = root.SaveService;
+            Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+            var floor = root.Save.validatedCanonicalSpatialState.Floors[0];
+            Assert.That(service.ExecuteCanonicalMutation(root.Save, DetachedCanonicalMutationRequest.Place(
+                MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId,
+                floor.Layout.Rooms[0].RoomInstanceId, floor.FloorInstanceId, new TileCoordinate(1, 1))).IsSuccess, Is.True);
+            var advance = InstallForegroundBoundaryTestClock();
+            var flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            var update = (Action)Delegate.CreateDelegate(typeof(Action), root, typeof(GameRoot).GetMethod("UpdateForeground", flags));
+            update();
+            advance((root.Save.livingDungeon.Scheduler.NextOpportunityTime.Value - root.TimeService.SampleForeground()) / 1000d + .001);
+            update(); Assert.That(root.Save.livingDungeon.Parties.Count, Is.EqualTo(1));
+            var profile = service.ForegroundConfiguration.CreateProfile(root.SaveSpatialMigrationLimits.Canonical.ForSchema(13).Serialized);
+            var execution = LivingDungeonContracts.Restore(root.Save.livingDungeon.Parties.Single(), profile);
+            long finish; RunOutcomeRecord expected;
+            try {
+                expected = execution.DrainToCompletion();
+                finish = root.Save.livingDungeon.Parties.Single().AdmittedAt + execution.Inspect().LogicalTime;
+            } finally { execution.Abandon(); }
+            var bounded = LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(
+                File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json")
+                    .Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1")));
+            typeof(SaveService).GetProperty(nameof(SaveService.ForegroundConfiguration)).SetValue(service, bounded);
+            advance((finish - root.TimeService.SampleForeground()) / 1000d + .001); update();
+            Assert.That(root.Save.livingDungeon.IsClosed, Is.False, "Accept a horizon that needs several bounded passes");
+            var original = root.Save; var session = service.CanonicalSession; var before = session.GetCurrentBytes();
+            string state = EditMode.LivingDungeonPhaseABaselineTests.Structured(root.Save);
+            var fsField = typeof(SaveService).GetField("_canonicalFileSystem", flags);
+            var native = fsField.GetValue(service);
+            var fs = new EditMode.Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            fs.Seed(service.SavePath, before); fsField.SetValue(service, fs);
+            int published = 0; service.CanonicalRuntimePublished += save => published++;
+            var flush = EditMode.Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush;
+            if (uncertain) fs.EnableFailureSequence(flush, 1, EditMode.Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 2);
+            else fs.EnableFailure(flush, 1);
+            try {
+                update(); Assert.That(published, Is.Zero);
+                Assert.That(root.Save, Is.SameAs(original)); Assert.That(service.CanonicalSession, Is.SameAs(session));
+                Assert.That(EditMode.LivingDungeonPhaseABaselineTests.Structured(root.Save), Is.EqualTo(state));
+                if (!uncertain) CollectionAssert.AreEqual(before, fs.ReadAllBytes(service.SavePath));
+                int operations = fs.Operations.Count;
+                for (int frame = 0; frame < 120; frame++) update();
+                Assert.That(fs.Operations.Count, Is.EqualTo(operations), "Do not busy-retry storage each render frame");
+                if (uncertain) {
+                    fs.DisableFailure(); Assert.That(service.BeforeForegroundAction(), Is.False);
+                    Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root),
+                        Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+                    Assert.That(service.AdvanceForeground(root.Save, finish, 10, (save, tick) => { }).Reason,
+                        Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+                    Assert.That(published, Is.Zero);
+                } else {
+                    fs.EnableTargetedFailure(flush, paths => true, 1, false);
+                    Assert.That(service.BeforeForegroundAction(), Is.False);
+                    Assert.That(fs.Operations.Count, Is.GreaterThan(operations), "An explicit barrier must attempt a safe retry");
+                    Assert.That(root.ForegroundActivity.StateKey, Is.EqualTo("ui.living.retryable"));
+                    Assert.That(published, Is.Zero); CollectionAssert.AreEqual(before, fs.ReadAllBytes(service.SavePath));
+                    fs.DisableFailure(); bool closed = false;
+                    for (int attempt = 0; attempt < 32 && !closed; attempt++) closed = service.BeforeForegroundAction();
+                    Assert.That(closed, Is.True, "Proven rollback must resume without restarting");
+                    Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root), Is.Null);
+                    Assert.That(root.Save.livingDungeon.Parties, Is.Empty);
+                    Assert.That(root.Save.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
+                    Assert.That(root.Save.runHistory.NextRunSequence, Is.EqualTo(2));
+                    Assert.That(EditMode.LivingDungeonPhaseABaselineTests.Structured(CombatC0Diagnostics.Events(root.Save.runHistory.LatestOutcome)),
+                        Is.EqualTo(EditMode.LivingDungeonPhaseABaselineTests.Structured(CombatC0Diagnostics.Events(expected))));
+                    long ticks = root.Save.totalTicks; double mana = root.Save.structureRuntime.ManaReserve;
+                    var monsters = EditMode.LivingDungeonPhaseABaselineTests.Structured(root.Save.monsterContinuity);
+                    Assert.That(service.Save(root.Save, SaveReason.ManualDev), Is.True, "Ordinary saving remains usable after retry");
+                    Assert.That(root.Save.totalTicks, Is.EqualTo(ticks)); Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana));
+                    Assert.That(EditMode.LivingDungeonPhaseABaselineTests.Structured(root.Save.monsterContinuity), Is.EqualTo(monsters));
+                    Assert.That(root.Save.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
+                }
+            } finally {
+                // Restore the disposable native fixture; do not flush the in-memory
+                // failure experiment during object teardown.
+                fsField.SetValue(service, native);
+                typeof(SaveService).GetField("_canonicalSession", flags).SetValue(service, session);
+                typeof(GameRoot).GetProperty(nameof(GameRoot.Save)).SetValue(root, original);
+                typeof(GameRoot).GetField("_explicitSaveDeleteQuiesced", flags).SetValue(root, true);
+            }
+            yield return null;
+        }
+
         [UnityTest]
         public IEnumerator LivingDungeonB3B2AutomaticSceneLoopSettlesAndAdmitsAgainstCommittedEdit()
         {
