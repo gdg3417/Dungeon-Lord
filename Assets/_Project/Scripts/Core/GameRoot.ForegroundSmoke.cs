@@ -13,8 +13,8 @@ namespace DungeonBuilder.M0
     {
         [Serializable] internal sealed class ForegroundSmokeReport
         {
-            public bool Passed, MarkerVisible, ActiveEditCommitted;
-            public string Phase, Product, SavePath, RunId, CheckpointIdentity, Failure;
+            public bool Passed, MarkerVisible, ActiveEditCommitted, SecondRunUsesEditedGeometry;
+            public string Phase, Product, SavePath, RunId, CheckpointIdentity, PendingGeometry, Failure;
             public long Accepted, Closed, Ordinal, HistoryCount, RealSourceUnits;
         }
         // Opt-in development qualification only. Real Bootstrap/UI/native writer;
@@ -26,6 +26,14 @@ namespace DungeonBuilder.M0
                 !Path.GetFileName(SaveService.SavePath).StartsWith("living-dungeon-b3b2-qualification-", StringComparison.Ordinal))
                 throw new InvalidOperationException("b3b2.smoke.isolation_required");
             report.Product = Application.productName; report.SavePath = SaveService.SavePath;
+            ForegroundSmokeReport prior = null;
+            string PendingGeometry()
+            {
+                var profile = SaveService.ForegroundConfiguration.CreateProfile(SaveSpatialMigrationLimits.Canonical.ForSchema(13).Serialized);
+                var execution = LivingDungeonContracts.Restore(Save.livingDungeon.Parties.Single(), profile);
+                try { return execution.Snapshot.Floors[0].KnowledgeFingerprint; }
+                finally { execution.Abandon(); }
+            }
             if (phase == "admit") {
                 if (Save.livingDungeon.RetainedCount != 0 || !string.IsNullOrEmpty(Save.runHistory.LatestOutcome?.RunId))
                     throw new InvalidOperationException("b3b2.smoke.fresh_save_required");
@@ -48,7 +56,7 @@ namespace DungeonBuilder.M0
                 if (report.RealSourceUnits < SaveService.ForegroundConfiguration.UnitsPerSecond || !FlushForeground())
                     throw new InvalidOperationException("b3b2.smoke.real_monotonic_source");
             } else {
-                var prior = JsonUtility.FromJson<ForegroundSmokeReport>(File.ReadAllText(previousReport));
+                prior = JsonUtility.FromJson<ForegroundSmokeReport>(File.ReadAllText(previousReport));
                 if (!prior.Passed || Save.livingDungeon.Parties.Count != 1 || Save.livingDungeon.Scheduler.ProfileId != LivingDungeonForegroundConfig.ProfileId ||
                     Save.livingDungeon.Scheduler.AcceptedThrough != prior.Accepted ||
                     Save.livingDungeon.Parties[0].CheckpointIdentity != prior.CheckpointIdentity || Save.livingDungeon.Parties[0].NextOrdinal != prior.Ordinal)
@@ -89,6 +97,15 @@ namespace DungeonBuilder.M0
                 if (phase != "admit" && Save.runHistory.LatestOutcome?.RunId == initial) {
                     if (Save.runHistory.RecentOutcomes.Count(o => o.RunId == initial) != 1) throw new InvalidOperationException("b3b2.smoke.duplicate_history");
                     if (phase == "finish" || Save.livingDungeon.Parties.Count == 1 && "run-" + Save.livingDungeon.Parties[0].Sequence != initial) {
+                        if (phase == "settle") {
+                            string captured = PendingGeometry();
+                            if (!FloorKnowledgeApplicability.TryCompute(Save.validatedCanonicalSpatialState, Save.corridorContent,
+                                SaveSpatialMigrationLimits.Canonical, Save.livingDungeon.Parties.Count == 1 ?
+                                    Save.validatedCanonicalSpatialState.Floors[0].FloorInstanceId : null, out string current) ||
+                                captured != current || captured == prior.PendingGeometry)
+                                throw new InvalidOperationException("b3b2.smoke.second_run_geometry");
+                            report.SecondRunUsesEditedGeometry = true;
+                        }
                         report.RunId = initial; completed = true; break;
                     }
                 }
@@ -100,6 +117,7 @@ namespace DungeonBuilder.M0
             report.HistoryCount = Save.runHistory.RecentOutcomes.Length;
             if (Save.livingDungeon.Parties.Count == 1) {
                 report.CheckpointIdentity = Save.livingDungeon.Parties[0].CheckpointIdentity; report.Ordinal = Save.livingDungeon.Parties[0].NextOrdinal;
+                report.PendingGeometry = PendingGeometry();
             }
             report.Passed = true;
         }
