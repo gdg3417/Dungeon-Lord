@@ -371,7 +371,7 @@ The synchronous durable path still has visible **approximately230–400 ms** eve
 
 All required corrected-source automated/build/native gates above pass. Earlier full-suite results, failures and skips remain historical at their original SHAs, and no fresh full-suite run is claimed. Schema15, migration readers, checkpoint encodings/digests, gameplay timing/work limits, C2 net-damage settlement and active-run editing permissions are unchanged. Final preservation/restoration audit and documentation-only closeout are pending; do not merge.
 
-### Final review recovery no-op edge check (pending reproduction)
+### Final review recovery no-op edge (reproduced and corrected)
 
 The AFTER campaign closed with **10,173/10,173 protected files and7,936/7,936 historical evidence files unchanged, zero new exceptions**; substitutions restored. Before pushing, code review identified a possible equivalence gap in the new recovery no-op predicate: double-wallet subtraction can round to the same value at a valid very large finite balance while HP/revival changes. Admission captures from the last validated owned condition, so that condition must be staged before a same-boundary opportunity. Source `a4e88981` adds an actual writer/admission test; no runtime correction is made before reproducing it. A fresh FINAL identity is used because AFTER is closed; its evidence is preserved and not reopened. Existing successful source/build results above remain valid at their stated SHAs, but final review readiness is deferred until this check completes. No recovery formula, tuning or economy change is authorized by this investigation.
 
@@ -393,7 +393,7 @@ FINAL native admit/settle/finish **all passed** at `4ee533c5`. Frozen post-exit 
 
 ### Final corrected-source closeout (supersedes pending statements above)
 
-Final runtime/test/build/native source: **`4ee533c5c1240a2d8b12caefb86526c1b2a2a77a`**. Later commits update documentation only. Main baseline remains **`5fbaa5f5d845c1341ee4cc4f52b706a8ba586d0d`**; branch and existing PR245 are unchanged. No source input changed after the final Windows build. GitHub pre-push inspection confirms PR245 remains open/unmerged at the previously reviewed78a94fe3 head; both earlier inline threads remain resolved.
+Final runtime/test/build/native source: **`4ee533c5c1240a2d8b12caefb86526c1b2a2a77a`**. Later commits update documentation only. Main baseline remains **`5fbaa5f5d845c1341ee4cc4f52b706a8ba586d0d`**; branch and existing PR245 are unchanged. No intended runtime/input change follows the final Windows build; recorded qualification namespace/settings restorations and documentation-only closeout are distinguished from gameplay source changes. GitHub pre-push inspection confirms PR245 remains open/unmerged at the previously reviewed78a94fe3 head; both earlier inline threads remain resolved.
 
 | Final-source gate | Actual result |
 | --- | --- |
@@ -424,4 +424,12 @@ The large-wallet staging regression remains explicit: FINAL01 at a4e88981 fails 
 
 The schema target remains **15**, with **no migration changes**, no new historical replay schema/journal, no tuning/budget change and no C2 net-damage reconciliation change. B1 format1/executable and ProfileA remain frozen; manual C0/C2 and the restricted B3A path remain qualified. Production scope stays one active Floor1/one party; no descent/queues/offline adventurers/secure foreground provenance or broader Living Dungeon completion is claimed.
 
-All required corrected-source technical gates pass. Final preservation/restoration audit is pending; independent review remains required and the PR must remain unmerged. Gameplay-only owner steps above target the new isolated FINAL player after closeout.
+All required corrected-source technical gates pass. Final preservation/restoration audit passed; independent review may begin and the PR must remain unmerged. Gameplay-only owner steps above target the new isolated FINAL player after closeout.
+
+### Preservation and final review gate
+
+FINAL campaign is **closed**: **10,476/10,476 protected save/player files and8,200/8,200 historical evidence files unchanged; zero new exceptions**. BEFORE and AFTER remain separately closed/preserved with their recorded successful audits. The final audit retained all earlier builds, screenshots, logs, partial tests and failed/provisional reports. Recorded product/default-save/fixture/capture and generated Unity settings were restored; pre-existing local assets remain preserved. `preservation-after.json`, `historical-evidence-after.json`, `accepted-preservation-exceptions.json` and `substitutions-restored.json` retain the evidence.
+
+Post-restoration working tree was clean before this documentation-only closeout. No installed Editor or Windows player remained; only the ordinary UnityHub service was present. The final gameplay assembly/build and runtime inputs remain those qualified at4ee533c5; later changes are confined to this report, the contract and roadmap. No generated artifact or temporary substitution enters the feature commits. Both original GitHub inline threads were verified resolved; no new PR is created.
+
+**Ready for another independent PR review**, with explicit synchronous-stall, motion-allocation, compact-Large-layout and historical replay limitations above. No required automated/build/native gate remains failed or pending, and no new technical blocker remains. Gameplay-only owner retesting can use the isolated FINAL player described above. Do not merge or claim broader Living Dungeon, offline adventurer or secure foreground-provenance completion. Historical #242/#244 exceptions remain historical, with no new owner-data loss or restoration claim.
