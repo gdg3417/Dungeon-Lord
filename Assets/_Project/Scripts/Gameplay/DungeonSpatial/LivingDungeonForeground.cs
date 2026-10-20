@@ -153,8 +153,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         foreach (int sequence in owner.Parties.Select(p => p.Sequence).OrderBy(n => n).ToArray()) {
                             var p = owner.Parties.Single(party => party.Sequence == sequence); var e = Execution(p);
                             if (!lineage.Release(working.GetCurrentBytes(), p, e, time, Occupied(), profile)) continue;
-                            if (++boundaryEvents > policy.MaximumBoundaryEvents) throw new InvalidOperationException("living.foreground.boundary_limit");
-                            LivingDungeonScheduling.Change(owner); Stage();
+                            boundaryEvents = checked(boundaryEvents + 2);
+                            if (boundaryEvents > policy.MaximumBoundaryEvents) throw new InvalidOperationException("living.foreground.boundary_limit");
+                            LivingDungeonScheduling.Change(owner); LivingDungeonScheduling.Change(owner); Stage();
                             ProcessParties(time); Recover(); changed = true;
                         }
                     } while (changed);

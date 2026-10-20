@@ -55,6 +55,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 throw new InvalidOperationException("living.transfer.vacancy_unproven");
             execution.ReleaseTransfer(checked(time - party.AdmittedAt), cause.Sequence, cause.Ordinal,
                 checked(cause.Time - party.AdmittedAt));
+            // Released is a real replayable execution prefix, but never a durable
+            // half-published canonical boundary. Complete its pending transfer now.
+            execution.AdvanceThrough(checked(time - party.AdmittedAt), 1, execution.NextOrdinal);
             LivingDungeonScheduling.Pin(party, execution, profile);
             released[party.Sequence] = party.CheckpointIdentity;
             return true;

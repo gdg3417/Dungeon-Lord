@@ -258,6 +258,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     var due = e.NextDueTime();
                     if (due.HasValue && checked(p.AdmittedAt + due.Value) <= s.ClosedThrough) return false;
                     if (e.TransferContract) {
+                        // Format-3 alone supports Released for exact prefix replay;
+                        // complete-save publication requires its transfer in the same boundary.
+                        if (e.TransferReleased) return false;
                         if (occupancy.ContainsKey(e.OccupiedFloor)) return false;
                         occupancy.Add(e.OccupiedFloor, p.Sequence);
                         if (e.TransferWaiting) {
