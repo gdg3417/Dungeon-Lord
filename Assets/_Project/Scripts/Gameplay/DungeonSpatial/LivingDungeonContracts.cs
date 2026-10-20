@@ -200,10 +200,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
         internal static LivingDungeonProfile Profile(LivingDungeonState state, IReadOnlyList<LivingDungeonProfile> profiles) =>
             profiles?.SingleOrDefault(p => p.Id == state.Scheduler?.ProfileId);
-        internal static RunExecution Restore(LivingDungeonParty p, LivingDungeonProfile profile)
+        internal static RunExecution Restore(LivingDungeonParty p, LivingDungeonProfile profile, bool retainPresentation = false)
         {
             using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Restore);
-            var restored = CombatCheckpointCodec.RestoreSupported(p.Checkpoint, p.CheckpointIdentity, p.StartIdentity, p.NextOrdinal, profile.Checkpoints);
+            var restored = CombatCheckpointCodec.RestoreSupported(p.Checkpoint, p.CheckpointIdentity, p.StartIdentity, p.NextOrdinal, profile.Checkpoints, retainPresentation);
             if (!restored.IsValid) throw new InvalidOperationException(restored.FailureReason);
             if (profile.Id == LivingDungeonForegroundConfig.ProfileId &&
                 (restored.Execution.Combat?.Kernel.RulesId != MonsterRecoveryRules.Executable ||

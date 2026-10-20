@@ -25,6 +25,11 @@ source = source.replace("IDENTITY_TEST=", "m.q.OUTPUT_TESTS.append('Assets/_Proj
 source = source.replace("'focused': 'LivingDungeonB3B2'", "'profile': 'ForegroundPerformanceSustainedProduction68Runs', 'focused': 'LivingDungeonB3B2'")
 source = source.replace("('admit','settle','finish')", "('admit','settle','finish','profile')")
 source = source.replace("if phase!='admit'", "if phase not in ('admit','profile')")
+# This file owns a documented capture substitution, but its committed tests can
+# evolve during the campaign. Cleanup restores HEAD after archiving qualified
+# inputs instead of reverting those corrections to the initial archive version.
+source = source.replace('        restore_identity_test()',
+    '        restore_identity_test()\n        name="Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonForegroundSceneTests.cs"\n        (ROOT/name).write_bytes(subprocess.check_output(["git","show","HEAD:"+name],cwd=ROOT))')
 if profile_retry:
     if variant != 'before': raise ValueError('Only the baseline profile fixture has a retry build')
     source = source.replace('Windows-living-dungeon-b3b2-20261019-live-before', 'Windows-living-dungeon-b3b2-20261019-live-before-profile-fix')

@@ -57,6 +57,55 @@ namespace DungeonBuilder.M0.Tests.EditMode
             try { e.DrainToCompletion(); return checked(p.AdmittedAt + e.Inspect().LogicalTime); } finally { e.Abandon(); }
         }
 
+        [Test] public void PresentationObserverCannotChangeCheckpointBytesWorkReceiptsOrOutcome()
+        {
+            var f = Dungeon(); Admitted(f); var party = f.Runtime.livingDungeon.Parties.Single();
+            var profile = Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized);
+            var plain = LivingDungeonContracts.Restore(party, profile);
+            var observed = LivingDungeonContracts.Restore(party, profile, retainPresentation: true);
+            byte[] canonical = f.Session.GetCurrentBytes();
+            try {
+                while (!plain.IsTerminal) {
+                    long due = plain.NextDueTime().Value;
+                    Assert.That(observed.NextDueTime(), Is.EqualTo(due));
+                    Assert.That(observed.NextDueTime(), Is.EqualTo(due));
+                    CollectionAssert.AreEqual(plain.ExportCheckpoint(profile.Checkpoints).GetBytes(), observed.ExportCheckpoint(profile.Checkpoints).GetBytes());
+                    if (due > plain.Inspect().LogicalTime) {
+                        plain.AdvanceThrough(due - 1, 1, plain.NextOrdinal);
+                        observed.AdvanceThrough(due - 1, 1, observed.NextOrdinal);
+                        Assert.That(observed.PresentationSteps.Count, Is.EqualTo(observed.NextOrdinal), "Lookahead is never a recorded effect");
+                    }
+                    Assert.That(B.Structured(observed.AdvanceThrough(due, 1, observed.NextOrdinal)),
+                        Is.EqualTo(B.Structured(plain.AdvanceThrough(due, 1, plain.NextOrdinal))));
+                    CollectionAssert.AreEqual(plain.ExportCheckpoint(profile.Checkpoints).GetBytes(), observed.ExportCheckpoint(profile.Checkpoints).GetBytes());
+                }
+                var expected = plain.TakeOutcome(); var shown = observed.TakeOutcome();
+                Assert.That(B.Structured(shown), Is.EqualTo(B.Structured(expected)));
+                Assert.That(B.Structured(CombatC0Diagnostics.Events(shown)), Is.EqualTo(B.Structured(CombatC0Diagnostics.Events(expected))));
+                Assert.That(CombatC0Diagnostics.ChargedWork(shown), Is.EqualTo(CombatC0Diagnostics.ChargedWork(expected)));
+                Assert.That(shown.PresentationSteps.Length, Is.EqualTo(observed.NextOrdinal));
+                Assert.That(shown.PresentationSteps.Last().Kind, Is.EqualTo(RunStepKind.Terminal));
+                CollectionAssert.AreEqual(canonical, f.Session.GetCurrentBytes());
+            } finally { plain.Abandon(); observed.Abandon(); }
+        }
+
+        [Test] public void AutomaticSettlementRetainsSessionReplayWithoutChangingHistoricalSaveContract()
+        {
+            var f = Dungeon(); Admitted(f); Through(f, Finish(f));
+            var outcome = f.Runtime.runHistory.LatestOutcome;
+            Assert.That(outcome.PresentationSteps, Is.Not.Empty);
+            Assert.That(outcome.PresentationLayoutFingerprint, Is.Not.Null);
+            Assert.That(outcome.PresentationCorridorFingerprint, Is.Not.Null);
+            Assert.That(CombatC0Diagnostics.Events(outcome), Is.Not.Empty);
+            string savedSummary = JsonUtility.ToJson(outcome);
+            string bytes = System.Text.Encoding.UTF8.GetString(f.Session.GetCurrentBytes());
+            Assert.That(bytes, Does.Not.Contain("PresentationSteps").And.Not.Contain("CombatEvents"));
+            f.Reopen();
+            Assert.That(JsonUtility.ToJson(f.Runtime.runHistory.LatestOutcome), Is.EqualTo(savedSummary));
+            Assert.That(f.Runtime.runHistory.LatestOutcome.PresentationSteps, Is.Null);
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(r => r.RunId == outcome.RunId), Is.EqualTo(1));
+        }
+
         [Test] public void AcceptedButUnclosedHorizonReopensWithoutDroppingTimeOrDuplicatingHistory()
         {
             var budget = LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(

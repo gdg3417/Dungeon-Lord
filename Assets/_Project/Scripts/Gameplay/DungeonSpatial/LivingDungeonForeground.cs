@@ -26,9 +26,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (current.researchPending == null) runtime.researchPending = null;
                 if (current.researchProgress == null) runtime.researchProgress = null;
                 if (current.lastOfflineSummary == null) runtime.lastOfflineSummary = null;
+                if (current.runHistory.LatestOutcome == null) runtime.runHistory.LatestOutcome = null;
+                if (current.runHistory.RecentOutcomes == null) runtime.runHistory.RecentOutcomes = null;
                 RunTransientEvidence.Retain(current, runtime);
                 runtime.lastSavedUtcUnix = savedUtcUnix;
                 var owner = owned.LivingDungeon;
+                runtime.livingDungeon = owner;
+                DetachedCanonicalSaveSessionResult staged = null;
                 string admissionReason = null;
                 double recoveredManaSpent = 0;
                 if (!owner.IsDormant && owner.Scheduler.ProfileId != profile.Id) return Failure("living.foreground.provenance_required");
@@ -45,13 +49,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         knowledge ? runtime.sharedBranchKnowledge : null, knowledge ? runtime.sharedFloorKnowledge : null, history);
                     prepareMeasurement.Dispose();
                     if (!prepared.IsSuccess) throw new InvalidOperationException(prepared.Reason);
-                    var openMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Open);
-                    var next = DetachedCanonicalSaveSession.Open(prepared.Update.GetBytes(), context, limits);
-                    openMeasurement.Dispose();
-                    if (!next.IsSuccess) throw new InvalidOperationException(next.Reason);
-                    var validateMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Validate);
-                    working = next.Session; owned = ValidateSession(working);
-                    validateMeasurement.Dispose();
+                    // Prepare already round-tripped these exact bytes under this
+                    // context. Do not parse/replay the same candidate twice more.
+                    staged = prepared; working = prepared.Session; owned = prepared.ForegroundValidation;
+                    if (working == null || owned?.CurrentTargetValidated != true) throw new InvalidOperationException(invalid);
                     var projectionMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Projection);
                     if (!CanonicalMvpRouteProjection.TryPublishValidated(owned, production, out var projection, out _)) throw new InvalidOperationException(invalid);
                     projectionMeasurement.Dispose();
@@ -63,7 +64,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!LivingDungeonScheduling.AllocatorValid(runtime.runHistory, owner, false) || observedThrough < owner.Scheduler.AcceptedThrough)
                     return Failure(invalid);
                 if (owner.IsClosed && owner.Scheduler.AcceptedThrough != observedThrough) LivingDungeonScheduling.Accept(owner, observedThrough);
-                Stage(); // accepted time, not any encounter consequence
+                // Acceptance changes only the typed scheduler. Validate its checkpoint
+                // envelope now; the complete detached candidate is validated at Stage
+                // before persistence. No accepted state is published in the meantime.
+                if (!LivingDungeonContracts.Validate(owner, context.LivingDungeonProfiles)) return Failure(invalid);
                 long tickUnits = checked((long)tickSeconds * policy.UnitsPerSecond);
                 int boundaryEvents = 0;
 
@@ -85,7 +89,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     foreach (int sequence in owner.Parties.Select(p => p.Sequence).ToArray()) {
                         var p = owner.Parties.Single(party => party.Sequence == sequence);
-                        var e = LivingDungeonContracts.Restore(p, profile);
+                        var e = LivingDungeonContracts.Restore(p, profile, retainPresentation: true);
                         try {
                             while (!e.IsTerminal && checked(p.AdmittedAt + e.NextDueTime().Value) <= time) {
                                 if (++boundaryEvents > policy.MaximumBoundaryEvents) throw new InvalidOperationException("living.foreground.boundary_limit");
@@ -93,6 +97,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             }
                             if (e.IsTerminal) {
                                 var outcome = e.TakeOutcome();
+                                // Bind session-only C1 observation to compatible
+                                // captured inputs. An edit never authenticates old
+                                // positions against a different current layout.
+                                if (e.Snapshot.Floors.All(f => FloorKnowledgeApplicability.TryCompute(owned.State, owned.CorridorContent,
+                                        limits.Canonical, f.FloorInstanceId, out string fingerprint) && fingerprint == f.KnowledgeFingerprint) &&
+                                    CanonicalMvpRouteProjectionService.TryFingerprint(owned.State, limits.Canonical, out string layout) &&
+                                    RunTransientEvidence.TryCorridorFingerprint(outcome, owned.CorridorContent, limits.Canonical, out string corridor)) {
+                                    outcome.PresentationLayoutFingerprint = layout; outcome.PresentationCorridorFingerprint = corridor;
+                                }
                                 string runId = outcome.RunId;
                                 if (runtime.runHistory.LatestOutcome?.RunId == runId ||
                                     (runtime.runHistory.RecentOutcomes ?? Array.Empty<RunOutcomeRecord>()).Any(r => r?.RunId == runId)) throw new InvalidOperationException(invalid);
@@ -127,8 +140,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     double wallet = MonsterContinuity.Recover(healed, owned.State, context.MonsterRecovery,
                         runtime.structureRuntime.ManaReserve, OccupiedFloors(owned));
                     recoveredManaSpent += runtime.structureRuntime.ManaReserve - wallet;
+                    bool changed = runtime.structureRuntime.ManaReserve != wallet;
                     runtime.structureRuntime.ManaReserve = wallet; runtime.monsterContinuity = healed;
-                    Stage(healed);
+                    if (changed) Stage(healed);
                 }
 
                 // Activation and an edit are authoritative boundaries too. Apply
@@ -160,7 +174,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         Stage();
                     }
                     ProcessParties(time);
-                    Stage(); // retain progression before occupancy/recovery inspection
+                    // Production parties remain on captured Floor 1. A terminal
+                    // party was already retired/staged by ProcessParties; a live
+                    // prefix cannot change occupancy. Stage it once at closure.
                     Recover();
                     if (owner.Scheduler.NextOpportunityTime == time) {
                         owner.Scheduler.NextOpportunityTime = null; owner.Scheduler.LastOpportunityTime = time;
@@ -206,9 +222,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 // A bounded pump may retain an accepted horizon. It resumes that exact
                 // prefix before accepting additional observed time on a later invocation.
-                var final = new DetachedCanonicalSaveSessionResult(null,
-                    new DetachedCanonicalSaveSessionUpdate(working.GetCurrentBytes(), owned.State), null);
-                var result = PrepareAndPersist(path, fs, session, final, false);
+                var result = PrepareAndPersist(path, fs, session, staged, false);
                 if (result.IsSuccess && recoveredManaSpent != 0) result = new DetachedCanonicalWriteResult(true, result.Reason,
                     result.IsNoOp, result.ApplyExplicitRoomEffect, result.GetPersistedBytes(), result.Session, result.Validation,
                     result.RuntimeProjection, result.RecoveryManaSpent + recoveredManaSpent);

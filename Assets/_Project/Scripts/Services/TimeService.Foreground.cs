@@ -10,6 +10,7 @@ namespace DungeonBuilder.M0
         private bool foregroundFocused = true;
         internal bool HasForegroundClock => foregroundUnitsPerSecond > 0;
         internal long ForegroundThrough => foregroundThrough;
+        internal bool ForegroundPresentationActive => HasForegroundClock && foregroundFocused && !_isPaused && _save != null;
         internal void BeginForeground(int unitsPerSecond, long acceptedThrough)
         {
             if (HasForegroundClock || unitsPerSecond <= 0 || acceptedThrough < -1) throw new InvalidOperationException("living.foreground.clock_invalid");

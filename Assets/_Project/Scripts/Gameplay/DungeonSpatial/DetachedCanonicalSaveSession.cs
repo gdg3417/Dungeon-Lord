@@ -138,12 +138,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class DetachedCanonicalSaveSessionResult
     {
         internal DetachedCanonicalSaveSessionResult(DetachedCanonicalSaveSession session,
-            DetachedCanonicalSaveSessionUpdate update, string reason)
-        { Session = session; Update = update; Reason = reason; }
+            DetachedCanonicalSaveSessionUpdate update, string reason, DetachedCompleteSaveValidationResult foregroundValidation = null)
+        { Session = session; Update = update; Reason = reason; ForegroundValidation = foregroundValidation; }
         public DetachedCanonicalSaveSession Session { get; }
         public DetachedCanonicalSaveSessionUpdate Update { get; }
         public string Reason { get; }
         public bool IsSuccess => Session != null || Update != null;
+        // Only a freshly validated foreground stage/readback carries this result.
+        // It is consumed synchronously inside the same detached transaction.
+        internal DetachedCompleteSaveValidationResult ForegroundValidation { get; }
     }
 
     /// <summary>
@@ -164,6 +167,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         public static DetachedCanonicalSaveSessionResult Open(byte[] bytes,
             DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits)
+            => OpenCore(bytes, context, limits, false);
+
+        internal static DetachedCanonicalSaveSessionResult OpenForegroundReadback(byte[] bytes,
+            DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits)
+            => OpenCore(bytes, context, limits, true);
+
+        private static DetachedCanonicalSaveSessionResult OpenCore(byte[] bytes,
+            DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits, bool foreground)
         {
             if (bytes == null || context == null || limits == null ||
                 !limits.Raw.IsValid || !limits.Canonical.IsValid || !limits.Whole.IsValid ||
@@ -173,7 +184,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, context);
             return validated.IsValid && validated.CurrentTargetValidated
                 ? new DetachedCanonicalSaveSessionResult(
-                    new DetachedCanonicalSaveSession(validated.GetBytes(), context, limits), null, null)
+                    new DetachedCanonicalSaveSession(validated.GetBytes(), context, limits), null, null, foreground ? validated : null)
                 : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
         }
 
@@ -203,7 +214,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SharedBranchKnowledgeAuthority branchKnowledge,
             SharedFloorKnowledgeAuthority floorKnowledge,
             LivingDungeonState livingDungeon = null, bool manualRun = false,
-            MonsterContinuityState monsterContinuity = null, DurableSettlementHistory settlement = null)
+            MonsterContinuityState monsterContinuity = null, DurableSettlementHistory settlement = null, bool foregroundStage = false)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -349,8 +360,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 DetachedCompleteSaveValidationResult validated =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
                 return validated.IsValid && validated.CurrentTargetValidated
-                    ? new DetachedCanonicalSaveSessionResult(null,
-                        new DetachedCanonicalSaveSessionUpdate(validated.GetBytes(), validated.State), null)
+                    ? new DetachedCanonicalSaveSessionResult(foregroundStage ? new DetachedCanonicalSaveSession(validated.GetBytes(), context, limits) : null,
+                        new DetachedCanonicalSaveSessionUpdate(validated.GetBytes(), validated.State), null, foregroundStage ? validated : null)
                     : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
             }
             catch (WorkloadException)
@@ -414,7 +425,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SharedBranchKnowledgeAuthority branch = null, SharedFloorKnowledgeAuthority floor = null,
             DurableSettlementHistory settlement = null) => recognized?.IsSuccess == true
                 ? PrepareReplacement(recognized.Snapshot, owned.State, null, null, branch, floor,
-                    livingDungeon, monsterContinuity: monsters, settlement: settlement)
+                    livingDungeon, monsterContinuity: monsters, settlement: settlement, foregroundStage: true)
                 : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
 
         private static void WriteField(ContractJsonWriter writer, string key,

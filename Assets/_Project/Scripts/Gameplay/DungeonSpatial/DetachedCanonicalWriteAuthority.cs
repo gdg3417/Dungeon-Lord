@@ -397,8 +397,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(prepared?.Reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
             byte[] candidate = prepared.Update.GetBytes();
             double recoveryManaSpent = 0;
+            bool foregroundStage = prepared.ForegroundValidation?.CurrentTargetValidated == true && prepared.Session != null &&
+                prepared.ForegroundValidation.GetBytes().SequenceEqual(candidate) && prepared.Session.GetCurrentBytes().SequenceEqual(candidate);
             DetachedCompleteSaveValidationResult validated =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
+                foregroundStage ? prepared.ForegroundValidation : DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
             var predecessor = ValidateSession(session);
             if (validated.IsValid && predecessor?.IsValid == true)
             {
@@ -438,7 +440,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 catch { return Failure(MonsterRecoveryRules.Invalid); }
             }
             DetachedCanonicalSaveSessionResult reopened = validated.IsValid
-                ? DetachedCanonicalSaveSession.Open(candidate, context, limits) : null;
+                ? (foregroundStage ? prepared : DetachedCanonicalSaveSession.Open(candidate, context, limits)) : null;
             if (!validated.IsValid || !validated.CurrentTargetValidated || reopened == null ||
                 !reopened.IsSuccess)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
@@ -454,9 +456,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
                 limits.Canonical.Serialized.MaximumCollectionRecords, durable =>
                 {
-                    var readValidation = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(durable, context);
-                    var readSession = DetachedCanonicalSaveSession.Open(durable, context, limits);
-                    if (!readValidation.IsValid || !readValidation.CurrentTargetValidated || !readSession.IsSuccess ||
+                    // Always validate fresh durable bytes. For the foreground path,
+                    // one round trip also supplies its session instead of repeating
+                    // the entire parse/checkpoint reconstruction inside Open.
+                    var readSession = foregroundStage ? DetachedCanonicalSaveSession.OpenForegroundReadback(durable, context, limits) :
+                        DetachedCanonicalSaveSession.Open(durable, context, limits);
+                    var readValidation = foregroundStage ? readSession.ForegroundValidation :
+                        DetachedCompleteSaveContract.ParseValidateAndRoundTrip(durable, context);
+                    if (readValidation?.IsValid != true || !readValidation.CurrentTargetValidated || !readSession.IsSuccess ||
                         !CanonicalMvpRouteProjection.TryPublishValidated(readValidation, production, out SaveData readRuntime, out _)) return false;
                     validated = readValidation; reopened = readSession; runtime = readRuntime;
                     return true;

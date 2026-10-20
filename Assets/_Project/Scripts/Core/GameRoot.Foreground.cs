@@ -11,6 +11,9 @@ namespace DungeonBuilder.M0
         private bool foregroundDirty = true, foregroundPumping, foregroundResumePending, foregroundRetryPending;
         private string foregroundFailure;
         public LivingDungeonForegroundInspection ForegroundActivity { get; private set; }
+        internal long ForegroundPresentationTime => TimeService?.ForegroundThrough ?? 0;
+        internal bool ForegroundPresentationActive => !_explicitSaveDeleteQuiesced && foregroundFailure == null && !foregroundRetryPending &&
+            TimeService?.ForegroundPresentationActive == true;
 
         private void OnDisable()
         {

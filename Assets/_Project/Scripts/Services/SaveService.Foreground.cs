@@ -71,13 +71,27 @@ namespace DungeonBuilder.M0
                 view.StateKey = "ui.living.unsupported_layout";
             var profile = _validationContext.LivingDungeonProfiles.Single(p => p.Id == LivingDungeonForegroundConfig.ProfileId);
             foreach (var p in owner.Parties) {
-                var e = LivingDungeonContracts.Restore(p, profile);
+                var e = LivingDungeonContracts.Restore(p, profile, retainPresentation: true);
                 try {
                     if (e.IsTerminal) { view.StateKey = "ui.living.blocked"; continue; }
-                    view.RunId = e.Inspect().RunId; view.Ordinal = e.NextOrdinal; view.Step = e.Inspect().LastStep;
-                    view.Members = e.Inspect().Members; view.FloorId = e.Snapshot.Floors[0].FloorInstanceId;
+                    var inspection = e.Inspect();
+                    view.RunId = inspection.RunId; view.Ordinal = e.NextOrdinal; view.Step = inspection.LastStep;
+                    view.Members = inspection.Members; view.FloorId = e.Snapshot.Floors[0].FloorInstanceId;
+                    view.AdmittedAt = p.AdmittedAt; view.MovementUnits = ForegroundConfiguration.Timing.UnitsPerTileEdge;
+                    view.CarriedLootValue = inspection.CarriedLootValue;
+                    view.Steps = Array.AsReadOnly(e.PresentationSteps.ToArray());
+                    view.PositionStep = view.Steps.Where(s => s.PositionSpace != RunPositionSpace.None).Select(s => (RunStep?)s).LastOrDefault();
+                    view.RecentInteraction = view.Steps.Where(s => s.Kind == RunStepKind.MonsterEngagement || s.Kind == RunStepKind.TrapTrigger ||
+                        s.Kind == RunStepKind.LootInteraction || s.Kind == RunStepKind.UnreachableInteraction).Select(s => (RunStep?)s).LastOrDefault();
+                    if (view.RecentInteraction.HasValue) {
+                        var interaction = view.RecentInteraction.Value;
+                        view.InteractionCombat = Array.AsReadOnly(e.Combat.Events.Where(c => c.RunOrdinal == interaction.Ordinal).ToArray());
+                        view.InteractionOption = interaction.Encounter?.OptionId ??
+                            e.Combat.Kernel.InspectMonsters().FirstOrDefault(m => m.AssignmentId == interaction.AssignmentId)?.OptionId;
+                    }
                     view.StateKey = "ui.living.active";
                     view.NextBoundary = Math.Min(view.NextBoundary, checked(p.AdmittedAt + e.NextDueTime().Value));
+                    view.AnnouncedAction = e.AnnouncedAction;
                     view.GeometryCompatible = FloorKnowledgeApplicability.TryCompute(current.validatedCanonicalSpatialState,
                         current.corridorContent, _limits.Canonical, view.FloorId, out string fingerprint) &&
                         fingerprint == e.Snapshot.Floors[0].KnowledgeFingerprint;
@@ -96,6 +110,15 @@ namespace DungeonBuilder.M0
         public long Ordinal { get; internal set; }
         public bool GeometryCompatible { get; internal set; }
         public RunStep? Step { get; internal set; }
+        public RunStep? PositionStep { get; internal set; }
+        public RunStep? RecentInteraction { get; internal set; }
+        public RunStepKind? AnnouncedAction { get; internal set; }
+        public string InteractionOption { get; internal set; }
+        public int CarriedLootValue { get; internal set; }
+        public long AdmittedAt { get; internal set; }
+        public long MovementUnits { get; internal set; }
+        public System.Collections.Generic.IReadOnlyList<RunStep> Steps { get; internal set; } = Array.Empty<RunStep>();
+        public System.Collections.Generic.IReadOnlyList<CombatC0Event> InteractionCombat { get; internal set; } = Array.Empty<CombatC0Event>();
         public System.Collections.Generic.IReadOnlyList<RunMemberState> Members { get; internal set; }
         internal long NextBoundary;
     }
