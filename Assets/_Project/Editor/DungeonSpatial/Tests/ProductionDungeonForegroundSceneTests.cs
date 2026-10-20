@@ -22,9 +22,18 @@ namespace DungeonBuilder.M0.Tests
                     DetachedCanonicalMutationRequest.Unassign(assignment.AssignmentId)).IsSuccess, Is.True);
             var report = new GameRoot.ForegroundProfileReport();
             var operation = root.ProfileForeground(report);
-            try { while (operation.MoveNext()) yield return operation.Current; }
+            try {
+                while (true) {
+                    bool more; object next = null;
+                    try { more = operation.MoveNext(); if (more) next = operation.Current; }
+                    catch (Exception error) { report.Failure = error.ToString(); break; }
+                    if (!more) break;
+                    yield return next;
+                }
+            }
             finally {
                 string path = "TestResults/foreground-profile-" + Guid.NewGuid().ToString("N") + ".json";
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
                 using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write))
                 using (var writer = new StreamWriter(stream)) writer.Write(UnityEngine.JsonUtility.ToJson(report, true));
                 TestContext.WriteLine(path);
