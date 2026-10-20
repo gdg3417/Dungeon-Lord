@@ -153,6 +153,43 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.Throws<InvalidOperationException>(() => lineage.Release(new byte[] { 0 }, p, e,
                 f.Runtime.livingDungeon.Scheduler.AcceptedThrough + 1, new System.Collections.Generic.HashSet<string>(), Profile(f))); e.Abandon();
         }
+        [TestCase(false)] [TestCase(true)] public void HistoricalV1DrainsOnceAndUpgradesWithoutEligibility(bool removeLoot)
+        {
+            var f = Dungeon(); string second = PhaseSixA4Tests.FloorTwo(f);
+            f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Deactivate, second));
+            var oldPolicy = LivingDungeonForegroundConfig.Load(); var oldProfile = oldPolicy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized);
+            var e = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot()).StartTimedCombatSnapshot(1, PhaseSixA4Tests.Snapshot(f), oldPolicy.Timing);
+            var owner = LivingDungeonState.Empty(); LivingDungeonScheduling.Activate(owner, oldProfile, oldPolicy.MinimumArrival, f.Runtime.runHistory);
+            owner.Scheduler.AcceptedThrough = 0;
+            var party = new LivingDungeonParty { Sequence = 1, AdmittedAt = 0 }; LivingDungeonScheduling.Pin(party, e, oldProfile); owner.Parties.Add(party);
+            f.Runtime.runHistory.NextRunSequence = 2;
+            var prepared = f.Session.PrepareLivingDungeonReplacement(DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile), f.State, owner);
+            Assert.That(prepared.IsSuccess, Is.True, prepared.Reason); f.FileSystem.Seed(f.ActivePath, prepared.Update.GetBytes()); f.Reopen(); Through(f, 0);
+            string identity = f.Runtime.livingDungeon.Parties.Single().StartIdentity;
+            long? opportunity = f.Runtime.livingDungeon.Scheduler.NextOpportunityTime;
+            f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
+            if (removeLoot) {
+                string loot = f.State.Floors[0].RoomContents.Assignments.Single(a => a.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId).AssignmentId;
+                f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(loot)));
+            }
+            Assert.That(f.Runtime.livingDungeon.Parties.Single().StartIdentity, Is.EqualTo(identity));
+            e.DrainToCompletion(); long finish = e.Inspect().LogicalTime; e.Abandon(); f.Reopen(); Through(f, finish);
+            Assert.That(f.Runtime.livingDungeon.Scheduler.ProfileId, Is.EqualTo(Policy.Id));
+            Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(2));
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
+            Assert.That(f.Runtime.livingDungeon.Scheduler.NextOpportunityTime, Is.EqualTo(opportunity));
+            var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, finish); CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes());
+        }
+        [Test] public void CompletedForgedReleaseCannotRetireItsBlockerOrBypassVacancyPermit()
+        {
+            var f = Waiting(); var owner = f.Runtime.livingDungeon; var p = owner.Parties[1]; var e = LivingDungeonContracts.Restore(p, Profile(f));
+            long r = owner.Scheduler.AcceptedThrough + 1; e.ReleaseTransfer(r, 1, 99, r); e.AdvanceThrough(r, 1, e.NextOrdinal);
+            LivingDungeonScheduling.Pin(p, e, Profile(f)); owner.Parties.RemoveAt(0); owner.Scheduler.AcceptedThrough = r;
+            var before = f.Session.GetCurrentBytes();
+            var rejected = f.Session.PrepareLivingDungeonReplacement(DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile), f.State, owner);
+            Assert.That(rejected.IsSuccess, Is.False); Assert.That(rejected.Reason, Is.EqualTo("living.transfer.vacancy_unproven"));
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath)); e.Abandon();
+        }
     }
 }
 #endif

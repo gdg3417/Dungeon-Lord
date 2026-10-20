@@ -61,7 +61,7 @@ namespace DungeonBuilder.M0
                     throw new InvalidOperationException("b3b2.smoke.real_monotonic_source");
             } else {
                 prior = JsonUtility.FromJson<ForegroundSmokeReport>(File.ReadAllText(previousReport));
-                if (!prior.Passed || Save.livingDungeon.Parties.Count != 1 || Save.livingDungeon.Scheduler.ProfileId != LivingDungeonForegroundConfig.ProfileId ||
+                if (!prior.Passed || Save.livingDungeon.Parties.Count != 1 || !LivingDungeonForegroundConfig.IsProduction(Save.livingDungeon.Scheduler.ProfileId) ||
                     Save.livingDungeon.Scheduler.AcceptedThrough != prior.Accepted ||
                     Save.livingDungeon.Parties[0].CheckpointIdentity != prior.CheckpointIdentity || Save.livingDungeon.Parties[0].NextOrdinal != prior.Ordinal)
                     throw new InvalidOperationException("b3b2.smoke.exact_pending_reopen");
