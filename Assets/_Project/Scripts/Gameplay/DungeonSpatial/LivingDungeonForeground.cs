@@ -218,6 +218,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         if (interval > 0) { owner.Scheduler.NextOpportunityTime = checked(time + interval); LivingDungeonScheduling.Change(owner); }
                     }
                     if (owner.Scheduler.ClosedThrough != time) { owner.Scheduler.ClosedThrough = time; LivingDungeonScheduling.Change(owner); }
+                    // Authorized history composition deliberately retains the
+                    // predecessor's unrelated metadata. Closure must restore the
+                    // already-injected save boundary before ordinary staging.
+                    runtime.lastSavedUtcUnix = savedUtcUnix;
                     Stage();
                 }
                 // A bounded pump may retain an accepted horizon. It resumes that exact

@@ -27,7 +27,10 @@ namespace DungeonBuilder.M0.Tests.PlayMode
             foreach (string method in new[] { "ActualAdmissionRetainsAnUnfinishedTimedC2PrefixThenSettlesAndRetiresExactlyOnce",
                 "ActualActiveRunAllowsSameFloorDraftCommitAndUsesSnapshotUntilSettlement",
                 "SharedMonotonicClockPreservesWholeUnitsAcrossPartitionFocusPauseAndRestart",
-                "DevelopmentReopenClockIsOptInAndPreservesRestoredHorizon" })
+                "DevelopmentReopenClockIsOptInAndPreservesRestoredHorizon",
+                "PresentationObserverCannotChangeCheckpointBytesWorkReceiptsOrOutcome",
+                "AutomaticSettlementRetainsSessionReplayWithoutChangingHistoricalSaveContract",
+                "TerminalSettlementPreservesTheCurrentSavedBoundary" })
                 Assert.DoesNotThrow(() => type.GetMethod(method).Invoke(suite, null));
             yield return null;
         }

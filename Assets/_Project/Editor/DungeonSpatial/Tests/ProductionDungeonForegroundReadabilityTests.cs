@@ -107,11 +107,14 @@ namespace DungeonBuilder.M0.Tests
             byte[] canonical = root.SaveService.CanonicalSession.GetCurrentBytes();
             foreach (var size in new[] { new Vector2Int(720, 1280), new Vector2Int(1280, 720), new Vector2Int(360, 640) }) {
                 EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y); controller.SetTextSize(DungeonTextSize.Large);
-                for (int frame = 0; frame < 8; frame++) yield return null;
+                // Editor Game View resizing can deliver focus callbacks even
+                // though the fixture disables root.Update. Resume only this
+                // explicit test clock; production focus handling is unchanged.
+                for (int frame = 0; frame < 8; frame++) { root.TimeService.SetForegroundFocus(true); yield return null; }
                 var marker = ui.Q<Label>("foregroundPartyLabel");
                 TestContext.WriteLine("Live layout " + size + " marker=" + controller.World.ForegroundPartyVisible +
                     " label=" + marker.resolvedStyle.display + " bounds=" + marker.worldBound +
-                    " map=" + ui.Q("mapArea").worldBound + " rail=" + ui.Q("floorRail").worldBound);
+                    " map=" + ui.Q("mapArea").worldBound + " rail=" + ui.Q("floorRail").worldBound + " clock=" + root.TimeService.ForegroundPresentationActive);
                 yield return RoomContentCapture("living-live-large-" + size.x + "x" + size.y + ".png");
                 Assert.That(marker.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
                 Assert.That(marker.worldBound.width, Is.GreaterThan(0));
