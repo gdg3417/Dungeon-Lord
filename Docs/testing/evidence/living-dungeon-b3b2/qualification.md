@@ -433,3 +433,78 @@ FINAL campaign is **closed**: **10,476/10,476 protected save/player files and8,2
 Post-restoration working tree was clean before this documentation-only closeout. No installed Editor or Windows player remained; only the ordinary UnityHub service was present. The final gameplay assembly/build and runtime inputs remain those qualified at4ee533c5; later changes are confined to this report, the contract and roadmap. No generated artifact or temporary substitution enters the feature commits. Both original GitHub inline threads were verified resolved; no new PR is created.
 
 **Ready for another independent PR review**, with explicit synchronous-stall, motion-allocation, compact-Large-layout and historical replay limitations above. No required automated/build/native gate remains failed or pending, and no new technical blocker remains. Gameplay-only owner retesting can use the isolated FINAL player described above. Do not merge or claim broader Living Dungeon, offline adventurer or secure foreground-provenance completion. Historical #242/#244 exceptions remain historical, with no new owner-data loss or restoration claim.
+
+## 2026-10-20: Party-caption occlusion and neutral replay readiness
+
+This addendum addresses the two owner findings at reviewed HEAD `b3b5441af9f26433d4f98c0b0de4601610a4e684`. Earlier qualification results above remain historical and are not rewritten. Branch and base remain `codex/living-dungeon-b3b2-autonomous-foreground-c2` and `5fbaa5f5d845c1341ee4cc4f52b706a8ba586d0d`; PR #245 remains unmerged.
+
+### Findings and corrections
+
+The floating label used the party's center, measured text before its changed font had resolved, and clamped its box to the map without protecting the rendered diamond. The original label's actual height was 34 panel units in the reproduced 720×1280 Large case. Probe03 at `98524e2d6de7e26efe2813cb89f71504585fb0c6` failed the new actual-label-versus-rendered-sprite clearance assertion (1 pass/1 fail), establishing the defect before production placement changed.
+
+`ProductionDungeonForeground` now projects the existing sprite renderer's bounds into the existing camera/map viewport. At most 12 candidate rectangles place the optional caption above, below or beside the icon, preserving the existing policy gap and excluding the floor rail. A one-physical-pixel allowance prevents final UI Toolkit raster rounding from consuming that gap. No valid placement means only the caption hides; the existing localized activity panel still identifies the party. Font measurement is cached after style resolution, with an explicit zero-margin/padding/border box. The diamond's position, identity, sprite, scale, colors and simulation-independent movement are unchanged. Live/replay sprite-reference and scale equality are asserted; complete live/replay combat-animation parity remains outside this correction.
+
+The shared `ui.dungeon.replay.ready` entry was manual-only wording despite already serving both manual and automatic session replay. Its text is now **“Completed run available for replay in this session.”** The presenter gate and reopened-history restriction are unchanged. The automatic completion scene test asserts that exact localized entry before opening its retained session replay.
+
+### Source applicability and final gates
+
+Production UI source: `5c45ede778355838ab75db8888635aaaeda1172a`. Final Windows/native source: `809913050295b0d45a8d8e9038ac57f952a9f6c4`. Between these commits, Unity input changes are confined to the explicit Development-only visual smoke hook and unused Editor build targets; production UI, styles, localization, simulation, checkpoint, save, settlement and recovery source are identical. Later closeout changes contain documentation and screenshots only. The native launcher records build/launcher identities and rejects changed Unity input trees; a launcher-only change is permitted only when its own file is the sole changed path.
+
+All artifacts below use the unused `TestResults/living-dungeon-b3b2-20261019-live-marker/` campaign and isolated product `Dungeon Lord B3B2 Smoke 20261019 Live Marker`. The dated namespace retains the established adapter's stem; actual command timestamps are2026-10-20. Native saves use a separately baked `living-dungeon-b3b2-qualification-20261019-live-marker-native-rendered-final.json` filename. Native canonical copies are taken only after normal process exit.
+
+| Gate | Result | Source / retained artifact |
+|---|---|---|
+| Focused presentation, scene, replay and localization EditMode |101 passed, 0 failed, 0 skipped|5c45ede7; `07-marker-ui.xml`, `.log`, `-command.json`|
+| Relevant B3B2/B3B1/A/B1/B2/B3A/C2 PlayMode |10 passed, 0 failed, 0 skipped|5c45ede7; `08-integration-play.xml`, `.log`, `-command.json`|
+| Static English JSON / readiness key |1,296 entries; 0 duplicate keys; exact neutral entry passes|`static-localization.json`|
+| Windows Development, Bootstrap, Unity 6000.3.2f1 |Succeeded; 181,858,536 bytes; 0 BuildReport errors; 1 symbol-upload warning|80991305; `11-build-command.json`, `11-build.log`, build-local `build-report.json`|
+| Rendered native admission / active edit |Passed; 3 actual-layout checks; 3 visible captions; captured checkpoint unchanged by edit|`native-rendered-final-admit.json`; Run 1, ordinal 4, 0 history|
+| Exact reopen / settle / changed second run |Passed|`native-rendered-final-settle.json`; Run 1 exactly once, 1 history, new geometry captured|
+| Second exact reopen / settlement |Passed|`native-rendered-final-finish.json`; Run 2 exactly once, 2 histories, 0 active parties|
+| Screenshot metadata and inspection |9 PNGs have their named dimensions; final native images visually inspected|`static-image-validation.json`; committed gallery below|
+
+Commands are retained verbatim in each command JSON. Reproduction uses bundled Python with `Tools/Presentation/qualify_b3b2_live.py marker run marker-ui 07`, `run integration-play 08`, `run build-rendered-final 11`, then `smoke admit rendered-final`, `smoke settle rendered-final`, `smoke finish rendered-final`. Each launch passes the existing protection/source preflight. The fixed gated sequence is retained as `qualify-rendered-final.ps1` in the campaign.
+
+The scene suite checks actual `Label.worldBound` against the projected `SpriteRenderer.bounds` plus policy clearance, not just their centers lying inside the map. Coverage includes 1280×720,720×1280 and360×640 Large; 45 camera position/zoom combinations; map edges and floor rail; three forced no-fit cases that retain the icon/activity identification; existing interruption/unknown-geometry cases; exact canonical-byte equality; and the 120 idle-frame no-save-reconstruction/no-publication/no-map-rebuild regression. Manual C1/replay cases remain included. No new 68-run performance or full 340-case manual/save campaign was needed for this caption-only production change; their prior source/results remain identified above rather than presented as new results.
+
+Final player: `Builds/Development/Windows-living-dungeon-b3b2-20261019-live-marker-rendered-final/Dungeon Lord.exe`. Gameplay assembly SHA256: `577293ec07d0aadf7dfa281f5d9da60eaf684f363f61ce56cc695abbb03eb860`; `globalgamemanagers`: `57a0c389675257ad8d5fe3796b45ad8e614c2ecbb9fcac184001a07e3e7dbd92`. The Unity launcher exe hash alone does not identify gameplay code. The licensing-client validation log message and missing Cloud Diagnostics symbol-upload credentials also appeared in retained earlier/baseline qualification; do not describe this build as log-error-free.
+
+### Visual evidence and physical-display limit
+
+Exact 720×1280 is qualified in Editor Game View. This machine's 1080-pixel-high monitor clamps a windowed 720×1280 request to 720×1080. The native report records **one unavailable requested layout**, validates its actual 720×1080 frame and names its screenshot accordingly; it does not claim native 720×1280 qualification. Exact 1280×720 and360×640 native frames pass. This hardware limitation does not replace the exact 720×1280 Editor assertions. Native movement positions progress (1.27,2.50)→(1.17,2.50)→(1.07,2.50) along the recorded edge. Caption-to-icon vertical gaps in those frames are 6.98, 7.45 and 6.74 panel units; the configured gap is retained after raster rounding. Capture-only frames leave canonical bytes unchanged.
+
+| Layout | Exact Editor frame | Editor boundary frame | Rendered native movement |
+|---|---|---|---|
+|1280×720 Large|[Live](marker-20261020/editor-living-live-large-1280x720.png)|[Map boundary](marker-20261020/editor-living-marker-edge-1280x720-0.05.png)|[Movement](marker-20261020/native-marker-moving-large-1280x720.png)|
+|720×1280 Large|[Live](marker-20261020/editor-living-live-large-720x1280.png)|[Map boundary](marker-20261020/editor-living-marker-edge-720x1280-0.05.png)|[Actual720×1080 monitor-limited frame](marker-20261020/native-marker-moving-large-720x1080.png)|
+|360×640 Large|[Live](marker-20261020/editor-living-live-large-360x640.png)|[Map boundary](marker-20261020/editor-living-marker-edge-360x640-0.05.png)|[Movement](marker-20261020/native-marker-moving-large-360x640.png)|
+
+These are unmodified PNGs; camera pans in boundary qualification deliberately expose map edges. They do not fabricate routes or change recorded run positions.
+
+### Retained unsuccessful/provisional attempts
+
+Preparation first stopped because source changed during inventory; all original manifests/archives were retained and preparation completed after committing source, before any Unity/player launch. Attempt01 stopped before Unity on the adapter's filter mapping. Probe02 retained a test-helper policy-access null reference; it was corrected before defect reproduction. Probe03 reproduces the original overlap. Broad04 retained 99 passes/2 failures: physical-pixel clearance at a 360 edge, corrected by the rounding allowance, and a construction-layout null reference that did not recur in the unchanged construction test in final 101/101. Historical gameplay/save assertions and fixtures are unchanged; the prior inside-map-only graphical checks are replaced with actual rendered-bounds clearance checks. No unrelated/pre-existing-defect claim is made.
+
+Build 09 passed, but its batch-mode visual attempt yielded a black capture and ignored portrait resizing; that image is not visual evidence. Build 10 rendered a valid 1280×720 frame, then failed the strict requested-height check at the monitor's 720×1080 limit. Its report, image and post-exit failed save remain preserved. A launcher-only HEAD mismatch also stopped a rendered launch before any player ran; explicit unchanged-Unity-tree proof now records both identities. Final build 11 and all three rendered-final phases pass with the physical-resolution limitation reported separately. Superseded builds, failed reports and saves were never overwritten.
+
+### Changed files, boundaries and owner retest
+
+| File | Purpose |
+|---|---|
+|`Assets/_Project/Scripts/UI/ProductionDungeonForeground.cs`|Rendered-bounds placement, cached resolved-font box, bounded rail/viewport exclusion and hide-caption fallback|
+|`Assets/_Project/Scripts/UI/DungeonFloorWorldForeground.cs`|Read-only actual party bounds accessor|
+|`Assets/_Project/UI/ProductionDungeon/Dungeon.uss`|Explicit floating-label box metrics|
+|`Assets/_Project/Data/Bootstrap/string_table_en.json`|Neutral existing replay-readiness entry|
+|`Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonForegroundReadabilityTests.cs`|Actual graphical clearance, layouts/edges/zoom/fallback, replay wording/artwork and state invariance|
+|`Assets/_Project/Scripts/Core/GameRoot.ForegroundSmoke.cs`|Opt-in isolated Development visual assertions/captures and honest physical-monitor reporting|
+|`Assets/_Project/Editor/DungeonVisualBuildQualification.cs`|Fresh non-overwriting Windows build targets|
+|`Tools/Presentation/qualify_b3b2_live.py`|Reuse existing isolation campaign, test filter, rendered launcher and source applicability checks|
+|`Docs/planning/living-dungeon-phase-b3b2-implementation-contract.md`|Exact caption placement and replay-text contract|
+|`docs/planning/post-gd60-mvp-execution-plan.md`|Current correction/qualification status|
+|This qualification report and nine `marker-20261020/*.png` files|Append-only results and reviewable screenshots|
+
+Schema 15, frozen checkpoint formats/executables, Profile A, gameplay timing/tuning, active editing, C2 damage reconciliation, recovery and atomic persistence are unchanged. No new canonical authority, camera, sprite system or historical replay schema is introduced. The transient-session versus reopened-summary distinction remains intact.
+
+Preservation closeout passed: **10,779/10,779 protected files and 8,302/8,302 historical evidence files unchanged; zero new exceptions**. Original Unity settings, default save/product identity, fixture names and capture redirections are restored. The working tree contains only the intended documentation and selected screenshots after restoration. No qualification Editor/player remains. The existing campaign is closed; `preservation-after.json`, `historical-evidence-after.json`, `accepted-preservation-exceptions.json` and `substitutions-restored.json` retain the audit. Only the nine deliberate review PNGs enter Docs; no build, TestResults output or temporary substitution enters the feature commits. PR #245 is ready for independent re-review and remains unmerged, with the explicit native-monitor and live/replay-animation limitations above.
+
+Gameplay-only retest after technical closeout: launch the new isolated player above without qualification arguments; select Large text in Display; follow a fresh automatic party while panning/zooming normally; after that same session's new completion, check the neutral readiness message and start Replay Run to recognize the same party diamond. Reopened historical runs retain their existing summary-only restriction. No owner gameplay test is needed to complete the automated gates. Leave PR #245 unmerged.
