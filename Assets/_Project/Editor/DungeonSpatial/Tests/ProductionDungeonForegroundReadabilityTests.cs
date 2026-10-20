@@ -109,10 +109,13 @@ namespace DungeonBuilder.M0.Tests
                 EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y); controller.SetTextSize(DungeonTextSize.Large);
                 for (int frame = 0; frame < 8; frame++) yield return null;
                 var marker = ui.Q<Label>("foregroundPartyLabel");
+                TestContext.WriteLine("Live layout " + size + " marker=" + controller.World.ForegroundPartyVisible +
+                    " label=" + marker.resolvedStyle.display + " bounds=" + marker.worldBound +
+                    " map=" + ui.Q("mapArea").worldBound + " rail=" + ui.Q("floorRail").worldBound);
+                yield return RoomContentCapture("living-live-large-" + size.x + "x" + size.y + ".png");
                 Assert.That(marker.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
                 Assert.That(marker.worldBound.width, Is.GreaterThan(0));
                 Assert.That(ui.Q("mapArea").worldBound.Contains(marker.worldBound.center), Is.True);
-                yield return RoomContentCapture("living-live-large-" + size.x + "x" + size.y + ".png");
             }
             CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
             root.TimeService.SetForegroundFocus(false); yield return null;

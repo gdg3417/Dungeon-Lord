@@ -106,6 +106,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(r => r.RunId == outcome.RunId), Is.EqualTo(1));
         }
 
+        [Test] public void TerminalSettlementPreservesTheCurrentSavedBoundary()
+        {
+            var f = Dungeon(); Admitted(f); long finish = Finish(f); Through(f, finish - 1);
+            // Test-only passive period is derived beyond this run's terminal
+            // boundary so a coincident tick cannot mask lost lifecycle metadata.
+            int tickSeconds = checked((int)(finish / Policy.UnitsPerSecond + 1));
+            var result = PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem, f.Session,
+                f.Runtime, Policy, finish, tickSeconds, (save, tick) => { }, 2000);
+            f.Accept(result);
+            Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.EqualTo("run-1"));
+            Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(2000));
+            f.Reopen(); Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(2000));
+        }
+
         [Test] public void AcceptedButUnclosedHorizonReopensWithoutDroppingTimeOrDuplicatingHistory()
         {
             var budget = LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(
