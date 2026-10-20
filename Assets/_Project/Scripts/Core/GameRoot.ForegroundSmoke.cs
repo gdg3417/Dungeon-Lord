@@ -18,6 +18,7 @@ namespace DungeonBuilder.M0
             public string Phase, Product, SavePath, RunId, CheckpointIdentity, PendingGeometry, Failure;
             public long Accepted, Closed, Ordinal, HistoryCount, RealSourceUnits;
             public int VisualChecks, VisualLabelsShown, VisualLabelsHidden;
+            public string VisualBounds;
         }
         // Opt-in development qualification only. Real Bootstrap/UI/native writer;
         // an injected technical clock accelerates the configured gameplay timings.
@@ -145,24 +146,29 @@ namespace DungeonBuilder.M0
             }
             if (!moving) throw new InvalidOperationException("b3b2.visual.movement_missing");
             controller.SetTextSize(DungeonTextSize.Large);
-            var canonical = SaveService.CanonicalSession.GetCurrentBytes();
+            byte[] canonical;
             foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(720, 1280), new Vector2Int(360, 640) }) {
                 Screen.SetResolution(size.x, size.y, FullScreenMode.Windowed);
                 for (int frame = 0; frame < 12; frame++) { TimeService.SetForegroundFocus(true); yield return null; }
                 if (Screen.width != size.x || Screen.height != size.y || !controller.World.ForegroundPartyVisible)
                     throw new InvalidOperationException("b3b2.visual.layout_or_marker");
+                canonical = SaveService.CanonicalSession.GetCurrentBytes();
                 var sprite = (SpriteRenderer)typeof(DungeonFloorWorldView).GetField("foregroundParty", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(controller.World);
                 var min = camera.WorldToScreenPoint(sprite.bounds.min); var max = camera.WorldToScreenPoint(sprite.bounds.max);
                 float scale = document.panelSettings.scale;
                 var icon = Rect.MinMaxRect(Mathf.Min(min.x, max.x) / scale, (Screen.height - Mathf.Max(min.y, max.y)) / scale,
                     Mathf.Max(min.x, max.x) / scale, (Screen.height - Mathf.Min(min.y, max.y)) / scale);
                 var label = ui.Q<Label>("foregroundPartyLabel"); var map = ui.Q("mapArea");
+                float gap = controller.presentationPolicy.ReplayActorLabelOffset - .5f;
+                var clear = Rect.MinMaxRect(icon.xMin - gap, icon.yMin - gap, icon.xMax + gap, icon.yMax + gap);
                 if (label.resolvedStyle.display != DisplayStyle.None) {
-                    if (label.worldBound.Overlaps(icon) || label.worldBound.Overlaps(ui.Q("floorRail").worldBound) ||
-                        !map.worldBound.Contains(label.worldBound.min) || !map.worldBound.Contains(label.worldBound.max))
+                    if (label.worldBound.Overlaps(clear) || label.worldBound.Overlaps(ui.Q("floorRail").worldBound) ||
+                        label.worldBound.xMin < map.worldBound.xMin - .5f || label.worldBound.yMin < map.worldBound.yMin - .5f ||
+                        label.worldBound.xMax > map.worldBound.xMax + .5f || label.worldBound.yMax > map.worldBound.yMax + .5f)
                         throw new InvalidOperationException("b3b2.visual.label_overlap");
                     report.VisualLabelsShown++;
                 } else report.VisualLabelsHidden++;
+                report.VisualBounds += size + " icon=" + icon + " label=" + label.worldBound + " display=" + label.resolvedStyle.display + " position=" + controller.World.ForegroundPartyPosition + "\n";
                 if (string.IsNullOrEmpty(ui.Q<Label>("foregroundActivity").text) || !canonical.SequenceEqual(SaveService.CanonicalSession.GetCurrentBytes()))
                     throw new InvalidOperationException("b3b2.visual.canonical_or_identification");
                 string path = Path.Combine(directory, "native-marker-moving-large-" + size.x + "x" + size.y + ".png");
@@ -170,6 +176,8 @@ namespace DungeonBuilder.M0
                 ScreenCapture.CaptureScreenshot(path);
                 for (int frame = 0; frame < 60 && !File.Exists(path); frame++) yield return null;
                 if (!File.Exists(path)) throw new InvalidOperationException("b3b2.visual.capture_missing");
+                if (!canonical.SequenceEqual(SaveService.CanonicalSession.GetCurrentBytes()))
+                    throw new InvalidOperationException("b3b2.visual.presentation_published_gameplay");
                 report.VisualChecks++;
                 // A real advancing clock fraction, still before the next
                 // configured movement boundary. No display-generated events.

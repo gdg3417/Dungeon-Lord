@@ -66,39 +66,63 @@ namespace DungeonBuilder.M0
         private void PresentForegroundPartyLabel()
         {
             if (foregroundPartyLabel == null) return;
-            bool visible = world?.ForegroundPartyVisible == true;
-            if (!visible) { foregroundPartyLabel.style.display = DisplayStyle.None; return; }
+            if (world == null || !world.TryForegroundPartyBounds(out var bounds)) {
+                foregroundPartyLabel.style.display = DisplayStyle.None; return;
+            }
             float font = Mathf.Max(presentationPolicy.ReplayPartyTextSize, presentationPolicy.Text(textSize) * presentationPolicy.ReplayPartyTextScale);
-            if (foregroundLabelFont != font || foregroundLabelSize == Vector2.zero || foregroundPartyLabel.style.fontSize.value.value != font) {
+            if (foregroundLabelFont != font || foregroundPartyLabel.style.fontSize.value.value != font) {
                 foregroundLabelFont = font; foregroundPartyLabel.style.fontSize = font;
+                foregroundLabelSize = Vector2.zero;
+            }
+            // Wait for the changed font to resolve before caching its metrics.
+            // The explicit USS box has no margin/padding/border to add afterward.
+            if (!Mathf.Approximately(foregroundPartyLabel.resolvedStyle.fontSize, font)) {
+                foregroundPartyLabel.style.display = DisplayStyle.None; return;
+            }
+            if (foregroundLabelSize == Vector2.zero) {
                 foregroundLabelSize = foregroundPartyLabel.MeasureTextSize(foregroundPartyLabel.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
             }
             var parent = foregroundPartyLabel.parent;
-            var screen = worldCamera.WorldToScreenPoint(world.transform.TransformPoint(world.ForegroundPartyPosition));
-            visible &= worldCamera.pixelRect.Contains(new Vector2(screen.x, screen.y));
-            var point = parent.WorldToLocal(new Vector2(screen.x, Screen.height - screen.y) / document.panelSettings.scale);
-            float width = Mathf.Min(foregroundLabelSize.x, Mathf.Min(presentationPolicy.ReplayPartyInfoWidth, parent.contentRect.width));
-            float height = foregroundLabelSize.y;
-            var placed = new Rect(Mathf.Clamp(point.x - width * .5f, 0, Mathf.Max(0, parent.contentRect.width - width)),
-                Mathf.Clamp(point.y - height - presentationPolicy.ReplayActorLabelOffset, 0, Mathf.Max(0, parent.contentRect.height - height)), width, height);
+            Vector2 PanelPoint(Vector3 screen) => parent.WorldToLocal(new Vector2(screen.x, Screen.height - screen.y) / document.panelSettings.scale);
+            var screen = worldCamera.WorldToScreenPoint(bounds.center);
+            var min = PanelPoint(worldCamera.WorldToScreenPoint(bounds.min));
+            var max = PanelPoint(worldCamera.WorldToScreenPoint(bounds.max));
+            var icon = Rect.MinMaxRect(Mathf.Min(min.x, max.x), Mathf.Min(min.y, max.y), Mathf.Max(min.x, max.x), Mathf.Max(min.y, max.y));
+            var pixels = worldCamera.pixelRect;
+            min = PanelPoint(new Vector3(pixels.xMin, pixels.yMax)); max = PanelPoint(new Vector3(pixels.xMax, pixels.yMin));
+            var area = Rect.MinMaxRect(Mathf.Max(parent.contentRect.xMin, min.x), Mathf.Max(parent.contentRect.yMin, min.y),
+                Mathf.Min(parent.contentRect.xMax, max.x), Mathf.Min(parent.contentRect.yMax, max.y));
             var rail = document.rootVisualElement.Q("floorRail");
-            if (rail.resolvedStyle.display != DisplayStyle.None) {
-                var blocked = parent.WorldToLocal(rail.worldBound);
-                if (placed.Overlaps(blocked)) {
-                    float gap = presentationPolicy.ReplayActorLabelOffset;
-                    float leftWidth = Mathf.Max(0, blocked.xMin - gap), rightStart = Mathf.Min(parent.contentRect.width, blocked.xMax + gap);
-                    float rightWidth = Mathf.Max(0, parent.contentRect.width - rightStart);
-                    bool right = rightWidth >= leftWidth;
-                    width = Mathf.Min(width, right ? rightWidth : leftWidth);
-                    placed.width = width;
-                    placed.x = Mathf.Clamp(point.x - width * .5f, right ? rightStart : 0,
-                        right ? Mathf.Max(rightStart, parent.contentRect.width - width) : Mathf.Max(0, leftWidth - width));
-                    visible &= width > 0;
+            bool railVisible = rail.resolvedStyle.display != DisplayStyle.None;
+            var blocked = parent.WorldToLocal(rail.worldBound);
+            float width = Mathf.Min(Mathf.Ceil(foregroundLabelSize.x), presentationPolicy.ReplayPartyInfoWidth);
+            float height = Mathf.Ceil(foregroundLabelSize.y), gap = presentationPolicy.ReplayActorLabelOffset;
+            bool visible = pixels.Contains(new Vector2(screen.x, screen.y)) && width > 0 && height > 0 && width <= area.width && height <= area.height;
+            bool found = false; Rect placed = default;
+            // Bounded screen-space inspection only: four sides, with at most
+            // three alignments to clear the existing rail. Never clamp toward
+            // the icon or move/hide the icon to make an optional caption fit.
+            for (int side = 0; visible && side < 4 && !found; side++)
+                for (int shift = 0; shift < (railVisible ? 3 : 1) && !found; shift++) {
+                    float x = side < 2 ? icon.center.x - width * .5f : side == 2 ? icon.xMax + gap : icon.xMin - gap - width;
+                    float y = side < 2 ? side == 0 ? icon.yMin - gap - height : icon.yMax + gap : icon.center.y - height * .5f;
+                    if (side < 2) {
+                        if (shift > 0) x = shift == 1 ? blocked.xMax + gap : blocked.xMin - gap - width;
+                        x = Mathf.Clamp(x, area.xMin, area.xMax - width);
+                    } else {
+                        if (shift > 0) y = shift == 1 ? blocked.yMax + gap : blocked.yMin - gap - height;
+                        y = Mathf.Clamp(y, area.yMin, area.yMax - height);
+                    }
+                    var candidate = new Rect(x, y, width, height);
+                    if (candidate.xMin < area.xMin || candidate.yMin < area.yMin || candidate.xMax > area.xMax || candidate.yMax > area.yMax ||
+                        candidate.Overlaps(icon) || railVisible && candidate.Overlaps(blocked)) continue;
+                    placed = candidate; found = true;
                 }
-            }
+            visible &= found;
             foregroundPartyLabel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
             if (visible) {
-                foregroundPartyLabel.style.width = width; foregroundPartyLabel.style.left = placed.x; foregroundPartyLabel.style.top = placed.y;
+                foregroundPartyLabel.style.width = width; foregroundPartyLabel.style.height = height;
+                foregroundPartyLabel.style.left = placed.x; foregroundPartyLabel.style.top = placed.y;
             }
         }
     }

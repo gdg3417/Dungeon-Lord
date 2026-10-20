@@ -6,7 +6,7 @@
 .replay-actor, .replay-actor-health { white-space: nowrap; margin: 0; padding: 0; flex-shrink: 0; -unity-text-align: middle-center; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }
 .replay-actor { overflow: hidden; text-overflow: ellipsis; }
 .replay-party-info { position: absolute; display: none; }
-.foreground-party-label { position: absolute; display: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); background-color: var(--panel); -unity-text-align: middle-center; }
+.foreground-party-label { position: absolute; display: none; margin: 0; padding: 0; border-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); background-color: var(--panel); -unity-text-align: middle-center; }
 .replay-party-line { flex-direction: row; flex-shrink: 0; }
 .replay-party-row, .replay-party-health { white-space: nowrap; margin: 0; padding: 0; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }
 .replay-party-row { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }

@@ -139,7 +139,7 @@
     {"key":"ui.dungeon.replay.pause","text":"Pause"},
     {"key":"ui.dungeon.replay.resume","text":"Resume"},
     {"key":"ui.dungeon.replay.close","text":"Close Replay"},
-    {"key":"ui.dungeon.replay.ready","text":"Completed manual run available for this session."},
+    {"key":"ui.dungeon.replay.ready","text":"Completed run available for replay in this session."},
     {"key":"ui.dungeon.replay.unavailable","text":"Replay unavailable: saved history has no retained transient replay evidence."},
     {"key":"ui.dungeon.replay.historical","text":"Replay unavailable: the recorded dungeon layout differs from the current layout."},
     {"key":"ui.dungeon.replay.recorded","text":"Recorded completed run · Diamond: party · {0} survivors"},

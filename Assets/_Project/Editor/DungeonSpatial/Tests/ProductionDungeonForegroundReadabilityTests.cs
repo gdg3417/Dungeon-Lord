@@ -144,6 +144,7 @@ namespace DungeonBuilder.M0.Tests
                     " map=" + ui.Q("mapArea").worldBound + " rail=" + ui.Q("floorRail").worldBound + " clock=" + root.TimeService.ForegroundPresentationActive);
                 yield return RoomContentCapture("living-live-large-" + size.x + "x" + size.y + ".png");
                 AssertForegroundLabelClear(ui);
+                Assert.That(marker.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex), "The ordinary layout has room for the caption");
             }
             yield return ForegroundMarkerBoundaryLayouts(ui);
             CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());

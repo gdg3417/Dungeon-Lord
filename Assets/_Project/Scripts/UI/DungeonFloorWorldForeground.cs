@@ -14,6 +14,11 @@ namespace DungeonBuilder.M0
         private bool foregroundMotion;
         public bool ForegroundPartyVisible => foregroundParty != null && foregroundParty.gameObject.activeSelf;
         public Vector2 ForegroundPartyPosition => foregroundParty == null ? default : (Vector2)foregroundParty.transform.localPosition;
+        public bool TryForegroundPartyBounds(out Bounds bounds)
+        {
+            bounds = ForegroundPartyVisible ? foregroundParty.bounds : default;
+            return ForegroundPartyVisible;
+        }
         public void PresentForeground(LivingDungeonForegroundInspection view, bool hidden, long? observedTime = null)
         {
             if (foregroundView != view || foregroundProjection != ReconstructionCount || foregroundHidden != hidden) {
