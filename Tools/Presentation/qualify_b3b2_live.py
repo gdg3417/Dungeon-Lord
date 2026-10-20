@@ -30,4 +30,10 @@ if profile_retry:
     source = source.replace('Windows-living-dungeon-b3b2-20261019-live-before', 'Windows-living-dungeon-b3b2-20261019-live-before-profile-fix')
     source = source.replace('BuildLivingDungeonB3B2LiveBeforeWindows', 'BuildLivingDungeonB3B2LiveBeforeProfileFixWindows')
     source = source.replace("else 'native-'", "else 'native-profile-fix-'")
+    loader = "exec(compile(source,m.__file__,'exec'),m.__dict__)"
+    if source.count(loader) != 1: raise ValueError('Nested adapter loader changed')
+    source = source.replace(loader,
+        "source=source.replace('Windows-living-dungeon-b3b2-20261019-live-before', 'Windows-living-dungeon-b3b2-20261019-live-before-profile-fix')\n" + loader)
+    source = source.replace('IDENTITY_TEST=',
+        "assert 'Builds/Development/Windows-living-dungeon-b3b2-20261019-live-before-profile-fix' in m.run.__code__.co_consts, 'Retry target was not isolated'\nIDENTITY_TEST=")
 exec(compile(source, str(source_path), 'exec'))
