@@ -199,3 +199,9 @@ This checklist is the repeatable authoring workflow. It is intended to be mechan
 - Research nodes should be pure data. Code should not hardcode monster families or evolution paths.
 
 - Debug tools recommended: force unlock panel, and a monster sandbox room for quick encounter tests.
+
+<!-- P8-00-2026-10-20 -->
+
+### Phase 8 owner-approved design precedence (2026-10-20; after merged PR #245)
+
+The historical Monsterology v1 roster, post-MVP elite deferral and blanket evolution parent checks are superseded **only for the approved future Phase 8 roster**. Family→form/species→individual class→level remain distinct; **each named class has its own research**, with no grant simply from unlocking a form; valid per-instance evolution/recruitment and paid respecialization preserve stable identity, level and proportional injury (D09–D44, D144–D173). Goblinoid: basic Goblin Archer/Spearman/Rogue/Shaman; Hobgoblin Tactician, Bugbear Crusher, Hobgoblin Warlord. Undead: Skeleton Warrior/Archer, Zombie Ravager/Bulwark, Wight Sentinel/Reaper, Ghoul distinct baseline, Wight Lord. Goblin Warrior **is not newly available in MVP**; current `mon_300` and obsolete Shaman prereqs require explicit historical saved-state compatibility. Hobgoblin and Bugbear each require any **two distinct researched basic Goblin classes**; Wight both basic Skeleton classes; Ghoul any **two distinct researched Zombie classes**; Warlord any one Hobgoblin class plus coordination achievement; Wight Lord any one Wight class plus real prevented-damage achievement. Advanced branches nonexclusive; only eligible chosen classes/form choices receive authored abilities. Exact research node identities/costs, migration mapping and target validation remain technical/content gates. See [Phase 8 owner lock](../docs/planning/decisions/phase-8-owner-design-lock.md).

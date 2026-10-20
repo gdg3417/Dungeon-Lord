@@ -125,3 +125,9 @@ MVP includes a minimal, readable node set that demonstrates the branch fantasy a
 4.  Run lint checks, fix FAIL items.
 
 5.  Add one test scenario verifying the modifier applies in the correct formula layer.
+
+<!-- P8-00-2026-10-20 -->
+
+### Phase 8 owner-approved design precedence (2026-10-20; after merged PR #245)
+
+D174 **supersedes the former future design** of independent `ac_100` Floor 2 permission followed by unrelated ranks: the approved Phase 8 target is **one unified ranked Architecture floor-permission progression covering Floors 1–5**, with separate per-rank authorized timed/start-paid research; a rank grants permission only, not floor construction or activation (D01–D04, D174–D176). Existing `ac_100` permission, in-flight project and already constructed Floor 2 must receive **explicit identity/entitlement compatibility review**, avoiding double charge, free rank escalation, lost saved data or accidental permission removal; **the exact migration encoding is not approved here**. Floors 3–5 require new authored floor records, with Floor 5 a noticeable capacity milestone rather than a mandatory boss room. Pillar Chamber and Flooded Basic Room are distinct **separately researched Architecture options**, not a new environmental research tree; gameplay geometry/time remains content-authored (D177–D181). Do not assume the runtime already supports ranked nodes. See [Phase 8 owner lock](../docs/planning/decisions/phase-8-owner-design-lock.md).

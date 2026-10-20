@@ -135,3 +135,9 @@ MVP includes a minimal, readable node set that demonstrates the branch fantasy a
 4.  Run lint checks, fix FAIL items.
 
 5.  Add one test scenario verifying the modifier applies in the correct formula layer.
+
+<!-- P8-00-2026-10-20 -->
+
+### Phase 8 owner-approved design precedence (2026-10-20; after merged PR #245)
+
+The one approved **additional MVP trap archetype** is **Treasure Ward**, linked to an eligible room loot-node instance (D49/D50, D59–D88). It may legally share that node's tile only as a narrow named exception while using a separate trap-capacity slot; one Ward per node, one node per Ward. Security difficulty is individually configured/research-gated and mana-funded; a valid party receives **one seeded bypass attempt per linked node per visit**, with authored Mage/Cleric aptitude and team support; failure damages the primary specialist **or the attempted collector when no specialist is eligible** (D73), denies linked loot but does not necessarily end the visit. Later parties may try again without a generic per-attempt Ward recharge charge. Ward and node can be moved, unassigned and relinked under the explicit custody policies (D186–D188), preserving unrelated stock and immutable in-flight rules. Separately, ordinary authored traps choose **paid single-use replacement**, **paid mechanical reset** (Snare example) or **paid magical recharge** (Chilling Sigil example), with restoration on a legal vacant-floor opportunity following monsters and preceding loot (D199/D200). Do not infer Spike Trap's lifecycle, buy new monsters automatically or add a recharge fee to each Ward attempt. Details of replacement identity, per-trap costs, readiness state and event ordering are technical/data gates. See [Phase 8 owner lock](../docs/planning/decisions/phase-8-owner-design-lock.md).

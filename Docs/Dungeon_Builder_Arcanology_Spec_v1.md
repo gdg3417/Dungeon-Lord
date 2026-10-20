@@ -123,3 +123,9 @@ MVP includes a minimal, readable node set that demonstrates the branch fantasy a
 4.  Run lint checks, fix FAIL items.
 
 5.  Add one test scenario verifying the modifier applies in the correct formula layer.
+
+<!-- P8-00-2026-10-20 -->
+
+### Phase 8 owner-approved design precedence (2026-10-20; after merged PR #245)
+
+For future Phase 8, Arcanology permissions and discovered analysis evidence gate **individual item/material-tier Blueprint Research projects** on the independent one-slot Blueprint track (D90–D109). Item-tier research is not a rarity research per item; each researched blueprint authors eligible rarity profiles, items are automatically selected for suitable paid stock subject to legality/affordability and a saved loot-node focus, and General permissions may still gate blueprint availability. Keep `ar_100`/`ar_200` as **historical existing references** until reviewed content mapping determines how Steel/focus permissions are represented. Old loot-table reserve reductions and ongoing research project reserves cannot silently act as the new per-created-item or upfront project charge formula (D130–D139). Actual IDs/costs/sample targets/eligibility and data-authoring authority must be validated in a separate implementation/content PR. See [Phase 8 owner lock](../docs/planning/decisions/phase-8-owner-design-lock.md).
