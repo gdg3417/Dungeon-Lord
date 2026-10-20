@@ -16,6 +16,31 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         private static LivingDungeonForegroundConfig Policy => LivingDungeonForegroundConfig.Load();
 
+        [Test] public void RecoveryConditionChangesAreStagedBeforeAdmissionWhenDoubleWalletDebitRoundsAway()
+        {
+            var f = Dungeon(); Through(f, 0);
+            long arrival = f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value;
+            Assert.That(arrival % 10000, Is.Not.Zero, "This fixture must isolate recovery/admission from a passive tick");
+            Through(f, arrival - 1);
+            const double testLargeWallet = 1e20; // valid finite test input, not gameplay tuning
+            CombatC2Tests.SetState(f, 1, true, testLargeWallet);
+            var expected = f.Runtime.monsterContinuity.Copy();
+            double wallet = MonsterContinuity.Recover(expected, f.State, MonsterRecoveryRules.Capture(f.Configuration),
+                testLargeWallet, new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal));
+            Assert.That(wallet, Is.EqualTo(testLargeWallet), "IEEE double rounding hides this small existing-policy debit");
+            Assert.That(expected.Records.Single().Health, Is.GreaterThan(1));
+            Assert.That(expected.Records.Single().RevivalRequired, Is.False);
+            Through(f, arrival);
+            var e = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties.Single(),
+                Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized));
+            try {
+                var captured = e.Snapshot.MonsterStarts.Records.Single();
+                Assert.That(captured.Health, Is.EqualTo(expected.Records.Single().Health), "Admission must capture recovery before its boundary");
+                Assert.That(captured.RevivalRequired, Is.False);
+            } finally { e.Abandon(); }
+            Assert.That(f.Runtime.monsterContinuity.Records.Single().Health, Is.EqualTo(expected.Records.Single().Health));
+        }
+
         [Test] public void LiveFeedbackUsesCommittedCombatReceiptsAndLocalizedBypassReasons()
         {
             var table = JsonUtility.FromJson<StringTable>(File.ReadAllText("Assets/_Project/Data/Bootstrap/string_table_en.json"));

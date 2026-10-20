@@ -3,8 +3,8 @@ from pathlib import Path
 import sys
 
 variant = sys.argv.pop(1)
-if variant not in ('before', 'after'):
-    raise ValueError('Choose before or after; never reopen an older campaign')
+if variant not in ('before', 'after', 'final'):
+    raise ValueError('Choose an unused before, after or final campaign; never reopen an older campaign')
 if any(arg in ('build-smoke-fix', 'smoke-fix') for arg in sys.argv[1:]):
     raise ValueError('Historical smoke-fix outputs are not part of this campaign')
 profile_retry = 'build-profile-fix' in sys.argv or 'profile-retry' in sys.argv
@@ -24,6 +24,7 @@ source = source.replace("p=Path(row['path']);z.write(p,p.relative_to(ROOT/'TestR
 source = source.replace("IDENTITY_TEST=", "m.q.OUTPUT_TESTS.append('Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonForegroundSceneTests.cs')\nIDENTITY_TEST=")
 source = source.replace("'focused': 'LivingDungeonB3B2'", "'probe': 'TerminalSettlementPreservesTheCurrentSavedBoundary;LivingDungeonB3B2LiveLabelsSessionReplayAndLargeLayoutsObserveOnlyCommittedState', 'profile': 'ForegroundPerformanceSustainedProduction68Runs', 'readability': 'VisualRun;CombatC1;LivingDungeonB3B1;TimeService;SimulationClock', 'focused': 'LivingDungeonB3B2'")
 source = source.replace("('admit','settle','finish')", "('admit','settle','finish','profile')")
+source = source.replace("'probe':", "'recovery-probe': 'RecoveryConditionChangesAreStagedBeforeAdmissionWhenDoubleWalletDebitRoundsAway', 'probe':")
 source = source.replace("if phase!='admit'", "if phase not in ('admit','profile')")
 # This file owns a documented capture substitution, but its committed tests can
 # evolve during the campaign. Cleanup restores HEAD after archiving qualified
