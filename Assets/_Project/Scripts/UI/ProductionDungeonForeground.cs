@@ -24,6 +24,11 @@ namespace DungeonBuilder.M0
                 foregroundPresentedFloor = selectedFloor; foregroundLatest = latest;
                 var label = document.rootVisualElement.Q<Label>("foregroundActivity");
                 if (label != null) {
+                    // Normal play keeps activity visible below the scrolling HUD.
+                    // Editing retains the existing compact chrome arrangement.
+                    var scroll = (ScrollView)top;
+                    if (IsEditing && label.parent != scroll.contentContainer) scroll.Add(label);
+                    else if (!IsEditing && label.parent != safe) safe.Insert(safe.IndexOf(top) + 1, label);
                     label.style.display = view == null || observingReplay ? DisplayStyle.None : DisplayStyle.Flex;
                     if (view != null) {
                         label.text = view.RunId == null ? Text(view.StateKey) : Format("ui.living.active_format", view.RunId,
@@ -77,7 +82,20 @@ namespace DungeonBuilder.M0
             var placed = new Rect(Mathf.Clamp(point.x - width * .5f, 0, Mathf.Max(0, parent.contentRect.width - width)),
                 Mathf.Clamp(point.y - height - presentationPolicy.ReplayActorLabelOffset, 0, Mathf.Max(0, parent.contentRect.height - height)), width, height);
             var rail = document.rootVisualElement.Q("floorRail");
-            if (rail.resolvedStyle.display != DisplayStyle.None && placed.Overlaps(parent.WorldToLocal(rail.worldBound))) visible = false;
+            if (rail.resolvedStyle.display != DisplayStyle.None) {
+                var blocked = parent.WorldToLocal(rail.worldBound);
+                if (placed.Overlaps(blocked)) {
+                    float gap = presentationPolicy.ReplayActorLabelOffset;
+                    float leftWidth = Mathf.Max(0, blocked.xMin - gap), rightStart = Mathf.Min(parent.contentRect.width, blocked.xMax + gap);
+                    float rightWidth = Mathf.Max(0, parent.contentRect.width - rightStart);
+                    bool right = rightWidth >= leftWidth;
+                    width = Mathf.Min(width, right ? rightWidth : leftWidth);
+                    placed.width = width;
+                    placed.x = Mathf.Clamp(point.x - width * .5f, right ? rightStart : 0,
+                        right ? Mathf.Max(rightStart, parent.contentRect.width - width) : Mathf.Max(0, leftWidth - width));
+                    visible &= width > 0;
+                }
+            }
             foregroundPartyLabel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
             if (visible) {
                 foregroundPartyLabel.style.width = width; foregroundPartyLabel.style.left = placed.x; foregroundPartyLabel.style.top = placed.y;

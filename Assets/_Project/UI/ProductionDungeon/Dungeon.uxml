@@ -16,7 +16,7 @@
             </ui:VisualElement>
             </ui:VisualElement>
             <ui:Label name="manaReserve" class="reserve-information" />
-            <ui:Label name="foregroundActivity" class="reserve-information" />
+            <ui:Label name="foregroundActivity" class="reserve-information foreground-activity" />
         </ui:ScrollView>
         <ui:Label name="capacity" class="capacity-bar" />
         <ui:VisualElement name="workspace" class="workspace" picking-mode="Ignore">
