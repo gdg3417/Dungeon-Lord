@@ -134,6 +134,35 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.Save.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
             controller.SetTextSize(DungeonTextSize.Default);
         }
+
+        [UnityTest] public IEnumerator LivingDungeonB3B2ActiveIdleFramesDoNotReconstructSaveOrRebuildUi()
+        {
+            var root = GameRoot.Instance;
+            Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+            var floor = root.Save.validatedCanonicalSpatialState.Floors[0];
+            Assert.That(root.SaveService.ExecuteCanonicalMutation(root.Save, DetachedCanonicalMutationRequest.Place(
+                MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId,
+                floor.Layout.Rooms[0].RoomInstanceId, floor.FloorInstanceId, new TileCoordinate(1, 1))).IsSuccess, Is.True);
+            var advance = InstallForegroundBoundaryTestClock();
+            var update = (Action)Delegate.CreateDelegate(typeof(Action), root, typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.NonPublic | BindingFlags.Instance));
+            root.TimeService.SetForegroundFocus(true); update();
+            advance((root.Save.livingDungeon.Scheduler.NextOpportunityTime.Value - root.TimeService.SampleForeground()) / 1000d); update();
+            yield return null;
+            Assert.That(root.Save.livingDungeon.Parties.Count, Is.EqualTo(1));
+            var session = root.SaveService.CanonicalSession; var view = root.ForegroundActivity;
+            int render = controller.World.ReconstructionCount;
+            ForegroundQualificationMetrics.Reset(); ForegroundQualificationMetrics.Enabled = true;
+            try {
+                for (int frame = 0; frame < 120; frame++) { advance(.0001); update(); yield return null; }
+                foreach (var area in new[] { ForegroundQualificationMetrics.Area.Stage, ForegroundQualificationMetrics.Area.Restore,
+                    ForegroundQualificationMetrics.Area.Inspect, ForegroundQualificationMetrics.Area.AtomicWrite,
+                    ForegroundQualificationMetrics.Area.Publication, ForegroundQualificationMetrics.Area.Present, ForegroundQualificationMetrics.Area.WorldRender })
+                    Assert.That(ForegroundQualificationMetrics.Calls[(int)area], Is.Zero, area.ToString());
+            } finally { ForegroundQualificationMetrics.Enabled = false; }
+            Assert.That(root.SaveService.CanonicalSession, Is.SameAs(session));
+            Assert.That(root.ForegroundActivity, Is.SameAs(view));
+            Assert.That(controller.World.ReconstructionCount, Is.EqualTo(render));
+        }
     }
 }
 #endif

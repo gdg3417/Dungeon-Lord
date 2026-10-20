@@ -102,7 +102,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                 // positions against a different current layout.
                                 if (e.Snapshot.Floors.All(f => FloorKnowledgeApplicability.TryCompute(owned.State, owned.CorridorContent,
                                         limits.Canonical, f.FloorInstanceId, out string fingerprint) && fingerprint == f.KnowledgeFingerprint) &&
-                                    CanonicalMvpRouteProjectionService.TryFingerprint(owned.State, limits.Canonical, out string layout) &&
+                                    StructuralEditService.TryFingerprint(owned.State, limits.Canonical, out string layout) &&
                                     RunTransientEvidence.TryCorridorFingerprint(outcome, owned.CorridorContent, limits.Canonical, out string corridor)) {
                                     outcome.PresentationLayoutFingerprint = layout; outcome.PresentationCorridorFingerprint = corridor;
                                 }
