@@ -123,3 +123,11 @@ Research interacts with Mana, Loot, Reputation, and Raid systems.
 The system fails if progression becomes trivial or ignores mana pressure.
 
 System Spec 9 is locked.
+
+<!-- P8-00-2026-10-20 -->
+
+### Phase 8 owner-approved design precedence (2026-10-20; after merged PR #245)
+
+This is an **approved future Phase 8 design**, not a claim about current production research. Sections 3.1–3.3 and the historical one-global-slot requirement are superseded **for Phase 8 MVP** to the extent they reserve research mana throughout a timer, pause paid projects for lower later mana, or allow only one shared General/Blueprint project. The owner approved **two independent single-project tracks** (General and Blueprint); manual start; **one-time atomic upfront spend of usable mana**; offline timer progression; explicit once-only locally validated MVP completion/claim; no cancel/automatic queue; and no unlock/slot release before valid claim (D106–D109, D137–D140, D196). A public production release **after the offline-first MVP** requires genuine backend/online start and claim verification; locally checked state is not online verification. Actual timed/state/save design, gate bypass of legacy online-only restrictions and future server integration require reviewed contracts. Monsterology prerequisite gates may count *distinct researched predecessor-form classes* and authentic achievements (D157–D173, D182–D185, D201), rather than assume universal direct-parent class dependencies. No costs/durations/thresholds are set by this addendum.
+
+Current `PlayerResearchActionHandler` is a **single-slot, no-charge, no-offline-progress local-MVP scaffold**, not proof of Phase 8 paid dual tracks. Follow [the Phase 8 owner lock](../docs/planning/decisions/phase-8-owner-design-lock.md), research section; preserve current behavior until a separately tested PR activates it.

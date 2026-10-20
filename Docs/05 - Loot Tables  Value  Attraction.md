@@ -441,3 +441,9 @@ Each monster family yields a themed boss set.**
 - **Loot table UI simple but explicit**
 
 **All systems are forward compatible.**
+
+<!-- P8-00-2026-10-20 -->
+
+### Phase 8 owner-approved design precedence (2026-10-20; after merged PR #245)
+
+The historical **room-editable loot table**, ongoing reserve and per-room generation rules remain current only where implemented; they are **superseded as future Phase 8 loot-node design** by individually configured, researched, **automatically eligible** loot-node focus and authored Basic/Cache/Hoard reward pools (D54→D92, D97–D98, D123–D136). Future created item+rareness outcomes are selected only from eligible affordable candidates and **paid once at actual creation**, not continuously reserved. Each physically stocked item persists if ignored; actual collection depletes the node, and after that **floor is vacant**, eligible depleted nodes attempt deterministic paid refill in canonical floor/room/assignment order, after eligible monster and paid trap recovery. Unaffordable focus candidates temporarily fall back to Mixed without mutating saved focus; no affordable item leaves the node empty and eligible to retry (D189–D194). **Partial failed-extraction recovery (D195/D197)** is a narrow exceptional credit using the paid item's original mana cost, **not** world-value conversion or a general loot income source. Existing expected successfully extracted world value remains the attraction/Heat basis; item world value never directly produces mana. Prelaunch save and synthetic roll compatibility must be reviewed before replacement. See [Phase 8 owner lock](../docs/planning/decisions/phase-8-owner-design-lock.md).

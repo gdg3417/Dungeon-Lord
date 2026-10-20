@@ -63,3 +63,9 @@ Numbers and breakdowns should appear only when the player opts into a panel or a
 6.3 Change explanations
 
 For key metrics, provide short change explanations, such as last three causes for heat, without forcing the player to open deep panels.
+
+<!-- P8-00-2026-10-20 -->
+
+### Phase 8 owner-approved design precedence (2026-10-20; after merged PR #245)
+
+For future Phase 8 features, apply the existing text-size, comfortable touch-target and **noncolor-only status** contracts specifically to General/Blueprint timers and prerequisite errors, ranked floor ranks, active boss skill recipients/cooldowns, monster readiness, spent paid traps, Treasure Ward outcomes, and selected loot node **stocked / empty / waiting for mana**. The owner-approved D194 mana-starved halo must have an additional meaningful **shape/icon and inspectable localized text**, not only different color. Allow detailed evidence on demand while keeping watched-run reward popups concise (D141) and no compulsory per-run inventory recap. Test actual confusing/invalid states, font expansion, portrait/landscape/scroll and device touch; do not claim Windows-only large-text testing proves mobile accessibility. See [Phase 8 owner lock](../docs/planning/decisions/phase-8-owner-design-lock.md).

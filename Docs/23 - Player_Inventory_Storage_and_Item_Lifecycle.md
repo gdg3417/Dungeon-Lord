@@ -77,3 +77,9 @@ Players can craft specific items for export in later releases. Crafted exports i
 9\. Save Data Requirements
 
 Saves store: material counters, researched loot ids, sample token counts per loot id, loot table configurations per room instance, and any item improvement research states.
+
+<!-- P8-00-2026-10-20 -->
+
+### Phase 8 owner-approved design precedence (2026-10-20; after merged PR #245)
+
+For **future Phase 8**, distinguish three independent entities: (1) authentic **adventurer-origin discovery and analysis samples**; (2) a reusable player's placed **loot node** with persisted focus and current paid stock; and (3) its **generated item unit** with original creation-cost provenance and collected/extracted attribution (D90–D105, D120–D143, D189–D197). This does **not** create a second physical player inventory. The historical universal requirement that a discovered item be successfully extracted *and* an adventurer die before a sample is eligible is superseded where authentic approved **nonlethal** discovery permits samples at every MVP tier. First eligible discovery counts as the first sample; at most one per item+tier+party visit; retain samples through analysis, clearing redundant counts only after a valid claimed blueprint. Items ignored by the party stay stocked. Collected, unextracted *paid* item portions can return a configured partial fraction of their **original creation mana cost** once at eligible settlement; never restore them to a node, credit unpaid/extracted items, duplicate refund or use world sale value (D195, D197). Existing single wallet, snapshot, occupancy and provenance rules remain. The item-to-party extraction adapter, stored IDs, fractional rounding and schema/migration mapping are a future reviewed implementation gate; the old aggregate roll alone is not sufficient proof. See [Phase 8 owner lock](../docs/planning/decisions/phase-8-owner-design-lock.md).
