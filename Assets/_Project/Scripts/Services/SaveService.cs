@@ -230,7 +230,7 @@ namespace DungeonBuilder.M0
             _roomContentOccupancy = roomContentOccupancy;
             LivingDungeonProfile foregroundProfile = null;
             try {
-                var policy = LivingDungeonForegroundConfig.Load();
+                var policy = LivingDungeonForegroundConfig.LoadTwoFloor();
                 if (limits != null) foregroundProfile = policy.CreateProfile(limits.Canonical.ForSchema(13).Serialized);
                 ForegroundConfiguration = foregroundProfile == null ? null : policy;
             }
@@ -239,7 +239,8 @@ namespace DungeonBuilder.M0
                 legacyConfiguration == null || positionMigrationProfiles == null ||
                 roomContentOccupancy == null ? null : new DetachedCurrentTargetValidationContext(
                     compatibility, production, legacyConfiguration, limits.Canonical,
-                    roomContentOccupancy, livingDungeonProfiles: foregroundProfile == null ? null : new[] { foregroundProfile },
+                    roomContentOccupancy, livingDungeonProfiles: foregroundProfile == null ? null : new[] { foregroundProfile,
+                        LivingDungeonForegroundConfig.Load().CreateProfile(limits.Canonical.ForSchema(13).Serialized) },
                     monsterRecovery: MonsterRecoveryRules.Capture(legacyGameplayConfiguration));
         }
 

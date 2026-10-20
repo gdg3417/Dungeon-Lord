@@ -15,7 +15,7 @@ namespace DungeonBuilder.M0
         private float foregroundLabelFont;
         private void PresentForegroundActivity()
         {
-            var view = root?.ForegroundActivity;
+            var view = root?.ForegroundActivity?.ForFloor(selectedFloor);
             bool observingReplay = replay != null;
             var latest = root?.Save?.runHistory?.LatestOutcome;
             if (view != presentedForeground || IsEditing != foregroundWasEditing || observingReplay != foregroundWasReplay ||
@@ -34,6 +34,7 @@ namespace DungeonBuilder.M0
                         label.text = view.RunId == null ? Text(view.StateKey) : Format("ui.living.active_format", view.RunId,
                             view.Step?.FloorIndex + 1 ?? 1, Text("ui.living.pending." + (view.AnnouncedAction?.ToString() ?? "RoomEntry")));
                         label.enableRichText = false;
+                        if (view.Waiting) label.text = Text("ui.living.waiting") + "\n" + label.text;
                         if (view.RunId != null) {
                             label.text += "\n" + ProductionDungeonPresenter.ForegroundParty(view, Text, Culture);
                             string recent = ProductionDungeonPresenter.ForegroundInteraction(view, Text, ContentName, Culture);

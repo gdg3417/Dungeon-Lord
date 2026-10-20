@@ -206,8 +206,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var restored = CombatCheckpointCodec.RestoreSupported(p.Checkpoint, p.CheckpointIdentity, p.StartIdentity, p.NextOrdinal, profile.Checkpoints, retainPresentation);
             if (!restored.IsValid) throw new InvalidOperationException(restored.FailureReason);
             if (profile.Id == LivingDungeonForegroundConfig.ProfileId &&
-                (restored.Execution.Combat?.Kernel.RulesId != MonsterRecoveryRules.Executable ||
+                (restored.Execution.TransferContract || restored.Execution.Combat?.Kernel.RulesId != MonsterRecoveryRules.Executable ||
                  restored.Execution.Snapshot?.Floors.Count != 1 || restored.Execution.Snapshot.Floors[0].FloorIndex != 0 ||
+                 restored.Execution.Snapshot.PostureId != RunPostureResolver.BalancedId ||
+                 !restored.Execution.TimingMatches(profile.QualificationTiming)))
+            { restored.Execution.Abandon(); throw new InvalidOperationException("living.foreground.provenance_required"); }
+            if (profile.Id == LivingDungeonForegroundConfig.TwoFloorProfileId &&
+                (!restored.Execution.TransferContract || restored.Execution.Combat?.Kernel.RulesId != MonsterRecoveryRules.Executable ||
+                 restored.Execution.Snapshot.Floors.Count < 1 || restored.Execution.Snapshot.Floors.Count > 2 ||
+                 restored.Execution.Snapshot.Floors.Where((f, i) => f.FloorIndex != i).Any() ||
                  restored.Execution.Snapshot.PostureId != RunPostureResolver.BalancedId ||
                  !restored.Execution.TimingMatches(profile.QualificationTiming)))
             { restored.Execution.Abandon(); throw new InvalidOperationException("living.foreground.provenance_required"); }
@@ -236,6 +243,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (total > profile.MaximumTotalReplay) return false;
             }
             // Reject aggregate work before any reconstruction.
+            var occupancy = new Dictionary<string, int>(StringComparer.Ordinal);
+            var waiters = new List<(string destination, int blocker)>();
             foreach (var p in state.Parties)
             {
                 var e = Restore(p, profile);
@@ -248,11 +257,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         checked(p.AdmittedAt + e.AcceptedDeadline) > s.AcceptedThrough) return false;
                     var due = e.NextDueTime();
                     if (due.HasValue && checked(p.AdmittedAt + due.Value) <= s.ClosedThrough) return false;
+                    if (e.TransferContract) {
+                        if (occupancy.ContainsKey(e.OccupiedFloor)) return false;
+                        occupancy.Add(e.OccupiedFloor, p.Sequence);
+                        if (e.TransferWaiting) {
+                            if (e.TransferGate.BlockerSequence == p.Sequence) return false;
+                            waiters.Add((e.TransferGate.Destination, e.TransferGate.BlockerSequence));
+                        }
+                    }
                     if (!e.IsTerminal) active++;
                 }
                 finally { e.Abandon(); }
             }
-            return active <= profile.MaximumActive;
+            return active <= profile.MaximumActive && (!state.IsClosed || waiters.All(w =>
+                occupancy.TryGetValue(w.destination, out int blocker) && blocker == w.blocker));
         }
     }
 }

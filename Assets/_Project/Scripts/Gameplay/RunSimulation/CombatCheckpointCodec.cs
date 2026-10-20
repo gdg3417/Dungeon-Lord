@@ -74,6 +74,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 return Failed("run.checkpoint.byte_limit");
             var bytes = (byte[])source.Clone();
             int format = BitConverter.ToInt32(bytes, 0);
+            if (format == TransferCheckpointCodec.Format) return TransferCheckpointCodec.Restore(bytes, checkpointIdentity, startIdentity, expectedOrdinal, limits, retainPresentation);
             if (format == RunCheckpointCodec.Format) return RunCheckpointCodec.Restore(bytes, checkpointIdentity, startIdentity, expectedOrdinal, limits);
             if (format != Format) return Failed("run.checkpoint.unsupported_format");
             RunExecution candidate = null;
