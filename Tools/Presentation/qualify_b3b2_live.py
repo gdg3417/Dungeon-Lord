@@ -8,6 +8,9 @@ if variant not in ('before', 'after', 'final', 'marker'):
 if any(arg in ('build-smoke-fix', 'smoke-fix') for arg in sys.argv[1:]):
     raise ValueError('Historical smoke-fix outputs are not part of this campaign')
 profile_retry = 'build-profile-fix' in sys.argv or 'profile-retry' in sys.argv
+rendered = 'build-rendered' in sys.argv or 'rendered' in sys.argv
+if rendered and variant != 'marker': raise ValueError('Rendered visual qualification belongs to the marker campaign')
+sys.argv = [arg.replace('build-rendered', 'build') for arg in sys.argv if arg != 'rendered']
 sys.argv = [arg.replace('build-profile-fix', 'build').replace('profile-retry', 'profile') for arg in sys.argv]
 source_path = Path(__file__).with_name('qualify_b3b2.py')
 source = source_path.read_text(encoding='utf-8')
@@ -55,4 +58,18 @@ if profile_retry:
         "source=source.replace('Windows-living-dungeon-b3b2-20261019-live-before', 'Windows-living-dungeon-b3b2-20261019-live-before-profile-fix')\n" + loader)
     source = source.replace('IDENTITY_TEST=',
         "assert 'Builds/Development/Windows-living-dungeon-b3b2-20261019-live-before-profile-fix' in m.run.__code__.co_consts, 'Retry target was not isolated'\nIDENTITY_TEST=")
+if rendered:
+    # Batch mode has no usable screenshot backbuffer and ignores resizing.
+    # A requested visual smoke needs a rendered, non-activating player window.
+    source = source.replace('Windows-living-dungeon-b3b2-20261019-live-marker', 'Windows-living-dungeon-b3b2-20261019-live-marker-rendered')
+    source = source.replace('BuildLivingDungeonB3B2LiveMarkerWindows', 'BuildLivingDungeonB3B2LiveMarkerRenderedWindows')
+    source = source.replace("native='living-dungeon-b3b2-qualification-20261019-live-marker-native'", "native='living-dungeon-b3b2-qualification-20261019-live-marker-native-rendered'")
+    source = source.replace("'native-namespace'", "'native-rendered-namespace'")
+    source = source.replace("else 'native-'", "else 'native-rendered-'")
+    source = source.replace("'-batchmode',", '')
+    source = source.replace('startup.wShowWindow=subprocess.SW_HIDE', 'startup.wShowWindow=4')
+    loader = "exec(compile(source,m.__file__,'exec'),m.__dict__)"
+    if source.count(loader) != 1: raise ValueError('Nested adapter loader changed')
+    source = source.replace(loader,
+        "source=source.replace('Windows-living-dungeon-b3b2-20261019-live-marker', 'Windows-living-dungeon-b3b2-20261019-live-marker-rendered').replace('BuildLivingDungeonB3B2LiveMarkerWindows', 'BuildLivingDungeonB3B2LiveMarkerRenderedWindows')\n" + loader)
 exec(compile(source, str(source_path), 'exec'))

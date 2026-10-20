@@ -135,7 +135,10 @@ namespace DungeonBuilder.M0
         private IEnumerator QualifyForegroundMarkerVisuals(ProductionDungeonController controller, ForegroundSmokeReport report, Action<double> advance)
         {
             var args = Environment.GetCommandLineArgs(); int index = Array.IndexOf(args, "-b3b2ForegroundSmoke");
-            string directory = Path.GetDirectoryName(Path.GetFullPath(args[index + 2]));
+            string reportPath = Path.GetFullPath(args[index + 2]);
+            string directory = Path.Combine(Path.GetDirectoryName(reportPath), Path.GetFileNameWithoutExtension(reportPath) + "-visuals");
+            if (Directory.Exists(directory)) throw new InvalidOperationException("b3b2.visual.preserve_capture_directory");
+            Directory.CreateDirectory(directory);
             var camera = (Camera)typeof(ProductionDungeonController).GetField("worldCamera", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(controller);
             var document = controller.GetComponent<UIDocument>(); var ui = document.rootVisualElement;
             var start = controller.World.ForegroundPartyPosition; bool moving = false;
@@ -151,7 +154,7 @@ namespace DungeonBuilder.M0
                 Screen.SetResolution(size.x, size.y, FullScreenMode.Windowed);
                 for (int frame = 0; frame < 12; frame++) { TimeService.SetForegroundFocus(true); yield return null; }
                 if (Screen.width != size.x || Screen.height != size.y || !controller.World.ForegroundPartyVisible)
-                    throw new InvalidOperationException("b3b2.visual.layout_or_marker");
+                    throw new InvalidOperationException("b3b2.visual.layout_or_marker expected=" + size + " actual=" + Screen.width + "x" + Screen.height + " visible=" + controller.World.ForegroundPartyVisible);
                 canonical = SaveService.CanonicalSession.GetCurrentBytes();
                 var sprite = (SpriteRenderer)typeof(DungeonFloorWorldView).GetField("foregroundParty", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(controller.World);
                 var min = camera.WorldToScreenPoint(sprite.bounds.min); var max = camera.WorldToScreenPoint(sprite.bounds.max);
