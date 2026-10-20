@@ -8,9 +8,10 @@ if variant not in ('before', 'after', 'final', 'marker'):
 if any(arg in ('build-smoke-fix', 'smoke-fix') for arg in sys.argv[1:]):
     raise ValueError('Historical smoke-fix outputs are not part of this campaign')
 profile_retry = 'build-profile-fix' in sys.argv or 'profile-retry' in sys.argv
-rendered = 'build-rendered' in sys.argv or 'rendered' in sys.argv
+rendered_final = 'build-rendered-final' in sys.argv or 'rendered-final' in sys.argv
+rendered = rendered_final or 'build-rendered' in sys.argv or 'rendered' in sys.argv
 if rendered and variant != 'marker': raise ValueError('Rendered visual qualification belongs to the marker campaign')
-sys.argv = [arg.replace('build-rendered', 'build') for arg in sys.argv if arg != 'rendered']
+sys.argv = [arg.replace('build-rendered-final', 'build').replace('build-rendered', 'build') for arg in sys.argv if arg not in ('rendered', 'rendered-final')]
 sys.argv = [arg.replace('build-profile-fix', 'build').replace('profile-retry', 'profile') for arg in sys.argv]
 source_path = Path(__file__).with_name('qualify_b3b2.py')
 source = source_path.read_text(encoding='utf-8')
@@ -92,4 +93,7 @@ if rendered:
     if source.count(loader) != 1: raise ValueError('Nested adapter loader changed')
     source = source.replace(loader,
         "source=source.replace('Windows-living-dungeon-b3b2-20261019-live-marker', 'Windows-living-dungeon-b3b2-20261019-live-marker-rendered').replace('BuildLivingDungeonB3B2LiveMarkerWindows', 'BuildLivingDungeonB3B2LiveMarkerRenderedWindows')\n" + loader)
+if rendered_final:
+    source = source.replace('marker-rendered', 'marker-rendered-final').replace('MarkerRenderedWindows', 'MarkerRenderedFinalWindows')
+    source = source.replace('native-rendered-', 'native-rendered-final-').replace("native-rendered'", "native-rendered-final'")
 exec(compile(source, str(source_path), 'exec'))

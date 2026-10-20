@@ -18,6 +18,7 @@ namespace DungeonBuilder.M0
             public string Phase, Product, SavePath, RunId, CheckpointIdentity, PendingGeometry, Failure;
             public long Accepted, Closed, Ordinal, HistoryCount, RealSourceUnits;
             public int VisualChecks, VisualLabelsShown, VisualLabelsHidden;
+            public int VisualRequestedLayoutsUnavailable;
             public string VisualBounds;
         }
         // Opt-in development qualification only. Real Bootstrap/UI/native writer;
@@ -153,7 +154,15 @@ namespace DungeonBuilder.M0
             foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(720, 1280), new Vector2Int(360, 640) }) {
                 Screen.SetResolution(size.x, size.y, FullScreenMode.Windowed);
                 for (int frame = 0; frame < 12; frame++) { TimeService.SetForegroundFocus(true); yield return null; }
-                if (Screen.width != size.x || Screen.height != size.y || !controller.World.ForegroundPartyVisible)
+                if (Screen.width != size.x || Screen.height != size.y) {
+                    // Windowed players cannot exceed the physical monitor's
+                    // height. Record actual coverage; Editor Game View tests
+                    // separately qualify the exact requested portrait layout.
+                    if (Screen.width != size.x || size.y <= Screen.currentResolution.height || Screen.height != Screen.currentResolution.height)
+                        throw new InvalidOperationException("b3b2.visual.unexpected_resolution expected=" + size + " actual=" + Screen.width + "x" + Screen.height);
+                    report.VisualRequestedLayoutsUnavailable++;
+                }
+                if (!controller.World.ForegroundPartyVisible)
                     throw new InvalidOperationException("b3b2.visual.layout_or_marker expected=" + size + " actual=" + Screen.width + "x" + Screen.height + " visible=" + controller.World.ForegroundPartyVisible);
                 canonical = SaveService.CanonicalSession.GetCurrentBytes();
                 var sprite = (SpriteRenderer)typeof(DungeonFloorWorldView).GetField("foregroundParty", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(controller.World);
@@ -171,10 +180,10 @@ namespace DungeonBuilder.M0
                         throw new InvalidOperationException("b3b2.visual.label_overlap");
                     report.VisualLabelsShown++;
                 } else report.VisualLabelsHidden++;
-                report.VisualBounds += size + " icon=" + icon + " label=" + label.worldBound + " display=" + label.resolvedStyle.display + " position=" + controller.World.ForegroundPartyPosition + "\n";
+                report.VisualBounds += "requested=" + size + " actual=" + Screen.width + "x" + Screen.height + " icon=" + icon + " label=" + label.worldBound + " display=" + label.resolvedStyle.display + " position=" + controller.World.ForegroundPartyPosition + "\n";
                 if (string.IsNullOrEmpty(ui.Q<Label>("foregroundActivity").text) || !canonical.SequenceEqual(SaveService.CanonicalSession.GetCurrentBytes()))
                     throw new InvalidOperationException("b3b2.visual.canonical_or_identification");
-                string path = Path.Combine(directory, "native-marker-moving-large-" + size.x + "x" + size.y + ".png");
+                string path = Path.Combine(directory, "native-marker-moving-large-" + Screen.width + "x" + Screen.height + ".png");
                 if (File.Exists(path)) throw new InvalidOperationException("b3b2.visual.preserve_capture");
                 ScreenCapture.CaptureScreenshot(path);
                 for (int frame = 0; frame < 60 && !File.Exists(path); frame++) yield return null;
