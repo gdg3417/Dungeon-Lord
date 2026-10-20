@@ -125,6 +125,23 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.World.ForegroundPartyVisible, Is.False);
             root.TimeService.SetForegroundFocus(true); yield return null;
             Assert.That(controller.World.ForegroundPartyVisible, Is.True);
+            for (int boundary = 0; boundary < 20 && root.ForegroundActivity.RecentInteraction?.Kind != RunStepKind.MonsterEngagement; boundary++) {
+                advance(Math.Max(0, root.ForegroundActivity.NextBoundary - root.TimeService.SampleForeground()) / 1000d);
+                update(); yield return null;
+            }
+            Assert.That(root.ForegroundActivity.RecentInteraction?.Kind, Is.EqualTo(RunStepKind.MonsterEngagement));
+            Assert.That(ui.Q<Label>("foregroundActivity").text, Does.Contain("attacks").Or.Contain("bypassed"));
+            canonical = root.SaveService.CanonicalSession.GetCurrentBytes();
+            foreach (var size in new[] { new Vector2Int(720, 1280), new Vector2Int(1280, 720), new Vector2Int(360, 640) }) {
+                EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
+                for (int frame = 0; frame < 8; frame++) { root.TimeService.SetForegroundFocus(true); yield return null; }
+                var activity = ui.Q<Label>("foregroundActivity"); var map = ui.Q("mapArea");
+                Assert.That(activity.worldBound.yMax, Is.LessThanOrEqualTo(map.worldBound.yMin + 1), "Feedback must not cover the map");
+                Assert.That(map.worldBound.Contains(ui.Q("foregroundPartyLabel").worldBound.center), Is.True);
+                Assert.That(ui.worldBound.Contains(ui.Q("sessionActions").worldBound.center), Is.True, "Keep the ordinary actions onscreen");
+                yield return RoomContentCapture("living-live-encounter-large-" + size.x + "x" + size.y + ".png");
+            }
+            CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
             var profile = root.SaveService.ForegroundConfiguration.CreateProfile(root.SaveSpatialMigrationLimits.Canonical.ForSchema(13).Serialized);
             var execution = LivingDungeonContracts.Restore(root.Save.livingDungeon.Parties.Single(), profile);
             long finish;
