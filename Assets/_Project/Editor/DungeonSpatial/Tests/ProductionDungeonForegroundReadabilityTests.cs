@@ -41,12 +41,14 @@ namespace DungeonBuilder.M0.Tests
             var before = ForegroundDisplay(entry); var after = ForegroundDisplay(entry, movement);
             world.PresentForeground(before, true, 100); world.PresentForeground(before, false, 100);
             var from = world.ForegroundPartyPosition;
+            Assert.That(DungeonRunReplay.TryProject(movement.Position, movement.PositionSpace, movement.RoomId,
+                root.Save.validatedCanonicalSpatialState.Floors[0], root.ProductionSpatialContent.Catalog, out var destination), Is.True);
             world.PresentForeground(after, false, 1100);
             Assert.That(world.ForegroundPartyPosition, Is.EqualTo(from));
             world.PresentForeground(after, false, 1600);
-            Assert.That(world.ForegroundPartyPosition, Is.EqualTo(from + Vector2.right * .5f));
+            Assert.That(world.ForegroundPartyPosition, Is.EqualTo(Vector2.Lerp(from, destination, .5f)));
             world.PresentForeground(after, false, 2100);
-            Assert.That(world.ForegroundPartyPosition, Is.EqualTo(from + Vector2.right));
+            Assert.That(world.ForegroundPartyPosition, Is.EqualTo(destination));
             for (int frame = 0; frame < 120; frame++) world.PresentForeground(after, false, 2100);
             Assert.That(root.Save, Is.SameAs(save));
             CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
