@@ -29,6 +29,8 @@ namespace DungeonBuilder.M0.Tests.PlayMode
                 "SharedMonotonicClockPreservesWholeUnitsAcrossPartitionFocusPauseAndRestart",
                 "DevelopmentReopenClockIsOptInAndPreservesRestoredHorizon",
                 "PresentationObserverCannotChangeCheckpointBytesWorkReceiptsOrOutcome",
+                "LiveFeedbackUsesCommittedCombatReceiptsAndLocalizedBypassReasons",
+                "LiveFeedbackExplainsRecordedTrapCasualtyAndCarriedLoot",
                 "AutomaticSettlementRetainsSessionReplayWithoutChangingHistoricalSaveContract",
                 "TerminalSettlementPreservesTheCurrentSavedBoundary" })
                 Assert.DoesNotThrow(() => type.GetMethod(method).Invoke(suite, null));

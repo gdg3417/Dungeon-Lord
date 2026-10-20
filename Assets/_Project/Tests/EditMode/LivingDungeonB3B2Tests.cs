@@ -15,6 +15,43 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public class LivingDungeonB3B2Tests
     {
         private static LivingDungeonForegroundConfig Policy => LivingDungeonForegroundConfig.Load();
+
+        [Test] public void LiveFeedbackUsesCommittedCombatReceiptsAndLocalizedBypassReasons()
+        {
+            var table = JsonUtility.FromJson<StringTable>(File.ReadAllText("Assets/_Project/Data/Bootstrap/string_table_en.json"));
+            var text = table.entries.ToDictionary(e => e.key, e => e.text, StringComparer.Ordinal);
+            var view = new LivingDungeonForegroundInspection { RunId = "run-1", InteractionOption = "test.goblin" };
+            // Presentation-only receipts: two adventurer attacks, then two monster
+            // attacks against one member. Monster HP loss is not party HP loss.
+            CombatC0Event Hit(int ordinal, string target, int before, int after) => new CombatC0Event("run-1", "test.encounter",
+                ordinal, ordinal, 1, "test.floor", "test.room", CombatC0EventKind.Attack, CombatC0Reason.Legal,
+                target: target, before: before, after: after);
+            view.InteractionCombat = Array.AsReadOnly(new[] { Hit(0, "test.monster", 20, 10), Hit(1, "test.monster", 10, 0),
+                Hit(2, "run-1/member/0", 8, 5), Hit(3, "run-1/member/0", 5, 0) });
+            string Feedback() => ProductionDungeonPresenter.ForegroundInteraction(view, k => text[k], _ => "Test goblin",
+                System.Globalization.CultureInfo.InvariantCulture);
+            Assert.That(Feedback(), Is.Empty, "A pending interaction cannot announce its result");
+            view.RecentInteraction = new RunStep(RunStepKind.MonsterEngagement, 0, "test.room");
+            Assert.That(Feedback(), Is.EqualTo("Test goblin: 4 attacks · 8 party HP lost · 1 fallen"));
+            view.InteractionCombat = Array.AsReadOnly(new[] { new CombatC0Event("run-1", "test.encounter", 0, 0, 1,
+                "test.floor", "test.room", CombatC0EventKind.Bypass, CombatC0Reason.RoundLimit) });
+            Assert.That(Feedback(), Does.Contain(text["combat.c0.reason.RoundLimit"]).And.Contain("bypassed"));
+            Assert.That(Feedback(), Does.Not.Contain("attacks"));
+        }
+
+        [Test] public void LiveFeedbackExplainsRecordedTrapCasualtyAndCarriedLoot()
+        {
+            var table = JsonUtility.FromJson<StringTable>(File.ReadAllText("Assets/_Project/Data/Bootstrap/string_table_en.json"));
+            string Text(string key) => table.entries.Single(e => e.key == key).text;
+            var view = new LivingDungeonForegroundInspection { RunId = "run-1", InteractionOption = "test.trap",
+                RecentInteraction = new RunStep(RunStepKind.TrapTrigger, 0, "test.room",
+                    encounter: new RunEncounterEvent { HealthBefore = 5, HealthAfter = 0 }) };
+            string Feedback() => ProductionDungeonPresenter.ForegroundInteraction(view, Text, _ => "Test trap",
+                System.Globalization.CultureInfo.InvariantCulture);
+            Assert.That(Feedback(), Is.EqualTo("Test trap: 5 party HP lost. " + Text("ui.living.casualty")));
+            view.RecentInteraction = new RunStep(RunStepKind.LootInteraction, 0, "test.room", carriedLootValue: 17);
+            Assert.That(Feedback(), Is.EqualTo("Loot reached · Carried value 17"));
+        }
         private static Fixture Dungeon()
         {
             var f = Fixture.Create(null); f.Configuration = CombatC0IntegrationTests.Config();
