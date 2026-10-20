@@ -14,7 +14,7 @@ namespace DungeonBuilder.M0.Tests
 {
     public abstract partial class PhaseSevenA4ProductionSceneTests
     {
-        [UnityTest] public IEnumerator ForegroundPerformanceSustainedProduction68Runs()
+        [UnityTest, Timeout(1800000)] public IEnumerator ForegroundPerformanceSustainedProduction68Runs()
         {
             var root = GameRoot.Instance;
             foreach (var assignment in root.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.ToArray())
