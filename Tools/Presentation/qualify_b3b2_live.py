@@ -60,14 +60,16 @@ if profile_retry:
         "assert 'Builds/Development/Windows-living-dungeon-b3b2-20261019-live-before-profile-fix' in m.run.__code__.co_consts, 'Retry target was not isolated'\nIDENTITY_TEST=")
 if rendered:
     # Batch mode has no usable screenshot backbuffer and ignores resizing.
-    # A requested visual smoke needs a rendered, non-activating player window.
+    # The requested visual smoke needs a rendered foreground window because
+    # the unchanged production setting pauses unfocused players.
     source = source.replace('Windows-living-dungeon-b3b2-20261019-live-marker', 'Windows-living-dungeon-b3b2-20261019-live-marker-rendered')
     source = source.replace('BuildLivingDungeonB3B2LiveMarkerWindows', 'BuildLivingDungeonB3B2LiveMarkerRenderedWindows')
     source = source.replace("native='living-dungeon-b3b2-qualification-20261019-live-marker-native'", "native='living-dungeon-b3b2-qualification-20261019-live-marker-native-rendered'")
     source = source.replace("'native-namespace'", "'native-rendered-namespace'")
     source = source.replace("else 'native-'", "else 'native-rendered-'")
     source = source.replace("'-batchmode',", '')
-    source = source.replace('startup.wShowWindow=subprocess.SW_HIDE', 'startup.wShowWindow=4')
+    source = source.replace('startup.wShowWindow=subprocess.SW_HIDE', 'startup.wShowWindow=1')
+    source = source.replace("'-screen-width','1280'", "'-screen-fullscreen','0','-screen-width','1280'")
     loader = "exec(compile(source,m.__file__,'exec'),m.__dict__)"
     if source.count(loader) != 1: raise ValueError('Nested adapter loader changed')
     source = source.replace(loader,
