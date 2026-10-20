@@ -66,6 +66,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
 
                 if (owner.IsDormant) LivingDungeonScheduling.Activate(owner, profile, policy.MinimumArrival, runtime.runHistory);
+                if (policy.TwoFloor && profile.Id == LivingDungeonForegroundConfig.ProfileId && owner.IsClosed && owner.Parties.Count == 0) {
+                    var nextProfile = context.LivingDungeonProfiles.Single(p => p.Id == policy.Id);
+                    LivingDungeonScheduling.UpgradeProfile(owner, profile, nextProfile); profile = nextProfile;
+                }
                 bool previousHorizonClosed = owner.IsClosed;
                 if (!LivingDungeonScheduling.AllocatorValid(runtime.runHistory, owner, false) || observedThrough < owner.Scheduler.AcceptedThrough)
                     return Failure(invalid);

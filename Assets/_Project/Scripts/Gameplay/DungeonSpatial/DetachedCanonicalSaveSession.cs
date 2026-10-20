@@ -362,13 +362,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 DetachedCompleteSaveValidationResult validated =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
                 if (validated.IsValid && livingDungeon?.Scheduler?.ProfileId == LivingDungeonForegroundConfig.TwoFloorProfileId) {
-                    var prior = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, context);
+                    var releasePredecessor = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, context);
                     var profile = LivingDungeonContracts.Profile(livingDungeon, context.LivingDungeonProfiles);
                     foreach (var party in livingDungeon.Parties) {
                         var nextExecution = LivingDungeonContracts.Restore(party, profile);
                         try {
                             if (nextExecution.TransferGate?.ReleaseOrdinal >= 0) {
-                                var old = prior.LivingDungeon.Parties.SingleOrDefault(p => p.Sequence == party.Sequence);
+                                var old = releasePredecessor.LivingDungeon.Parties.SingleOrDefault(p => p.Sequence == party.Sequence);
                                 bool alreadyReleased = false;
                                 if (old != null) {
                                     var oldExecution = LivingDungeonContracts.Restore(old, profile);
