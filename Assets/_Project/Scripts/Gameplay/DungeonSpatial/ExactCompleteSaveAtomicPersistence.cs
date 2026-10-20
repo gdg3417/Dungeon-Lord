@@ -11,6 +11,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static string Persist(string activePath, ISpatialMigrationFileSystem fileSystem,
             byte[] original, byte[] candidate, int maximumEvidence, Func<byte[], bool> validateReadback = null)
         {
+            using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.AtomicWrite);
             if (string.IsNullOrEmpty(activePath) || original == null || candidate == null)
                 return DetachedCanonicalWriteAuthority.AtomicSaveFailedReason;
             string directory;

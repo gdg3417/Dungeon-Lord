@@ -14,6 +14,23 @@ namespace DungeonBuilder.M0.Tests
 {
     public abstract partial class PhaseSevenA4ProductionSceneTests
     {
+        [UnityTest] public IEnumerator ForegroundPerformanceSustainedProduction68Runs()
+        {
+            var root = GameRoot.Instance;
+            foreach (var assignment in root.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.ToArray())
+                Assert.That(root.SaveService.ExecuteCanonicalMutation(root.Save,
+                    DetachedCanonicalMutationRequest.Unassign(assignment.AssignmentId)).IsSuccess, Is.True);
+            var report = new GameRoot.ForegroundProfileReport();
+            var operation = root.ProfileForeground(report);
+            try { while (operation.MoveNext()) yield return operation.Current; }
+            finally {
+                string path = "TestResults/foreground-profile-" + Guid.NewGuid().ToString("N") + ".json";
+                using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write))
+                using (var writer = new StreamWriter(stream)) writer.Write(UnityEngine.JsonUtility.ToJson(report, true));
+                TestContext.WriteLine(path);
+            }
+            Assert.That(report.Passed, Is.True, report.Failure);
+        }
         private Action<double> InstallForegroundBoundaryTestClock(ITimeSource utc = null)
         {
             var root = GameRoot.Instance; double sample = 100;

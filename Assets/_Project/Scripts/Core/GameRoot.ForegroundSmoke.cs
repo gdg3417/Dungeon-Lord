@@ -147,21 +147,22 @@ namespace DungeonBuilder.M0
         private IEnumerator Start()
         {
             if (File.Exists(destination) || !Directory.Exists(Path.GetDirectoryName(destination)) ||
-                phase != "admit" && phase != "settle" && phase != "finish") { Application.Quit(2); yield break; }
+                phase != "admit" && phase != "settle" && phase != "finish" && phase != "profile") { Application.Quit(2); yield break; }
             for (int frame = 0; frame < 600 && GameRoot.Instance?.TimeService?.HasForegroundClock != true; frame++) yield return null;
             var report = new GameRoot.ForegroundSmokeReport { Phase = phase };
-            IEnumerator test = GameRoot.Instance?.QualifyForeground(phase, report, previous);
+            var profile = phase == "profile" ? new GameRoot.ForegroundProfileReport() : null;
+            IEnumerator test = profile != null ? GameRoot.Instance?.ProfileForeground(profile) : GameRoot.Instance?.QualifyForeground(phase, report, previous);
             while (test != null) {
                 object next = null; bool more = false;
                 try { more = test.MoveNext(); if (more) next = test.Current; }
-                catch (Exception error) { report.Failure = error.ToString(); Debug.LogException(error); break; }
+                catch (Exception error) { report.Failure = error.ToString(); if (profile != null) profile.Failure = error.ToString(); Debug.LogException(error); break; }
                 if (!more) break;
                 yield return next;
             }
             if (test == null) report.Failure = "b3b2.smoke.boot_failed";
             using (var stream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write))
-            using (var writer = new StreamWriter(stream)) writer.Write(JsonUtility.ToJson(report, true));
-            Application.Quit(report.Passed ? 0 : 1); // normal lifecycle saves finish synchronously
+            using (var writer = new StreamWriter(stream)) writer.Write(profile != null ? JsonUtility.ToJson(profile, true) : JsonUtility.ToJson(report, true));
+            Application.Quit((profile?.Passed ?? report.Passed) ? 0 : 1); // normal lifecycle saves finish synchronously
         }
     }
 }

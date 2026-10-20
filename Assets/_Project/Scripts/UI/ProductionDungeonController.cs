@@ -364,6 +364,7 @@ namespace DungeonBuilder.M0
         }
         private void CanonicalPublished(SaveData save)
         {
+            using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Publication);
             if (!HasCanonicalRuntime()) return;
             floorPreviewSession = null;
             if (!IsEditing && draftContext.Fingerprint(renderState) != draftContext.Fingerprint(save.validatedCanonicalSpatialState))
@@ -410,6 +411,7 @@ namespace DungeonBuilder.M0
           selectedFloor = id; ClearConstructionSelection(); CloseSheet(); RebuildFloor(true); Present(); Layout(); }
         private void Present()
         {
+            using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Present);
             if (!initialized || !HasCanonicalRuntime()) return;
             var ui = document.rootVisualElement;
             PresentHud();

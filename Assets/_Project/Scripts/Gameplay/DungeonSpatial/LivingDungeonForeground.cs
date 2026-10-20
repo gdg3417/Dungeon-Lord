@@ -38,14 +38,23 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
                 void Stage(MonsterContinuityState monsters = null, DurableSettlementHistory history = null, bool knowledge = false)
                 {
+                    using var stageMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Stage);
+                    var prepareMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Prepare);
                     var prepared = working.PrepareForegroundReplacement(DetachedRecognizedSaveStateSnapshot.Capture(runtime, limits),
                         owned, owner, monsters ?? runtime.monsterContinuity,
                         knowledge ? runtime.sharedBranchKnowledge : null, knowledge ? runtime.sharedFloorKnowledge : null, history);
+                    prepareMeasurement.Dispose();
                     if (!prepared.IsSuccess) throw new InvalidOperationException(prepared.Reason);
+                    var openMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Open);
                     var next = DetachedCanonicalSaveSession.Open(prepared.Update.GetBytes(), context, limits);
+                    openMeasurement.Dispose();
                     if (!next.IsSuccess) throw new InvalidOperationException(next.Reason);
+                    var validateMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Validate);
                     working = next.Session; owned = ValidateSession(working);
+                    validateMeasurement.Dispose();
+                    var projectionMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Projection);
                     if (!CanonicalMvpRouteProjection.TryPublishValidated(owned, production, out var projection, out _)) throw new InvalidOperationException(invalid);
+                    projectionMeasurement.Dispose();
                     RunTransientEvidence.Retain(runtime, projection); runtime = projection; owner = owned.LivingDungeon;
                 }
 
@@ -170,6 +179,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                 // Same lifetime checkpoint assurance as B2, with no effects published.
                                 var probe = LivingDungeonContracts.Restore(newborn, profile);
                                 try {
+                                    using var probeMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.LifetimeProbe);
                                     while (!probe.IsTerminal) {
                                         if (probe.NextOrdinal >= profile.MaximumPartyReplay) throw new InvalidOperationException("run.checkpoint.replay_limit");
                                         probe.Advance(1, probe.NextOrdinal); probe.ExportCheckpoint(profile.Checkpoints);

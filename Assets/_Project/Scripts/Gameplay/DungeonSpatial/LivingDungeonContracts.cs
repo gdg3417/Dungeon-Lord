@@ -202,6 +202,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             profiles?.SingleOrDefault(p => p.Id == state.Scheduler?.ProfileId);
         internal static RunExecution Restore(LivingDungeonParty p, LivingDungeonProfile profile)
         {
+            using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Restore);
             var restored = CombatCheckpointCodec.RestoreSupported(p.Checkpoint, p.CheckpointIdentity, p.StartIdentity, p.NextOrdinal, profile.Checkpoints);
             if (!restored.IsValid) throw new InvalidOperationException(restored.FailureReason);
             if (profile.Id == LivingDungeonForegroundConfig.ProfileId &&

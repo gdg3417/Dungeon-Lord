@@ -54,6 +54,7 @@ namespace DungeonBuilder.M0
 
         internal LivingDungeonForegroundInspection InspectForeground(SaveData current, int tickSeconds)
         {
+            using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Inspect);
             if (current?.livingDungeon == null || ForegroundConfiguration == null) return null;
             var owner = current.livingDungeon;
             var view = new LivingDungeonForegroundInspection { StateKey = "ui.living.awaiting", NextBoundary = 0 };
