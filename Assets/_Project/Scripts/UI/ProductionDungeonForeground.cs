@@ -96,7 +96,9 @@ namespace DungeonBuilder.M0
             bool railVisible = rail.resolvedStyle.display != DisplayStyle.None;
             var blocked = parent.WorldToLocal(rail.worldBound);
             float width = Mathf.Min(Mathf.Ceil(foregroundLabelSize.x), presentationPolicy.ReplayPartyInfoWidth);
-            float height = Mathf.Ceil(foregroundLabelSize.y), gap = presentationPolicy.ReplayActorLabelOffset;
+            // UI Toolkit rounds the final box to physical pixels. Reserve one
+            // pixel so that rounding cannot consume the configured clear gap.
+            float height = Mathf.Ceil(foregroundLabelSize.y), gap = presentationPolicy.ReplayActorLabelOffset + 1f / document.panelSettings.scale;
             bool visible = pixels.Contains(new Vector2(screen.x, screen.y)) && width > 0 && height > 0 && width <= area.width && height <= area.height;
             bool found = false; Rect placed = default;
             // Bounded screen-space inspection only: four sides, with at most

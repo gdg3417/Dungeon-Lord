@@ -210,8 +210,8 @@ namespace DungeonBuilder.M0.Tests
                         var center = controller.World.transform.TransformPoint(controller.World.ForegroundPartyPosition);
                         camera.transform.position += new Vector3(center.x - desired.x, center.y - desired.y, 0);
                         present(); yield return null; present(); yield return null;
-                        AssertForegroundLabelClear(ui);
                         TestContext.WriteLine("Marker edge " + size + " zoom=" + factor + " at=" + target + " icon=" + ForegroundMarkerPanelRect(ui) + " label=" + ui.Q("foregroundPartyLabel").worldBound + " display=" + ui.Q("foregroundPartyLabel").resolvedStyle.display);
+                        AssertForegroundLabelClear(ui);
                         if (factor == 1f && target.x == .95f)
                             yield return RoomContentCapture("living-marker-edge-" + size.x + "x" + size.y + "-" + target.y + ".png");
                     }
