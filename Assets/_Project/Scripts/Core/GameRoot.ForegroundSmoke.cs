@@ -148,7 +148,7 @@ namespace DungeonBuilder.M0
                 if (root == null || !Application.productName.Contains("B3B2 Smoke")) { Application.Quit(2); return; }
                 var config = JsonUtility.FromJson<BuildConfig>(root.buildConfigJson.text);
                 if (!config.save.fileName.StartsWith("living-dungeon-b3b2-qualification-", StringComparison.Ordinal)) { Application.Quit(2); return; }
-                config.save.fileName = Path.GetFileNameWithoutExtension(config.save.fileName) + "-profile.json";
+                config.save.fileName = Path.GetFileNameWithoutExtension(config.save.fileName) + "-" + Path.GetFileNameWithoutExtension(probe.destination) + ".json";
                 if (File.Exists(Path.Combine(Application.persistentDataPath, config.save.fileName))) { Application.Quit(2); return; }
                 root.buildConfigJson = new TextAsset(JsonUtility.ToJson(config));
             }

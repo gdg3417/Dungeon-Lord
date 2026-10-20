@@ -60,7 +60,7 @@ namespace DungeonBuilder.M0
                 for (int frame = 0; frame < 40000; frame++) {
                     if (frame == 120) {
                         if (!TrySetQaManaFromDevPanel(true)) throw new InvalidOperationException("b3b2.profile.funding");
-                        if (Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length == 0 &&
+                        if ((Save.validatedCanonicalSpatialState.Floors.Length == 0 || Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length == 0) &&
                             !TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.RoomCategoryId,
                                 MvpDungeonPlacementIds.BasicRoomOptionId, out _, out _, out _)) throw new InvalidOperationException("b3b2.profile.room");
                         foreach (var item in new[] { (MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId),
