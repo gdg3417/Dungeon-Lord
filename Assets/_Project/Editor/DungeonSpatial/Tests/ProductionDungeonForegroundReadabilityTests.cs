@@ -15,6 +15,30 @@ namespace DungeonBuilder.M0.Tests
 {
     public abstract partial class PhaseSevenA4ProductionSceneTests
     {
+        private Rect ForegroundMarkerPanelRect(VisualElement ui)
+        {
+            var camera = (Camera)typeof(ProductionDungeonController).GetField("worldCamera", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(controller);
+            var sprite = (SpriteRenderer)typeof(DungeonFloorWorldView).GetField("foregroundParty", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(controller.World);
+            float scale = controller.GetComponent<UIDocument>().panelSettings.scale;
+            var min = camera.WorldToScreenPoint(sprite.bounds.min); var max = camera.WorldToScreenPoint(sprite.bounds.max);
+            return Rect.MinMaxRect(Mathf.Min(min.x, max.x) / scale, (Screen.height - Mathf.Max(min.y, max.y)) / scale,
+                Mathf.Max(min.x, max.x) / scale, (Screen.height - Mathf.Min(min.y, max.y)) / scale);
+        }
+        private void AssertForegroundLabelClear(VisualElement ui)
+        {
+            Assert.That(controller.World.ForegroundPartyVisible, Is.True, "A caption must never suppress the party icon");
+            var label = ui.Q<Label>("foregroundPartyLabel");
+            Assert.That(ui.Q<Label>("foregroundActivity").text, Does.Contain("Adventurers"));
+            if (label.resolvedStyle.display == DisplayStyle.None) return;
+            var icon = ForegroundMarkerPanelRect(ui);
+            var policy = (DungeonPresentationPolicy)typeof(ProductionDungeonController).GetField("presentationPolicy", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(controller);
+            float gap = policy.ReplayActorLabelOffset - .5f; // subpixel layout tolerance
+            icon = Rect.MinMaxRect(icon.xMin - gap, icon.yMin - gap, icon.xMax + gap, icon.yMax + gap);
+            Assert.That(label.worldBound.Overlaps(icon), Is.False, "The actual label box must clear the rendered diamond plus its separation");
+            Assert.That(ui.Q("mapArea").worldBound.Contains(label.worldBound.min), Is.True);
+            Assert.That(ui.Q("mapArea").worldBound.Contains(label.worldBound.max), Is.True);
+            Assert.That(label.worldBound.Overlaps(ui.Q("floorRail").worldBound), Is.False);
+        }
         // Display-only fake data against the existing rendered test room. It is
         // never installed in the canonical owner or passed to a simulation.
         private LivingDungeonForegroundInspection ForegroundDisplay(params RunStep[] steps)
@@ -116,10 +140,9 @@ namespace DungeonBuilder.M0.Tests
                     " label=" + marker.resolvedStyle.display + " bounds=" + marker.worldBound +
                     " map=" + ui.Q("mapArea").worldBound + " rail=" + ui.Q("floorRail").worldBound + " clock=" + root.TimeService.ForegroundPresentationActive);
                 yield return RoomContentCapture("living-live-large-" + size.x + "x" + size.y + ".png");
-                Assert.That(marker.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
-                Assert.That(marker.worldBound.width, Is.GreaterThan(0));
-                Assert.That(ui.Q("mapArea").worldBound.Contains(marker.worldBound.center), Is.True);
+                AssertForegroundLabelClear(ui);
             }
+            yield return ForegroundMarkerBoundaryLayouts(ui);
             CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
             root.TimeService.SetForegroundFocus(false); yield return null;
             Assert.That(controller.World.ForegroundPartyVisible, Is.False);
@@ -137,7 +160,7 @@ namespace DungeonBuilder.M0.Tests
                 for (int frame = 0; frame < 8; frame++) { root.TimeService.SetForegroundFocus(true); yield return null; }
                 var activity = ui.Q<Label>("foregroundActivity"); var map = ui.Q("mapArea");
                 Assert.That(activity.worldBound.yMax, Is.LessThanOrEqualTo(map.worldBound.yMin + 1), "Feedback must not cover the map");
-                Assert.That(map.worldBound.Contains(ui.Q("foregroundPartyLabel").worldBound.center), Is.True);
+                AssertForegroundLabelClear(ui);
                 Assert.That(ui.worldBound.Contains(ui.Q("sessionActions").worldBound.center), Is.True, "Keep the ordinary actions onscreen");
                 yield return RoomContentCapture("living-live-encounter-large-" + size.x + "x" + size.y + ".png");
             }
@@ -150,12 +173,56 @@ namespace DungeonBuilder.M0.Tests
             advance((finish - root.TimeService.SampleForeground()) / 1000d); update(); yield return null;
             Assert.That(root.Save.runHistory.LatestOutcome.RunId, Is.EqualTo("run-1"));
             Assert.That(ui.Q<Label>("foregroundActivity").text, Does.Contain("survived").And.Contain("loot"));
+            Assert.That(ui.Q<Label>("replayAvailability").text, Is.EqualTo("Completed run available for replay in this session."));
             Assert.That(controller.StartReplay(), Is.True, "A just-completed compatible automatic run must retain its authoritative session evidence");
+            yield return null;
+            var liveSprite = (SpriteRenderer)typeof(DungeonFloorWorldView).GetField("foregroundParty", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(controller.World);
+            var replaySprite = (SpriteRenderer)typeof(DungeonFloorWorldView).GetField("replayParty", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(controller.World);
+            Assert.That(replaySprite.sprite, Is.SameAs(liveSprite.sprite), "Live and replay use the same party diamond artwork");
+            Assert.That(replaySprite.transform.localScale, Is.EqualTo(liveSprite.transform.localScale));
             canonical = root.SaveService.CanonicalSession.GetCurrentBytes();
             controller.Replay.Advance(10000); yield return null; controller.CloseReplay();
             CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
             Assert.That(root.Save.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
             controller.SetTextSize(DungeonTextSize.Default);
+        }
+
+        private IEnumerator ForegroundMarkerBoundaryLayouts(VisualElement ui)
+        {
+            var flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            var camera = (Camera)typeof(ProductionDungeonController).GetField("worldCamera", flags).GetValue(controller);
+            var present = (Action)Delegate.CreateDelegate(typeof(Action), controller,
+                typeof(ProductionDungeonController).GetMethod("PresentForegroundPartyLabel", flags));
+            foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(720, 1280), new Vector2Int(360, 640) }) {
+                EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
+                for (int frame = 0; frame < 8; frame++) { GameRoot.Instance.TimeService.SetForegroundFocus(true); yield return null; }
+                controller.enabled = false;
+                var position = camera.transform.position; float zoom = camera.orthographicSize;
+                try {
+                    foreach (float factor in new[] { .5f, 1f, 2f })
+                    foreach (var target in new[] { new Vector2(.05f, .05f), new Vector2(.95f, .05f), new Vector2(.05f, .95f), new Vector2(.95f, .95f), new Vector2(.5f, .5f) }) {
+                        camera.orthographicSize = zoom * factor;
+                        var desired = camera.ViewportToWorldPoint(new Vector3(target.x, target.y, -camera.transform.position.z));
+                        var center = controller.World.transform.TransformPoint(controller.World.ForegroundPartyPosition);
+                        camera.transform.position += new Vector3(center.x - desired.x, center.y - desired.y, 0);
+                        present(); yield return null; present(); yield return null;
+                        AssertForegroundLabelClear(ui);
+                        TestContext.WriteLine("Marker edge " + size + " zoom=" + factor + " at=" + target + " icon=" + ForegroundMarkerPanelRect(ui) + " label=" + ui.Q("foregroundPartyLabel").worldBound + " display=" + ui.Q("foregroundPartyLabel").resolvedStyle.display);
+                        if (factor == 1f && target.x == .95f)
+                            yield return RoomContentCapture("living-marker-edge-" + size.x + "x" + size.y + "-" + target.y + ".png");
+                    }
+                    var cached = typeof(ProductionDungeonController).GetField("foregroundLabelSize", flags);
+                    var measured = cached.GetValue(controller);
+                    cached.SetValue(controller, new Vector2(ui.Q("mapArea").contentRect.width + 1, ui.Q("mapArea").contentRect.height + 1));
+                    present(); yield return null;
+                    Assert.That(ui.Q("foregroundPartyLabel").resolvedStyle.display, Is.EqualTo(DisplayStyle.None), "No valid placement hides only the optional label");
+                    AssertForegroundLabelClear(ui);
+                    cached.SetValue(controller, measured);
+                } finally {
+                    camera.transform.position = position; camera.orthographicSize = zoom; controller.enabled = true;
+                }
+                yield return null;
+            }
         }
 
         [UnityTest] public IEnumerator LivingDungeonB3B2ActiveIdleFramesDoNotReconstructSaveOrRebuildUi()

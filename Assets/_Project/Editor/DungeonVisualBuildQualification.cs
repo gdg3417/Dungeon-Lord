@@ -75,6 +75,8 @@ namespace DungeonBuilder.M0.EditorTools
             => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-live-after/Dungeon Lord.exe");
         public static void BuildLivingDungeonB3B2LiveFinalWindows()
             => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-live-final/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2LiveMarkerWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-live-marker/Dungeon Lord.exe");
         private static void BuildWindowsAt(string outputPath)
         {
             DevelopmentBuildUtility.BuildDevelopment(BuildTarget.StandaloneWindows64, outputPath);

@@ -6,6 +6,7 @@ using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace DungeonBuilder.M0
 {
@@ -16,6 +17,7 @@ namespace DungeonBuilder.M0
             public bool Passed, MarkerVisible, ActiveEditCommitted, SecondRunUsesEditedGeometry;
             public string Phase, Product, SavePath, RunId, CheckpointIdentity, PendingGeometry, Failure;
             public long Accepted, Closed, Ordinal, HistoryCount, RealSourceUnits;
+            public int VisualChecks, VisualLabelsShown, VisualLabelsHidden;
         }
         // Opt-in development qualification only. Real Bootstrap/UI/native writer;
         // an injected technical clock accelerates the configured gameplay timings.
@@ -79,6 +81,12 @@ namespace DungeonBuilder.M0
                 yield return null;
                 if (controller?.World?.ForegroundPartyVisible == true) report.MarkerVisible = true;
                 if (phase == "admit" && Save.livingDungeon.Parties.Count == 1 && report.MarkerVisible) {
+                    if (Environment.GetCommandLineArgs().Contains("-b3b2MarkerVisuals")) {
+                        var visual = QualifyForegroundMarkerVisuals(controller, report, seconds => {
+                            sample += seconds; TimeService.SetForegroundFocus(true); UpdateForeground();
+                        });
+                        while (visual.MoveNext()) yield return visual.Current;
+                    }
                     var p = Save.livingDungeon.Parties.Single(); report.RunId = "run-" + p.Sequence;
                     controller.EnterEdit(); yield return null;
                     if (controller.World.ForegroundPartyVisible) throw new InvalidOperationException("b3b2.smoke.edit_marker");
@@ -119,6 +127,56 @@ namespace DungeonBuilder.M0
                 report.PendingGeometry = PendingGeometry();
             }
             report.Passed = true;
+        }
+
+        // Explicit isolated Development smoke only; observes the real admitted
+        // party and its production clock/renderer, never writes display fixtures.
+        private IEnumerator QualifyForegroundMarkerVisuals(ProductionDungeonController controller, ForegroundSmokeReport report, Action<double> advance)
+        {
+            var args = Environment.GetCommandLineArgs(); int index = Array.IndexOf(args, "-b3b2ForegroundSmoke");
+            string directory = Path.GetDirectoryName(Path.GetFullPath(args[index + 2]));
+            var camera = (Camera)typeof(ProductionDungeonController).GetField("worldCamera", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(controller);
+            var document = controller.GetComponent<UIDocument>(); var ui = document.rootVisualElement;
+            var start = controller.World.ForegroundPartyPosition; bool moving = false;
+            for (int boundary = 0; boundary < 80; boundary++) {
+                advance(.25); yield return null;
+                if (controller.World.ForegroundPartyVisible && controller.World.ForegroundPartyPosition != start &&
+                    ForegroundActivity?.PositionStep?.Kind == Gameplay.RunSimulation.RunStepKind.Movement) { moving = true; break; }
+            }
+            if (!moving) throw new InvalidOperationException("b3b2.visual.movement_missing");
+            controller.SetTextSize(DungeonTextSize.Large);
+            var canonical = SaveService.CanonicalSession.GetCurrentBytes();
+            foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(720, 1280), new Vector2Int(360, 640) }) {
+                Screen.SetResolution(size.x, size.y, FullScreenMode.Windowed);
+                for (int frame = 0; frame < 12; frame++) { TimeService.SetForegroundFocus(true); yield return null; }
+                if (Screen.width != size.x || Screen.height != size.y || !controller.World.ForegroundPartyVisible)
+                    throw new InvalidOperationException("b3b2.visual.layout_or_marker");
+                var sprite = (SpriteRenderer)typeof(DungeonFloorWorldView).GetField("foregroundParty", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(controller.World);
+                var min = camera.WorldToScreenPoint(sprite.bounds.min); var max = camera.WorldToScreenPoint(sprite.bounds.max);
+                float scale = document.panelSettings.scale;
+                var icon = Rect.MinMaxRect(Mathf.Min(min.x, max.x) / scale, (Screen.height - Mathf.Max(min.y, max.y)) / scale,
+                    Mathf.Max(min.x, max.x) / scale, (Screen.height - Mathf.Min(min.y, max.y)) / scale);
+                var label = ui.Q<Label>("foregroundPartyLabel"); var map = ui.Q("mapArea");
+                if (label.resolvedStyle.display != DisplayStyle.None) {
+                    if (label.worldBound.Overlaps(icon) || label.worldBound.Overlaps(ui.Q("floorRail").worldBound) ||
+                        !map.worldBound.Contains(label.worldBound.min) || !map.worldBound.Contains(label.worldBound.max))
+                        throw new InvalidOperationException("b3b2.visual.label_overlap");
+                    report.VisualLabelsShown++;
+                } else report.VisualLabelsHidden++;
+                if (string.IsNullOrEmpty(ui.Q<Label>("foregroundActivity").text) || !canonical.SequenceEqual(SaveService.CanonicalSession.GetCurrentBytes()))
+                    throw new InvalidOperationException("b3b2.visual.canonical_or_identification");
+                string path = Path.Combine(directory, "native-marker-moving-large-" + size.x + "x" + size.y + ".png");
+                if (File.Exists(path)) throw new InvalidOperationException("b3b2.visual.preserve_capture");
+                ScreenCapture.CaptureScreenshot(path);
+                for (int frame = 0; frame < 60 && !File.Exists(path); frame++) yield return null;
+                if (!File.Exists(path)) throw new InvalidOperationException("b3b2.visual.capture_missing");
+                report.VisualChecks++;
+                // A real advancing clock fraction, still before the next
+                // configured movement boundary. No display-generated events.
+                advance(.1); yield return null;
+                canonical = SaveService.CanonicalSession.GetCurrentBytes();
+            }
+            controller.SetTextSize(DungeonTextSize.Default);
         }
     }
     internal sealed class LivingDungeonForegroundDevelopmentSmoke : MonoBehaviour

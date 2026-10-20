@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 
 variant = sys.argv.pop(1)
-if variant not in ('before', 'after', 'final'):
+if variant not in ('before', 'after', 'final', 'marker'):
     raise ValueError('Choose an unused before, after or final campaign; never reopen an older campaign')
 if any(arg in ('build-smoke-fix', 'smoke-fix') for arg in sys.argv[1:]):
     raise ValueError('Historical smoke-fix outputs are not part of this campaign')
@@ -25,7 +25,20 @@ source = source.replace("IDENTITY_TEST=", "m.q.OUTPUT_TESTS.append('Assets/_Proj
 source = source.replace("'focused': 'LivingDungeonB3B2'", "'probe': 'TerminalSettlementPreservesTheCurrentSavedBoundary;LivingDungeonB3B2LiveLabelsSessionReplayAndLargeLayoutsObserveOnlyCommittedState', 'profile': 'ForegroundPerformanceSustainedProduction68Runs', 'readability': 'VisualRun;CombatC1;LivingDungeonB3B1;TimeService;SimulationClock', 'focused': 'LivingDungeonB3B2'")
 source = source.replace("('admit','settle','finish')", "('admit','settle','finish','profile')")
 source = source.replace("'probe':", "'recovery-probe': 'RecoveryConditionChangesAreStagedBeforeAdmissionWhenDoubleWalletDebitRoundsAway', 'probe':")
+source = source.replace("'focused':", "'marker-ui': 'LivingDungeonB3B2LiveLabels;LivingDungeonB3B2Marker;LivingDungeonB3B2RecordedAdjacent;LivingDungeonB3B2PresentationSnaps;LivingDungeonB3B2ActiveIdle;VisualRun;CombatC1;Localization', 'focused':")
 source = source.replace("if phase!='admit'", "if phase not in ('admit','profile')")
+if variant == 'marker':
+    source = source.replace('    import datetime', "    args += ['-b3b2MarkerVisuals']\n    import datetime")
+    # Resume only the already inventoried, interrupted preparation. Every
+    # original archive/manifest stays intact; normal preflight rechecks hashes.
+    source = source.replace("elif mode=='run':", """elif mode=='complete-preparation':
+    m.q.applicability('preparation-resumed')
+    with zipfile.ZipFile(m.q.OUT/'historical-evidence-preserved.zip','x',zipfile.ZIP_DEFLATED) as z:
+        for row in json.loads((m.q.OUT/'historical-evidence-before.json').read_text()):
+            p=Path(row['path'])
+            if p.suffix.lower() != '.zip': z.write(p,p.relative_to(ROOT/'TestResults').as_posix())
+    m.isolate_product()
+elif mode=='run':""")
 # This file owns a documented capture substitution, but its committed tests can
 # evolve during the campaign. Cleanup restores HEAD after archiving qualified
 # inputs instead of reverting those corrections to the initial archive version.
