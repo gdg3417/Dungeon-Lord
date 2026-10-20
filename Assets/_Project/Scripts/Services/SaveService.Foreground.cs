@@ -94,6 +94,9 @@ namespace DungeonBuilder.M0
                             e.Combat.Kernel.InspectMonsters().FirstOrDefault(m => m.AssignmentId == interaction.AssignmentId)?.OptionId;
                     }
                     view.Waiting = e.TransferWaiting;
+                    view.Descended = view.Steps.Any(s => s.Kind == RunStepKind.FloorTransfer && s.FloorIndex == floorIndex);
+                    view.Decision = view.Steps.Where(s => s.Kind == RunStepKind.FloorDecision && s.FloorIndex == floorIndex)
+                        .Select(s => s.ContinueChosen).LastOrDefault();
                     view.StateKey = view.Waiting ? "ui.living.waiting" : "ui.living.active";
                     var due = e.NextDueTime();
                     if (due.HasValue) nextBoundary = Math.Min(nextBoundary, checked(p.AdmittedAt + due.Value));
@@ -112,9 +115,12 @@ namespace DungeonBuilder.M0
     public sealed class LivingDungeonForegroundInspection
     {
         public bool Waiting { get; internal set; }
+        public bool Descended { get; internal set; }
+        public bool? Decision { get; internal set; }
+        private LivingDungeonForegroundInspection vacant;
         public System.Collections.Generic.IReadOnlyList<LivingDungeonForegroundInspection> Parties { get; internal set; } = Array.Empty<LivingDungeonForegroundInspection>();
         public LivingDungeonForegroundInspection ForFloor(string floor) => Parties.Count == 0 ? this :
-            Parties.SingleOrDefault(p => p.FloorId == floor) ?? new LivingDungeonForegroundInspection { StateKey = "ui.living.awaiting" };
+            Parties.SingleOrDefault(p => p.FloorId == floor) ?? (vacant ??= new LivingDungeonForegroundInspection { StateKey = "ui.living.awaiting" });
         public string StateKey { get; internal set; }
         public string RunId { get; internal set; }
         public string FloorId { get; internal set; }

@@ -119,7 +119,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             if (e.IsTerminal) {
                                 // Pin the actual unconsumed terminal in the exact private
                                 // lineage before authorizing settlement and its vacancy.
-                                Stage(); var terminalPredecessor = owned;
+                                Stage(); var terminalPredecessor = ValidateSession(working);
                                 var outcome = e.TakeOutcome();
                                 // Bind session-only C1 observation to compatible
                                 // captured inputs. An edit never authenticates old

@@ -33,6 +33,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             // Fixed-width control integers and captured floor IDs make the released
             // gate's encoded size independent of wait duration or blocker identity.
             var cp = e.ExportCheckpoint(profile.Checkpoints);
+            if (!e.TransferContract) return; // retain the historical admission-probe workload
             var restored = CombatCheckpointCodec.RestoreSupported(cp.GetBytes(), cp.Identity, cp.StartIdentity, cp.NextOrdinal, profile.Checkpoints);
             if (!restored.IsValid) throw new InvalidOperationException(restored.FailureReason);
             restored.Execution.Abandon();
