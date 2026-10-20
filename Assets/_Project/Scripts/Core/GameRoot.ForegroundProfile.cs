@@ -18,13 +18,13 @@ namespace DungeonBuilder.M0
         {
             public int Frame, Sequence, Collections;
             public string Category;
-            public long Ordinal, Allocated, ManagedBytes, NativeBytes, MainThreadNanoseconds;
+            public long Ordinal, Allocated, ManagedBytes, NativeBytes, MainThreadNanoseconds, FrameAllocatedBytes;
             public double UpdateMs, FrameMs;
             public long[] Calls, Ticks, Bytes;
         }
         [Serializable] internal sealed class ForegroundProfileReport
         {
-            public bool Passed;
+            public bool Passed, ThreadAllocationCounterAvailable, FrameAllocationCounterAvailable;
             public string Failure, Product, SavePath;
             public int CompletedRuns;
             public long StopwatchFrequency;
@@ -47,6 +47,12 @@ namespace DungeonBuilder.M0
             TimeService.BeginForeground(SaveService.ForegroundConfiguration.UnitsPerSecond, Save.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
             foregroundApplicationFocused = true; foregroundApplicationPaused = false; foregroundDirty = true;
             using var mainThread = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "Main Thread", 1);
+            using var frameAllocations = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocated In Frame", 1);
+            long allocationBefore = GC.GetAllocatedBytesForCurrentThread();
+            var calibration = new byte[1024];
+            report.ThreadAllocationCounterAvailable = GC.GetAllocatedBytesForCurrentThread() > allocationBefore;
+            GC.KeepAlive(calibration);
+            report.FrameAllocationCounterAvailable = frameAllocations.Valid;
             int baselineSequence = Save.runHistory.NextRunSequence;
             int originalGc = GC.CollectionCount(0);
             ForegroundQualificationMetrics.Enabled = true;
@@ -85,6 +91,7 @@ namespace DungeonBuilder.M0
                         UpdateMs = elapsed, FrameMs = Time.unscaledDeltaTime * 1000d, Allocated = allocated,
                         ManagedBytes = Profiler.GetMonoUsedSizeLong(), NativeBytes = Profiler.GetTotalAllocatedMemoryLong(),
                         MainThreadNanoseconds = mainThread.Valid ? mainThread.LastValue : -1,
+                        FrameAllocatedBytes = frameAllocations.Valid ? frameAllocations.LastValue : -1,
                         Collections = GC.CollectionCount(0) - originalGc, Calls = (long[])ForegroundQualificationMetrics.Calls.Clone(),
                         Ticks = (long[])ForegroundQualificationMetrics.Ticks.Clone(), Bytes = (long[])ForegroundQualificationMetrics.Allocated.Clone() });
                     if (Save.runHistory.LatestOutcome?.RunId == "run-" + (baselineSequence + 67)) {

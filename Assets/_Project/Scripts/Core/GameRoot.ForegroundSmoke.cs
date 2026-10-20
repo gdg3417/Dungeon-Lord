@@ -126,7 +126,7 @@ namespace DungeonBuilder.M0
         internal static Func<double> ReopenClock(string[] args, string product, string savePath)
         {
             int index = Array.IndexOf(args, "-b3b2ForegroundSmoke");
-            if (index < 0 || index + 1 >= args.Length || args[index + 1] != "settle" && args[index + 1] != "finish" ||
+            if (index < 0 || index + 1 >= args.Length || args[index + 1] != "settle" && args[index + 1] != "finish" && args[index + 1] != "profile" ||
                 product == null || !product.Contains("B3B2 Smoke") || string.IsNullOrEmpty(savePath) ||
                 !Path.GetFileName(savePath).StartsWith("living-dungeon-b3b2-qualification-", StringComparison.Ordinal)) return null;
             // Qualification-only epoch: inspect the exact loaded prefix before
@@ -143,6 +143,15 @@ namespace DungeonBuilder.M0
             if (index + 3 >= args.Length) { Application.Quit(2); return; }
             var probe = new GameObject("B3B2ForegroundQualification").AddComponent<LivingDungeonForegroundDevelopmentSmoke>();
             DontDestroyOnLoad(probe.gameObject); probe.phase = args[index + 1]; probe.destination = Path.GetFullPath(args[index + 2]); probe.previous = args[index + 3];
+            if (probe.phase == "profile") {
+                var root = GameRoot.Instance;
+                if (root == null || !Application.productName.Contains("B3B2 Smoke")) { Application.Quit(2); return; }
+                var config = JsonUtility.FromJson<BuildConfig>(root.buildConfigJson.text);
+                if (!config.save.fileName.StartsWith("living-dungeon-b3b2-qualification-", StringComparison.Ordinal)) { Application.Quit(2); return; }
+                config.save.fileName = Path.GetFileNameWithoutExtension(config.save.fileName) + "-profile.json";
+                if (File.Exists(Path.Combine(Application.persistentDataPath, config.save.fileName))) { Application.Quit(2); return; }
+                root.buildConfigJson = new TextAsset(JsonUtility.ToJson(config));
+            }
         }
         private IEnumerator Start()
         {
@@ -162,6 +171,11 @@ namespace DungeonBuilder.M0
             if (test == null) report.Failure = "b3b2.smoke.boot_failed";
             using (var stream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write))
             using (var writer = new StreamWriter(stream)) writer.Write(profile != null ? JsonUtility.ToJson(profile, true) : JsonUtility.ToJson(report, true));
+            if (profile != null && GameRoot.Instance?.SaveService?.CanonicalSession != null)
+                using (var stream = new FileStream(destination + ".save.json", FileMode.CreateNew, FileAccess.Write)) {
+                    var bytes = GameRoot.Instance.SaveService.CanonicalSession.GetCurrentBytes();
+                    stream.Write(bytes, 0, bytes.Length);
+                }
             Application.Quit((profile?.Passed ?? report.Passed) ? 0 : 1); // normal lifecycle saves finish synchronously
         }
     }

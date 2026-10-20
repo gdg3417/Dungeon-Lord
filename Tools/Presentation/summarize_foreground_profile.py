@@ -19,12 +19,14 @@ def distribution(values):
                 p95=ordered[int((len(ordered)-1)*.95)], p99=ordered[int((len(ordered)-1)*.99)], maximum=ordered[-1])
 
 result = dict(source=str(source), passed=data['Passed'], completedRuns=data['CompletedRuns'],
-              failure=data.get('Failure'), categories={})
+              failure=data.get('Failure'), threadAllocationCounterAvailable=data.get('ThreadAllocationCounterAvailable', False),
+              frameAllocationCounterAvailable=data.get('FrameAllocationCounterAvailable', False), categories={})
 for category, frames in groups.items():
     result['categories'][category] = dict(count=len(frames),
         updateMs=distribution([f['UpdateMs'] for f in frames]), frameMs=distribution([f['FrameMs'] for f in frames]),
         mainThreadMs=distribution([f['MainThreadNanoseconds']/1e6 for f in frames]),
-        updateAllocatedBytes=distribution([f['Allocated'] for f in frames]),
+        updateAllocatedBytes=distribution([f['Allocated'] for f in frames]) if data.get('ThreadAllocationCounterAvailable') else None,
+        frameAllocatedBytes=distribution([f['FrameAllocatedBytes'] for f in frames]) if data.get('FrameAllocationCounterAvailable') else None,
         areas={name: dict(calls=sum(f['Calls'][i] for f in frames),
             inclusiveMs=sum(f['Ticks'][i] for f in frames)*1000/data['StopwatchFrequency'],
             inclusiveAllocatedBytes=sum(f['Bytes'][i] for f in frames)) for i, name in enumerate(data['Areas'])})
