@@ -25,7 +25,7 @@ source = source.replace("IDENTITY_TEST=", "m.q.OUTPUT_TESTS.append('Assets/_Proj
 source = source.replace("'focused': 'LivingDungeonB3B2'", "'probe': 'TerminalSettlementPreservesTheCurrentSavedBoundary;LivingDungeonB3B2LiveLabelsSessionReplayAndLargeLayoutsObserveOnlyCommittedState', 'profile': 'ForegroundPerformanceSustainedProduction68Runs', 'readability': 'VisualRun;CombatC1;LivingDungeonB3B1;TimeService;SimulationClock', 'focused': 'LivingDungeonB3B2'")
 source = source.replace("('admit','settle','finish')", "('admit','settle','finish','profile')")
 source = source.replace("'probe':", "'recovery-probe': 'RecoveryConditionChangesAreStagedBeforeAdmissionWhenDoubleWalletDebitRoundsAway', 'probe':")
-source = source.replace("'focused':", "'marker-ui': 'LivingDungeonB3B2LiveLabels;LivingDungeonB3B2Marker;LivingDungeonB3B2RecordedAdjacent;LivingDungeonB3B2PresentationSnaps;LivingDungeonB3B2ActiveIdle;VisualRun;CombatC1;Localization', 'focused':")
+source = source.replace("'profile': 'ForegroundPerformanceSustainedProduction68Runs',", "'profile': 'ForegroundPerformanceSustainedProduction68Runs', 'marker-ui': 'LivingDungeonB3B2LiveLabels;LivingDungeonB3B2Marker;LivingDungeonB3B2RecordedAdjacent;LivingDungeonB3B2PresentationSnaps;LivingDungeonB3B2ActiveIdle;VisualRun;CombatC1;Localization',")
 source = source.replace("if phase!='admit'", "if phase not in ('admit','profile')")
 if variant == 'marker':
     source = source.replace('    import datetime', "    args += ['-b3b2MarkerVisuals']\n    import datetime")

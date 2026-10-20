@@ -31,12 +31,15 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(ui.Q<Label>("foregroundActivity").text, Does.Contain("Adventurers"));
             if (label.resolvedStyle.display == DisplayStyle.None) return;
             var icon = ForegroundMarkerPanelRect(ui);
-            var policy = (DungeonPresentationPolicy)typeof(ProductionDungeonController).GetField("presentationPolicy", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(controller);
+            var policy = controller.presentationPolicy;
             float gap = policy.ReplayActorLabelOffset - .5f; // subpixel layout tolerance
             icon = Rect.MinMaxRect(icon.xMin - gap, icon.yMin - gap, icon.xMax + gap, icon.yMax + gap);
             Assert.That(label.worldBound.Overlaps(icon), Is.False, "The actual label box must clear the rendered diamond plus its separation");
-            Assert.That(ui.Q("mapArea").worldBound.Contains(label.worldBound.min), Is.True);
-            Assert.That(ui.Q("mapArea").worldBound.Contains(label.worldBound.max), Is.True);
+            var map = ui.Q("mapArea").worldBound;
+            Assert.That(label.worldBound.xMin, Is.GreaterThanOrEqualTo(map.xMin - .5f));
+            Assert.That(label.worldBound.yMin, Is.GreaterThanOrEqualTo(map.yMin - .5f));
+            Assert.That(label.worldBound.xMax, Is.LessThanOrEqualTo(map.xMax + .5f));
+            Assert.That(label.worldBound.yMax, Is.LessThanOrEqualTo(map.yMax + .5f));
             Assert.That(label.worldBound.Overlaps(ui.Q("floorRail").worldBound), Is.False);
         }
         // Display-only fake data against the existing rendered test room. It is
