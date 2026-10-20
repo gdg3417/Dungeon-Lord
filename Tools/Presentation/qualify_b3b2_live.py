@@ -70,6 +70,24 @@ if rendered:
     source = source.replace("'-batchmode',", '')
     source = source.replace('startup.wShowWindow=subprocess.SW_HIDE', 'startup.wShowWindow=1')
     source = source.replace("'-screen-width','1280'", "'-screen-fullscreen','0','-screen-width','1280'")
+    # A launcher-only correction does not change a packed player. Authenticate
+    # all Unity input trees and retain both identities, never invent a build run.
+    original_guard = "    if not any(b.get('commit')==commit and b.get('exitCode')==0 for b in builds): raise ValueError('Player/source applicability requires matching successful build')"
+    rendered_guard = """    built = None
+    for candidate in builds:
+        if candidate.get('exitCode') != 0 or not any('BuildLivingDungeonB3B2LiveMarkerRenderedWindows' in arg for arg in candidate.get('arguments', [])): continue
+        changes = subprocess.check_output(['git','diff','--name-only',candidate['commit'],commit],cwd=ROOT,text=True).splitlines()
+        if any(name != 'Tools/Presentation/qualify_b3b2_live.py' for name in changes): continue
+        roots = ['Assets','Packages','ProjectSettings']
+        trees = {root: subprocess.check_output(['git','rev-parse',candidate['commit']+':'+root],cwd=ROOT,text=True).strip() for root in roots}
+        if any(subprocess.check_output(['git','rev-parse',commit+':'+root],cwd=ROOT,text=True).strip() != trees[root] for root in roots): continue
+        built = candidate
+        m.q.write(label+'-source-applicability.json',dict(buildCommit=built['commit'],launcherCommit=commit,unchangedUnityInputTrees=trees,changedFiles=changes))
+        break
+    if built is None: raise ValueError('Rendered player/source applicability could not be proven')"""
+    if source.count(original_guard) != 1: raise ValueError('Native build-source guard changed')
+    source = source.replace(original_guard, rendered_guard)
+    source = source.replace('record=dict(commit=commit,playerSha256=', "record=dict(commit=commit,buildCommit=built['commit'],playerSha256=")
     loader = "exec(compile(source,m.__file__,'exec'),m.__dict__)"
     if source.count(loader) != 1: raise ValueError('Nested adapter loader changed')
     source = source.replace(loader,
