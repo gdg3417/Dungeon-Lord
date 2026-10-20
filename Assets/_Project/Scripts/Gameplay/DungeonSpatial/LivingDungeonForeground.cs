@@ -141,6 +141,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         runtime.structureRuntime.ManaReserve, OccupiedFloors(owned));
                     recoveredManaSpent += runtime.structureRuntime.ManaReserve - wallet;
                     bool changed = runtime.structureRuntime.ManaReserve != wallet;
+                    // A small existing-policy debit can round away at a valid
+                    // large double balance. HP/revival still changed and must
+                    // reach the validated owner before same-boundary admission.
+                    for (int index = 0; !changed && index < healed.Records.Length; index++)
+                        changed = healed.Records[index].Health != runtime.monsterContinuity.Records[index].Health ||
+                            healed.Records[index].RevivalRequired != runtime.monsterContinuity.Records[index].RevivalRequired;
                     runtime.structureRuntime.ManaReserve = wallet; runtime.monsterContinuity = healed;
                     if (changed) Stage(healed);
                 }

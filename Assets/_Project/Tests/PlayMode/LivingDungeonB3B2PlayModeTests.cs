@@ -29,6 +29,7 @@ namespace DungeonBuilder.M0.Tests.PlayMode
                 "SharedMonotonicClockPreservesWholeUnitsAcrossPartitionFocusPauseAndRestart",
                 "DevelopmentReopenClockIsOptInAndPreservesRestoredHorizon",
                 "PresentationObserverCannotChangeCheckpointBytesWorkReceiptsOrOutcome",
+                "RecoveryConditionChangesAreStagedBeforeAdmissionWhenDoubleWalletDebitRoundsAway",
                 "LiveFeedbackUsesCommittedCombatReceiptsAndLocalizedBypassReasons",
                 "LiveFeedbackExplainsRecordedTrapCasualtyAndCarriedLoot",
                 "AutomaticSettlementRetainsSessionReplayWithoutChangingHistoricalSaveContract",
