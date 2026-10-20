@@ -122,6 +122,7 @@ namespace DungeonBuilder.M0
         public void Render(SavedSpatialFloor selected, ProductionSpatialContentSnapshot production,
             RoomContentSpatialOccupancySnapshot occupancy, int maximumTiles, int maximumGridTiles, bool edit)
         {
+            using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.WorldRender);
             ReconstructionCount++;
             HideReplay();
             floor = selected; this.production = production; this.occupancy = occupancy;

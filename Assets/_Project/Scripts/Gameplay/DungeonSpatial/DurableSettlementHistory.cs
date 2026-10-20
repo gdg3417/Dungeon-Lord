@@ -6,7 +6,7 @@ using UnityEngine;
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     // An exact transition authorization, never a writable save owner. Player builds have
-    // no factory. Generic/manual history validation cannot opt into this mutation.
+    // a narrowly scoped C2 foreground factory. Generic/manual history validation cannot opt into this mutation.
     internal sealed class DurableSettlementHistory
     {
         private readonly byte[] predecessor, retiredOwner;
@@ -26,6 +26,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return new DurableSettlementHistory(before, writer.Finish(), history, maximum);
         }
 #endif
+        internal static DurableSettlementHistory CreateForeground(byte[] before, LivingDungeonState retired,
+            RunHistoryState history, int maximum, SpatialSerializedInputLimits limits,
+            DungeonBuilder.M0.Gameplay.RunSimulation.RunExecution terminal)
+        {
+            if (maximum <= 0 || terminal == null || !terminal.IsTerminal || !terminal.OutcomeTaken ||
+                terminal.Combat?.Kernel.RulesId != MonsterRecoveryRules.Executable ||
+                retired?.Scheduler?.ProfileId != LivingDungeonForegroundConfig.ProfileId)
+                throw new InvalidOperationException("living.foreground.provenance_required");
+            var writer = new ContractJsonWriter(limits); LivingDungeonContracts.Write(writer, retired);
+            return new DurableSettlementHistory(before, writer.Finish(), history, maximum);
+        }
         internal bool Matches(byte[] before, LivingDungeonState retired, SpatialSerializedInputLimits limits)
         {
             if (retired == null || !predecessor.SequenceEqual(before)) return false;

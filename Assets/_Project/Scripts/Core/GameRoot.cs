@@ -15,7 +15,7 @@ using UnityEditor;
 
 namespace DungeonBuilder.M0
 {
-    public class GameRoot : MonoBehaviour
+    public partial class GameRoot : MonoBehaviour
     {
         public static GameRoot Instance { get; private set; }
 
@@ -212,6 +212,7 @@ namespace DungeonBuilder.M0
 
         public PlayerResearchActionResult StartConfiguredPlayerResearch()
         {
+            if (!FlushForeground()) return new PlayerResearchActionResult { FeedbackLocalizationKey = "ui.living.blocked" };
             PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Start();
             RefreshOfflineSummaryLines();
             return result;
@@ -219,6 +220,7 @@ namespace DungeonBuilder.M0
 
         public PlayerResearchActionResult ClaimConfiguredPlayerResearch()
         {
+            if (!FlushForeground()) return new PlayerResearchActionResult { FeedbackLocalizationKey = "ui.living.blocked" };
             PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Claim();
             RefreshOfflineSummaryLines();
             return result;
@@ -270,7 +272,8 @@ namespace DungeonBuilder.M0
         {
             if (TimeService != null)
             {
-                TimeService.Update(Time.deltaTime);
+                if (TimeService.HasForegroundClock) UpdateForeground();
+                else TimeService.Update(Time.deltaTime);
             }
 
             if (_sm != null)
@@ -281,7 +284,8 @@ namespace DungeonBuilder.M0
 
         private void OnApplicationPause(bool pause)
         {
-            ApplyPauseState(pause);
+            foregroundApplicationPaused = pause;
+            if (isActiveAndEnabled) ApplyPauseState(pause || !foregroundApplicationFocused);
         }
 
         private void OnApplicationQuit()
@@ -296,7 +300,7 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            SaveService.Save(Save, SaveReason.AppQuit);
+            FlushForeground(); SaveService.Save(Save, SaveReason.AppQuit);
             SaveLine = "Save: AppQuit";
         }
 
@@ -314,6 +318,13 @@ namespace DungeonBuilder.M0
         private void QuiesceAfterExplicitSaveDelete()
         {
             _explicitSaveDeleteQuiesced = true;
+            if (SaveService != null) {
+                SaveService.BeforeForegroundAction = null;
+                SaveService.ForegroundCurrent = null;
+                SaveService.CanonicalRuntimePublished -= ForegroundPublished;
+            }
+            ForegroundActivity = null;
+            foregroundResumePending = false;
             if (TimeService != null)
             {
                 TimeService.OnTick -= HandleSimulationTick;
@@ -331,28 +342,33 @@ namespace DungeonBuilder.M0
             if (_explicitSaveDeleteQuiesced) return;
             if (pause)
             {
+                foregroundResumePending = false;
                 PauseLine = "Pause: Paused";
                 bool wasPaused = TimeService != null && TimeService.IsPaused;
                 if (TimeService != null && !wasPaused)
                 {
+                    _resumeOfflineBoundaryPersisted = false;
                     TimeService.OnPause();
                 }
 
                 if (!wasPaused && SaveService != null && Save != null)
                 {
-                    _resumeOfflineBoundaryPersisted = SaveService.Save(Save, SaveReason.AppPause);
+                    bool saved = SaveService.Save(Save, SaveReason.AppPause);
+                    _resumeOfflineBoundaryPersisted = _resumeOfflineBoundaryPersisted || saved;
                     SaveLine = "Save: AppPause";
                 }
             }
             else
             {
                 if (TimeService == null || !TimeService.IsPaused) return;
+                if (!FlushForeground()) { foregroundResumePending = true; return; }
                 if (_resumeOfflineBoundaryPersisted && !TryApplyOfflinePassiveMana())
                 {
                     PauseLine = "Pause: Paused";
                     return;
                 }
                 PauseLine = "Pause: Running";
+                foregroundResumePending = false;
                 _resumeOfflineBoundaryPersisted = false;
                 if (TimeService != null)
                 {
@@ -596,7 +612,14 @@ namespace DungeonBuilder.M0
                 : 300;
 
             if (TimeService != null) return false;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var qualificationClock = LivingDungeonForegroundDevelopmentSmoke.ReopenClock(
+                Environment.GetCommandLineArgs(), Application.productName, SaveService.SavePath);
+            TimeService = qualificationClock == null ? new TimeService(Logger, tickSeconds, skewSeconds) :
+                new TimeService(Logger, tickSeconds, skewSeconds, new SystemTimeSource(), qualificationClock);
+#else
             TimeService = new TimeService(Logger, tickSeconds, skewSeconds);
+#endif
             TimeService.AttachSave(Save);
             TimeService.OnTick += HandleSimulationTick;
             TimeService.OnTick += HandleTickTelemetry;
@@ -616,6 +639,7 @@ namespace DungeonBuilder.M0
             InitializeStructureSimulationPass();
             InitializeRunSimulationService();
             SaveService.Save(Save, SaveReason.Boot);
+            InitializeForeground();
             overlay?.RefreshStructuralConstructionAuthority();
             SaveLine = "Save: Boot";
 
@@ -1865,6 +1889,7 @@ namespace DungeonBuilder.M0
 
         public bool SimulateRunOnce(string postureId)
         {
+            if (!FlushForeground()) { ApplyRunRejection("ui.living.blocked"); return false; }
             if (!TryResolveRunnableMvpRoute(out MvpOrderedRouteRoom[] route, out string rejectionReasonKey))
             {
                 ApplyRunRejection(rejectionReasonKey);

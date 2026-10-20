@@ -61,6 +61,26 @@ namespace DungeonBuilder.M0.EditorTools
             => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b1-20261018/Dungeon Lord.exe");
         public static void BuildLivingDungeonB3B1SmokeFixWindows()
             => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b1-20261018-smoke-fix/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2Windows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261018/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2SmokeFixWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261018-smoke-fix/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2ReviewWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-review/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2LiveBeforeWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-live-before/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2LiveBeforeProfileFixWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-live-before-profile-fix/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2LiveAfterWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-live-after/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2LiveFinalWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-live-final/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2LiveMarkerWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-live-marker/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2LiveMarkerRenderedWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-live-marker-rendered/Dungeon Lord.exe");
+        public static void BuildLivingDungeonB3B2LiveMarkerRenderedFinalWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261019-live-marker-rendered-final/Dungeon Lord.exe");
         private static void BuildWindowsAt(string outputPath)
         {
             DevelopmentBuildUtility.BuildDevelopment(BuildTarget.StandaloneWindows64, outputPath);

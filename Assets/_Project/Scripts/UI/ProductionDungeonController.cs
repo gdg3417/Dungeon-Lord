@@ -82,6 +82,7 @@ namespace DungeonBuilder.M0
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
             if (!legacy) ReadInput();
             UpdateReplay();
+            PresentForegroundActivity();
         }
 
         private bool HasCanonicalRuntime()
@@ -363,6 +364,7 @@ namespace DungeonBuilder.M0
         }
         private void CanonicalPublished(SaveData save)
         {
+            using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Publication);
             if (!HasCanonicalRuntime()) return;
             floorPreviewSession = null;
             if (!IsEditing && draftContext.Fingerprint(renderState) != draftContext.Fingerprint(save.validatedCanonicalSpatialState))
@@ -409,6 +411,7 @@ namespace DungeonBuilder.M0
           selectedFloor = id; ClearConstructionSelection(); CloseSheet(); RebuildFloor(true); Present(); Layout(); }
         private void Present()
         {
+            using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Present);
             if (!initialized || !HasCanonicalRuntime()) return;
             var ui = document.rootVisualElement;
             PresentHud();
@@ -518,6 +521,7 @@ namespace DungeonBuilder.M0
             // Keep the existing pixel/panel transform explicit at every viewport boundary.
             document.panelSettings.scale = Mathf.Max(1, Mathf.Min(Screen.width,Screen.height) / presentationPolicy.ReferenceShortSide);
             ApplySafeArea(lastSafe, lastResolution); SetTextSize(textSize);
+            safe.EnableInClassList("compact-hud", lastSafe.width / document.panelSettings.scale < presentationPolicy.ReferenceShortSide);
             safe.EnableInClassList("landscape", Screen.width > Screen.height);
             PlaceDevelopmentAction();
             PresentComposition();

@@ -67,7 +67,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return new RunCheckpoint(RunCheckpointCodec.Bytes(w => { w.Write(payload); w.Write(RunCheckpointCodec.Hash(payload)); }), execution.StartIdentity, v.NextOrdinal);
         }
         internal static RunCheckpointRestoreResult RestoreSupported(byte[] source, string checkpointIdentity, string startIdentity,
-            long expectedOrdinal, RunCheckpointLimits limits)
+            long expectedOrdinal, RunCheckpointLimits limits, bool retainPresentation = false)
         {
             // Dispatch only after the same independent byte/work envelope as the historical reader.
             if (source == null || limits == null || source.Length < 32 || source.Length > limits.MaximumBytes)
@@ -96,6 +96,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     if (time < 0 || deadline < -1 || deadline >= 0 && deadline < time || taken && !terminal || prefix.Length != 32)
                         return Failed("run.checkpoint.evidence_mismatch");
                     candidate = CombatStartCapture.Recreate(start, limits, executable);
+                    if (retainPresentation) candidate.PresentationSteps = new System.Collections.Generic.List<RunStep>();
                     for (long i = 0; i < ordinal; i++) {
                         if (candidate.IsTerminal) return Failed("run.checkpoint.evidence_mismatch", candidate);
                         candidate.Advance(1, i);

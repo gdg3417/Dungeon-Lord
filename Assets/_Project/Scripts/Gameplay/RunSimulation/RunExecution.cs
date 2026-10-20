@@ -116,6 +116,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal CombatC0ExecutionState Combat;
         // Geometry lookahead can charge work, but only a committed boundary enters evidence.
         internal long CommittedCombatWork;
+        // Optional bounded observer, reconstructed from the verified prefix.
+        // Never serialized, hashed, or consulted by execution/settlement rules.
+        internal List<RunStep> PresentationSteps;
+        internal RunStepKind? AnnouncedAction => pending?.Kind;
         internal RunOutcomeRecord Outcome;
         internal RunSimulationService.BranchTraversal Traversal;
         internal ActiveFloorRunSnapshot Snapshot;
@@ -126,6 +130,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal bool OutcomeTaken => taken;
         internal long MaximumEvents => maximumEvents;
         internal long AcceptedDeadline => acceptedDeadline;
+        internal bool TimingMatches(RunLogicalTiming other) => timing != null && other != null &&
+            timing.UnitsPerTileEdge == other.UnitsPerTileEdge && timing.MonsterInteractionUnits == other.MonsterInteractionUnits &&
+            timing.TrapInteractionUnits == other.TrapInteractionUnits && timing.LootInteractionUnits == other.LootInteractionUnits &&
+            timing.FloorTransferUnits == other.FloorTransferUnits;
         internal RunExecution(RunParty party, RunLogicalTiming timing, long maximumEvents)
         {
             Party = party; this.timing = timing;
@@ -196,6 +204,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     if (step.CombatEvents != null && step.CombatEvents.Any(e => e.Kind == CombatC0EventKind.EncounterStart)) encounters++;
                     if (step.Kind == RunStepKind.LootInteraction) lootInteractions++;
                     batch?.Add(last.Value); processed++;
+                    PresentationSteps?.Add(last.Value);
                     if (step.Kind == RunStepKind.Terminal)
                     {
                         if (Outcome == null) throw new InvalidOperationException("run.execution.invalid_cursor");
@@ -237,6 +246,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         {
             if (!IsTerminal || taken || failure != null) throw new InvalidOperationException("run.execution.outcome_unavailable");
             Combat?.Finish(Outcome);
+            if (PresentationSteps != null) Outcome.PresentationSteps = PresentationSteps.ToArray();
             taken = true; return Outcome;
         }
         public RunCheckpoint ExportCheckpoint(RunCheckpointLimits limits)
