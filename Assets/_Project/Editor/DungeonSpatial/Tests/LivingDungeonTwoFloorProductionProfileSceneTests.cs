@@ -67,6 +67,7 @@ namespace DungeonBuilder.M0.Tests
                             Assert.That(ui.Q<Label>("foregroundPartyLabel").tooltip, Is.EqualTo(party.RunId));
                             if (floor.FloorIndex == 0) Assert.That(activity.text, Does.Contain(root.Content.GetString("ui.living.waiting", string.Empty)));
                             var map = ui.Q("mapArea");
+                            TestContext.WriteLine($"Two-floor waiting layout {size} {textSize} floor={floor.FloorIndex} activity={activity.worldBound} map={map.worldBound} top={ui.Q("topChrome").worldBound} bottom={ui.Q("bottomChrome").worldBound}");
                             Assert.That(map.worldBound.height, Is.GreaterThan(80), "Retain an interactive map viewport");
                             Assert.That(activity.worldBound.yMax, Is.LessThanOrEqualTo(map.worldBound.yMin + 1), "Waiting feedback must not cover the map");
                             Assert.That(ui.worldBound.Contains(ui.Q("sessionActions").worldBound.center), Is.True);
@@ -76,7 +77,6 @@ namespace DungeonBuilder.M0.Tests
                             Assert.That(buttons[0].ClassListContains("floor-party-waiting"), Is.True);
                             Assert.That(buttons[1].ClassListContains("floor-party-active"), Is.True);
                             if (!party.GeometryCompatible) Assert.That(controller.World.ForegroundPartyVisible, Is.False);
-                            TestContext.WriteLine($"Two-floor waiting layout {size} {textSize} floor={floor.FloorIndex} activity={activity.worldBound} map={map.worldBound}");
                             if (textSize == DungeonTextSize.Large) {
                                 EditorTools.ProductionDungeonScreenshots.Capture($"two-floor-waiting-{size.x}x{size.y}-floor{floor.FloorIndex + 1}.png");
                                 yield return null; yield return null;
