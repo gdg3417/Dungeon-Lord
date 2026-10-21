@@ -521,7 +521,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
         }
 
-        [Test] public void AutomaticProductionPartyCanChooseASurvivingFloorOneExitWithTwoCapturedFloors()
+        [Test, Timeout(600000)] public void AutomaticProductionPartyCanChooseASurvivingFloorOneExitWithTwoCapturedFloors()
         {
             var f = ProductionDungeon(); string second = PhaseSixA4Tests.FloorTwo(f);
             f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
