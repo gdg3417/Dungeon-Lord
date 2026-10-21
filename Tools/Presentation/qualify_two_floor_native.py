@@ -12,7 +12,7 @@ def launch(campaign, phase, label, previous):
     m = campaign
     root, out = m.q.ROOT, m.q.OUT
     allowed = ('two-floor-wait', 'two-floor-release', 'two-floor-finish',
-               'v1-upgrade', 'two-floor-profile')
+               'v1-upgrade', 'two-floor-profile', 'baseline-profile')
     if phase not in allowed or not label.replace('-', '').isalnum():
         raise ValueError('Unknown phase or unsafe output label')
     m.preflight(label)
@@ -36,8 +36,14 @@ def launch(campaign, phase, label, previous):
     product = json.loads((out / 'product-isolation.json').read_text())
     destination = Path(product['savePath']).resolve()
     m.q.inputs.no_redirect(destination)
+    baseline = phase == 'baseline-profile'
     initial = phase in ('two-floor-wait', 'two-floor-profile', 'v1-upgrade')
-    if initial:
+    if baseline:
+        packed = json.loads((out / 'native-namespace-final.json').read_text())
+        if prior != {'profile': 'fresh-production-baseline'}:
+            raise ValueError('Invalid fresh baseline request')
+        name = Path(packed['fileName']).stem + '-' + report.stem + '.json'
+    elif initial:
         if prior['Product'] != product['product']:
             raise ValueError('Seed product mismatch')
         name = prior['SaveFileName']
@@ -57,12 +63,14 @@ def launch(campaign, phase, label, previous):
         raise ValueError('Save identity is not isolated')
     save = destination / name
     m.q.inputs.no_redirect(save)
-    player = root / 'Builds/Development/Windows-living-dungeon-two-floor-20261020/Dungeon Lord.exe'
+    if baseline and (save.exists() or len(str(save) + '.editor-draft.draft-' + '0' * 32 + '.000000.candidate') > 240):
+        raise ValueError('Fresh baseline namespace is occupied or exceeds the existing path envelope')
+    player = root / 'Builds/Development/Windows-living-dungeon-two-floor-20261021-final/Dungeon Lord.exe'
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
     builds = [json.loads(p.read_text()) for p in out.glob('*-build-command.json')]
     if not player.is_file() or not any(b.get('commit') == commit and b.get('exitCode') == 0 for b in builds):
         raise ValueError('Player/source applicability requires matching successful build')
-    seal = out / 'qualified-native-build-files.json'
+    seal = out / 'qualified-native-final-build-files.json'
     if not seal.exists():
         files = []
         for path in sorted(player.parent.rglob('*')):
@@ -87,7 +95,7 @@ def launch(campaign, phase, label, previous):
             stream.write(seed_bytes)
             stream.flush()
             os.fsync(stream.fileno())
-    else:
+    elif not baseline:
         prior_command = json.loads(previous.with_name(previous.stem + '-command.json').read_text())
         if m.q.sha(save) != prior_command['postExitSaveSha256']:
             raise ValueError('Continuation save changed since prior normal exit')
@@ -95,13 +103,13 @@ def launch(campaign, phase, label, previous):
     startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     startup.wShowWindow = subprocess.SW_HIDE
     args = [str(player), '-batchmode', '-screen-width', '1280', '-screen-height', '720',
-            '-logFile', str(log), '-b3b2ForegroundSmoke', phase, str(report), str(previous)]
+            '-logFile', str(log), '-b3b2ForegroundSmoke', 'profile' if baseline else phase, str(report), str(previous)]
     record = dict(commit=commit, playerSha256=m.q.sha(player), arguments=args,
                   gameplayAssemblySha256=m.q.sha(player.parent / 'Dungeon Lord_Data/Managed/Assembly-CSharp.dll'),
                   packedManagersSha256=m.q.sha(player.parent / 'Dungeon Lord_Data/globalgamemanagers'),
                   buildArtifactManifestSha256=m.q.sha(seal),
                   launcherSha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-                  preLaunchSaveSha256=m.q.sha(save),
+                  preLaunchSaveSha256=None if baseline else m.q.sha(save),
                   startedUtc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                   rendering='Development player batchmode; production scene/controller, no human visual assessment')
     with command.open('x', encoding='utf-8') as stream:
@@ -126,5 +134,7 @@ def launch(campaign, phase, label, previous):
     record['bootstrapTimingLimitation'] = 'Whole-second log bounds; includes Unity startup, canonical validation/restoration and Boot write, not an isolated parser microbenchmark.'
     command.write_text(json.dumps(record, indent=2), encoding='utf-8')
     print(json.dumps(record))
-    if record['exitCode'] or not report.is_file() or not json.loads(report.read_text()).get('Passed'):
+    result = json.loads(report.read_text()) if report.is_file() else None
+    if (record['exitCode'] or not result or not result.get('Passed') or result.get('Product') != product['product']
+            or Path(result.get('SavePath', '')).resolve() != save.resolve()):
         raise ValueError('Native qualification failed; preserve all outputs')
