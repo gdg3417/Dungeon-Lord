@@ -304,7 +304,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming()
         {
             var f = PhaseSixA4Tests.Eligible();
-            f.Configuration = JsonUtility.FromJson<RunSimulationConfig>(File.ReadAllText("Assets/_Project/Data/Bootstrap/run_simulation_config.json"));
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                File.ReadAllText("Assets/_Project/Data/Bootstrap/run_simulation_config.json"), out f.Configuration), Is.True);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
