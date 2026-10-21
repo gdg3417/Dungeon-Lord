@@ -1,0 +1,32 @@
+{
+  "qualifiedSource": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da",
+  "verifiedUtc": "2026-10-21T19:49:49.733513+00:00",
+  "compiledInputTrees": {
+    "Assets": "f97b5a4c05134ebb4cd03d912fb067f78818db3a",
+    "Packages": "e3fec9b0c4018adde155b4d8cd05cac3217df206",
+    "ProjectSettings": "c55e5632c33401052e04e4c9172dfadc312686f3"
+  },
+  "compiledWorkingInputsMatchQualifiedSource": true,
+  "onlyPostQualificationCodeAdditions": [
+    "Tools/Presentation/collect_two_floor_qualification.py",
+    "Tools/Presentation/audit_two_floor_preservation.py"
+  ],
+  "postQualificationCodeDisposition": "Offline evidence collection and byte audit, executed successfully; not imported or compiled by Unity.",
+  "cliBefore": "1.0.0-beta.12",
+  "cliFinal": "1.0.0-beta.13",
+  "cliUpdateOwnerApproved": true,
+  "editor": "6000.3.2f1 (a9779f353c9b)",
+  "projectVersionSha256": "e73efc41b94f6a8523e3bab8da46ec57a26a6eb7bed9a8c7f4be890d04bc6f6f",
+  "preservationSummarySha256": "aee1da3dbb139ac599e2eb2bb4f9641f6b738274617c5d3e06f44c42e55562a8",
+  "buildProvenanceSha256": "a8fa5e5e0b34e1aa05aae5e786601f209d02458b7e5bcf26849f05e6fd3a4b97",
+  "interrupted38ColdArtifacts": {
+    "disposition": "Interrupted attempt; copied only after verified process exit, no passing verdict inferred.",
+    "files": [
+      {
+        "name": "living-dungeon-b3b2-qualification-two-floor-76fe0ecfa6324b559fdd892aa5b33cc0.json",
+        "bytes": 252051,
+        "sha256": "014d4471921c953c3319f6d8376fad0ea604d11f413056f34c1e63eed59ff65a"
+      }
+    ]
+  }
+}

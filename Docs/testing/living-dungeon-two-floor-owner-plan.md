@@ -1,0 +1,33 @@
+# Later owner gameplay qualification
+
+Do not start this plan yet. Technical qualification and an independent review must resolve blocking findings first. This is a later player-experience plan, not a replacement for Codex's automated/build/persistence testing.
+
+Branch: `codex/living-dungeon-two-floor-foreground`. Qualified executable source: `3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da`; later documentation commits do not rebuild it. Use the independently reviewed PR head before beginning. Build: `Builds/Development/Windows-living-dungeon-two-floor-20261021-final/Dungeon Lord.exe`. Gameplay assembly SHA-256: `8f4238bdef329eb673185f34a3e4c31528d4f3f097a7bc639446d7eb6a4e4290`; packed managers: `7b6aeba37ad811b42f670e85e63afd4dd901a464c2d869998b92bdbe2cf3bbc7`. The complete artifact seal is recorded in the preservation evidence. Do not use an owner save or historical build.
+
+## Setup
+
+Use the qualified Windows Development player and its dedicated test product/save. The manual fixture must contain legal constructed Floors 1 and 2, the existing `ac_100` construction prerequisite, sufficient current Mana, existing Goblin/Skeleton defenders and Hidden Caches. Floor 2's longer legal route supplies an opportunity for occupied-destination waiting without changing combat, timing, arrival rules or decisions. Preserve a fresh fixture copy before launching. No manual JSON editing or live file copying is part of gameplay testing.
+
+A prepared synthetic [cold fixture](evidence/living-dungeon-two-floor/later-owner-inactive-floor2-fixture.json) and [identity manifest](evidence/living-dungeon-two-floor/later-owner-fixture-manifest.json) are available for that later session. With all QA players stopped, verify its SHA-256 `5eadd0feb3881e38283189b423491204b683a514d642b49de833792679d1380c`. Only if the destination is absent, copy it to `%USERPROFILE%/AppData/LocalLow/gdg3417/Dungeon Lord B3B2 Smoke Two Floor 20261020/living-dungeon-b3b2-qualification-two-floor-20261020-native-final.json`. If that path already exists, preserve it and obtain another approved fresh product fixture; do not overwrite it. Launch the qualified executable normally, without profile/smoke/accelerated-clock arguments. No fixture has been installed for owner play by this plan.
+
+If Floor 2 starts Inactive, open Floors, select Floor 2 and choose Activate. Verify both floor labels say Active and both layouts are Valid. Floor 1 is the existing automatically Active first floor. If a party already captured a one-floor run before activation, let it complete; later arrivals capture both floors. Do not expect activation to rewrite an existing snapshot.
+
+## Actions and expected results
+
+1. Keep the application focused in normal play. With eligible Floor 1 defenders/loot, observe an automatic visitor without using Observe Dungeon or another manual run command. Record its RunId and the real visible arrival time. Installed opportunities follow the existing cadence, so vacancy does not promise an immediate new arrival.
+2. Follow the party on Floor 1. Record its terminal choice/outcome. A genuine EXIT produces the existing exited-at-terminal result; a genuine DESCEND shows preparation followed by activity on Floor 2. Do not expect every party to descend or force a decision by restarting.
+3. Select Floor 2 after descent. Confirm the corresponding RunId/party is shown. Switch between floors while observing; selection changes presentation, while offscreen parties continue. Record a screenshot of each selected floor when both have parties.
+4. Observe a later Floor 1 party attempt descent while Floor 2 is occupied. It must show Waiting and remain associated with Floor 1. No replacement Floor 1 party may appear during that wait. Record both RunIds, floor labels, waiting text, current Mana and reserve.
+5. Wait for the Floor 2 occupant to complete. Its outcome settles once. The waiting party then transfers to Floor 2 without another full transfer delay. Floor 1 becomes available only after completed transfer. Subsequent arrivals still follow their installed opportunities.
+6. During a run, enter Edit, make an otherwise legal affordable content/position change, Save, then return to play. The existing party continues its captured execution. If current geometry/content no longer matches its captured projection, its position marker must hide safely and the activity panel must explain the incompatibility. A later party uses the newly committed layout. Also check Discard leaves canonical content unchanged.
+7. On a fresh waiting occurrence, close normally while the party says Waiting. Reopen the same dedicated test save. Confirm the same party identities and floor associations, then observe release after actual occupant departure. Close/reopen again after release and confirm the party continues on Floor 2 rather than repeating the transfer or settlement.
+8. Inspect current monsters, Current/Usable Mana, protected Recovery Reserve, Heat, loot extraction and run history after completion. Earlier damage must not be overwritten by another party's captured HP. Affordable recovery can occur in the same boundary as vacancy, so full current HP does not imply no combat damage; inspect recovery expenditure as well. Inactive/occupied floors must not receive ineligible recovery.
+9. Use the supported floor selector and Display text sizes. Check both portrait and landscape layouts at their actual available resolution. Floor buttons, waiting/outcome feedback and build/edit controls must remain reachable. Record any native monitor clamp separately from the requested resolution.
+
+## Negative cases and evidence
+
+Deactivating Floor 2 during captured activity must not evict a party or fabricate a vacancy. A party with an already captured legal two-floor route continues that route; new admissions use current eligibility. An unsupported new start must show localized feedback while retaining the dungeon/save. An incompatible edited projection must not show a falsely authoritative position.
+
+Retain screenshots/video with both RunIds, selected floor, state/outcome, actual resolution/text size and the reviewed commit. Record exact actions around edits, close/reopen and unexpected behavior. Count each A/B outcome once in history and note reserve/recovery changes. Report the earliest unexpected state; do not reset the fixture or continue through a recovery-required/save failure. Codex must investigate technical failures before further owner qualification.
+
+Performance limitation: technical captures show material synchronous event/admission/release stalls. Record actual pauses separately from logical waiting. These results do not establish mobile performance or a successful player-experience qualification.

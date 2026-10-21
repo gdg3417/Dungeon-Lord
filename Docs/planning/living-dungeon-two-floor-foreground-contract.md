@@ -14,9 +14,23 @@ The canonical writer must establish vacancy through an actual pinned terminal pr
 
 Global event order is deadline, numeric RunSequence and local ordinal. At a shared timestamp: existing configured passive tick; existing party events with immediate verified terminal settlement/retirement; eligible vacancy recovery; previously blocked-party release and completed transfer with same-time consequences until stable; admission opportunity and newborn work; closure. An ordinary transfer at its original deadline remains in the existing-event phase and can enter before recovery if an earlier ordered party has just vacated its destination. A previously blocked transfer releases after recovery. Complete timestamps publish atomically under bounded hard event limits.
 
+| Phase at absolute time `t` | Authoritative work |
+| --- | --- |
+| 1 | Due configured passive mana/research tick and its existing consequences. |
+| 2 | Existing actionable combat, movement, FloorDecision, ordinary transfer attempt, Blocked, or Terminal. Choose the earliest absolute deadline, numeric party sequence, then local ordinal; repeat after each event. |
+| 2a | Immediately after each Terminal: independently verify the pinned outcome, reconcile current monster identities, apply consequences/history, retire, and record the exact vacancy cause in transaction-local lineage. |
+| 3 | Existing recovery policy on currently eligible vacant floors. Waiting/Released still protect their source floor. |
+| 4 | Release previously blocked parties in numeric sequence/ordinal order, only against a matching vacancy from phase 2a. Commit Released and completed transfer, then enabled same-time events and recovery; repeat until stable. |
+| 5 | Consume the automatic opportunity; throttle without sequence allocation when Floor 1 is occupied or eligibility fails. Perform admitted newborn zero-time work and applicable recovery/release. |
+| 6 | Close `t` only after all eligible work finishes. Publish no partial timestamp if a hard limit or validation fails. |
+
+For a transfer announced after party-relative time `p`, `b = p + T` remains its original deadline. A vacant destination commits Transfer ordinal `n` at `b`. An occupied destination commits Blocked `n` at `b`, leaving the iterator transfer pending. A vacancy at `r >= b` commits Released `n+1` and Transfer `n+2` at `r`; only the latter consumes the iterator transfer. The next iterator delay starts at `r`. The blocked digest includes only then-known control fields; subsequent release fields cannot change that prefix. The immutable wrapped start identity never changes. Replay applies the same Block/Release/transfer routines and requires exact checkpoint re-encoding.
+
 Existing B2 revision behavior remains. Determinism comparisons may normalize documented partition-dependent revision bookkeeping while comparing identical external inputs and every gameplay-relevant field.
 
 Occupancy derives from authenticated captured floor identities and transfer progress. Editing or changing current activation cannot alter a running party's captured route. Recovery separately requires current active/assigned/vacant eligibility. Terminal occupancy remains protected until verified settlement and retirement.
+
+A raw format-3 terminal checkpoint remains replayable. Its temporary complete owner is private, unclosed settlement staging. A closed v2 complete owner cannot retain that unsettled terminal, since closure includes verified consequences and retirement. This contextual owner rule does not change frozen format-1/format-2 readers or historical v1 semantics.
 
 Each party preserves its original multi-floor monster inputs. Verified net damage is applied once to then-current stable identities: `max(0, currentHP - (capturedInitialHP - verifiedFinalHP))`, with existing readiness/revival, custody, retirement and replacement rules. No additional monster authority is introduced.
 

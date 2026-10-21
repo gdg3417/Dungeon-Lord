@@ -1,0 +1,36 @@
+{
+  "profiles": [
+    {
+      "raw": "TestResults/living-dungeon-two-floor-20261020/editor-owner-inactive-d15c573f9c9b4ade9ba7dcefcc454851.profile.json",
+      "rawSha256": "c2627142e46a510387b508059ff3086815833fd05b9f3804da03dd3e5925405c",
+      "summary": "final-editor-one-floor-summary.json",
+      "source": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da"
+    },
+    {
+      "raw": "TestResults/living-dungeon-two-floor-20261020/editor-two-floor-477a98d367b54649945b5c32fc722178.profile.json",
+      "rawSha256": "74b2bbfb6f845ea1a27ae9d515f6cbb7c59f3c1197fd2613174bcc22624f58ab",
+      "summary": "final-editor-two-floor-summary.json",
+      "source": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da"
+    },
+    {
+      "raw": "TestResults/living-dungeon-two-floor-20261020/36-base.json",
+      "rawSha256": "7da2b66bfbaf7c54db7afeaa5a5b3e86f13dbf8098736ea1dca6ccb31641901d",
+      "summary": "final-windows-pr245-scenario-summary.json",
+      "source": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da"
+    },
+    {
+      "raw": "TestResults/living-dungeon-two-floor-20261020/37-one-profile.json",
+      "rawSha256": "f5b7bb1327f446c46b53065ff9b89529ce796aaa29d8a4605ffa4c3785f8897b",
+      "summary": "final-windows-one-floor-summary.json",
+      "source": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da"
+    },
+    {
+      "raw": "TestResults/living-dungeon-two-floor-20261020/39-two-profile.json",
+      "rawSha256": "40043a51a4e509f99d9ba1b6a58c03bde3ea4c571168ea8d395f4ea51072f740",
+      "summary": "final-windows-two-floor-summary.json",
+      "source": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da"
+    }
+  ],
+  "baseline": "76f78c5c2d17d3aab916f297aecb5c25cf146d76",
+  "limits": "Separate same-platform matched one/two-floor comparisons. Event category includes blocked-transfer frames. Settlement/recovery/release tags overlap. No mobile qualification. Raw reports stay in preserved local TestResults."
+}

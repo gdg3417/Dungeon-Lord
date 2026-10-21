@@ -1,0 +1,413 @@
+{
+  "source": "TestResults\\living-dungeon-two-floor-20261020\\39-two-profile.json",
+  "passed": true,
+  "completedRuns": 68,
+  "display": {
+    "ScreenWidth": 1280,
+    "ScreenHeight": 720,
+    "TextSize": "Default"
+  },
+  "failure": "",
+  "categories": {
+    "admission": {
+      "updateMs": {
+        "count": 69,
+        "mean": 2138.1053057971017,
+        "p95": 2241.0402,
+        "maximum": 2282.1627
+      },
+      "frameMs": {
+        "count": 69,
+        "mean": 2138.439707134081,
+        "p95": 2241.6746616363525,
+        "maximum": 2282.510757446289
+      },
+      "mainThreadMs": {
+        "count": 69,
+        "mean": 2138.452608695652,
+        "p95": 2241.682,
+        "maximum": 2282.517
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 69,
+        "mean": 793625804.5652174,
+        "p95": 835452898,
+        "maximum": 837545358
+      }
+    },
+    "between-events": {
+      "updateMs": {
+        "count": 9411,
+        "mean": 0.00010756561470619489,
+        "p95": 0.0002,
+        "maximum": 0.0484
+      },
+      "frameMs": {
+        "count": 9411,
+        "mean": 0.3082668401025953,
+        "p95": 0.87679986609146,
+        "maximum": 4.262903705239296
+      },
+      "mainThreadMs": {
+        "count": 9411,
+        "mean": 0.3051084581872277,
+        "p95": 0.8687,
+        "maximum": 4.2596
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 9411,
+        "mean": 14259.006481776645,
+        "p95": 102400,
+        "maximum": 246390
+      }
+    },
+    "event": {
+      "updateMs": {
+        "count": 2869,
+        "mean": 538.088799302893,
+        "p95": 732.1711,
+        "maximum": 1168.4273
+      },
+      "frameMs": {
+        "count": 2869,
+        "mean": 538.3786978508463,
+        "p95": 732.4717044830322,
+        "maximum": 1168.8244342803955
+      },
+      "mainThreadMs": {
+        "count": 2869,
+        "mean": 538.3835238410596,
+        "p95": 732.4795,
+        "maximum": 1168.8325
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 2869,
+        "mean": 222441046.3119554,
+        "p95": 315015226,
+        "maximum": 497246058
+      }
+    },
+    "idle-empty": {
+      "updateMs": {
+        "count": 119,
+        "mean": 6.050420168067227e-05,
+        "p95": 0.0001,
+        "maximum": 0.0002
+      },
+      "frameMs": {
+        "count": 119,
+        "mean": 0.07096558792221638,
+        "p95": 0.1241000572917983,
+        "maximum": 3.25710023753345
+      },
+      "mainThreadMs": {
+        "count": 119,
+        "mean": 0.07052521008403362,
+        "p95": 0.1214,
+        "maximum": 3.2483
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 119,
+        "mean": 816.1680672268908,
+        "p95": 792,
+        "maximum": 1848
+      }
+    },
+    "passive": {
+      "updateMs": {
+        "count": 4,
+        "mean": 126.17795,
+        "p95": 148.105,
+        "maximum": 157.5462
+      },
+      "frameMs": {
+        "count": 4,
+        "mean": 425.0630885362625,
+        "p95": 268.9107060432434,
+        "maximum": 1125.2386569976807
+      },
+      "mainThreadMs": {
+        "count": 4,
+        "mean": 143.7561,
+        "p95": 157.7136,
+        "maximum": 268.9136
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 4,
+        "mean": 48709497,
+        "p95": 45296969,
+        "maximum": 71563349
+      }
+    },
+    "settlement": {
+      "updateMs": {
+        "count": 68,
+        "mean": 1542.8261691176472,
+        "p95": 1853.5196,
+        "maximum": 1893.5217
+      },
+      "frameMs": {
+        "count": 68,
+        "mean": 1543.291853631244,
+        "p95": 1853.9533615112305,
+        "maximum": 1893.9224481582642
+      },
+      "mainThreadMs": {
+        "count": 68,
+        "mean": 1543.2993338235294,
+        "p95": 1853.9613,
+        "maximum": 1893.929
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 68,
+        "mean": 673415880.25,
+        "p95": 812348345,
+        "maximum": 813305435
+      }
+    }
+  },
+  "taggedFrames": {
+    "LifetimeProbe": {
+      "updateMs": {
+        "count": 69,
+        "mean": 2138.1053057971017,
+        "p95": 2241.0402,
+        "maximum": 2282.1627
+      },
+      "frameMs": {
+        "count": 69,
+        "mean": 2138.439707134081,
+        "p95": 2241.6746616363525,
+        "maximum": 2282.510757446289
+      },
+      "mainThreadMs": {
+        "count": 69,
+        "mean": 2138.452608695652,
+        "p95": 2241.682,
+        "maximum": 2282.517
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 69,
+        "mean": 793625804.5652174,
+        "p95": 835452898,
+        "maximum": 837545358
+      }
+    },
+    "TransferBlocked": {
+      "updateMs": {
+        "count": 34,
+        "mean": 562.541305882353,
+        "p95": 601.1023,
+        "maximum": 612.1722
+      },
+      "frameMs": {
+        "count": 34,
+        "mean": 562.903980121893,
+        "p95": 601.4518737792969,
+        "maximum": 612.551212310791
+      },
+      "mainThreadMs": {
+        "count": 34,
+        "mean": 562.9061794117647,
+        "p95": 601.4536,
+        "maximum": 612.5535
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 34,
+        "mean": 229755388.9117647,
+        "p95": 241705326,
+        "maximum": 241942249
+      }
+    },
+    "TransferReleased": {
+      "updateMs": {
+        "count": 34,
+        "mean": 1761.763588235294,
+        "p95": 1870.7687,
+        "maximum": 1893.5217
+      },
+      "frameMs": {
+        "count": 34,
+        "mean": 1762.2153829125798,
+        "p95": 1871.2587356567383,
+        "maximum": 1893.9224481582642
+      },
+      "mainThreadMs": {
+        "count": 34,
+        "mean": 1762.2230323529411,
+        "p95": 1871.2685,
+        "maximum": 1893.929
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 34,
+        "mean": 772244358.117647,
+        "p95": 812757096,
+        "maximum": 813305435
+      }
+    },
+    "RecoveryApplied": {
+      "updateMs": {
+        "count": 101,
+        "mean": 1260.9596584158417,
+        "p95": 1852.3497,
+        "maximum": 1893.5217
+      },
+      "frameMs": {
+        "count": 101,
+        "mean": 1261.421808511904,
+        "p95": 1852.760672569275,
+        "maximum": 1893.9224481582642
+      },
+      "mainThreadMs": {
+        "count": 101,
+        "mean": 1261.4288693069307,
+        "p95": 1852.7694,
+        "maximum": 1893.929
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 101,
+        "mean": 547988824.6237624,
+        "p95": 811900083,
+        "maximum": 813305435
+      }
+    },
+    "Settlement": {
+      "updateMs": {
+        "count": 68,
+        "mean": 1542.8261691176472,
+        "p95": 1853.5196,
+        "maximum": 1893.5217
+      },
+      "frameMs": {
+        "count": 68,
+        "mean": 1543.291853631244,
+        "p95": 1853.9533615112305,
+        "maximum": 1893.9224481582642
+      },
+      "mainThreadMs": {
+        "count": 68,
+        "mean": 1543.2993338235294,
+        "p95": 1853.9613,
+        "maximum": 1893.929
+      },
+      "threadAllocatedBytes": null,
+      "frameAllocatedBytes": {
+        "count": 68,
+        "mean": 673415880.25,
+        "p95": 812348345,
+        "maximum": 813305435
+      }
+    }
+  },
+  "areas": {
+    "Stage": {
+      "calls": 3727,
+      "inclusiveMs": 896839.5055,
+      "inclusiveAllocatedBytes": null
+    },
+    "Prepare": {
+      "calls": 3727,
+      "inclusiveMs": 880415.2015,
+      "inclusiveAllocatedBytes": null
+    },
+    "Open": {
+      "calls": 0,
+      "inclusiveMs": 0.0,
+      "inclusiveAllocatedBytes": null
+    },
+    "Validate": {
+      "calls": 0,
+      "inclusiveMs": 0.0,
+      "inclusiveAllocatedBytes": null
+    },
+    "Projection": {
+      "calls": 3727,
+      "inclusiveMs": 9865.7686,
+      "inclusiveAllocatedBytes": null
+    },
+    "Restore": {
+      "calls": 51166,
+      "inclusiveMs": 386355.3286,
+      "inclusiveAllocatedBytes": null
+    },
+    "LifetimeProbe": {
+      "calls": 69,
+      "inclusiveMs": 78560.2786,
+      "inclusiveAllocatedBytes": null
+    },
+    "Inspect": {
+      "calls": 3010,
+      "inclusiveMs": 42166.1217,
+      "inclusiveAllocatedBytes": null
+    },
+    "AtomicWrite": {
+      "calls": 3010,
+      "inclusiveMs": 258694.2983,
+      "inclusiveAllocatedBytes": null
+    },
+    "Publication": {
+      "calls": 3009,
+      "inclusiveMs": 15263.9042,
+      "inclusiveAllocatedBytes": null
+    },
+    "Present": {
+      "calls": 3010,
+      "inclusiveMs": 8143.4542,
+      "inclusiveAllocatedBytes": null
+    },
+    "WorldRender": {
+      "calls": 1,
+      "inclusiveMs": 15.8027,
+      "inclusiveAllocatedBytes": null
+    },
+    "TransferBlocked": {
+      "calls": 34,
+      "inclusiveMs": 1.4068,
+      "inclusiveAllocatedBytes": null
+    },
+    "TransferReleased": {
+      "calls": 34,
+      "inclusiveMs": 33.7624,
+      "inclusiveAllocatedBytes": null
+    },
+    "RecoveryApplied": {
+      "calls": 135,
+      "inclusiveMs": 29572.857,
+      "inclusiveAllocatedBytes": null
+    },
+    "Settlement": {
+      "calls": 68,
+      "inclusiveMs": 40493.5714,
+      "inclusiveAllocatedBytes": null
+    },
+    "CheckpointReplay": {
+      "calls": 60067,
+      "inclusiveMs": 455677.0589,
+      "inclusiveAllocatedBytes": null
+    }
+  },
+  "threadAllocationCounterAvailable": false,
+  "frameAllocationCounterAvailable": true,
+  "workload": {
+    "frames": 12540,
+    "concurrentFrames": 6256,
+    "maximumRetainedCheckpointBytes": 73719,
+    "maximumObservedFrameMs": 2282.510757446289
+  },
+  "limitations": [
+    "Scope measurements are inclusive and nested; tagged phases may overlap.",
+    "Null allocations mean unavailable, never zero.",
+    "Opt-in injected clock preserves configured logical timing; Windows results do not establish mobile performance.",
+    "Complete-save sizes and reopen durations are recorded separately from post-exit files and launch records."
+  ]
+}
