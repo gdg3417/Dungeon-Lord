@@ -67,6 +67,8 @@ namespace DungeonBuilder.M0.EditorTools
             => BuildWindowsAt("Builds/Development/Windows-living-dungeon-two-floor-20261020/Dungeon Lord.exe");
         public static void BuildLivingDungeonTwoFloorFinalWindows()
             => BuildWindowsAt("Builds/Development/Windows-living-dungeon-two-floor-20261021-final/Dungeon Lord.exe");
+        public static void BuildLivingDungeonTwoFloorPerformanceWindows()
+            => BuildWindowsAt("Builds/Development/Windows-living-dungeon-two-floor-perf-20261021/Dungeon Lord.exe");
         public static void BuildLivingDungeonB3B2SmokeFixWindows()
             => BuildWindowsAt("Builds/Development/Windows-living-dungeon-b3b2-20261018-smoke-fix/Dungeon Lord.exe");
         public static void BuildLivingDungeonB3B2ReviewWindows()

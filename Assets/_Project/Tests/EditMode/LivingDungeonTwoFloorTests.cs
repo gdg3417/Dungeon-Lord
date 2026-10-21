@@ -15,6 +15,68 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public class LivingDungeonTwoFloorTests
     {
         internal static LivingDungeonForegroundConfig Policy => LivingDungeonForegroundConfig.LoadTwoFloor();
+        // Frozen pre-correction format-3 composition, kept independent of the
+        // optimized inspection hand-off. Compare every live/reopened prefix.
+        private static byte[] OriginalTransferInspection(RunExecution e) => RunCheckpointCodec.Bytes(w => {
+            RunCheckpointCodec.Text(w, TransferCheckpointCodec.Evidence);
+            RunCheckpointCodec.Blob(w, CombatCheckpointCodec.Inspection(e));
+            RunCheckpointCodec.Text(w, e.OccupiedFloor); w.Write(e.TransferWaiting); w.Write(e.TransferReleased);
+            w.Write(TransferCheckpointCodec.ControlBytes(e.TransferGate));
+        });
+        private static byte[] OriginalTransferFold(byte[] prefix, RunStep step, RunExecution e) =>
+            RunCheckpointCodec.Hash(RunCheckpointCodec.Bytes(w => {
+                RunCheckpointCodec.Text(w, TransferCheckpointCodec.Evidence);
+                RunCheckpointCodec.Blob(w, CombatCheckpointCodec.Fold(prefix, step, e));
+                RunCheckpointCodec.Blob(w, OriginalTransferInspection(e));
+            }));
+        private static byte[] OriginalTransferCheckpoint(RunExecution e) {
+            var payload = RunCheckpointCodec.Bytes(w => {
+                w.Write(3); RunCheckpointCodec.Text(w, TransferCheckpointCodec.Contract);
+                RunCheckpointCodec.Text(w, TransferCheckpointCodec.Evidence);
+                RunCheckpointCodec.Blob(w, e.StartInputs); w.Write(e.NextOrdinal); w.Write(e.Inspect().LogicalTime);
+                w.Write(e.AcceptedDeadline); w.Write(e.IsTerminal); w.Write(e.OutcomeTaken);
+                w.Write(TransferCheckpointCodec.ControlBytes(e.TransferGate));
+                RunCheckpointCodec.Blob(w, e.PrefixDigest); RunCheckpointCodec.Blob(w, OriginalTransferInspection(e));
+            });
+            return RunCheckpointCodec.Bytes(w => { w.Write(payload); w.Write(RunCheckpointCodec.Hash(payload)); });
+        }
+        [TestCase(false, false)] [TestCase(true, false)] [TestCase(true, true)]
+        public void InspectionReusePreservesOriginalFoldAndCheckpointAtEveryPrefix(bool descend, bool waiting)
+        {
+            var f = Dungeon(descend); var profile = Profile(f); var e = Start(f); string start = e.StartIdentity;
+            bool blocked = false;
+            try {
+                CollectionAssert.AreEqual(OriginalTransferCheckpoint(e), e.ExportCheckpoint(profile.Checkpoints).GetBytes());
+                while (!e.IsTerminal) {
+                    var prefix = (byte[])e.PrefixDigest.Clone(); RunStep step;
+                    if (e.TransferWaiting) step = e.ReleaseTransfer(e.TransferGate.Deadline + 5000, 2, 40, e.TransferGate.Deadline + 5000);
+                    else {
+                        long due = e.NextDueTime().Value;
+                        if (waiting && !blocked && e.AnnouncedAction == RunStepKind.FloorTransfer) {
+                            step = e.BlockTransfer(due, 2); blocked = true;
+                        } else step = e.AdvanceThrough(due, 1, e.NextOrdinal).Single();
+                    }
+                    CollectionAssert.AreEqual(OriginalTransferFold(prefix, step, e), e.PrefixDigest);
+                    var cp = e.ExportCheckpoint(profile.Checkpoints);
+                    CollectionAssert.AreEqual(OriginalTransferCheckpoint(e), cp.GetBytes());
+                    var restored = CombatCheckpointCodec.RestoreSupported(cp.GetBytes(), cp.Identity, cp.StartIdentity, cp.NextOrdinal, profile.Checkpoints);
+                    Assert.That(restored.IsValid, Is.True, restored.FailureReason);
+                    CollectionAssert.AreEqual(cp.GetBytes(), restored.Execution.ExportCheckpoint(profile.Checkpoints).GetBytes());
+                    restored.Execution.Abandon(); Assert.That(e.StartIdentity, Is.EqualTo(start));
+                }
+                Assert.That(blocked, Is.EqualTo(waiting));
+                // Diagnostic only: equivalent folds of one frozen terminal view.
+                // No gameplay work, timing or pass threshold is changed.
+                var last = e.Inspect().LastStep.Value; var p = e.PrefixDigest; const int samples = 512;
+                long work = e.CommittedCombatWork;
+                var timer = System.Diagnostics.Stopwatch.StartNew();
+                for (int i = 0; i < samples; i++) OriginalTransferFold(p, last, e);
+                timer.Stop(); double original = timer.Elapsed.TotalMilliseconds; timer.Restart();
+                for (int i = 0; i < samples; i++) TransferCheckpointCodec.Fold(p, last, e);
+                timer.Stop(); TestContext.WriteLine("Identical-view fold diagnostic: original_ms=" + original + " reused_ms=" + timer.Elapsed.TotalMilliseconds);
+                Assert.That(e.CommittedCombatWork, Is.EqualTo(work));
+            } finally { e.Abandon(); }
+        }
         [Serializable] private sealed class HistoricalCheckpoint
         {
             public string Source, SourceSha256, StartIdentity, CheckpointIdentity, Base64;

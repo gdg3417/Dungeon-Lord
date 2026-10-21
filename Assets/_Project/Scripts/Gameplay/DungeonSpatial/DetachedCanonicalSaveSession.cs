@@ -362,7 +362,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 DetachedCompleteSaveValidationResult validated =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
                 if (validated.IsValid && livingDungeon?.Scheduler?.ProfileId == LivingDungeonForegroundConfig.TwoFloorProfileId) {
-                    var releasePredecessor = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, context);
+                    // The same immutable currentBytes/context were fully validated above.
+                    // Reconcile and Write only read that detached result; keep the exact
+                    // predecessor proof local to this preparation, never between saves.
+                    var releasePredecessor = prior;
                     var profile = LivingDungeonContracts.Profile(livingDungeon, context.LivingDungeonProfiles);
                     foreach (var party in livingDungeon.Parties) {
                         var nextExecution = LivingDungeonContracts.Restore(party, profile);

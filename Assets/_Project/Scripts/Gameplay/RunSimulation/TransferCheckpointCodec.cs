@@ -27,14 +27,17 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             ReleaseOrdinal = r.ReadInt64(), ReleaseTime = r.ReadInt64(), VacancySequence = r.ReadInt32(),
             VacancyOrdinal = r.ReadInt64(), VacancyTime = r.ReadInt64() };
         internal static byte[] ControlBytes(TransferControl gate) => RunCheckpointCodec.Bytes(w => Gate(w, gate));
-        private static byte[] Inspection(RunExecution e) => RunCheckpointCodec.Bytes(w => {
-            RunCheckpointCodec.Text(w, Evidence); RunCheckpointCodec.Blob(w, CombatCheckpointCodec.Inspection(e));
+        private static byte[] Inspection(RunExecution e) => Inspection(e, CombatCheckpointCodec.Inspection(e));
+        private static byte[] Inspection(RunExecution e, byte[] combatInspection) => RunCheckpointCodec.Bytes(w => {
+            RunCheckpointCodec.Text(w, Evidence); RunCheckpointCodec.Blob(w, combatInspection);
             RunCheckpointCodec.Text(w, e.OccupiedFloor); w.Write(e.TransferWaiting); w.Write(e.TransferReleased); Gate(w, e.TransferGate);
         });
         internal static byte[] Fold(byte[] prefix, RunStep step, RunExecution e) => RunCheckpointCodec.Hash(RunCheckpointCodec.Bytes(w => {
             RunCheckpointCodec.Text(w, Evidence);
-            RunCheckpointCodec.Blob(w, CombatCheckpointCodec.Fold(prefix, step, e));
-            RunCheckpointCodec.Blob(w, Inspection(e));
+            // Both envelopes describe this same synchronous committed event. Reuse
+            // only the bytes captured by its combat fold; no execution/state cache.
+            RunCheckpointCodec.Blob(w, CombatCheckpointCodec.Fold(prefix, step, e, out var combatInspection));
+            RunCheckpointCodec.Blob(w, Inspection(e, combatInspection));
         }));
         internal static RunCheckpoint Export(RunExecution e, RunCheckpointLimits limits)
         {
