@@ -45,8 +45,18 @@ namespace DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests
                     var cp = current.ExportCheckpoint(currentLimits); var bytes = cp.GetBytes();
                     var result = restore.Invoke(null, new object[] { bytes, cp.Identity, cp.StartIdentity, cp.NextOrdinal, oldLimits, false });
                     var resultType = result.GetType();
-                    if (!(bool)resultType.GetProperty("IsValid").GetValue(result))
+                    if (!(bool)resultType.GetProperty("IsValid").GetValue(result)) {
+                        // Preserve the underlying old-reader failure instead of
+                        // mistaking a load-context/fixture limitation for a byte change.
+                        using var reader = new BinaryReader(new MemoryStream(bytes));
+                        reader.ReadInt32(); reader.BaseStream.Position += reader.ReadInt32();
+                        var start = reader.ReadBytes(reader.ReadInt32());
+                        try {
+                            old.GetType("DungeonBuilder.M0.Gameplay.RunSimulation.RunStartCapture", true)
+                                .GetMethod("Recreate", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] { start });
+                        } catch (TargetInvocationException error) { Debug.LogException(error.InnerException); }
                         throw new InvalidOperationException("historical.capture.old_reader_rejected: " + resultType.GetProperty("FailureReason").GetValue(result));
+                    }
                     var execution = resultType.GetProperty("Execution").GetValue(result);
                     try {
                         var checkpoint = execution.GetType().GetMethod("ExportCheckpoint").Invoke(execution, new[] { oldLimits });
