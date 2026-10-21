@@ -60,7 +60,11 @@ namespace DungeonBuilder.M0.Tests
                             var party = root.ForegroundActivity.ForFloor(floor.FloorInstanceId);
                             Assert.That(party.RunId, Is.EqualTo("run-" + (floor.FloorIndex == 0 ? report.WaitingSequence : report.BlockerSequence)));
                             var activity = ui.Q<UnityEngine.UIElements.Label>("foregroundActivity");
-                            Assert.That(activity.text, Does.Contain(party.RunId));
+                            string heading = string.Format(root.Content.GetString("ui.living.active_format", string.Empty),
+                                party.RunId, party.Step?.FloorIndex + 1 ?? 1,
+                                root.Content.GetString("ui.living.pending." + (party.AnnouncedAction?.ToString() ?? "RoomEntry"), string.Empty));
+                            Assert.That(activity.text, Does.Contain(heading));
+                            Assert.That(ui.Q<Label>("foregroundPartyLabel").tooltip, Is.EqualTo(party.RunId));
                             if (floor.FloorIndex == 0) Assert.That(activity.text, Does.Contain(root.Content.GetString("ui.living.waiting", string.Empty)));
                             var map = ui.Q("mapArea");
                             Assert.That(map.worldBound.height, Is.GreaterThan(80), "Retain an interactive map viewport");
