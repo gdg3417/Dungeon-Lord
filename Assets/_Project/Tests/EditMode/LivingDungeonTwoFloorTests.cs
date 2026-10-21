@@ -106,9 +106,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Reopen(); Through(f, finish); Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
             var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, finish); CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes());
         }
-        internal static Fixture Waiting()
+        internal static Fixture Waiting(int? capturedBHealth = null)
         {
-            var f = Dungeon(); var profile = Profile(f); var a = Start(f, 1); var b = Start(f, 2);
+            var f = Dungeon(); var profile = Profile(f); var a = Start(f, 1);
+            if (capturedBHealth.HasValue) {
+                var condition = f.Runtime.monsterContinuity.Copy();
+                string id = f.State.Floors[1].RoomContents.Assignments.Single(m => m.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId).AssignmentId;
+                condition.Records.Single(m => m.AssignmentId == id).Health = capturedBHealth.Value;
+                var updated = f.Session.PrepareLiveReplacement(DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile), f.State, monsterContinuity: condition);
+                Assert.That(updated.IsSuccess, Is.True, updated.Reason); f.FileSystem.Seed(f.ActivePath, updated.Update.GetBytes()); f.Reopen();
+            }
+            var b = Start(f, 2);
             long deadline = ToTransfer(b); long aDeadline = ToTransfer(a); a.AdvanceThrough(aDeadline, 1, a.NextOrdinal);
             while (a.NextDueTime() <= deadline) a.AdvanceThrough(a.NextDueTime().Value, 1, a.NextOrdinal);
             b.BlockTransfer(deadline, 1);
@@ -170,7 +178,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
             if (removeLoot) {
                 string loot = f.State.Floors[0].RoomContents.Assignments.Single(a => a.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId).AssignmentId;
-                f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(loot)));
+                f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(loot, f.State.Floors[0].FloorInstanceId)));
             }
             Assert.That(f.Runtime.livingDungeon.Parties.Single().StartIdentity, Is.EqualTo(identity));
             e.DrainToCompletion(); long finish = e.Inspect().LogicalTime; e.Abandon(); f.Reopen(); Through(f, finish);
@@ -247,6 +255,50 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"livingDungeon\":{\"FormatVersion\":1,\"Revision\":" + f.Runtime.livingDungeon.Revision + ",",
                 "\"livingDungeon\":{\"FormatVersion\":1,\"Revision\":0,");
             Assert.That(Stable(split), Is.EqualTo(Stable(direct)));
+        }
+        [TestCase(false)] [TestCase(true)] public void OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements(bool partial)
+        {
+            var f = Waiting(partial ? 2 : (int?)null); var profile = Profile(f);
+            string id = f.State.Floors[1].RoomContents.Assignments.Single(m => m.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId).AssignmentId;
+            var b = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties[1], profile);
+            int captured = b.Snapshot.MonsterStarts.Records.Single(m => m.AssignmentId == id).Health;
+            string start = b.StartIdentity; b.Abandon();
+            if (partial) Fund(f, 5); // test-only available balance; real vacant-floor recovery spends it
+            var a = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties[0], profile); var outcomeA = a.DrainToCompletion();
+            long aFinish = a.Inspect().LogicalTime; a.Abandon(); Through(f, aFinish);
+            Assert.That(outcomeA.CombatMonsters.Single(m => m.AssignmentId == id).Health, Is.Zero);
+            Assert.That(f.Runtime.monsterContinuity.Records.Single(m => m.AssignmentId == id).Health, Is.EqualTo(partial ? 5 : 7));
+            b = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties.Single(p => p.Sequence == 2), profile);
+            Assert.That(b.StartIdentity, Is.EqualTo(start));
+            Assert.That(b.Snapshot.MonsterStarts.Records.Single(m => m.AssignmentId == id).Health, Is.EqualTo(captured));
+            Fund(f, 0); var before = f.Runtime.monsterContinuity.Copy();
+            var outcomeB = b.DrainToCompletion(); long bFinish = b.Inspect().LogicalTime; b.Abandon();
+            var expected = before.Records.ToDictionary(m => m.AssignmentId, m => m.Health);
+            foreach (var monster in outcomeB.CombatMonsters)
+                expected[monster.AssignmentId] = Math.Max(0, expected[monster.AssignmentId] - monster.InitialHealth + monster.Health);
+            f.Reopen(); Through(f, bFinish);
+            foreach (var monster in f.Runtime.monsterContinuity.Records) Assert.That(monster.Health, Is.EqualTo(expected[monster.AssignmentId]));
+            if (partial) { Assert.That(expected[id], Is.EqualTo(3)); Assert.That(f.Runtime.monsterContinuity.Records.Single(m => m.AssignmentId == id).RevivalRequired, Is.True); }
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Select(o => o.RunId), Is.EqualTo(new[] { "run-1", "run-2" }));
+            Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(3));
+            var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, bFinish); CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes());
+        }
+        private static void Fund(Fixture f, double wallet)
+        {
+            var current = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(f.Runtime)); current.structureRuntime.ManaReserve = wallet;
+            if (f.Runtime.runHistory.LatestOutcome == null) current.runHistory.LatestOutcome = null;
+            if (f.Runtime.runHistory.RecentOutcomes == null) current.runHistory.RecentOutcomes = null;
+            f.Accept(PhaseSixA4Tests.Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, current));
+        }
+        [Test] public void CorruptFormatThreeReturnsFailureWithoutThrowingOrPublishing()
+        {
+            var f = Dungeon(); var e = Start(f); long b = ToTransfer(e); e.BlockTransfer(b, 2);
+            var cp = e.ExportCheckpoint(Profile(f).Checkpoints); var bytes = cp.GetBytes(); bytes[bytes.Length - 1] ^= 1;
+            Assert.DoesNotThrow(() => {
+                var failed = CombatCheckpointCodec.RestoreSupported(bytes, RunCheckpointCodec.Identity(bytes), cp.StartIdentity, cp.NextOrdinal, Profile(f).Checkpoints);
+                Assert.That(failed.IsValid, Is.False);
+            });
+            e.Abandon();
         }
     }
 }

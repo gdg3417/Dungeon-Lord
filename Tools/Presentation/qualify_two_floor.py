@@ -12,6 +12,8 @@ for old, new in (
     ('BuildLivingDungeonB3B2Windows', 'BuildLivingDungeonTwoFloorWindows'),
 ):
     source = source.replace(old, new)
+source = source.replace("'LivingDungeonB3B2PlayModeTests;", "'LivingDungeonTwoFloorPlayModeTests;LivingDungeonB3B2PlayModeTests;")
+source = source.replace("'LivingDungeonB3B2;Graphical", "'LivingDungeonTwoFloor;LivingDungeonB3B2;Graphical")
 source = source.replace("p=Path(row['path']);z.write(p,p.relative_to(ROOT/'TestResults').as_posix())",
     "p=Path(row['path']);\n            if p.suffix.lower() != '.zip': z.write(p,p.relative_to(ROOT/'TestResults').as_posix())")
 exec(compile(source, str(source_path), 'exec'))

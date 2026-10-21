@@ -69,6 +69,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (ordinal != expectedOrdinal || ordinal < 0 || ordinal > limits.MaximumReplayEvents || time < 0 ||
                     deadline < -1 || deadline >= 0 && deadline < time || consumed && !terminal || digest.Length != 32)
                     throw new InvalidDataException();
+                if (gate?.ReleaseOrdinal >= 0 && gate.VacancyOrdinal >= limits.MaximumReplayEvents) throw new InvalidDataException();
                 using (var sr = new BinaryReader(new MemoryStream(start), new UTF8Encoding(false, true))) {
                     if (RunCheckpointCodec.Text(sr) != Contract || sr.ReadInt32() != Format) throw new InvalidDataException();
                     long maximum = sr.ReadInt64(); var inner = RunCheckpointCodec.Blob(sr); RunCheckpointCodec.End(sr);
@@ -94,8 +95,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 e.RestoreMetadata(deadline, consumed);
                 if (!Export(e, limits).GetBytes().SequenceEqual(bytes)) throw new InvalidDataException();
                 return new RunCheckpointRestoreResult(e, null);
-            } catch (Exception error) when (error is IOException || error is ArgumentException || error is InvalidOperationException ||
-                error is OverflowException || error is NullReferenceException || error is IndexOutOfRangeException) {
+            } catch (Exception error) when (error is IOException || error is InvalidDataException || error is ArgumentException || error is InvalidOperationException ||
+                error is OverflowException || error is NullReferenceException || error is IndexOutOfRangeException ||
+                error is System.Collections.Generic.KeyNotFoundException || error is FormatException) {
                 e?.Abandon(); return new RunCheckpointRestoreResult(null, "run.checkpoint.transfer_evidence_mismatch");
             }
         }

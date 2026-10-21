@@ -7,6 +7,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         internal static void Check(RunExecution probe, LivingDungeonProfile profile, bool blockedPath = false)
         {
+            long? alternativeWork = null;
             while (!probe.IsTerminal) {
                 if (probe.NextOrdinal >= profile.MaximumPartyReplay) throw new InvalidOperationException("run.checkpoint.replay_limit");
                 var due = probe.NextDueTime();
@@ -21,12 +22,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         // wallet or vacancy capability is created by this size/work probe.
                         e.BlockTransfer(due.Value, int.MaxValue); Verify(e, profile);
                         long release = checked(due.Value + 1);
-                        e.ReleaseTransfer(release, int.MaxValue, long.MaxValue, release); Verify(e, profile);
+                        e.ReleaseTransfer(release, int.MaxValue, profile.MaximumPartyReplay - 1, release); Verify(e, profile);
                         Check(e, profile, true);
+                        alternativeWork = e.CommittedCombatWork;
                     } finally { alternative.Execution.Abandon(); }
                 }
                 probe.AdvanceThrough(due.Value, 1, probe.NextOrdinal); Verify(probe, profile);
             }
+            if (alternativeWork.HasValue && alternativeWork.Value != probe.CommittedCombatWork)
+                throw new InvalidOperationException("living.transfer.invalid_probe_work");
         }
         private static void Verify(RunExecution e, LivingDungeonProfile profile)
         {
