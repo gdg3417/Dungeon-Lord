@@ -25,6 +25,12 @@ namespace DungeonBuilder.M0.Tests
                     UnityEditor.SceneManagement.NewSceneMode.Single);
                 yield return new EnterPlayMode();
             }
+            // Create the setup closure after the Play Mode domain reload.
+            yield return WaitingSelectedFloorLayouts();
+        }
+
+        private IEnumerator WaitingSelectedFloorLayouts()
+        {
             new EditMode.LivingDungeonTwoFloorTests().ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming();
             string directory = Path.GetFullPath("TestResults/living-dungeon-two-floor-20261020/inputs");
             string manifestPath = Directory.GetFiles(directory, "two-floor-*.manifest.json").OrderByDescending(File.GetLastWriteTimeUtc).First();
