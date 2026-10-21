@@ -18,4 +18,6 @@ source = source.replace("'LivingDungeonB3B2;Graphical", "'LivingDungeonTwoFloor;
 source = source.replace("p=Path(row['path']);z.write(p,p.relative_to(ROOT/'TestResults').as_posix())",
     "p=Path(row['path']);\n            if p.suffix.lower() != '.zip': z.write(p,p.relative_to(ROOT/'TestResults').as_posix())")
 source = source.replace("elif mode=='smoke':", "elif mode=='two-floor-smoke':\n    from qualify_two_floor_native import launch\n    launch(m,sys.argv[2],sys.argv[3],sys.argv[4])\nelif mode=='smoke':")
+source = source.replace("exec(compile(source,m.__file__,'exec'),m.__dict__)",
+    "source=source.replace(\"'1800'\", \"'7200'\")\nexec(compile(source,m.__file__,'exec'),m.__dict__)")
 exec(compile(source, str(source_path), 'exec'))

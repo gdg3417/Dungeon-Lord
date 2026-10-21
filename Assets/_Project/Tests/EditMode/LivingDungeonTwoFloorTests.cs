@@ -15,6 +15,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public class LivingDungeonTwoFloorTests
     {
         internal static LivingDungeonForegroundConfig Policy => LivingDungeonForegroundConfig.LoadTwoFloor();
+        [Serializable] private sealed class HistoricalCheckpoint
+        {
+            public string Source, SourceSha256, StartIdentity, CheckpointIdentity, Base64;
+            public int Format;
+            public long NextOrdinal;
+        }
+        [Test] public void Pr245HistoricalFormatTwoGoldenRestoresAndReencodesExactOriginalBytes()
+        {
+            var frozen = JsonUtility.FromJson<HistoricalCheckpoint>(File.ReadAllText("Tools/Presentation/Fixtures/historical-c2-format2.json"));
+            var bytes = Convert.FromBase64String(frozen.Base64);
+            Assert.That(BitConverter.ToInt32(bytes, 0), Is.EqualTo(2));
+            Assert.That(RunCheckpointCodec.Identity(bytes), Is.EqualTo(frozen.CheckpointIdentity));
+            var profile = LivingDungeonForegroundConfig.Load().CreateProfile(SaveSpatialMigrationLimits.Canonical.ForSchema(13).Serialized);
+            var restored = CombatCheckpointCodec.RestoreSupported(bytes, frozen.CheckpointIdentity, frozen.StartIdentity, frozen.NextOrdinal, profile.Checkpoints);
+            Assert.That(restored.IsValid, Is.True, restored.FailureReason);
+            try {
+                Assert.That(restored.Execution.TransferContract, Is.False);
+                CollectionAssert.AreEqual(bytes, restored.Execution.ExportCheckpoint(profile.Checkpoints).GetBytes());
+                restored.Execution.DrainToCompletion();
+            } finally { restored.Execution.Abandon(); }
+        }
         internal static Fixture Dungeon(bool descend = true)
         {
             var f = PhaseSixA4Tests.Eligible(); f.Configuration = CombatC0IntegrationTests.Config();
