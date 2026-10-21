@@ -258,6 +258,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     var due = e.NextDueTime();
                     if (due.HasValue && checked(p.AdmittedAt + due.Value) <= s.ClosedThrough) return false;
                     if (e.TransferContract) {
+                        // Terminal pinning is private, unclosed settlement staging.
+                        // A published closed timestamp already includes retirement.
+                        if (e.IsTerminal && state.IsClosed) return false;
                         // Format-3 alone supports Released for exact prefix replay;
                         // complete-save publication requires its transfer in the same boundary.
                         if (e.TransferReleased) return false;

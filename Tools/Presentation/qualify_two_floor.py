@@ -16,6 +16,7 @@ source = source.replace("'LivingDungeonB3B2PlayModeTests;", "'LivingDungeonTwoFl
 source = source.replace("'focused': 'LivingDungeonTwoFloor'", "'focused': 'DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor', 'profile-edit': 'LivingDungeonTwoFloorProductionProfileSceneTests'")
 source = source.replace("'profile-edit': 'LivingDungeonTwoFloorProductionProfileSceneTests'", "'profile-edit': 'LivingDungeonTwoFloorProductionProfileSceneTests', 'profile-two': 'LivingDungeonTwoFloorEditorProductionProfile'")
 source = source.replace("'profile-two': 'LivingDungeonTwoFloorEditorProductionProfile'", "'profile-two': 'LivingDungeonTwoFloorEditorProductionProfile', 'closed-terminal': 'TerminalPrefixOnlyFitsAnUnclosedV2Boundary'")
+source = source.replace("'closed-terminal': 'TerminalPrefixOnlyFitsAnUnclosedV2Boundary'", "'closed-terminal': 'TerminalPrefixOnlyFitsAnUnclosedV2Boundary', 'layout-two': 'LivingDungeonTwoFloorWaitingSelectedFloorLayoutsPreserveCanonicalState'")
 source = source.replace("'LivingDungeonB3B2;Graphical", "'DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor;LivingDungeonB3B2;Graphical")
 source = source.replace("p=Path(row['path']);z.write(p,p.relative_to(ROOT/'TestResults').as_posix())",
     "p=Path(row['path']);\n            if p.suffix.lower() != '.zip': z.write(p,p.relative_to(ROOT/'TestResults').as_posix())")
