@@ -16,4 +16,5 @@ source = source.replace("'LivingDungeonB3B2PlayModeTests;", "'LivingDungeonTwoFl
 source = source.replace("'LivingDungeonB3B2;Graphical", "'LivingDungeonTwoFloor;LivingDungeonB3B2;Graphical")
 source = source.replace("p=Path(row['path']);z.write(p,p.relative_to(ROOT/'TestResults').as_posix())",
     "p=Path(row['path']);\n            if p.suffix.lower() != '.zip': z.write(p,p.relative_to(ROOT/'TestResults').as_posix())")
+source = source.replace("elif mode=='smoke':", "elif mode=='two-floor-smoke':\n    from qualify_two_floor_native import launch\n    launch(m,sys.argv[2],sys.argv[3],sys.argv[4])\nelif mode=='smoke':")
 exec(compile(source, str(source_path), 'exec'))
