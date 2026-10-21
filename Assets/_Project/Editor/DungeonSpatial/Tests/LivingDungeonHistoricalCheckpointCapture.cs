@@ -48,9 +48,7 @@ namespace DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests
                     if (!(bool)resultType.GetProperty("IsValid").GetValue(result)) {
                         // Preserve the underlying old-reader failure instead of
                         // mistaking a load-context/fixture limitation for a byte change.
-                        using var reader = new BinaryReader(new MemoryStream(bytes));
-                        reader.ReadInt32(); reader.BaseStream.Position += reader.ReadInt32();
-                        var start = reader.ReadBytes(reader.ReadInt32());
+                        var start = (byte[])typeof(RunExecution).GetField("StartInputs", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(current);
                         try {
                             old.GetType("DungeonBuilder.M0.Gameplay.RunSimulation.RunStartCapture", true)
                                 .GetMethod("Recreate", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] { start });
