@@ -71,6 +71,7 @@ namespace DungeonBuilder.M0
                 view.StateKey = "ui.living.unsupported_layout";
             var profile = _validationContext.LivingDungeonProfiles.Single(p => p.Id == owner.Scheduler.ProfileId);
             var parties = new System.Collections.Generic.List<LivingDungeonForegroundInspection>();
+            string vacantStateKey = view.StateKey;
             long nextBoundary = view.NextBoundary;
             foreach (var p in owner.Parties) {
                 var e = LivingDungeonContracts.Restore(p, profile, retainPresentation: true);
@@ -107,7 +108,8 @@ namespace DungeonBuilder.M0
                     parties.Add(view);
                 } finally { e.Abandon(); }
             }
-            view.NextBoundary = nextBoundary; view.Parties = parties.AsReadOnly(); return view;
+            view.NextBoundary = nextBoundary; view.Parties = parties.AsReadOnly();
+            view.SetVacantReason(parties.Count == 0 ? view.StateKey : vacantStateKey); return view;
         }
     }
 
@@ -118,13 +120,20 @@ namespace DungeonBuilder.M0
         public bool Descended { get; internal set; }
         public bool? Decision { get; internal set; }
         private LivingDungeonForegroundInspection vacant;
+        private string vacantStateKey;
+        internal void SetVacantReason(string key)
+        {
+            vacantStateKey = key;
+            if (Parties.Count == 0) StateKey = key;
+            if (vacant != null) vacant.StateKey = key;
+        }
         public System.Collections.Generic.IReadOnlyList<LivingDungeonForegroundInspection> Parties { get; internal set; } = Array.Empty<LivingDungeonForegroundInspection>();
         public LivingDungeonForegroundInspection ForFloor(string floor)
         {
             if (Parties.Count == 0) return this;
             // Called by presentation every frame; selection needs no LINQ closure.
             for (int i = 0; i < Parties.Count; i++) if (Parties[i].FloorId == floor) return Parties[i];
-            return vacant ??= new LivingDungeonForegroundInspection { StateKey = "ui.living.awaiting" };
+            return vacant ??= new LivingDungeonForegroundInspection { StateKey = vacantStateKey ?? StateKey };
         }
         public string StateKey { get; internal set; }
         public string RunId { get; internal set; }

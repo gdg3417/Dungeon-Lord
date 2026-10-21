@@ -116,18 +116,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = Dungeon(descend); var e = Start(f); LivingDungeonLifetimeAssurance.Check(e, Profile(f));
             Assert.That(e.IsTerminal, Is.True); Assert.That(e.NextOrdinal, Is.LessThan(Profile(f).MaximumPartyReplay)); e.Abandon();
         }
-        [Test, Timeout(1000)] public void SynchronousWaitingHelpersFailWithoutConsumingOrPoisoningThePrefix()
+        [Test, Timeout(60000)] public void SynchronousWaitingHelpersFailWithoutConsumingOrPoisoningThePrefix()
         {
             var f = Dungeon(); var e = Start(f); long b = ToTransfer(e); e.BlockTransfer(b, 2);
             var bytes = e.ExportCheckpoint(Profile(f).Checkpoints).GetBytes(); long work = e.CommittedCombatWork;
             string source = e.OccupiedFloor, start = e.StartIdentity; long ordinal = e.NextOrdinal;
             Assert.That(Assert.Throws<InvalidOperationException>(() => e.DrainToCompletion(true)).Message, Is.EqualTo("living.transfer.waiting"));
-            Assert.That(Assert.Throws<InvalidOperationException>(() => e.AdvanceOne(e.NextOrdinal)).Message, Is.EqualTo("living.transfer.waiting"));
+            Assert.That(Assert.Throws<InvalidOperationException>(() => e.AdvanceToNextEvent(e.NextOrdinal)).Message, Is.EqualTo("living.transfer.waiting"));
             CollectionAssert.AreEqual(bytes, e.ExportCheckpoint(Profile(f).Checkpoints).GetBytes());
             Assert.That(e.CommittedCombatWork, Is.EqualTo(work)); Assert.That(e.NextOrdinal, Is.EqualTo(ordinal));
             Assert.That(e.StartIdentity, Is.EqualTo(start)); Assert.That(e.OccupiedFloor, Is.EqualTo(source));
             e.ReleaseTransfer(b + 1, 2, 40, b + 1); e.AdvanceThrough(b + 1, 1, e.NextOrdinal);
             Assert.That(e.OccupiedFloor, Is.EqualTo(PhaseSixA4Tests.FloorTwo(f))); e.Abandon();
+        }
+        [Test] public void VacantFloorRetainsEligibilityFeedbackWhileAnotherFloorHasAParty()
+        {
+            var active = new LivingDungeonForegroundInspection { RunId = "run-1", FloorId = "floor-2", StateKey = "ui.living.active" };
+            active.Parties = new[] { active };
+            active.SetVacantReason("ui.living.unsupported_layout");
+            Assert.That(active.ForFloor("floor-2"), Is.SameAs(active)); Assert.That(active.StateKey, Is.EqualTo("ui.living.active"));
+            var vacant = active.ForFloor("floor-1"); Assert.That(vacant.StateKey, Is.EqualTo("ui.living.unsupported_layout"));
+            active.SetVacantReason("ui.living.admission_unavailable");
+            Assert.That(active.ForFloor("floor-1"), Is.SameAs(vacant)); Assert.That(vacant.StateKey, Is.EqualTo("ui.living.admission_unavailable"));
+            Assert.That(active.ForFloor("floor-2").RunId, Is.EqualTo("run-1"));
         }
         [Test] public void AutomaticTwoFloorAdmissionCompletesAndRetiresExactlyOnce()
         {

@@ -101,8 +101,8 @@ namespace DungeonBuilder.M0
                 if (TimeService.IsPaused && Save.livingDungeon.IsClosed)
                     _resumeOfflineBoundaryPersisted = true;
                 ForegroundActivity = SaveService.InspectForeground(Save, _configuredSimulationTickSeconds);
-                if (result.ForegroundAdmissionReason != null && ForegroundActivity.RunId == null)
-                    ForegroundActivity.StateKey = "ui.living.admission_unavailable";
+                if (result.ForegroundAdmissionReason != null)
+                    ForegroundActivity.SetVacantReason("ui.living.admission_unavailable");
                 if (Save.totalTicks > beforeTicks) {
                     _activeSessionTickCount = checked(_activeSessionTickCount + Save.totalTicks - beforeTicks);
                     HandleTickTelemetry(Save.totalTicks);
