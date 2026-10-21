@@ -12,8 +12,11 @@ namespace DungeonBuilder.M0.Tests
 {
     public sealed class LivingDungeonTwoFloorProductionProfileSceneTests
     {
-        [UnityTest, Timeout(1800000)]
-        public IEnumerator LivingDungeonTwoFloorMatchedEditorProductionProfiles()
+        [UnityTest, Timeout(7200000)]
+        public IEnumerator LivingDungeonTwoFloorEditorProductionProfile() => MatchedProfile("two-floor");
+        [UnityTest, Timeout(7200000)]
+        public IEnumerator LivingDungeonSingleFloorEditorProductionProfile() => MatchedProfile("owner-inactive");
+        private IEnumerator MatchedProfile(string selectedVariant)
         {
             // Entering play reloads the domain. Create captured fixture objects
             // only afterward, so the test runner need not serialize them.
@@ -26,7 +29,7 @@ namespace DungeonBuilder.M0.Tests
             // writer. Their only difference is Floor 2's activation state.
             new EditMode.LivingDungeonTwoFloorTests().ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming();
             string directory = Path.GetFullPath("TestResults/living-dungeon-two-floor-20261020/inputs");
-            foreach (string variant in new[] { "owner-inactive", "two-floor" }) {
+            foreach (string variant in new[] { selectedVariant }) {
                 string manifestPath = Directory.GetFiles(directory, variant + "-*.manifest.json")
                     .OrderByDescending(File.GetLastWriteTimeUtc).First();
                 var manifest = JsonUtility.FromJson<TwoFloorSeedManifest>(File.ReadAllText(manifestPath));

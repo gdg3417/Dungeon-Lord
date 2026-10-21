@@ -34,6 +34,7 @@
     {"key":"ui.living.pending.FloorDecision","text":"Finishing exploration"},
     {"key":"ui.living.pending.FloorTransfer","text":"Changing floors"},
     {"key":"ui.living.waiting","text":"Waiting for the next floor to become vacant"},
+    {"key":"living.transfer.waiting","text":"The party is waiting for a verified floor vacancy."},
     {"key":"ui.living.descended","text":"Descended to this floor"},
     {"key":"ui.living.decision.descend","text":"The party chose to descend"},
     {"key":"ui.living.decision.exit","text":"The party chose to exit"},

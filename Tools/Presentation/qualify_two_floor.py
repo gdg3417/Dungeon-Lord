@@ -14,10 +14,12 @@ for old, new in (
     source = source.replace(old, new)
 source = source.replace("'LivingDungeonB3B2PlayModeTests;", "'LivingDungeonTwoFloorPlayModeTests;LivingDungeonB3B2PlayModeTests;")
 source = source.replace("'focused': 'LivingDungeonTwoFloor'", "'focused': 'DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor', 'profile-edit': 'LivingDungeonTwoFloorProductionProfileSceneTests'")
+source = source.replace("'profile-edit': 'LivingDungeonTwoFloorProductionProfileSceneTests'", "'profile-edit': 'LivingDungeonTwoFloorProductionProfileSceneTests', 'profile-two': 'LivingDungeonTwoFloorEditorProductionProfile'")
 source = source.replace("'LivingDungeonB3B2;Graphical", "'DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor;LivingDungeonB3B2;Graphical")
 source = source.replace("p=Path(row['path']);z.write(p,p.relative_to(ROOT/'TestResults').as_posix())",
     "p=Path(row['path']);\n            if p.suffix.lower() != '.zip': z.write(p,p.relative_to(ROOT/'TestResults').as_posix())")
 source = source.replace("elif mode=='smoke':", "elif mode=='two-floor-smoke':\n    from qualify_two_floor_native import launch\n    launch(m,sys.argv[2],sys.argv[3],sys.argv[4])\nelif mode=='smoke':")
+source = source.replace("elif mode=='smoke':", "elif mode=='golden-capture':\n    from qualify_two_floor_compat import capture\n    capture(m,sys.argv[2])\nelif mode=='smoke':")
 source = source.replace("exec(compile(source,m.__file__,'exec'),m.__dict__)",
     "source=source.replace(\"'1800'\", \"'7200'\")\nexec(compile(source,m.__file__,'exec'),m.__dict__)")
 source = source.replace("elif mode=='all-required':", "elif mode=='remaining-required':\n    for stage in ('boundary-edit','profile-edit','full-play','build'):\n        if stage=='build': build_namespace()\n        result=m.run(stage,sys.argv[2])\n        if result: sys.exit(result)\n        checkpoint(sys.argv[2]+'-'+stage+'-passed')\n    m.q.NAMESPACE='living-dungeon-b3b2-qualification-two-floor-20261020.json'\n    m.q.inputs.NAMESPACE=m.q.NAMESPACE\n    data=subprocess.check_output(['git','show','HEAD:'+m.q.inputs.CONFIG],cwd=ROOT)\n    (ROOT/m.q.inputs.CONFIG).write_bytes(m.q.inputs.transformed(m.q.inputs.CONFIG,data))\n    current_service(True)\nelif mode=='all-required':")

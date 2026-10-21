@@ -231,11 +231,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public RunStep AdvanceToNextEvent(long expectedNextOrdinal)
         {
             var steps = Advance(1, expectedNextOrdinal);
-            if (steps.Length == 0) throw new InvalidOperationException("run.execution.terminal");
+            if (steps.Length == 0) throw new InvalidOperationException(TransferWaiting ? "living.transfer.waiting" : "run.execution.terminal");
             return steps[0];
         }
         public RunOutcomeRecord DrainToCompletion(bool retainPresentationSteps = false)
         {
+            // A vacancy is external authority. A synchronous drain cannot invent
+            // that transition or make progress through a waiting transfer.
+            if (TransferWaiting) throw new InvalidOperationException("living.transfer.waiting");
             // Only completed manual publication opts in. The existing geometry-derived
             // event ceiling bounds this session evidence; checkpoint execution is unchanged.
             var steps = retainPresentationSteps ? new List<RunStep>() : null;
