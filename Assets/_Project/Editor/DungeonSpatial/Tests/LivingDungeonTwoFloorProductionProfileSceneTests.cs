@@ -25,12 +25,7 @@ namespace DungeonBuilder.M0.Tests
                     UnityEditor.SceneManagement.NewSceneMode.Single);
                 yield return new EnterPlayMode();
             }
-            // Create the setup closure after the Play Mode domain reload.
-            yield return WaitingSelectedFloorLayouts();
-        }
-
-        private IEnumerator WaitingSelectedFloorLayouts()
-        {
+            Assert.That(Application.isPlaying, Is.True, "Load production gameplay only after EnterPlayMode");
             new EditMode.LivingDungeonTwoFloorTests().ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming();
             string directory = Path.GetFullPath("TestResults/living-dungeon-two-floor-20261020/inputs");
             string manifestPath = Directory.GetFiles(directory, "two-floor-*.manifest.json").OrderByDescending(File.GetLastWriteTimeUtc).First();
@@ -39,13 +34,8 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(manifest.Product, Is.EqualTo(Application.productName));
             string path = Path.Combine(Application.persistentDataPath, manifest.SaveFileName);
             Assert.That(File.Exists(path), Is.False); File.Copy(manifest.SeedPath, path, false);
-            TextAsset isolated = null;
-            void Isolate(Scene scene, LoadSceneMode mode) {
-                var config = JsonUtility.FromJson<BuildConfig>(GameRoot.Instance.buildConfigJson.text);
-                config.save.fileName = manifest.SaveFileName;
-                GameRoot.Instance.buildConfigJson = isolated = new TextAsset(JsonUtility.ToJson(config));
-            }
-            SceneManager.sceneLoaded += Isolate;
+            var isolation = new WaitingSceneIsolation(manifest.SaveFileName);
+            SceneManager.sceneLoaded += isolation.Loaded;
             try {
                 yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
                 for (int frame = 0; frame < 120 && GameRoot.Instance?.Save == null; frame++) yield return null;
@@ -91,9 +81,26 @@ namespace DungeonBuilder.M0.Tests
                         }
                     }
             } finally {
-                SceneManager.sceneLoaded -= Isolate;
+                SceneManager.sceneLoaded -= isolation.Loaded;
                 if (GameRoot.Instance != null) UnityEngine.Object.Destroy(GameRoot.Instance.gameObject);
-                if (isolated != null) UnityEngine.Object.Destroy(isolated);
+                if (isolation.Config != null) UnityEngine.Object.Destroy(isolation.Config);
+            }
+        }
+
+        // Unlike a captured local function, this setup object is allocated only
+        // after EnterPlayMode and is not lost when Unity reloads the iterator.
+        private sealed class WaitingSceneIsolation
+        {
+            private readonly string fileName;
+            internal TextAsset Config;
+            internal WaitingSceneIsolation(string fileName) { this.fileName = fileName; }
+            internal void Loaded(Scene scene, LoadSceneMode mode)
+            {
+                var root = GameRoot.Instance; Assert.That(root, Is.Not.Null);
+                Assert.That(root.SaveService, Is.Null);
+                var config = JsonUtility.FromJson<BuildConfig>(root.buildConfigJson.text);
+                config.save.fileName = fileName;
+                root.buildConfigJson = Config = new TextAsset(JsonUtility.ToJson(config));
             }
         }
 
