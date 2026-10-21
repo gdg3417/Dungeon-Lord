@@ -523,44 +523,51 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void AutomaticProductionPartyCanChooseASurvivingFloorOneExitWithTwoCapturedFloors()
         {
-            // Legal authored defenders/traps vary; production combat, decision,
-            // timing, HP and arrival configuration are never overridden.
-            (bool skeletons, int monsters, int traps)[] cases = {
-                (false, 1, 0), (true, 1, 0), (true, 2, 0), (true, 2, 1), (true, 2, 2), (false, 2, 2) };
-            foreach (var setup in cases) {
-                var f = ProductionDungeon(setup.skeletons, setup.monsters, setup.traps);
-                string second = PhaseSixA4Tests.FloorTwo(f);
-                f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
-                Through(f, 0); Through(f, f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value);
-                var party = f.Runtime.livingDungeon.Parties.Single(); var e = LivingDungeonContracts.Restore(party, Profile(f));
+            var f = ProductionDungeon(); string second = PhaseSixA4Tests.FloorTwo(f);
+            f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
+            Through(f, 0);
+            for (int opportunity = 0; opportunity < 128; opportunity++) {
+                long time = f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value;
+                Through(f, time - 1);
+                // A legal player edit invalidates old shared Floor 2 knowledge,
+                // without rewriting the immutable inputs of existing parties.
+                var monster = f.State.Floors[1].RoomContents.Assignments.Single(a => a.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId);
+                var pinned = f.Runtime.livingDungeon.Parties.Select(p => p.CheckpointIdentity).ToArray();
+                var draft = TransactionalDungeonDraft.Create(f.State, PhaseSevenA4TransactionalEditorTests.Context(f), new PhaseSevenA4TransactionalEditorTests.Store());
+                var position = monster.RoomLocalPosition.Equals(new TileCoordinate(1, 1)) ? new TileCoordinate(2, 1) : new TileCoordinate(1, 1);
+                Assert.That(draft.Move(second, monster.RoomInstanceId, monster.AssignmentId, position), Is.True);
+                while (draft.Durability == DraftDurability.Pending) Assert.That(draft.FlushNext(), Is.True);
+                f.Accept(PhaseSixA4Tests.Writer(f).CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, draft));
+                CollectionAssert.AreEqual(pinned, f.Runtime.livingDungeon.Parties.Select(p => p.CheckpointIdentity));
+                int next = f.Runtime.runHistory.NextRunSequence; Through(f, time);
+                if (f.Runtime.runHistory.NextRunSequence == next) continue; // authentic occupancy throttle
+                var party = f.Runtime.livingDungeon.Parties.Single(p => p.Sequence == next);
+                var e = LivingDungeonContracts.Restore(party, Profile(f));
                 try {
                     Assert.That(e.Snapshot.Floors.Count, Is.EqualTo(2));
                     var outcome = e.DrainToCompletion();
                     var choice = outcome.FloorTransitions?.SingleOrDefault(t => t.CurrentFloorInstanceId == f.State.Floors[0].FloorInstanceId);
-                    TestContext.WriteLine($"Production EXIT fixture skeletons={setup.skeletons} monsters={setup.monsters} traps={setup.traps} choice={choice?.Reason} survivors={outcome.SurvivalSummary.SurvivorCount}");
+                    TestContext.WriteLine($"Automatic production {outcome.RunId} choice={choice?.Reason} survivors={outcome.SurvivalSummary.SurvivorCount}");
                     if (choice == null || choice.NextFloorInstanceId == null || choice.Descend || outcome.SurvivalSummary.SurvivorCount == 0) continue;
                     Assert.That(e.TransferGate, Is.Null);
                     long finish = checked(party.AdmittedAt + e.Inspect().LogicalTime);
                     Through(f, finish);
-                    Assert.That(f.Runtime.livingDungeon.Parties, Is.Empty);
-                    Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
+                    Assert.That(f.Runtime.livingDungeon.Parties.Any(p => p.Sequence == next), Is.False);
+                    Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == outcome.RunId), Is.EqualTo(1));
+                    Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.EqualTo(outcome.RunId));
                     Assert.That(f.Runtime.runHistory.LatestOutcome.ReachedRoomCount, Is.EqualTo(1));
                     Assert.That(f.Runtime.runHistory.LatestOutcome.FinalRouteOutcomeKey, Is.EqualTo(outcome.FinalRouteOutcomeKey));
                     return;
                 } finally { e.Abandon(); }
             }
-            Assert.Fail("The production-content cases must exercise a surviving authentic Floor 1 EXIT; do not manufacture a transfer or alter decision tuning");
+            Assert.Fail("The bounded automatic production arrivals must exercise a surviving Floor 1 EXIT; no decision/HP/timing tuning may be overridden");
         }
-        internal static Fixture ProductionDungeon(bool skeletons = false, int monsterCount = 1, int trapCount = 0)
+        internal static Fixture ProductionDungeon()
         {
             var f = PhaseSixA4Tests.Eligible();
             Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
                 File.ReadAllText("Assets/_Project/Data/Bootstrap/run_simulation_config.json"), out f.Configuration), Is.True);
-            for (int monster = 0; monster < monsterCount; monster++)
-                PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, skeletons ? MvpDungeonPlacementIds.SkeletonOptionId : MvpDungeonPlacementIds.GoblinOptionId);
-            for (int trap = 0; trap < trapCount; trap++)
-                PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.TrapCategoryId,
-                    trap == 0 ? MvpDungeonPlacementIds.SnareTrapOptionId : MvpDungeonPlacementIds.ChillingSigilOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             string second = PhaseSixA4Tests.FloorTwo(f);
