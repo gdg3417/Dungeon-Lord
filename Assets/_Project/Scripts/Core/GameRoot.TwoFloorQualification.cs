@@ -4,6 +4,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using UnityEngine;
 
