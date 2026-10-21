@@ -27,7 +27,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var bytes = Convert.FromBase64String(frozen.Base64);
             Assert.That(BitConverter.ToInt32(bytes, 0), Is.EqualTo(2));
             Assert.That(RunCheckpointCodec.Identity(bytes), Is.EqualTo(frozen.CheckpointIdentity));
-            var profile = LivingDungeonForegroundConfig.Load().CreateProfile(SaveSpatialMigrationLimits.Canonical.ForSchema(13).Serialized);
+            var limits = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            var profile = LivingDungeonForegroundConfig.Load().CreateProfile(limits.Canonical.ForSchema(13).Serialized);
             var restored = CombatCheckpointCodec.RestoreSupported(bytes, frozen.CheckpointIdentity, frozen.StartIdentity, frozen.NextOrdinal, profile.Checkpoints);
             Assert.That(restored.IsValid, Is.True, restored.FailureReason);
             try {
