@@ -15,6 +15,13 @@ namespace DungeonBuilder.M0.Tests
         [UnityTest, Timeout(1800000)]
         public IEnumerator LivingDungeonTwoFloorMatchedEditorProductionProfiles()
         {
+            // Entering play reloads the domain. Create captured fixture objects
+            // only afterward, so the test runner need not serialize them.
+            if (!Application.isPlaying) {
+                UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,
+                    UnityEditor.SceneManagement.NewSceneMode.Single);
+                yield return new EnterPlayMode();
+            }
             // Build fresh production-content inputs through the canonical test
             // writer. Their only difference is Floor 2's activation state.
             new EditMode.LivingDungeonTwoFloorTests().ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming();
@@ -23,11 +30,6 @@ namespace DungeonBuilder.M0.Tests
                 string manifestPath = Directory.GetFiles(directory, variant + "-*.manifest.json")
                     .OrderByDescending(File.GetLastWriteTimeUtc).First();
                 var manifest = JsonUtility.FromJson<TwoFloorSeedManifest>(File.ReadAllText(manifestPath));
-                if (!Application.isPlaying) {
-                    UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,
-                        UnityEditor.SceneManagement.NewSceneMode.Single);
-                    yield return new EnterPlayMode();
-                }
                 if (GameRoot.Instance != null) { UnityEngine.Object.Destroy(GameRoot.Instance.gameObject); yield return null; }
                 string savePath = Path.Combine(Application.persistentDataPath, manifest.SaveFileName);
                 Assert.That(manifest.Product, Is.EqualTo(Application.productName));

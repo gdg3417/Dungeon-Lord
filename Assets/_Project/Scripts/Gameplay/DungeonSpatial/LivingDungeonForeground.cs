@@ -233,9 +233,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         Stage();
                     }
                     ProcessParties(time);
-                    // Production parties remain on captured Floor 1. A terminal
-                    // party was already retired/staged by ProcessParties; a live
-                    // prefix cannot change occupancy. Stage it once at closure.
+                    // Terminal parties were already settled and retired. Recover
+                    // vacant floors before releasing a previously blocked transfer.
                     Recover();
                     ReleaseWaiting(time);
                     if (owner.Scheduler.NextOpportunityTime == time) {

@@ -69,6 +69,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal static RunCheckpointRestoreResult RestoreSupported(byte[] source, string checkpointIdentity, string startIdentity,
             long expectedOrdinal, RunCheckpointLimits limits, bool retainPresentation = false)
         {
+            using var replayMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.CheckpointReplay);
             // Dispatch only after the same independent byte/work envelope as the historical reader.
             if (source == null || limits == null || source.Length < 32 || source.Length > limits.MaximumBytes)
                 return Failed("run.checkpoint.byte_limit");

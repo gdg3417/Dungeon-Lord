@@ -119,8 +119,13 @@ namespace DungeonBuilder.M0
         public bool? Decision { get; internal set; }
         private LivingDungeonForegroundInspection vacant;
         public System.Collections.Generic.IReadOnlyList<LivingDungeonForegroundInspection> Parties { get; internal set; } = Array.Empty<LivingDungeonForegroundInspection>();
-        public LivingDungeonForegroundInspection ForFloor(string floor) => Parties.Count == 0 ? this :
-            Parties.SingleOrDefault(p => p.FloorId == floor) ?? (vacant ??= new LivingDungeonForegroundInspection { StateKey = "ui.living.awaiting" });
+        public LivingDungeonForegroundInspection ForFloor(string floor)
+        {
+            if (Parties.Count == 0) return this;
+            // Called by presentation every frame; selection needs no LINQ closure.
+            for (int i = 0; i < Parties.Count; i++) if (Parties[i].FloorId == floor) return Parties[i];
+            return vacant ??= new LivingDungeonForegroundInspection { StateKey = "ui.living.awaiting" };
+        }
         public string StateKey { get; internal set; }
         public string RunId { get; internal set; }
         public string FloorId { get; internal set; }

@@ -7,7 +7,7 @@ namespace DungeonBuilder.M0
     internal static class ForegroundQualificationMetrics
     {
         internal enum Area { Stage, Prepare, Open, Validate, Projection, Restore, LifetimeProbe, Inspect, AtomicWrite, Publication, Present, WorldRender,
-            TransferBlocked, TransferReleased, RecoveryApplied, Settlement }
+            TransferBlocked, TransferReleased, RecoveryApplied, Settlement, CheckpointReplay }
         internal static bool Enabled;
         internal static readonly long[] Calls = new long[Enum.GetValues(typeof(Area)).Length],
             Ticks = new long[Enum.GetValues(typeof(Area)).Length], Allocated = new long[Enum.GetValues(typeof(Area)).Length];

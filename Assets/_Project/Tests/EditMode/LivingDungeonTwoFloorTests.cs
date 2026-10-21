@@ -279,6 +279,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"livingDungeon\":{\"FormatVersion\":1,\"Revision\":0,");
             Assert.That(Stable(split), Is.EqualTo(Stable(direct)));
         }
+        [Test] public void ReopenOneUnitBeforeVacancyAndImmediatelyAfterReleasePreservesExactPrefixes()
+        {
+            var f = Waiting(); var a = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties[0], Profile(f));
+            a.DrainToCompletion(); long finish = a.Inspect().LogicalTime; a.Abandon();
+            Through(f, finish - 1);
+            string waitingIdentity = f.Runtime.livingDungeon.Parties.Single(p => p.Sequence == 2).CheckpointIdentity;
+            f.Reopen();
+            var b = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties.Single(p => p.Sequence == 2), Profile(f));
+            Assert.That(b.TransferWaiting, Is.True); Assert.That(b.OccupiedFloor, Is.EqualTo(f.State.Floors[0].FloorInstanceId)); b.Abandon();
+            Assert.That(f.Runtime.livingDungeon.Parties.Single(p => p.Sequence == 2).CheckpointIdentity, Is.EqualTo(waitingIdentity));
+            Through(f, finish);
+            string releasedIdentity = f.Runtime.livingDungeon.Parties.Single(p => p.Sequence == 2).CheckpointIdentity;
+            f.Reopen();
+            b = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties.Single(p => p.Sequence == 2), Profile(f));
+            Assert.That(b.TransferGate.ReleaseTime, Is.EqualTo(finish)); Assert.That(b.OccupiedFloor, Is.EqualTo(PhaseSixA4Tests.FloorTwo(f))); b.Abandon();
+            Through(f, finish); Assert.That(f.Runtime.livingDungeon.Parties.Single(p => p.Sequence == 2).CheckpointIdentity, Is.EqualTo(releasedIdentity));
+        }
         [TestCase(false)] [TestCase(true)] public void OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements(bool partial)
         {
             var f = Waiting(partial ? 2 : (int?)null); var profile = Profile(f);

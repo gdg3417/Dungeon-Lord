@@ -41,8 +41,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 new[] { data.LowInterval, data.BuildingInterval, data.SteadyInterval, data.HeavyInterval, data.ChurnInterval }
                     .Any(n => n < data.MinimumArrivalUnits || n > data.MaximumArrivalUnits) ||
                 data.UnitsPerTileEdge <= 0 || data.MonsterInteractionUnits <= 0 || data.TrapInteractionUnits <= 0 || data.LootInteractionUnits <= 0) throw new ArgumentException(Invalid);
-            // Transfers are not admitted in this single-floor contract. Zero is a
-            // structural unused value, not an invented production descent duration.
+            // Historical v1 omits transfer timing and retains zero. V2's positive
+            // transfer duration is separately authored in its versioned resource.
             Timing = new RunLogicalTiming(data.UnitsPerTileEdge, data.MonsterInteractionUnits, data.TrapInteractionUnits, data.LootInteractionUnits, data.FloorTransferUnits);
             CreateProfile(default);
         }
