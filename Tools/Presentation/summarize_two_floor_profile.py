@@ -29,6 +29,7 @@ def summarize(selected):
 
 
 result = dict(source=str(source), passed=data['Passed'], completedRuns=data['CompletedRuns'],
+              display={key: data.get(key) for key in ('ScreenWidth', 'ScreenHeight', 'TextSize')},
               failure=data.get('Failure'), categories={}, taggedFrames={}, areas={},
               threadAllocationCounterAvailable=data['ThreadAllocationCounterAvailable'],
               frameAllocationCounterAvailable=data['FrameAllocationCounterAvailable'])

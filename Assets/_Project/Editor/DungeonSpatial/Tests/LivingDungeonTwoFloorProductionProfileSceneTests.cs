@@ -69,7 +69,17 @@ namespace DungeonBuilder.M0.Tests
                             var map = ui.Q("mapArea");
                             TestContext.WriteLine($"Two-floor waiting layout {size} {textSize} floor={floor.FloorIndex} activity={activity.worldBound} map={map.worldBound} top={ui.Q("topChrome").worldBound} bottom={ui.Q("bottomChrome").worldBound}");
                             Assert.That(map.worldBound.height, Is.GreaterThan(80), "Retain an interactive map viewport");
-                            Assert.That(activity.worldBound.yMax, Is.LessThanOrEqualTo(map.worldBound.yMin + 1), "Waiting feedback must not cover the map");
+                            var activityScroll = ui.Q<ScrollView>("foregroundActivityScroll");
+                            var visibleActivity = activityScroll != null && activityScroll.resolvedStyle.display != DisplayStyle.None
+                                ? activityScroll.contentViewport.worldBound : activity.worldBound;
+                            Assert.That(visibleActivity.yMax, Is.LessThanOrEqualTo(map.worldBound.yMin + 1), "Waiting feedback must not cover the map");
+                            if (floor.FloorIndex == 0) Assert.That(visibleActivity.height, Is.GreaterThan(activity.resolvedStyle.fontSize), "Keep the waiting status visible");
+                            if (activityScroll != null && activityScroll.resolvedStyle.display != DisplayStyle.None && activity.worldBound.height > visibleActivity.height + 1) {
+                                activityScroll.verticalScroller.value = activityScroll.verticalScroller.highValue;
+                                yield return null; yield return null;
+                                Assert.That(activity.worldBound.yMax, Is.LessThanOrEqualTo(activityScroll.contentViewport.worldBound.yMax + 1), "Full feedback remains reachable by scrolling");
+                                activityScroll.scrollOffset = Vector2.zero; yield return null; yield return null;
+                            }
                             Assert.That(ui.worldBound.Contains(ui.Q("sessionActions").worldBound.center), Is.True);
                             var buttons = ui.Q("floors").Query<UnityEngine.UIElements.Button>().ToList(); Assert.That(buttons.Count, Is.EqualTo(2));
                             var selected = buttons.Single(button => button.userData as string == floor.FloorInstanceId);
@@ -144,6 +154,9 @@ namespace DungeonBuilder.M0.Tests
                     for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
                     var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null);
                     root.enabled = false;
+                    EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
+                    UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>().SetTextSize(DungeonTextSize.Default);
+                    for (int frame = 0; frame < 8; frame++) yield return null;
                     var operation = root.ProfileForeground(report);
                     while (true) {
                         bool more; object current = null;

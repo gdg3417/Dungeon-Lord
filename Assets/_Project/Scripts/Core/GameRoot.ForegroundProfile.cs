@@ -27,6 +27,8 @@ namespace DungeonBuilder.M0
             public bool Passed, ThreadAllocationCounterAvailable, FrameAllocationCounterAvailable;
             public string Failure, Product, SavePath;
             public int CompletedRuns;
+            public int ScreenWidth, ScreenHeight;
+            public string TextSize;
             public long StopwatchFrequency;
             public string[] Areas;
             public List<ForegroundProfileFrame> Frames = new List<ForegroundProfileFrame>();
@@ -38,6 +40,8 @@ namespace DungeonBuilder.M0
                   Application.isEditor && System.IO.Path.GetFileName(SaveService.SavePath).StartsWith("phase7a4-scene-", StringComparison.Ordinal)))
                 throw new InvalidOperationException("b3b2.profile.isolation_required");
             report.Product = Application.productName; report.SavePath = SaveService.SavePath;
+            report.ScreenWidth = Screen.width; report.ScreenHeight = Screen.height;
+            report.TextSize = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>()?.TextSize.ToString();
             report.StopwatchFrequency = Stopwatch.Frequency;
             report.Areas = Enum.GetNames(typeof(ForegroundQualificationMetrics.Area));
             double sample = 1000;

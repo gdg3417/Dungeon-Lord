@@ -163,7 +163,10 @@ namespace DungeonBuilder.M0.Tests
                 EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
                 for (int frame = 0; frame < 8; frame++) { root.TimeService.SetForegroundFocus(true); yield return null; }
                 var activity = ui.Q<Label>("foregroundActivity"); var map = ui.Q("mapArea");
-                Assert.That(activity.worldBound.yMax, Is.LessThanOrEqualTo(map.worldBound.yMin + 1), "Feedback must not cover the map");
+                var activityScroll = ui.Q<ScrollView>("foregroundActivityScroll");
+                var visibleActivity = activityScroll != null && activityScroll.resolvedStyle.display != DisplayStyle.None
+                    ? activityScroll.contentViewport.worldBound : activity.worldBound;
+                Assert.That(visibleActivity.yMax, Is.LessThanOrEqualTo(map.worldBound.yMin + 1), "Feedback must not cover the map");
                 AssertForegroundLabelClear(ui);
                 Assert.That(ui.worldBound.Contains(ui.Q("sessionActions").worldBound.center), Is.True, "Keep the ordinary actions onscreen");
                 yield return RoomContentCapture("living-live-encounter-large-" + size.x + "x" + size.y + ".png");
