@@ -442,6 +442,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = Waiting(); var a = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties[0], Profile(f));
             a.DrainToCompletion(); long finish = a.Inspect().LogicalTime; a.Abandon();
             var original = f.Runtime; string structured = JsonUtility.ToJson(original);
+            f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            f.FileSystem.Seed(f.ActivePath, f.Session.GetCurrentBytes());
             f.FileSystem.EnableFailureSequence(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1,
                 Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 2);
             var failed = PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
@@ -519,12 +521,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
         }
 
-        [Test] public void ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming()
+        [Test] public void AutomaticProductionPartyCanChooseASurvivingFloorOneExitWithTwoCapturedFloors()
+        {
+            // Legal authored defenders/traps vary; production combat, decision,
+            // timing, HP and arrival configuration are never overridden.
+            (bool skeletons, int monsters, int traps)[] cases = {
+                (false, 1, 0), (true, 1, 0), (true, 2, 0), (true, 2, 1), (true, 2, 2), (false, 2, 2) };
+            foreach (var setup in cases) {
+                var f = ProductionDungeon(setup.skeletons, setup.monsters, setup.traps);
+                string second = PhaseSixA4Tests.FloorTwo(f);
+                f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
+                Through(f, 0); Through(f, f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value);
+                var party = f.Runtime.livingDungeon.Parties.Single(); var e = LivingDungeonContracts.Restore(party, Profile(f));
+                try {
+                    Assert.That(e.Snapshot.Floors.Count, Is.EqualTo(2));
+                    var outcome = e.DrainToCompletion();
+                    var choice = outcome.FloorTransitions?.SingleOrDefault(t => t.CurrentFloorInstanceId == f.State.Floors[0].FloorInstanceId);
+                    TestContext.WriteLine($"Production EXIT fixture skeletons={setup.skeletons} monsters={setup.monsters} traps={setup.traps} choice={choice?.Reason} survivors={outcome.SurvivalSummary.SurvivorCount}");
+                    if (choice == null || choice.NextFloorInstanceId == null || choice.Descend || outcome.SurvivalSummary.SurvivorCount == 0) continue;
+                    Assert.That(e.TransferGate, Is.Null);
+                    long finish = checked(party.AdmittedAt + e.Inspect().LogicalTime);
+                    Through(f, finish);
+                    Assert.That(f.Runtime.livingDungeon.Parties, Is.Empty);
+                    Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
+                    Assert.That(f.Runtime.runHistory.LatestOutcome.ReachedRoomCount, Is.EqualTo(1));
+                    Assert.That(f.Runtime.runHistory.LatestOutcome.FinalRouteOutcomeKey, Is.EqualTo(outcome.FinalRouteOutcomeKey));
+                    return;
+                } finally { e.Abandon(); }
+            }
+            Assert.Fail("The production-content cases must exercise a surviving authentic Floor 1 EXIT; do not manufacture a transfer or alter decision tuning");
+        }
+        internal static Fixture ProductionDungeon(bool skeletons = false, int monsterCount = 1, int trapCount = 0)
         {
             var f = PhaseSixA4Tests.Eligible();
             Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
                 File.ReadAllText("Assets/_Project/Data/Bootstrap/run_simulation_config.json"), out f.Configuration), Is.True);
-            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            for (int monster = 0; monster < monsterCount; monster++)
+                PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, skeletons ? MvpDungeonPlacementIds.SkeletonOptionId : MvpDungeonPlacementIds.GoblinOptionId);
+            for (int trap = 0; trap < trapCount; trap++)
+                PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.TrapCategoryId,
+                    trap == 0 ? MvpDungeonPlacementIds.SnareTrapOptionId : MvpDungeonPlacementIds.ChillingSigilOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             string second = PhaseSixA4Tests.FloorTwo(f);
@@ -549,6 +585,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile.Canonical, f.Occupancy,
                 livingDungeonProfiles: new[] { Profile(f), LivingDungeonForegroundConfig.Load().CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized) },
                 monsterRecovery: MonsterRecoveryRules.Capture(f.Configuration)); f.Reopen();
+            return f;
+        }
+        [Test] public void ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming()
+        {
+            var f = ProductionDungeon(); string second = PhaseSixA4Tests.FloorTwo(f);
             string directory = Path.GetFullPath("TestResults/living-dungeon-two-floor-20261020/inputs"); Directory.CreateDirectory(directory);
             var utc = DateTimeOffset.UtcNow.ToUnixTimeSeconds(); f.Runtime.lastSavedUtcUnix = utc; f.Runtime.lastPausedUtcUnix = utc;
             f.Accept(PhaseSixA4Tests.Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
