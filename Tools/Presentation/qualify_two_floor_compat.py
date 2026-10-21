@@ -1,4 +1,4 @@
-"""Run original-reader attestation in the actual, preserved Unity project."""
+"""Capture a frozen-source format-1 golden in the actual preserved project."""
 import datetime
 import json
 import subprocess
@@ -32,4 +32,4 @@ def capture(m, label):
         json.dump(record, stream, indent=2)
     print(json.dumps(record))
     if record['exitCode']:
-        raise ValueError('Original-reader attestation failed; preserve output')
+        raise ValueError('Checkpoint golden capture failed; preserve output')
