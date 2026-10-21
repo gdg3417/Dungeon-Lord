@@ -178,7 +178,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
             if (removeLoot) {
                 string loot = f.State.Floors[0].RoomContents.Assignments.Single(a => a.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId).AssignmentId;
-                f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(loot, f.State.Floors[0].FloorInstanceId)));
+                f.Accept(PhaseSixA4Tests.Writer(f).Execute(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                    DetachedCanonicalMutationRequest.Unassign(loot, f.State.Floors[0].FloorInstanceId)));
             }
             Assert.That(f.Runtime.livingDungeon.Parties.Single().StartIdentity, Is.EqualTo(identity));
             e.DrainToCompletion(); long finish = e.Inspect().LogicalTime; e.Abandon(); f.Reopen(); Through(f, finish);
@@ -299,6 +300,82 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(failed.IsValid, Is.False);
             });
             e.Abandon();
+        }
+        [Test] public void ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming()
+        {
+            var f = PhaseSixA4Tests.Eligible();
+            f.Configuration = JsonUtility.FromJson<RunSimulationConfig>(File.ReadAllText("Assets/_Project/Data/Bootstrap/run_simulation_config.json"));
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+            string second = PhaseSixA4Tests.FloorTwo(f);
+            foreach (var anchor in new[] { new TileCoordinate(1, 8), new TileCoordinate(7, 8) }) {
+                var preview = StructuralEditService.Preview(f.State, new StructuralConstructionRequest { FloorInstanceId = second,
+                    RoomDefinitionId = "spatial.room.basic", Anchor = anchor, Orientation = CardinalOrientation.Zero,
+                    TerminalConnectionPointId = "east" }, f.Production, f.Compatibility, f.Configuration, f.Profile.Canonical);
+                Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+                f.Accept(PhaseSixA4Tests.Writer(f).Execute(f.ActivePath, f.FileSystem, f.Session, f.Runtime, DetachedCanonicalMutationRequest.Construct(preview)));
+            }
+            var rooms = f.State.Floors[1].Layout.Rooms;
+            foreach (var room in rooms)
+                foreach (var position in new[] { new TileCoordinate(0, 0), new TileCoordinate(3, 3) })
+                    f.Accept(PhaseSixA4Tests.Writer(f).Execute(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                        DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId,
+                            room.RoomInstanceId, second, position)));
+            f.Accept(PhaseSixA4Tests.Writer(f).Execute(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId,
+                    rooms.Last().RoomInstanceId, second, new TileCoordinate(1, 1))));
+            f.Profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            f.Context = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
+                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile.Canonical, f.Occupancy,
+                livingDungeonProfiles: new[] { Profile(f), LivingDungeonForegroundConfig.Load().CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized) },
+                monsterRecovery: MonsterRecoveryRules.Capture(f.Configuration)); f.Reopen();
+            string directory = Path.GetFullPath("TestResults/living-dungeon-two-floor-20261020/inputs"); Directory.CreateDirectory(directory);
+            var utc = DateTimeOffset.UtcNow.ToUnixTimeSeconds(); f.Runtime.lastSavedUtcUnix = utc; f.Runtime.lastPausedUtcUnix = utc;
+            f.Accept(PhaseSixA4Tests.Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
+            WriteSeed(f, directory, "owner-inactive", null, 0);
+            f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
+            int descending = 0; long longest = 0;
+            for (int sequence = 1; sequence <= 32; sequence++) {
+                var e = Start(f, sequence); long transfer = -1;
+                try {
+                    while (!e.IsTerminal) {
+                        var step = e.AdvanceThrough(e.NextDueTime().Value, 1, e.NextOrdinal).Single();
+                        if (step.Kind == RunStepKind.FloorTransfer) transfer = step.LogicalTime;
+                        e.ExportCheckpoint(Profile(f).Checkpoints);
+                    }
+                    if (transfer >= 0) { descending++; longest = Math.Max(longest, e.Inspect().LogicalTime - transfer); }
+                } finally { e.Abandon(); }
+            }
+            Assert.That(descending, Is.GreaterThan(0), "The unchanged production decision must genuinely choose DESCEND");
+            Assert.That(longest, Is.GreaterThan(Policy.MinimumArrival), "Author legal content long enough for concurrent waiting");
+            WriteSeed(f, directory, "two-floor", null, 0, descending, longest);
+            f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Deactivate, second));
+            var oldPolicy = LivingDungeonForegroundConfig.Load(); var oldProfile = oldPolicy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized);
+            var old = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot()).StartTimedCombatSnapshot(1, PhaseSixA4Tests.Snapshot(f), oldPolicy.Timing);
+            while (old.NextDueTime() == 0) old.AdvanceThrough(0, 1, old.NextOrdinal);
+            var owner = LivingDungeonState.Empty(); LivingDungeonScheduling.Activate(owner, oldProfile, oldPolicy.MinimumArrival, f.Runtime.runHistory);
+            owner.Scheduler.AcceptedThrough = owner.Scheduler.ClosedThrough = 0;
+            var party = new LivingDungeonParty { Sequence = 1, AdmittedAt = 0 }; LivingDungeonScheduling.Pin(party, old, oldProfile); owner.Parties.Add(party);
+            f.Runtime.runHistory.NextRunSequence = 2;
+            var prepared = f.Session.PrepareLivingDungeonReplacement(DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile), f.State, owner);
+            Assert.That(prepared.IsSuccess, Is.True, prepared.Reason); f.FileSystem.Seed(f.ActivePath, prepared.Update.GetBytes()); f.Reopen();
+            f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
+            WriteSeed(f, directory, "v1", old.StartIdentity, old.NextOrdinal); old.Abandon();
+            TestContext.WriteLine("Production input descents=" + descending + "/32 longest Floor2 units=" + longest);
+        }
+        private static void WriteSeed(Fixture f, string directory, string variant, string historicalStart, long historicalOrdinal,
+            int descents = 0, long longest = 0)
+        {
+            string id = variant + "-" + Guid.NewGuid().ToString("N"); string path = Path.Combine(directory, id + ".save.json");
+            var bytes = f.Session.GetCurrentBytes();
+            using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write)) stream.Write(bytes, 0, bytes.Length);
+            var manifest = new TwoFloorSeedManifest { Product = Application.productName,
+                SaveFileName = "living-dungeon-b3b2-qualification-two-floor-" + id + ".json",
+                SeedPath = path, SeedSha256 = RunCheckpointCodec.Identity(bytes), HistoricalStartIdentity = historicalStart,
+                HistoricalOrdinal = historicalOrdinal, DescendingSamples = descents, LongestFloorTwoDuration = longest };
+            using (var stream = new FileStream(Path.Combine(directory, id + ".manifest.json"), FileMode.CreateNew, FileAccess.Write))
+            using (var writer = new StreamWriter(stream)) writer.Write(JsonUtility.ToJson(manifest, true));
         }
     }
 }

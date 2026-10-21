@@ -116,11 +116,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         if (++boundaryEvents > policy.MaximumBoundaryEvents) throw new InvalidOperationException("living.foreground.boundary_limit");
                         if (e.TransferContract && !e.TransferReleased && e.AnnouncedAction == RunStepKind.FloorTransfer) {
                             var blocker = owner.Parties.FirstOrDefault(other => other.Sequence != p.Sequence && Execution(other).OccupiedFloor == e.TransferDestination);
-                            if (blocker != null) e.BlockTransfer(selected.due.Value, blocker.Sequence);
+                            if (blocker != null) {
+                                using var blockedMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.TransferBlocked);
+                                e.BlockTransfer(selected.due.Value, blocker.Sequence);
+                            }
                             else e.AdvanceThrough(selected.due.Value, 1, e.NextOrdinal);
                         } else e.AdvanceThrough(selected.due.Value, 1, e.NextOrdinal);
                         LivingDungeonScheduling.Pin(p, e, profile); LivingDungeonScheduling.Change(owner);
                             if (e.IsTerminal) {
+                                using var settlementMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Settlement);
                                 // Pin the actual unconsumed terminal in the exact private
                                 // lineage before authorizing settlement and its vacancy.
                                 Stage(); var terminalPredecessor = ValidateSession(working);
@@ -193,7 +197,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         changed = healed.Records[index].Health != runtime.monsterContinuity.Records[index].Health ||
                             healed.Records[index].RevivalRequired != runtime.monsterContinuity.Records[index].RevivalRequired;
                     runtime.structureRuntime.ManaReserve = wallet; runtime.monsterContinuity = healed;
-                    if (changed) Stage(healed);
+                    if (changed) {
+                        using var recoveryMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.RecoveryApplied);
+                        Stage(healed);
+                    }
                 }
 
                 // Activation and an edit are authoritative boundaries too. Apply

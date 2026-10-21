@@ -22,6 +22,7 @@ namespace DungeonBuilder.M0
                 foregroundPresentedFloor != selectedFloor || latest != foregroundLatest) {
                 presentedForeground = view; foregroundWasEditing = IsEditing; foregroundWasReplay = observingReplay;
                 foregroundPresentedFloor = selectedFloor; foregroundLatest = latest;
+                if (renderState != null) PresentFloorRail();
                 var label = document.rootVisualElement.Q<Label>("foregroundActivity");
                 if (label != null) {
                     // Normal play keeps activity visible below the scrolling HUD.
