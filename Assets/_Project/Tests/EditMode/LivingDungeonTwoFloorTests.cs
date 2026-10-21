@@ -366,6 +366,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
             });
             e.Abandon();
         }
+        [TestCase(false)] [TestCase(true)]
+        public void TerminalPrefixOnlyFitsAnUnclosedV2Boundary(bool closed)
+        {
+            var f = Dungeon(); var profile = Profile(f); var e = Start(f);
+            try {
+                while (!e.IsTerminal) e.AdvanceThrough(e.NextDueTime().Value, 1, e.NextOrdinal);
+                Assert.That(e.OutcomeTaken, Is.False);
+                var checkpoint = e.ExportCheckpoint(profile.Checkpoints);
+                var replay = CombatCheckpointCodec.RestoreSupported(checkpoint.GetBytes(), checkpoint.Identity,
+                    checkpoint.StartIdentity, checkpoint.NextOrdinal, profile.Checkpoints);
+                Assert.That(replay.IsValid, Is.True, replay.FailureReason); replay.Execution.Abandon();
+                var owner = LivingDungeonState.Empty(); LivingDungeonScheduling.Activate(owner, profile, Policy.MinimumArrival, f.Runtime.runHistory);
+                long time = e.Inspect().LogicalTime;
+                owner.Scheduler.AcceptedThrough = time; owner.Scheduler.ClosedThrough = closed ? time : time - 1;
+                var party = new LivingDungeonParty { Sequence = 1, AdmittedAt = 0 }; LivingDungeonScheduling.Pin(party, e, profile); owner.Parties.Add(party);
+                f.Runtime.runHistory.NextRunSequence = 2;
+                var before = f.Session.GetCurrentBytes();
+                var candidate = f.Session.PrepareLivingDungeonReplacement(DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile), f.State, owner);
+                Assert.That(candidate.IsSuccess, Is.EqualTo(!closed), "A closed timestamp cannot retain an unsettled terminal; private open staging remains valid");
+                CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            } finally { e.Abandon(); }
+        }
         [Test] public void ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming()
         {
             var f = PhaseSixA4Tests.Eligible();
