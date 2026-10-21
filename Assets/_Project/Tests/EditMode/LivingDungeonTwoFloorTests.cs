@@ -21,11 +21,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             public int Format;
             public long NextOrdinal;
         }
-        [Test] public void Pr245HistoricalFormatTwoGoldenRestoresAndReencodesExactOriginalBytes()
+        [TestCase("historical-b1-format1.json", 1)]
+        [TestCase("historical-c2-format2.json", 2)]
+        public void HistoricalGoldenRestoresAndReencodesExactPinnedBytes(string filename, int format)
         {
-            var frozen = JsonUtility.FromJson<HistoricalCheckpoint>(File.ReadAllText("Tools/Presentation/Fixtures/historical-c2-format2.json"));
+            var frozen = JsonUtility.FromJson<HistoricalCheckpoint>(File.ReadAllText("Tools/Presentation/Fixtures/" + filename));
             var bytes = Convert.FromBase64String(frozen.Base64);
-            Assert.That(BitConverter.ToInt32(bytes, 0), Is.EqualTo(2));
+            Assert.That(BitConverter.ToInt32(bytes, 0), Is.EqualTo(format)); Assert.That(frozen.Format, Is.EqualTo(format));
             Assert.That(RunCheckpointCodec.Identity(bytes), Is.EqualTo(frozen.CheckpointIdentity));
             var limits = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
             var profile = LivingDungeonForegroundConfig.Load().CreateProfile(limits.Canonical.ForSchema(13).Serialized);
