@@ -190,6 +190,64 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(rejected.IsSuccess, Is.False); Assert.That(rejected.Reason, Is.EqualTo("living.transfer.vacancy_unproven"));
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath)); e.Abandon();
         }
+        [Test] public void WaitingProtectsBothFloorsFromRecoveryAndThrottlesAdmissionAfterReopen()
+        {
+            var f = Waiting(); var injured = f.Runtime.monsterContinuity.Copy();
+            foreach (var m in injured.Records) { m.Health = 1; m.RevivalRequired = false; }
+            var owner = f.Runtime.livingDungeon; long due = owner.Scheduler.ClosedThrough + 1;
+            LivingDungeonScheduling.Install(owner, 0, due); // explicit first-opportunity test input
+            var prepared = f.Session.PrepareForegroundReplacement(DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile),
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context), owner, injured);
+            Assert.That(prepared.IsSuccess, Is.True, prepared.Reason); f.FileSystem.Seed(f.ActivePath, prepared.Update.GetBytes()); f.Reopen();
+            Through(f, due); Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(3));
+            Assert.That(f.Runtime.livingDungeon.Parties.Count, Is.EqualTo(2));
+            Assert.That(f.Runtime.monsterContinuity.Records.All(m => m.Health == 1), Is.True);
+            var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, due); CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes());
+        }
+        [Test] public void CurrentDeactivationDoesNotFabricateVacancyOrRewriteCapturedRoute()
+        {
+            var f = Waiting(); string identity = f.Runtime.livingDungeon.Parties[1].StartIdentity;
+            f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                FloorLifecycleAction.Deactivate, PhaseSixA4Tests.FloorTwo(f))); f.Reopen();
+            var b = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties[1], Profile(f));
+            Assert.That(b.TransferWaiting, Is.True); Assert.That(b.OccupiedFloor, Is.EqualTo(f.State.Floors[0].FloorInstanceId)); b.Abandon();
+            var a = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties[0], Profile(f)); a.DrainToCompletion();
+            long finish = a.Inspect().LogicalTime; a.Abandon(); Through(f, finish);
+            b = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties.Single(p => p.Sequence == 2), Profile(f));
+            Assert.That(b.StartIdentity, Is.EqualTo(identity)); Assert.That(b.OccupiedFloor, Is.EqualTo(PhaseSixA4Tests.FloorTwo(f))); b.Abandon();
+        }
+        [TestCase(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 2)]
+        [TestCase(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 1)]
+        [TestCase(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1)]
+        public void FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(
+            Gd66DetachedSpatialMigrationTransactionTests.OperationType operation, int occurrence)
+        {
+            var f = Waiting(); var a = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties[0], Profile(f));
+            a.DrainToCompletion(); long finish = a.Inspect().LogicalTime; a.Abandon();
+            var bytes = f.Session.GetCurrentBytes(); var live = JsonUtility.ToJson(f.Runtime);
+            f.FileSystem.EnableFailure(operation, occurrence);
+            var failed = PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                Policy, finish, 10, (save, tick) => { }, 1000); f.FileSystem.DisableFailure();
+            Assert.That(failed.IsSuccess, Is.False); Assert.That(failed.RuntimeProjection, Is.Null);
+            CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(JsonUtility.ToJson(f.Runtime), Is.EqualTo(live));
+            f.Reopen(); Through(f, finish);
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
+            var b = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties.Single(p => p.Sequence == 2), Profile(f));
+            Assert.That(b.TransferGate.ReleaseTime, Is.EqualTo(finish)); b.Abandon();
+        }
+        [Test] public void WaitingReleaseIsEquivalentAcrossForegroundPartitionsAndReopen()
+        {
+            var direct = Waiting(); var split = Waiting();
+            var a = LivingDungeonContracts.Restore(direct.Runtime.livingDungeon.Parties[0], Profile(direct)); a.DrainToCompletion();
+            long finish = a.Inspect().LogicalTime; a.Abandon();
+            Through(direct, finish);
+            for (long time = split.Runtime.livingDungeon.Scheduler.ClosedThrough + 1; time < finish; time += 997) { Through(split, time); split.Reopen(); }
+            Through(split, finish);
+            string Stable(Fixture f) => Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace(
+                "\"livingDungeon\":{\"FormatVersion\":1,\"Revision\":" + f.Runtime.livingDungeon.Revision + ",",
+                "\"livingDungeon\":{\"FormatVersion\":1,\"Revision\":0,");
+            Assert.That(Stable(split), Is.EqualTo(Stable(direct)));
+        }
     }
 }
 #endif
