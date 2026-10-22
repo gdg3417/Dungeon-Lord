@@ -167,7 +167,8 @@ namespace DungeonBuilder.M0.Tests
                 foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
                 foreach (string choice in new[] {"cancel","navigationDiscard","confirm"})
                 {
-                    yield return AnalysisModifiedDraft(); yield return AnalysisPhoneConfigure(size);
+                    yield return AnalysisPhoneConfigure(size); yield return AnalysisModifiedDraft();
+                    Assert.That(controller.IsEditing, Is.True); Assert.That(simulatedTouch, Is.Not.Null);
                     var draft = controller.Draft; var before = File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath);
                     int rooms = GameRoot.Instance.Save.validatedCanonicalSpatialState.Floors.Sum(f=>f.Layout.Rooms.Length);
                     yield return AnalysisPhoneOpenFromEdit();

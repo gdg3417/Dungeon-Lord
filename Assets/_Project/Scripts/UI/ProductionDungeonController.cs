@@ -532,6 +532,7 @@ namespace DungeonBuilder.M0
             ApplySafeArea(lastSafe, lastResolution); SetTextSize(textSize);
             safe.EnableInClassList("compact-hud", lastSafe.width / document.panelSettings.scale < presentationPolicy.ReferenceShortSide);
             safe.EnableInClassList("landscape", Screen.width > Screen.height);
+            PresentPerformanceSummary();
             PlaceDevelopmentAction();
             PresentComposition();
             viewportElement.UnregisterCallback<GeometryChangedEvent>(ViewportGeometry);

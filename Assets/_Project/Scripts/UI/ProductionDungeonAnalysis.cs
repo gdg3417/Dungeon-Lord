@@ -120,7 +120,9 @@ namespace DungeonBuilder.M0
             var ui = document.rootVisualElement;
             string compact = ProductionAnalysisPresenter.Compact(analysisReport, Text, Culture);
             var summary = ui.Q<Label>("performanceSummary");
-            summary.text = replay == null ? compact : compact.Replace("\n", " ");
+            bool bounded = replay != null || safe.ClassListContains("compact-hud");
+            summary.text = bounded ? compact.Replace("\n", " ") : compact;
+            summary.EnableInClassList("bounded-summary", bounded);
             summary.EnableInClassList("replay-summary", replay != null);
             ui.Q<Button>("openAnalysis").tooltip = compact;
         }
