@@ -18,6 +18,15 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         private object fixture;
         private Type fixtureType;
 
+        [UnityTest] public IEnumerator AnalysisPhoneNavigationAndCoveredInput()
+        { yield return Invoke("AnalysisPhoneNavigationSafeAreaAndCoveredInput"); }
+        [UnityTest] public IEnumerator AnalysisPhoneValidDraftChoices()
+        { yield return Invoke("AnalysisPhoneValidDraftChoicesUseTouchButtons"); }
+        [UnityTest] public IEnumerator AnalysisPhoneInvalidAndStaleDialogs()
+        { yield return Invoke("AnalysisPhoneInvalidAndStaleDialogsRemainAccessible"); }
+        [UnityTest] public IEnumerator AnalysisPhoneReplayExit()
+        { yield return Invoke("AnalysisPhoneOpeningDuringReplayClosesPresentationOnly"); }
+
         [UnityTest] public IEnumerator AnalysisNavigationAndReopen()
         { yield return Invoke("AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen"); }
         [UnityTest] public IEnumerator AnalysisCleanAndModifiedDraftChoices()

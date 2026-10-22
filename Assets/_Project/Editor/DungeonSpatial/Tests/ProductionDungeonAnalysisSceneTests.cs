@@ -26,6 +26,234 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.Draft.CanSave, Is.True);
         }
 
+        private IEnumerator AnalysisPhoneSettle()
+        {
+            controller.ApplySafeArea(new Rect(10,18,340,604), new Vector2(360,640));
+            for (int i=0;i<8;i++) yield return null;
+            Assert.That(new Vector2Int(Screen.width,Screen.height), Is.EqualTo(new Vector2Int(360,640)));
+            var expected = DungeonPresentationPolicy.SafePanelRect(new Rect(10,18,340,604),640,
+                controller.GetComponent<UIDocument>().panelSettings.scale);
+            Assert.That(controller.SafeRoot.worldBound.x, Is.EqualTo(expected.x).Within(1));
+            Assert.That(controller.SafeRoot.worldBound.y, Is.EqualTo(expected.y).Within(1));
+            Assert.That(controller.SafeRoot.worldBound.width, Is.EqualTo(expected.width).Within(1));
+            Assert.That(controller.SafeRoot.worldBound.height, Is.EqualTo(expected.height).Within(1));
+        }
+
+        private IEnumerator AnalysisPhoneConfigure(DungeonTextSize size)
+        {
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(360,640);
+            for (int i=0;i<12;i++) yield return null;
+            controller.SetTextSize(size);
+            if (simulatedTouch == null) simulatedTouch = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Touchscreen>();
+            yield return AnalysisPhoneSettle();
+        }
+
+        private IEnumerator AnalysisPhoneReveal(VisualElement element)
+        {
+            var scroll = element.GetFirstAncestorOfType<ScrollView>();
+            if (scroll != null) scroll.ScrollTo(element);
+            yield return AnalysisPhoneSettle();
+            TestContext.WriteLine("Phone target " + element.name + " " + controller.TextSize + ": " + element.worldBound + "; safe=" + controller.SafeRoot.worldBound);
+        }
+
+        private IEnumerator AnalysisPhoneTap(Button button, bool enabled = true)
+        {
+            yield return AnalysisPhoneReveal(button);
+            AssertReachable(button); UatSafeAction(button);
+            Assert.That(button.worldBound.width*controller.GetComponent<UIDocument>().panelSettings.scale, Is.GreaterThanOrEqualTo(47.99),button.name);
+            Assert.That(button.enabledInHierarchy, Is.EqualTo(enabled),button.name);
+            yield return CompositionTap(CompositionButtonScreen(button));
+            yield return AnalysisPhoneSettle();
+        }
+
+        private IEnumerator AnalysisPhoneOpenFromEdit()
+        {
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            yield return AnalysisPhoneTap(ui.Q<Button>("displaySettings"));
+            Assert.That(ui.Q("displayPopover").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+            yield return AnalysisPhoneTap(ui.Q<Button>("openAnalysis"));
+            Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+        }
+
+        private IEnumerator AnalysisPhoneDialog(string reasonKey, params string[] choices)
+        {
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var scroll = ui.Q<Button>("confirm").GetFirstAncestorOfType<ScrollView>();
+            Assert.That(scroll.verticalScroller.highValue, Is.GreaterThan(0),"Expanded test localization must exercise bounded dialog scrolling");
+            var text = ui.Q<Label>("modalText");
+            Assert.That(text.text, Does.Not.Contain("ui.analysis."));
+            Assert.That(text.worldBound.xMin, Is.GreaterThanOrEqualTo(scroll.contentViewport.worldBound.xMin-1));
+            Assert.That(text.worldBound.xMax, Is.LessThanOrEqualTo(scroll.contentViewport.worldBound.xMax+1));
+            scroll.scrollOffset = Vector2.zero;
+            yield return AnalysisPhoneSettle();
+            Assert.That(text.worldBound.Overlaps(scroll.contentViewport.worldBound), Is.True);
+            if (reasonKey != null)
+            {
+                var reason = ui.Q<Label>("navigationStatus");
+                Assert.That(reason.text, Is.EqualTo(GameRoot.Instance.Content.GetString(reasonKey,null)));
+                yield return AnalysisPhoneReveal(reason);
+                Assert.That(reason.worldBound.Overlaps(scroll.contentViewport.worldBound), Is.True);
+                Assert.That(reason.worldBound.xMax, Is.LessThanOrEqualTo(scroll.contentViewport.worldBound.xMax+1));
+            }
+            foreach (string choice in choices)
+            { yield return AnalysisPhoneReveal(ui.Q<Button>(choice)); AssertReachable(ui.Q<Button>(choice)); UatSafeAction(ui.Q<Button>(choice)); }
+            TestContext.WriteLine("Phone dialog " + controller.TextSize + " scroll range=" + scroll.verticalScroller.highValue);
+        }
+
+        private System.Collections.Generic.Dictionary<string,string> AnalysisPhoneStrings =>
+            (System.Collections.Generic.Dictionary<string,string>)typeof(ContentService)
+                .GetField("_stringMap",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(GameRoot.Instance.Content);
+
+        [UnityTest] public IEnumerator AnalysisPhoneNavigationSafeAreaAndCoveredInput()
+        {
+            var root = GameRoot.Instance; root.Save.structureRuntime.ManaReserve = 1000;
+            Assert.That(root.SimulateRunOnce(), Is.True);
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var before = File.ReadAllBytes(root.SaveService.SavePath); string live = JsonUtility.ToJson(root.Save);
+            foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
+            {
+                yield return AnalysisPhoneConfigure(size);
+                yield return AnalysisPhoneTap(ui.Q<Button>("displaySettings"));
+                yield return AnalysisPhoneTap(ui.Q<Button>(size==DungeonTextSize.Large ? "large" : "default"));
+                Assert.That(controller.TextSize, Is.EqualTo(size));
+                yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay"));
+                var covered = new[] {ui.Q<Button>("edit"),ui.Q<Button>("replayRun"),ui.Q<Button>("collapseFloors")};
+                var points = covered.Select(CompositionButtonScreen).ToArray();
+                var mapPoint = controller.Viewport.ScreenRect.center;
+                bool rail = controller.FloorRailCollapsed; string floor = controller.SelectedFloorInstanceId;
+                int activated = 0; Action observed = () => activated++;
+                foreach (var button in covered) button.clicked += observed;
+                try
+                {
+                    yield return AnalysisPhoneTap(ui.Q<Button>("openAnalysis")); Assert.That(controller.IsAnalysis, Is.True);
+                    foreach (var button in covered) Assert.That(button.enabledInHierarchy, Is.False);
+                    foreach (var point in points.Append(mapPoint)) yield return CompositionTap(point);
+                    Assert.That(activated, Is.Zero); Assert.That(controller.IsAnalysis, Is.True);
+                    Assert.That(controller.IsEditing, Is.False); Assert.That(controller.Replay, Is.Null);
+                    Assert.That(controller.FloorRailCollapsed, Is.EqualTo(rail));
+                    Assert.That(controller.SelectedFloorInstanceId, Is.EqualTo(floor));
+                    yield return AnalysisPhoneTap(ui.Q<Button>("analysisDisplay"));
+                    yield return AnalysisPhoneTap(ui.Q<Button>(size==DungeonTextSize.Large ? "large" : "default"));
+                    yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay"));
+                    yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon")); Assert.That(controller.IsAnalysis, Is.False);
+                    yield return AnalysisPhoneReveal(ui.Q<Button>("openAnalysis")); AssertReachable(ui.Q<Button>("openAnalysis"));
+                    foreach (var button in covered) Assert.That(button.enabledInHierarchy, Is.True);
+                }
+                finally { foreach (var button in covered) button.clicked -= observed; }
+                CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath)); Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(live));
+            }
+        }
+
+        [UnityTest] public IEnumerator AnalysisPhoneValidDraftChoicesUseTouchButtons()
+        {
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var strings = AnalysisPhoneStrings; string original = strings["ui.analysis.leave_edit"];
+            try
+            {
+                strings["ui.analysis.leave_edit"] = original + " " + string.Join(" ",Enumerable.Repeat("Test-only extended localized review information.",24));
+                foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
+                foreach (string choice in new[] {"cancel","navigationDiscard","confirm"})
+                {
+                    yield return AnalysisModifiedDraft(); yield return AnalysisPhoneConfigure(size);
+                    var draft = controller.Draft; var before = File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath);
+                    int rooms = GameRoot.Instance.Save.validatedCanonicalSpatialState.Floors.Sum(f=>f.Layout.Rooms.Length);
+                    yield return AnalysisPhoneOpenFromEdit();
+                    Assert.That(ui.Q<Button>("confirm").text, Is.EqualTo(strings["ui.dungeon.save"]));
+                    Assert.That(ui.Q<Button>("navigationDiscard").text, Is.EqualTo(strings["ui.analysis.discard_changes"]));
+                    Assert.That(ui.Q<Button>("cancel").text, Is.EqualTo(strings["ui.analysis.continue_editing"]));
+                    yield return AnalysisPhoneDialog(null,"confirm","navigationDiscard","cancel");
+                    yield return AnalysisPhoneTap(ui.Q<Button>(choice));
+                    Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                    if (choice=="cancel")
+                    {
+                        Assert.That(controller.IsAnalysis, Is.False); Assert.That(controller.Draft, Is.SameAs(draft));
+                        CollectionAssert.AreEqual(before,File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath));
+                        yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay")); Assert.That(controller.Discard(), Is.True);
+                    }
+                    else
+                    {
+                        Assert.That(controller.IsAnalysis, Is.True); Assert.That(controller.IsEditing, Is.False);
+                        Assert.That(GameRoot.Instance.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
+                        if (choice=="navigationDiscard") CollectionAssert.AreEqual(before,File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath));
+                        else Assert.That(GameRoot.Instance.Save.validatedCanonicalSpatialState.Floors.Sum(f=>f.Layout.Rooms.Length), Is.EqualTo(rooms+1));
+                        yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon"));
+                    }
+                }
+            }
+            finally { strings["ui.analysis.leave_edit"] = original; }
+        }
+
+        [UnityTest] public IEnumerator AnalysisPhoneInvalidAndStaleDialogsRemainAccessible()
+        {
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var strings = AnalysisPhoneStrings; string invalidText = strings["ui.analysis.leave_invalid"];
+            string staleText = strings[TransactionalDungeonDraft.StaleReason];
+            try
+            {
+                strings["ui.analysis.leave_invalid"] = invalidText + " " + string.Join(" ",Enumerable.Repeat("Test-only expanded invalid draft guidance.",24));
+                strings[TransactionalDungeonDraft.StaleReason] = staleText + " " + string.Join(" ",Enumerable.Repeat("Test-only expanded stale draft guidance.",24));
+                foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
+                {
+                    yield return AnalysisPhoneConfigure(size); controller.EnterEdit();
+                    var root = GameRoot.Instance; var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var room = floor.Layout.Rooms[0];
+                    controller.TapWorld(new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+2)); controller.BeginMove();
+                    controller.TapWorld(new TileCoordinate(-1,-1)); yield return null;
+                    var draft = controller.Draft; Assert.That(draft.IsStructurallyValid, Is.False);
+                    var before = File.ReadAllBytes(root.SaveService.SavePath);
+                    yield return AnalysisPhoneOpenFromEdit();
+                    Assert.That(ui.Q<Button>("confirm").text, Is.EqualTo(strings["ui.analysis.discard_changes"]));
+                    Assert.That(ui.Q<Button>("navigationDiscard").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                    yield return AnalysisPhoneDialog(draft.StructuralReason,"confirm","cancel");
+                    yield return AnalysisPhoneTap(ui.Q<Button>("cancel")); Assert.That(controller.Draft, Is.SameAs(draft));
+                    yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay"));
+                    yield return AnalysisPhoneOpenFromEdit(); yield return AnalysisPhoneTap(ui.Q<Button>("confirm"));
+                    Assert.That(controller.IsAnalysis, Is.True); CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath));
+                    yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon"));
+
+                    controller.EnterEdit(); draft = controller.Draft; var assignment = floor.RoomContents.Assignments.First();
+                    Assert.That(draft.Move(floor.FloorInstanceId,assignment.RoomInstanceId,assignment.AssignmentId,new TileCoordinate(1,0)), Is.True);
+                    yield return null; yield return null;
+                    var otherStore = new FileDungeonDraftStore(root.SaveService.SavePath+".phone-stale",
+                        SpatialMigrationFileSystemSelector.Evaluate(root.SaveService.SavePath).FileSystem,root.SaveSpatialMigrationLimits);
+                    var other = TransactionalDungeonDraft.Create(root.Save.validatedCanonicalSpatialState,root.SaveService.DungeonDraftContext,otherStore);
+                    var competingTarget = assignment.RoomLocalPosition.Equals(new TileCoordinate(2,1)) ? new TileCoordinate(0,0) : new TileCoordinate(2,1);
+                    Assert.That(other.Move(floor.FloorInstanceId,assignment.RoomInstanceId,assignment.AssignmentId,competingTarget), Is.True);
+                    Assert.That(other.FlushNext(), Is.True); Assert.That(root.SaveService.CommitDungeonDraft(root.Save,other).IsSuccess, Is.True);
+                    before = File.ReadAllBytes(root.SaveService.SavePath);
+                    yield return AnalysisPhoneOpenFromEdit(); Assert.That(ui.Q<Button>("confirm").enabledInHierarchy, Is.False);
+                    yield return AnalysisPhoneDialog(TransactionalDungeonDraft.StaleReason,"confirm","navigationDiscard","cancel");
+                    yield return AnalysisPhoneTap(ui.Q<Button>("confirm"),false);
+                    Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex)); Assert.That(controller.Draft, Is.SameAs(draft));
+                    yield return AnalysisPhoneTap(ui.Q<Button>("cancel")); Assert.That(controller.Draft, Is.SameAs(draft));
+                    yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay"));
+                    yield return AnalysisPhoneOpenFromEdit(); yield return AnalysisPhoneTap(ui.Q<Button>("navigationDiscard"));
+                    Assert.That(controller.IsAnalysis, Is.True); CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath));
+                    yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon"));
+                }
+            }
+            finally { strings["ui.analysis.leave_invalid"]=invalidText; strings[TransactionalDungeonDraft.StaleReason]=staleText; }
+        }
+
+        [UnityTest] public IEnumerator AnalysisPhoneOpeningDuringReplayClosesPresentationOnly()
+        {
+            var root = GameRoot.Instance; root.Save.structureRuntime.ManaReserve = 1000;
+            Assert.That(root.SimulateRunOnce(), Is.True); var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var before = File.ReadAllBytes(root.SaveService.SavePath); string live = JsonUtility.ToJson(root.Save);
+            foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
+            {
+                yield return AnalysisPhoneConfigure(size);
+                yield return AnalysisPhoneTap(ui.Q<Button>("replayRun")); Assert.That(controller.Replay, Is.Not.Null);
+                Assert.That(ui.Q<Label>("performanceSummary").ClassListContains("replay-summary"), Is.True);
+                yield return AnalysisPhoneTap(ui.Q<Button>("openAnalysis"));
+                Assert.That(controller.IsAnalysis, Is.True); Assert.That(controller.Replay, Is.Null);
+                Assert.That(ui.Q<Label>("performanceSummary").ClassListContains("replay-summary"), Is.False);
+                Assert.That(ui.Q("replayPanel").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon"));
+                Assert.That(controller.Replay, Is.Null); Assert.That(controller.IsAnalysis, Is.False);
+                CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath)); Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(live));
+            }
+        }
+
         [UnityTest] public IEnumerator AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen()
         {
             var root = GameRoot.Instance;
