@@ -106,16 +106,23 @@ namespace DungeonBuilder.M0
                 else host.Insert(1, entry);
             }
             entry.text = IsEditing ? Text("ui.analysis.title") : string.Empty;
-            string compact = ProductionAnalysisPresenter.Compact(analysisReport, Text, Culture);
-            var summary = ui.Q<Label>("performanceSummary");
-            summary.text = replay == null ? compact : compact.Replace("\n", " ");
-            summary.EnableInClassList("replay-summary", replay != null);
-            entry.tooltip = compact;
+            PresentPerformanceSummary();
             ui.Q<Label>("analysisReport").text = ProductionAnalysisPresenter.Details(analysisReport, Text, Culture);
             // Detailed causal evidence remains owned and validated by the existing replay presenter.
             ui.Q<Label>("analysisEvidence").text = Text("ui.analysis.evidence");
             ui.Q("performanceSummary").style.display = IsEditing ? DisplayStyle.None : DisplayStyle.Flex;
             PresentNavigationReview();
+        }
+
+        private void PresentPerformanceSummary()
+        {
+            if (analysisReport == null) return;
+            var ui = document.rootVisualElement;
+            string compact = ProductionAnalysisPresenter.Compact(analysisReport, Text, Culture);
+            var summary = ui.Q<Label>("performanceSummary");
+            summary.text = replay == null ? compact : compact.Replace("\n", " ");
+            summary.EnableInClassList("replay-summary", replay != null);
+            ui.Q<Button>("openAnalysis").tooltip = compact;
         }
     }
 }

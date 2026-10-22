@@ -34,6 +34,8 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         { yield return Invoke("AnalysisMissingLocalizationUsesExistingAvailabilityFeedback"); }
         [UnityTest] public IEnumerator AnalysisForegroundContinuity()
         { yield return Invoke("AnalysisDoesNotInterruptAuthoritativeForegroundAdmissionAndSettlement"); }
+        [UnityTest] public IEnumerator AnalysisReplayHeaderTransition()
+        { yield return Invoke("AnalysisReplayEntryImmediatelyUsesCompactHeader"); }
 
         [UnitySetUp]
         public IEnumerator SetUp()

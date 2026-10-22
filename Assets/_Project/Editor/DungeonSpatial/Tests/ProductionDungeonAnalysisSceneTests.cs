@@ -172,6 +172,21 @@ namespace DungeonBuilder.M0.Tests
             yield return null;
         }
 
+        [UnityTest] public IEnumerator AnalysisReplayEntryImmediatelyUsesCompactHeader()
+        {
+            GameRoot.Instance.Save.structureRuntime.ManaReserve = 1000;
+            Assert.That(GameRoot.Instance.SimulateRunOnce(), Is.True);
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280,720);
+            controller.SetTextSize(DungeonTextSize.Large);
+            for (int i=0;i<12;i++) yield return null;
+            Assert.That(controller.StartReplay(), Is.True);
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            Assert.That(ui.Q<Label>("performanceSummary").ClassListContains("replay-summary"), Is.True);
+            Assert.That(ui.Q<Label>("performanceSummary").text, Does.Not.Contain("\n"));
+            for (int i=0;i<8;i++) yield return null;
+            UatSafeAction(ui.Q<Button>("edit")); UatSafeAction(ui.Q<Button>("openAnalysis"));
+        }
+
         [UnityTest] public IEnumerator AnalysisDoesNotInterruptAuthoritativeForegroundAdmissionAndSettlement()
         {
             var root = GameRoot.Instance; var service = root.SaveService;
