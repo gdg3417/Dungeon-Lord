@@ -1,0 +1,37 @@
+{
+  "qualifiedSource": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+  "allUnityInputsByteEqual": 1410,
+  "settingsPackagesImporterInputsByteEqual": 740,
+  "protectedFilesByteEqual": 12294,
+  "historicalEvidenceFilesByteEqual": 10624,
+  "exceptions": [],
+  "substitutionsRestored": true,
+  "currentBuildSealFilesVerified": 303,
+  "currentBuildSealSha256": "1c3bc25caa6e4c720a6092ff9605211da3fb189babe62de2595dfcb46588229f",
+  "previousBuilds": "Every preexisting build file is included in the protected file inventory and remains byte-identical.",
+  "auditSources": {
+    "baseline.json": {
+      "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\baseline.json",
+      "sha256": "6556350541e1e46791bb81572d8d21db3da79f81fbbc5c04e7a5022f7562a059"
+    },
+    "preservation-after.json": {
+      "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\preservation-after.json",
+      "sha256": "9724e50dd14ea010d14681d973b3616fd19c395d84f9b978ee5a97615b00a888"
+    },
+    "historical-evidence-after.json": {
+      "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\historical-evidence-after.json",
+      "sha256": "90862e88ab8560a08ded6ff98c8bc0c8fbba0fea597f564d1cb50b327098035c"
+    },
+    "accepted-preservation-exceptions.json": {
+      "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\accepted-preservation-exceptions.json",
+      "sha256": "4f36970309ef6b681910b005a7e553a68ae29a9600cfafbb14890fd0a27e9476"
+    },
+    "substitutions-restored.json": {
+      "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\substitutions-restored.json",
+      "sha256": "e43745c110a9c344c43d2df9568845bdaad60099c187f0e827bed618b19b1a3a"
+    }
+  },
+  "editorVersion": "m_EditorVersion: 6000.3.2f1\nm_EditorVersionWithRevision: 6000.3.2f1 (a9779f353c9b)",
+  "cliVersion": "1.0.0-beta.13",
+  "toolChanges": "None in this correction; the previously approved beta.12 to beta.13 update remains recorded in the initial qualification."
+}
