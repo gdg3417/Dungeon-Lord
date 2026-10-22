@@ -448,10 +448,10 @@ All repository ranges below refer to `7dc6f96b5c35f24923f6e8cbfa8a5e256c16c3ac`;
 
 | Repository source | Methods / relevant lines |
 | --- | --- |
-| [AGENTS.md](../../AGENTS.md), [model policy](../process/AI_Model_Selection_Policy.md), [development rules](../development/codex-development-rules.md) | Repository guardrails, classification/defaults and implementation governance |
-| [Active execution plan](../planning/post-gd60-mvp-execution-plan.md) | Phase 7 235–267; later precedence/two-floor notes 386–398, including historical premerge wording |
-| [Phase 7A0 lock](../planning/phase-7a0-graphical-dungeon-editor-design-lock.md) | Decision 92 899–913; Living Dungeon/responsive-editing addenda 1211–1229 |
-| [Living Dungeon owner lock](../planning/decisions/living-dungeon-owner-design-lock.md), [Phase 8 dependency plan](../planning/phase-8-dependency-roadmap.md) | Immutable starts, authoritative events, selected-floor presentation; future capabilities versus completion |
+| [AGENTS.md](../../AGENTS.md), [model policy](../process/AI_Model_Selection_Policy.md), [development rules](../../docs/development/codex-development-rules.md) | Repository guardrails, classification/defaults and implementation governance |
+| [Active execution plan](../../docs/planning/post-gd60-mvp-execution-plan.md) | Phase 7 235–267; later precedence/two-floor notes 386–398, including historical premerge wording |
+| [Phase 7A0 lock](../../docs/planning/phase-7a0-graphical-dungeon-editor-design-lock.md) | Decision 92 899–913; Living Dungeon/responsive-editing addenda 1211–1229 |
+| [Living Dungeon owner lock](../../docs/planning/decisions/living-dungeon-owner-design-lock.md), [Phase 8 dependency plan](../../docs/planning/phase-8-dependency-roadmap.md) | Immutable starts, authoritative events, selected-floor presentation; future capabilities versus completion |
 | [B2 contract](../planning/living-dungeon-phase-b2-implementation-contract.md), [B3A](../planning/living-dungeon-phase-b3a-implementation-contract.md), [B3B1](../planning/living-dungeon-phase-b3b1-implementation-contract.md), [B3B2](../planning/living-dungeon-phase-b3b2-implementation-contract.md) | Versioned bounded persistence, synthetic versus production settlement, timed C2 compatibility and foreground integration |
 | [Two-floor contract](../planning/living-dungeon-two-floor-foreground-contract.md) | Complete approved transfer/ordering/lineage/lifetime/schema contract |
 | [Spec 17](../17%20-%20Save_State_Offline_Simulation_and_Time_Handling.md), [Spec 28](../28%20-%20Save_Data_Model_Versioning_and_Migration.md), [invariants](../Cross_Spec_Glossary_of_Invariants_UPDATED.md) | Deterministic time/catch-up, detached atomic readback, migration compatibility, INV-12 draft safety and INV-15 stable spatial authority |
