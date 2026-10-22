@@ -1,0 +1,239 @@
+{
+  "campaigns": {
+    "ok": {
+      "first": {
+        "campaign": "3f8b22c78d884c5ca2feee380003e2a5",
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-ok-b6087f620bf0495f8709f4d1cd4ca20d\\TestResults\\qualification-supervisor\\3f8b22c78d884c5ca2feee380003e2a5",
+        "recorded_status": "PASSED",
+        "stages": {
+          "stage0": "PASSED"
+        },
+        "status": "PASSED"
+      },
+      "invocations": 1,
+      "launch_receipt": {
+        "launched_utc": "2026-10-22T17:50:45.007249+00:00",
+        "process": {
+          "created": 134371650450013798,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 34072
+        }
+      },
+      "second": {
+        "campaign": "3f8b22c78d884c5ca2feee380003e2a5",
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-ok-b6087f620bf0495f8709f4d1cd4ca20d\\TestResults\\qualification-supervisor\\3f8b22c78d884c5ca2feee380003e2a5",
+        "recorded_status": "PASSED",
+        "stages": {
+          "stage0": "PASSED"
+        },
+        "status": "PASSED"
+      },
+      "terminal": {
+        "campaign": "3f8b22c78d884c5ca2feee380003e2a5",
+        "child_finished_utc": "2026-10-22T17:50:55.750705+00:00",
+        "child_process": {
+          "created": 134371650455560224,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 13660
+        },
+        "child_started_utc": "2026-10-22T17:50:45.563055+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "C:\\Dev\\Dungeon-Lord\\Tools\\Presentation\\test_qualification_supervisor.py",
+          "--fixture",
+          "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-ok-b6087f620bf0495f8709f4d1cd4ca20d\\TestResults\\qualification-supervisor\\3f8b22c78d884c5ca2feee380003e2a5\\stage0",
+          "ok",
+          "10",
+          "stage0"
+        ],
+        "evidence": {
+          "child.json": "6ff36415a7f6b53fb5b1e4a0f6d09095f8c186d3f1c1a0b8ae95345424b50ec4",
+          "exit.json": "bf9694a9b243fd23223b31c6fb9898228fcd4b55d86d4813e2ce4141e1ca4b2d",
+          "results.xml": "29c422448edbf1b3d618dc3e67a4bbd800540122da210508b7d31341fc4454a6",
+          "started.json": "6159799c6fa6084ad60a2bea2b3976336c260a0aefa7babb73daffabf77115a2",
+          "stdout.log": "6fd1145219a6d2c9eb929aaccd33591ebe02c9f709c99620d424f1dc3967d62b"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-22T17:50:55.760704+00:00",
+        "host_exit_code": 0,
+        "input_identity": "f5c4105ce2ded1cf747fa830f1d1af9710543d76b7894797f6a83f4d16689ad5",
+        "job": "Local\\DLQ-7b5a423c2f05435bb08f1695cb49f7ee",
+        "process": {
+          "created": 134371650454227196,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 44316
+        },
+        "source_sha": "8e91b52a374ff62f9d5fe9b25f527f608cb19d33",
+        "stage": "stage0",
+        "started_utc": "2026-10-22T17:50:45.417567+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": 1,
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0,
+          "skips": []
+        }
+      }
+    },
+    "partial": {
+      "first": {
+        "campaign": "2c80e680a9b84bceb6f381f82c838183",
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-partial-d098d9d095e9467daf0777f295373b83\\TestResults\\qualification-supervisor\\2c80e680a9b84bceb6f381f82c838183",
+        "recorded_status": "FAILED",
+        "stages": {
+          "stage0": "FAILED"
+        },
+        "status": "FAILED"
+      },
+      "invocations": 1,
+      "launch_receipt": {
+        "launched_utc": "2026-10-22T17:50:45.360320+00:00",
+        "process": {
+          "created": 134371650453527468,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 26160
+        }
+      },
+      "second": {
+        "campaign": "2c80e680a9b84bceb6f381f82c838183",
+        "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-partial-d098d9d095e9467daf0777f295373b83\\TestResults\\qualification-supervisor\\2c80e680a9b84bceb6f381f82c838183",
+        "recorded_status": "FAILED",
+        "stages": {
+          "stage0": "FAILED"
+        },
+        "status": "FAILED"
+      },
+      "terminal": {
+        "campaign": "2c80e680a9b84bceb6f381f82c838183",
+        "child_finished_utc": "2026-10-22T17:50:56.058120+00:00",
+        "child_process": {
+          "created": 134371650458838404,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 13692
+        },
+        "child_started_utc": "2026-10-22T17:50:45.889541+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "C:\\Dev\\Dungeon-Lord\\Tools\\Presentation\\test_qualification_supervisor.py",
+          "--fixture",
+          "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-partial-d098d9d095e9467daf0777f295373b83\\TestResults\\qualification-supervisor\\2c80e680a9b84bceb6f381f82c838183\\stage0",
+          "partial",
+          "10",
+          "stage0"
+        ],
+        "detail": "no element found: line 1, column 10",
+        "evidence": {
+          "child.json": "b21a30fc9831cb83b4aac46c2e32f1aa8411ff10a0cabc28a9fc4c8bbc28d0fc",
+          "exit.json": "8ebfc64f774f45cd347c76c19f66e6f567ecf2903968dbe782800a0433b6b9e8",
+          "results.xml": "854f4fd5af1cf47056e109e431c36e6570aa297405c6f341ad7e5dc01cbd8c4e",
+          "started.json": "a7ed145006fe1ef1e2abcbea2bdb7fdcd3acb8c98d05876061f4c566110408a7",
+          "stdout.log": "a2724742822f0e0b6331607f97a9ad554fe0ea8a7bfc9cec6bea3c7a5fd26bed"
+        },
+        "exit_code": 0,
+        "failure": "INVALID_EVIDENCE",
+        "finished_utc": "2026-10-22T17:50:56.068120+00:00",
+        "host_exit_code": 0,
+        "input_identity": "f5c4105ce2ded1cf747fa830f1d1af9710543d76b7894797f6a83f4d16689ad5",
+        "job": "Local\\DLQ-d8d3e4685df14a6ab993e88e731ba78e",
+        "process": {
+          "created": 134371650457684543,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 16104
+        },
+        "source_sha": "a18a207a2d741a735a3433d1c84d65371e89511d",
+        "stage": "stage0",
+        "started_utc": "2026-10-22T17:50:45.762391+00:00",
+        "status": "FAILED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      }
+    }
+  },
+  "inspected_utc": "2026-10-22T17:51:27.375174+00:00",
+  "launcher": {
+    "campaigns": {
+      "ok": {
+        "campaign": "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-ok-b6087f620bf0495f8709f4d1cd4ca20d\\TestResults\\qualification-supervisor\\3f8b22c78d884c5ca2feee380003e2a5",
+        "launched": {
+          "campaign": "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-ok-b6087f620bf0495f8709f4d1cd4ca20d\\TestResults\\qualification-supervisor\\3f8b22c78d884c5ca2feee380003e2a5",
+          "launched": true,
+          "pid": 34072
+        },
+        "project": "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-ok-b6087f620bf0495f8709f4d1cd4ca20d"
+      },
+      "partial": {
+        "campaign": "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-partial-d098d9d095e9467daf0777f295373b83\\TestResults\\qualification-supervisor\\2c80e680a9b84bceb6f381f82c838183",
+        "launched": {
+          "campaign": "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-partial-d098d9d095e9467daf0777f295373b83\\TestResults\\qualification-supervisor\\2c80e680a9b84bceb6f381f82c838183",
+          "launched": true,
+          "pid": 26160
+        },
+        "project": "C:\\Dev\\Dungeon-Lord\\TestResults\\supervisor-tooling-20261022-reviewed\\fixture-partial-d098d9d095e9467daf0777f295373b83"
+      }
+    },
+    "utc": "2026-10-22T17:50:45.363933+00:00"
+  },
+  "preservation": {
+    "Assets": {
+      "after_sha256": "f0f11cd380471e8e842d73a2bc71c3dfc67fafedbad532e9a07a7846b69257e8",
+      "before_sha256": "f0f11cd380471e8e842d73a2bc71c3dfc67fafedbad532e9a07a7846b69257e8",
+      "files": 1362,
+      "unchanged": true
+    },
+    "Builds/Development/Windows-living-dungeon-b3b2-20261018": {
+      "after_sha256": "059ccabe627571296d94ae8269051bfad03d61c5c3b890f7d2253ae78604b748",
+      "before_sha256": "059ccabe627571296d94ae8269051bfad03d61c5c3b890f7d2253ae78604b748",
+      "files": 303,
+      "unchanged": true
+    },
+    "Builds/Development/Windows-living-dungeon-two-floor-20261021-final": {
+      "after_sha256": "47a18d2ac57a6b356a4dd924529bde379d69b913b83e2232baf34bf51d404da7",
+      "before_sha256": "47a18d2ac57a6b356a4dd924529bde379d69b913b83e2232baf34bf51d404da7",
+      "files": 303,
+      "unchanged": true
+    },
+    "Builds/Development/Windows-living-dungeon-two-floor-perf-20261021": {
+      "after_sha256": "ea34aa8c244fb797b4cbcab6c87c7f1a2f6a350ccb1504a231a1d15012595a27",
+      "before_sha256": "ea34aa8c244fb797b4cbcab6c87c7f1a2f6a350ccb1504a231a1d15012595a27",
+      "files": 303,
+      "unchanged": true
+    },
+    "ContentAuthoring": {
+      "after_sha256": "a5e7d39423d9733b8b8bcaa21cf2f38bd52823714f85c81efefbedb9dff9cb54",
+      "before_sha256": "a5e7d39423d9733b8b8bcaa21cf2f38bd52823714f85c81efefbedb9dff9cb54",
+      "files": 19,
+      "unchanged": true
+    },
+    "Docs/testing/evidence": {
+      "after_sha256": "e81de985c27ea52c04d5ff69b101cc9d92959e0c7035fc9d968135fc9c65d50a",
+      "before_sha256": "e81de985c27ea52c04d5ff69b101cc9d92959e0c7035fc9d968135fc9c65d50a",
+      "files": 1015,
+      "unchanged": true
+    },
+    "Packages": {
+      "after_sha256": "b65c1d182144ec1119f84a3ac0185d98c37995c7ebb83a95bd794564947fe735",
+      "before_sha256": "b65c1d182144ec1119f84a3ac0185d98c37995c7ebb83a95bd794564947fe735",
+      "files": 2,
+      "unchanged": true
+    },
+    "ProjectSettings": {
+      "after_sha256": "ad4ebfe14bbda89c74cd7b6a32337d21657a5f2b39598a15c4cdee57854fa26c",
+      "before_sha256": "ad4ebfe14bbda89c74cd7b6a32337d21657a5f2b39598a15c4cdee57854fa26c",
+      "files": 27,
+      "unchanged": true
+    }
+  },
+  "savings": {
+    "model_completion_polls": 0,
+    "partial_fixture_invocations": 1,
+    "successful_fixture_invocations": 1,
+    "token_savings": "not measured",
+    "unity_speedup": "not claimed"
+  }
+}
