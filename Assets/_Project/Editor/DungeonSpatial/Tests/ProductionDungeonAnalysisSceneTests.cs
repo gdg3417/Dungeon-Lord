@@ -50,12 +50,15 @@ namespace DungeonBuilder.M0.Tests
 
         private IEnumerator AnalysisPhoneReveal(VisualElement element)
         {
+            yield return AnalysisPhoneSettle();
             var scroll = element.GetFirstAncestorOfType<ScrollView>();
             if (scroll != null) scroll.ScrollTo(element);
             yield return AnalysisPhoneSettle();
             TestContext.WriteLine("Phone target " + element.name + " " + controller.TextSize + ": " + element.worldBound + "; safe=" + controller.SafeRoot.worldBound);
             var picked = element.panel.Pick(element.worldBound.center);
-            TestContext.WriteLine("Picked=" + picked?.name + "; parent=" + picked?.parent?.name + "; viewport=" + scroll?.contentViewport.worldBound);
+            TestContext.WriteLine("Picked=" + picked?.name + "; parent=" + picked?.parent?.name + "; viewport=" + scroll?.contentViewport.worldBound +
+                "; editing=" + controller.IsEditing + "; top=" + controller.SafeRoot.Q("topChrome").worldBound +
+                "; bottom=" + controller.SafeRoot.Q("bottomChrome").worldBound + "; map=" + controller.SafeRoot.Q("mapArea").worldBound);
             if (!controller.SafeRoot.worldBound.Contains(element.worldBound.max-Vector2.one) ||
                 picked != element && !element.Contains(picked))
             {
