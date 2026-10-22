@@ -54,6 +54,16 @@ namespace DungeonBuilder.M0.Tests
             if (scroll != null) scroll.ScrollTo(element);
             yield return AnalysisPhoneSettle();
             TestContext.WriteLine("Phone target " + element.name + " " + controller.TextSize + ": " + element.worldBound + "; safe=" + controller.SafeRoot.worldBound);
+            var picked = element.panel.Pick(element.worldBound.center);
+            TestContext.WriteLine("Picked=" + picked?.name + "; parent=" + picked?.parent?.name + "; viewport=" + scroll?.contentViewport.worldBound);
+            if (!controller.SafeRoot.worldBound.Contains(element.worldBound.max-Vector2.one) ||
+                picked != element && !element.Contains(picked))
+            {
+                string capture = "analysis-phone-failure-" + element.name + "-" + Guid.NewGuid().ToString("N") + ".png";
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture);
+                TestContext.WriteLine(capture);
+                yield return null; yield return null;
+            }
         }
 
         private IEnumerator AnalysisPhoneTap(Button button, bool enabled = true)
