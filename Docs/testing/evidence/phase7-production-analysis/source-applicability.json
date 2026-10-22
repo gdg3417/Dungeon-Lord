@@ -1,0 +1,65 @@
+{
+  "baseline": "7dc6f96b5c35f24923f6e8cbfa8a5e256c16c3ac",
+  "final_implementation_source": "e44ea6c103cd450b7a3433c29dff205d5808646f",
+  "unity_version": "6000.3.2f1",
+  "unity_cli_version": "1.0.0-beta.13",
+  "reports": [
+    {
+      "report": "09-final-affected-edit.xml",
+      "source_sha": "31733c030d0aa44733022211bf66e967f7f191ac",
+      "total": 148,
+      "passed": 148,
+      "failed": 0,
+      "skipped": 0,
+      "sha256": "ac2a222700695b53520c93472b50a17cabbd845e0ec75febff8fa5bb58dcbb15"
+    },
+    {
+      "report": "10-final-focused-edit.xml",
+      "source_sha": "e44ea6c103cd450b7a3433c29dff205d5808646f",
+      "total": 41,
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "sha256": "dd4ffe43500af038a8e76a8933ed7feb46be5e760c162e34c21fe3385561e4c8"
+    },
+    {
+      "report": "11-final-affected-play.xml",
+      "source_sha": "e44ea6c103cd450b7a3433c29dff205d5808646f",
+      "total": 44,
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0,
+      "sha256": "69bc9605d803ab13244e6095853dc0f84354b471e0266573f3899aef827be6df"
+    }
+  ],
+  "prepared_and_compared_inputs": 1418,
+  "input_mismatches": [],
+  "normalization": [
+    "exact config and SaveService save filename substitution: phase7-analysis-focused-20261022-01.json",
+    "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+  ],
+  "input_manifest_sha256": "cdb0c0bef58b9ac6e122b617831f23d07068d896fa210a9aab07bd58e43136e5",
+  "protected_original_files": 60,
+  "protected_original_files_byte_equal": true,
+  "additional_protected_files": 0,
+  "protected_inventory_sha256": "b0be5d4d4f9b3f2b28d4fd1f29c7d081022459a6f80a7ce32a50d2fb918bfb1a",
+  "restored_inputs_after_final_play": [
+    "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset",
+    "ProjectSettings/ProjectSettings.asset"
+  ],
+  "restored_default_test_report": {
+    "name": "TestResults.xml",
+    "prior_and_restored_sha256": "f9eccd6bb418bc6f4f03b71dd0272384262aa088d59675e7c99fd9d6362efc6e",
+    "verified_original_copy": "TestResults/living-dungeon-b3b1-20261018/12-integration-play.xml",
+    "new_report_archived": true
+  },
+  "tools": {
+    "unity_cli_sha256": "9a63636402d8a087e9b67621f31b15fbe0f48eba130a91bdefb88b68aa717b20",
+    "qualification_inputs_sha256": "d684f97a4f2e6287f36620c308262fd1fcee39e23fa58295493bc52b803e167c"
+  },
+  "limitations": [
+    "Reports apply only to their recorded source SHA and selection.",
+    "No final full-suite, sustained-profile, Windows standalone, native continuation or owner UAT verdict.",
+    "Raw logs, owner save contents and private filename inventories are not published."
+  ]
+}
