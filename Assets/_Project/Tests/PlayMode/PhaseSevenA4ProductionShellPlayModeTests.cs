@@ -18,6 +18,23 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         private object fixture;
         private Type fixtureType;
 
+        [UnityTest] public IEnumerator AnalysisNavigationAndReopen()
+        { yield return Invoke("AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen"); }
+        [UnityTest] public IEnumerator AnalysisCleanAndModifiedDraftChoices()
+        { yield return Invoke("AnalysisCleanAndModifiedDraftContinueDiscardSave"); }
+        [UnityTest] public IEnumerator AnalysisFailedTransactionsKeepDraft()
+        { yield return Invoke("AnalysisFailedDiscardAndFailedSaveNeverNavigateOrLoseDraft"); }
+        [UnityTest] public IEnumerator AnalysisInvalidDraftChoices()
+        { yield return Invoke("AnalysisInvalidDraftOffersOnlyDiscardAndContinue"); }
+        [UnityTest] public IEnumerator AnalysisPendingAndStaleDrafts()
+        { yield return Invoke("AnalysisPendingAndStaleSaveRemainDisabledWithDraftIntact"); }
+        [UnityTest] public IEnumerator AnalysisResponsiveLayouts()
+        { yield return Invoke("AnalysisResponsiveSafeAreaLocalizationAndScroll"); }
+        [UnityTest] public IEnumerator AnalysisMissingLocalization()
+        { yield return Invoke("AnalysisMissingLocalizationUsesExistingAvailabilityFeedback"); }
+        [UnityTest] public IEnumerator AnalysisForegroundContinuity()
+        { yield return Invoke("AnalysisDoesNotInterruptAuthoritativeForegroundAdmissionAndSettlement"); }
+
         [UnitySetUp]
         public IEnumerator SetUp()
         {

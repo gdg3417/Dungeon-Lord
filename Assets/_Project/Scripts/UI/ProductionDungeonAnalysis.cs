@@ -106,7 +106,11 @@ namespace DungeonBuilder.M0
                 else host.Insert(1, entry);
             }
             entry.text = IsEditing ? Text("ui.analysis.title") : string.Empty;
-            ui.Q<Label>("performanceSummary").text = ProductionAnalysisPresenter.Compact(analysisReport, Text, Culture);
+            string compact = ProductionAnalysisPresenter.Compact(analysisReport, Text, Culture);
+            var summary = ui.Q<Label>("performanceSummary");
+            summary.text = replay == null ? compact : compact.Replace("\n", " ");
+            summary.EnableInClassList("replay-summary", replay != null);
+            entry.tooltip = compact;
             ui.Q<Label>("analysisReport").text = ProductionAnalysisPresenter.Details(analysisReport, Text, Culture);
             // Detailed causal evidence remains owned and validated by the existing replay presenter.
             ui.Q<Label>("analysisEvidence").text = Text("ui.analysis.evidence");

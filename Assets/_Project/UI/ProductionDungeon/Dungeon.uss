@@ -220,3 +220,4 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .sheet-header #openAnalysis { flex-grow: 1; flex-shrink: 1; flex-basis: 0; align-items: flex-start; }
 .sheet-header #collapseDetails { flex-shrink: 0; }
 #openAnalysis .performance-summary { margin: 0; padding: 0; -unity-text-align: middle-left; }
+#openAnalysis .replay-summary { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
