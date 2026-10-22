@@ -7,7 +7,8 @@ namespace DungeonBuilder.M0
     public sealed partial class ProductionDungeonController
     {
         private LivingDungeonForegroundInspection presentedForeground;
-        private bool foregroundWasEditing, foregroundWasReplay;
+        private bool foregroundWasEditing, foregroundWasReplay, foregroundWasCompact;
+        private ScrollView foregroundActivityScroll;
         private string foregroundPresentedFloor;
         private RunOutcomeRecord foregroundLatest;
         private Label foregroundPartyLabel;
@@ -15,25 +16,42 @@ namespace DungeonBuilder.M0
         private float foregroundLabelFont;
         private void PresentForegroundActivity()
         {
-            var view = root?.ForegroundActivity;
+            var view = root?.ForegroundActivity?.ForFloor(selectedFloor);
             bool observingReplay = replay != null;
+            bool compact = safe.ClassListContains("compact-hud");
             var latest = root?.Save?.runHistory?.LatestOutcome;
             if (view != presentedForeground || IsEditing != foregroundWasEditing || observingReplay != foregroundWasReplay ||
-                foregroundPresentedFloor != selectedFloor || latest != foregroundLatest) {
+                foregroundPresentedFloor != selectedFloor || latest != foregroundLatest || compact != foregroundWasCompact) {
+                bool resetScroll = foregroundPresentedFloor != selectedFloor || view?.RunId != presentedForeground?.RunId ||
+                    view?.Waiting != presentedForeground?.Waiting;
                 presentedForeground = view; foregroundWasEditing = IsEditing; foregroundWasReplay = observingReplay;
-                foregroundPresentedFloor = selectedFloor; foregroundLatest = latest;
+                foregroundPresentedFloor = selectedFloor; foregroundLatest = latest; foregroundWasCompact = compact;
+                safe.EnableInClassList("foreground-visible", view != null && !IsEditing && !observingReplay);
+                if (renderState != null) PresentFloorRail();
                 var label = document.rootVisualElement.Q<Label>("foregroundActivity");
                 if (label != null) {
-                    // Normal play keeps activity visible below the scrolling HUD.
-                    // Editing retains the existing compact chrome arrangement.
                     var scroll = (ScrollView)top;
                     if (IsEditing && label.parent != scroll.contentContainer) scroll.Add(label);
+                    else if (!IsEditing && compact) {
+                        if (foregroundActivityScroll == null) {
+                            foregroundActivityScroll = new ScrollView(ScrollViewMode.Vertical) { name = "foregroundActivityScroll" };
+                            foregroundActivityScroll.AddToClassList("foreground-activity-scroll");
+                            safe.Insert(safe.IndexOf(top) + 1, foregroundActivityScroll);
+                        }
+                        if (label.parent != foregroundActivityScroll.contentContainer) foregroundActivityScroll.Add(label);
+                        if (resetScroll) foregroundActivityScroll.scrollOffset = Vector2.zero;
+                    }
                     else if (!IsEditing && label.parent != safe) safe.Insert(safe.IndexOf(top) + 1, label);
+                    if (foregroundActivityScroll != null)
+                        foregroundActivityScroll.style.display = !IsEditing && compact && view != null && !observingReplay ? DisplayStyle.Flex : DisplayStyle.None;
                     label.style.display = view == null || observingReplay ? DisplayStyle.None : DisplayStyle.Flex;
                     if (view != null) {
                         label.text = view.RunId == null ? Text(view.StateKey) : Format("ui.living.active_format", view.RunId,
                             view.Step?.FloorIndex + 1 ?? 1, Text("ui.living.pending." + (view.AnnouncedAction?.ToString() ?? "RoomEntry")));
                         label.enableRichText = false;
+                        if (view.Waiting) label.text = Text("ui.living.waiting") + "\n" + label.text;
+                        if (view.Descended) label.text += "\n" + Text("ui.living.descended");
+                        if (view.Decision.HasValue) label.text += "\n" + Text(view.Decision.Value ? "ui.living.decision.descend" : "ui.living.decision.exit");
                         if (view.RunId != null) {
                             label.text += "\n" + ProductionDungeonPresenter.ForegroundParty(view, Text, Culture);
                             string recent = ProductionDungeonPresenter.ForegroundInteraction(view, Text, ContentName, Culture);

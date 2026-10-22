@@ -67,6 +67,10 @@ namespace DungeonBuilder.M0
                     (blocked ? Text("ui.dungeon.floor.blocked") : string.Empty);
                 button.EnableInClassList("selected-floor",floor.FloorInstanceId==selectedFloor);
                 button.EnableInClassList("floor-blocked",blocked);
+                var party = root?.ForegroundActivity?.Parties.SingleOrDefault(p => p.FloorId == floor.FloorInstanceId);
+                button.EnableInClassList("floor-party-active", party != null);
+                button.EnableInClassList("floor-party-waiting", party?.Waiting == true);
+                button.tooltip = party == null ? string.Empty : party.Waiting ? Text("ui.living.waiting") : Text("ui.living.active");
             }
         }
         private void PresentComposition()

@@ -1,0 +1,163 @@
+{
+  "reviewedHead": "4008980ffbd42ff9d25969dcca3a2663556d2177",
+  "qualifiedSource": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+  "baselineUnitySource": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da",
+  "metrics": {
+    "editor-one": {
+      "beforeSummary": "Docs\\testing\\evidence\\living-dungeon-two-floor\\final-editor-one-floor-summary.json",
+      "beforeSummarySha256": "5043287c636d1ede34b4e1bb3990ad6f8c94b9b38cebb3b8c59e4f636ad2a96b",
+      "afterSummary": "Docs\\testing\\evidence\\living-dungeon-two-floor\\performance-correction\\editor-one-summary.json",
+      "afterSummarySha256": "4afef247bc371759cc7ec68d11399b544e2d0cb72e7c865da22184669dda668e",
+      "source": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3"
+    },
+    "editor-two": {
+      "beforeSummary": "Docs\\testing\\evidence\\living-dungeon-two-floor\\final-editor-two-floor-summary.json",
+      "beforeSummarySha256": "34b2b5002abcc6fc4ae24e829b4d06aac194b1cb357c3bb8e9ab35f75c688833",
+      "afterSummary": "Docs\\testing\\evidence\\living-dungeon-two-floor\\performance-correction\\editor-two-summary.json",
+      "afterSummarySha256": "4f2ce9714644128d02899c10492ceba9dd35c1675c88c4a3585d5c7d0152cd1f",
+      "source": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3"
+    },
+    "windows-one": {
+      "beforeSummary": "Docs\\testing\\evidence\\living-dungeon-two-floor\\final-windows-one-floor-summary.json",
+      "beforeSummarySha256": "a5be5e308fd44c466fac3d9e37f18ebb8031ff46fa6fcc56a464f788a19d7e6d",
+      "afterSummary": "Docs\\testing\\evidence\\living-dungeon-two-floor\\performance-correction\\windows-one-summary.json",
+      "afterSummarySha256": "0737ef094db6640f269841ecef6bf933649c3820ed3f48b52394deca99d1210b",
+      "source": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3"
+    },
+    "windows-two": {
+      "beforeSummary": "Docs\\testing\\evidence\\living-dungeon-two-floor\\final-windows-two-floor-summary.json",
+      "beforeSummarySha256": "36ebd86f9fe3043f232cb63c77dce300a9236718704075fe23ba9bcc50d014bd",
+      "afterSummary": "Docs\\testing\\evidence\\living-dungeon-two-floor\\performance-correction\\windows-two-summary.json",
+      "afterSummarySha256": "34908ab978c5b4a7d7534f3808ef11710c79a086e5af82336023b5ce4c89114a",
+      "source": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3"
+    }
+  },
+  "equivalence": {
+    "editor-one": {
+      "before": "TestResults\\living-dungeon-two-floor-20261020\\editor-owner-inactive-d15c573f9c9b4ade9ba7dcefcc454851.profile.json",
+      "beforeSha256": "c2627142e46a510387b508059ff3086815833fd05b9f3804da03dd3e5925405c",
+      "after": "TestResults\\living-dungeon-two-floor-perf-20261021\\outputs-42-full-edit-passed\\living-dungeon-two-floor-20261020\\editor-owner-inactive-62e5adf0cfb04a718216871d4cf37cc6.profile.json",
+      "afterSha256": "5c19bdb0226247040259cdec0b5ce6378c64b9a94d7ed68d72c96c36bf185528",
+      "boundaryFields": [
+        "Category",
+        "Sequence",
+        "Ordinal",
+        "PartyCount",
+        "CheckpointBytes"
+      ],
+      "excludedCategory": "between-events",
+      "reason": "No committed boundary; startup/frame partitioning can change idle-frame count. No gameplay event is excluded.",
+      "rowsBefore": 1210,
+      "rowsAfter": 1210,
+      "boundaryProjectionSha256": "5c2c0574b5a3f86ce9f62225675aa3239765ce5a6f21e3f23c208dd988c84804",
+      "equal": true,
+      "framesBefore": 8341,
+      "framesAfter": 8341
+    },
+    "editor-two": {
+      "before": "TestResults\\living-dungeon-two-floor-20261020\\editor-two-floor-477a98d367b54649945b5c32fc722178.profile.json",
+      "beforeSha256": "74b2bbfb6f845ea1a27ae9d515f6cbb7c59f3c1197fd2613174bcc22624f58ab",
+      "after": "TestResults\\living-dungeon-two-floor-perf-20261021\\outputs-42-full-edit-passed\\living-dungeon-two-floor-20261020\\editor-two-floor-7b134191a4c9484e9b1ef59832efe663.profile.json",
+      "afterSha256": "87fbb3b9be4bfbbacc704b1592d2352416dc58924dfd4210defda67c60c2f876",
+      "boundaryFields": [
+        "Category",
+        "Sequence",
+        "Ordinal",
+        "PartyCount",
+        "CheckpointBytes"
+      ],
+      "excludedCategory": "between-events",
+      "reason": "No committed boundary; startup/frame partitioning can change idle-frame count. No gameplay event is excluded.",
+      "rowsBefore": 3129,
+      "rowsAfter": 3129,
+      "boundaryProjectionSha256": "3e8375d394f45e4654cb6946f277c9364104613ae7a798f1f535a548bfb70cbb",
+      "equal": true,
+      "framesBefore": 12537,
+      "framesAfter": 12537
+    },
+    "windows-one": {
+      "before": "TestResults\\living-dungeon-two-floor-20261020\\37-one-profile.json",
+      "beforeSha256": "f5b7bb1327f446c46b53065ff9b89529ce796aaa29d8a4605ffa4c3785f8897b",
+      "after": "TestResults\\living-dungeon-two-floor-perf-20261021\\47-one-profile.json",
+      "afterSha256": "02c98e3b7ab054ec3b12790b25ef01a12dbe113d7286fe39c45294fc1bc9b53d",
+      "boundaryFields": [
+        "Category",
+        "Sequence",
+        "Ordinal",
+        "PartyCount",
+        "CheckpointBytes"
+      ],
+      "excludedCategory": "between-events",
+      "reason": "No committed boundary; startup/frame partitioning can change idle-frame count. No gameplay event is excluded.",
+      "rowsBefore": 1210,
+      "rowsAfter": 1210,
+      "boundaryProjectionSha256": "5c2c0574b5a3f86ce9f62225675aa3239765ce5a6f21e3f23c208dd988c84804",
+      "equal": true,
+      "framesBefore": 8344,
+      "framesAfter": 8344,
+      "saveEquivalence": {
+        "before": "TestResults\\living-dungeon-two-floor-20261020\\37-one-profile-post-exit.save.json",
+        "after": "TestResults\\living-dungeon-two-floor-perf-20261021\\47-one-profile-post-exit.save.json",
+        "beforeSha256": "ebb52396d773501897e4d2f38fe53fcce0b52bb0abfe12608758d9e34635d09f",
+        "afterSha256": "dee72873671fad6fd44a593932dc81added718a7e2e9dddf564d6fe7d2354804",
+        "beforeBytes": 94759,
+        "afterBytes": 94759,
+        "normalizedSha256": "ec878a55f5457d3520c5daeb563450f1e0420a6046c6a487604d6d5e435c7faf",
+        "equalAfterOnlyUtcLifecycleNormalization": true,
+        "normalizedFields": [
+          "primary.lastSavedUtcUnix",
+          "primary.lastPausedUtcUnix",
+          "primary.lastResumedUtcUnix"
+        ],
+        "gameplayFieldsNormalized": [],
+        "checkpointFieldsNormalized": [],
+        "revisionNormalized": false
+      }
+    },
+    "windows-two": {
+      "before": "TestResults\\living-dungeon-two-floor-20261020\\39-two-profile.json",
+      "beforeSha256": "40043a51a4e509f99d9ba1b6a58c03bde3ea4c571168ea8d395f4ea51072f740",
+      "after": "TestResults\\living-dungeon-two-floor-perf-20261021\\48-two-profile.json",
+      "afterSha256": "2e73a39f7bad8a768211d65e10ea40cf6d4f9fe6186008c6bde3eb814478406f",
+      "boundaryFields": [
+        "Category",
+        "Sequence",
+        "Ordinal",
+        "PartyCount",
+        "CheckpointBytes"
+      ],
+      "excludedCategory": "between-events",
+      "reason": "No committed boundary; startup/frame partitioning can change idle-frame count. No gameplay event is excluded.",
+      "rowsBefore": 3129,
+      "rowsAfter": 3129,
+      "boundaryProjectionSha256": "61b5b7e931e00f38c1d550555f2d75f7d59f885b366e3a77ad6435dc16e1dbef",
+      "equal": true,
+      "framesBefore": 12540,
+      "framesAfter": 12540,
+      "saveEquivalence": {
+        "before": "TestResults\\living-dungeon-two-floor-20261020\\39-two-profile-post-exit.save.json",
+        "after": "TestResults\\living-dungeon-two-floor-perf-20261021\\48-two-profile-post-exit.save.json",
+        "beforeSha256": "4e8fa02c2d8fb3daca1ef08bdb5eb8a679ed640e692b934b8a685d3885eae7f0",
+        "afterSha256": "f5a487e2f2cd2ccb51b5a970324d6efa9e42fb8b906fa24db7f11945d809aa38",
+        "beforeBytes": 216802,
+        "afterBytes": 216802,
+        "normalizedSha256": "ee5323edc29bc91e71502586f574766f2aea2b51ef1f9ce8da9f94ca99d62647",
+        "equalAfterOnlyUtcLifecycleNormalization": true,
+        "normalizedFields": [
+          "primary.lastSavedUtcUnix",
+          "primary.lastPausedUtcUnix",
+          "primary.lastResumedUtcUnix"
+        ],
+        "gameplayFieldsNormalized": [],
+        "checkpointFieldsNormalized": [],
+        "revisionNormalized": false
+      }
+    }
+  },
+  "limitations": [
+    "External wall UTC differs. Native performance profiles use the unchanged QA funding step before admissions; both final canonical saves match after only the three stated UTC fields.",
+    "Standalone continuation scenarios do not reset funding: their boot-time offline passive mana legitimately differs between old/new launch times, so their cross-build start IDs/mana/scores are not claimed equal. Each new continuation verifies its own immutable identities and exact predecessor save.",
+    "Inclusive nested scopes must not be added. Frame allocations include engine/controller/render work. Thread allocations are unavailable. Windows does not qualify mobile responsiveness.",
+    "Measured reductions do not establish an owner-approved performance threshold; large synchronous stalls remain."
+  ]
+}

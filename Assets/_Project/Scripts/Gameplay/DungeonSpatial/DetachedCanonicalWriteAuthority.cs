@@ -486,7 +486,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             foreach (var party in owned.LivingDungeon.Parties)
             {
                 var execution = LivingDungeonContracts.Restore(party, profile);
-                if (execution.IsTerminal && profile.Id != LivingDungeonForegroundConfig.ProfileId) { execution.Abandon(); continue; }
+                if (execution.IsTerminal && !LivingDungeonForegroundConfig.IsProduction(profile.Id)) { execution.Abandon(); continue; }
+                if (execution.TransferContract) { occupied.Add(execution.OccupiedFloor); execution.Abandon(); continue; }
                 var last = execution.Inspect().LastStep;
                 // Qualification-only route checkpoints can lack canonical floor identity.
                 // Vacancy cannot be proven for these inputs, so recovery is ineligible.

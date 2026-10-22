@@ -20,6 +20,13 @@ namespace DungeonBuilder.M0
             public int VisualChecks, VisualLabelsShown, VisualLabelsHidden;
             public int VisualRequestedLayoutsUnavailable;
             public string VisualBounds;
+            public int BlockerSequence, WaitingSequence, NextRunSequence;
+            public string AStartIdentity, BStartIdentity;
+            public int[] PartySequences;
+            public string[] PartyCheckpoints;
+            public long BlockerAdmittedAt, WaiterAdmittedAt, BlockedAt, ReleasedAt, BlockerTerminalAt, BlockerTerminalOrdinal;
+            public bool WaitingResumed;
+            public double Mana, Heat;
         }
         // Opt-in development qualification only. Real Bootstrap/UI/native writer;
         // an injected technical clock accelerates the configured gameplay timings.
@@ -61,7 +68,7 @@ namespace DungeonBuilder.M0
                     throw new InvalidOperationException("b3b2.smoke.real_monotonic_source");
             } else {
                 prior = JsonUtility.FromJson<ForegroundSmokeReport>(File.ReadAllText(previousReport));
-                if (!prior.Passed || Save.livingDungeon.Parties.Count != 1 || Save.livingDungeon.Scheduler.ProfileId != LivingDungeonForegroundConfig.ProfileId ||
+                if (!prior.Passed || Save.livingDungeon.Parties.Count != 1 || !LivingDungeonForegroundConfig.IsProduction(Save.livingDungeon.Scheduler.ProfileId) ||
                     Save.livingDungeon.Scheduler.AcceptedThrough != prior.Accepted ||
                     Save.livingDungeon.Parties[0].CheckpointIdentity != prior.CheckpointIdentity || Save.livingDungeon.Parties[0].NextOrdinal != prior.Ordinal)
                     throw new InvalidOperationException("b3b2.smoke.exact_pending_reopen");
@@ -204,7 +211,8 @@ namespace DungeonBuilder.M0
         internal static Func<double> ReopenClock(string[] args, string product, string savePath)
         {
             int index = Array.IndexOf(args, "-b3b2ForegroundSmoke");
-            if (index < 0 || index + 1 >= args.Length || args[index + 1] != "settle" && args[index + 1] != "finish" && args[index + 1] != "profile" ||
+            if (index < 0 || index + 1 >= args.Length || args[index + 1] != "settle" && args[index + 1] != "finish" && args[index + 1] != "profile" &&
+                !args[index + 1].StartsWith("two-floor-", StringComparison.Ordinal) && args[index + 1] != "v1-upgrade" ||
                 product == null || !product.Contains("B3B2 Smoke") || string.IsNullOrEmpty(savePath) ||
                 !Path.GetFileName(savePath).StartsWith("living-dungeon-b3b2-qualification-", StringComparison.Ordinal)) return null;
             // Qualification-only epoch: inspect the exact loaded prefix before
@@ -221,6 +229,18 @@ namespace DungeonBuilder.M0
             if (index + 3 >= args.Length) { Application.Quit(2); return; }
             var probe = new GameObject("B3B2ForegroundQualification").AddComponent<LivingDungeonForegroundDevelopmentSmoke>();
             DontDestroyOnLoad(probe.gameObject); probe.phase = args[index + 1]; probe.destination = Path.GetFullPath(args[index + 2]); probe.previous = args[index + 3];
+            if (probe.phase.StartsWith("two-floor-", StringComparison.Ordinal) || probe.phase == "v1-upgrade") {
+                var root = GameRoot.Instance;
+                if (root == null || !Application.productName.Contains("B3B2 Smoke Two Floor")) { Application.Quit(2); return; }
+                string file;
+                if (probe.phase == "two-floor-wait" || probe.phase == "two-floor-profile" || probe.phase == "v1-upgrade")
+                    file = JsonUtility.FromJson<TwoFloorSeedManifest>(File.ReadAllText(probe.previous)).SaveFileName;
+                else file = Path.GetFileName(JsonUtility.FromJson<GameRoot.ForegroundSmokeReport>(File.ReadAllText(probe.previous)).SavePath);
+                if (file != Path.GetFileName(file) || !file.StartsWith("living-dungeon-b3b2-qualification-two-floor-", StringComparison.Ordinal) ||
+                    !File.Exists(Path.Combine(Application.persistentDataPath, file))) { Application.Quit(2); return; }
+                var config = JsonUtility.FromJson<BuildConfig>(root.buildConfigJson.text);
+                config.save.fileName = file; root.buildConfigJson = new TextAsset(JsonUtility.ToJson(config));
+            }
             if (probe.phase == "profile") {
                 var root = GameRoot.Instance;
                 if (root == null || !Application.productName.Contains("B3B2 Smoke")) { Application.Quit(2); return; }
@@ -234,11 +254,14 @@ namespace DungeonBuilder.M0
         private IEnumerator Start()
         {
             if (File.Exists(destination) || !Directory.Exists(Path.GetDirectoryName(destination)) ||
-                phase != "admit" && phase != "settle" && phase != "finish" && phase != "profile") { Application.Quit(2); yield break; }
+                phase != "admit" && phase != "settle" && phase != "finish" && phase != "profile" &&
+                phase != "two-floor-wait" && phase != "two-floor-release" && phase != "two-floor-finish" && phase != "two-floor-profile" && phase != "v1-upgrade") { Application.Quit(2); yield break; }
             for (int frame = 0; frame < 600 && GameRoot.Instance?.TimeService?.HasForegroundClock != true; frame++) yield return null;
             var report = new GameRoot.ForegroundSmokeReport { Phase = phase };
-            var profile = phase == "profile" ? new GameRoot.ForegroundProfileReport() : null;
-            IEnumerator test = profile != null ? GameRoot.Instance?.ProfileForeground(profile) : GameRoot.Instance?.QualifyForeground(phase, report, previous);
+            var profile = phase == "profile" || phase == "two-floor-profile" ? new GameRoot.ForegroundProfileReport() : null;
+            IEnumerator test = profile != null ? GameRoot.Instance?.ProfileForeground(profile) :
+                phase.StartsWith("two-floor-", StringComparison.Ordinal) || phase == "v1-upgrade"
+                    ? GameRoot.Instance?.QualifyTwoFloor(phase, report, previous) : GameRoot.Instance?.QualifyForeground(phase, report, previous);
             while (test != null) {
                 object next = null; bool more = false;
                 try { more = test.MoveNext(); if (more) next = test.Current; }
@@ -249,7 +272,7 @@ namespace DungeonBuilder.M0
             if (test == null) report.Failure = "b3b2.smoke.boot_failed";
             using (var stream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write))
             using (var writer = new StreamWriter(stream)) writer.Write(profile != null ? JsonUtility.ToJson(profile, true) : JsonUtility.ToJson(report, true));
-            if (profile != null && GameRoot.Instance?.SaveService?.CanonicalSession != null)
+            if (GameRoot.Instance?.SaveService?.CanonicalSession != null)
                 using (var stream = new FileStream(destination + ".save.json", FileMode.CreateNew, FileAccess.Write)) {
                     var bytes = GameRoot.Instance.SaveService.CanonicalSession.GetCurrentBytes();
                     stream.Write(bytes, 0, bytes.Length);

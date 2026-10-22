@@ -28,7 +28,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 w.Write(m.MaxHealth); w.Write(m.Health); w.Write(m.InitialHealth); w.Write(m.InitialRevivalRequired); w.Write(m.RevivalRequired); w.Write(m.Defeated);
             }
         });
-        internal static byte[] Fold(byte[] prefix, RunStep step, RunExecution execution) => RunCheckpointCodec.Hash(RunCheckpointCodec.Bytes(w => {
+        internal static byte[] Fold(byte[] prefix, RunStep step, RunExecution execution) => Fold(prefix, step, execution, out _);
+        internal static byte[] Fold(byte[] prefix, RunStep step, RunExecution execution, out byte[] inspection)
+        {
+            byte[] capturedInspection = null;
+            var folded = RunCheckpointCodec.Hash(RunCheckpointCodec.Bytes(w => {
             RunCheckpointCodec.Text(w, Evidence);
             // Includes all established route/trap/loot/branch/floor evidence unchanged.
             RunCheckpointCodec.Blob(w, RunCheckpointCodec.Fold(prefix, step, execution.Inspect()));
@@ -47,8 +51,12 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 if (e.TargetPosition.HasValue) { w.Write(e.TargetPosition.Value.X); w.Write(e.TargetPosition.Value.Y); }
                 w.Write(e.HealthBefore); w.Write(e.HealthAfter); w.Write(e.Damage); w.Write(e.Defeated);
             }
-            RunCheckpointCodec.Blob(w, Inspection(execution));
-        }));
+            capturedInspection = Inspection(execution);
+            RunCheckpointCodec.Blob(w, capturedInspection);
+            }));
+            inspection = capturedInspection;
+            return folded;
+        }
         internal static RunCheckpoint Export(RunExecution execution, long deadline, bool taken, RunCheckpointLimits limits)
         {
             if (limits == null) throw new ArgumentNullException(nameof(limits));
@@ -69,11 +77,13 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal static RunCheckpointRestoreResult RestoreSupported(byte[] source, string checkpointIdentity, string startIdentity,
             long expectedOrdinal, RunCheckpointLimits limits, bool retainPresentation = false)
         {
+            using var replayMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.CheckpointReplay);
             // Dispatch only after the same independent byte/work envelope as the historical reader.
             if (source == null || limits == null || source.Length < 32 || source.Length > limits.MaximumBytes)
                 return Failed("run.checkpoint.byte_limit");
             var bytes = (byte[])source.Clone();
             int format = BitConverter.ToInt32(bytes, 0);
+            if (format == TransferCheckpointCodec.Format) return TransferCheckpointCodec.Restore(bytes, checkpointIdentity, startIdentity, expectedOrdinal, limits, retainPresentation);
             if (format == RunCheckpointCodec.Format) return RunCheckpointCodec.Restore(bytes, checkpointIdentity, startIdentity, expectedOrdinal, limits);
             if (format != Format) return Failed("run.checkpoint.unsupported_format");
             RunExecution candidate = null;

@@ -1,0 +1,792 @@
+{
+  "qualifiedSource": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+  "commands": [
+    {
+      "file": "TestResults\\living-dungeon-two-floor-perf-20261021\\40-boundary-edit-command.json",
+      "sha256": "bff70622df6a4d2d92352fa3f5c7e9ca756fbb3c3ffbe370a55a4a610df45eb9",
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "arguments": [
+        "test",
+        "C:\\Dev\\Dungeon-Lord",
+        "--mode",
+        "EditMode",
+        "--filter",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor;LivingDungeonB3B2;GraphicalFloorReview;RoomContentProductionPreviewCustodySaveDiscardAndLayouts;TransactionalRoomConstructionLayoutsLocalizationAndResume;TimeService;SimulationClock;OfflinePassiveMana;PhaseSixA4",
+        "--output",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\40-boundary-edit.xml",
+        "--timeout",
+        "7200",
+        "--no-color",
+        "--",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\40-boundary-edit.log"
+      ],
+      "commit": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "startedUtc": "2026-10-21T20:25:13.434869+00:00",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-21T20:33:04.032871+00:00",
+      "xml": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\40-boundary-edit.xml",
+        "sha256": "075d80df2527d727624f311ab385f2c47c603e1eb9ba1c230b8ddf19d9be9575",
+        "counts": {
+          "total": "208",
+          "passed": "208",
+          "failed": "0",
+          "skipped": "0",
+          "inconclusive": "0"
+        },
+        "skips": []
+      },
+      "log": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\40-boundary-edit.log",
+        "sha256": "1b69c622ba299ab9ca6e795921413701f756f7213f564b6f152677622060311e",
+        "bytes": 580335
+      }
+    },
+    {
+      "file": "TestResults\\living-dungeon-two-floor-perf-20261021\\42-build-command.json",
+      "sha256": "79b597cc31b02f29f393bda7a2d12f709ea9784676c7d4e2268cbad0e282d63e",
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "arguments": [
+        "build",
+        "C:\\Dev\\Dungeon-Lord",
+        "--target",
+        "StandaloneWindows64",
+        "--execute-method",
+        "DungeonBuilder.M0.EditorTools.DungeonVisualBuildQualification.BuildLivingDungeonTwoFloorPerformanceWindows",
+        "--allow-dirty-build",
+        "--timeout",
+        "7200",
+        "--no-tail",
+        "--log-file",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\42-build.log",
+        "--no-color"
+      ],
+      "commit": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "startedUtc": "2026-10-21T22:22:26.493633+00:00",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-21T22:23:28.157730+00:00",
+      "log": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\42-build.log",
+        "sha256": "18f94f694b9a13ad9ac9e63cb149d224f6ded754df8da78fa8a3dcba8fa0cde1",
+        "bytes": 654281
+      }
+    },
+    {
+      "file": "TestResults\\living-dungeon-two-floor-perf-20261021\\42-full-edit-command.json",
+      "sha256": "a931d0fe073abd1ab30ff5013bbb5c9d105fcc529f1381ab48bb35dbe92035ac",
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "arguments": [
+        "test",
+        "C:\\Dev\\Dungeon-Lord",
+        "--mode",
+        "EditMode",
+        "--output",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\42-full-edit.xml",
+        "--timeout",
+        "7200",
+        "--no-color",
+        "--",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\42-full-edit.log"
+      ],
+      "commit": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "startedUtc": "2026-10-21T20:38:54.234483+00:00",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-21T21:53:01.041618+00:00",
+      "xml": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\42-full-edit.xml",
+        "sha256": "edb2e0402aa25585decd49fd630a68673a846897d7b5b3780a9a8a34bf00bfd6",
+        "counts": {
+          "total": "2332",
+          "passed": "2331",
+          "failed": "0",
+          "skipped": "1",
+          "inconclusive": "0"
+        },
+        "skips": [
+          {
+            "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+            "result": "Skipped",
+            "reason": "gd66.test.windows_only_inverse"
+          }
+        ]
+      },
+      "log": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\42-full-edit.log",
+        "sha256": "b2ef564a5a46c9308398dac957ef08c024595c99b964995714423c7968fc7f41",
+        "bytes": 9226593
+      }
+    },
+    {
+      "file": "TestResults\\living-dungeon-two-floor-perf-20261021\\42-full-play-command.json",
+      "sha256": "a6625ff89023dbe3bfd4fcb4ee1071c28813f6d939215ad988258ca6f4b33d39",
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "arguments": [
+        "test",
+        "C:\\Dev\\Dungeon-Lord",
+        "--mode",
+        "PlayMode",
+        "--output",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\42-full-play.xml",
+        "--timeout",
+        "7200",
+        "--no-color",
+        "--",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\42-full-play.log"
+      ],
+      "commit": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "startedUtc": "2026-10-21T21:57:37.050852+00:00",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-21T22:18:19.047091+00:00",
+      "xml": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\42-full-play.xml",
+        "sha256": "47567fa1094626cb1dfce0730645d3ac6920de0f3696dbff2962fa4ede865a1e",
+        "counts": {
+          "total": "3738",
+          "passed": "3728",
+          "failed": "0",
+          "skipped": "10",
+          "inconclusive": "0"
+        },
+        "skips": [
+          {
+            "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+            "result": "Skipped",
+            "reason": "gd66.test.synchronous_edit_mode_fixture"
+          },
+          {
+            "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+            "result": "Skipped",
+            "reason": "gd66.test.synchronous_edit_mode_fixture"
+          },
+          {
+            "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+            "result": "Skipped",
+            "reason": "gd66.test.synchronous_edit_mode_fixture"
+          },
+          {
+            "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+            "result": "Skipped",
+            "reason": "gd66.test.synchronous_edit_mode_fixture"
+          },
+          {
+            "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+            "result": "Skipped",
+            "reason": "gd66.test.synchronous_edit_mode_fixture"
+          },
+          {
+            "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+            "result": "Skipped",
+            "reason": "gd66.test.synchronous_edit_mode_fixture"
+          },
+          {
+            "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+            "result": "Skipped",
+            "reason": "gd66.test.synchronous_edit_mode_fixture"
+          },
+          {
+            "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+            "result": "Skipped",
+            "reason": "gd66.test.synchronous_edit_mode_fixture"
+          },
+          {
+            "name": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.CurrentNonWindowsRuntimeFailsClosed",
+            "result": "Skipped",
+            "reason": "gd66.test.windows_only_inverse"
+          },
+          {
+            "name": "DungeonBuilder.M0.Tests.PlayMode.Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification",
+            "result": "Skipped",
+            "reason": "gd66.test.windows_player_only"
+          }
+        ]
+      },
+      "log": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\42-full-play.log",
+        "sha256": "6ac26bfe7385f88a2f992909246f5e207794e0bf19bbde15cc9eeb58ee9e9a08",
+        "bytes": 2697008
+      }
+    },
+    {
+      "file": "TestResults\\living-dungeon-two-floor-perf-20261021\\43-wait-command.json",
+      "sha256": "8678dda5736aa5bfe991bd8a54fc3008fb5aaee03f21d2c766adef1498fdb780",
+      "commit": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "playerSha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "arguments": [
+        "C:\\Dev\\Dungeon-Lord\\Builds\\Development\\Windows-living-dungeon-two-floor-perf-20261021\\Dungeon Lord.exe",
+        "-batchmode",
+        "-screen-width",
+        "1280",
+        "-screen-height",
+        "720",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\43-wait.log",
+        "-b3b2ForegroundSmoke",
+        "two-floor-wait",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\43-wait.json",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\inputs\\wait.manifest.json"
+      ],
+      "gameplayAssemblySha256": "e92de8776ae20b6dad5299fc710f4b5eecc2f230890095f7cdf44fc7e7dcd5cc",
+      "packedManagersSha256": "2da3ad42d02b0dc63ddf55d186fb788d9b3d95a54272d104f671132d65505257",
+      "buildArtifactManifestSha256": "1c3bc25caa6e4c720a6092ff9605211da3fb189babe62de2595dfcb46588229f",
+      "launcherSha256": "e4206909e3dbec1693eb96cdce2814771e992322d6dcf6834fd3d792ee6e2549",
+      "preLaunchSaveSha256": "46216ab8b95be6e8843875def43b75123e8f6ac778c3ea704c77e393694a4084",
+      "startedUtc": "2026-10-21T22:38:28.450072+00:00",
+      "rendering": "Development player batchmode; production scene/controller, no human visual assessment",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-21T22:38:46.610314+00:00",
+      "postExitSaveSha256": "5e3faaed031a0319e3d5d2fd3cb6f2dc95093f32a441259b9b292fec8bc809ab",
+      "postExitCompleteSaveBytes": 112722,
+      "bootstrapReadyElapsedBoundsMs": [
+        1549.9279999999999,
+        2549.928
+      ],
+      "bootstrapTimingLimitation": "Whole-second log bounds; includes Unity startup, canonical validation/restoration and Boot write, not an isolated parser microbenchmark.",
+      "log": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\43-wait.log",
+        "sha256": "7e5d5e1227489e5a09c08e72f704fa8ff847d4d6f864b84f78f2e98e87f3ce84",
+        "bytes": 32778
+      },
+      "report": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\43-wait.json",
+        "sha256": "597d54245eef2dfd0601957a6b58b8368a6383aa8cf0eae449db8c70440327c0",
+        "Passed": true,
+        "Failure": ""
+      }
+    },
+    {
+      "file": "TestResults\\living-dungeon-two-floor-perf-20261021\\44-release-command.json",
+      "sha256": "8a32616f30a61e4fc7deefda6fce2ba8eb357f6548edaa8e119c3b9eb48f5a66",
+      "commit": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "playerSha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "arguments": [
+        "C:\\Dev\\Dungeon-Lord\\Builds\\Development\\Windows-living-dungeon-two-floor-perf-20261021\\Dungeon Lord.exe",
+        "-batchmode",
+        "-screen-width",
+        "1280",
+        "-screen-height",
+        "720",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\44-release.log",
+        "-b3b2ForegroundSmoke",
+        "two-floor-release",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\44-release.json",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\43-wait.json"
+      ],
+      "gameplayAssemblySha256": "e92de8776ae20b6dad5299fc710f4b5eecc2f230890095f7cdf44fc7e7dcd5cc",
+      "packedManagersSha256": "2da3ad42d02b0dc63ddf55d186fb788d9b3d95a54272d104f671132d65505257",
+      "buildArtifactManifestSha256": "1c3bc25caa6e4c720a6092ff9605211da3fb189babe62de2595dfcb46588229f",
+      "launcherSha256": "e4206909e3dbec1693eb96cdce2814771e992322d6dcf6834fd3d792ee6e2549",
+      "preLaunchSaveSha256": "5e3faaed031a0319e3d5d2fd3cb6f2dc95093f32a441259b9b292fec8bc809ab",
+      "startedUtc": "2026-10-21T22:42:21.391528+00:00",
+      "rendering": "Development player batchmode; production scene/controller, no human visual assessment",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-21T22:42:30.383563+00:00",
+      "postExitSaveSha256": "62f1963136e6375eb8b6e06c3c5c6ef610f1e88694326b17bd6f5b40f20c060d",
+      "postExitCompleteSaveBytes": 88918,
+      "bootstrapReadyElapsedBoundsMs": [
+        1608.472,
+        2608.4719999999998
+      ],
+      "bootstrapTimingLimitation": "Whole-second log bounds; includes Unity startup, canonical validation/restoration and Boot write, not an isolated parser microbenchmark.",
+      "log": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\44-release.log",
+        "sha256": "d784fa87196456afe955913c5f56a67034e6120534ab66e903a0b0e76834c5b1",
+        "bytes": 22061
+      },
+      "report": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\44-release.json",
+        "sha256": "8639313067e482f174e2ffde4f805b0d39b346ea4e0a8c63b9f19c74acf553b9",
+        "Passed": true,
+        "Failure": ""
+      }
+    },
+    {
+      "file": "TestResults\\living-dungeon-two-floor-perf-20261021\\45-finish-command.json",
+      "sha256": "a6e59d4a55a325ec9b344738b1e31ea3945c3fc680d9a3300984ae1e2d1b8ec4",
+      "commit": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "playerSha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "arguments": [
+        "C:\\Dev\\Dungeon-Lord\\Builds\\Development\\Windows-living-dungeon-two-floor-perf-20261021\\Dungeon Lord.exe",
+        "-batchmode",
+        "-screen-width",
+        "1280",
+        "-screen-height",
+        "720",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\45-finish.log",
+        "-b3b2ForegroundSmoke",
+        "two-floor-finish",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\45-finish.json",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\44-release.json"
+      ],
+      "gameplayAssemblySha256": "e92de8776ae20b6dad5299fc710f4b5eecc2f230890095f7cdf44fc7e7dcd5cc",
+      "packedManagersSha256": "2da3ad42d02b0dc63ddf55d186fb788d9b3d95a54272d104f671132d65505257",
+      "buildArtifactManifestSha256": "1c3bc25caa6e4c720a6092ff9605211da3fb189babe62de2595dfcb46588229f",
+      "launcherSha256": "e4206909e3dbec1693eb96cdce2814771e992322d6dcf6834fd3d792ee6e2549",
+      "preLaunchSaveSha256": "62f1963136e6375eb8b6e06c3c5c6ef610f1e88694326b17bd6f5b40f20c060d",
+      "startedUtc": "2026-10-21T22:45:47.001148+00:00",
+      "rendering": "Development player batchmode; production scene/controller, no human visual assessment",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-21T22:46:05.711185+00:00",
+      "postExitSaveSha256": "eb5ed77f58d0f83701ebe782089aa4c66b5c9d9e240309285c6fbe520c750335",
+      "postExitCompleteSaveBytes": 103364,
+      "bootstrapReadyElapsedBoundsMs": [
+        1998.852,
+        2998.852
+      ],
+      "bootstrapTimingLimitation": "Whole-second log bounds; includes Unity startup, canonical validation/restoration and Boot write, not an isolated parser microbenchmark.",
+      "log": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\45-finish.log",
+        "sha256": "e733423337aae87a42392e8003d0f2c81bee1c16008126f49d2a939588c8700c",
+        "bytes": 26350
+      },
+      "report": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\45-finish.json",
+        "sha256": "6112004c2e58069d209b6745bdb6d1409a1f82e9f1153df6b6397fe8c7185c08",
+        "Passed": true,
+        "Failure": ""
+      }
+    },
+    {
+      "file": "TestResults\\living-dungeon-two-floor-perf-20261021\\46-v1-command.json",
+      "sha256": "a1889f0695a36b223a5fea5522b4866d6f959975052804a694d6f5c167e791cf",
+      "commit": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "playerSha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "arguments": [
+        "C:\\Dev\\Dungeon-Lord\\Builds\\Development\\Windows-living-dungeon-two-floor-perf-20261021\\Dungeon Lord.exe",
+        "-batchmode",
+        "-screen-width",
+        "1280",
+        "-screen-height",
+        "720",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\46-v1.log",
+        "-b3b2ForegroundSmoke",
+        "v1-upgrade",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\46-v1.json",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\inputs\\v1.manifest.json"
+      ],
+      "gameplayAssemblySha256": "e92de8776ae20b6dad5299fc710f4b5eecc2f230890095f7cdf44fc7e7dcd5cc",
+      "packedManagersSha256": "2da3ad42d02b0dc63ddf55d186fb788d9b3d95a54272d104f671132d65505257",
+      "buildArtifactManifestSha256": "1c3bc25caa6e4c720a6092ff9605211da3fb189babe62de2595dfcb46588229f",
+      "launcherSha256": "e4206909e3dbec1693eb96cdce2814771e992322d6dcf6834fd3d792ee6e2549",
+      "preLaunchSaveSha256": "ea1834f0916a80c9970cb1441baf56e3db222c28fe84efb60bf293e8af3cb3bc",
+      "startedUtc": "2026-10-21T22:49:26.227622+00:00",
+      "rendering": "Development player batchmode; production scene/controller, no human visual assessment",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-21T22:49:31.464592+00:00",
+      "postExitSaveSha256": "e1f8ae2d9978a2804a56e3ce0126af6be326d672c03b2c568e6cf467574323c3",
+      "postExitCompleteSaveBytes": 27270,
+      "bootstrapReadyElapsedBoundsMs": [
+        1772.378,
+        2772.3779999999997
+      ],
+      "bootstrapTimingLimitation": "Whole-second log bounds; includes Unity startup, canonical validation/restoration and Boot write, not an isolated parser microbenchmark.",
+      "log": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\46-v1.log",
+        "sha256": "a886c1dec9b0401383cbe6998fae7eec0f6c92948e8b931f49ec460d41c0c412",
+        "bytes": 19913
+      },
+      "report": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\46-v1.json",
+        "sha256": "5f019843b76e674d348a457b7c957581b92ad9e35a38048ac7fa8eb920f7d2dc",
+        "Passed": true,
+        "Failure": ""
+      }
+    },
+    {
+      "file": "TestResults\\living-dungeon-two-floor-perf-20261021\\47-one-profile-command.json",
+      "sha256": "b7d05a0e38d9c5ce10d6622c2361c7aac984882f4b3a86d1f387a02e62112660",
+      "commit": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "playerSha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "arguments": [
+        "C:\\Dev\\Dungeon-Lord\\Builds\\Development\\Windows-living-dungeon-two-floor-perf-20261021\\Dungeon Lord.exe",
+        "-batchmode",
+        "-screen-width",
+        "1280",
+        "-screen-height",
+        "720",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\47-one-profile.log",
+        "-b3b2ForegroundSmoke",
+        "two-floor-profile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\47-one-profile.json",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\inputs\\one-profile.manifest.json"
+      ],
+      "gameplayAssemblySha256": "e92de8776ae20b6dad5299fc710f4b5eecc2f230890095f7cdf44fc7e7dcd5cc",
+      "packedManagersSha256": "2da3ad42d02b0dc63ddf55d186fb788d9b3d95a54272d104f671132d65505257",
+      "buildArtifactManifestSha256": "1c3bc25caa6e4c720a6092ff9605211da3fb189babe62de2595dfcb46588229f",
+      "launcherSha256": "e4206909e3dbec1693eb96cdce2814771e992322d6dcf6834fd3d792ee6e2549",
+      "preLaunchSaveSha256": "5eadd0feb3881e38283189b423491204b683a514d642b49de833792679d1380c",
+      "startedUtc": "2026-10-21T22:53:05.386716+00:00",
+      "rendering": "Development player batchmode; production scene/controller, no human visual assessment",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-21T22:58:40.265433+00:00",
+      "postExitSaveSha256": "dee72873671fad6fd44a593932dc81added718a7e2e9dddf564d6fe7d2354804",
+      "postExitCompleteSaveBytes": 94759,
+      "bootstrapReadyElapsedBoundsMs": [
+        1613.2839999999999,
+        2613.2839999999997
+      ],
+      "bootstrapTimingLimitation": "Whole-second log bounds; includes Unity startup, canonical validation/restoration and Boot write, not an isolated parser microbenchmark.",
+      "log": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\47-one-profile.log",
+        "sha256": "50efc1b1fec4e08aeef9487835f1436fa307d3b7bd6fc92410da477a1068245c",
+        "bytes": 457043
+      },
+      "report": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\47-one-profile.json",
+        "sha256": "02c98e3b7ab054ec3b12790b25ef01a12dbe113d7286fe39c45294fc1bc9b53d",
+        "Passed": true,
+        "Failure": ""
+      }
+    },
+    {
+      "file": "TestResults\\living-dungeon-two-floor-perf-20261021\\48-two-profile-command.json",
+      "sha256": "c6fbda4223bb047dcb3f3fe14e39cbf0ab08bc56d160064eb1fac68ef9bda489",
+      "commit": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "playerSha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "arguments": [
+        "C:\\Dev\\Dungeon-Lord\\Builds\\Development\\Windows-living-dungeon-two-floor-perf-20261021\\Dungeon Lord.exe",
+        "-batchmode",
+        "-screen-width",
+        "1280",
+        "-screen-height",
+        "720",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\48-two-profile.log",
+        "-b3b2ForegroundSmoke",
+        "two-floor-profile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\48-two-profile.json",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\living-dungeon-two-floor-perf-20261021\\inputs\\two-profile.manifest.json"
+      ],
+      "gameplayAssemblySha256": "e92de8776ae20b6dad5299fc710f4b5eecc2f230890095f7cdf44fc7e7dcd5cc",
+      "packedManagersSha256": "2da3ad42d02b0dc63ddf55d186fb788d9b3d95a54272d104f671132d65505257",
+      "buildArtifactManifestSha256": "1c3bc25caa6e4c720a6092ff9605211da3fb189babe62de2595dfcb46588229f",
+      "launcherSha256": "e4206909e3dbec1693eb96cdce2814771e992322d6dcf6834fd3d792ee6e2549",
+      "preLaunchSaveSha256": "46216ab8b95be6e8843875def43b75123e8f6ac778c3ea704c77e393694a4084",
+      "startedUtc": "2026-10-21T23:02:27.366024+00:00",
+      "rendering": "Development player batchmode; production scene/controller, no human visual assessment",
+      "exitCode": 0,
+      "finishedUtc": "2026-10-21T23:28:37.775697+00:00",
+      "postExitSaveSha256": "f5a487e2f2cd2ccb51b5a970324d6efa9e42fb8b906fa24db7f11945d809aa38",
+      "postExitCompleteSaveBytes": 216802,
+      "bootstrapReadyElapsedBoundsMs": [
+        1633.976,
+        2633.976
+      ],
+      "bootstrapTimingLimitation": "Whole-second log bounds; includes Unity startup, canonical validation/restoration and Boot write, not an isolated parser microbenchmark.",
+      "log": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\48-two-profile.log",
+        "sha256": "b225789e691e740faa744ea03e60059a224807332e6fc44dccdd7be81f13d8d0",
+        "bytes": 681953
+      },
+      "report": {
+        "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\48-two-profile.json",
+        "sha256": "2e73a39f7bad8a768211d65e10ea40cf6d4f9fe6186008c6bde3eb814478406f",
+        "Passed": true,
+        "Failure": ""
+      }
+    }
+  ],
+  "prelaunchRejection": {
+    "source": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+    "attempt": "41-full-edit",
+    "status": "prelaunch-rejected",
+    "unityLaunched": false,
+    "reason": "Generated LiberationSans SDF - Fallback.asset differed after the passing focused suite. Strict applicability guard rejected the launch.",
+    "correction": "Existing checkpoint procedure archived generated bytes and restored the original asset/settings; retry uses attempt 42. No runtime/source changes or guard weakening.",
+    "evidence": [
+      "applicability-41-full-edit.json",
+      "generated-40-boundary-passed.zip",
+      "inputs-40-boundary-passed.json"
+    ]
+  },
+  "buildProvenance": {
+    "schemaVersion": 1,
+    "generator": {
+      "name": "unity-cli",
+      "version": "1.0.0-beta.13"
+    },
+    "outcome": "success",
+    "exitCode": 0,
+    "startedAt": "2026-10-21T22:22:28.159Z",
+    "endedAt": "2026-10-21T22:23:27.000Z",
+    "editor": {
+      "version": "6000.3.2f1",
+      "changeset": "a9779f353c9b",
+      "architecture": "x86_64"
+    },
+    "build": {
+      "target": "StandaloneWindows64",
+      "executeMethod": "DungeonBuilder.M0.EditorTools.DungeonVisualBuildQualification.BuildLivingDungeonTwoFloorPerformanceWindows",
+      "logFile": "TestResults/living-dungeon-two-floor-perf-20261021/42-build.log"
+    },
+    "source": {
+      "vcs": "git",
+      "revision": "c3a21ba58a80174e2732c497b2ce1e0361a26fc3",
+      "dirty": true
+    },
+    "packages": {
+      "source": "packages-lock.json",
+      "entries": {
+        "com.unity.2d.animation": "13.0.2",
+        "com.unity.2d.aseprite": "3.0.1",
+        "com.unity.2d.common": "12.0.1",
+        "com.unity.2d.psdimporter": "12.0.1",
+        "com.unity.2d.sprite": "1.0.0",
+        "com.unity.2d.spriteshape": "13.0.0",
+        "com.unity.2d.tilemap": "1.0.0",
+        "com.unity.2d.tilemap.extras": "6.0.1",
+        "com.unity.2d.tooling": "1.0.0",
+        "com.unity.burst": "1.8.26",
+        "com.unity.collab-proxy": "2.10.2",
+        "com.unity.collections": "2.6.2",
+        "com.unity.ext.nunit": "2.0.5",
+        "com.unity.ide.rider": "3.0.38",
+        "com.unity.ide.visualstudio": "2.0.25",
+        "com.unity.inputsystem": "1.17.0",
+        "com.unity.mathematics": "1.3.3",
+        "com.unity.multiplayer.center": "1.0.1",
+        "com.unity.nuget.mono-cecil": "1.11.6",
+        "com.unity.render-pipelines.core": "17.3.0",
+        "com.unity.render-pipelines.universal": "17.3.0",
+        "com.unity.render-pipelines.universal-config": "17.0.3",
+        "com.unity.searcher": "4.9.4",
+        "com.unity.shadergraph": "17.3.0",
+        "com.unity.test-framework": "1.6.0",
+        "com.unity.test-framework.performance": "3.2.0",
+        "com.unity.timeline": "1.8.9",
+        "com.unity.ugui": "2.0.0",
+        "com.unity.visualscripting": "1.9.9",
+        "com.unity.modules.accessibility": "1.0.0",
+        "com.unity.modules.adaptiveperformance": "1.0.0",
+        "com.unity.modules.ai": "1.0.0",
+        "com.unity.modules.androidjni": "1.0.0",
+        "com.unity.modules.animation": "1.0.0",
+        "com.unity.modules.assetbundle": "1.0.0",
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.cloth": "1.0.0",
+        "com.unity.modules.director": "1.0.0",
+        "com.unity.modules.hierarchycore": "1.0.0",
+        "com.unity.modules.imageconversion": "1.0.0",
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.particlesystem": "1.0.0",
+        "com.unity.modules.physics": "1.0.0",
+        "com.unity.modules.physics2d": "1.0.0",
+        "com.unity.modules.screencapture": "1.0.0",
+        "com.unity.modules.subsystems": "1.0.0",
+        "com.unity.modules.terrain": "1.0.0",
+        "com.unity.modules.terrainphysics": "1.0.0",
+        "com.unity.modules.tilemap": "1.0.0",
+        "com.unity.modules.ui": "1.0.0",
+        "com.unity.modules.uielements": "1.0.0",
+        "com.unity.modules.umbra": "1.0.0",
+        "com.unity.modules.unityanalytics": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
+        "com.unity.modules.unitywebrequestaudio": "1.0.0",
+        "com.unity.modules.unitywebrequesttexture": "1.0.0",
+        "com.unity.modules.unitywebrequestwww": "1.0.0",
+        "com.unity.modules.vectorgraphics": "1.0.0",
+        "com.unity.modules.vehicles": "1.0.0",
+        "com.unity.modules.video": "1.0.0",
+        "com.unity.modules.vr": "1.0.0",
+        "com.unity.modules.wind": "1.0.0",
+        "com.unity.modules.xr": "1.0.0"
+      }
+    }
+  },
+  "nativeFunctionalReports": {
+    "43-wait": {
+      "Passed": true,
+      "MarkerVisible": true,
+      "ActiveEditCommitted": true,
+      "SecondRunUsesEditedGeometry": false,
+      "Phase": "two-floor-wait",
+      "Product": "Dungeon Lord B3B2 Smoke Two Floor Perf",
+      "SavePath": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke Two Floor Perf\\living-dungeon-b3b2-qualification-two-floor-c4a0503c44a34f278e4f32ef563f162a.json",
+      "RunId": "",
+      "CheckpointIdentity": "",
+      "PendingGeometry": "",
+      "Failure": "",
+      "Accepted": 77000,
+      "Closed": 77000,
+      "Ordinal": 0,
+      "HistoryCount": 0,
+      "RealSourceUnits": 0,
+      "VisualChecks": 0,
+      "VisualLabelsShown": 0,
+      "VisualLabelsHidden": 0,
+      "VisualRequestedLayoutsUnavailable": 0,
+      "VisualBounds": "",
+      "BlockerSequence": 1,
+      "WaitingSequence": 2,
+      "NextRunSequence": 3,
+      "AStartIdentity": "ab1dad61c4e105febef9bfa5a250b4c15247c0acc5bfd6076208b418de6808bf",
+      "BStartIdentity": "af37a27956dc6e61cb6843a0a2873033ea9b48167952fa28044046274454f467",
+      "PartySequences": [
+        1,
+        2
+      ],
+      "PartyCheckpoints": [
+        "55486b409add5fff9c72d010dd495952ce91fe748c1110b99930d045d3485a51",
+        "b46f03fbdcef97773a4b158ad4b0c2be3cc82ed293db884419f6375f3231c389"
+      ],
+      "BlockerAdmittedAt": 30000,
+      "WaiterAdmittedAt": 60000,
+      "BlockedAt": 77000,
+      "ReleasedAt": 0,
+      "BlockerTerminalAt": 91000,
+      "BlockerTerminalOrdinal": 71,
+      "WaitingResumed": false,
+      "Mana": 268.77666666666687,
+      "Heat": 0.0
+    },
+    "44-release": {
+      "Passed": true,
+      "MarkerVisible": false,
+      "ActiveEditCommitted": false,
+      "SecondRunUsesEditedGeometry": false,
+      "Phase": "two-floor-release",
+      "Product": "Dungeon Lord B3B2 Smoke Two Floor Perf",
+      "SavePath": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke Two Floor Perf\\living-dungeon-b3b2-qualification-two-floor-c4a0503c44a34f278e4f32ef563f162a.json",
+      "RunId": "",
+      "CheckpointIdentity": "",
+      "PendingGeometry": "",
+      "Failure": "",
+      "Accepted": 91000,
+      "Closed": 91000,
+      "Ordinal": 0,
+      "HistoryCount": 1,
+      "RealSourceUnits": 0,
+      "VisualChecks": 0,
+      "VisualLabelsShown": 0,
+      "VisualLabelsHidden": 0,
+      "VisualRequestedLayoutsUnavailable": 0,
+      "VisualBounds": "",
+      "BlockerSequence": 1,
+      "WaitingSequence": 2,
+      "NextRunSequence": 3,
+      "AStartIdentity": "ab1dad61c4e105febef9bfa5a250b4c15247c0acc5bfd6076208b418de6808bf",
+      "BStartIdentity": "af37a27956dc6e61cb6843a0a2873033ea9b48167952fa28044046274454f467",
+      "PartySequences": [
+        2
+      ],
+      "PartyCheckpoints": [
+        "1128d77110b6bcc288e1685c2a5d4fb0a4fc899c8060b4e69e912e126674a5b3"
+      ],
+      "BlockerAdmittedAt": 30000,
+      "WaiterAdmittedAt": 60000,
+      "BlockedAt": 77000,
+      "ReleasedAt": 91000,
+      "BlockerTerminalAt": 91000,
+      "BlockerTerminalOrdinal": 71,
+      "WaitingResumed": true,
+      "Mana": 259.2800000000003,
+      "Heat": 0.0
+    },
+    "45-finish": {
+      "Passed": true,
+      "MarkerVisible": false,
+      "ActiveEditCommitted": false,
+      "SecondRunUsesEditedGeometry": false,
+      "Phase": "two-floor-finish",
+      "Product": "Dungeon Lord B3B2 Smoke Two Floor Perf",
+      "SavePath": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke Two Floor Perf\\living-dungeon-b3b2-qualification-two-floor-c4a0503c44a34f278e4f32ef563f162a.json",
+      "RunId": "",
+      "CheckpointIdentity": "",
+      "PendingGeometry": "",
+      "Failure": "",
+      "Accepted": 135000,
+      "Closed": 135000,
+      "Ordinal": 0,
+      "HistoryCount": 2,
+      "RealSourceUnits": 0,
+      "VisualChecks": 0,
+      "VisualLabelsShown": 0,
+      "VisualLabelsHidden": 0,
+      "VisualRequestedLayoutsUnavailable": 0,
+      "VisualBounds": "",
+      "BlockerSequence": 1,
+      "WaitingSequence": 2,
+      "NextRunSequence": 4,
+      "AStartIdentity": "ab1dad61c4e105febef9bfa5a250b4c15247c0acc5bfd6076208b418de6808bf",
+      "BStartIdentity": "af37a27956dc6e61cb6843a0a2873033ea9b48167952fa28044046274454f467",
+      "PartySequences": [
+        3
+      ],
+      "PartyCheckpoints": [
+        "408e40e68bb20848bc62b8edea6b6e52c101f9413f685e765969d868b41b43fd"
+      ],
+      "BlockerAdmittedAt": 30000,
+      "WaiterAdmittedAt": 60000,
+      "BlockedAt": 77000,
+      "ReleasedAt": 0,
+      "BlockerTerminalAt": 91000,
+      "BlockerTerminalOrdinal": 71,
+      "WaitingResumed": false,
+      "Mana": 256.93666666666707,
+      "Heat": 0.0
+    },
+    "46-v1": {
+      "Passed": true,
+      "MarkerVisible": false,
+      "ActiveEditCommitted": false,
+      "SecondRunUsesEditedGeometry": false,
+      "Phase": "v1-upgrade",
+      "Product": "Dungeon Lord B3B2 Smoke Two Floor Perf",
+      "SavePath": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke Two Floor Perf\\living-dungeon-b3b2-qualification-two-floor-f7d5e394b60a47fea51b193586b9f9a6.json",
+      "RunId": "",
+      "CheckpointIdentity": "",
+      "PendingGeometry": "",
+      "Failure": "",
+      "Accepted": 16000,
+      "Closed": 16000,
+      "Ordinal": 0,
+      "HistoryCount": 1,
+      "RealSourceUnits": 0,
+      "VisualChecks": 0,
+      "VisualLabelsShown": 0,
+      "VisualLabelsHidden": 0,
+      "VisualRequestedLayoutsUnavailable": 0,
+      "VisualBounds": "",
+      "BlockerSequence": 0,
+      "WaitingSequence": 0,
+      "NextRunSequence": 2,
+      "AStartIdentity": "6daf4d41740e8faadbbd8efc5209cb61a4921aa09580d487f76ff2dafbadde92",
+      "BStartIdentity": "",
+      "PartySequences": [],
+      "PartyCheckpoints": [],
+      "BlockerAdmittedAt": 0,
+      "WaiterAdmittedAt": 0,
+      "BlockedAt": 0,
+      "ReleasedAt": 0,
+      "BlockerTerminalAt": 0,
+      "BlockerTerminalOrdinal": 0,
+      "WaitingResumed": false,
+      "Mana": 265.3566666666667,
+      "Heat": 0.0
+    }
+  },
+  "isolatedAdapter": {
+    "wrapperSha256": "e4206909e3dbec1693eb96cdce2814771e992322d6dcf6834fd3d792ee6e2549",
+    "twoFloorAdapterSha256": "e90cce90e8a034c60ba8f159d2638c61bc70369f724ab121061e8c85460ef3f1",
+    "nativeAdapterSha256": "e7366560fd48eedb6a7a14a2f0dc9f594ec66b091af388258a84aca52853590d",
+    "nativeTransformation": "Fresh Windows performance output path only",
+    "additionalEvidenceSubstitutions": [
+      "Assets/_Project/Tests/EditMode/LivingDungeonTwoFloorTests.cs",
+      "Assets/_Project/Editor/DungeonSpatial/Tests/LivingDungeonTwoFloorProductionProfileSceneTests.cs"
+    ]
+  },
+  "buildSeal": {
+    "path": "TestResults\\living-dungeon-two-floor-perf-20261021\\qualified-native-final-build-files.json",
+    "sha256": "1c3bc25caa6e4c720a6092ff9605211da3fb189babe62de2595dfcb46588229f"
+  },
+  "warning": "Successful build retains LicensingClient validation diagnostic and other unfiltered warnings in the hashed original log; success is not a warning-free-log claim.",
+  "countsOverlap": true
+}

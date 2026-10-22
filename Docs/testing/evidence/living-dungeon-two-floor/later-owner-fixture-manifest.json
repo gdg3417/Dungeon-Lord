@@ -1,0 +1,12 @@
+{
+  "qualifiedImplementationSource": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da",
+  "fixture": "later-owner-inactive-floor2-fixture.json",
+  "sha256": "5eadd0feb3881e38283189b423491204b683a514d642b49de833792679d1380c",
+  "bytes": 15341,
+  "product": "Dungeon Lord B3B2 Smoke Two Floor 20261020",
+  "packedDefaultFileName": "living-dungeon-b3b2-qualification-two-floor-20261020-native-final.json",
+  "build": "Builds/Development/Windows-living-dungeon-two-floor-20261021-final/Dungeon Lord.exe",
+  "assemblySha256": "8f4238bdef329eb673185f34a3e4c31528d4f3f097a7bc639446d7eb6a4e4290",
+  "packedManagersSha256": "7b6aeba37ad811b42f670e85e63afd4dd901a464c2d869998b92bdbe2cf3bbc7",
+  "disposition": "Later owner testing only after independent review. Synthetic production-content seed, never an owner save. Copy only with all QA players stopped and destination absent. Do not use acceleration/profile/smoke flags for owner gameplay."
+}

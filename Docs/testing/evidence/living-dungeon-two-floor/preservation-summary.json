@@ -1,0 +1,46 @@
+{
+  "qualifiedSource": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da",
+  "requiredGates": [
+    "32-full-edit",
+    "32-full-play",
+    "32-build",
+    "32-wait",
+    "33-release",
+    "34-finish",
+    "35-v1",
+    "36-base",
+    "37-one-profile",
+    "39-two-profile"
+  ],
+  "interruptedCampaignRecordPreserved": true,
+  "originalInputArchiveSha256": "caa41721f720b8fb7bf35d5d053cd9bff10fdc16de1509ce624938f3e39dbfdc",
+  "originalSettingsPackagesAndMetadata": 736,
+  "allOriginalInputsByteEqual": true,
+  "archivedAndRestoredEolOnly": [],
+  "protectedFiles": 11688,
+  "allProtectedByteEqual": true,
+  "historicalEvidenceFiles": 8604,
+  "allHistoricalByteEqual": true,
+  "protectedAuditSha256": "7188b697dea5284f7987ff6139b53545d80d9a31a2997eae23e87b04e2dcd064",
+  "historicalAuditSha256": "20c066b6322a6f1c7848ea09eea86b4125580a85c9373b00209b89dbad626d71",
+  "buildSeals": [
+    {
+      "record": "qualified-native-build-files.json",
+      "sha256": "0142dc2937c7e1d52c026d54542e4cea3128bb9276057d96253fb813ca5dd714",
+      "commit": "1c7946169a4f25437c2f61d8ecac3f0aa40cf33a",
+      "files": 303,
+      "allUnchanged": true
+    },
+    {
+      "record": "qualified-native-final-build-files.json",
+      "sha256": "5b87f8ac32c61d28b7bdd91fca4b982700d5ebe222b88bc4d20164a1b76aa611",
+      "commit": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da",
+      "files": 303,
+      "allUnchanged": true
+    }
+  ],
+  "limitations": [
+    "Original owner/save contents and raw Unity authentication logs are not published.",
+    "All canonical post-exit collections occur only after player termination; process guards precede preservation reads."
+  ]
+}

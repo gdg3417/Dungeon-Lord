@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -214,7 +215,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SharedBranchKnowledgeAuthority branchKnowledge,
             SharedFloorKnowledgeAuthority floorKnowledge,
             LivingDungeonState livingDungeon = null, bool manualRun = false,
-            MonsterContinuityState monsterContinuity = null, DurableSettlementHistory settlement = null, bool foregroundStage = false)
+            MonsterContinuityState monsterContinuity = null, DurableSettlementHistory settlement = null, bool foregroundStage = false,
+            LivingDungeonForegroundLineage.ReleasePermit releases = null)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -359,6 +361,34 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return Failure(rawReason);
                 DetachedCompleteSaveValidationResult validated =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
+                if (validated.IsValid && livingDungeon?.Scheduler?.ProfileId == LivingDungeonForegroundConfig.TwoFloorProfileId) {
+                    // The same immutable currentBytes/context were fully validated above.
+                    // Reconcile and Write only read that detached result; keep the exact
+                    // predecessor proof local to this preparation, never between saves.
+                    var releasePredecessor = prior;
+                    var profile = LivingDungeonContracts.Profile(livingDungeon, context.LivingDungeonProfiles);
+                    foreach (var party in livingDungeon.Parties) {
+                        var nextExecution = LivingDungeonContracts.Restore(party, profile);
+                        try {
+                            if (nextExecution.TransferGate?.ReleaseOrdinal >= 0) {
+                                var old = releasePredecessor.LivingDungeon.Parties.SingleOrDefault(p => p.Sequence == party.Sequence);
+                                bool alreadyReleased = false;
+                                if (old != null) {
+                                    var oldExecution = LivingDungeonContracts.Restore(old, profile);
+                                    try {
+                                        alreadyReleased = oldExecution.TransferGate?.ReleaseOrdinal >= 0;
+                                        if (alreadyReleased && !RunSimulation.TransferCheckpointCodec.ControlBytes(oldExecution.TransferGate)
+                                            .SequenceEqual(RunSimulation.TransferCheckpointCodec.ControlBytes(nextExecution.TransferGate)))
+                                            return Failure("living.transfer.vacancy_unproven");
+                                    }
+                                    finally { oldExecution.Abandon(); }
+                                }
+                                if (!alreadyReleased && releases?.Allows(currentBytes, party) != true)
+                                    return Failure("living.transfer.vacancy_unproven");
+                            }
+                        } finally { nextExecution.Abandon(); }
+                    }
+                }
                 return validated.IsValid && validated.CurrentTargetValidated
                     ? new DetachedCanonicalSaveSessionResult(foregroundStage ? new DetachedCanonicalSaveSession(validated.GetBytes(), context, limits) : null,
                         new DetachedCanonicalSaveSessionUpdate(validated.GetBytes(), validated.State), null, foregroundStage ? validated : null)
@@ -423,9 +453,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedRecognizedSaveStateSnapshotResult recognized, DetachedCompleteSaveValidationResult owned,
             LivingDungeonState livingDungeon, MonsterContinuityState monsters,
             SharedBranchKnowledgeAuthority branch = null, SharedFloorKnowledgeAuthority floor = null,
-            DurableSettlementHistory settlement = null) => recognized?.IsSuccess == true
+            DurableSettlementHistory settlement = null, LivingDungeonForegroundLineage.ReleasePermit releases = null) => recognized?.IsSuccess == true
                 ? PrepareReplacement(recognized.Snapshot, owned.State, null, null, branch, floor,
-                    livingDungeon, monsterContinuity: monsters, settlement: settlement, foregroundStage: true)
+                    livingDungeon, monsterContinuity: monsters, settlement: settlement, foregroundStage: true, releases: releases)
                 : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
 
         private static void WriteField(ContractJsonWriter writer, string key,

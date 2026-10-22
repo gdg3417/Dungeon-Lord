@@ -32,7 +32,7 @@ namespace DungeonBuilder.M0
         private void InitializeForeground()
         {
             if (SaveService?.ForegroundConfiguration == null || TimeService == null || !CanonicalMvpRouteProjection.IsCanonical(Save)) return;
-            if (Save.livingDungeon?.Scheduler != null && Save.livingDungeon.Scheduler.ProfileId != LivingDungeonForegroundConfig.ProfileId) return;
+            if (Save.livingDungeon?.Scheduler != null && !LivingDungeonForegroundConfig.IsProduction(Save.livingDungeon.Scheduler.ProfileId)) return;
             foregroundApplicationFocused = Application.isFocused;
             TimeService.SetForegroundFocus(foregroundApplicationFocused && isActiveAndEnabled);
             TimeService.BeginForeground(SaveService.ForegroundConfiguration.UnitsPerSecond, Save.livingDungeon?.Scheduler?.AcceptedThrough ?? -1);
@@ -101,8 +101,8 @@ namespace DungeonBuilder.M0
                 if (TimeService.IsPaused && Save.livingDungeon.IsClosed)
                     _resumeOfflineBoundaryPersisted = true;
                 ForegroundActivity = SaveService.InspectForeground(Save, _configuredSimulationTickSeconds);
-                if (result.ForegroundAdmissionReason != null && ForegroundActivity.RunId == null)
-                    ForegroundActivity.StateKey = "ui.living.admission_unavailable";
+                if (result.ForegroundAdmissionReason != null)
+                    ForegroundActivity.SetVacantReason("ui.living.admission_unavailable");
                 if (Save.totalTicks > beforeTicks) {
                     _activeSessionTickCount = checked(_activeSessionTickCount + Save.totalTicks - beforeTicks);
                     HandleTickTelemetry(Save.totalTicks);

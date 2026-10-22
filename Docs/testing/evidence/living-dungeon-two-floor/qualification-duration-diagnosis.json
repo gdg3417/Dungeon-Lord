@@ -1,0 +1,50 @@
+{
+  "implementationSource": "3040ddc4b87b0f70eac4046c3a7a4c48c5ec12da",
+  "completedInvocationsAtAudit": 46,
+  "completedInvocationWallSeconds": 18718.4,
+  "completedExitZero": 25,
+  "completedNonzero": 21,
+  "limitations": [
+    "Overlapping tests and older revisions are separate attempts, not unique passing-test totals.",
+    "Incomplete 38/current 39 and preservation preflight gaps are excluded from the completed invocation sum.",
+    "The reported approximately 15-hour task elapsed time cannot be equated with Unity execution or model monitoring usage; per-poll token accounting was not captured."
+  ],
+  "finalEditorWallSeconds": 5027.340663,
+  "finalPlayWallSeconds": 1301.989776,
+  "longestFinalEditModeCasesSeconds": {
+    "twoFloorProfile": 2455.933283,
+    "singleFloorProfile": 526.301481,
+    "authenticSurvivingExit": 296.675126,
+    "historicalSustainedProfile": 296.263621
+  },
+  "replacementProfile": {
+    "pid": 37832,
+    "parentPid": 24924,
+    "createdUtc": "2026-10-21T19:11:16.854959Z",
+    "first": {
+      "utc": "2026-10-21T19:14:06Z",
+      "kernel100ns": 193125000,
+      "user100ns": 1433281250,
+      "workingSetBytes": 361037824
+    },
+    "second": {
+      "utc": "2026-10-21T19:19:54Z",
+      "kernel100ns": 551406250,
+      "user100ns": 4432031250,
+      "workingSetBytes": 370503680,
+      "logBytes": 223326,
+      "logModifiedUtc": "2026-10-21T19:19:50.3166957Z"
+    },
+    "conclusion": "CPU/log progression, one isolated player, no final verdict at this sample. No restart or duplicate campaign."
+  },
+  "orchestration": {
+    "cli": "0.163.0-alpha.10.2",
+    "queueHelpAvailable": true,
+    "daemonVersionOutsideSandboxExit": 1,
+    "daemonSocketError": 10050,
+    "sameDesktopThreadCallbackTested": false,
+    "queueSkillFound": false,
+    "configurationChanged": false,
+    "toolInstalled": false
+  }
+}

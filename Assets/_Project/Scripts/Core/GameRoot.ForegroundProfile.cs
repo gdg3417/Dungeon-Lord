@@ -16,7 +16,7 @@ namespace DungeonBuilder.M0
     {
         [Serializable] internal sealed class ForegroundProfileFrame
         {
-            public int Frame, Sequence, Collections;
+            public int Frame, Sequence, Collections, PartyCount, CheckpointBytes;
             public string Category;
             public long Ordinal, Allocated, ManagedBytes, NativeBytes, MainThreadNanoseconds, FrameAllocatedBytes;
             public double UpdateMs, FrameMs;
@@ -27,6 +27,8 @@ namespace DungeonBuilder.M0
             public bool Passed, ThreadAllocationCounterAvailable, FrameAllocationCounterAvailable;
             public string Failure, Product, SavePath;
             public int CompletedRuns;
+            public int ScreenWidth, ScreenHeight;
+            public string TextSize;
             public long StopwatchFrequency;
             public string[] Areas;
             public List<ForegroundProfileFrame> Frames = new List<ForegroundProfileFrame>();
@@ -38,6 +40,8 @@ namespace DungeonBuilder.M0
                   Application.isEditor && System.IO.Path.GetFileName(SaveService.SavePath).StartsWith("phase7a4-scene-", StringComparison.Ordinal)))
                 throw new InvalidOperationException("b3b2.profile.isolation_required");
             report.Product = Application.productName; report.SavePath = SaveService.SavePath;
+            report.ScreenWidth = Screen.width; report.ScreenHeight = Screen.height;
+            report.TextSize = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>()?.TextSize.ToString();
             report.StopwatchFrequency = Stopwatch.Frequency;
             report.Areas = Enum.GetNames(typeof(ForegroundQualificationMetrics.Area));
             double sample = 1000;
@@ -54,6 +58,7 @@ namespace DungeonBuilder.M0
             GC.KeepAlive(calibration);
             report.FrameAllocationCounterAvailable = frameAllocations.Valid;
             int baselineSequence = Save.runHistory.NextRunSequence;
+            int baselineRetained = Save.livingDungeon.Parties.Count;
             int originalGc = GC.CollectionCount(0);
             ForegroundQualificationMetrics.Enabled = true;
             try {
@@ -74,7 +79,7 @@ namespace DungeonBuilder.M0
                     TimeService.SetForegroundFocus(true); TimeService.OnResume();
                     if (frame >= 120) sample += .25; // explicit qualification clock acceleration; configuration unchanged
                     int sequence = Save.runHistory.NextRunSequence;
-                    long ordinal = Save.livingDungeon.Parties.FirstOrDefault()?.NextOrdinal ?? -1;
+                    long ordinal = Save.livingDungeon.Parties.Sum(p => p.NextOrdinal);
                     string latest = Save.runHistory.LatestOutcome?.RunId;
                     ForegroundQualificationMetrics.Reset();
                     long bytes = GC.GetAllocatedBytesForCurrentThread(), start = Stopwatch.GetTimestamp();
@@ -85,17 +90,19 @@ namespace DungeonBuilder.M0
                     yield return null; // include the real controller, map, layout and render frame
                     string category = Save.runHistory.LatestOutcome?.RunId != latest ? "settlement" :
                         Save.runHistory.NextRunSequence != sequence ? "admission" :
-                        (Save.livingDungeon.Parties.FirstOrDefault()?.NextOrdinal ?? -1) != ordinal ? "event" :
+                        Save.livingDungeon.Parties.Sum(p => p.NextOrdinal) != ordinal ? "event" :
                         ForegroundQualificationMetrics.Calls[(int)ForegroundQualificationMetrics.Area.AtomicWrite] > 0 ? "passive" : frame < 120 ? "idle-empty" : "between-events";
                     report.Frames.Add(new ForegroundProfileFrame { Frame = frame, Sequence = sequence, Ordinal = ordinal, Category = category,
+                        PartyCount = Save.livingDungeon.Parties.Count, CheckpointBytes = Save.livingDungeon.Parties.Sum(p => p.Checkpoint.Length),
                         UpdateMs = elapsed, FrameMs = Time.unscaledDeltaTime * 1000d, Allocated = allocated,
                         ManagedBytes = Profiler.GetMonoUsedSizeLong(), NativeBytes = Profiler.GetTotalAllocatedMemoryLong(),
                         MainThreadNanoseconds = mainThread.Valid ? mainThread.LastValue : -1,
                         FrameAllocatedBytes = frameAllocations.Valid ? frameAllocations.LastValue : -1,
                         Collections = GC.CollectionCount(0) - originalGc, Calls = (long[])ForegroundQualificationMetrics.Calls.Clone(),
                         Ticks = (long[])ForegroundQualificationMetrics.Ticks.Clone(), Bytes = (long[])ForegroundQualificationMetrics.Allocated.Clone() });
-                    if (Save.runHistory.LatestOutcome?.RunId == "run-" + (baselineSequence + 67)) {
-                        report.CompletedRuns = 68; report.Passed = true; break;
+                    int completed = Save.runHistory.NextRunSequence - baselineSequence - Save.livingDungeon.Parties.Count + baselineRetained;
+                    if (completed >= 68) {
+                        report.CompletedRuns = completed; report.Passed = true; break;
                     }
                 }
                 if (!report.Passed) throw new InvalidOperationException("b3b2.profile.incomplete");

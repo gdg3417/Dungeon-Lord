@@ -32,7 +32,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (maximum <= 0 || terminal == null || !terminal.IsTerminal || !terminal.OutcomeTaken ||
                 terminal.Combat?.Kernel.RulesId != MonsterRecoveryRules.Executable ||
-                retired?.Scheduler?.ProfileId != LivingDungeonForegroundConfig.ProfileId)
+                !LivingDungeonForegroundConfig.IsProduction(retired?.Scheduler?.ProfileId))
                 throw new InvalidOperationException("living.foreground.provenance_required");
             var writer = new ContractJsonWriter(limits); LivingDungeonContracts.Write(writer, retired);
             return new DurableSettlementHistory(before, writer.Finish(), history, maximum);

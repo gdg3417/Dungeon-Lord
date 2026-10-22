@@ -17,8 +17,13 @@
 .top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/panel.png"); -unity-slice-left: 14; -unity-slice-right: 14; -unity-slice-top: 14; -unity-slice-bottom: 14; }
 .top-chrome { flex-shrink: 0; }
 .normal-mode > .foreground-activity { flex-shrink: 0; background-color: var(--panel); padding-left: var(--space); padding-right: var(--space); }
+.foreground-activity-scroll { flex-grow: 0; flex-shrink: 0; max-height: 20%; background-color: var(--panel); }
+.foreground-activity-scroll .foreground-activity { flex-shrink: 0; padding-left: var(--space); padding-right: var(--space); }
 .normal-mode.compact-hud.large-text .top-chrome { max-height: 25%; flex-shrink: 1; }
 .normal-mode.compact-hud.large-text .map-area { min-height: 25%; flex-shrink: 0; }
+.normal-mode.compact-hud.foreground-visible .top-chrome { min-height: 64px; max-height: 25%; flex-shrink: 1; }
+.normal-mode.compact-hud.foreground-visible .map-area { min-height: 25%; flex-shrink: 0; }
+.normal-mode.compact-hud.foreground-visible .bottom-chrome { flex-shrink: 0; }
 .normal-mode.compact-hud.large-text .sheet-header .mode { display: none; }
 .normal-mode.compact-hud.large-text .hud { flex-wrap: wrap; }
 .normal-mode.compact-hud.large-text .metric-card { flex-basis: 45%; }
@@ -80,6 +85,8 @@
 .floor-rail Button { background-image: none; background-color: rgba(8,17,23,0.56); border-width: 0; border-left-width: 1px; border-left-color: rgba(157,175,177,0.35); border-radius: 3px; margin: 1px 0; padding-left: 10px; padding-right: 6px; }
 .floor-rail .selected-floor { background-color: rgba(32,36,28,0.68); border-left-width: 3px; border-left-color: var(--gold); color: rgb(250,222,155); -unity-font-style: bold; }
 .floor-rail .floor-blocked { border-bottom-width: 1px; border-bottom-color: rgb(230,144,116); }
+.floor-rail .floor-party-active { border-right-width: 3px; border-right-color: var(--gold); }
+.floor-rail .floor-party-waiting { border-right-color: var(--cool); }
 .floor-rail Button:hover, .floor-rail Button:focus { background-color: rgba(12,25,32,0.78); }
 .floor-rail Button:focus { border-top-width: 1px; border-top-color: var(--cool); }
 .floor-rail Button:active { background-color: rgba(12,25,32,0.85); }

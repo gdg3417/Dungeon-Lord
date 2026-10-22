@@ -292,7 +292,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var service = Service(f, new Utc());
             Assert.That(f.Runtime.livingDungeon.IsDormant, Is.True);
             f.Accept(service.AdvanceForeground(f.Runtime, 0, 10, (save, tick) => { }));
-            Assert.That(f.Runtime.livingDungeon.Scheduler.ProfileId, Is.EqualTo(LivingDungeonForegroundConfig.ProfileId));
+            Assert.That(f.Runtime.livingDungeon.Scheduler.ProfileId, Is.EqualTo(LivingDungeonForegroundConfig.TwoFloorProfileId));
             Assert.That(f.Runtime.livingDungeon.IsClosed, Is.True);
             service = Service(f, new Utc());
             Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.Zero);
@@ -562,7 +562,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(activateTarget ? 100 - (ready - 3) - ready : 100));
             var bytes = f.Session.GetCurrentBytes(); f.Reopen(); Through(f, finish);
             CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes());
-            if (activateTarget) Assert.That(Service(f, new Utc()).InspectForeground(f.Runtime, 10).StateKey, Is.EqualTo("ui.living.unsupported_layout"));
+            if (activateTarget) {
+                var view = Service(f, new Utc()).InspectForeground(f.Runtime, 10);
+                Assert.That(view.StateKey, Is.Not.EqualTo("ui.living.unsupported_layout"));
+            }
         }
 
         [Test] public void RetiredCapturedIdentityIsNeverRecreatedAndReplacementIsUntouched()

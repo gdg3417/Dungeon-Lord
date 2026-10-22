@@ -8,8 +8,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 {
     public enum RunStepKind
     {
-        RoomEntry, Movement, MonsterEngagement, TrapTrigger, LootInteraction, UnreachableInteraction,
-        RoomEgress, RoomComplete, BranchDecision, BranchReturn, FloorDecision, FloorTransfer, Terminal
+        RoomEntry = 0, Movement = 1, MonsterEngagement = 2, TrapTrigger = 3, LootInteraction = 4, UnreachableInteraction = 5,
+        RoomEgress = 6, RoomComplete = 7, BranchDecision = 8, BranchReturn = 9, FloorDecision = 10, FloorTransfer = 11, Terminal = 12,
+        FloorTransferBlocked = 13, FloorTransferReleased = 14
     }
     public enum RunPositionSpace { None, RoomLocal, Floor }
 
@@ -98,11 +99,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
     // The existing iterators own private gameplay locals; a verified prefix can reconstruct them.
     // Single caller only. No save writes, external state setters or retained event log.
-    public sealed class RunExecution
+    public sealed partial class RunExecution
     {
         private IEnumerator<RunStep> cursor;
         private readonly RunLogicalTiming timing;
-        private readonly long maximumEvents;
+        private long maximumEvents;
         private bool advancing, taken;
         private long ordinal, logicalTime;
         private RunStep? last;
@@ -163,6 +164,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (failure != null || advancing) throw new InvalidOperationException("run.execution.failed");
             if (timing == null) throw new InvalidOperationException("run.execution.timing_required");
             if (IsTerminal) return null;
+            if (TransferWaiting) return null;
+            if (TransferReleased) return logicalTime;
             try { Prepare(); return checked(logicalTime + timing.Duration(pending.Value.Kind, pending.Value.Distance)); }
             catch { failure = "run.execution.failed"; cursor?.Dispose(); throw; }
         }
@@ -189,13 +192,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 while (processed < eventBudget && !IsTerminal)
                 {
                     Prepare();
-                    long due = checked(logicalTime + (timing?.Duration(pending.Value.Kind, pending.Value.Distance) ?? 0));
+                    if (TransferWaiting) break;
+                    long due = TransferReleased ? logicalTime : checked(logicalTime + (timing?.Duration(pending.Value.Kind, pending.Value.Distance) ?? 0));
                     if (deadline.HasValue && due > deadline.Value) break;
                     if (!cursor.MoveNext()) throw new InvalidOperationException("run.execution.invalid_cursor");
                     var step = cursor.Current;
                     if (step.IsAnnouncement || step.Kind != pending.Value.Kind || step.Distance != pending.Value.Distance)
                         throw new InvalidOperationException("run.execution.invalid_cursor");
                     pending = null; logicalTime = due;
+                    if (TransferContract && step.Kind == RunStepKind.FloorTransfer) CompleteTransfer(step);
                     // Ordinal advancement explicitly authorizes this committed prefix too.
                     if (!deadline.HasValue && acceptedDeadline >= 0) acceptedDeadline = Math.Max(acceptedDeadline, logicalTime);
                     last = step.Stamp(Party.RunId, ordinal++, logicalTime, CarriedLootValue);
@@ -213,7 +218,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     if (StartInputs != null)
                     {
                         if (Combat != null) CommittedCombatWork = Combat.Kernel.WorkCount;
-                        PrefixDigest = Combat == null ? RunCheckpointCodec.Fold(PrefixDigest, last.Value, Inspect()) :
+                        PrefixDigest = TransferContract ? TransferCheckpointCodec.Fold(PrefixDigest, last.Value, this) :
+                            Combat == null ? RunCheckpointCodec.Fold(PrefixDigest, last.Value, Inspect()) :
                             CombatCheckpointCodec.Fold(PrefixDigest, last.Value, this);
                     }
                 }
@@ -225,11 +231,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         public RunStep AdvanceToNextEvent(long expectedNextOrdinal)
         {
             var steps = Advance(1, expectedNextOrdinal);
-            if (steps.Length == 0) throw new InvalidOperationException("run.execution.terminal");
+            if (steps.Length == 0) throw new InvalidOperationException(TransferWaiting ? "living.transfer.waiting" : "run.execution.terminal");
             return steps[0];
         }
         public RunOutcomeRecord DrainToCompletion(bool retainPresentationSteps = false)
         {
+            // A vacancy is external authority. A synchronous drain cannot invent
+            // that transition or make progress through a waiting transfer.
+            if (TransferWaiting) throw new InvalidOperationException("living.transfer.waiting");
             // Only completed manual publication opts in. The existing geometry-derived
             // event ceiling bounds this session evidence; checkpoint execution is unchanged.
             var steps = retainPresentationSteps ? new List<RunStep>() : null;
@@ -254,7 +263,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             if (Combat != null && StartInputs == null) throw new InvalidOperationException("combat.c0.checkpoint_contract_unapproved");
             if (failure != null || advancing || StartInputs == null)
                 throw new InvalidOperationException("run.checkpoint.unavailable");
-            return Combat == null ? RunCheckpointCodec.Export(this, acceptedDeadline, taken, PrefixDigest, limits) :
+            return TransferContract ? TransferCheckpointCodec.Export(this, limits) :
+                Combat == null ? RunCheckpointCodec.Export(this, acceptedDeadline, taken, PrefixDigest, limits) :
                 CombatCheckpointCodec.Export(this, acceptedDeadline, taken, limits);
         }
         internal void RestoreMetadata(long deadline, bool consumed)
