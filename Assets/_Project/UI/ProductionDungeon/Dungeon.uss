@@ -209,3 +209,14 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .content-choices { flex-shrink: 0; }
 .replay-damage { position: absolute; display: none; background-color: rgba(18, 22, 30, 0.96); border-radius: 6px; padding: 6px; white-space: normal; -unity-text-align: middle-center; -unity-font-style: bold; }
 .replay-combat-damage { padding: 0; background-color: rgba(0,0,0,0); white-space: nowrap; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(8,12,16); }
+.analysis-screen { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none; background-color: var(--panel); padding: var(--space); }
+.analysis-navigation { flex-shrink: 0; border-bottom-width: 2px; border-bottom-color: var(--gold); }
+.selected-destination { color: var(--gold); -unity-font-style: bold; }
+.analysis-scroll { flex-grow: 1; flex-shrink: 1; min-height: 0; }
+.analysis-scroll Label { white-space: normal; margin-bottom: 16px; }
+.performance-summary { color: var(--cool); white-space: normal; }
+#navigationDiscard { display: none; }
+.normal-mode #sheetTitle { display: none; }
+.sheet-header #openAnalysis { flex-grow: 1; flex-shrink: 1; flex-basis: 0; align-items: flex-start; }
+.sheet-header #collapseDetails { flex-shrink: 0; }
+#openAnalysis .performance-summary { margin: 0; padding: 0; -unity-text-align: middle-left; }
