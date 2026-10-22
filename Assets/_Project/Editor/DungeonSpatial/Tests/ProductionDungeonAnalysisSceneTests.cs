@@ -79,6 +79,14 @@ namespace DungeonBuilder.M0.Tests
             yield return AnalysisPhoneSettle();
         }
 
+        private IEnumerator AnalysisPhoneCapture(string context)
+        {
+            string name = "analysis-phone-" + context + "-" + controller.TextSize + "-" + Guid.NewGuid().ToString("N") + ".png";
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(name);
+            TestContext.WriteLine(name);
+            yield return null; yield return null;
+        }
+
         private IEnumerator AnalysisPhoneOpenFromEdit()
         {
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
@@ -111,6 +119,7 @@ namespace DungeonBuilder.M0.Tests
             foreach (string choice in choices)
             { yield return AnalysisPhoneReveal(ui.Q<Button>(choice)); AssertReachable(ui.Q<Button>(choice)); UatSafeAction(ui.Q<Button>(choice)); }
             TestContext.WriteLine("Phone dialog " + controller.TextSize + " scroll range=" + scroll.verticalScroller.highValue);
+            yield return AnalysisPhoneCapture("dialog");
         }
 
         private System.Collections.Generic.Dictionary<string,string> AnalysisPhoneStrings =>
@@ -139,6 +148,7 @@ namespace DungeonBuilder.M0.Tests
                 try
                 {
                     yield return AnalysisPhoneTap(ui.Q<Button>("openAnalysis")); Assert.That(controller.IsAnalysis, Is.True);
+                    yield return AnalysisPhoneCapture("analysis");
                     foreach (var button in covered) Assert.That(button.enabledInHierarchy, Is.False);
                     foreach (var point in points.Append(mapPoint)) yield return CompositionTap(point);
                     Assert.That(activated, Is.Zero); Assert.That(controller.IsAnalysis, Is.True);
@@ -151,6 +161,7 @@ namespace DungeonBuilder.M0.Tests
                     yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon")); Assert.That(controller.IsAnalysis, Is.False);
                     yield return AnalysisPhoneReveal(ui.Q<Button>("openAnalysis")); AssertReachable(ui.Q<Button>("openAnalysis"));
                     foreach (var button in covered) Assert.That(button.enabledInHierarchy, Is.True);
+                    yield return AnalysisPhoneCapture("dungeon");
                 }
                 finally { foreach (var button in covered) button.clicked -= observed; }
                 CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath)); Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(live));
@@ -256,6 +267,7 @@ namespace DungeonBuilder.M0.Tests
             foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
             {
                 yield return AnalysisPhoneConfigure(size);
+                string normalSummary = ui.Q<Label>("performanceSummary").text;
                 yield return AnalysisPhoneTap(ui.Q<Button>("replayRun")); Assert.That(controller.Replay, Is.Not.Null);
                 Assert.That(ui.Q<Label>("performanceSummary").ClassListContains("replay-summary"), Is.True);
                 yield return AnalysisPhoneTap(ui.Q<Button>("openAnalysis"));
@@ -264,6 +276,7 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(ui.Q("replayPanel").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
                 yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon"));
                 Assert.That(controller.Replay, Is.Null); Assert.That(controller.IsAnalysis, Is.False);
+                Assert.That(ui.Q<Label>("performanceSummary").text, Is.EqualTo(normalSummary));
                 CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath)); Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(live));
             }
         }
