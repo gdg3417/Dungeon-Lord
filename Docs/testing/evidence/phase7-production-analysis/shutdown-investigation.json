@@ -1,0 +1,861 @@
+{
+  "status": "still blocked",
+  "python_version": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "python_executable": "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+  "classifications": [
+    {
+      "category": 4,
+      "label": "Unresolved after bounded diagnosis",
+      "confidence": "High confidence in the reproduced visible-process hang; insufficient evidence to assign its production/engine/environment cause"
+    },
+    {
+      "category": 3,
+      "label": "Qualification process-observation defect",
+      "confidence": "Confirmed; corrected by the native two-handle diagnostic monitor; older provisional snapshots remain invalid"
+    }
+  ],
+  "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+  "implementation": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+  "starting_head": "5174e92c2c074d827b7296290ce71e5c3b6d7fef",
+  "main": "fbe4bdff0cba9fea72b42fb6a05714327f880df4",
+  "original_baseline": "7dc6f96b5c35f24923f6e8cbfa8a5e256c16c3ac",
+  "artifact": {
+    "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+    "stages": [
+      {
+        "stage": "focused",
+        "exact_original_inputs": 1418
+      },
+      {
+        "stage": "edit",
+        "exact_original_inputs": 1418
+      },
+      {
+        "stage": "play",
+        "exact_original_inputs": 1418
+      },
+      {
+        "stage": "native",
+        "exact_original_inputs": 1418
+      },
+      {
+        "stage": "nativefs",
+        "exact_original_inputs": 1418
+      }
+    ],
+    "sealed_files": 303,
+    "artifact": "P249R2-fe8daae0264348579db73d3402254215",
+    "executable_sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+    "unity_source_changes": false,
+    "build_repeated": false
+  },
+  "preflight": {
+    "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+    "head": "5174e92c2c074d827b7296290ce71e5c3b6d7fef",
+    "main": "fbe4bdff0cba9fea72b42fb6a05714327f880df4",
+    "sealed_build_artifact": "P249R2-fe8daae0264348579db73d3402254215",
+    "build_manifest_sha256": "46c71a3674bed100cae21d3750ba6ca9083a3ee24e417087d52d4de1567bbef6",
+    "build_files": 303,
+    "protected_files": 28780,
+    "unity_inputs": 1418,
+    "prior_preservation_valid": true,
+    "utc": "2026-10-23T14:14:15.062035+00:00"
+  },
+  "monitor_self_check": {
+    "identity_equal": true,
+    "live_launch": {
+      "wait": 258,
+      "exit_code": 259,
+      "exited": false
+    },
+    "live_independent": {
+      "wait": 258,
+      "exit_code": 259,
+      "exited": false
+    },
+    "exited_launch": {
+      "wait": 0,
+      "exit_code": 23,
+      "exited": true
+    },
+    "exited_independent": {
+      "wait": 0,
+      "exit_code": 23,
+      "exited": true
+    },
+    "invalid_handle_result": "RuntimeError('Unknown native wait 4294967295 error 6')",
+    "verdict": "Passed process-observation self-check; not a Unity test"
+  },
+  "attempts": [
+    {
+      "attempt": "01-scripted",
+      "pid": 7384,
+      "exit": {
+        "utc": "2026-10-23T14:19:51.736417+00:00",
+        "normal": true,
+        "forced": false,
+        "error": null,
+        "exit_code": 0,
+        "launch_handle_state": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "independent_handle_state": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "wall_seconds": 18.40600000001723,
+        "appquit_seen": false,
+        "surviving_children": null
+      },
+      "fixture_source_sha256": "bfa6f99babb86babe69310c7c0470e828eab345ca54673e5387fa7c5c4bbdc80",
+      "post_verified_exit_save_sha256": "4665d2dd1db8bb0d096ea43950f55f44622756e754cd8bf275c87441791ffcf1",
+      "schemaVersion": 15,
+      "retained_records": 0,
+      "active_parties": 2,
+      "appquit_log": [
+        "[2026-10-23 14:19:50 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+      ],
+      "last_log_lines": [
+        "(Filename: C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs Line: 123)",
+        "",
+        "[Physics::Module] Cleanup current backend.",
+        "[Physics::Module] Id: 0xf2b8ea05",
+        "Input System module state changed to: ShutdownInProgress.",
+        "Input System polling thread exited.",
+        "Input System module state changed to: Shutdown.",
+        "GarbageCollector disposing of ComputeBuffer. Please use ComputeBuffer.Release() or .Dispose() to manually release the buffer.",
+        "PlayerConnection::Cleanup##utp:{\"type\":\"MemoryLeaks\",\"version\":2,\"phase\":\"Immediate\",\"time\":1792765190862,\"processId\":7384,\"allocatedMemory\":579007,\"memoryLabels\":[{\"Default\":136},{\"NewDelete\":104},{\"Manager\":15699},{\"GfxDevice\":288},{\"GfxThread\":24},{\"Audio\":752},{\"Serialization\":520},{\"JobScheduler\":32768},{\"String\":510},{\"HashMap\":3584},{\"PoolAlloc\":192},{\"CloudService\":144},{\"WebRequest\":3562},{\"VR\":1872},{\"Video\":144},{\"NativeArray\":503956},{\"Subsystems\":96},{\"Accessibility\":80},{\"UIElements\":14560},{\"CoreBusinessMetrics\":120}]}"
+      ],
+      "scripted_report_passed": true,
+      "native_client_resolutions": [],
+      "wait_samples": []
+    },
+    {
+      "attempt": "02-visible",
+      "pid": 44508,
+      "exit": {
+        "utc": "2026-10-23T14:22:38.772318+00:00",
+        "normal": false,
+        "forced": true,
+        "error": null,
+        "exit_code": 3796434945,
+        "launch_handle_state": {
+          "wait": 0,
+          "exit_code": 3796434945,
+          "exited": true
+        },
+        "independent_handle_state": {
+          "wait": 0,
+          "exit_code": 3796434945,
+          "exited": true
+        },
+        "wall_seconds": 129.23399999999674,
+        "appquit_seen": true,
+        "surviving_children": null
+      },
+      "fixture_source_sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+      "post_verified_exit_save_sha256": "c8ff948e8e5598480a498ec823bdba5ae4f35cc64de0b3dbc07382e3b6e75e09",
+      "schemaVersion": 15,
+      "retained_records": 2,
+      "active_parties": 2,
+      "appquit_log": [
+        "[2026-10-23 14:21:07 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+      ],
+      "last_log_lines": [
+        "(Filename: C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs Line: 123)",
+        "",
+        "[Physics::Module] Cleanup current backend.",
+        "[Physics::Module] Id: 0xf2b8ea05",
+        "Input System module state changed to: ShutdownInProgress.",
+        "Input System polling thread exited.",
+        "Input System module state changed to: Shutdown.",
+        "GarbageCollector disposing of ComputeBuffer. Please use ComputeBuffer.Release() or .Dispose() to manually release the buffer.",
+        "PlayerConnection::Cleanup"
+      ],
+      "native_client_resolutions": [
+        [
+          1280,
+          720
+        ]
+      ],
+      "wait_samples": [
+        {
+          "seconds_after_appquit": 10,
+          "cpu": 25.53125,
+          "thread_count": 65,
+          "wait_reasons": {
+            "UserRequest": 50,
+            "EventPairLow": 8,
+            "Unknown": 6,
+            "ExecutionDelay": 1
+          },
+          "wct_node_counts": {
+            "1": 65
+          },
+          "wct_cycles": 0,
+          "wct_errors": 0
+        },
+        {
+          "seconds_after_appquit": 70,
+          "cpu": 25.640625,
+          "thread_count": 62,
+          "wait_reasons": {
+            "UserRequest": 50,
+            "Unknown": 6,
+            "EventPairLow": 5,
+            "ExecutionDelay": 1
+          },
+          "wct_node_counts": {
+            "1": 62
+          },
+          "wct_cycles": 0,
+          "wct_errors": 0
+        }
+      ]
+    },
+    {
+      "attempt": "03-visible-no-capture",
+      "pid": 27080,
+      "exit": {
+        "utc": "2026-10-23T14:25:58.982303+00:00",
+        "normal": false,
+        "forced": true,
+        "error": null,
+        "exit_code": 3796434945,
+        "launch_handle_state": {
+          "wait": 0,
+          "exit_code": 3796434945,
+          "exited": true
+        },
+        "independent_handle_state": {
+          "wait": 0,
+          "exit_code": 3796434945,
+          "exited": true
+        },
+        "wall_seconds": 135.28100000001723,
+        "appquit_seen": true,
+        "surviving_children": null
+      },
+      "fixture_source_sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+      "post_verified_exit_save_sha256": "7c88685f640a00597ae57d9b2e2d8bb674963eebd532157f4c4d45088eb5acaf",
+      "schemaVersion": 15,
+      "retained_records": 2,
+      "active_parties": 2,
+      "appquit_log": [
+        "[2026-10-23 14:24:26 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+      ],
+      "last_log_lines": [
+        "(Filename: C:/build/output/unity/unity/Runtime/Export/Debug/Debug.bindings.cs Line: 123)",
+        "",
+        "[Physics::Module] Cleanup current backend.",
+        "[Physics::Module] Id: 0xf2b8ea05",
+        "Input System module state changed to: ShutdownInProgress.",
+        "Input System polling thread exited.",
+        "Input System module state changed to: Shutdown.",
+        "GarbageCollector disposing of ComputeBuffer. Please use ComputeBuffer.Release() or .Dispose() to manually release the buffer.",
+        "PlayerConnection::Cleanup"
+      ],
+      "native_client_resolutions": [
+        [
+          33,
+          17
+        ],
+        [
+          1280,
+          720
+        ]
+      ],
+      "wait_samples": [
+        {
+          "seconds_after_appquit": 10,
+          "cpu": 27.015625,
+          "thread_count": 68,
+          "wait_reasons": {
+            "UserRequest": 51,
+            "EventPairLow": 10,
+            "Unknown": 6,
+            "ExecutionDelay": 1
+          },
+          "wct_node_counts": {
+            "1": 68
+          },
+          "wct_cycles": 0,
+          "wct_errors": 0
+        },
+        {
+          "seconds_after_appquit": 70,
+          "cpu": 27.140625,
+          "thread_count": 65,
+          "wait_reasons": {
+            "UserRequest": 51,
+            "Unknown": 6,
+            "EventPairLow": 7,
+            "ExecutionDelay": 1
+          },
+          "wct_node_counts": {
+            "1": 65
+          },
+          "wct_cycles": 0,
+          "wct_errors": 0
+        }
+      ]
+    }
+  ],
+  "host_final": {
+    "utc": "2026-10-23T14:28:30.808730+00:00",
+    "process_states": {
+      "38808": null,
+      "39392": null,
+      "7384": null,
+      "44508": null,
+      "27080": null
+    },
+    "active_players": [],
+    "all_fixture_leases_restored": true,
+    "method": "Existing qualification_windows.identity: native process handle, executable and creation time; signaled or absent is exited; access errors raise"
+  },
+  "environment": {
+    "os": {
+      "Caption": "Microsoft Windows 11 Pro",
+      "Version": "10.0.26300",
+      "BuildNumber": "26300"
+    },
+    "gpu": [
+      {
+        "Name": "NVIDIA GeForce RTX 3070 Ti",
+        "DriverVersion": "32.0.16.1692",
+        "DriverDate": "2026-09-03T19:00:00-05:00"
+      }
+    ],
+    "availableDebugTools": [],
+    "utc": "2026-10-23T14:26:11.4563825Z",
+    "settingsChanged": false
+  },
+  "events": {
+    "queryStatus": "query completed: no matching event IDs in interval",
+    "queryError": null,
+    "matchingEvents": [],
+    "utc": "2026-10-23T14:27:30.7502955Z"
+  },
+  "initial_preservation_failure": {
+    "utc": "2026-10-23T14:33:12.748799+00:00",
+    "protected_files": 28780,
+    "changes": [
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\c",
+        "before": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "after": null
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\e",
+        "before": "b3ca334496c4f28e1c0c7abf4f7d1f707187243fdd719d28f57fc768dd43c9f8",
+        "after": null
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\g",
+        "before": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "after": null
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\s",
+        "before": "572c16dd66c60da68fd311b10a41c4c4ded14f978b065212729f1a7fe907564f",
+        "after": null
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\c",
+        "before": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "after": null
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\e",
+        "before": "a6072c0d6ed7a3007a24cbce33314dd5b3bdb363b024d7c3c6afec3ae0717fd1",
+        "after": null
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\g",
+        "before": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "after": null
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\s",
+        "before": "572c16dd66c60da68fd311b10a41c4c4ded14f978b065212729f1a7fe907564f",
+        "after": null
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Insights\\ArchivedEvents\\Session\\session_end_event",
+        "before": "413cea458d2ad718974d8b85e27704b8796276dae3951caed7636ffceee19950",
+        "after": "c1765039652a579af708ea0a3e1ed86553d14f2bee1d6a4b108f853e202dbee6"
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\ShaderVariantAnalytics\\ShaderRuntimeInfoEvent.json",
+        "before": "0de6c4190d5191238748f94a0c47662a1589d75f984b51b8efe4bb801ef0573a",
+        "after": "857e2b655958755928cc8b8df36ef88aa04397b4f40b1a4f109a141cb1c91cd9"
+      }
+    ],
+    "unity_input_files": 1418,
+    "unity_input_changes": [],
+    "original_normal_owner_and_recovery_files_unchanged": false
+  },
+  "sdk_cache_restoration": {
+    "utc": "2026-10-23T14:38:31.178038+00:00",
+    "failed_check_retained": "preservation-final.json",
+    "restored": [
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\c",
+        "before": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "generated": null,
+        "verified_original_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\13-native-closed-product\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\c",
+        "restored_sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "classification": "Existing isolated product SDK telemetry/cache pruning or rewrite; not canonical save or recovery data"
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\e",
+        "before": "b3ca334496c4f28e1c0c7abf4f7d1f707187243fdd719d28f57fc768dd43c9f8",
+        "generated": null,
+        "verified_original_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\13-native-closed-product\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\e",
+        "restored_sha256": "b3ca334496c4f28e1c0c7abf4f7d1f707187243fdd719d28f57fc768dd43c9f8",
+        "classification": "Existing isolated product SDK telemetry/cache pruning or rewrite; not canonical save or recovery data"
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\g",
+        "before": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "generated": null,
+        "verified_original_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\13-native-closed-product\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\g",
+        "restored_sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "classification": "Existing isolated product SDK telemetry/cache pruning or rewrite; not canonical save or recovery data"
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\s",
+        "before": "572c16dd66c60da68fd311b10a41c4c4ded14f978b065212729f1a7fe907564f",
+        "generated": null,
+        "verified_original_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\13-native-closed-product\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276133200001.3ff1f7d2\\s",
+        "restored_sha256": "572c16dd66c60da68fd311b10a41c4c4ded14f978b065212729f1a7fe907564f",
+        "classification": "Existing isolated product SDK telemetry/cache pruning or rewrite; not canonical save or recovery data"
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\c",
+        "before": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "generated": null,
+        "verified_original_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\13-native-closed-product\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\c",
+        "restored_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "classification": "Existing isolated product SDK telemetry/cache pruning or rewrite; not canonical save or recovery data"
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\e",
+        "before": "a6072c0d6ed7a3007a24cbce33314dd5b3bdb363b024d7c3c6afec3ae0717fd1",
+        "generated": null,
+        "verified_original_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\13-native-closed-product\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\e",
+        "restored_sha256": "a6072c0d6ed7a3007a24cbce33314dd5b3bdb363b024d7c3c6afec3ae0717fd1",
+        "classification": "Existing isolated product SDK telemetry/cache pruning or rewrite; not canonical save or recovery data"
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\g",
+        "before": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "generated": null,
+        "verified_original_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\13-native-closed-product\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\g",
+        "restored_sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "classification": "Existing isolated product SDK telemetry/cache pruning or rewrite; not canonical save or recovery data"
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\s",
+        "before": "572c16dd66c60da68fd311b10a41c4c4ded14f978b065212729f1a7fe907564f",
+        "generated": null,
+        "verified_original_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\13-native-closed-product\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276143200002.3ff1f7d2\\s",
+        "restored_sha256": "572c16dd66c60da68fd311b10a41c4c4ded14f978b065212729f1a7fe907564f",
+        "classification": "Existing isolated product SDK telemetry/cache pruning or rewrite; not canonical save or recovery data"
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Insights\\ArchivedEvents\\Session\\session_end_event",
+        "before": "413cea458d2ad718974d8b85e27704b8796276dae3951caed7636ffceee19950",
+        "generated": "c1765039652a579af708ea0a3e1ed86553d14f2bee1d6a4b108f853e202dbee6",
+        "verified_original_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\13-native-closed-product\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Insights\\ArchivedEvents\\Session\\session_end_event",
+        "restored_sha256": "413cea458d2ad718974d8b85e27704b8796276dae3951caed7636ffceee19950",
+        "classification": "Existing isolated product SDK telemetry/cache pruning or rewrite; not canonical save or recovery data"
+      },
+      {
+        "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\ShaderVariantAnalytics\\ShaderRuntimeInfoEvent.json",
+        "before": "0de6c4190d5191238748f94a0c47662a1589d75f984b51b8efe4bb801ef0573a",
+        "generated": "857e2b655958755928cc8b8df36ef88aa04397b4f40b1a4f109a141cb1c91cd9",
+        "verified_original_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\13-native-closed-product\\Unity\\ShaderVariantAnalytics\\ShaderRuntimeInfoEvent.json",
+        "restored_sha256": "0de6c4190d5191238748f94a0c47662a1589d75f984b51b8efe4bb801ef0573a",
+        "classification": "Existing isolated product SDK telemetry/cache pruning or rewrite; not canonical save or recovery data"
+      }
+    ],
+    "generated_new_archived": [
+      {
+        "original_path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276546600004.ee162627\\c",
+        "archived_path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-shutdown-20261023-d1\\analytics-closeout\\generated-new\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276546600004.ee162627\\c",
+        "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+      },
+      {
+        "original_path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276546600004.ee162627\\e",
+        "archived_path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-shutdown-20261023-d1\\analytics-closeout\\generated-new\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276546600004.ee162627\\e",
+        "sha256": "bf01a87090646ae6e3e00890fab900af20b777e5bb89d0577af6d336552fc19b"
+      },
+      {
+        "original_path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276546600004.ee162627\\g",
+        "archived_path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-shutdown-20261023-d1\\analytics-closeout\\generated-new\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276546600004.ee162627\\g",
+        "sha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+      },
+      {
+        "original_path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276546600004.ee162627\\s",
+        "archived_path": "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-shutdown-20261023-d1\\analytics-closeout\\generated-new\\Unity\\eb221dfc-dbd2-47b0-a963-3dc79a2f2bf4\\Analytics\\ArchivedEvents\\179276546600004.ee162627\\s",
+        "sha256": "45eee081528bff160b5a34595065f49e4aaa8e1e7ff07a8bf380c0516361ff7c"
+      }
+    ],
+    "exact_product_inventory_restored": 47,
+    "all_processes_exited_before_restore": true,
+    "no_canonical_save_or_recovery_change": true,
+    "reason": "Post-exit restoration of SDK-generated changes from independently hash-verified original archives; no passing shutdown verdict is manufactured"
+  },
+  "preservation": {
+    "utc": "2026-10-23T14:43:46.363463+00:00",
+    "protected_files": 28780,
+    "changes": [],
+    "unity_input_files": 1418,
+    "unity_input_changes": [],
+    "original_normal_owner_and_recovery_files_unchanged": true
+  },
+  "protected_manifest_sha256": "58524ab4e8a5b4c3d8f4469d4894399aa29e1d258d31a7ed274e61b9ce458208",
+  "raw_logs": [
+    {
+      "attempt": "01-scripted",
+      "sha256": "7a9c238d4d0d1ed7a0eb5d6a2a9ebed108cae278f1017172b89303492de28623",
+      "bytes": 37583,
+      "excerpt": "01-scripted\\shutdown-excerpt.txt"
+    },
+    {
+      "attempt": "02-visible",
+      "sha256": "2007b8b30745c0e89fa5da5e100573e8149e2b2adb455b1fce72b6ee2d7cf2c0",
+      "bytes": 25981,
+      "excerpt": "02-visible\\shutdown-excerpt.txt"
+    },
+    {
+      "attempt": "03-visible-no-capture",
+      "sha256": "07ec74f31d50fa6a3d3251cdf24e9fad6d4b12cee11c93f404c9f51a6e71efdb",
+      "bytes": 30050,
+      "excerpt": "03-visible-no-capture\\shutdown-excerpt.txt"
+    }
+  ],
+  "production_code_change_required": "Not demonstrated; no production correction proposed or made",
+  "new_full_suites": 0,
+  "new_builds": 0,
+  "new_sustained_profiles": 0,
+  "completed_gap": "Independent 1280x720 selected native client verification",
+  "remaining_blocked": [
+    "valid modified Save/Discard/Continue",
+    "invalid draft two-choice",
+    "pending/failed/stale native draft safety",
+    "empty/incomplete-history native Analysis",
+    "strict graceful visible close/reopen and canonical/draft comparison",
+    "remaining Default/Large portrait/landscape checks",
+    "independent portrait client resolution",
+    "owner UAT fixture/launcher and physical Moonlight acceptance"
+  ],
+  "owner_uat_ready": false,
+  "next_recommendation": "Independent review; then explicitly scoped symbolized thread-stack investigation and a proposed same-build comparison outside the Codex/Computer Use launch environment. No speculative production or graphics/security changes.",
+  "packet": {
+    "path": "shutdown-investigation-reports.zip",
+    "sha256": "dba7767e6888234667b1a3b3520df3042c4d8a8e6444ea21492c16d4766956e8",
+    "entries": [
+      {
+        "path": "tools/p249-shutdown-preflight.py",
+        "sha256": "0ca20d14240bde0952f2831367ca30b632f1ef32db463b12882e3fadea6d0530",
+        "bytes": 2330
+      },
+      {
+        "path": "01-scripted/exit.json",
+        "sha256": "5cf4685611c366b23dc0d81eb35be34f806f741618785c90b4b2b60b5b162bbf",
+        "bytes": 407
+      },
+      {
+        "path": "01-scripted/fixture-closed.json",
+        "sha256": "e02ca8c864239eb185cebdeacac0fdc848f71f23847c0db7137393166c55756e",
+        "bytes": 167
+      },
+      {
+        "path": "01-scripted/fixture.json",
+        "sha256": "c523f272e87d3d1969999ed369bd3e68df235e79f00285bf4a01a3fd019c5e15",
+        "bytes": 484
+      },
+      {
+        "path": "01-scripted/launch.json",
+        "sha256": "c5cb0854d30dc2f86f939b303a2cce34cbc25f099ffb84745ea0ef021aa213ec",
+        "bytes": 2177
+      },
+      {
+        "path": "01-scripted/observations.jsonl",
+        "sha256": "c2ba2eb6d2ed96de16e25ebc6275efaa3ac1a9fcadd9843126da7df6bb670468",
+        "bytes": 4585
+      },
+      {
+        "path": "01-scripted/seed.manifest.json",
+        "sha256": "b4c2a4258d1236a091b5ff20f3024996f968a5dbd678438ffbbc7fd3b59614b6",
+        "bytes": 502
+      },
+      {
+        "path": "01-scripted/shutdown-excerpt.txt",
+        "sha256": "91433549f77f4ac8b02f5ca66fe59f227a380d0c375b02dcb42a095edcfa1ecd",
+        "bytes": 1117
+      },
+      {
+        "path": "01-scripted/smoke.json",
+        "sha256": "e7e4e790787b692a99d04b484139e93e5fac1a60ff150d11189ab2b273a8a6f0",
+        "bytes": 1465
+      },
+      {
+        "path": "02-visible/appquit-observed.json",
+        "sha256": "6d962564a56d59c9c63a4e3190367922aaafcc74b6bb3da3243e15114b3e1d16",
+        "bytes": 171
+      },
+      {
+        "path": "02-visible/before-close.png",
+        "sha256": "3354640196d9864e8fc50f1d8009dedc743150811e953ae8560d2a86a0a258d9",
+        "bytes": 122789
+      },
+      {
+        "path": "02-visible/exit.json",
+        "sha256": "0823c83d9529e90899d3038d8efbaa994816fc09e16445431fe605abdbbfe041",
+        "bytes": 434
+      },
+      {
+        "path": "02-visible/fixture-closed.json",
+        "sha256": "3584b39af9daa44cf7210732d41a86fa7e5c02a1ea5ce943ecd78b7751c32a10",
+        "bytes": 620
+      },
+      {
+        "path": "02-visible/fixture.json",
+        "sha256": "3e185d45d33e3cbfd3635fb719df0f4d16e2ee92bfbd98e760e3262049530d1c",
+        "bytes": 867
+      },
+      {
+        "path": "02-visible/hang-detail-10.json",
+        "sha256": "7dfe4432686864f08ac9c9e2efac601ac61eed21dbb34e0a26b2450ffdc5cf49",
+        "bytes": 51202
+      },
+      {
+        "path": "02-visible/hang-detail-70.json",
+        "sha256": "97b9ddc21bb82823db011d1d26818f9c8bc855304d371d576924f8f1d16d27b2",
+        "bytes": 49856
+      },
+      {
+        "path": "02-visible/launch.json",
+        "sha256": "a504068897890a0a0a761997055a1744f2a8dc6e8f973a0328682b9a76fd86f6",
+        "bytes": 1694
+      },
+      {
+        "path": "02-visible/lease.json",
+        "sha256": "789867ee51a9c93ae616d4a016c8b974520c37b1dc509d64f4d7dcdc751fb6f9",
+        "bytes": 442
+      },
+      {
+        "path": "02-visible/observations.jsonl",
+        "sha256": "63df267c56dfacdf640253b63d7eab1cbe8117e1bb5636ab1f18693ede9fd504",
+        "bytes": 32910
+      },
+      {
+        "path": "02-visible/shutdown-excerpt.txt",
+        "sha256": "b1776ed2ff7011ef4a851b15b5b129acecced4f10711eea661725ba682cc5cb9",
+        "bytes": 603
+      },
+      {
+        "path": "02-visible/unsuccessful-graceful-exit.json",
+        "sha256": "1fdeedec4d61d9ba8c27ce8edbeaa1455319867d48245782f777000537e3826b",
+        "bytes": 499
+      },
+      {
+        "path": "03-visible-no-capture/appquit-observed.json",
+        "sha256": "be621a8079dc5399dcf09997940209eab5cd61b1c573b4abd5cdff2fa9b88757",
+        "bytes": 171
+      },
+      {
+        "path": "03-visible-no-capture/exit.json",
+        "sha256": "8130c6ec13f1e1084c3b57173f12d748be8a380836ea58f4ba3ad49c3143c628",
+        "bytes": 434
+      },
+      {
+        "path": "03-visible-no-capture/fixture-closed.json",
+        "sha256": "d351b8183b49ac1c2b0e5f6d05947488440b3142568800e469e05e920f64474d",
+        "bytes": 631
+      },
+      {
+        "path": "03-visible-no-capture/fixture.json",
+        "sha256": "71e36534edefbb108ffdb98f9c4ed88732e20aba88936c355c69e8bb82cad65f",
+        "bytes": 878
+      },
+      {
+        "path": "03-visible-no-capture/hang-detail-10.json",
+        "sha256": "3f166e2ba06d5ca6f1b2e4250f09ee0168896755eb5dd938807398be6c021e03",
+        "bytes": 52751
+      },
+      {
+        "path": "03-visible-no-capture/hang-detail-70.json",
+        "sha256": "8946774795c00104a8d40434b2e8c39fa5c73320c0961e6ba8eea23f386c7c2b",
+        "bytes": 51405
+      },
+      {
+        "path": "03-visible-no-capture/launch.json",
+        "sha256": "74c71318c9ad460929d61872c641f2c7107ca90b6a973097e0a45449bbd7137a",
+        "bytes": 1714
+      },
+      {
+        "path": "03-visible-no-capture/lease.json",
+        "sha256": "0c3be1ddb1e0fb1b107b9147276706e66ae4394705e00af5d990ada531309171",
+        "bytes": 453
+      },
+      {
+        "path": "03-visible-no-capture/observations.jsonl",
+        "sha256": "4c4c654d4c8e73cff52a99a0fa11f3bb90c6170dd194a2d02ae0a686d96785fd",
+        "bytes": 34800
+      },
+      {
+        "path": "03-visible-no-capture/shutdown-excerpt.txt",
+        "sha256": "61260a5c54b027a2ba2e4d4f723adb3107d14886b3da642f4283be1d03d2fa50",
+        "bytes": 603
+      },
+      {
+        "path": "03-visible-no-capture/thread-descriptions.json",
+        "sha256": "48c1c2f20cdfcc24dfd419aabc32326c16792badab1dc3958a64f52eea75a0db",
+        "bytes": 21364
+      },
+      {
+        "path": "03-visible-no-capture/unsuccessful-graceful-exit.json",
+        "sha256": "191ed4bf4e2eeb4c45d6b00987bd7a5a2076074fe2c496298c490c96668a25fb",
+        "bytes": 499
+      },
+      {
+        "path": "analytics-restoration.json",
+        "sha256": "a3123a01185024f19c4cfa8c4781acdb67dd421ac34ced4cf7f47d5913ed417a",
+        "bytes": 10499
+      },
+      {
+        "path": "attempt-summary.json",
+        "sha256": "b75e274174bb1b76db73eb13d19a2ec1d0d71d9c480fdb4f512d1d07ace4121e",
+        "bytes": 7173
+      },
+      {
+        "path": "collect_shutdown.py",
+        "sha256": "cad9e3a351008de8425d375e9e82cf58d1437d33a4252aa794c431b32dc4efca",
+        "bytes": 5459
+      },
+      {
+        "path": "diagnose.py",
+        "sha256": "fd07076e6267c7993d8af7388aa240be5c9f294857c5af4bae9f1126e78504ed",
+        "bytes": 13677
+      },
+      {
+        "path": "environment.json",
+        "sha256": "d4cea847cae7ec39e476971987a787d7b133d78ff88dc152a26c5196b20c435a",
+        "bytes": 391
+      },
+      {
+        "path": "final-source-build.json",
+        "sha256": "b9cb5e282651be2894f9f091c40f914c56b477f1bcacf8687cc2b027f109e47d",
+        "bytes": 705
+      },
+      {
+        "path": "final_source_build.py",
+        "sha256": "aa44a6be894a06eeec8eb8ee1955fe4f43c82749d8341f54e4775942095ba7fc",
+        "bytes": 1396
+      },
+      {
+        "path": "host-final.json",
+        "sha256": "edc6b5fec6cc7fac328ee66b1bf03b0e4f91523523dc74c05e1d9b17c738c0b8",
+        "bytes": 401
+      },
+      {
+        "path": "host-preflight.json",
+        "sha256": "2115f306bea79696c736259741016d82ca5fc1428ec4b0d7a530b18c2cafc03c",
+        "bytes": 236
+      },
+      {
+        "path": "host_final.py",
+        "sha256": "36b29d79879b505c91f3673bdaff826a418008df92d8b625a41ef77a6d145f32",
+        "bytes": 853
+      },
+      {
+        "path": "monitor-self-check.json",
+        "sha256": "7b5c058b656d1851fc3c971b5ba572f68dd4924832d330e239ce75a65d891b22",
+        "bytes": 547
+      },
+      {
+        "path": "monitor_self_check.py",
+        "sha256": "a461459f32947fba4540f8c6e80ccb7add6ce46452d1ad253c71aa08f43450f9",
+        "bytes": 1097
+      },
+      {
+        "path": "preflight.json",
+        "sha256": "c3432151ce9a73c0cda625297a99b97a66f5f0756f9320cdb25b1620977610d5",
+        "bytes": 497
+      },
+      {
+        "path": "preservation-final-restored.json",
+        "sha256": "c65662a829e045d49074caa6260b24877290242187b4d5d60e671d37bc7fb0b9",
+        "bytes": 219
+      },
+      {
+        "path": "preservation-final.json",
+        "sha256": "3b5bceb9b6f5b7ddf75a960781d28b77fd56a8fc08b49abbb4d65a53e4afcc1d",
+        "bytes": 3474
+      },
+      {
+        "path": "preservation_after_restore.py",
+        "sha256": "5207ac0fed47230d625a9d192ec43eb39c4346fd683bf15654e4c0e5cdfcca45",
+        "bytes": 1298
+      },
+      {
+        "path": "preservation_final.py",
+        "sha256": "fde4454bc837be154489dc22910d5867013d2735fbc7a73545a69943718c55a1",
+        "bytes": 1289
+      },
+      {
+        "path": "restore_analytics.py",
+        "sha256": "fcdd8d7bb067e01ae2f35176bdf7dded99667918e4edf44f6474bbe6db172f4d",
+        "bytes": 3106
+      },
+      {
+        "path": "summarize_attempts.py",
+        "sha256": "f5a3c93f9ac952ce5352cf83d208aabbf302f262d10dd9ee9e08dbc52c71e4a1",
+        "bytes": 1890
+      },
+      {
+        "path": "summarize_waits.py",
+        "sha256": "4425b00b94e25dfdb40610708480a68ce9fc0a5143486392c3de6a7caba5365b",
+        "bytes": 773
+      },
+      {
+        "path": "thread_descriptions.py",
+        "sha256": "bfbdcafcf38a5478280c83f360934a0d61130adc0c63a542c7f81d4fbae0b0bd",
+        "bytes": 1895
+      },
+      {
+        "path": "ui-actions.json",
+        "sha256": "fa58ee45fe71472e0f8005c02b5ab087348fdc3965b99908991e7751ee96e475",
+        "bytes": 795
+      },
+      {
+        "path": "windows-events-verified.json",
+        "sha256": "e4f24537dd75a27d80cc8d160f2cc94ffbbf97f366b5b130c22af7170870e7a9",
+        "bytes": 167
+      },
+      {
+        "path": "windows-events.json",
+        "sha256": "1c45cbd57dc0b558fa19c07cb2e58c43f6208e09ad95e0dcdd0a64418ed9f669",
+        "bytes": 181
+      },
+      {
+        "path": "tools/qualification_inputs.py",
+        "sha256": "d684f97a4f2e6287f36620c308262fd1fcee39e23fa58295493bc52b803e167c",
+        "bytes": 6362
+      },
+      {
+        "path": "tools/qualification_windows.py",
+        "sha256": "862f888b074f7a01e3e3dcef80a1cbdf9ad0b6dd40ee7b1ad79b3757a0318dba",
+        "bytes": 6284
+      }
+    ]
+  }
+}
