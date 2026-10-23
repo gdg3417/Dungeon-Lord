@@ -1,6 +1,6 @@
 # PR #249 qualification preparation recovery
 
-Current status: automated qualification and native continuation pass; visible native UI verification is waiting for manual dismissal of a Windows Security firewall dialog. Owner UAT is not qualified or launched.
+Current status: automated qualification and scripted native continuation pass. After manual dialog dismissal, visible native checks made progress but found a repeatable windowless player shutdown failure. Further native work and owner preparation stopped. See the [2026-10-23 native continuation and preservation closeout](native-ui-continuation.md). Owner UAT is not qualified or launched.
 
 ## Source and isolation
 
@@ -62,7 +62,7 @@ The suite-generated TMP fallback font and settings key order were archived and r
 
 The follow-up hash comparison completed: all 26,181 historical files and all 350 original persistent files are byte-identical, with zero exceptions. The focused, EditMode, PlayMode and native-filesystem projects have closed their input transformations: each now matches all 1,418 original source files byte-for-byte, retaining archived qualified versions. The native build project still has its six declared qualification transformations while visible UI work remains open. Its generated build caches have already been restored. No live canonical file from the still-running GUI player was read for this audit.
 
-## Visible UI and owner status
+## Visible UI checkpoint before manual dismissal (superseded)
 
 The ordinary, unmodified-clock native player was launched with the genuine `08` fixture at requested 1280×720 for UI verification. It is isolated from owner progress. Computer Use app capture initially timed out; the refreshed retry succeeded but showed a Windows Security firewall dialog for the already completed `PlayerWithTests.exe` over the desktop. No UI action was sent. The skill forbids acting on security permission requests; manual Cancel was requested. Networking permission is not needed for the completed test.
 
