@@ -1,0 +1,662 @@
+{
+  "date": "2026-10-23",
+  "campaign": "TestResults/phase7-analysis-functional-20261023-f1",
+  "branch": "feature/phase7-production-analysis",
+  "start_head": "8978cb41ca5c4a8692fd225929bd34932e69a260",
+  "qualified_source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+  "underlying_implementation": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+  "main": "fbe4bdff0cba9fea72b42fb6a05714327f880df4",
+  "artifact_id": "P249R2-fe8daae0264348579db73d3402254215",
+  "exe_sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+  "production_changes": 0,
+  "unity_input_transformations": 0,
+  "unity_operations": 0,
+  "debugger_operations": 0,
+  "native_checklist": {
+    "passed": 28,
+    "demonstrated_functional_failures": 0,
+    "not_directly_native": 3,
+    "not_nunit_totals": true,
+    "checks": [
+      {
+        "case": "empty_history",
+        "result": "passed native observation",
+        "screenshot": "02-analysis-empty.png",
+        "sha256": "b2b42ef636a21512c8e19d451664d93d2e760438bbcfcfb8c7b558b3f3625bc0"
+      },
+      {
+        "case": "compact_desktop_entry",
+        "result": "passed native observation",
+        "screenshot": "01-dungeon-empty.png",
+        "sha256": "b8c11a3e3d8cb18d99662f691940b6a48b8c248bbc9ff49daa7137836652eba1"
+      },
+      {
+        "case": "compact_portrait_entry",
+        "result": "passed native observation",
+        "screenshot": "26-partial-portrait-compact-entry.png",
+        "sha256": "ef502d7aadfa407fc9dcc90e3a84c9a094501be11bebe7c774e4c510eabd4ecd"
+      },
+      {
+        "case": "valid_continue",
+        "result": "passed native observation",
+        "screenshot": "05-continue-retains-draft.png",
+        "sha256": "6b59bab379b17090ce11419b99b669050f7f120fbaf2969620c50af51d441ecc"
+      },
+      {
+        "case": "valid_discard",
+        "result": "passed native observation",
+        "screenshot": "07-discard-restores-dungeon.png",
+        "sha256": "fae629f875d2fc6686968bc15a0e5738386dda1ab9092f14488ace93d2d5e47d"
+      },
+      {
+        "case": "valid_save",
+        "result": "passed native observation",
+        "screenshot": "09-save-restores-normal-controls.png",
+        "sha256": "80ebc87b80c26858e874d8cefe7865bc16d49c337fd05ba2af53a4fd4d290a93"
+      },
+      {
+        "case": "invalid_continue",
+        "result": "passed native observation",
+        "screenshot": "12-invalid-continue-preserved.png",
+        "sha256": "9d8d9f2cb4a7d560fa605c0bfbd9f9cb1007c4ae690c9174a51f80003a32a889"
+      },
+      {
+        "case": "invalid_discard",
+        "result": "passed native observation",
+        "screenshot": "17-analysis-portrait-large-top.png",
+        "sha256": "c38a246b9a0db707821e995ecdb30c378fd78db3c1a9e579d65f2896eb488076"
+      },
+      {
+        "case": "invalid_save_unavailable",
+        "result": "passed native observation",
+        "screenshot": "11-invalid-two-choice-dialog.png",
+        "sha256": "153bceb63233c3d8b9b128c3237b61a4f186fe2effc21dfd0a58026e3045848a"
+      },
+      {
+        "case": "draft_recovery",
+        "result": "passed native observation",
+        "screenshot": "13-portrait-recovery-dialog.png",
+        "sha256": "6652215f47d0221504efa0dd2da79dfadc97cee15b62676c7fbdb86664c51336"
+      },
+      {
+        "case": "stale_recovery",
+        "result": "passed native observation",
+        "screenshot": "30-stale-recovery-reason.png",
+        "sha256": "943fc21cae13abf14405fb90e4b338cc8bdc16d50d6792721f819a0ff0b39715"
+      },
+      {
+        "case": "failed_discard",
+        "result": "passed native observation",
+        "screenshot": "31-busy-draft-discard-failed.png",
+        "sha256": "b15456762d58e0caf3b8ef19b2f63814596aaedd88afea0a19fdbd6f5133b621"
+      },
+      {
+        "case": "discard_retry",
+        "result": "passed native observation",
+        "screenshot": "32-retry-discard-restores-normal-controls.png",
+        "sha256": "5196fc076daaf1ac842a0037370a7d7a5ca7a395929de6746fc3b88171575b10"
+      },
+      {
+        "case": "partial_coverage",
+        "result": "passed native observation",
+        "screenshot": "27-partial-history-default-coverage.png",
+        "sha256": "99f47b66d721692d6fc5146d976543016b9c7e744e1394bced01016c20ea18de"
+      },
+      {
+        "case": "causal_availability",
+        "result": "passed native observation",
+        "screenshot": "28-partial-history-default-end.png",
+        "sha256": "cfccbd6aa645e1bb92f9a00166b5e2ce77b5952aebf9902f326bdbecc5c1f04c"
+      },
+      {
+        "case": "analysis_foreground_continuity",
+        "result": "passed native observation",
+        "screenshot": "21-analysis-live-progress-four-runs.png",
+        "sha256": "a8db0c6b69191e34733e7d2da9485a6fb20024d028883de8dec35560597da682"
+      },
+      {
+        "case": "compatible_replay",
+        "result": "passed native observation",
+        "screenshot": "23-compatible-replay-large.png",
+        "sha256": "a8a87f18ce29b68ff46f1d7d642a6b0b155b74856fbee08758cd80ce4956b52b"
+      },
+      {
+        "case": "analysis_closes_replay",
+        "result": "passed native observation",
+        "screenshot": "24-analysis-covers-dungeon-controls.png",
+        "sha256": "0c49e7df00072b2f29620c7ff22c7971b3bf0b0b9c8c957727d3bbb95890e4ae"
+      },
+      {
+        "case": "covered_controls",
+        "result": "passed native observation",
+        "screenshot": "24-analysis-covers-dungeon-controls.png",
+        "sha256": "0c49e7df00072b2f29620c7ff22c7971b3bf0b0b9c8c957727d3bbb95890e4ae"
+      },
+      {
+        "case": "return_restores_header",
+        "result": "passed native observation",
+        "screenshot": "25-replay-closed-normal-header.png",
+        "sha256": "7d1b2dbdc5d4a934177e4c04d8544ff00bc496a5718dc3aabbc58df70c525fed"
+      },
+      {
+        "case": "portrait_default",
+        "result": "passed native observation",
+        "screenshot": "15-invalid-portrait-default-dialog.png",
+        "sha256": "599136751f97379a906d468bf381c9069343a29b95519c4ac7a515d1917908ad"
+      },
+      {
+        "case": "portrait_large",
+        "result": "passed native observation",
+        "screenshot": "16-invalid-portrait-large-dialog.png",
+        "sha256": "594123be2a512ebef8996029893df484f7b6595c69923b81da72c91651981ab4"
+      },
+      {
+        "case": "desktop_large",
+        "result": "passed native observation",
+        "screenshot": "22-populated-analysis-large-landscape.png",
+        "sha256": "1593c9b0a2bff0452ed4e67251afae4c4cb7c4df195c6832e97090e632e45e3d"
+      },
+      {
+        "case": "phone_landscape_default",
+        "result": "passed native observation",
+        "screenshot": "35-phone-landscape-default-report.png",
+        "sha256": "8ae8dcca8a743d702c6fc8cce9eb006a77dadce6fdb3bfc566b77845eb4d8bd0"
+      },
+      {
+        "case": "phone_landscape_large",
+        "result": "passed native observation",
+        "screenshot": "36-phone-landscape-large-end.png",
+        "sha256": "56272bafa925bd8e0a7d44c6f01d16a903e03a15e746f97ff2f982b9de247a5f"
+      },
+      {
+        "case": "scroll_guidance",
+        "result": "passed native observation",
+        "screenshot": "18-analysis-portrait-large-end.png",
+        "sha256": "bf4bb24c72700f05ceb0b4253eeec14e8bd490c073df05dcdbc82d756552bd05"
+      },
+      {
+        "case": "committed_save_reopen",
+        "result": "passed native observation",
+        "screenshot": "19-forced-exit-reopen-committed-state.png",
+        "sha256": "49e40cc2cf62de67d6eeeaa722bdb8bbc1e6ef8c3e0fee175f5c305d65af5540"
+      },
+      {
+        "case": "retained_save_reopen",
+        "result": "passed native observation",
+        "screenshot": "34-retained-reopen-phone-landscape.png",
+        "sha256": "63641b09f38a26b54a08d706b0b4f9a4af67f7a3addd2fd14225dce37d8a095c"
+      }
+    ],
+    "coverage_limits": [
+      {
+        "case": "transient pending Save unavailable",
+        "result": "not directly observed natively",
+        "coverage": "Passing qualified scene tests; unchanged controller flushes next frame"
+      },
+      {
+        "case": "in-session stale navigation Save unavailable",
+        "result": "not directly observed natively",
+        "coverage": "Passing qualified scene tests; native stale recovery was a separate case"
+      },
+      {
+        "case": "authoritative Save rejection",
+        "result": "not directly observed natively",
+        "coverage": "Passing qualified scene tests; native failed Discard/retry was a separate case"
+      }
+    ]
+  },
+  "process_results": {
+    "total": 7,
+    "normal_exits": 3,
+    "failed_graceful_exits": 4,
+    "sessions": [
+      {
+        "session": "01-empty-drafts",
+        "pid": 52424,
+        "created_filetime": 134372544949021135,
+        "exit": {
+          "utc": "2026-10-23T18:46:24.722138+00:00",
+          "normal": true,
+          "forced": false,
+          "error": null,
+          "exit_code": 0,
+          "launch_handle_state": {
+            "wait": 0,
+            "exit_code": 0,
+            "exited": true
+          },
+          "independent_handle_state": {
+            "wait": 0,
+            "exit_code": 0,
+            "exited": true
+          },
+          "wall_seconds": 289.40600000001723,
+          "appquit_seen": false,
+          "surviving_children": null
+        },
+        "actual_client_rects": [
+          [
+            1280,
+            720
+          ]
+        ],
+        "fixture_sha256": "c58510814147e51e732c2ebb3215b7dd37d1b9e642037df564b2a1722553b778",
+        "log_sha256": "7073948ce569632d4a10afc65c7365662bc945897e62c77f4215d0c7b49e4080",
+        "launch_record_sha256": "062b9d49bab035227a056616f6ecdcb9ba5c9b6fc14846a946e7a47b90978a8d",
+        "observation_sha256": "b1af325cab9a868a29feb0213dfdd6da5ceabd66281ad1589fe2d4760a725ca6",
+        "boot_saves": 1,
+        "appquit_lines": [
+          "[2026-10-23 18:46:23 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+        ],
+        "namespace_restored": true
+      },
+      {
+        "session": "02-draft-reopen-portrait",
+        "pid": 30712,
+        "created_filetime": 134372548473784470,
+        "exit": {
+          "utc": "2026-10-23T18:49:29.607532+00:00",
+          "normal": false,
+          "forced": true,
+          "error": null,
+          "exit_code": 3796434945,
+          "launch_handle_state": {
+            "wait": 0,
+            "exit_code": 3796434945,
+            "exited": true
+          },
+          "independent_handle_state": {
+            "wait": 0,
+            "exit_code": 3796434945,
+            "exited": true
+          },
+          "wall_seconds": 121.84400000004098,
+          "appquit_seen": true,
+          "surviving_children": null
+        },
+        "actual_client_rects": [
+          [
+            360,
+            640
+          ]
+        ],
+        "fixture_sha256": "3b2a9146efba95d433e52ae6c47ac4e7eef8e3f640a1f0a7749cd1457f8c00ba",
+        "log_sha256": "8ad3594b65abcac72ad515d9d83b66781b5c17e7e78a33845a0815fcfdee35ae",
+        "launch_record_sha256": "d184fa9659b0814077f62991f21ff03c457507af8e62e5e81687da1540009d44",
+        "observation_sha256": "c78c3a9e2fea77e41a16f470aa7c8e604b732112fe9a917141a141722499787e",
+        "boot_saves": 1,
+        "appquit_lines": [
+          "[2026-10-23 18:48:58 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+        ],
+        "namespace_restored": true
+      },
+      {
+        "session": "03-verified-forced-reopen",
+        "pid": 7228,
+        "created_filetime": 134372550173438295,
+        "exit": {
+          "utc": "2026-10-23T18:52:05.473225+00:00",
+          "normal": true,
+          "forced": false,
+          "error": null,
+          "exit_code": 0,
+          "launch_handle_state": {
+            "wait": 0,
+            "exit_code": 0,
+            "exited": true
+          },
+          "independent_handle_state": {
+            "wait": 0,
+            "exit_code": 0,
+            "exited": true
+          },
+          "wall_seconds": 107.76500000001397,
+          "appquit_seen": true,
+          "surviving_children": null
+        },
+        "actual_client_rects": [
+          [
+            1280,
+            720
+          ]
+        ],
+        "fixture_sha256": "e2de2e39b45e6f76d1dab14125cc0bc7416c8f9f268b4fd6dcebcb6228142807",
+        "log_sha256": "1c6b2205596400b6ba43e48b0ad345a02ee05d46d17c8f53af62e767dced6f69",
+        "launch_record_sha256": "04b2f23b8ae239718d9eaae20ae026e2d67260e76ee1205dd478129d8fae647d",
+        "observation_sha256": "33078e317b8f6095c4113cfb224883008fcb689e92a6171079014c0ec1134c7e",
+        "boot_saves": 1,
+        "appquit_lines": [
+          "[2026-10-23 18:52:03 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+        ],
+        "namespace_restored": true
+      },
+      {
+        "session": "04-live-history",
+        "pid": 50548,
+        "created_filetime": 134372553096913511,
+        "exit": {
+          "utc": "2026-10-23T18:59:58.372179+00:00",
+          "normal": false,
+          "forced": true,
+          "error": null,
+          "exit_code": 3796434945,
+          "launch_handle_state": {
+            "wait": 0,
+            "exit_code": 3796434945,
+            "exited": true
+          },
+          "independent_handle_state": {
+            "wait": 0,
+            "exit_code": 3796434945,
+            "exited": true
+          },
+          "wall_seconds": 288.31300000002375,
+          "appquit_seen": true,
+          "surviving_children": null
+        },
+        "actual_client_rects": [
+          [
+            1280,
+            720
+          ]
+        ],
+        "fixture_sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+        "log_sha256": "5e118612837725e5f7808fe890297aee0143fda70447f8dd5bf8c5ab1e1ac776",
+        "launch_record_sha256": "53f997fe08d610825168de2486965c0bd4c672cc693a9679bdcea55aafe4f5bd",
+        "observation_sha256": "c10ce18b840ca58140962d3d77771bee767bfda7ddc41053e8eb829319918f59",
+        "boot_saves": 1,
+        "appquit_lines": [
+          "[2026-10-23 18:59:27 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+        ],
+        "namespace_restored": true
+      },
+      {
+        "session": "05-partial-history",
+        "pid": 54788,
+        "created_filetime": 134372556751159906,
+        "exit": {
+          "utc": "2026-10-23T19:03:01.181592+00:00",
+          "normal": true,
+          "forced": false,
+          "error": null,
+          "exit_code": 0,
+          "launch_handle_state": {
+            "wait": 0,
+            "exit_code": 0,
+            "exited": true
+          },
+          "independent_handle_state": {
+            "wait": 0,
+            "exit_code": 0,
+            "exited": true
+          },
+          "wall_seconds": 105.68699999997625,
+          "appquit_seen": true,
+          "surviving_children": null
+        },
+        "actual_client_rects": [
+          [
+            360,
+            640
+          ]
+        ],
+        "fixture_sha256": "55af433ce343f7ebc9ba3a4eca333119979a591ca81f44bdfbf223744486526d",
+        "log_sha256": "c6d4be5cd0b463f26d8788fa17edde4818b898d6f99e71db64072381dfb7f30a",
+        "launch_record_sha256": "67555e2d2d35eb1698056fb81ad856112076215f8205da37a7cf5ad90604dab2",
+        "observation_sha256": "2eb41143bc4bc11cfae6c2cf8350f50bbb5115a634ec5a1dd63d3051b3464d43",
+        "boot_saves": 1,
+        "appquit_lines": [
+          "[2026-10-23 19:02:59 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+        ],
+        "namespace_restored": true
+      },
+      {
+        "session": "06-stale-and-partial-reopen",
+        "pid": 14496,
+        "created_filetime": 134372558302303252,
+        "exit": {
+          "utc": "2026-10-23T19:09:34.948324+00:00",
+          "normal": false,
+          "forced": true,
+          "error": null,
+          "exit_code": 3796434945,
+          "launch_handle_state": {
+            "wait": 0,
+            "exit_code": 3796434945,
+            "exited": true
+          },
+          "independent_handle_state": {
+            "wait": 0,
+            "exit_code": 3796434945,
+            "exited": true
+          },
+          "wall_seconds": 344.3279999999795,
+          "appquit_seen": true,
+          "surviving_children": null
+        },
+        "actual_client_rects": [
+          [
+            1280,
+            720
+          ]
+        ],
+        "fixture_sha256": "61423ea08af5a911ab5babaf33fe233e835927d1b8e07d4c5a18028d1f6d9a62",
+        "log_sha256": "b1e477a3429f6fe1262ae0494f7611c4d9cfc4b6730fc574956a6610ec585c44",
+        "launch_record_sha256": "85f214467b53b1cf8dd7a614d665de84e473ea639c4478916a43eee65d85238c",
+        "observation_sha256": "8ab9e918d21f332e2de1b1ec1f524d481e09dad80333e090994866712b7a3d8f",
+        "boot_saves": 1,
+        "appquit_lines": [
+          "[2026-10-23 19:09:03 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+        ],
+        "namespace_restored": true
+      },
+      {
+        "session": "07-retained-reopen-landscape",
+        "pid": 11660,
+        "created_filetime": 134372562120245133,
+        "exit": {
+          "utc": "2026-10-23T19:12:30.311924+00:00",
+          "normal": false,
+          "forced": true,
+          "error": null,
+          "exit_code": 3796434945,
+          "launch_handle_state": {
+            "wait": 0,
+            "exit_code": 3796434945,
+            "exited": true
+          },
+          "independent_handle_state": {
+            "wait": 0,
+            "exit_code": 3796434945,
+            "exited": true
+          },
+          "wall_seconds": 137.9220000000205,
+          "appquit_seen": true,
+          "surviving_children": null
+        },
+        "actual_client_rects": [
+          [
+            640,
+            360
+          ]
+        ],
+        "fixture_sha256": "d42e298c7ececce4abcb4abe970780ffc9f03dffad862dc6c984e7192dcee932",
+        "log_sha256": "1a1540968d0e9790ab73cbc400b6edbd8ec4ac8b6f6dd4fc96b8775b7d4a102f",
+        "launch_record_sha256": "be5c1c9d4e414d2fa3f4d857e0e41bb3315d1f8d7fc45e820c620b09d382ccfd",
+        "observation_sha256": "d30d0db7dc9cbb24861efa31bd490fb28633675adb36b4390a3843dbc5a93ce0",
+        "boot_saves": 1,
+        "appquit_lines": [
+          "[2026-10-23 19:11:59 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+        ],
+        "namespace_restored": true
+      }
+    ]
+  },
+  "lifecycle_disposition": {
+    "owner_reported_preexisting": true,
+    "historical_baseline_smoke_evidence": true,
+    "identical_root_cause_proven": false,
+    "graceful_shutdown_gate": "not passed",
+    "new_root_cause_investigation": false,
+    "matching_issue_found": false,
+    "search_terms": [
+      "shutdown",
+      "hang",
+      "quit"
+    ],
+    "recommended_separate_issue": "Windows player remains alive after AppQuit and window close"
+  },
+  "save_reopen": [
+    {
+      "before": "02-draft-reopen-portrait",
+      "after": "03-verified-forced-reopen",
+      "spatial_exact": true,
+      "retained_records_before": 0,
+      "retained_records_after": 0,
+      "identical_overlap": 0,
+      "duplicate_run_ids": 0,
+      "draft_sidecars_remaining": 0,
+      "next_sequence_monotonic": true,
+      "allowed_progression": "Normal foreground scheduler, party lifecycle, loot/economy and clock fields; no historical record mutation"
+    },
+    {
+      "before": "05-partial-history",
+      "after": "06-stale-and-partial-reopen",
+      "spatial_exact": true,
+      "retained_records_before": 4,
+      "retained_records_after": 8,
+      "identical_overlap": 4,
+      "duplicate_run_ids": 0,
+      "draft_sidecars_remaining": 0,
+      "next_sequence_monotonic": true,
+      "allowed_progression": "Normal foreground scheduler, party lifecycle, loot/economy and clock fields; no historical record mutation"
+    },
+    {
+      "before": "04-live-history",
+      "after": "07-retained-reopen-landscape",
+      "spatial_exact": true,
+      "retained_records_before": 7,
+      "retained_records_after": 9,
+      "identical_overlap": 7,
+      "duplicate_run_ids": 0,
+      "next_sequence_monotonic": true,
+      "expected_progression": "Only legitimate automatic parties, settlements, economy and lifecycle fields; all old retained records remain byte-equivalent as parsed objects"
+    }
+  ],
+  "preservation": {
+    "utc": "2026-10-23T19:19:23.325697+00:00",
+    "protected_files": 29302,
+    "differences": [],
+    "unity_inputs": 1418,
+    "unity_input_differences": [],
+    "sealed_build_files": 303,
+    "sealed_build_unchanged": true,
+    "disposable_projects": [
+      {
+        "project": "ui-composition-analysis-p249r2-edit",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-focused",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-native",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-nativefs",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-play",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      }
+    ]
+  },
+  "post_launcher_product_recheck": {
+    "original_files": 47,
+    "hashes_unchanged": true
+  },
+  "sdk_closeout": {
+    "original_differences": 10,
+    "new_files": 4,
+    "archived": true,
+    "originals_restored": true,
+    "original_owner_save_recovery_corrective_restorations": 0
+  },
+  "owner_package": {
+    "directory": "C:\\Dev\\Dungeon-Lord\\Temp\\pr249-analysis-owner-f1",
+    "desktop_shortcut": "PR249 Analysis UAT",
+    "shortcut_sha256": "7e6c21999c39f805a11d3b8d93ea12487071de1cbfea077031dc21f01bbc5f89",
+    "manifest_sha256": "fbb42736f17f76645cdfbaf054ab320ae05bb9b1cfc7fb0de599f96f653c4c16",
+    "launcher_sha256": "d8466808b26330ddce813bbdfaa63083b39656d9b27bcf4c5c277fc8794a00f6",
+    "mirrored_build_files": 303,
+    "scenarios": [
+      "Main dungeon",
+      "Funded editing / empty history",
+      "Partial historical summaries",
+      "Recover an invalid draft",
+      "Stale draft safety"
+    ],
+    "package_selfcheck": {
+      "passed": true,
+      "unchanged_build_files": 303,
+      "fixtures": 5,
+      "lease_restoration": true,
+      "generated_outputs_retained": true,
+      "unrelated_owner_sentinel_unchanged": true,
+      "two_handle_child_exit_code": 23,
+      "no_game_launched": true
+    },
+    "visual_launcher_smoke_passed": true,
+    "owner_game_sessions_started": 0,
+    "owner_uat_passed": false,
+    "readiness": "Prepared; independent review must confirm documented native coverage disposition before owner handoff",
+    "package_identity_sha256": "c54380e90c5561d85e9ed40439ab548fd4b11f9ee6686b4f296ee5271e5164cb"
+  },
+  "retained_automated_results": {
+    "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+    "editmode": {
+      "passed": 2352,
+      "failed": 0,
+      "skipped": 1
+    },
+    "playmode": {
+      "passed": 3741,
+      "failed": 0,
+      "skipped": 10
+    },
+    "filesystem": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "editor_profiles": {
+      "methods": 3,
+      "runs_each": 68
+    },
+    "rerun": false
+  },
+  "remaining": [
+    "Independent review of three exact native coverage limits and lifecycle disposition",
+    "Physical owner Moonlight acceptance",
+    "Final merge approval; PR stays draft/unmerged"
+  ],
+  "recommendation": "Technical qualification complete, pending independent review of remaining native coverage and owner Moonlight acceptance.",
+  "packet": {
+    "path": "functional-qualification-reports.zip",
+    "sha256": "8313019aa33a72a769a3b6ad157de4dd006c450a17f13223a441881c3cd36562",
+    "entries": 59
+  }
+}
