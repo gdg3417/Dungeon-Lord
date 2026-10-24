@@ -1,0 +1,1002 @@
+{
+  "baseline": "e7667c4e57b7b1c9cfcf04ecea0084be37ac5f9c",
+  "testedSource": "231e0f549240d4e37257304950059878ae0734e0",
+  "sourceApplicability": {
+    "sourceCommit": "231e0f549240d4e37257304950059878ae0734e0",
+    "baseline": "e7667c4e57b7b1c9cfcf04ecea0084be37ac5f9c",
+    "changedSource": [
+      {
+        "path": "Assets/_Project/Editor/DungeonSpatial/Tests/ForegroundPerformanceDiagnosticSceneTests.cs",
+        "workingFileSha256": "d8ff4e510c8ab2754183f51950427e69c8ceb19fa3c73fa054828d8dda7defd2",
+        "gitBlob": "463931d863e22a15a4e66fa2f5a6e09ee3f11b5a"
+      },
+      {
+        "path": "Assets/_Project/Editor/DungeonSpatial/Tests/ForegroundPerformanceDiagnosticSceneTests.cs.meta",
+        "workingFileSha256": "fb140a0224d2ea03af5125a7d4d1ee55e3f9c870a7b3943e5497d2acdc0a04fa",
+        "gitBlob": "2112e75bd92f0645e32b954991518b595cbc37dd"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Core/ForegroundQualificationMetrics.cs",
+        "workingFileSha256": "ec69b340192ca054ab60457034b4fd7ec31735013faefb6299b1d77916f3113b",
+        "gitBlob": "15f84aec0fd47a97609fdd3b0d41e2c58496620b"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalSaveSession.cs",
+        "workingFileSha256": "28e2e649b7e1fbfa4206cc6beba84c78eeaa9b959d170a92cd865f57a174af14",
+        "gitBlob": "1a000cd906e819b494c80e656caba56b76269f5e"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalWriteAuthority.cs",
+        "workingFileSha256": "fdcc0d2bffdcaddbaee802ece46c56bc6c8d709bc0bee3294cb9ffa28c38299b",
+        "gitBlob": "a0045fdf93b1e62b5387c94ea215ce5aca3f9eec"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCompleteSaveContract.cs",
+        "workingFileSha256": "a3f4b642ec2ddefd55e1a6022fee699fbba8e64ea29fb944900c0d2e1f7bd3b5",
+        "gitBlob": "35f6a92009479b2b852b8bad6720a2acd177ae7a"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/ExactCompleteSaveAtomicPersistence.cs",
+        "workingFileSha256": "a431050e787cac631c4dcca67353be2673245ff46205ad2216ea4268bc957701",
+        "gitBlob": "2ce595c576bf8a92256df504b5a4c16f5e2d3e77"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonContracts.cs",
+        "workingFileSha256": "7de4a81cb9e47fe6d12baa8439c82719bd898638768f74157292539b4bb1308e",
+        "gitBlob": "5770b21e419091052f04795089632a02bc6f20b1"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonForeground.cs",
+        "workingFileSha256": "1dc3fec098800f29d7f62350a6ec33443d47e041b6926665c6b9bcfafdb4bcc3",
+        "gitBlob": "3afc6575a5925cd3ab118820eb26f299a9b042a7"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonForegroundLineage.cs",
+        "workingFileSha256": "90404d09a9d51239a1fbd33f0047f1b8b00ed194d75d0743e41d4b40db5485e2",
+        "gitBlob": "193cbd321b2a981c7eef500bea66d3f2c5a1c03e"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonLifetimeAssurance.cs",
+        "workingFileSha256": "999187e943096c771640c15e0940b93766f12940c15eb9ad18f53432e91a6aa0",
+        "gitBlob": "ef6df2f4148dadf099ba3adc89ad68f644420cf6"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatCheckpointCodec.cs",
+        "workingFileSha256": "3e1072bca0a7058949945340966b04e6c11f285251e1f9d89163027438f9b77a",
+        "gitBlob": "62d240fe88b2eb270b7d3e2f43e536ff571037c8"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatStartCapture.cs",
+        "workingFileSha256": "bfdde0df878d69ef399957d82a011d32eb922aa0a25e2350313e1f396d3cd1af",
+        "gitBlob": "eb18baa969d95af49aa8be0b6c1af1f742d5eed1"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/RunCheckpoint.cs",
+        "workingFileSha256": "fb602bf8685f1d430b348214f4d478ae8652ceabbae25a05f8afc3a3e63a193c",
+        "gitBlob": "429609bf13dd3180ab8916be0218afb005e1970e"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Gameplay/RunSimulation/TransferCheckpointCodec.cs",
+        "workingFileSha256": "f38c8a8f7481aa929a6a6d4e47c9ec6f248d9ed85abef45662ff2c1f01355cb1",
+        "gitBlob": "031fd705623a9203db90cafc61a4be48056ec78f"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Services/SaveService.Foreground.cs",
+        "workingFileSha256": "23b70c9fc77fac35c780242a120f25732b8b7ad59c90db739e1278e320821485",
+        "gitBlob": "c3e3ef4c66d9539e120381b53683d1ded02d3dec"
+      },
+      {
+        "path": "Assets/_Project/Tests/EditMode/ForegroundPerformanceInstrumentationTests.cs",
+        "workingFileSha256": "0b490a4f5f94d76d61678ad4eebc32874e06275b2217e13e1e50938b678fd0b0",
+        "gitBlob": "891f0a03d5954b9f124d6a02011d1b9dff15da5b"
+      },
+      {
+        "path": "Assets/_Project/Tests/EditMode/ForegroundPerformanceInstrumentationTests.cs.meta",
+        "workingFileSha256": "13cc03cf8f2a5d9545887ba51b09b769fafb9e6db7ccbaa82c20b8703ad46b16",
+        "gitBlob": "c0fe549b78e29371508dc5495456071274224ff9"
+      }
+    ],
+    "inputs": [
+      {
+        "path": "ProjectSettings/ProjectVersion.txt",
+        "sha256": "e73efc41b94f6a8523e3bab8da46ec57a26a6eb7bed9a8c7f4be890d04bc6f6f"
+      },
+      {
+        "path": "Packages/manifest.json",
+        "sha256": "2f588f98c98748f66bf2ce1904fc53c8cde092b7f77356d22dd5427abe1c4b8f"
+      },
+      {
+        "path": "Packages/packages-lock.json",
+        "sha256": "6631ee6b5b91852643e7626bfb0ca499a88e7fe4264914776bff02a39a8b1386"
+      },
+      {
+        "path": "Assets/_Project/Resources/save_spatial_migration_limits_schema13.json",
+        "sha256": "e3ba04771aea8955afec08f52f67b7b5f124aec46d2803802d66208435c750ea"
+      },
+      {
+        "path": "Assets/_Project/Data/Bootstrap/run_simulation_config.json",
+        "sha256": "f07657572530df1955ae904c66a76feeb71ca7ae8a6e8382c25bb8b7a1cf4e16"
+      },
+      {
+        "path": "Tools/Presentation/Fixtures/historical-b1-format1.json",
+        "sha256": "ba684d789be830114a08ecb8073d9a379d0b142d711c285006068d4a585b1567"
+      },
+      {
+        "path": "Tools/Presentation/Fixtures/historical-c2-format2.json",
+        "sha256": "94a06bd66997c4f518859151ff3f4725e8231fc2bdb306f810dc051a9168119d"
+      },
+      {
+        "path": "Assets/_Project/Tests/EditMode/LivingDungeonTwoFloorTests.cs",
+        "sha256": "d6532adc4a78a1fc98c81bd93a18f83a3589750c77b7194c31609a1f3a66a15a"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json",
+        "sha256": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json",
+        "sha256": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json",
+        "sha256": "8248d3037e24bd50f5a2df1f64292e6fa4f857949e5f4fcb37091a478f55443a"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json",
+        "sha256": "37ece030181bb51ff887a75aa41a2293bdece9eed8d292ef6ec40e48beef3262"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json",
+        "sha256": "9d279717c15b9a1397d86261b8fd95df835cb2688ffa35b20e3c5d2773fa47c1"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/all_research_nodes.json",
+        "sha256": "56232db70606b0ec9ad358112fd9ec69cd8c4ba9a0277e19cd76e77542124291"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/cost_profiles.json",
+        "sha256": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/lint_rules.json",
+        "sha256": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/migration_map.json",
+        "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/research_nodes.json",
+        "sha256": "4d2277f1965d94a910cb40b0191ef1d48cd688106aecf2d1bf8eea2479c1b038"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/tables.json",
+        "sha256": "b1205a2f9c1169e91ee0d57d49afcb3cb2fc78c527b002c3e31d8bca85c41f00"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/cost_profiles.json",
+        "sha256": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/lint_rules.json",
+        "sha256": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/migration_map.json",
+        "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/research_nodes.json",
+        "sha256": "4c89c5ca09a5778826929f85e4dc3039aaec0957842110b97842b383b148174e"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json",
+        "sha256": "6b83faeff4a1180a86bf2c6b109110888022baad720311fd02808a0c2fc62870"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/cost_profiles.json",
+        "sha256": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/lint_rules.json",
+        "sha256": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/migration_map.json",
+        "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/research_nodes.json",
+        "sha256": "fb3a4bdcf0b57cd7695cb03ac6896c4ada71300d9f49a7e369c3fbbb633027b0"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/tables.json",
+        "sha256": "a301687c2c0f863cb731e3edfbde6a8f62fbc11ce860d80aff9a3283cd534519"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/cost_profiles.json",
+        "sha256": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/lint_rules.json",
+        "sha256": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/migration_map.json",
+        "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/research_nodes.json",
+        "sha256": "b29068659ccbc92951154ad47996d0d89cb63a0d9e53314f6991fce72961013d"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/tables.json",
+        "sha256": "097fd12a8c777e87c47314e30612c6efa25ec90b64e049dcaec6d05ae671768d"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/manifest.json",
+        "sha256": "cbb1b1825ddad3c6344d34130433cbab9144b08e9bd9dd704850826698da642b"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/cost_profiles.json",
+        "sha256": "380fa552588e508f3120fdeec96a0ae2c40583c4b470c05422003cc34160d594"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/lint_rules.json",
+        "sha256": "89e24e75a042bdebb241854159b8e81723b0901831fe130b6678a25365a93cad"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/migration_map.json",
+        "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/research_nodes.json",
+        "sha256": "eb9dd8b3a9900e90852ce3dd843d210f368b0236dab5e873c4a520eec07d7144"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/tables.json",
+        "sha256": "774579042d82819619e6d649e305d2ef9c95dffc1e620f79bb74bd87299a3c6c"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/schemas.json",
+        "sha256": "3c79a38ee5cab3177234621c0c51ef1e5b8e6838764ea1051cef6bad79ec9496"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/cost_profiles.json",
+        "sha256": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/lint_rules.json",
+        "sha256": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/migration_map.json",
+        "sha256": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/research_nodes.json",
+        "sha256": "c1d97843a98e4df969706a7e91d2ef82a5d09f43fc0b7da9a11908a9fa10cae4"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/tables.json",
+        "sha256": "5d5f7b119d8663fc65decc8dd433892921b2a967ffdd67da2b81f7bcc0d8db5e"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Save/living_dungeon_qualification_profile.json",
+        "sha256": "7a424f236b9af83cae4eb553a20a1506af7f8f6bc63d744cdbc0a203419242fb"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Save/room_content_position_migration_profiles.json",
+        "sha256": "599db0c16f1b3414bb4d887ef953d2c8cb1acba03dbab68a60fd65a83e1468f1"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json",
+        "sha256": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Save/save_spatial_migration_limits.json",
+        "sha256": "aa162762f7c437ca58f8a4f8f4cccb22e6868801269dc6f04dd3d241482a9782"
+      },
+      {
+        "path": "Assets/_Project/Data/Production/Save/structural_content_removal_policy.json",
+        "sha256": "5edad7716383b9d2689263556e4e071903d09e001fcae99c130b2d23b7a6d64a"
+      },
+      {
+        "path": "Assets/_Project/Resources/content_acquisition_economy.json",
+        "sha256": "2761a84ccc358cdb053c6cba6631e86900fd158b51fc91885b33d4bb7ac9c39f"
+      },
+      {
+        "path": "Assets/_Project/Resources/floor_construction_profiles.json",
+        "sha256": "a890300afe306035a43fbbc60e10f94f7ba6b1f8f9b018ce5d513a3a522f0117"
+      },
+      {
+        "path": "Assets/_Project/Resources/living_dungeon_foreground.json",
+        "sha256": "7edc60a6c06d4ce29678b5818a348b8bfc3fb78aff3f6367744eaa3a06c957f6"
+      },
+      {
+        "path": "Assets/_Project/Resources/living_dungeon_foreground_v2.json",
+        "sha256": "696b80459259d590145f9a312e288b003f26d589d5fe53e3d46e9ac73b88ef79"
+      },
+      {
+        "path": "Assets/_Project/Resources/monster_recovery.json",
+        "sha256": "5d82724b0673c3ef1a2053b47c9282489857b67e5f4767910c8a5d6b9157c892"
+      },
+      {
+        "path": "Assets/_Project/Resources/passive_online_mana.json",
+        "sha256": "2848ccfa6ffde744ade883edb0171bfbe993bbee5c32758a70d8ee4b690e6639"
+      },
+      {
+        "path": "Assets/_Project/Resources/save_spatial_migration_limits_schema14.json",
+        "sha256": "f535a0f7ba406916eb088dc499e58630e95eac340e88f18ce47227914bde642f"
+      },
+      {
+        "path": "Assets/_Project/Resources/structural_economy.json",
+        "sha256": "a285ddafcb4f430472f691fb4c25225a132feadaa6bc13feb74d430df33d2803"
+      },
+      {
+        "path": "Assets/_Project/Data/Bootstrap/build_config.json",
+        "sha256": "edf2b29d6ffa3f3cecfd03d1607acd4370742719d316cf2889e43c3e5ac26828"
+      },
+      {
+        "path": "Assets/_Project/Data/Bootstrap/content_bootstrap.json",
+        "sha256": "8a90c78da4e0941f4da7e02292de7df0e8cd53bc84ac3ab2c78d3014d9500b8f"
+      },
+      {
+        "path": "Assets/_Project/Data/Bootstrap/content_manifest.json",
+        "sha256": "757dc615bb2d9a418ba947536617aba629e5efcdbd5589d1ad771fedc79af4d3"
+      },
+      {
+        "path": "Assets/_Project/Data/Bootstrap/dev_commands.json",
+        "sha256": "bf1ce67cf81637fc09060d4d4ed575a848654cfe796d357ccf518ce372e1ff86"
+      },
+      {
+        "path": "Assets/_Project/Data/Bootstrap/heat_runtime.json",
+        "sha256": "94d5ce5af73bcb7cddc0e0f9a54bcc4de5f221b558b6562a1c6443ec423e04a9"
+      },
+      {
+        "path": "Assets/_Project/Data/Bootstrap/loot_config.json",
+        "sha256": "f0efb530aa6673c7cd12d2b2d5cbf87b4b93a49f77af6fd2af30e761d6ba327a"
+      },
+      {
+        "path": "Assets/_Project/Data/Bootstrap/schema_versions.json",
+        "sha256": "175ed4122c34284cea980fcde266eb4cc6d62454f810520e8fba6fb38d6e538a"
+      },
+      {
+        "path": "Assets/_Project/Data/Bootstrap/string_table_en.json",
+        "sha256": "6846ebbe880c9718847832816eff47da9e0192d3d1a3e7de0510846d2ca0f8ee"
+      },
+      {
+        "path": "Assets/_Project/Data/Bootstrap/structure_simulation_config.json",
+        "sha256": "21c3a64cdc9a9658711d1c3fea2dd609294c0cfceafdcbd83f20f96de10f7a45"
+      }
+    ],
+    "unityCliVersion": "1.0.0-beta.14",
+    "unityCliSha256": "78761a0547cd4a9bc212e27a217c66e6a621bf48c753ba440e4b2327ee7ff8ac",
+    "editorVersion": "6000.3.2f1",
+    "testIsolation": {
+      "productName": "Dungeon Lord Foreground Diagnostic 20261024 01",
+      "projectSettingsAtLaunchSha256": "64203272b2324a09e86580f521984362496ed46e57fd37a0508971a35b70809d",
+      "originalProjectSettingsSha256": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "canonicalFilesystem": "existing DeterministicFileSystem fixture; no OS canonical save writes",
+      "sourceOverrides": "only temporary productName; no source/fixture/package substitutions"
+    }
+  },
+  "finalValidation": {
+    "total": 55,
+    "passed": 55,
+    "failed": 0,
+    "skipped": 0,
+    "durationSeconds": 60.8987382,
+    "exitCode": 0,
+    "command": "& TestResults/foreground-validation-cost-20261024-01/focused-regression-final.ps1",
+    "exactFilter": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformance;DungeonBuilder.M0.Editor.Tests.PhaseFourSessions;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.AuthoredTimingAndFrozenEventIdentitiesRemainExplicit;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.BlockReleaseAndTransferReplayRetainSourceUntilCompletionWithoutCombatWork;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.LifetimeAssuranceUsesAuthenticExitOrDescentAndFitsAllPrefixes;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalGoldenRestoresAndReencodesExactPinnedBytes;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.InspectionReusePreservesOriginalFoldAndCheckpointAtEveryPrefix;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.SelfConsistentReleaseWithoutVacancyCannotPublishThroughSession;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EmptyProjectionAndStaleLineageCannotAuthorizeRelease;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.CompletedForgedReleaseCannotRetireItsBlockerOrBypassVacancyPermit;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EqualTimeOrdinaryTransferAndBlockedReleaseRespectSequenceAndRecoveryPhases;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.CorruptFormatThreeReturnsFailureWithoutThrowingOrPublishing;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.TerminalPrefixOnlyFitsAnUnclosedV2Boundary;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.UnprovenWaitingReleaseRollbackRequiresRecoveryWithoutPublishingEitherParty;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.WaitingReleaseIsEquivalentAcrossForegroundPartitionsAndReopen;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OneBoundaryPumpsAndReopenMatchTheSameAcceptedTwoPartyHorizon;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.ReopenOneUnitBeforeVacancyAndImmediatelyAfterReleasePreservesExactPrefixes;DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalV1DrainsOnceAndUpgradesWithoutEligibility;DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.SuccessfulWritePersistsExactCompleteBytesThenPublishesRuntime;DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RecognizedStateOnlySaveKeepsCanonicalAndUnknownEvidence;DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RecognizedStateSavePersistsExplicitNullableClearsAndReopensThemAsNull;DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.StaleSuppliedStateCannotOverrideSessionAuthority;DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.FailedStagingWriteLeavesDiskAndRuntimeUnpublished;DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.FailedReplaceOrDurabilityRestoresOldDiskAndPublishesNothing;DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RestoreFailureReturnsRecoveryRequiredNotOrdinaryAtomicFailure",
+    "tests": [
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.BlockedReleaseAndFailedPersistenceAreExactlyNeutral",
+        "result": "Passed",
+        "durationSeconds": 5.484635
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.DisabledResetBoundsAndExceptionNesting",
+        "result": "Passed",
+        "durationSeconds": 0.001739
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.EmptyScopeOverheadIsReportedWithoutASpeedupClaim",
+        "result": "Passed",
+        "durationSeconds": 0.001054
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.ForegroundBlockedTransferIsAttributedAndExactlyNeutral",
+        "result": "Passed",
+        "durationSeconds": 1.288791
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.HistoricalReadersAreExactlyNeutral(\"historical-b1-format1.json\")",
+        "result": "Passed",
+        "durationSeconds": 0.026715
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.HistoricalReadersAreExactlyNeutral(\"historical-c2-format2.json\")",
+        "result": "Passed",
+        "durationSeconds": 0.025237
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.NormalAdmissionEventAndSettlementAreExactlyNeutral",
+        "result": "Passed",
+        "durationSeconds": 3.851178
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.PostPublicationInspectionAttributesEveryPartyWithoutChangingBytes",
+        "result": "Passed",
+        "durationSeconds": 0.670547
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.RejectedSemanticReadbackPreservesTheExactPredecessorInBothModes",
+        "result": "Passed",
+        "durationSeconds": 0.390047
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.StalePredecessorIsExactlyNeutral",
+        "result": "Passed",
+        "durationSeconds": 0.382466
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnosticSceneTests.BoundedProductionAdmissionReportsAvailableCpuEvidence",
+        "result": "Passed",
+        "durationSeconds": 5.680724
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourSessions.AbsentLegacySpatialEvidenceRemainsAbsentDespiteInitializedRuntimeFields",
+        "result": "Passed",
+        "durationSeconds": 0.06264
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourSessions.Capture_InvalidNonWorkloadLimits_ReturnsCandidateInvalid",
+        "result": "Passed",
+        "durationSeconds": 0.002128
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourSessions.ClearedNullableRecognizedStateDoesNotRetainOrRevivePriorValue",
+        "result": "Passed",
+        "durationSeconds": 0.033317
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourSessions.CurrentRecognizedStateUpdatesWhileLegacySpatialEvidenceStaysFrozen",
+        "result": "Passed",
+        "durationSeconds": 0.0781
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourSessions.FrozenLegacyNullEvidenceRemainsNullDespiteRuntimeInitializers",
+        "result": "Passed",
+        "durationSeconds": 0.029688
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourSessions.InvalidAndWorkloadFailureDoNotCreateAnUpdate",
+        "result": "Passed",
+        "durationSeconds": 0.046128
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourSessions.ReopenAndReplaceTwicePreservesCompleteSaveEvidence",
+        "result": "Passed",
+        "durationSeconds": 0.058757
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourSessions.SnapshotWorkloadFailureCannotFallBackToSpatialOnlyReplacement",
+        "result": "Passed",
+        "durationSeconds": 0.041674
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.FailedReplaceOrDurabilityRestoresOldDiskAndPublishesNothing(Replace,1)",
+        "result": "Passed",
+        "durationSeconds": 0.047745
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.FailedReplaceOrDurabilityRestoresOldDiskAndPublishesNothing(Flush,1)",
+        "result": "Passed",
+        "durationSeconds": 0.049299
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.FailedStagingWriteLeavesDiskAndRuntimeUnpublished",
+        "result": "Passed",
+        "durationSeconds": 0.047682
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RecognizedStateOnlySaveKeepsCanonicalAndUnknownEvidence",
+        "result": "Passed",
+        "durationSeconds": 0.099737
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RecognizedStateSavePersistsExplicitNullableClearsAndReopensThemAsNull",
+        "result": "Passed",
+        "durationSeconds": 0.065947
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RestoreFailureReturnsRecoveryRequiredNotOrdinaryAtomicFailure",
+        "result": "Passed",
+        "durationSeconds": 0.04778
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.StaleSuppliedStateCannotOverrideSessionAuthority",
+        "result": "Passed",
+        "durationSeconds": 0.033906
+      },
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.SuccessfulWritePersistsExactCompleteBytesThenPublishesRuntime",
+        "result": "Passed",
+        "durationSeconds": 0.083511
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.AuthoredTimingAndFrozenEventIdentitiesRemainExplicit",
+        "result": "Passed",
+        "durationSeconds": 0.000439
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.BlockReleaseAndTransferReplayRetainSourceUntilCompletionWithoutCombatWork",
+        "result": "Passed",
+        "durationSeconds": 0.420105
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.CompletedForgedReleaseCannotRetireItsBlockerOrBypassVacancyPermit",
+        "result": "Passed",
+        "durationSeconds": 0.605766
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.CorruptFormatThreeReturnsFailureWithoutThrowingOrPublishing",
+        "result": "Passed",
+        "durationSeconds": 0.383651
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EmptyProjectionAndStaleLineageCannotAuthorizeRelease",
+        "result": "Passed",
+        "durationSeconds": 0.493445
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EqualTimeOrdinaryTransferAndBlockedReleaseRespectSequenceAndRecoveryPhases(True)",
+        "result": "Passed",
+        "durationSeconds": 0.96218
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EqualTimeOrdinaryTransferAndBlockedReleaseRespectSequenceAndRecoveryPhases(False)",
+        "result": "Passed",
+        "durationSeconds": 1.177458
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Write,2)",
+        "result": "Passed",
+        "durationSeconds": 2.77627
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Replace,1)",
+        "result": "Passed",
+        "durationSeconds": 2.748545
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Flush,1)",
+        "result": "Passed",
+        "durationSeconds": 2.831939
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalGoldenRestoresAndReencodesExactPinnedBytes(\"historical-b1-format1.json\",1)",
+        "result": "Passed",
+        "durationSeconds": 0.036313
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalGoldenRestoresAndReencodesExactPinnedBytes(\"historical-c2-format2.json\",2)",
+        "result": "Passed",
+        "durationSeconds": 0.012389
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalV1DrainsOnceAndUpgradesWithoutEligibility(False)",
+        "result": "Passed",
+        "durationSeconds": 1.282287
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalV1DrainsOnceAndUpgradesWithoutEligibility(True)",
+        "result": "Passed",
+        "durationSeconds": 1.406556
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.InspectionReusePreservesOriginalFoldAndCheckpointAtEveryPrefix(False,False)",
+        "result": "Passed",
+        "durationSeconds": 0.810512
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.InspectionReusePreservesOriginalFoldAndCheckpointAtEveryPrefix(True,False)",
+        "result": "Passed",
+        "durationSeconds": 1.322498
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.InspectionReusePreservesOriginalFoldAndCheckpointAtEveryPrefix(True,True)",
+        "result": "Passed",
+        "durationSeconds": 1.24803
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.LifetimeAssuranceUsesAuthenticExitOrDescentAndFitsAllPrefixes(False)",
+        "result": "Passed",
+        "durationSeconds": 0.457943
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.LifetimeAssuranceUsesAuthenticExitOrDescentAndFitsAllPrefixes(True)",
+        "result": "Passed",
+        "durationSeconds": 0.657633
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OneBoundaryPumpsAndReopenMatchTheSameAcceptedTwoPartyHorizon",
+        "result": "Passed",
+        "durationSeconds": 4.807869
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements(False)",
+        "result": "Passed",
+        "durationSeconds": 2.681541
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements(True)",
+        "result": "Passed",
+        "durationSeconds": 2.8824
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.ReopenOneUnitBeforeVacancyAndImmediatelyAfterReleasePreservesExactPrefixes",
+        "result": "Passed",
+        "durationSeconds": 2.172484
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.SelfConsistentReleaseWithoutVacancyCannotPublishThroughSession",
+        "result": "Passed",
+        "durationSeconds": 0.568975
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.TerminalPrefixOnlyFitsAnUnclosedV2Boundary(False)",
+        "result": "Passed",
+        "durationSeconds": 0.41337
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.TerminalPrefixOnlyFitsAnUnclosedV2Boundary(True)",
+        "result": "Passed",
+        "durationSeconds": 0.440452
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.UnprovenWaitingReleaseRollbackRequiresRecoveryWithoutPublishingEitherParty",
+        "result": "Passed",
+        "durationSeconds": 1.540162
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.WaitingReleaseIsEquivalentAcrossForegroundPartitionsAndReopen",
+        "result": "Passed",
+        "durationSeconds": 6.041212
+      }
+    ]
+  },
+  "attempts": [
+    {
+      "report": "instrumentation-03.xml",
+      "total": 8,
+      "passed": 7,
+      "failed": 1,
+      "skipped": 0,
+      "durationSeconds": 13.6148514,
+      "sha256": "2bf18feafe3f65e15f5c3e7b714be701555556c484285c13355f389d0e4310e6",
+      "sourceApplicability": "superseded local worktree; retained attempt only"
+    },
+    {
+      "report": "instrumentation-05.xml",
+      "total": 10,
+      "passed": 9,
+      "failed": 1,
+      "skipped": 0,
+      "durationSeconds": 16.4996349,
+      "sha256": "6951610181c4ab74fea35e7092cff5668ca82d3a4cacc1bb32f005df473c027c",
+      "sourceApplicability": "superseded local worktree; retained attempt only"
+    },
+    {
+      "report": "instrumentation-06.xml",
+      "total": 10,
+      "passed": 9,
+      "failed": 1,
+      "skipped": 0,
+      "durationSeconds": 1.2781611,
+      "sha256": "70c7dd4f4d2de3c1c11406b2e2f392e5e7704d79b639fa593aae0c46426ffb29",
+      "sourceApplicability": "superseded local worktree; retained attempt only"
+    },
+    {
+      "report": "instrumentation-07.xml",
+      "total": 11,
+      "passed": 10,
+      "failed": 1,
+      "skipped": 0,
+      "durationSeconds": 16.3416355,
+      "sha256": "b6517a1c43d4448b56de99ebc96070a3a8c85e30de117738769bf48b08aee620",
+      "sourceApplicability": "superseded local worktree; retained attempt only"
+    },
+    {
+      "report": "instrumentation-08.xml",
+      "total": 11,
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 17.1109906,
+      "sha256": "ed3218e67509221a32c6a82f9d19545f4077ec9a601eea0504cef0ab922edeb9",
+      "sourceApplicability": "superseded local worktree; retained attempt only"
+    },
+    {
+      "report": "focused-regression-01.xml",
+      "total": 55,
+      "passed": 55,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 59.1868576,
+      "sha256": "12562dd9c3098eb6c17bc1c5bf1958958328a4e0fd11ee4a6f1706eb7d2c106b",
+      "sourceApplicability": "superseded local worktree; retained attempt only"
+    },
+    {
+      "report": "focused-regression-final.xml",
+      "total": 55,
+      "passed": 55,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 60.8987382,
+      "sha256": "011f19fcbfb97df1479bdc9e98200fa77b75b6e6043302eefa06ae7d55b4b9fd",
+      "sourceApplicability": "final committed source"
+    }
+  ],
+  "infrastructureAttempts": [
+    {
+      "attempt": "01",
+      "outcome": "Sandbox licensing failed; owned PID 41128 stopped after verification; no test verdict"
+    },
+    {
+      "attempt": "02",
+      "outcome": "Retry refused the still-running Editor lock; no tests launched"
+    },
+    {
+      "attempt": "04",
+      "outcome": "Wrong ProfilerWindow namespace; compile failure, no test verdict"
+    }
+  ],
+  "attemptCorrections": [
+    "03 and 05: batch CPU frames unavailable; final diagnostic reports explicit unavailable state",
+    "06: empty-scene PlayMode fixture experiment failed and was removed",
+    "07: isolated pre-block fixture accepted horizon corrected",
+    "08 and regression-01: correctness passed; record JSON export omission found during packaging, fixed with Serializable attribute and export assertion before final committed run"
+  ],
+  "methodology": {
+    "backend": "Editor 6000.3.2f1, deterministic in-memory filesystem, production content/timing, one admission and post-publication inspection; existing fixture passive-tick callback is a no-op",
+    "stopwatchFrequency": 10000000,
+    "selfMeaning": "exclusive only relative to selected nested scopes; wall ticks include unmarked work/GC/waits/instrumentation",
+    "cpuTimelineHierarchyAvailable": false,
+    "nativeCapture": false,
+    "profileSaved": false,
+    "nativeBlocker": "Existing native profile bridge runs 68 completions and has no bounded selector; historical adapter unchanged"
+  },
+  "production": {
+    "inputSha256": "92d54453e23f84c06b35360be96bbc929959932cf74697d674a14d490908c513",
+    "outputSha256": "8f11e703b39ff9fe5b28ad3a38e139657f67d7700293c36409813475048c4c82",
+    "byteComparison": "Exact full bytes compared, no normalization",
+    "records": 499,
+    "droppedRecords": 0,
+    "droppedScopes": 0,
+    "boundaries": [
+      {
+        "boundary": "Pump",
+        "calls": 1,
+        "inclusiveMs": 1715.9093,
+        "selectedSelfMs": 187.1231
+      },
+      {
+        "boundary": "StagePreparation",
+        "calls": 7,
+        "inclusiveMs": 295.029,
+        "selectedSelfMs": 68.6786
+      },
+      {
+        "boundary": "CompleteValidation",
+        "calls": 17,
+        "inclusiveMs": 258.8965,
+        "selectedSelfMs": 237.9134
+      },
+      {
+        "boundary": "PriorValidation",
+        "calls": 7,
+        "inclusiveMs": 98.9757,
+        "selectedSelfMs": 0.0097
+      },
+      {
+        "boundary": "CandidateValidation",
+        "calls": 7,
+        "inclusiveMs": 117.6539,
+        "selectedSelfMs": 0.0112
+      },
+      {
+        "boundary": "OwnerValidation",
+        "calls": 18,
+        "inclusiveMs": 20.987,
+        "selectedSelfMs": 1.4271
+      },
+      {
+        "boundary": "Restoration",
+        "calls": 9,
+        "inclusiveMs": 43.6665,
+        "selectedSelfMs": 0.0358
+      },
+      {
+        "boundary": "SupportedReader",
+        "calls": 138,
+        "inclusiveMs": 1101.8025,
+        "selectedSelfMs": 302.614
+      },
+      {
+        "boundary": "StartRecreation",
+        "calls": 138,
+        "inclusiveMs": 381.1426,
+        "selectedSelfMs": 381.1426
+      },
+      {
+        "boundary": "PrefixReplay",
+        "calls": 138,
+        "inclusiveMs": 418.0459,
+        "selectedSelfMs": 418.0459
+      },
+      {
+        "boundary": "AdmissionAssurance",
+        "calls": 2,
+        "inclusiveMs": 1681.4047,
+        "selectedSelfMs": 110.8977
+      },
+      {
+        "boundary": "FinalPredecessor",
+        "calls": 1,
+        "inclusiveMs": 11.5788,
+        "selectedSelfMs": 0.0044
+      },
+      {
+        "boundary": "SemanticReadback",
+        "calls": 1,
+        "inclusiveMs": 19.625,
+        "selectedSelfMs": 1.1643
+      },
+      {
+        "boundary": "DurableFileSystem",
+        "calls": 1,
+        "inclusiveMs": 20.4083,
+        "selectedSelfMs": 0.7833
+      },
+      {
+        "boundary": "PostPublicationInspection",
+        "calls": 1,
+        "inclusiveMs": 7.4066,
+        "selectedSelfMs": 2.5181
+      },
+      {
+        "boundary": "ReleaseCheck",
+        "calls": 7,
+        "inclusiveMs": 9.7208,
+        "selectedSelfMs": 0.0223
+      },
+      {
+        "boundary": "Feasibility",
+        "calls": 1,
+        "inclusiveMs": 8.4694,
+        "selectedSelfMs": 8.4694
+      },
+      {
+        "boundary": "SessionOpen",
+        "calls": 1,
+        "inclusiveMs": 18.4607,
+        "selectedSelfMs": 0.0128
+      },
+      {
+        "boundary": "ExecutionReconstruction",
+        "calls": 1,
+        "inclusiveMs": 4.6509,
+        "selectedSelfMs": 0.0016
+      },
+      {
+        "boundary": "AdmissionReconstruction",
+        "calls": 1,
+        "inclusiveMs": 1176.3792,
+        "selectedSelfMs": 0.0058
+      },
+      {
+        "boundary": "Acceptance",
+        "calls": 1,
+        "inclusiveMs": 0.0051,
+        "selectedSelfMs": 0.0012
+      },
+      {
+        "boundary": "LifetimeBranch",
+        "calls": 1,
+        "inclusiveMs": 531.7138,
+        "selectedSelfMs": 2.4336
+      }
+    ],
+    "restorationParentOrigins": [
+      {
+        "parent": "AdmissionReconstruction",
+        "origin": "Admission",
+        "calls": 1
+      },
+      {
+        "parent": "OwnerValidation",
+        "origin": "Opportunity",
+        "calls": 1
+      },
+      {
+        "parent": "ReleaseCheck",
+        "origin": "Opportunity",
+        "calls": 1
+      },
+      {
+        "parent": "ExecutionReconstruction",
+        "origin": "Execution",
+        "calls": 1
+      },
+      {
+        "parent": "OwnerValidation",
+        "origin": "Closure",
+        "calls": 2
+      },
+      {
+        "parent": "ReleaseCheck",
+        "origin": "Closure",
+        "calls": 1
+      },
+      {
+        "parent": "OwnerValidation",
+        "origin": "Readback",
+        "calls": 1
+      },
+      {
+        "parent": "PostPublicationInspection",
+        "origin": "Inspection",
+        "calls": 1
+      }
+    ],
+    "readerOrigins": [
+      "reader=Admission party=1 count=1 prefix_min=0 prefix_max=0",
+      "reader=LifetimeNormal party=1 count=72 prefix_min=1 prefix_max=72",
+      "reader=LifetimeAlternative party=1 count=57 prefix_min=18 prefix_max=74",
+      "reader=Opportunity party=1 count=2 prefix_min=0 prefix_max=0",
+      "reader=Execution party=1 count=1 prefix_min=0 prefix_max=0",
+      "reader=Closure party=1 count=3 prefix_min=0 prefix_max=0",
+      "reader=Readback party=1 count=1 prefix_min=0 prefix_max=0",
+      "reader=Inspection party=1 count=1 prefix_min=0 prefix_max=0"
+    ],
+    "wallPairs": [
+      "case=production-admission enabled=True elapsed_ms=1725.7134 records=499 dropped_records=0 dropped_scopes=0",
+      "case=production-admission-disabled enabled=False elapsed_ms=1564.095 records=0 dropped_records=0 dropped_scopes=0"
+    ]
+  },
+  "overhead": [
+    "empty-scope enabled=False samples=4096 elapsed_ms=0.0483",
+    "empty-scope enabled=True samples=4096 elapsed_ms=0.2883",
+    "empty-scope enabled=True samples=4096 elapsed_ms=0.2875",
+    "empty-scope enabled=False samples=4096 elapsed_ms=0.029"
+  ],
+  "preservation": {
+    "files": 49450,
+    "mismatches": [],
+    "elapsedSeconds": 314.2744331359863,
+    "baselineSha256": "88105b9a06d057866357f62a4e4d9e131f7e24f8963570df4abe4b9ef80a53ad",
+    "baselineHistoricalPathsAbsent": [],
+    "originalSettingsExact": true
+  },
+  "preservationIncident": {
+    "file": "owner-product TestResults.xml",
+    "kind": "test-runner report; no player-save contents changed",
+    "restoredExactSha256": "f9eccd6bb418bc6f4f03b71dd0272384262aa088d59675e7c99fd9d6362efc6e",
+    "retainedOriginalSource": "TestResults/living-dungeon-b3b1-20261018/12-integration-play.xml",
+    "laterProduct": "Dungeon Lord Foreground Diagnostic 20261024 01",
+    "originalProjectSettingsRestored": true
+  },
+  "gaps": [
+    "No CPU Timeline/Hierarchy frame stream on batch Editor",
+    "No OS/native disk/flush timing, controller/render or mobile evidence",
+    "No per-site allocation/retained-memory/GC-pause attribution",
+    "No exact context/alias proof authorizing reuse",
+    "Historical sustained Editor/Windows stage-count difference unresolved"
+  ],
+  "nextOptimization": "Single-admission immutable decoded-start reuse, contingent on separate exact input/context and mutable-ownership proof; retain every prefix verification and fresh durable readback",
+  "status": "Ready for independent source review as a draft with disclosed measurement limitations; no optimization or speedup claimed",
+  "archiveSha256": "8c9749fcc4346aa940f77a33c6a07f704712bd4ed89e76529e209166dd0fefbe"
+}
