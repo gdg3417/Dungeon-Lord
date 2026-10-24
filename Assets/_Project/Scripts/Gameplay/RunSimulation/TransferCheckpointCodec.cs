@@ -53,7 +53,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return new RunCheckpoint(RunCheckpointCodec.Bytes(w => { w.Write(payload); w.Write(RunCheckpointCodec.Hash(payload)); }), e.StartIdentity, e.NextOrdinal);
         }
         internal static RunCheckpointRestoreResult Restore(byte[] bytes, string identity, string startIdentity,
-            long expectedOrdinal, RunCheckpointLimits limits, bool presentation)
+            long expectedOrdinal, RunCheckpointLimits limits, bool presentation, CombatStartCapture.AdmissionPreparation preparation = null)
         {
             RunExecution e = null;
             try {
@@ -76,7 +76,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 using (var sr = new BinaryReader(new MemoryStream(start), new UTF8Encoding(false, true))) {
                     if (RunCheckpointCodec.Text(sr) != Contract || sr.ReadInt32() != Format) throw new InvalidDataException();
                     long maximum = sr.ReadInt64(); var inner = RunCheckpointCodec.Blob(sr); RunCheckpointCodec.End(sr);
-                    e = CombatStartCapture.Recreate(inner, limits, DungeonSpatial.MonsterRecoveryRules.Executable);
+                    e = CombatStartCapture.Recreate(inner, limits, DungeonSpatial.MonsterRecoveryRules.Executable, preparation, start);
                     e.EnableTransfers();
                     if (e.MaximumEvents != maximum || !e.StartInputs.SequenceEqual(start)) throw new InvalidDataException();
                 }
