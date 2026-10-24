@@ -75,7 +75,8 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             return new RunCheckpoint(RunCheckpointCodec.Bytes(w => { w.Write(payload); w.Write(RunCheckpointCodec.Hash(payload)); }), execution.StartIdentity, v.NextOrdinal);
         }
         internal static RunCheckpointRestoreResult RestoreSupported(byte[] source, string checkpointIdentity, string startIdentity,
-            long expectedOrdinal, RunCheckpointLimits limits, bool retainPresentation = false)
+            long expectedOrdinal, RunCheckpointLimits limits, bool retainPresentation = false,
+            CombatStartCapture.AdmissionPreparation preparation = null)
         {
             using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.SupportedReader, depth: expectedOrdinal);
             using var replayMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.CheckpointReplay);
@@ -84,7 +85,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 return Failed("run.checkpoint.byte_limit");
             var bytes = (byte[])source.Clone();
             int format = BitConverter.ToInt32(bytes, 0);
-            if (format == TransferCheckpointCodec.Format) return TransferCheckpointCodec.Restore(bytes, checkpointIdentity, startIdentity, expectedOrdinal, limits, retainPresentation);
+            if (format == TransferCheckpointCodec.Format) return TransferCheckpointCodec.Restore(bytes, checkpointIdentity, startIdentity, expectedOrdinal, limits, retainPresentation, preparation);
             if (format == RunCheckpointCodec.Format) return RunCheckpointCodec.Restore(bytes, checkpointIdentity, startIdentity, expectedOrdinal, limits);
             if (format != Format) return Failed("run.checkpoint.unsupported_format");
             RunExecution candidate = null;

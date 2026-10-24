@@ -139,6 +139,22 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             Floors = Array.AsReadOnly(floors);
         }
         internal static ActiveFloorRunSnapshot ReadCheckpoint(BinaryReader r) => new ActiveFloorRunSnapshot(r);
+        // Admission preparation owns its template privately. Share only immutable
+        // leaves; no writable snapshot array/monster record crosses executions.
+        internal ActiveFloorRunSnapshot CopyForExecution() => new ActiveFloorRunSnapshot(this);
+        private ActiveFloorRunSnapshot(ActiveFloorRunSnapshot source)
+        {
+            configuration = source.configuration; loot = source.loot; knowledge = source.knowledge;
+            floorKnowledge = source.floorKnowledge; initialRuntime = source.initialRuntime;
+            TickStarted = source.TickStarted; PostureId = source.PostureId; LootTableId = source.LootTableId;
+            Floors = source.Floors; CombatRules = source.CombatRules;
+            CombatBounds = (CombatC0RoomBounds[])source.CombatBounds.Clone();
+            monsterStarts = source.monsterStarts?.Copy();
+            monsterOptions = source.monsterOptions == null ? null : (string[])source.monsterOptions.Clone();
+            MonsterStartLevel = source.MonsterStartLevel;
+            MonsterReadinessNumerator = source.MonsterReadinessNumerator;
+            MonsterReadinessDenominator = source.MonsterReadinessDenominator;
+        }
         // Used only by the separate format-2 reader on newly owned snapshot bytes.
         internal void RestoreCombatInputs(CombatC0QualificationConfig rules, CombatC0RoomBounds[] bounds, MonsterContinuityState starts,
             int level, int numerator, int denominator, string[] options)

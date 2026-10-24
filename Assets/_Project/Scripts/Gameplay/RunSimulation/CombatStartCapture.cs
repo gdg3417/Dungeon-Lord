@@ -11,6 +11,62 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
     internal static class CombatStartCapture
     {
         internal const int Version = 1;
+        // One privately owned admission, including its hypothetical branch. This
+        // stores validated start preparation, never a prefix or mutable execution.
+        internal sealed class AdmissionPreparation : IDisposable
+        {
+            private PreparedStart prepared;
+            private bool disposed;
+            private sealed class PreparedStart
+            {
+                internal readonly byte[] Bytes, Wrapped;
+                internal readonly string Executable;
+                internal readonly RunCheckpointLimits Limits;
+                internal readonly int Sequence;
+                internal readonly long? Limit;
+                internal readonly RunLogicalTiming Timing;
+                internal readonly ActiveFloorRunSnapshot Snapshot;
+                internal PreparedStart(byte[] bytes, byte[] wrapped, string executable, RunCheckpointLimits limits,
+                    int sequence, long? limit, RunLogicalTiming timing, ActiveFloorRunSnapshot snapshot)
+                {
+                    Bytes = (byte[])bytes.Clone(); Wrapped = (byte[])wrapped.Clone();
+                    Executable = executable; Limits = limits; Sequence = sequence; Limit = limit; Timing = timing;
+                    // Never retain the shell exposed to the first execution.
+                    Snapshot = snapshot.CopyForExecution();
+                }
+            }
+            internal bool TryRecreate(byte[] bytes, byte[] wrapped, RunCheckpointLimits limits, string executable, out RunExecution execution)
+            {
+                if (disposed) throw new ObjectDisposedException(nameof(AdmissionPreparation));
+                execution = null;
+                var p = prepared;
+                if (p == null || wrapped == null || executable != p.Executable ||
+                    limits.MaximumBytes != p.Limits.MaximumBytes || limits.MaximumReplayEvents != p.Limits.MaximumReplayEvents ||
+                    limits.MaximumCombatWork != p.Limits.MaximumCombatWork ||
+                    !bytes.SequenceEqual(p.Bytes) || !wrapped.SequenceEqual(p.Wrapped)) return false;
+                using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.AdmissionStartReuse);
+                var snapshot = p.Snapshot.CopyForExecution();
+                var engine = new RunSimulationService(snapshot.Configuration, snapshot.LootConfiguration, snapshot.LootTableId);
+                // The same start validator, planning/work charges, capture and exact
+                // re-encoding still run on a fresh independently mutable execution.
+                execution = engine.StartTimedCombatSnapshot(p.Sequence, snapshot, p.Timing,
+                    executable == MonsterRecoveryRules.Executable, p.Limit);
+                if (!bytes.SequenceEqual(execution.StartInputs)) {
+                    execution.Abandon(); execution = null; throw new InvalidDataException("run.checkpoint.encoding");
+                }
+                return true;
+            }
+            internal void Remember(byte[] bytes, byte[] wrapped, RunCheckpointLimits limits, string executable,
+                int sequence, long? limit, RunLogicalTiming timing, ActiveFloorRunSnapshot snapshot)
+            {
+                if (disposed) throw new ObjectDisposedException(nameof(AdmissionPreparation));
+                // Ineligible inputs use the original decoder; they cannot replace
+                // this admission's one proven preparation or grow retained memory.
+                if (prepared == null && wrapped != null)
+                    prepared = new PreparedStart(bytes, wrapped, executable, limits, sequence, limit, timing, snapshot);
+            }
+            public void Dispose() { prepared = null; disposed = true; }
+        }
         internal static byte[] Capture(int sequence, ActiveFloorRunSnapshot snapshot, RunLogicalTiming timing,
             long? limit, bool persistent) => RunCheckpointCodec.Bytes(w => {
                 w.Write(Version); RunCheckpointCodec.Text(w, persistent ? MonsterRecoveryRules.Executable : CombatC0Config.Executable);
@@ -68,9 +124,12 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             }
             return profiles;
         }
-        internal static RunExecution Recreate(byte[] bytes, RunCheckpointLimits limits, string executable)
+        internal static RunExecution Recreate(byte[] bytes, RunCheckpointLimits limits, string executable,
+            AdmissionPreparation preparation = null, byte[] wrapped = null)
         {
             using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.StartRecreation);
+            if (preparation != null && preparation.TryRecreate(bytes, wrapped, limits, executable, out var reused)) return reused;
+            using var preparationDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.StartPreparation);
             using (var r = new BinaryReader(new MemoryStream(bytes), new UTF8Encoding(false, true))) {
                 if (r.ReadInt32() != Version || RunCheckpointCodec.Text(r) != executable) throw new InvalidDataException("run.checkpoint.unsupported_rules");
                 int sequence = r.ReadInt32(); long? limit = RunCheckpointCodec.Flag(r) ? r.ReadInt64() : (long?)null;
@@ -106,6 +165,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 var engine = new RunSimulationService(snapshot.Configuration, snapshot.LootConfiguration, snapshot.LootTableId);
                 var execution = engine.StartTimedCombatSnapshot(sequence, snapshot, timing, persistent, limit);
                 if (!bytes.SequenceEqual(execution.StartInputs)) { execution.Abandon(); throw new InvalidDataException("run.checkpoint.encoding"); }
+                preparation?.Remember(bytes, wrapped, limits, executable, sequence, limit, timing, snapshot);
                 return execution;
             }
         }
