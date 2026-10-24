@@ -31,7 +31,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="bottomChrome" class="bottom-chrome">
             <ui:VisualElement class="sheet-top">
-            <ui:VisualElement class="sheet-header row"><ui:Label name="sheetTitle" class="mode" /><ui:Button name="collapseDetails" tooltip="ui.dungeon.details.collapse" /></ui:VisualElement>
+            <ui:VisualElement class="sheet-header row"><ui:Label name="sheetTitle" class="mode" /><ui:Button name="openAnalysis" tooltip="ui.analysis.title"><ui:Label name="performanceSummary" class="performance-summary" /></ui:Button><ui:Button name="collapseDetails" tooltip="ui.dungeon.details.collapse" /></ui:VisualElement>
             <ui:VisualElement name="constructionCategories" class="category-row">
                 <ui:ScrollView mode="Horizontal" class="category-strip"><ui:VisualElement class="category-row">
                     <ui:Button name="roomsCategory" class="selected-floor" tooltip="ui.dungeon.construction.rooms" />
@@ -110,6 +110,17 @@
             </ui:VisualElement>
         </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="analysisScreen" class="analysis-screen">
+            <ui:VisualElement class="row analysis-navigation">
+                <ui:Button name="analysisDungeon" tooltip="ui.analysis.dungeon" />
+                <ui:Label class="mode selected-destination" tooltip="ui.analysis.title" />
+                <ui:Button name="analysisDisplay" tooltip="ui.dungeon.display" />
+            </ui:VisualElement>
+            <ui:ScrollView name="analysisScroll" mode="Vertical" class="analysis-scroll">
+                <ui:Label name="analysisReport" />
+                <ui:Label name="analysisEvidence" />
+            </ui:ScrollView>
+        </ui:VisualElement>
         <ui:VisualElement name="displayPopover" class="display-popover">
             <ui:Label tooltip="ui.dungeon.text_size" />
             <ui:VisualElement class="row text-controls"><ui:Button name="small" tooltip="ui.dungeon.text_small" /><ui:Button name="default" tooltip="ui.dungeon.text_default" /><ui:Button name="large" tooltip="ui.dungeon.text_large" /></ui:VisualElement>
@@ -118,7 +129,8 @@
         <ui:VisualElement name="modal" class="modal">
             <ui:ScrollView mode="Vertical" class="modal-content">
                 <ui:Label name="modalText" />
-                <ui:VisualElement class="row"><ui:Button name="confirm" tooltip="ui.dungeon.save" /><ui:Button name="cancel" tooltip="ui.dungeon.continue" /></ui:VisualElement>
+                <ui:Label name="navigationStatus" />
+                <ui:VisualElement class="row"><ui:Button name="confirm" tooltip="ui.dungeon.save" /><ui:Button name="navigationDiscard" tooltip="ui.analysis.discard_changes" /><ui:Button name="cancel" tooltip="ui.dungeon.continue" /></ui:VisualElement>
             </ui:ScrollView>
         </ui:VisualElement>
     </ui:VisualElement>

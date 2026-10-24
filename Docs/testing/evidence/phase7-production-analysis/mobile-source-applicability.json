@@ -1,0 +1,95 @@
+{
+  "reviewed_head": "d3e3c5c0e948834aac7f3bfa767ea3aaf728f151",
+  "final_tested_source": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+  "unity_version": "6000.3.2f1",
+  "unity_cli_version": "1.0.0-beta.13",
+  "viewport": [
+    360,
+    640
+  ],
+  "injected_safe_rect": [
+    10,
+    18,
+    340,
+    604
+  ],
+  "text_sizes": [
+    "Default",
+    "Large"
+  ],
+  "reports": [
+    {
+      "identity": "01-phone-edit",
+      "source_sha": "b5bcf8842c04fc43c40b96ab3e37df60f0e7e562",
+      "passed": 2,
+      "failed": 2,
+      "skipped": 0,
+      "sha256": "b54f61ff043f886759ef1080f03c45ddca7ab120d94d22d72418b3a3f41ab630"
+    },
+    {
+      "identity": "02-phone-repro",
+      "source_sha": "744804450b3e9ad10a053d8f2c8f9c03adf2a2d9",
+      "passed": 0,
+      "failed": 2,
+      "skipped": 0,
+      "sha256": "b7cf79f73e38564e1ad9799d51459a010537b1a524e5953cbd3d3062c730cf83"
+    },
+    {
+      "identity": "03-phone-repro",
+      "source_sha": "a5f2127369afb6671f6c30f609955dd5fe69c3cd",
+      "passed": 0,
+      "failed": 2,
+      "skipped": 0,
+      "sha256": "a58a3af7b690d8c7546da4f8794557647b4e5651ebda03d975e8c6a1ca751d21"
+    },
+    {
+      "identity": "04-phone-repro",
+      "source_sha": "b26681785baccb34fad7a477f0a75d79ad905b00",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "sha256": "1b0d90c28337860c8569f0a5cdf804f7c09a5c90464c4401473bc1aeae0fed2c"
+    },
+    {
+      "identity": "05-focused-edit",
+      "source_sha": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+      "passed": 48,
+      "failed": 0,
+      "skipped": 0,
+      "sha256": "b3e03ebe08b3f34150f648decd03ffefab15bb8e69eb022e8d9f7522899a5226"
+    },
+    {
+      "identity": "06-focused-play",
+      "source_sha": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "sha256": "5d3da43755eb951c11539fa2bef131441a923090c1017fca0f15d4f9908ef58f"
+    }
+  ],
+  "unity_inputs": 1418,
+  "input_mismatches": [],
+  "input_manifest_sha256": "f5d1962a422f92f1afcc19df9599e52cbf0ea0c2fabf15eccf2a8dd9784a4e61",
+  "permitted_transformations": [
+    "exact config and SaveService save filename substitution: phase7-analysis-mobile-20261022-01.json",
+    "JSON config formatting; text CRLF/LF and UTF-8 BOM normalization"
+  ],
+  "protected_files": 60,
+  "protected_files_byte_equal": true,
+  "approved_historical_files": 47,
+  "approved_historical_files_byte_equal": true,
+  "restored_disposable_inputs": [
+    "ProjectSettings/ProjectSettings.asset"
+  ],
+  "restored_default_report": {
+    "sha256": "f9eccd6bb418bc6f4f03b71dd0272384262aa088d59675e7c99fd9d6362efc6e",
+    "archived_output_sha256": "5d3da43755eb951c11539fa2bef131441a923090c1017fca0f15d4f9908ef58f",
+    "restored_from_pre_run_backup": true
+  },
+  "no_save_or_recovery_restoration": true,
+  "limitations": [
+    "Focused selections only; no full suite, sustained profile, Windows build, owner UAT or merge.",
+    "Injected Editor safe area and synthetic touch; no physical phone/DPI or swipe-gesture acceptance.",
+    "Raw logs, private file inventories and owner backup contents remain local."
+  ]
+}

@@ -1,0 +1,410 @@
+{
+  "date": "2026-10-23",
+  "campaign": "TestResults\\phase7-analysis-shutdown-20261023-d2",
+  "source": {
+    "branch": "feature/phase7-production-analysis",
+    "investigation_start_head": "adf0ffab189fc11edb77a88997e3ac548d8ee88c",
+    "main": "fbe4bdff0cba9fea72b42fb6a05714327f880df4",
+    "qualified_unity_source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+    "implementation": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+    "original_baseline": "7dc6f96b5c35f24923f6e8cbfa8a5e256c16c3ac",
+    "new_unity_input_transformations": 0,
+    "production_changes": 0
+  },
+  "artifact": {
+    "id": "P249R2-fe8daae0264348579db73d3402254215",
+    "files": 303,
+    "exe_sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+    "unity_player_sha256": "0b3ca5a98c9d9424ff7d3b311d50c5a2afb1282ad5d095e5535f29aed6b00874",
+    "unchanged": true
+  },
+  "attempts": [
+    {
+      "attempt": "01-visible-application-quit",
+      "pid": 47108,
+      "creation_filetime": 134372417125977176,
+      "launch_utc": "2026-10-23T15:08:33.012915+00:00",
+      "arguments_sha256": "0dba6d98a5fae877b741595ba144a8157abc0d97b32baf6b4f8817ef548bb5d8",
+      "executable_sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "exit": {
+        "utc": "2026-10-23T15:08:58.468535+00:00",
+        "normal": true,
+        "forced": false,
+        "error": null,
+        "exit_code": 0,
+        "launch_handle_state": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "independent_handle_state": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "wall_seconds": 25.45299999997951,
+        "appquit_seen": false,
+        "surviving_children": null
+      },
+      "appquit_log_lines": [
+        "[2026-10-23 15:08:57 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+      ],
+      "memory_report_after_cleanup": true,
+      "visible_client_rects": [
+        [
+          1280,
+          720
+        ]
+      ],
+      "fixture_lease_restored": true,
+      "raw_log_sha256": "e7463ff97ab163726408037ccbd2a440a709ce89c7ee842999c8aa35b4e5c3c1",
+      "raw_launch_sha256": "b8648df9bad6517a2bc484678dd6802b4e1704c9d53a44ac8150f3fe3fba45ae",
+      "raw_observations_sha256": "9c30b3312b1fc6ce22337cd68a33c4ee1089eb1905b63c766ade28378f570475",
+      "fixture": {
+        "source_name": "two-floor-b85eecf94f0c4bbd9f790546a06683cc.save.json",
+        "sha256": "bfa6f99babb86babe69310c7c0470e828eab345ca54673e5387fa7c5c4bbdc80",
+        "kind": "scripted"
+      },
+      "smoke_passed": true
+    },
+    {
+      "attempt": "02-ordinary-debugged",
+      "pid": 24432,
+      "creation_filetime": 134372424580869803,
+      "launch_utc": "2026-10-23T15:20:58.448962+00:00",
+      "arguments_sha256": "68bfa302dd88606cd266ed90ca67f586c52be074b454872f9343d0a30ce5402b",
+      "executable_sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "exit": {
+        "utc": "2026-10-23T15:26:43.434652+00:00",
+        "normal": false,
+        "normal_lifecycle_eligible": false,
+        "debugger_interference_planned": true,
+        "forced": true,
+        "error": null,
+        "exit_code": 3796434945,
+        "launch_handle_state": {
+          "wait": 0,
+          "exit_code": 3796434945,
+          "exited": true
+        },
+        "independent_handle_state": {
+          "wait": 0,
+          "exit_code": 3796434945,
+          "exited": true
+        },
+        "wall_seconds": 344.98499999998603,
+        "appquit_seen": true,
+        "surviving_children": null
+      },
+      "appquit_log_lines": [
+        "[2026-10-23 15:21:42 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+      ],
+      "memory_report_after_cleanup": false,
+      "visible_client_rects": [
+        [
+          1280,
+          720
+        ]
+      ],
+      "fixture_lease_restored": true,
+      "raw_log_sha256": "5d3e8d5e29e1bc64ff2bc7dd2a2f858280db97ce48af378cddf942b737ef1baa",
+      "raw_launch_sha256": "0cf7e0b8b88e913c59f2428268768b9fd54e73a3f9c3c7f58ccca83744404190",
+      "raw_observations_sha256": "68495f28cc21d4d32795612c6b45198ac818352577373e6bb135260b10eabee2",
+      "fixture": {
+        "source_name": "08-native-finish-post-exit.save.json",
+        "sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+        "kind": "visible"
+      }
+    },
+    {
+      "attempt": "03-ordinary-stack-target",
+      "pid": 30588,
+      "creation_filetime": 134372428567581678,
+      "launch_utc": "2026-10-23T15:27:37.150653+00:00",
+      "arguments_sha256": "102bd419bca28449af43ab6ca1b1e96660612d4c15e1b2cbc30b0dae34a695f2",
+      "executable_sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "exit": {
+        "utc": "2026-10-23T15:33:16.964313+00:00",
+        "normal": false,
+        "normal_lifecycle_eligible": false,
+        "debugger_interference_planned": true,
+        "forced": true,
+        "error": null,
+        "exit_code": 3796434945,
+        "launch_handle_state": {
+          "wait": 0,
+          "exit_code": 3796434945,
+          "exited": true
+        },
+        "independent_handle_state": {
+          "wait": 0,
+          "exit_code": 3796434945,
+          "exited": true
+        },
+        "wall_seconds": 339.7970000000205,
+        "appquit_seen": true,
+        "surviving_children": null
+      },
+      "appquit_log_lines": [
+        "[2026-10-23 15:28:16 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+      ],
+      "memory_report_after_cleanup": false,
+      "visible_client_rects": [
+        [
+          1280,
+          720
+        ]
+      ],
+      "fixture_lease_restored": true,
+      "raw_log_sha256": "dde739bb7b2944386a60ba0313d0c78a1fcc1d0e1dee3a718b32c1443f05b462",
+      "raw_launch_sha256": "f27a5cb4db3cf2d7b5862251baf613f0ca02905da3f46713e66e264089dc1df6",
+      "raw_observations_sha256": "17f93a9f37be6a86e6f71c9671e28c7eb7d53a001f375c80830225277c38bdf6",
+      "fixture": {
+        "source_name": "08-native-finish-post-exit.save.json",
+        "sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+        "kind": "visible"
+      }
+    },
+    {
+      "attempt": "04-ordinary-valid-stacks",
+      "pid": 32436,
+      "creation_filetime": 134372441228290033,
+      "launch_utc": "2026-10-23T15:48:43.234733+00:00",
+      "arguments_sha256": "85e56acd405012d6be318166587c853a1e3870bb1c8945d4ee21824897738c5b",
+      "executable_sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "exit": {
+        "utc": "2026-10-23T15:49:26.751766+00:00",
+        "normal": true,
+        "normal_lifecycle_eligible": false,
+        "debugger_interference_planned": true,
+        "forced": false,
+        "error": null,
+        "exit_code": 0,
+        "launch_handle_state": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "independent_handle_state": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "wall_seconds": 43.51600000000326,
+        "appquit_seen": true,
+        "surviving_children": null
+      },
+      "appquit_log_lines": [
+        "[2026-10-23 15:49:24 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+      ],
+      "memory_report_after_cleanup": true,
+      "visible_client_rects": [
+        [
+          1280,
+          720
+        ]
+      ],
+      "fixture_lease_restored": true,
+      "raw_log_sha256": "99d5ffe4250c8d032d6d8825dc2ed55bb0af802b42e6585b0ce39c12219ca02d",
+      "raw_launch_sha256": "d3a31abc9afdcfcb4ec2fe8a0953e2c46f8e1bde636492094f19b1fedc33aec5",
+      "raw_observations_sha256": "9bb157084e8fde9ed87529f53cd5066bbc67349560a27c38a4d9b68e89b0b64e",
+      "fixture": {
+        "source_name": "08-native-finish-post-exit.save.json",
+        "sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+        "kind": "visible"
+      }
+    },
+    {
+      "attempt": "05-coordinated-stacks",
+      "pid": 50872,
+      "creation_filetime": 134372444326684645,
+      "launch_utc": "2026-10-23T15:53:53.122764+00:00",
+      "arguments_sha256": "2875599c5c1b859cf002037670ecf1cd733dcd9398532dfea1f32010b92a8114",
+      "executable_sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "exit": {
+        "utc": "2026-10-23T15:54:25.626505+00:00",
+        "normal": true,
+        "normal_lifecycle_eligible": false,
+        "debugger_interference_planned": true,
+        "forced": false,
+        "error": null,
+        "exit_code": 0,
+        "launch_handle_state": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "independent_handle_state": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "wall_seconds": 32.5,
+        "appquit_seen": false,
+        "surviving_children": null
+      },
+      "appquit_log_lines": [
+        "[2026-10-23 15:54:24 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+      ],
+      "memory_report_after_cleanup": true,
+      "visible_client_rects": [
+        [
+          1280,
+          720
+        ]
+      ],
+      "fixture_lease_restored": true,
+      "raw_log_sha256": "9b7049d744f529d55e5614f496384468c337ff161d51456e6aff6a5eb28c0c97",
+      "raw_launch_sha256": "bc26f645d673c68f869064adce4ce85edb2b11d7afff3093f22a737826f4f9a5",
+      "raw_observations_sha256": "55dd9acc59bf245b7b1580f046b1bbd98c734a86768e93113fe324e3476cbe4f",
+      "fixture": {
+        "source_name": "08-native-finish-post-exit.save.json",
+        "sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+        "kind": "visible"
+      }
+    },
+    {
+      "attempt": "06-mouse-close-stacks",
+      "pid": 11108,
+      "creation_filetime": 134372448335640894,
+      "launch_utc": "2026-10-23T16:00:34.052881+00:00",
+      "arguments_sha256": "c6891dd97a5b51ab928b08e1c21751dbef199aa3ded415b282185298029ff173",
+      "executable_sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+      "exit": {
+        "utc": "2026-10-23T16:01:16.568588+00:00",
+        "normal": true,
+        "normal_lifecycle_eligible": false,
+        "debugger_interference_planned": true,
+        "forced": false,
+        "error": null,
+        "exit_code": 0,
+        "launch_handle_state": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "independent_handle_state": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "wall_seconds": 42.51600000000326,
+        "appquit_seen": true,
+        "surviving_children": null
+      },
+      "appquit_log_lines": [
+        "[2026-10-23 16:01:14 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+      ],
+      "memory_report_after_cleanup": true,
+      "visible_client_rects": [
+        [
+          33,
+          17
+        ],
+        [
+          1280,
+          720
+        ]
+      ],
+      "fixture_lease_restored": true,
+      "raw_log_sha256": "b7d67803298e8b6ddb2c5373f70fb61f21431182e87f25fc8fb96e8f0ba99c7d",
+      "raw_launch_sha256": "becdc98f26c1caa60015969a8d56f89e9b7b82599d9e0df8cf174b337e629f63",
+      "raw_observations_sha256": "f7c598ce085a5820224ade624d91d90da8e1c97fcc3255fcf6ca5cbc27bc13dd",
+      "fixture": {
+        "source_name": "08-native-finish-post-exit.save.json",
+        "sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+        "kind": "visible"
+      }
+    }
+  ],
+  "debugger": {
+    "product": "Visual Studio Community 2022 17.14.36811.4",
+    "installed": true,
+    "native_attach_verified": true,
+    "validated_unity_pdb_guid_age_matches": 2,
+    "new_software_installed": false,
+    "accepted_hung_game_stack_samples": 0,
+    "invalid_game_captures_retained": true,
+    "preservation_checker_failure_retained": true,
+    "corrected_reader_selfcheck": {
+      "passed": true,
+      "thread_count": 3,
+      "two_samples": true,
+      "nonzero_native_contexts": true,
+      "not_Unity_qualification": true,
+      "correction": "Threads belong to EnvDTE.Program; explicit one-based COM thread/frame enumeration; empty/invalid records now rejected"
+    },
+    "windows_cache_scope": "Explicit known local caches; no matching ntdll/KernelBase candidates; no download",
+    "static_dbghelp_probe_resolved": false
+  },
+  "preservation": {
+    "utc": "2026-10-23T16:33:51.134506+00:00",
+    "protected_files": 28866,
+    "differences": [],
+    "unity_inputs": 1418,
+    "unity_input_differences": [],
+    "sealed_build_files": 303,
+    "sealed_build_unchanged": true,
+    "disposable_projects": [
+      {
+        "project": "ui-composition-analysis-p249r2-edit",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-focused",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-native",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-nativefs",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-play",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      }
+    ]
+  },
+  "product_closeout": {
+    "original_inventory_files": 47,
+    "original_sdk_cache_changes": 10,
+    "new_sdk_cache_files": 8,
+    "generated_archived_and_hash_verified": true,
+    "originals_restored_from_preflight_backup": true,
+    "corrective_save_recovery_restorations": 0
+  },
+  "classification": {
+    "category": "E: unresolved",
+    "observation": "Intermittent ordinary AppQuit hang under unchanged sealed build",
+    "confidence": "High for intermittency; insufficient evidence for ownership",
+    "production_correction_justified": false,
+    "native_gate": "failed/intermittent",
+    "owner_uat_ready": false,
+    "next_action": "At the next independently authorized verified ordinary AppQuit hang, obtain two comparable main/worker Program.Threads stack and native instruction-pointer samples with coordinated fresh readiness and validated Unity symbols before owned-process termination."
+  },
+  "reruns": {
+    "full_editmode": false,
+    "full_playmode": false,
+    "windows_build": false,
+    "sustained_profiles": false
+  },
+  "packet": {
+    "path": "visible-quit-thread-diagnosis-reports.zip",
+    "sha256": "592825c21f6c3d5733023d77a40c7e1165097f106e8d7f6d9ffa0383702aab4f",
+    "entries": 12
+  },
+  "privacy": "Only sanitized process evidence, identities, summaries and hashes published; raw material local."
+}

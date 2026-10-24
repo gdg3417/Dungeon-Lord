@@ -1,0 +1,202 @@
+{
+  "date": "2026-10-24",
+  "branch": "feature/phase7-production-analysis",
+  "start_head": "81f00432066b25a480c3280b6a28dcacd9420bd1",
+  "main": "fbe4bdff0cba9fea72b42fb6a05714327f880df4",
+  "qualified_source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+  "artifact_id": "P249R2-fe8daae0264348579db73d3402254215",
+  "unity_inputs": 1418,
+  "unity_input_differences": [],
+  "sealed_build_files": 303,
+  "sealed_and_owner_mirror_unchanged": true,
+  "owner_environment_files": 654,
+  "owner_environment_differences": [],
+  "original_product_files": 47,
+  "original_product_hashes_unchanged": true,
+  "game_launches": 0,
+  "unity_operations": 0,
+  "new_tests": 0,
+  "new_profiles": 0,
+  "new_builds": 0,
+  "display_observation": {
+    "method": "Host System.Windows.Forms.Screen.AllScreens; read-only",
+    "monitors": [
+      {
+        "name": "DISPLAY1",
+        "primary": true,
+        "width": 1920,
+        "height": 1080,
+        "work_height": 1032
+      },
+      {
+        "name": "DISPLAY2",
+        "primary": false,
+        "width": 1920,
+        "height": 1080,
+        "work_height": 1032
+      },
+      {
+        "name": "DISPLAY3",
+        "primary": false,
+        "width": 1920,
+        "height": 1080,
+        "work_height": 1032
+      }
+    ],
+    "settings_changed": false
+  },
+  "portrait_evidence": {
+    "kind": "Retained Editor Game View rendered captures, not new native client",
+    "resolution": [
+      720,
+      1280
+    ],
+    "panel_scale": 1,
+    "native_standalone_portrait": "Not qualified: prior requested 1179x2556 clamped to actual 1179x1080",
+    "native_device": false
+  },
+  "captures": [
+    {
+      "path": "TestResults/phase7-analysis-recovery-20261022-r2/02-full-edit-project-artifacts/phase7a4-screenshots/composition-floorhud-normal-Default-720x1280.png",
+      "sha256": "38dc52978c2a9e5220892dbae259a0905a27ec3fd66b8cfc1a632226ee1ab00a",
+      "archived_campaign_hash_matches": true,
+      "protected_f1_hash_matches": true,
+      "original_capture_sha256": "38dc52978c2a9e5220892dbae259a0905a27ec3fd66b8cfc1a632226ee1ab00a"
+    },
+    {
+      "path": "TestResults/phase7-analysis-recovery-20261022-r2/02-full-edit-project-artifacts/phase7a4-screenshots/composition-floorhud-normal-Large-720x1280.png",
+      "sha256": "ba8d7b877cc57c908b8d2cdef4ae3633951227a738d9692ef993653d869fcf4e",
+      "archived_campaign_hash_matches": true,
+      "protected_f1_hash_matches": true,
+      "original_capture_sha256": "ba8d7b877cc57c908b8d2cdef4ae3633951227a738d9692ef993653d869fcf4e"
+    },
+    {
+      "path": "TestResults/phase7-analysis-recovery-20261022-r2/02-full-edit-project-artifacts/phase7a4-screenshots/composition-analysis-Default-720x1280.png",
+      "sha256": "c9fa3cf58af1848a899d0ff3603d558943ed7414d57c53a39f8df215beb51974",
+      "archived_campaign_hash_matches": true,
+      "protected_f1_hash_matches": true,
+      "original_capture_sha256": "c9fa3cf58af1848a899d0ff3603d558943ed7414d57c53a39f8df215beb51974"
+    },
+    {
+      "path": "TestResults/phase7-analysis-recovery-20261022-r2/02-full-edit-project-artifacts/phase7a4-screenshots/composition-analysis-Large-720x1280.png",
+      "sha256": "12159a197d6f49017e2a9d78b54a2841f60b0246a02ae2f61a06d47679646eab",
+      "archived_campaign_hash_matches": true,
+      "protected_f1_hash_matches": true,
+      "original_capture_sha256": "12159a197d6f49017e2a9d78b54a2841f60b0246a02ae2f61a06d47679646eab"
+    },
+    {
+      "path": "TestResults/phase7-analysis-recovery-20261022-r2/02-full-edit-project-artifacts/phase7a4-screenshots/living-live-large-720x1280.png",
+      "sha256": "4188be13e6ed5668260e1df32a8ebef196c984d84bb5b1d8f13e96edb2ca2f63",
+      "archived_campaign_hash_matches": true,
+      "protected_f1_hash_matches": true,
+      "original_capture_sha256": "4188be13e6ed5668260e1df32a8ebef196c984d84bb5b1d8f13e96edb2ca2f63"
+    },
+    {
+      "path": "TestResults/phase7-analysis-recovery-20261022-r2/02-full-edit-project-artifacts/phase7a4-screenshots/living-live-encounter-large-720x1280.png",
+      "sha256": "960108ec83bc37b0129ce7bcbf7a692b6c9d8d89070ce8aa579e3a6ad5d642a5",
+      "archived_campaign_hash_matches": true,
+      "protected_f1_hash_matches": true,
+      "original_capture_sha256": "960108ec83bc37b0129ce7bcbf7a692b6c9d8d89070ce8aa579e3a6ad5d642a5"
+    },
+    {
+      "path": "TestResults/phase7-analysis-recovery-20261022-r2/02-full-edit-project-artifacts/phase7a4-screenshots/two-floor-waiting-720x1280-floor2.png",
+      "sha256": "ae80757977e80b461221def4dd586b1fb3474e69bb205423148e65f35e0d6b14",
+      "archived_campaign_hash_matches": true,
+      "protected_f1_hash_matches": true,
+      "original_capture_sha256": "ae80757977e80b461221def4dd586b1fb3474e69bb205423148e65f35e0d6b14"
+    },
+    {
+      "path": "TestResults/phase7-analysis-recovery-20261022-r2/02-full-edit-project-artifacts/phase7a4-screenshots/composition-visual-feedback-complete-720x1280.png",
+      "sha256": "d4c632336b0977c855c3a3cd0fa6738fe57e45209ad80e77a57b707ad57936c0",
+      "archived_campaign_hash_matches": true,
+      "protected_f1_hash_matches": true,
+      "original_capture_sha256": "d4c632336b0977c855c3a3cd0fa6738fe57e45209ad80e77a57b707ad57936c0"
+    }
+  ],
+  "retained_tests": {
+    "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+    "report": "TestResults\\phase7-analysis-recovery-20261022-r2\\02-full-edit.xml",
+    "sha256": "d5727e7dc0e35ab425a9fdb281d9ad01ef32b9e0523fc82ba654171f45433840",
+    "rerun": false,
+    "cases": [
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisResponsiveSafeAreaLocalizationAndScroll",
+        "result": "Passed",
+        "portrait_output": [
+          "Capture analysis-Default (720, 1280): sheet=(x:0.00, y:940.00, width:720.00, height:340.00) viewport=(x:0.00, y:340.00, width:720.00, height:665.00) zoom=4.6",
+          "Capture analysis-Large (720, 1280): sheet=(x:0.00, y:897.00, width:720.00, height:383.00) viewport=(x:0.00, y:383.00, width:720.00, height:529.00) zoom=4.6"
+        ]
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.FloorHudStatesAndInputCapture",
+        "result": "Passed",
+        "portrait_output": [
+          "Capture floorhud-normal-Small (720, 1280): sheet=(x:20.00, y:975.00, width:680.00, height:270.00) viewport=(x:20.00, y:305.00, width:680.00, height:733.00) zoom=4.6",
+          "Capture floorhud-focused-Small (720, 1280): sheet=(x:20.00, y:922.00, width:680.00, height:323.00) viewport=(x:20.00, y:358.00, width:680.00, height:680.00) zoom=2.3",
+          "Capture floorhud-collapsed-Small (720, 1280): sheet=(x:20.00, y:922.00, width:680.00, height:323.00) viewport=(x:20.00, y:358.00, width:680.00, height:680.00) zoom=2.3",
+          "Capture floorhud-inactive-Small (720, 1280): sheet=(x:0.00, y:1010.00, width:720.00, height:270.00) viewport=(x:0.00, y:270.00, width:720.00, height:803.00) zoom=8.05",
+          "Capture floorhud-blocked-Small (720, 1280): sheet=(x:0.00, y:994.00, width:720.00, height:286.00) viewport=(x:0.00, y:286.00, width:720.00, height:751.00) zoom=4.6",
+          "Capture floorhud-normal-Default (720, 1280): sheet=(x:20.00, y:922.00, width:680.00, height:323.00) viewport=(x:20.00, y:358.00, width:680.00, height:636.00) zoom=4.6",
+          "Capture floorhud-focused-Default (720, 1280): sheet=(x:20.00, y:898.00, width:680.00, height:347.00) viewport=(x:20.00, y:382.00, width:680.00, height:612.00) zoom=2.3",
+          "Capture floorhud-collapsed-Default (720, 1280): sheet=(x:20.00, y:898.00, width:680.00, height:347.00) viewport=(x:20.00, y:382.00, width:680.00, height:612.00) zoom=2.3",
+          "Capture floorhud-inactive-Default (720, 1280): sheet=(x:0.00, y:972.00, width:720.00, height:308.00) viewport=(x:0.00, y:308.00, width:720.00, height:721.00) zoom=8.05",
+          "Capture floorhud-blocked-Default (720, 1280): sheet=(x:0.00, y:984.00, width:720.00, height:296.00) viewport=(x:0.00, y:296.00, width:720.00, height:692.00) zoom=4.6",
+          "Capture floorhud-normal-Large (720, 1280): sheet=(x:20.00, y:893.00, width:680.00, height:352.00) viewport=(x:20.00, y:387.00, width:680.00, height:553.00) zoom=4.6",
+          "Capture floorhud-focused-Large (720, 1280): sheet=(x:20.00, y:830.00, width:680.00, height:415.00) viewport=(x:20.00, y:450.00, width:680.00, height:490.00) zoom=2.3",
+          "Capture floorhud-collapsed-Large (720, 1280): sheet=(x:20.00, y:830.00, width:680.00, height:415.00) viewport=(x:20.00, y:450.00, width:680.00, height:490.00) zoom=2.3",
+          "Capture floorhud-inactive-Large (720, 1280): sheet=(x:0.00, y:943.00, width:720.00, height:337.00) viewport=(x:0.00, y:337.00, width:720.00, height:638.00) zoom=8.05",
+          "Capture floorhud-blocked-Large (720, 1280): sheet=(x:0.00, y:968.00, width:720.00, height:312.00) viewport=(x:0.00, y:312.00, width:720.00, height:615.00) zoom=4.6"
+        ]
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.LivingDungeonB3B2LiveLabelsSessionReplayAndLargeLayoutsObserveOnlyCommittedState",
+        "result": "Passed",
+        "portrait_output": [
+          "Live layout (720, 1280) marker=True label=Flex bounds=(x:252.00, y:720.00, width:150.00, height:26.00) map=(x:0.00, y:368.00, width:720.00, height:606.00) rail=(x:4.00, y:372.00, width:156.00, height:166.00) clock=True"
+        ]
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls",
+        "result": "Passed",
+        "portrait_output": [
+          "Capture visual-feedback-Movement (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-damage-TrapTrigger-3 (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-TrapTrigger (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-LootInteraction (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-monster-approach-9 (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-damage-MonsterEngagement-9 (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-MonsterEngagement (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-resolved-9 (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-monster-approach-10 (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-damage-MonsterEngagement-10 (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-resolved-10 (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-damage-TrapTrigger-11 (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6",
+          "Capture visual-feedback-complete (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:530.00) zoom=4.6"
+        ]
+      }
+    ]
+  },
+  "header_disposition": {
+    "inherited_hud": "Independent review assigns outside automatic PR scope expansion",
+    "incremental_obstruction_demonstrated": false,
+    "precise_causal_header_delta": "unmeasured; no matched main runtime layout",
+    "scope": "No production correction justified from current evidence; hold ambiguous populated-summary portrait interaction for review"
+  },
+  "owner_moonlight": "Not performed; PC-only observations retained",
+  "performance": "Local PC 1-3 second owner observation; admission/settlement plausible, not event-correlated proof",
+  "packet": {
+    "path": "mobile-acceptance-closeout-reports.zip",
+    "sha256": "b0d5e460f045960ab23c608a0ee1f44ae48ec24da9c97c566999974d9ed0c618",
+    "entries": 12
+  },
+  "acceptance_classifications": {
+    "windows_360x640": "readability failed",
+    "windows_640x360": "readability failed",
+    "windows_1561x720": "relevant tested controls/HUD readable",
+    "requested_1179x2556": "actual 1179x1080, not portrait pass",
+    "editor_720x1280": "retained scoped portrait proxy",
+    "physical_moonlight": "not performed",
+    "native_ios": "not established"
+  },
+  "recommendation": "Continue remaining functional owner acceptance; keep PR draft/unmerged pending matrix/coverage review, unresolved populated-summary interaction and physical acceptance. No production correction authorized."
+}

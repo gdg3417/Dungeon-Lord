@@ -1,0 +1,31 @@
+{
+  "recordType": "owner-uat-acceptance",
+  "recordedDate": "2026-10-24",
+  "repository": "gdg3417/Dungeon-Lord",
+  "pullRequest": 249,
+  "branch": "feature/phase7-production-analysis",
+  "confirmation": "The owner confirmed PR #249 UAT passed.",
+  "confirmationScope": "Owner acceptance statement only; no scenario-by-scenario results or device, resolution, orientation, or platform details were supplied.",
+  "qualifiedUnitySource": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+  "testedImplementationSource": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+  "technicalEvidenceChanged": false,
+  "nativeIosQualificationClaimed": false,
+  "retainedLimitations": {
+    "windows360x640Readability": "failed",
+    "windows640x360Readability": "failed",
+    "requested1179x2556ActualViewport": "1179x1080; not a portrait pass",
+    "nativeInputCoverageExceptions": [
+      "transient Pending draft navigation",
+      "authoritative Save rejection",
+      "in-session stale draft navigation"
+    ],
+    "gracefulWindowsShutdown": "historical failed exits remain failed; root cause unresolved",
+    "performanceFollowUp": "separate measurement-only follow-up remains open; no cause established"
+  },
+  "ownerUatStatus": "owner-confirmed-passed",
+  "pullRequestStatusAtCloseout": {
+    "state": "open",
+    "draft": true,
+    "merged": false
+  }
+}

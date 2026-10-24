@@ -150,6 +150,7 @@ namespace DungeonBuilder.M0
         }
         private void PresentReplayControls()
         {
+            PresentPerformanceSummary();
             PresentReplayFeedback();
             var ui = document.rootVisualElement;
             ui.Q("replayDetails").style.maxHeight = presentationPolicy.ReplayDescriptionHeight;

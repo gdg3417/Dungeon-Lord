@@ -80,7 +80,7 @@ namespace DungeonBuilder.M0
             }
             RefreshFloorManagementIfNeeded();
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
-            if (!legacy) ReadInput();
+            if (!legacy && !IsAnalysis) ReadInput();
             UpdateReplay();
             PresentForegroundActivity();
         }
@@ -151,6 +151,7 @@ namespace DungeonBuilder.M0
             InitializeRoomContent();
             InitializeReplay();
             InitializeFloorManagement();
+            InitializeAnalysis();
             Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
             Button("default", () => SetTextSize(DungeonTextSize.Default));
@@ -167,6 +168,7 @@ namespace DungeonBuilder.M0
                 ui.Q("contentChoices").GetFirstAncestorOfType<ScrollView>(), ui.Q<ScrollView>("roomChoicesScroll") })
                 strip.horizontalScrollerVisibility = ScrollerVisibility.Auto;
             ui.Q<ScrollView>("contextDetails").verticalScrollerVisibility = ScrollerVisibility.Auto;
+            ui.Q<ScrollView>("analysisScroll").verticalScrollerVisibility = ScrollerVisibility.Auto;
             ui.Q<Button>("legacy").style.display = DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(
                 DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), root.DevPanelEnabled) ? DisplayStyle.Flex : DisplayStyle.None;
             SetLegacy(false);
@@ -190,7 +192,7 @@ namespace DungeonBuilder.M0
         public void EnterEdit()
         {
             if (!HasCanonicalRuntime()) return;
-            if (IsEditing || recoveryBytes != null || recoveryReason != null) return;
+            if (IsAnalysis || IsEditing || recoveryBytes != null || recoveryReason != null) return;
             string roomToRetain = ContextRoomId;
             draft = TransactionalDungeonDraft.Create(root.Save.validatedCanonicalSpatialState, draftContext, store);
             feedback = null; selected = null; moveMode = false; CloseSheet();
@@ -218,7 +220,7 @@ namespace DungeonBuilder.M0
         private void CloseSheet() { ClearContentSelection(); ClearConstructionSelection(); selected = null; selectedRoomId = null; selectedEdgeId=null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
         public void TapWorld(TileCoordinate cell)
         {
-            if (!initialized || !HasCanonicalRuntime() || legacy || modal.style.display == DisplayStyle.Flex) return;
+            if (!initialized || !HasCanonicalRuntime() || legacy || IsAnalysis || modal.style.display == DisplayStyle.Flex) return;
             if (IsEditing && reassigning != null) { SelectContentDestinationAt(cell); return; }
             if (IsPlacingContent) { PreviewRoomContent(cell); return; }
             if (constructionRequest != null && IsEditing) { PreviewConstruction(cell); return; }
@@ -345,6 +347,10 @@ namespace DungeonBuilder.M0
         }
         private void ShowModal(string key, Action action, string confirmKey)
         {
+            navigationReview = false;
+            document.rootVisualElement.Q<Label>("navigationStatus").text = string.Empty;
+            document.rootVisualElement.Q<Button>("navigationDiscard").style.display = DisplayStyle.None;
+            document.rootVisualElement.Q<Button>("confirm").SetEnabled(true);
             gesture.Cancel(); pointerDown = false; confirm = action;
             document.rootVisualElement.Q<Label>("modalText").text = Text(key);
             document.rootVisualElement.Q<Button>("confirm").text = Text(confirmKey);
@@ -354,6 +360,8 @@ namespace DungeonBuilder.M0
         }
         private void CloseModal()
         {
+            navigationReview = false;
+            document.rootVisualElement.Q<Button>("navigationDiscard").style.display = DisplayStyle.None;
             modal.style.display = DisplayStyle.None; confirm = null;
         }
         private void CancelModal()
@@ -449,6 +457,7 @@ namespace DungeonBuilder.M0
             if (IsEditing) replay?.Suspend();
             world.PresentReplay(replay, IsEditing || legacy);
             PresentReplayControls();
+            PresentAnalysis();
             SetTextSize(textSize);
         }
         private void PresentHud()
@@ -523,6 +532,7 @@ namespace DungeonBuilder.M0
             ApplySafeArea(lastSafe, lastResolution); SetTextSize(textSize);
             safe.EnableInClassList("compact-hud", lastSafe.width / document.panelSettings.scale < presentationPolicy.ReferenceShortSide);
             safe.EnableInClassList("landscape", Screen.width > Screen.height);
+            PresentPerformanceSummary();
             PlaceDevelopmentAction();
             PresentComposition();
             viewportElement.UnregisterCallback<GeometryChangedEvent>(ViewportGeometry);
