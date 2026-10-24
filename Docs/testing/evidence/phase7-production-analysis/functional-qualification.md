@@ -84,6 +84,10 @@ Its package/fixture hash checks, synthetic preservation dry run and native two-h
 
 See [owner Moonlight steps](owner-moonlight-uat.md), [machine-readable results](functional-qualification.json) and [sanitized screenshots/process evidence](functional-qualification-reports.zip). Raw saves, complete commands, SDK backups and private logs remain local in F1.
 
+## Subsequent owner acceptance
+
+On 2026-10-24 the owner confirmed that PR #249 UAT passed. This is a later owner acceptance report; it does not alter the source applicability or counts above, and no scenario-by-scenario evidence, device, resolution, orientation, or platform details accompanied the confirmation. The earlier directly observed PC testing and its reported limitations remain recorded as such. See the [owner acceptance addendum](owner-uat-acceptance.md). No native iOS qualification is claimed.
+
 Repository issue searches for shutdown/hang/quit did not locate a matching lifecycle issue. Recommend a separate tracked issue, **Windows player remains alive after AppQuit and window close**, linking the historical D1–D3/F1 evidence and owner report. Do not infer a resolved cause or implement its fix here.
 
 Technical qualification complete, pending independent review of remaining native coverage and owner Moonlight acceptance.
