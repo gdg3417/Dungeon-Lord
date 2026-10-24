@@ -208,9 +208,97 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             Restore(cp, limits, preparation).Abandon(); // the original entry was never replaced
         }
-        [TestCase(false)] [TestCase(true)] public void ActualLifetimeOperationReusesPreparationAndRetainsEveryReader(bool descend)
+        [TestCase(-1)] [TestCase(0)] [TestCase(1)]
+        public void WarmReuseMatchesReferenceAtMeasuredCombatWorkBoundary(int delta)
         {
-            var f = T.Dungeon(descend); var e = T.Start(f); var before = f.Session.GetCurrentBytes();
+            var f = T.Dungeon(false); var limits = T.Profile(f).Checkpoints;
+            var before = f.Session.GetCurrentBytes(); var runtime = B.Structured(f.Runtime);
+            int boundary; long pendingWork, encounterWork;
+            var measured = T.Start(f);
+            try {
+                var steps = Finish(measured, 1);
+                boundary = steps.FindIndex(s => s.Kind == RunStepKind.MonsterEngagement);
+            } finally { measured.Abandon(); }
+            Assert.That(boundary, Is.GreaterThan(0));
+            measured = T.Start(f);
+            try {
+                for (int i = 0; i < boundary; i++) measured.Advance(1, measured.NextOrdinal);
+                measured.NextDueTime(); pendingWork = measured.Combat.Kernel.WorkCount;
+                Assert.That(measured.Advance(1, measured.NextOrdinal).Single().Kind, Is.EqualTo(RunStepKind.MonsterEngagement));
+                encounterWork = measured.CommittedCombatWork;
+            } finally { measured.Abandon(); }
+            Assert.That(encounterWork, Is.GreaterThan(pendingWork));
+            // Test-only captured config: adjacent limits measured from this fixture's real kernel.
+            f.Configuration.CombatC0.MaximumWork = encounterWork + delta;
+            var source = T.Start(f);
+            using var preparation = new CombatStartCapture.AdmissionPreparation();
+            bool enabled = Metrics.Enabled, detailed = Metrics.DetailedEnabled;
+            RunExecution reused = null, reference = null;
+            try {
+                Metrics.Reset(); Metrics.Enabled = Metrics.DetailedEnabled = true;
+                Restore(source.ExportCheckpoint(limits), limits, preparation).Abandon();
+                for (int i = 0; i < boundary; i++) source.Advance(1, source.NextOrdinal);
+                // Export the closest legal committed prefix; never forge a later ordinal/digest.
+                var cp = source.ExportCheckpoint(limits);
+                reused = Restore(cp, limits, preparation);
+                Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.StartPreparation], Is.EqualTo(1));
+                Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.AdmissionStartReuse], Is.EqualTo(1));
+                reference = Restore(cp, limits);
+                Equal(reused, reference, limits);
+                Assert.That(B.Structured(AdvanceToWorkFailure(reused, limits)),
+                    Is.EqualTo(B.Structured(AdvanceToWorkFailure(reference, limits))));
+                Assert.That(reused.NextOrdinal, Is.EqualTo(reference.NextOrdinal));
+                Assert.That(reused.NextOrdinal, delta < 0 ? Is.EqualTo(boundary) : Is.GreaterThan(boundary));
+                Assert.That(reused.CommittedCombatWork, Is.EqualTo(reference.CommittedCombatWork));
+                Assert.That(reused.Combat.Kernel.WorkCount, Is.EqualTo(reference.Combat.Kernel.WorkCount));
+                CollectionAssert.AreEqual(reused.PrefixDigest, reference.PrefixDigest);
+                CollectionAssert.AreEqual(CombatCheckpointCodec.Inspection(reused), CombatCheckpointCodec.Inspection(reference));
+                Assert.That(B.Structured(reused.Combat.Events), Is.EqualTo(B.Structured(reference.Combat.Events)));
+                Assert.That(B.Structured(reused.PresentationSteps), Is.EqualTo(B.Structured(reference.PresentationSteps)));
+                Assert.That(B.Structured(reused.Combat.Kernel.InspectMonsters()), Is.EqualTo(B.Structured(reference.Combat.Kernel.InspectMonsters())));
+                CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
+                Assert.That(B.Structured(f.Runtime), Is.EqualTo(runtime));
+                TestContext.WriteLine("Legal warm combat boundary prefix=" + cp.NextOrdinal + " pending=" + pendingWork +
+                    " encounter=" + encounterWork + " limit=" + (encounterWork + delta) + " failedOrdinal=" + reused.NextOrdinal +
+                    " committed=" + reused.CommittedCombatWork + " charged=" + reused.Combat.Kernel.WorkCount);
+            } finally {
+                reused?.Abandon(); reference?.Abandon(); source.Abandon();
+                Metrics.Enabled = enabled; Metrics.DetailedEnabled = detailed;
+            }
+        }
+        private static List<RunStep> AdvanceToWorkFailure(RunExecution e, RunCheckpointLimits limits)
+        {
+            var steps = new List<RunStep>();
+            while (!e.IsTerminal) {
+                long ordinal = e.NextOrdinal, committed = e.CommittedCombatWork;
+                var prefix = (byte[])e.PrefixDigest.Clone(); var inspection = CombatCheckpointCodec.Inspection(e);
+                var events = B.Structured(e.Combat.Events);
+                try { steps.AddRange(e.Advance(1, ordinal)); }
+                catch (InvalidOperationException error) {
+                    while (error.InnerException is InvalidOperationException inner) error = inner;
+                    Assert.That(error.Message, Is.EqualTo(CombatC0Kernel.Workload));
+                    Assert.That(e.NextOrdinal, Is.EqualTo(ordinal));
+                    Assert.That(e.CommittedCombatWork, Is.EqualTo(committed));
+                    CollectionAssert.AreEqual(prefix, e.PrefixDigest);
+                    CollectionAssert.AreEqual(inspection, CombatCheckpointCodec.Inspection(e));
+                    Assert.That(B.Structured(e.Combat.Events), Is.EqualTo(events));
+                    Assert.That(e.Combat.Kernel.WorkCount, Is.LessThanOrEqualTo(e.Combat.Kernel.Configuration.MaximumWork));
+                    Assert.Throws<InvalidOperationException>(() => e.ExportCheckpoint(limits));
+                    Assert.Throws<InvalidOperationException>(() => e.TakeOutcome());
+                    Assert.Throws<InvalidOperationException>(() => e.NextDueTime());
+                    return steps;
+                }
+            }
+            Assert.Fail("Expected measured combat work exhaustion"); return steps;
+        }
+        [TestCase(false, false)] [TestCase(true, false)] [TestCase(true, true)]
+        public void ActualLifetimeOperationReusesPreparationAndRetainsEveryReader(bool twoFloors, bool descend)
+        {
+            var f = T.Dungeon(descend);
+            if (!twoFloors) f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session,
+                f.Runtime, FloorLifecycleAction.Deactivate, PhaseSixA4Tests.FloorTwo(f)));
+            var e = T.Start(f); var before = f.Session.GetCurrentBytes();
+            Assert.That(e.Snapshot.Floors.Count, Is.EqualTo(twoFloors ? 2 : 1));
             bool enabled = Metrics.Enabled, detailed = Metrics.DetailedEnabled;
             try {
                 Metrics.Reset(); Metrics.Enabled = Metrics.DetailedEnabled = true;
@@ -256,7 +344,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(Assert.Throws<InvalidOperationException>(() => LivingDungeonLifetimeAssurance.Check(e, bounded)).Message,
                     Is.EqualTo("run.checkpoint.replay_limit"));
             } finally { e.Abandon(); }
-            ActualLifetimeOperationReusesPreparationAndRetainsEveryReader(true);
+            ActualLifetimeOperationReusesPreparationAndRetainsEveryReader(true, true);
         }
     }
 }
