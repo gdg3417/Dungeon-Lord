@@ -1,0 +1,468 @@
+{
+  "status": "still blocked",
+  "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+  "underlying_implementation": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+  "evidence_head_before_closeout": "b6bfb7a4358cf733fe9fd0d0ea929ad9bdeab02b",
+  "main": "fbe4bdff0cba9fea72b42fb6a05714327f880df4",
+  "original_baseline": "7dc6f96b5c35f24923f6e8cbfa8a5e256c16c3ac",
+  "source_changes": false,
+  "attempts": {
+    "10-native-ui-landscape": {
+      "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+      "artifact_id": "P249R2-fe8daae0264348579db73d3402254215",
+      "arguments": [
+        "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-p249r2-native\\Builds\\Development\\Windows\\Dungeon Lord.exe",
+        "-screen-fullscreen",
+        "0",
+        "-screen-width",
+        "1280",
+        "-screen-height",
+        "720",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\10-native-ui-landscape.log"
+      ],
+      "prelaunch_save_sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+      "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\living-dungeon-b3b2-qualification-two-floor-p249r2-native.json",
+      "startedUtc": "2026-10-23T03:02:43.199187+00:00",
+      "requested_viewport": [
+        1280,
+        720
+      ],
+      "purpose": "Visible native UI qualification; ordinary unmodified foreground clock, not owner UAT",
+      "pid": 38808
+    },
+    "11-native-ui-portrait": {
+      "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+      "artifact_id": "P249R2-fe8daae0264348579db73d3402254215",
+      "arguments": [
+        "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-p249r2-native\\Builds\\Development\\Windows\\Dungeon Lord.exe",
+        "-screen-fullscreen",
+        "0",
+        "-screen-width",
+        "360",
+        "-screen-height",
+        "640",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\11-native-ui-portrait.log"
+      ],
+      "prelaunch_save_sha256": "b8a42fc4e91ce13616bbd73f735b2c7a6e68194cb269b3fef39ca168bced2123",
+      "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\living-dungeon-b3b2-qualification-two-floor-p249r2-native.json",
+      "startedUtc": "2026-10-23T13:14:08.627818+00:00",
+      "requested_viewport": [
+        360,
+        640
+      ],
+      "purpose": "Visible native UI qualification; ordinary unmodified foreground clock, not owner UAT",
+      "pid": 38752
+    },
+    "12-native-ui-portrait": {
+      "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+      "artifact_id": "P249R2-fe8daae0264348579db73d3402254215",
+      "arguments": [
+        "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-p249r2-native\\Builds\\Development\\Windows\\Dungeon Lord.exe",
+        "-screen-fullscreen",
+        "0",
+        "-screen-width",
+        "360",
+        "-screen-height",
+        "640",
+        "-logFile",
+        "C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\12-native-ui-portrait.log"
+      ],
+      "prelaunch_save_sha256": "b8a42fc4e91ce13616bbd73f735b2c7a6e68194cb269b3fef39ca168bced2123",
+      "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\DL B3B2 Smoke Two Floor P249R2\\living-dungeon-b3b2-qualification-two-floor-p249r2-native.json",
+      "startedUtc": "2026-10-23T13:15:28.425241+00:00",
+      "requested_viewport": [
+        360,
+        640
+      ],
+      "purpose": "Visible native UI qualification; ordinary unmodified foreground clock, not owner UAT",
+      "pid": 39392
+    }
+  },
+  "native_shutdown_failure": {
+    "status": "Native visible-player exit failed: window closed and AppQuit persisted, but process remains alive after cleanup",
+    "processes": [
+      {
+        "pid": 38808,
+        "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-p249r2-native\\Builds\\Development\\Windows\\Dungeon Lord.exe",
+        "command": "\"C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-p249r2-native\\Builds\\Development\\Windows\\Dungeon Lord.exe\" -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -logFile C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\10-native-ui-landscape.log",
+        "cpu": 28455.703125,
+        "handle": 0,
+        "observedUtc": "2026-10-23T13:22:12.7378671Z",
+        "cpuAfter3Seconds": 28455.703125
+      },
+      {
+        "pid": 39392,
+        "path": "C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-p249r2-native\\Builds\\Development\\Windows\\Dungeon Lord.exe",
+        "command": "\"C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-p249r2-native\\Builds\\Development\\Windows\\Dungeon Lord.exe\" -screen-fullscreen 0 -screen-width 360 -screen-height 640 -logFile C:\\Dev\\Dungeon-Lord\\TestResults\\phase7-analysis-recovery-20261022-r2\\12-native-ui-portrait.log",
+        "cpu": 81.828125,
+        "handle": 0,
+        "observedUtc": "2026-10-23T13:22:12.8481078Z",
+        "cpuAfter3Seconds": 81.828125
+      }
+    ],
+    "action": "Terminate only these two exact campaign processes after evidence capture; no further native launch or fixture preparation",
+    "source": "c870c5dc92aee87e854af350aa0a73653d045ff2"
+  },
+  "classification": "Visible ordinary Development-player process shutdown failure; production/environment cause unclassified; strict visible reopen invalid due premature landscape process-exit assumption and overlapping windowless process",
+  "provisional_snapshot": "10-native-ui-post-exit.save.json: not actual process exit, not accepted as non-overlapping reopen evidence",
+  "low_integrity_attempt": "11: 312-byte startup log and no window; not a pass",
+  "fixture_preparation": "Host-level guard aborted before directory creation or file mutation",
+  "native_ui_observations": [
+    "landscape compatible replay opened via actual button",
+    "Analysis opened from replay; returning Dungeon restored normal header without replay restart",
+    "click former Edit location while Analysis open did not enter Edit",
+    "landscape Display Default/Large via actual buttons",
+    "clean Edit draft Display Analysis immediate navigation",
+    "portrait Default header scroll reached Display",
+    "portrait Large compact entry opened Analysis",
+    "portrait Large report scroll reached final evidence-availability text",
+    "portrait Display restored Default and Dungeon return"
+  ],
+  "native_pending": [
+    "valid modified Save/Discard/Continue",
+    "invalid modified two-choice",
+    "pending/failed/stale native dialogs",
+    "empty/incomplete history native presentation",
+    "strict visible-player exit and reopen",
+    "independent client resolution measurement",
+    "owner build/fixture/launcher readiness",
+    "physical phone Moonlight acceptance"
+  ],
+  "native_viewports": [
+    {
+      "requested": [
+        1280,
+        720
+      ],
+      "captured_outer": [
+        1282,
+        752
+      ]
+    },
+    {
+      "requested": [
+        360,
+        640
+      ],
+      "captured_outer": [
+        362,
+        672
+      ]
+    }
+  ],
+  "new_automated_test_invocations": 0,
+  "previous_suites": [
+    {
+      "suite": "focused prerequisites",
+      "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "full EditMode",
+      "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+      "passed": 2352,
+      "failed": 0,
+      "skipped": 1
+    },
+    {
+      "suite": "full PlayMode",
+      "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+      "passed": 3741,
+      "failed": 0,
+      "skipped": 10
+    },
+    {
+      "suite": "native Windows filesystem",
+      "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "preservation": {
+    "utc": "2026-10-23T13:28:21.309349+00:00",
+    "historical_checked": 26181,
+    "historical_changes": [],
+    "protected_checked": 350,
+    "protected_changes": [],
+    "all_disposable_original_input_files_restored": [
+      {
+        "stage": "focused",
+        "original_exact_inputs": 1418
+      },
+      {
+        "stage": "edit",
+        "original_exact_inputs": 1418
+      },
+      {
+        "stage": "play",
+        "original_exact_inputs": 1418
+      },
+      {
+        "stage": "native",
+        "original_exact_inputs": 1418
+      },
+      {
+        "stage": "nativefs",
+        "original_exact_inputs": 1418
+      }
+    ],
+    "exceptions": "No protected-byte changes; native visible-player process exit/reopen evidence is invalidated, not accepted as a pass"
+  },
+  "input_closure": {
+    "source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+    "stages": [
+      {
+        "stage": "focused",
+        "original_exact_inputs": 1418
+      },
+      {
+        "stage": "edit",
+        "original_exact_inputs": 1418
+      },
+      {
+        "stage": "play",
+        "original_exact_inputs": 1418
+      },
+      {
+        "stage": "native",
+        "original_exact_inputs": 1418
+      },
+      {
+        "stage": "nativefs",
+        "original_exact_inputs": 1418
+      }
+    ],
+    "native_archived_qualified_inputs": [
+      {
+        "path": "Assets/_Project/Data/Bootstrap/build_config.json",
+        "qualified_sha256": "901984dbfac6aab39a6256554b4a4f57031b42b982dfac97a0156c6a9c2a1b91",
+        "source_sha256": "edf2b29d6ffa3f3cecfd03d1607acd4370742719d316cf2889e43c3e5ac26828"
+      },
+      {
+        "path": "Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs",
+        "qualified_sha256": "9f18e62c2ee2c679764e59a6dba8ca1d9d7fdf7fae32a464b642ccb8f3bac6f2",
+        "source_sha256": "a42a467ecfee1a34bec1a2fd7d8b39eb2d07300eb0b43befac61cacbf3cfedba"
+      },
+      {
+        "path": "Assets/_Project/Scripts/BuildTools/DevelopmentBuildUtility.cs",
+        "qualified_sha256": "072e8e1613b892650ec746e805692f5e441e08da70d3bdeea91c609cc3d330d9",
+        "source_sha256": "c4c66b7dcee5f5d56ef37841196291b7e9e17a2eb36b3b0044a3fb7add9323f3"
+      },
+      {
+        "path": "Assets/_Project/Scripts/Services/SaveService.cs",
+        "qualified_sha256": "54cb4b111d1ae8ba7cfaa8bcca1ea8e3d130365aee350964febababc5b560fe8",
+        "source_sha256": "54fd3c6766bd8c82ba6d543437dc7b5dda5f5119a2a4a9dcf664ee4bb333012e"
+      },
+      {
+        "path": "Assets/_Project/Tests/EditMode/BuildReadinessTests.cs",
+        "qualified_sha256": "99d0b828bdf76836ae94c0bd673301a6e4cd5ec31d15c1e5a0955e5297e44451",
+        "source_sha256": "1ff6d9759447d19cb3379cafcb7a8fb6103c806d7197db58ca55dd21240aed57"
+      },
+      {
+        "path": "ProjectSettings/EditorBuildSettings.asset",
+        "qualified_sha256": "f72e8fd550133184822260c85b62c371189f88e1d390fb95839292e9247ee7cf",
+        "source_sha256": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9"
+      },
+      {
+        "path": "ProjectSettings/ProjectSettings.asset",
+        "qualified_sha256": "c807ac5a807648b0cc9c35af37986a2989207a8db52bd480553b584b9cc16a01",
+        "source_sha256": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993"
+      },
+      {
+        "path": "ProjectSettings/ShaderGraphSettings.asset",
+        "qualified_sha256": "5c432c9c73fdf73fee91c8823ea02ab98e3b7a8edf341b5ae6901d699cce52a7",
+        "source_sha256": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+      }
+    ],
+    "build_files_verified": 303,
+    "artifact_id": "P249R2-fe8daae0264348579db73d3402254215"
+  },
+  "new_product_snapshot_manifest_sha256": "97222abca8214d56e5c921fd15f671af35c28d57448038a40fefed6e2b04fa41",
+  "logs": [
+    {
+      "path": "10-native-ui-landscape.log",
+      "sha256": "6cfe3dd18f825508fbd326fc45a91e7c576607b368b033dab51787714397f09a",
+      "bytes": 7611981,
+      "excerpt": "10-native-ui-landscape.log.shutdown-excerpt.txt",
+      "boot_entries": 1,
+      "appquit_entries": 1
+    },
+    {
+      "path": "11-native-ui-portrait.log",
+      "sha256": "02f9a6c79b2c0789af5ed471e435d9dfe7775d5d463bf3be28b2509a1449bed3",
+      "bytes": 312,
+      "excerpt": "11-native-ui-portrait.log.shutdown-excerpt.txt",
+      "boot_entries": 0,
+      "appquit_entries": 0
+    },
+    {
+      "path": "12-native-ui-portrait.log",
+      "sha256": "92432adabd20de4f093bc5ebdaa4fa67c7e321158336cdaa461978445b93bdb8",
+      "bytes": 38689,
+      "excerpt": "12-native-ui-portrait.log.shutdown-excerpt.txt",
+      "boot_entries": 1,
+      "appquit_entries": 1
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "10-ui-analysis-large.png",
+      "sha256": "bdea58613b0ee874ed6e7f39ed21ace3f0969aa1b5bbbc153557ce566a19ca97",
+      "bytes": 135652
+    },
+    {
+      "path": "10-ui-analysis.png",
+      "sha256": "ca6adf1ef18eb38aa42188067979b33d480b4fdecb93ae436f705af07385a205",
+      "bytes": 105496
+    },
+    {
+      "path": "10-ui-replay.png",
+      "sha256": "180259df601bcc12d14c00317bb282a407786d17d5cc875257b82f74869aa5fc",
+      "bytes": 136986
+    },
+    {
+      "path": "12-ui-portrait-large-analysis-end.png",
+      "sha256": "71d477871163107708380b7eca0f8a75a816d038f752fe5a31d30268f2dfdead",
+      "bytes": 60945
+    },
+    {
+      "path": "12-ui-portrait-large-analysis-top.png",
+      "sha256": "bbaa2b641adf68738dc4e108c4b125212df07b34d3a601c69ce54a53d67023b1",
+      "bytes": 54249
+    },
+    {
+      "path": "12-ui-portrait-large-dungeon.png",
+      "sha256": "97cf292015a7b16c193ab88a78bc425b20ed17213112c729892fb6f1b27fd79b",
+      "bytes": 56950
+    }
+  ],
+  "owner_uat_ready": false,
+  "physical_phone_acceptance": false,
+  "utc": "2026-10-23T13:28:37.294908+00:00",
+  "packet": {
+    "path": "native-ui-continuation-reports.zip",
+    "sha256": "275cd84831f02384cab0b0f1a3b81948a314ca722a4dbafb4a50875b212a86f8",
+    "entries": [
+      {
+        "path": "10-native-ui-landscape-ui-process.json",
+        "sha256": "0a05f77cd3f9441154cf06be765f082d997c99ae540ba7b2ea3e356d26cea4c3",
+        "bytes": 976
+      },
+      {
+        "path": "10-native-ui-landscape.log.shutdown-excerpt.txt",
+        "sha256": "6d8f83b4f9fadc164ec4141e8cff99912a81b5fae6ce5cd31e292cdc9db63840",
+        "bytes": 875
+      },
+      {
+        "path": "10-ui-analysis-large.png",
+        "sha256": "bdea58613b0ee874ed6e7f39ed21ace3f0969aa1b5bbbc153557ce566a19ca97",
+        "bytes": 135652
+      },
+      {
+        "path": "10-ui-analysis.png",
+        "sha256": "ca6adf1ef18eb38aa42188067979b33d480b4fdecb93ae436f705af07385a205",
+        "bytes": 105496
+      },
+      {
+        "path": "10-ui-replay.png",
+        "sha256": "180259df601bcc12d14c00317bb282a407786d17d5cc875257b82f74869aa5fc",
+        "bytes": 136986
+      },
+      {
+        "path": "11-native-ui-portrait-ui-process.json",
+        "sha256": "5bb7e004c9bbbb1e4da18524cdc6370a8e0f81874baefe7996b6a07b4e6ee583",
+        "bytes": 973
+      },
+      {
+        "path": "11-native-ui-portrait.log.shutdown-excerpt.txt",
+        "sha256": "e0c5c49880f27aeac3b6363321a6fa8a4efe7f5d924858d8f8ccc924c2a229e6",
+        "bytes": 357
+      },
+      {
+        "path": "12-native-ui-portrait-ui-process.json",
+        "sha256": "7f040261560a42876073c8b4752fd50d66350cce76c524c32646c0ca29af84a3",
+        "bytes": 973
+      },
+      {
+        "path": "12-native-ui-portrait.log.shutdown-excerpt.txt",
+        "sha256": "61595f94514d58a341f2c894c39c77b00082bc1f5e087b2c79604054bd058da0",
+        "bytes": 793
+      },
+      {
+        "path": "12-ui-portrait-large-analysis-end.png",
+        "sha256": "71d477871163107708380b7eca0f8a75a816d038f752fe5a31d30268f2dfdead",
+        "bytes": 60945
+      },
+      {
+        "path": "12-ui-portrait-large-analysis-top.png",
+        "sha256": "bbaa2b641adf68738dc4e108c4b125212df07b34d3a601c69ce54a53d67023b1",
+        "bytes": 54249
+      },
+      {
+        "path": "12-ui-portrait-large-dungeon.png",
+        "sha256": "97cf292015a7b16c193ab88a78bc425b20ed17213112c729892fb6f1b27fd79b",
+        "bytes": 56950
+      },
+      {
+        "path": "13-all-source-inputs-restored.json",
+        "sha256": "c8d7f67f46d075f604c4964154cc241bf58d19ae9e90c25f09161e7dee586b17",
+        "bytes": 2775
+      },
+      {
+        "path": "13-fixture-guard-abort.json",
+        "sha256": "57c705cd4f379c324d16d28ff7c8d60ee96f5f691be5b567cc27ece40344a623",
+        "bytes": 623
+      },
+      {
+        "path": "13-native-product-closed.json",
+        "sha256": "97222abca8214d56e5c921fd15f671af35c28d57448038a40fefed6e2b04fa41",
+        "bytes": 21782
+      },
+      {
+        "path": "13-native-shutdown-hang.json",
+        "sha256": "7cd2b14e79fdb09bdc13cdfa8645e663c72258ba7c47166dde80b93e394b51d6",
+        "bytes": 1583
+      },
+      {
+        "path": "13-preservation-final.json",
+        "sha256": "8eb42f807863e8bef46c4365699c9f73087c8a9983ec8b787d6b48b98c76c708",
+        "bytes": 751
+      },
+      {
+        "path": "archive_ui.py",
+        "sha256": "919be37c1f543bd895c0d6e7c8cb8d6290776656334a562cb504aed491b16190",
+        "bytes": 524
+      },
+      {
+        "path": "close_hung_native.ps1",
+        "sha256": "f3a153e0ab0a62711fb2fb8adac0a740dac8f682e123ead02c13b018d1de8ded",
+        "bytes": 2214
+      },
+      {
+        "path": "collect_native_ui.py",
+        "sha256": "bae9ffdc844c81be0246350f81cf43a1a9ce00ebfb81407a3bf30de1dc99cdcc",
+        "bytes": 5273
+      },
+      {
+        "path": "native_ui_closeout.py",
+        "sha256": "fd493221d43346c5844dfe11abfba0c71326cfa1c03b6bf08c43fd3afb41bb87",
+        "bytes": 3333
+      },
+      {
+        "path": "prepare_starter_ui.py",
+        "sha256": "0803fafb441b27eb6464c30a2fbb3e43682c2b8797a226c7ea14730f2365cd74",
+        "bytes": 1417
+      },
+      {
+        "path": "ui_launch.py",
+        "sha256": "654abfc5bb4854c4f3c1dfaaafdfcc09148b4c6c25058a27eb0058cf526b9f60",
+        "bytes": 1321
+      }
+    ]
+  }
+}

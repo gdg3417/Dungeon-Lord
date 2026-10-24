@@ -1,0 +1,133 @@
+{
+  "qualified_source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+  "start_head": "fb5ab9ddc583246b8342294f7e81e812114806f1",
+  "artifact_id": "P249R2-fe8daae0264348579db73d3402254215",
+  "owner_clarification": "Owner tested directly on PC; no phone or Moonlight testing reported",
+  "native_observations": [
+    {
+      "name": "portrait",
+      "pid": 1252,
+      "creation": 134373290373063981,
+      "requested": [
+        1179,
+        2556
+      ],
+      "actual_client": [
+        [
+          1179,
+          1080
+        ]
+      ],
+      "exit_code": 0,
+      "normal": true,
+      "product_restored": 47,
+      "log_sha256": "037ffa7d71f4e59a75f995695f504cb6265a50add2cf864a7fbb70ebd299efc6"
+    },
+    {
+      "name": "landscape",
+      "pid": 48400,
+      "creation": 134373292045162676,
+      "requested": [
+        1561,
+        720
+      ],
+      "actual_client": [
+        [
+          1561,
+          720
+        ]
+      ],
+      "exit_code": 0,
+      "normal": true,
+      "product_restored": 47,
+      "log_sha256": "c7e82948a891794ed47d1d32402d7ed855a93e4875f16d952d100b7e1f67c6ba"
+    }
+  ],
+  "sealed_files": 303,
+  "sealed_unchanged": true,
+  "owner_package_files": 654,
+  "owner_package_differences": [],
+  "initial_audit_failure": "Path separator mismatch in key comparison; retained initial report. Normalized path keys preserve identical identities; no filesystem restoration needed.",
+  "prepared_launcher_and_fixtures_unchanged": true,
+  "new_runtime_changes": 0,
+  "new_tests": 0,
+  "new_builds": 0,
+  "new_profiles": 0,
+  "screenshots": [
+    {
+      "path": "landscape-analysis-large.png",
+      "sha256": "d27d0fcbd379181d2d7445d97fff7faedb738ec99e272a4d5d46d90d9d8b2ac5"
+    },
+    {
+      "path": "landscape-default.png",
+      "sha256": "2eb80bf7c6764de03ee90b8c5c1d1f663e3de0583c7ab8ed336484dcb4f1725c"
+    },
+    {
+      "path": "landscape-large-active-transition.png",
+      "sha256": "83b6011e9c78e78dec95ee9e8c4ac62e0422b85c91dce9fa009aef96d61a68ca"
+    },
+    {
+      "path": "landscape-large.png",
+      "sha256": "d86afe764c72b514bc0277a0b13b73feaa80f2af507b0df0f45a694bc174e6a6"
+    },
+    {
+      "path": "portrait-clamped-analysis.png",
+      "sha256": "fd3e1f19222207b9c43c4161633fd9e57328baab071b3a49fb423eabde7a5f81"
+    },
+    {
+      "path": "portrait-clamped-default.png",
+      "sha256": "89d96b8e7d9fe1ebc225c9abcfb2250d7ae00e59a791b89b9514585939f16f40"
+    },
+    {
+      "path": "portrait-dungeon.png",
+      "sha256": "c7555f3fbccf1667db66e2ffd5a0841bfd08ff4ef73c424dca7b99b890bb8719"
+    }
+  ],
+  "disposition": "Hold draft PR for independent viewport/layout disposition and physical phone UAT; no fix authorized",
+  "source_comparison": {
+    "unity_inputs": 1418,
+    "differences": [],
+    "main_ui_comparison": [
+      {
+        "path": "Assets/_Project/Scripts/UI/DungeonPresentationPolicy.cs",
+        "identical_to_main": true,
+        "sha256": "ede51dfb3ead3ceb0ef9081ce8dcf7e8184be0ccc6ad1e5a8fb2d7b4e30e4fac"
+      },
+      {
+        "path": "Assets/_Project/Scripts/UI/DungeonPhysicalUnits.cs",
+        "identical_to_main": true,
+        "sha256": "ad8077930c94e05c3a6c47bf3c463e88de502cc4db40a230c3bec131e1be1ade"
+      },
+      {
+        "path": "Assets/_Project/UI/ProductionDungeon/Panel.asset",
+        "identical_to_main": true,
+        "sha256": "0e36518e2997fa7293c0f85c09fc5995718fdebdb7ce1080f5a8f546ec8ec06e"
+      },
+      {
+        "path": "Assets/_Project/UI/ProductionDungeon/Presentation.asset",
+        "identical_to_main": true,
+        "sha256": "887f17e7b0ec41041d0c9452704a9a638c8572983f101306d50e86a657981df3"
+      },
+      {
+        "path": "Assets/_Project/Scripts/UI/ProductionDungeonForeground.cs",
+        "identical_to_main": true,
+        "sha256": "e29e6913ed93d364f25aff37fce1abc7439fc9f0ba53550e581707b0022eb1f9"
+      },
+      {
+        "path": "Assets/_Project/UI/ProductionDungeon/Dungeon.uss",
+        "main_existing_rules_unchanged": true,
+        "main_bytes": 16770,
+        "added_lines": 12
+      }
+    ]
+  },
+  "supported_minimum": "No numeric minimum established by cited approved decisions",
+  "small_viewports": "Explicit prior qualification targets; small Windows stress/proxy sizes, not a native iPhone support definition",
+  "representative_portrait": "Not established: requested portrait was clamped to landscape",
+  "representative_landscape": "No letter-splitting in Default/Large; active-party messages still compress map",
+  "regression_disposition": "Baseline HUD constraints unchanged; new summary adds header cost; net main-versus-PR clipping delta unmeasured",
+  "owner_uat": "Owner explicitly reports PC-only testing; physical Moonlight acceptance outstanding",
+  "packet_entries": 16,
+  "packet_sha256": "7bab358d9c3488c9f166b141df6cd11e1eec8f5134080eee48ca5a7e2ceec851",
+  "packet": "mobile-layout-triage-reports.zip"
+}

@@ -1,0 +1,257 @@
+{
+  "status": "blocked: campaign preparation requires independent review",
+  "source": "d4071924993c67f2b22722a539be37eea781017e",
+  "implementation": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+  "original_main": "7dc6f96b5c35f24923f6e8cbfa8a5e256c16c3ac",
+  "current_main": "fbe4bdff0cba9fea72b42fb6a05714327f880df4",
+  "unity": "6000.3.2f1",
+  "cli": "1.0.0-beta.14",
+  "campaign": "TestResults\\phase7-analysis-final-20261023-01",
+  "suite": {
+    "mode": "EditMode",
+    "selection": "complete; no filter or exclusions",
+    "passed": 2345,
+    "failed": 7,
+    "skipped": 1,
+    "inconclusive": 0,
+    "total": 2353,
+    "unique_leaf_ids": 2353
+  },
+  "exit_record": {
+    "timeoutSeconds": 10800,
+    "source": "d4071924993c67f2b22722a539be37eea781017e",
+    "finishedUtc": "2026-10-22T23:34:11.5287515Z",
+    "selection": "complete EditMode suite; no filter or exclusions",
+    "implementation": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+    "startedUtc": "2026-10-22T23:02:05.5224285Z",
+    "exitCode": 8
+  },
+  "failures": [
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalGoldenRestoresAndReencodesExactPinnedBytes(\"historical-b1-format1.json\",1)",
+      "message": "System.IO.DirectoryNotFoundException : Could not find a part of the path \"C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Tools\\Presentation\\Fixtures\\historical-b1-format1.json\".",
+      "stack": "  at System.IO.FileStream..ctor (System.String path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, System.Int32 bufferSize, System.Boolean anonymous, System.IO.FileOptions options) [0x00164] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at System.IO.FileStream..ctor (System.String path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, System.Int32 bufferSize, System.IO.FileOptions options) [0x00000] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at (wrapper remoting-invoke-with-check) System.IO.FileStream..ctor(string,System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare,int,System.IO.FileOptions)\n  at System.IO.StreamReader..ctor (System.String path, System.Text.Encoding encoding, System.Boolean detectEncodingFromByteOrderMarks, System.Int32 bufferSize) [0x00055] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at System.IO.StreamReader..ctor (System.String path, System.Text.Encoding encoding, System.Boolean detectEncodingFromByteOrderMarks) [0x00000] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at (wrapper remoting-invoke-with-check) System.IO.StreamReader..ctor(string,System.Text.Encoding,bool)\n  at System.IO.File.InternalReadAllText (System.String path, System.Text.Encoding encoding) [0x00000] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at System.IO.File.ReadAllText (System.String path) [0x0002c] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.HistoricalGoldenRestoresAndReencodesExactPinnedBytes (System.String filename, System.Int32 format) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:90 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalGoldenRestoresAndReencodesExactPinnedBytes(\"historical-c2-format2.json\",2)",
+      "message": "System.IO.DirectoryNotFoundException : Could not find a part of the path \"C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Tools\\Presentation\\Fixtures\\historical-c2-format2.json\".",
+      "stack": "  at System.IO.FileStream..ctor (System.String path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, System.Int32 bufferSize, System.Boolean anonymous, System.IO.FileOptions options) [0x00164] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at System.IO.FileStream..ctor (System.String path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, System.Int32 bufferSize, System.IO.FileOptions options) [0x00000] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at (wrapper remoting-invoke-with-check) System.IO.FileStream..ctor(string,System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare,int,System.IO.FileOptions)\n  at System.IO.StreamReader..ctor (System.String path, System.Text.Encoding encoding, System.Boolean detectEncodingFromByteOrderMarks, System.Int32 bufferSize) [0x00055] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at System.IO.StreamReader..ctor (System.String path, System.Text.Encoding encoding, System.Boolean detectEncodingFromByteOrderMarks) [0x00000] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at (wrapper remoting-invoke-with-check) System.IO.StreamReader..ctor(string,System.Text.Encoding,bool)\n  at System.IO.File.InternalReadAllText (System.String path, System.Text.Encoding encoding) [0x00000] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at System.IO.File.ReadAllText (System.String path) [0x0002c] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.HistoricalGoldenRestoresAndReencodesExactPinnedBytes (System.String filename, System.Int32 format) [0x00000] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:90 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.ForegroundPerformanceSustainedProduction68Runs",
+      "message": "  System.InvalidOperationException: b3b2.profile.isolation_required\n  at DungeonBuilder.M0.GameRoot+<ProfileForeground>d__507.MoveNext () [0x00083] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Scripts\\Core\\GameRoot.ForegroundProfile.cs:41 \n  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<ForegroundPerformanceSustainedProduction68Runs>d__118.MoveNext () [0x000b4] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs:28 \n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<ForegroundPerformanceSustainedProduction68Runs>d__118.MoveNext () [0x00111] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs:41\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.OwnerUsabilityConstructionAndContentReachability",
+      "message": "System.IO.IOException : The file 'C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord\\owner-uat-starter.json' already exists.",
+      "stack": "  at System.IO.FileSystem.CopyFile (System.String sourceFullPath, System.String destFullPath, System.Boolean overwrite) [0x0005f] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at System.IO.File.Copy (System.String sourceFileName, System.String destFileName, System.Boolean overwrite) [0x00062] in <1eb9db207454431c84a47bcd81e79c37>:0 \n  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<OwnerUsabilityConstructionAndContentReachability>d__50.MoveNext () [0x000d2] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1127 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 "
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonSingleFloorEditorProductionProfile",
+      "message": "  System.InvalidOperationException: b3b2.profile.isolation_required\n  at DungeonBuilder.M0.GameRoot+<ProfileForeground>d__507.MoveNext () [0x00083] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Scripts\\Core\\GameRoot.ForegroundProfile.cs:41 \n  at DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests+<MatchedProfile>d__4.MoveNext () [0x0030c] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\LivingDungeonTwoFloorProductionProfileSceneTests.cs:163 \n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests+<MatchedProfile>d__4.MoveNext () [0x0037a] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\LivingDungeonTwoFloorProductionProfileSceneTests.cs:177\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonTwoFloorEditorProductionProfile",
+      "message": "  System.InvalidOperationException: b3b2.profile.isolation_required\n  at DungeonBuilder.M0.GameRoot+<ProfileForeground>d__507.MoveNext () [0x00083] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Scripts\\Core\\GameRoot.ForegroundProfile.cs:41 \n  at DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests+<MatchedProfile>d__4.MoveNext () [0x0030c] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\LivingDungeonTwoFloorProductionProfileSceneTests.cs:163 \n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests+<MatchedProfile>d__4.MoveNext () [0x0037a] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\LivingDungeonTwoFloorProductionProfileSceneTests.cs:177\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonTwoFloorWaitingSelectedFloorLayoutsPreserveCanonicalState",
+      "message": "System.InvalidOperationException : two_floor.smoke.isolation_required",
+      "stack": "  at DungeonBuilder.M0.GameRoot+<QualifyTwoFloor>d__511.MoveNext () [0x01018] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Scripts\\Core\\GameRoot.TwoFloorQualification.cs:152 \n  at DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests+<LivingDungeonTwoFloorWaitingSelectedFloorLayoutsPreserveCanonicalState>d__2.MoveNext () [0x002b1] in C:\\Dev\\Dungeon-Lord\\Temp\\ui-composition-analysis-final-20261022-01\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\LivingDungeonTwoFloorProductionProfileSceneTests.cs:45 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 "
+    }
+  ],
+  "skips": [
+    {
+      "name": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed",
+      "reason": "gd66.test.windows_only_inverse"
+    }
+  ],
+  "analysis_cases": [
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisCleanAndModifiedDraftContinueDiscardSave",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisDoesNotInterruptAuthoritativeForegroundAdmissionAndSettlement",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisFailedDiscardAndFailedSaveNeverNavigateOrLoseDraft",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisInvalidDraftOffersOnlyDiscardAndContinue",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisMissingLocalizationUsesExistingAvailabilityFeedback",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPendingAndStaleSaveRemainDisabledWithDraftIntact",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneNavigationSafeAreaAndCoveredInput",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneOpeningDuringReplayClosesPresentationOnly",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneValidDraftChoicesUseTouchButtons",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisReplayEntryImmediatelyUsesCompactHeader",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisResponsiveSafeAreaLocalizationAndScroll",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.ProductionAnalysisPresenterTests.ConfiguredProductionRetentionBoundUsesExactWindow",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.ProductionAnalysisPresenterTests.EmptyDoesNotUseLatestOrInventTotals",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.ProductionAnalysisPresenterTests.FormattingUsesCultureAndMissingKeysRemainSafe",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.ProductionAnalysisPresenterTests.OptionalIncompleteInvalidAndNullRecordsHaveIndependentCoverage",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.ProductionAnalysisPresenterTests.RetainedWindowUsesCorrectTotalsWithoutMutation(1)",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.ProductionAnalysisPresenterTests.RetainedWindowUsesCorrectTotalsWithoutMutation(3)",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.ProductionAnalysisPresenterTests.RetainedWindowUsesCorrectTotalsWithoutMutation(32)",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.Tests.ProductionAnalysisPresenterTests.UnknownOptionalValuesDoNotBecomeZerosOrHistoricalCauses",
+      "result": "Passed"
+    }
+  ],
+  "bounded_performance": [
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CompositionLayoutsAndPresentationWorkRemainBounded",
+      "result": "Passed",
+      "output": "Isolated scene boot 1: phase7a4-scene-3da8932afaf440a99818c4b23739568e.json\n[2026-10-22 23:23:32 UTC] [INFO] Entered BootState.\n[2026-10-22 23:23:33 UTC] [INFO] Offline passive mana grant persisted.\n[2026-10-22 23:23:33 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-22 23:23:33 UTC] [INFO] M0 init complete.\n[2026-10-22 23:23:33 UTC] [INFO] Entered HomeStubState.\n[2026-10-22 23:23:33 UTC] [INFO] Saved canonical complete save. Reason: StateChange\nRail (720, 1280) Small: viewport 720 -> 720, hit width=64\nRail (720, 1280) Default: viewport 720 -> 720, hit width=64\nRail (720, 1280) Large: viewport 720 -> 720, hit width=80\nCapture review-rail-collapsed-large (720, 1280): sheet=(x:0.00, y:742.00, width:720.00, height:538.00) viewport=(x:0.00, y:538.00, width:720.00, height:389.00) zoom=6.9\nRail (1080, 1920) Small: viewport 1080 -> 1080, hit width=64\nRail (1080, 1920) Default: viewport 1080 -> 1080, hit width=64\nRail (1080, 1920) Large: viewport 1080 -> 1080, hit width=80\nCapture review-rail-collapsed-large (1080, 1920): sheet=(x:0.00, y:742.67, width:720.00, height:537.33) viewport=(x:0.00, y:806.00, width:1080.00, height:582.00) zoom=6.9\nRail (1920, 1080) Small: viewport 1920 -> 1920, hit width=64\nRail (1920, 1080) Default: viewport 1920 -> 1920, hit width=64\nRail (1920, 1080) Large: viewport 1920 -> 1920, hit width=80\nCapture review-rail-collapsed-large (1920, 1080): sheet=(x:0.00, y:403.33, width:1280.00, height:316.67) viewport=(x:0.00, y:475.00, width:1920.00, height:221.00) zoom=6.9\n12 focus/fit/sheet/tick cycles: reconstruction=4, pooled renderers=5, draft commands=0\n"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.LivingDungeonB3B2ActiveIdleFramesDoNotReconstructSaveOrRebuildUi",
+      "result": "Passed",
+      "output": "Isolated scene boot 1: phase7a4-scene-e34d7e52dda94c2cbc6b8b5fc7605052.json\n[2026-10-22 23:25:16 UTC] [INFO] Entered BootState.\n[2026-10-22 23:25:16 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-22 23:25:16 UTC] [INFO] M0 init complete.\n[2026-10-22 23:25:16 UTC] [INFO] Entered HomeStubState.\n[2026-10-22 23:25:17 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n[2026-10-22 23:25:18 UTC] [INFO] Telemetry buffered: tick_processed\n"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish",
+      "result": "Passed",
+      "output": "Isolated scene boot 1: phase7a4-scene-47d11a78f70644f7bd78617ee775e917.json\n[2026-10-22 23:25:33 UTC] [INFO] Entered BootState.\n[2026-10-22 23:25:33 UTC] [INFO] Saved canonical complete save. Reason: Boot\n[2026-10-22 23:25:33 UTC] [INFO] M0 init complete.\n[2026-10-22 23:25:33 UTC] [INFO] Entered HomeStubState.\n[2026-10-22 23:25:33 UTC] [INFO] Saved canonical complete save. Reason: StateChange\n120 cached pump gates: 0.08 ms; 0 bytes on test thread\n"
+    }
+  ],
+  "content_gates": {
+    "passed": 65,
+    "failed": 0
+  },
+  "compile_errors": [],
+  "preservation": {
+    "protected": 60,
+    "all_byte_identical": true,
+    "extra_files": [],
+    "generated_saves_archived": 3,
+    "save_or_recovery_restored": false,
+    "default_report_restored": true,
+    "inputs": 1418,
+    "input_failures": []
+  },
+  "historical": {
+    "inventory_rows": 25483,
+    "preexisting_files": 25482,
+    "preexisting_changed": [],
+    "intentional_new_campaign_document": [
+      {
+        "path": "C:\\Dev\\Dungeon-Lord\\Docs\\testing\\evidence\\phase7-production-analysis\\final-qualification.md",
+        "before": "febf87c381b21b7e91e63773ccff12ad9b717e0a86c510b2f4b77601544ebc49",
+        "after": "c6160f8af8e1d4d1a068cc2aba7cbdcb47ed376f8fdaa13c058cde64e03b516d"
+      }
+    ]
+  },
+  "hashes": [
+    {
+      "path": "01-full-edit.xml",
+      "sha256": "fdd289af99f288c3d4fef9fe82d81332d5172c937bb1c63147c559c052180574"
+    },
+    {
+      "path": "01-full-edit.log",
+      "sha256": "744101fdb4a0dfbbaa5cb774898700dd3d49ff2835575eb8a67f1bbae96cc5c7"
+    },
+    {
+      "path": "01-full-edit-command.json",
+      "sha256": "0ae00911f807f10c4d0a3ae6b50855ced48b734cd1b92e91c8c9afff3088fd82"
+    },
+    {
+      "path": "01-full-edit-exit.json",
+      "sha256": "e467cac4a671643f189273770ca748a6ffd11da8965bea0ba44c243c324dcae7"
+    },
+    {
+      "path": "inputs-before.json",
+      "sha256": "dc6f9e43fe417dc26d9ce121c336002712e5b4101fadc22a454e2b16682be835"
+    },
+    {
+      "path": "inputs-after-restoration.json",
+      "sha256": "dc6f9e43fe417dc26d9ce121c336002712e5b4101fadc22a454e2b16682be835"
+    },
+    {
+      "path": "protected-before.json",
+      "sha256": "89a9369fe3489984ccc1472ff1e210b0525229806af9f286b27853fa69c63619"
+    },
+    {
+      "path": "historical-before.json",
+      "sha256": "51bdf59f0c44b1401553219e6c3dd17e0b9dd565926fbc1bf041237f34dcb9b0"
+    },
+    {
+      "path": "historical-after.json",
+      "sha256": "216f357e1e2e03d650e35fc03ac491530667512cfbc8d3c25b3646f256a69037"
+    },
+    {
+      "path": "restoration-provenance.json",
+      "sha256": "71fb9febf3bf6f25ce4545336c5b27ceecd73da02162cdc8c946da61f047a726"
+    }
+  ],
+  "archive": {
+    "path": "final-attempt-reports.zip",
+    "sha256": "5258b1568994f6c7045c9e87f887f91b35fbb59e201fb6367cb9246ae42ed361"
+  },
+  "outstanding": [
+    "passing full EditMode",
+    "full PlayMode",
+    "sustained methods blocked by isolation",
+    "Windows Development build",
+    "native continuation/reopen",
+    "owner fixtures and Moonlight UAT"
+  ],
+  "no_runtime_or_test_changes": true
+}

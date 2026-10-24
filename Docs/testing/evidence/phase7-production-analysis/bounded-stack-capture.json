@@ -1,0 +1,283 @@
+{
+  "date": "2026-10-23",
+  "campaign": "TestResults/phase7-analysis-shutdown-20261023-d3",
+  "branch": "feature/phase7-production-analysis",
+  "start_and_resumed_head": "e201717acdbeff664e1b0befa9b4fca4be4993d7",
+  "main": "fbe4bdff0cba9fea72b42fb6a05714327f880df4",
+  "qualified_source": "c870c5dc92aee87e854af350aa0a73653d045ff2",
+  "underlying_implementation": "948a38dc6f47b1419164fdfe8f44a2b3c9fd31f5",
+  "artifact": {
+    "id": "P249R2-fe8daae0264348579db73d3402254215",
+    "files": 303,
+    "exe_sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6",
+    "manifest_sha256": "46c71a3674bed100cae21d3750ba6ca9083a3ee24e417087d52d4de1567bbef6",
+    "unchanged": true
+  },
+  "resume_state": {
+    "utc": "2026-10-23T18:14:25.027129+00:00",
+    "attempts_used": 1,
+    "attempts_remaining": 1,
+    "prior_readiness_passed": true,
+    "prior_selfcheck_exit": 0,
+    "prior_player_pid": 46128,
+    "prior_exit": 3796434945,
+    "classification": "Interrupted before ordinary close; bounded forced timeout with visible window and no AppQuit; not shutdown-hang evidence",
+    "all_prior_processes_verified_exited": true,
+    "lease_hash_verified": true,
+    "sealed_files_verified": 303,
+    "successful_preflight_reused": true,
+    "new_debugger_readiness_required": "Prior debugger exited; fresh live connection required"
+  },
+  "maximum_attempts": 2,
+  "attempts_used": 2,
+  "attempts_remaining": 0,
+  "attempts": [
+    {
+      "attempt": "attempt-01",
+      "pid": 46128,
+      "creation_filetime": 134372482460450901,
+      "launch_utc": "2026-10-23T16:57:26.402717+00:00",
+      "exit": {
+        "utc": "2026-10-23T17:07:27.447915+00:00",
+        "exit_code": 3796434945,
+        "normal": false,
+        "forced": true,
+        "error": null,
+        "launch_handle": {
+          "wait": 0,
+          "exit_code": 3796434945,
+          "exited": true
+        },
+        "independent_handle": {
+          "wait": 0,
+          "exit_code": 3796434945,
+          "exited": true
+        },
+        "surviving_children": null,
+        "debugger_attached": false,
+        "not_full_ui_reopen_qualification": true
+      },
+      "fixture_sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+      "readiness": {
+        "passed": true,
+        "utc": "2026-10-23T16:57:25.722845+00:00",
+        "selfcheck": [
+          {
+            "threads": 4,
+            "frames": 34,
+            "nonzero_contexts": 4
+          },
+          {
+            "threads": 4,
+            "frames": 34,
+            "nonzero_contexts": 4
+          }
+        ],
+        "live_com": {
+          "selfcheckAccepted": true,
+          "utc": "2026-10-23T16:57:25.6993405Z",
+          "reader": "EnvDTE.Program.Threads",
+          "nativeDebuggerAvailable": true,
+          "pid": 51204
+        },
+        "player_launched": false
+      },
+      "non_unity_child_exit": {
+        "launch": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "independent": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "utc": "2026-10-23T16:57:25.520375+00:00"
+      },
+      "debugger_closeout": {
+        "forced": false,
+        "exited": true,
+        "pid": 51204
+      },
+      "main_window_thread": {
+        "tid": 1956,
+        "hwnd": 2298678,
+        "client": [
+          1280,
+          720
+        ],
+        "utc": "2026-10-23T16:57:27.413610+00:00",
+        "basis": "Thread owning the visible main game HWND; confirm stack before stronger engine-main attribution"
+      },
+      "appquit_lines": [],
+      "memory_report_after_cleanup": false,
+      "accepted_game_stack_samples": 0,
+      "lease_restored": true,
+      "raw_launch_sha256": "3e38b1f0efa47facee1d5b67ac33a425d0681b4f7caba3b6f3db8d01305948d4",
+      "raw_player_log_sha256": "a900efe25a41552ecf30eb313071e67969ac5aa5c9e404c4fd2dbaccd74cc028",
+      "raw_observations_sha256": "ebdbee32435ffa05894a27ad960a2bbcae19c4bb4de21826af7f2ce86631b33a",
+      "classification": "Interrupted before closure; 600-second bound; not shutdown-hang evidence"
+    },
+    {
+      "attempt": "attempt-02",
+      "pid": 25988,
+      "creation_filetime": 134372529546745529,
+      "launch_utc": "2026-10-23T18:15:55.045690+00:00",
+      "exit": {
+        "utc": "2026-10-23T18:16:46.571057+00:00",
+        "exit_code": 0,
+        "normal": true,
+        "forced": false,
+        "error": null,
+        "launch_handle": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "independent_handle": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "surviving_children": null,
+        "debugger_attached": false,
+        "not_full_ui_reopen_qualification": true
+      },
+      "fixture_sha256": "5b4db54b895ac2c0e2e0ee4c8e502fa028914b6ea196c966089fa4c5dd9729ab",
+      "readiness": {
+        "passed": true,
+        "utc": "2026-10-23T18:15:54.331947+00:00",
+        "selfcheck": [
+          {
+            "threads": 4,
+            "frames": 34,
+            "nonzero_contexts": 4
+          },
+          {
+            "threads": 4,
+            "frames": 34,
+            "nonzero_contexts": 4
+          }
+        ],
+        "live_com": {
+          "selfcheckAccepted": true,
+          "utc": "2026-10-23T18:15:54.1623804Z",
+          "reader": "EnvDTE.Program.Threads",
+          "nativeDebuggerAvailable": true,
+          "pid": 37812
+        },
+        "player_launched": false
+      },
+      "non_unity_child_exit": {
+        "launch": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "independent": {
+          "wait": 0,
+          "exit_code": 0,
+          "exited": true
+        },
+        "utc": "2026-10-23T18:15:54.128657+00:00"
+      },
+      "debugger_closeout": {
+        "forced": false,
+        "exited": true,
+        "pid": 37812
+      },
+      "main_window_thread": {
+        "tid": 35772,
+        "hwnd": 12654004,
+        "client": [
+          1280,
+          720
+        ],
+        "utc": "2026-10-23T18:15:56.057883+00:00",
+        "basis": "Thread owning the visible main game HWND; confirm stack before stronger engine-main attribution"
+      },
+      "appquit_lines": [
+        "[2026-10-23 18:16:45 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+      ],
+      "memory_report_after_cleanup": true,
+      "accepted_game_stack_samples": 0,
+      "lease_restored": true,
+      "raw_launch_sha256": "7ddbf0d49d75aa33adb6561eba4faa315b2a008d4666e37adf4a73fd902f7d21",
+      "raw_player_log_sha256": "58393a9b52a0bbedffdf3a074a16816bea5a39f767fd386b5ea851c7cf088af1",
+      "raw_observations_sha256": "b7e0c5a82734f16b7554106c7b8e3a4ebfd65d9817c9a74d932f28827529d76b",
+      "classification": "Normal ordinary process exit; not full UI/reopen qualification"
+    }
+  ],
+  "accepted_game_samples": 0,
+  "production_changes": 0,
+  "production_correction_justified": false,
+  "classification": "5: unresolved",
+  "confidence": "High in process outcomes and interruption classification; no evidence to assign historical shutdown ownership",
+  "preservation": {
+    "utc": "2026-10-23T18:21:32.519645+00:00",
+    "protected_files": 29153,
+    "differences": [],
+    "unity_inputs": 1418,
+    "unity_input_differences": [],
+    "sealed_build_files": 303,
+    "sealed_build_unchanged": true,
+    "disposable_projects": [
+      {
+        "project": "ui-composition-analysis-p249r2-edit",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-focused",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-native",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-nativefs",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      },
+      {
+        "project": "ui-composition-analysis-p249r2-play",
+        "files": 1418,
+        "differences": [],
+        "extra": []
+      }
+    ]
+  },
+  "product_restoration": {
+    "original_files": 47,
+    "original_sdk_cache_differences": 10,
+    "new_sdk_files": 4,
+    "originals_restored_from_verified_backup": true,
+    "generated_files_archived": true,
+    "corrective_owner_save_or_recovery_restorations": 0
+  },
+  "all_campaign_processes_exited": true,
+  "native_gate": "unresolved/failed",
+  "owner_uat_ready": false,
+  "additional_player_launches_authorized": false,
+  "next_action": "Independent review of accumulated evidence and exhausted D3 attempt budget to decide the next diagnostic or qualification disposition.",
+  "repeated_qualification": {
+    "full_editmode": false,
+    "full_playmode": false,
+    "filesystem_test": false,
+    "profiles": false,
+    "build": false
+  },
+  "packet": {
+    "path": "bounded-stack-capture-reports.zip",
+    "sha256": "6726f1905c6517880af618bc1acff47507dc44151e208322699533d13045334e",
+    "entries": 9
+  }
+}
