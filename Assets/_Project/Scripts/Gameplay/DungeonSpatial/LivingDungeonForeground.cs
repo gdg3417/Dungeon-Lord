@@ -15,6 +15,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSaveSession session, SaveData current, LivingDungeonForegroundConfig policy,
             long observedThrough, int tickSeconds, Action<SaveData, long> passiveTick, long savedUtcUnix)
         {
+            using var pumpDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.Pump,
+                ForegroundQualificationMetrics.Origin.Pump);
             const string invalid = "living.foreground.invalid_state";
             var executions = new Dictionary<int, RunExecution>();
             try {
@@ -44,8 +46,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 runtime.validatedCanonicalSpatialState = owned.State; runtime.canonicalSpatialAuthority = owned.State.Authority; runtime.spatialFloors = owned.State.Floors;
                 runtime.corridorContent = owned.CorridorContent; runtime.sharedBranchKnowledge = owned.BranchKnowledge; runtime.sharedFloorKnowledge = owned.FloorKnowledge;
 
-                void Stage(MonsterContinuityState monsters = null, DurableSettlementHistory history = null, bool knowledge = false)
+                void Stage(MonsterContinuityState monsters = null, DurableSettlementHistory history = null, bool knowledge = false,
+                    ForegroundQualificationMetrics.Origin origin = ForegroundQualificationMetrics.Origin.Closure)
                 {
+                    using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.StagePreparation, origin);
                     using var stageMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Stage);
                     var prepareMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Prepare);
                     var before = working.GetCurrentBytes();
@@ -77,13 +81,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 // Acceptance changes only the typed scheduler. Validate its checkpoint
                 // envelope now; the complete detached candidate is validated at Stage
                 // before persistence. No accepted state is published in the meantime.
-                if (!LivingDungeonContracts.Validate(owner, context.LivingDungeonProfiles)) return Failure(invalid);
+                using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.Acceptance,
+                    ForegroundQualificationMetrics.Origin.Acceptance))
+                    if (!LivingDungeonContracts.Validate(owner, context.LivingDungeonProfiles)) return Failure(invalid);
                 long tickUnits = checked((long)tickSeconds * policy.UnitsPerSecond);
                 int boundaryEvents = 0;
 
                 RunExecution Execution(LivingDungeonParty p)
                 {
                     if (!executions.TryGetValue(p.Sequence, out var e)) {
+                        using var executionDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.ExecutionReconstruction,
+                            ForegroundQualificationMetrics.Origin.Execution, p.Sequence, p.NextOrdinal);
                         e = LivingDungeonContracts.Restore(p, profile, retainPresentation: true); executions.Add(p.Sequence, e);
                     }
                     return e;
@@ -117,6 +125,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         if (e.TransferContract && !e.TransferReleased && e.AnnouncedAction == RunStepKind.FloorTransfer) {
                             var blocker = owner.Parties.FirstOrDefault(other => other.Sequence != p.Sequence && Execution(other).OccupiedFloor == e.TransferDestination);
                             if (blocker != null) {
+                                using var blockedDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.TransferBlocked,
+                                    ForegroundQualificationMetrics.Origin.Execution, p.Sequence, e.NextOrdinal);
                                 using var blockedMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.TransferBlocked);
                                 e.BlockTransfer(selected.due.Value, blocker.Sequence);
                             }
@@ -127,7 +137,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                 using var settlementMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Settlement);
                                 // Pin the actual unconsumed terminal in the exact private
                                 // lineage before authorizing settlement and its vacancy.
-                                Stage(); var terminalPredecessor = ValidateSession(working);
+                                Stage(origin: ForegroundQualificationMetrics.Origin.TerminalPin);
+                                DetachedCompleteSaveValidationResult terminalPredecessor;
+                                using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.SettlementPredecessor,
+                                    ForegroundQualificationMetrics.Origin.Settlement))
+                                    terminalPredecessor = ValidateSession(working);
                                 var outcome = e.TakeOutcome();
                                 // Bind session-only C1 observation to compatible
                                 // captured inputs. An edit never authenticates old
@@ -147,8 +161,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                 owner.Parties.RemoveAll(party => party.Sequence == p.Sequence); LivingDungeonScheduling.Change(owner);
                                 var authorization = DurableSettlementHistory.CreateForeground(working.GetCurrentBytes(), owner,
                                     runtime.runHistory, configuration.MaxRunHistoryEntries, limits.Canonical.Serialized, e);
-                                Stage(reconciled, authorization, true);
-                                lineage.Retired(terminalPredecessor, owned, profile, p.Sequence, e);
+                                Stage(reconciled, authorization, true, ForegroundQualificationMetrics.Origin.Settlement);
+                                using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.ReleaseCheck,
+                                    ForegroundQualificationMetrics.Origin.Settlement))
+                                    lineage.Retired(terminalPredecessor, owned, profile, p.Sequence, e);
                             }
                     }
                 }
@@ -163,7 +179,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             if (!lineage.Release(working.GetCurrentBytes(), p, e, time, Occupied(), profile)) continue;
                             boundaryEvents = checked(boundaryEvents + 2);
                             if (boundaryEvents > policy.MaximumBoundaryEvents) throw new InvalidOperationException("living.foreground.boundary_limit");
-                            LivingDungeonScheduling.Change(owner); LivingDungeonScheduling.Change(owner); Stage();
+                            LivingDungeonScheduling.Change(owner); LivingDungeonScheduling.Change(owner); Stage(origin: ForegroundQualificationMetrics.Origin.Release);
                             ProcessParties(time); Recover(); changed = true;
                         }
                     } while (changed);
@@ -199,7 +215,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     runtime.structureRuntime.ManaReserve = wallet; runtime.monsterContinuity = healed;
                     if (changed) {
                         using var recoveryMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.RecoveryApplied);
-                        Stage(healed);
+                        Stage(healed, origin: ForegroundQualificationMetrics.Origin.Recovery);
                     }
                 }
 
@@ -213,7 +229,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     long interval = DemandInterval();
                     if (interval > 0) {
                         owner.Scheduler.NextOpportunityTime = checked(Math.Max(0, owner.Scheduler.ClosedThrough) + interval);
-                        LivingDungeonScheduling.Change(owner); Stage();
+                        LivingDungeonScheduling.Change(owner); Stage(origin: ForegroundQualificationMetrics.Origin.Opportunity);
                     }
                 }
                 bool initial = true;
@@ -230,7 +246,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (time == nextTick) {
                         runtime.totalTicks = checked(runtime.totalTicks + 1);
                         passiveTick(runtime, runtime.totalTicks);
-                        Stage();
+                        Stage(origin: ForegroundQualificationMetrics.Origin.PassiveTick);
                     }
                     ProcessParties(time);
                     // Terminal parties were already settled and retired. Recover
@@ -254,6 +270,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             try {
                                 var newborn = new LivingDungeonParty { Sequence = runtime.runHistory.NextRunSequence, AdmittedAt = time };
                                 LivingDungeonScheduling.Pin(newborn, execution, profile);
+                                using var admissionDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.AdmissionReconstruction,
+                                    ForegroundQualificationMetrics.Origin.Admission, newborn.Sequence, newborn.NextOrdinal);
                                 // Same lifetime checkpoint assurance as B2, with no effects published.
                                 var probe = LivingDungeonContracts.Restore(newborn, profile);
                                 try {
@@ -270,7 +288,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             }
                         }
                         if (interval > 0) owner.Scheduler.NextOpportunityTime = checked(time + interval);
-                        Stage(); ProcessParties(time); Recover(); ReleaseWaiting(time);
+                        Stage(origin: ForegroundQualificationMetrics.Origin.Opportunity); ProcessParties(time); Recover(); ReleaseWaiting(time);
                     }
                     if (!owner.Scheduler.NextOpportunityTime.HasValue) {
                         long interval = DemandInterval();

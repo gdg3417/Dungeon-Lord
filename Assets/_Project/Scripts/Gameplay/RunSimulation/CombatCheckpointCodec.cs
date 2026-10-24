@@ -77,6 +77,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal static RunCheckpointRestoreResult RestoreSupported(byte[] source, string checkpointIdentity, string startIdentity,
             long expectedOrdinal, RunCheckpointLimits limits, bool retainPresentation = false)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.SupportedReader, depth: expectedOrdinal);
             using var replayMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.CheckpointReplay);
             // Dispatch only after the same independent byte/work envelope as the historical reader.
             if (source == null || limits == null || source.Length < 32 || source.Length > limits.MaximumBytes)
@@ -107,6 +108,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                         return Failed("run.checkpoint.evidence_mismatch");
                     candidate = CombatStartCapture.Recreate(start, limits, executable);
                     if (retainPresentation) candidate.PresentationSteps = new System.Collections.Generic.List<RunStep>();
+                    using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.PrefixReplay))
                     for (long i = 0; i < ordinal; i++) {
                         if (candidate.IsTerminal) return Failed("run.checkpoint.evidence_mismatch", candidate);
                         candidate.Advance(1, i);

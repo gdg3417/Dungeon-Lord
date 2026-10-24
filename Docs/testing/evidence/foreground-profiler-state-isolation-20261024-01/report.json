@@ -1,0 +1,138 @@
+{
+  "reviewedHead": "0d11e9eefdd5e867d6e6d53e83a80f1c52ec3eae",
+  "testedSource": "bdd6ec6258a53eceea8871e6d4b91a49d4f95ced",
+  "base": "e7667c4e57b7b1c9cfcf04ecea0084be37ac5f9c",
+  "classification": "Standard; GPT-6.1 Sol Medium recommendation; user fallbacks GPT-6 Sol Medium then GPT-5.6 Sol Medium if unavailable",
+  "changedSource": [
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ForegroundPerformanceDiagnosticSceneTests.cs"
+  ],
+  "runtimeConfigMarkerDiffFromReviewedHead": false,
+  "validation": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "durationSeconds": 15.5685581,
+    "command": "& TestResults/foreground-profiler-state-isolation-20261024-01/run-focused.ps1",
+    "cli": "unity test C:/Dev/Dungeon-Lord --mode EditMode --filter DungeonBuilder.M0.Editor.Tests.ForegroundPerformance --output TestResults/foreground-profiler-state-isolation-20261024-01/focused-01.xml --timeout 1200 --no-color -- -logFile TestResults/foreground-profiler-state-isolation-20261024-01/focused-01.log",
+    "cliVersion": "1.0.0-beta.14",
+    "editorVersion": "6000.3.2f1",
+    "tests": [
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.BlockedReleaseAndFailedPersistenceAreExactlyNeutral",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.DisabledResetBoundsAndExceptionNesting",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.EmptyScopeOverheadIsReportedWithoutASpeedupClaim",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.ForegroundBlockedTransferIsAttributedAndExactlyNeutral",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.HistoricalReadersAreExactlyNeutral(\"historical-b1-format1.json\")",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.HistoricalReadersAreExactlyNeutral(\"historical-c2-format2.json\")",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.NormalAdmissionEventAndSettlementAreExactlyNeutral",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.PostPublicationInspectionAttributesEveryPartyWithoutChangingBytes",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.RejectedSemanticReadbackPreservesTheExactPredecessorInBothModes",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnostics.StalePredecessorIsExactlyNeutral",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnosticSceneTests.BoundedProductionAdmissionReportsAvailableCpuEvidence",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.Editor.Tests.ForegroundPerformanceDiagnosticSceneTests.ProfilerStateGuardPreservesSettingsOnException",
+        "result": "Passed"
+      }
+    ]
+  },
+  "correctness": {
+    "exactCanonicalBytesEqual": true,
+    "boundedOriginsNestingPrefixChecksPassed": true,
+    "exceptionPathStateGuardPassed": true
+  },
+  "editorState": {
+    "noProfilerSettersOrWindowOpenCloseCalls": true,
+    "observedEntryAndExit": {
+      "enabled": false,
+      "profileEditor": false,
+      "cpu": false,
+      "deepProfiling": false,
+      "windows": 0,
+      "connection": -1
+    },
+    "stateGuardRunsInFinally": true,
+    "optionalCaptureRequested": false,
+    "cpuFramesUnavailableExplicitlyReported": true,
+    "newCaptureDirectories": 0,
+    "liveNonemptyWindowCaseExercised": false,
+    "deepEnabledLiveCaseExercised": false
+  },
+  "preservation": {
+    "inventoryRecords": 58746,
+    "uniqueResolvedFiles": 29591,
+    "mismatches": 0,
+    "baselineSha256": "7b3935a9d9bb9ea38b606883de5d69b0627125b5cc08f6ef8b62eadf4a66c660",
+    "ownerDefaultReportUnchanged": true,
+    "ownerDefaultReportSha256": "f9eccd6bb418bc6f4f03b71dd0272384262aa088d59675e7c99fd9d6362efc6e",
+    "ownerDefaultReportBackedUpBeforeExecution": true,
+    "originalSettingsExact": true,
+    "isolatedProduct": "Dungeon Lord Profiler State Isolation 20261024 01",
+    "temporarySettingsSha256": "9b8365b4f5f23cff0a23d69d956da61cf4e97a8b405d1426dd720113581b3e95",
+    "previousEvidence": [
+      {
+        "path": "Docs/testing/evidence/foreground-validation-cost-20261024-01/report.json",
+        "sha256": "e2750af5b9d9036f0f4b9b47b05aa6a6132de766abd03d0fc66931afcba0ace8",
+        "rawBytesUnchangedFromPreflight": true,
+        "gitCanonicalBytesMatchReviewedHead": true
+      },
+      {
+        "path": "Docs/testing/evidence/foreground-validation-cost-20261024-01/diagnostic-reports.zip",
+        "sha256": "8c9749fcc4346aa940f77a33c6a07f704712bd4ed89e76529e209166dd0fefbe",
+        "rawBytesUnchangedFromPreflight": true,
+        "gitCanonicalBytesMatchReviewedHead": true
+      }
+    ]
+  },
+  "historicalMeasurement": {
+    "source": "231e0f549240d4e37257304950059878ae0734e0",
+    "supportedReaderCalls": 138,
+    "completeValidationCalls": 17,
+    "status": "Historical evidence retained without replacement; no new performance campaign or CPU capture"
+  },
+  "limitations": [
+    "Batch run had no live Profiler windows and Deep Profiling was false; other existing Editor configurations were not live exercised",
+    "Explicit optional capture/export was not selected in this correctness run",
+    "CPU Timeline/Hierarchy remain unavailable; no new performance comparison",
+    "Only the focused cases were run; no full suite, build, sustained or native campaign"
+  ],
+  "notes": [
+    "Inherited preservation paths contain duplicates; unique files and inventory records are reported separately",
+    "The updatable diagnostic Markdown report had mixed text encoding; it was normalized to UTF-8 without changing historical numeric results"
+  ],
+  "archiveSha256": "91cb1b51ac269588e84ad0aa65d45c4af3db1d9c4f6f56aa01242d4857d6911f",
+  "status": "Stop for independent ChatGPT re-review; PR #251 remains draft and unmerged"
+}

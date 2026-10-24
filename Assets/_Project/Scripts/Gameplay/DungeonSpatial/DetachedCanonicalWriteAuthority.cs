@@ -401,7 +401,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 prepared.ForegroundValidation.GetBytes().SequenceEqual(candidate) && prepared.Session.GetCurrentBytes().SequenceEqual(candidate);
             DetachedCompleteSaveValidationResult validated =
                 foregroundStage ? prepared.ForegroundValidation : DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
-            var predecessor = ValidateSession(session);
+            DetachedCompleteSaveValidationResult predecessor;
+            using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.FinalPredecessor,
+                ForegroundQualificationMetrics.Origin.FinalWrite))
+                predecessor = ValidateSession(session);
             if (validated.IsValid && predecessor?.IsValid == true)
             {
                 try
@@ -449,6 +452,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(publishReason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
             if (validated.State.Floors.Count(f => f.ActivationState == FloorActivationState.Active) > 1)
             {
+                using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.Feasibility,
+                    ForegroundQualificationMetrics.Origin.FinalWrite);
                 try { DungeonBuilder.M0.Gameplay.RunSimulation.ActiveFloorRunSnapshot.Create(
                     validated, production, configuration, limits.Canonical, runLoot); }
                 catch { return Failure("floor.lifecycle.invalid_state"); }
@@ -456,6 +461,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
                 limits.Canonical.Serialized.MaximumCollectionRecords, durable =>
                 {
+                    using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.SemanticReadback,
+                        ForegroundQualificationMetrics.Origin.Readback);
                     // Always validate fresh durable bytes. For the foreground path,
                     // one round trip also supplies its session instead of repeating
                     // the entire parse/checkpoint reconstruction inside Open.

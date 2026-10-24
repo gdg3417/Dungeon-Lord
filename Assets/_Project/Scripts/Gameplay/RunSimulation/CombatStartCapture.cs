@@ -70,6 +70,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         }
         internal static RunExecution Recreate(byte[] bytes, RunCheckpointLimits limits, string executable)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.StartRecreation);
             using (var r = new BinaryReader(new MemoryStream(bytes), new UTF8Encoding(false, true))) {
                 if (r.ReadInt32() != Version || RunCheckpointCodec.Text(r) != executable) throw new InvalidDataException("run.checkpoint.unsupported_rules");
                 int sequence = r.ReadInt32(); long? limit = RunCheckpointCodec.Flag(r) ? r.ReadInt64() : (long?)null;

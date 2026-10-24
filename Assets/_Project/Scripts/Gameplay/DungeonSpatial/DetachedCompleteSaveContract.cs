@@ -167,6 +167,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
             DetachedCurrentTargetValidationContext context)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.CompleteValidation);
             if (context == null) return Failure();
             DetachedCompleteSaveValidationResult result = ParseValidateAndRoundTripCore(bytes,
                 context.Limits, CanonicalSaveSchemaVersions.CurrentWritableTarget, true,

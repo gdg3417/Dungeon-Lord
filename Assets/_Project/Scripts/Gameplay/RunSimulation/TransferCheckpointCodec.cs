@@ -81,6 +81,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     if (e.MaximumEvents != maximum || !e.StartInputs.SequenceEqual(start)) throw new InvalidDataException();
                 }
                 if (presentation) e.PresentationSteps = new System.Collections.Generic.List<RunStep>();
+                using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.PrefixReplay))
                 for (long i = 0; i < ordinal; i++) {
                     if (e.IsTerminal) throw new InvalidDataException();
                     if (gate != null && i == gate.BlockOrdinal) {
