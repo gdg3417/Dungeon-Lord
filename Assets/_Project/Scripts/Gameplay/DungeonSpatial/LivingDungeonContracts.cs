@@ -202,6 +202,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             profiles?.SingleOrDefault(p => p.Id == state.Scheduler?.ProfileId);
         internal static RunExecution Restore(LivingDungeonParty p, LivingDungeonProfile profile, bool retainPresentation = false)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.Restoration,
+                party: p.Sequence, depth: p.NextOrdinal);
             using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Restore);
             var restored = CombatCheckpointCodec.RestoreSupported(p.Checkpoint, p.CheckpointIdentity, p.StartIdentity, p.NextOrdinal, profile.Checkpoints, retainPresentation);
             if (!restored.IsValid) throw new InvalidOperationException(restored.FailureReason);
@@ -224,6 +226,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         { try { return ValidateCore(state, profiles); } catch { return false; } }
         private static bool ValidateCore(LivingDungeonState state, IReadOnlyList<LivingDungeonProfile> profiles)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.OwnerValidation);
             if (state == null || state.Revision < 0) return false;
             if (state.Scheduler == null) return state.Revision == 0 && state.Parties.Count == 0;
             var s = state.Scheduler; var profile = Profile(state, profiles);

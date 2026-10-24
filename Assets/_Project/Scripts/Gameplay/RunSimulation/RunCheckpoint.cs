@@ -131,7 +131,9 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     if (ordinal > limits.MaximumReplayEvents) return Failed("run.checkpoint.replay_limit");
                     if (time < 0 || deadline < -1 || (deadline >= 0 && deadline < time) || (taken && !terminal) || prefix.Length != 32)
                         return Failed("run.checkpoint.evidence_mismatch");
-                    candidate = RunStartCapture.Recreate(start);
+                    using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.StartRecreation))
+                        candidate = RunStartCapture.Recreate(start);
+                    using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.PrefixReplay))
                     for (long i = 0; i < ordinal; i++)
                     {
                         if (candidate.IsTerminal) return Failed("run.checkpoint.evidence_mismatch", candidate);

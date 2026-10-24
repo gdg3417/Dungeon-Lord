@@ -177,6 +177,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static DetachedCanonicalSaveSessionResult OpenCore(byte[] bytes,
             DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits, bool foreground)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.SessionOpen);
             if (bytes == null || context == null || limits == null ||
                 !limits.Raw.IsValid || !limits.Canonical.IsValid || !limits.Whole.IsValid ||
                 !SameLimits(context.Limits, limits.Canonical))
@@ -338,7 +339,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (livingDungeon != null) LivingDungeonContracts.Write(writer, livingDungeon);
                 else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[canonicalStart + 7].Value);
                 writer.Token(","); writer.String(MonsterContinuity.Owner); writer.Token(":");
-                var prior = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, context);
+                DetachedCompleteSaveValidationResult prior;
+                using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.PriorValidation))
+                    prior = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, context);
                 if (!prior.IsValid) return Failure(MonsterRecoveryRules.Invalid);
                 var continuity = monsterContinuity ?? MonsterContinuity.Reconcile(prior.MonsterContinuity, prior.State, replacement, context.MonsterRecovery);
                 MonsterContinuity.Write(writer, continuity);
@@ -359,9 +362,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason);
                 if (!RawSavePayloadClassifier.TryValidateWorkload(candidate, limits.Raw, out string rawReason))
                     return Failure(rawReason);
-                DetachedCompleteSaveValidationResult validated =
-                    DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
+                DetachedCompleteSaveValidationResult validated;
+                using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.CandidateValidation))
+                    validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
                 if (validated.IsValid && livingDungeon?.Scheduler?.ProfileId == LivingDungeonForegroundConfig.TwoFloorProfileId) {
+                    using var releaseDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.ReleaseCheck);
                     // The same immutable currentBytes/context were fully validated above.
                     // Reconcile and Write only read that detached result; keep the exact
                     // predecessor proof local to this preparation, never between saves.

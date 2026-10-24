@@ -7,12 +7,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         internal static void Check(RunExecution probe, LivingDungeonProfile profile, bool blockedPath = false)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.AdmissionAssurance,
+                blockedPath ? ForegroundQualificationMetrics.Origin.LifetimeAlternative : ForegroundQualificationMetrics.Origin.LifetimeNormal);
             long? alternativeWork = null;
             while (!probe.IsTerminal) {
                 if (probe.NextOrdinal >= profile.MaximumPartyReplay) throw new InvalidOperationException("run.checkpoint.replay_limit");
                 var due = probe.NextDueTime();
                 if (!due.HasValue) throw new InvalidOperationException("living.transfer.invalid_probe");
                 if (!blockedPath && probe.TransferContract && probe.AnnouncedAction == RunStepKind.FloorTransfer) {
+                    using var branchDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.LifetimeBranch,
+                        ForegroundQualificationMetrics.Origin.LifetimeAlternative);
                     var cp = probe.ExportCheckpoint(profile.Checkpoints);
                     var alternative = CombatCheckpointCodec.RestoreSupported(cp.GetBytes(), cp.Identity, cp.StartIdentity, cp.NextOrdinal, profile.Checkpoints);
                     if (!alternative.IsValid) throw new InvalidOperationException(alternative.FailureReason);

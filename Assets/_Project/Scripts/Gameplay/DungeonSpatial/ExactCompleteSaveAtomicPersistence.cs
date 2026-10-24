@@ -12,6 +12,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             byte[] original, byte[] candidate, int maximumEvidence, Func<byte[], bool> validateReadback = null)
         {
             using var measurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.AtomicWrite);
+            // Protocol scope includes byte comparisons, hashing and OS waits. Its
+            // selected-boundary self time excludes the semantic callback below it.
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.DurableFileSystem);
             if (string.IsNullOrEmpty(activePath) || original == null || candidate == null)
                 return DetachedCanonicalWriteAuthority.AtomicSaveFailedReason;
             string directory;

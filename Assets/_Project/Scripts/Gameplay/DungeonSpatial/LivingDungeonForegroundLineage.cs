@@ -54,6 +54,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 cause.Time > time || cause.Time < checked(party.AdmittedAt + gate.Deadline))
                 throw new InvalidOperationException("living.transfer.vacancy_unproven");
             using var releaseMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.TransferReleased);
+            using var releaseDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.TransferReleased,
+                ForegroundQualificationMetrics.Origin.Release, party.Sequence, execution.NextOrdinal);
             execution.ReleaseTransfer(checked(time - party.AdmittedAt), cause.Sequence, cause.Ordinal,
                 checked(cause.Time - party.AdmittedAt));
             // Released is a real replayable execution prefix, but never a durable
