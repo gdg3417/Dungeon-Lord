@@ -1,0 +1,91 @@
+#if UNITY_EDITOR
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
+using NUnit.Framework;
+using Fixture = DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests.Fixture;
+
+namespace DungeonBuilder.M0.Tests.EditMode
+{
+    // Run only against 09a46810, before modifying runtime code. Never regenerate in regression tests.
+    public class H1F1BaselineCaptureTests
+    {
+        const string DirectoryPath = "Tools/Presentation/Fixtures/schema15-09a46810";
+        readonly List<string> manifest = new List<string>();
+        readonly List<string> verdicts = new List<string>();
+        void Verdict(string name, byte[] bytes, string config, Fixture f) {
+            Store(name + ".json", bytes);
+            var method = typeof(DetachedCompleteSaveContract).GetMethod("ParseValidateAndRoundTripCore",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            var structural = (DetachedCompleteSaveValidationResult)method.Invoke(null,
+                new object[] { bytes, f.Profile.Canonical, 15, true, null, null, f.Context.LivingDungeonProfiles });
+            verdicts.Add(name + "\t" + config + "\t" + structural.IsValid + "\t" +
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, f.Context).IsValid);
+        }
+        void Store(string name, byte[] bytes) {
+            Assert.That(File.Exists(DirectoryPath + "/" + name), Is.False);
+            File.WriteAllBytes(DirectoryPath + "/" + name, bytes);
+            manifest.Add(name + "\t" + SpatialContractSha256.Compute(bytes));
+        }
+        void Capture(string name, Fixture f) {
+            var bytes = f.Session.GetCurrentBytes();
+            Verdict(name, bytes, name, f);
+            Store(name + "-config.json", LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration));
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, f.Context).IsValid, Is.True, name);
+            byte[] fourteen = PhaseFourTestSupport.FrozenFourteen(bytes);
+            Store(name + "-schema14.json", fourteen);
+            bool accepted = SchemaFourteenToFifteenUpgrade.TryPrepare(fourteen, f.Profile.Canonical,
+                MonsterRecoveryRules.Capture(f.Configuration), out var candidate, f.Context.LivingDungeonProfiles);
+            manifest.Add(name + "-upgrade\t" + accepted);
+            if (accepted) Store(name + "-candidate.json", candidate);
+            string text = Encoding.UTF8.GetString(bytes);
+            var variants = new Dictionary<string, string> {
+                { "bad-owner", text.Replace("\"livingDungeon\":{\"FormatVersion\":1", "\"livingDungeon\":{\"FormatVersion\":2") },
+                { "bad-order", text.Replace("\"FormatVersion\":1,\"Revision\":0", "\"Revision\":0,\"FormatVersion\":1") },
+                { "living-alias", text.Replace("\"canonicalSpatialAuthority\":", "\"LivingDungeon\":null,\"canonicalSpatialAuthority\":") },
+                { "monster-alias", text.Replace("\"canonicalSpatialAuthority\":", "\"MonsterContinuity\":null,\"canonicalSpatialAuthority\":") },
+                { "spatial-alias", text.Replace("\"canonicalSpatialAuthority\":", "\"CanonicalSpatialAuthority\":null,\"canonicalSpatialAuthority\":") },
+                { "owner-extension", text.Replace("\"livingDungeon\":{", "\"livingDungeon\":{\"extension\":null,") },
+                { "unsupported-schema", text.Replace("\"schemaVersion\":15", "\"schemaVersion\":2147483647") },
+                { "inconsistent-monster", text.Replace("\"Health\":8", "\"Health\":999") },
+                { "unsupported-profile", text.Replace("living.foreground.c2.v1", "living.foreground.missing").Replace("living.foreground.c2.v2", "living.foreground.missing") }
+            };
+            foreach (var pair in variants) if (pair.Value != text)
+                Verdict(name + "-" + pair.Key, Encoding.UTF8.GetBytes(pair.Value), name, f);
+        }
+        [Test] public void CaptureVerifiedBaseline() {
+            Directory.CreateDirectory(DirectoryPath);
+            Capture("dormant", Fixture.Create("\"extension\":{\"value\":17}", "\"rootExtension\":[true,null]"));
+            Capture("dormant-monsters", LivingDungeonTwoFloorTests.Dungeon());
+            foreach (bool v2 in new[] { false, true }) {
+                var f = LivingDungeonTwoFloorTests.Dungeon();
+                var policy = v2 ? LivingDungeonForegroundConfig.LoadTwoFloor() : LivingDungeonForegroundConfig.Load();
+                if (!v2) f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem,
+                    f.Session, f.Runtime, FloorLifecycleAction.Deactivate, PhaseSixA4Tests.FloorTwo(f)));
+                var profile = policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized);
+                var e = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot()).StartTimedCombatSnapshot(
+                    1, PhaseSixA4Tests.Snapshot(f), policy.Timing);
+                if (v2) e.EnableTransfers();
+                e.AdvanceThrough(0, 1, e.NextOrdinal);
+                var owner = LivingDungeonState.Empty();
+                LivingDungeonScheduling.Activate(owner, profile, policy.MinimumArrival, f.Runtime.runHistory);
+                owner.Scheduler.AcceptedThrough = 100; // isolated accepted/unclosed test envelope
+                var party = new LivingDungeonParty { Sequence = 1, AdmittedAt = 0 };
+                LivingDungeonScheduling.Pin(party, e, profile); owner.Parties.Add(party);
+                f.Runtime.runHistory.NextRunSequence = 2;
+                var update = f.Session.PrepareLivingDungeonReplacement(
+                    DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile), f.State, owner);
+                Assert.That(update.IsSuccess, Is.True, update.Reason);
+                f.FileSystem.Seed(f.ActivePath, update.Update.GetBytes()); f.Reopen(); e.Abandon();
+                Capture(v2 ? "active-v2" : "active-v1", f);
+            }
+            Store("limits.json", File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath));
+            File.WriteAllLines(DirectoryPath + "/SHA256SUMS.tsv", manifest, new UTF8Encoding(false));
+            File.WriteAllLines(DirectoryPath + "/verdicts.tsv", verdicts, new UTF8Encoding(false));
+        }
+    }
+}
+#endif

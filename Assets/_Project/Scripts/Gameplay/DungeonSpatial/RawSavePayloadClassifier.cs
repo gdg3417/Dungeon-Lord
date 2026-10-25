@@ -21,14 +21,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public RawSavePayloadClassificationLimits(int maximumInputBytes, int maximumNestingDepth,
             int maximumObjectMembers, int maximumArrayElements, int maximumStringBytes,
             int maximumScanWork, SaveSpatialMigrationLimitsProfile historical = null, int historicalBoundary = 14,
-            int maximumMonsterRecords = 0)
+            int maximumMonsterRecords = 0, bool includeHistoricalBoundary = false)
         { MaximumInputBytes = maximumInputBytes; MaximumNestingDepth = maximumNestingDepth;
           MaximumObjectMembers = maximumObjectMembers; MaximumArrayElements = maximumArrayElements;
           MaximumStringBytes = maximumStringBytes;
           MaximumScanWork = maximumScanWork; Historical = historical; HistoricalBoundary = historicalBoundary;
-          MaximumMonsterRecords = maximumMonsterRecords; }
+          MaximumMonsterRecords = maximumMonsterRecords; IncludeHistoricalBoundary = includeHistoricalBoundary; }
         internal int MaximumMonsterRecords { get; }
         private int HistoricalBoundary { get; }
+        private bool IncludeHistoricalBoundary { get; }
         internal SaveSpatialMigrationLimitsProfile Historical { get; }
         internal RawSavePayloadClassificationLimits ForPayload(byte[] bytes)
         {
@@ -42,7 +43,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 while (end < bytes.Length && bytes[end] >= '0' && bytes[end] <= '9') end++;
                 if (matches && end > prefix.Length && end - prefix.Length <= 10 &&
                     int.TryParse(Encoding.ASCII.GetString(bytes, prefix.Length, end - prefix.Length), out int schema) &&
-                    schema >= HistoricalBoundary) return this;
+                    (schema > HistoricalBoundary || schema == HistoricalBoundary && !IncludeHistoricalBoundary)) return this;
             }
             return Historical.Raw.ForPayload(bytes);
         }

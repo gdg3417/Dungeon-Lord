@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-25 19:03:36Z" end-time="2026-10-25 19:03:38Z" duration="2.4851217">
+  <test-suite type="TestSuite" id="1000" name="Dungeon Lord" fullname="Dungeon Lord" runstate="Runnable" testcasecount="2483" result="Passed" start-time="2026-10-25 19:03:36Z" end-time="2026-10-25 19:03:38Z" duration="2.485122" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="3886" name="Assembly-CSharp-Editor.dll" fullname="C:/Dev/Dungeon-Lord/Temp/h1-f1-frozen-schema15/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="2483" result="Passed" start-time="2026-10-25 19:03:36Z" end-time="2026-10-25 19:03:38Z" duration="2.451751" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="54608" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="3887" name="DungeonBuilder" fullname="DungeonBuilder" runstate="Runnable" testcasecount="2483" result="Passed" start-time="2026-10-25 19:03:36Z" end-time="2026-10-25 19:03:38Z" duration="2.426974" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="3888" name="M0" fullname="DungeonBuilder.M0" runstate="Runnable" testcasecount="2483" result="Passed" start-time="2026-10-25 19:03:36Z" end-time="2026-10-25 19:03:38Z" duration="2.402430" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="3895" name="EditorTools" fullname="DungeonBuilder.M0.EditorTools" runstate="Runnable" testcasecount="1040" result="Passed" start-time="2026-10-25 19:03:36Z" end-time="2026-10-25 19:03:38Z" duration="2.382666" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="3898" name="Tests" fullname="DungeonBuilder.M0.EditorTools.Tests" runstate="Runnable" testcasecount="182" result="Passed" start-time="2026-10-25 19:03:36Z" end-time="2026-10-25 19:03:38Z" duration="2.375383" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="3884" name="H1F1BaselineCapture" fullname="DungeonBuilder.M0.EditorTools.Tests.H1F1BaselineCapture" classname="DungeonBuilder.M0.EditorTools.Tests.H1F1BaselineCapture" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-25 19:03:36Z" end-time="2026-10-25 19:03:38Z" duration="2.371779" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="3885" name="CaptureVerifiedBaseline" fullname="DungeonBuilder.M0.EditorTools.Tests.H1F1BaselineCapture.CaptureVerifiedBaseline" methodname="CaptureVerifiedBaseline" classname="DungeonBuilder.M0.Tests.EditMode.H1F1BaselineCaptureTests" runstate="Runnable" seed="590692185" result="Passed" start-time="2026-10-25 19:03:36Z" end-time="2026-10-25 19:03:38Z" duration="2.355663" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

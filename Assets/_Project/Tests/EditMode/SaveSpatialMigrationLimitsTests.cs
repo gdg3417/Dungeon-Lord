@@ -128,10 +128,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.Profile.Raw.MaximumInputBytes, Is.EqualTo(2752512));
             Assert.That(result.Profile.Whole.MaximumCandidateBytes, Is.EqualTo(1376256));
-            Assert.That(result.Profile.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(1310720));
-            Assert.That(result.Profile.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(655360));
-            Assert.That(result.Profile.Raw.Historical.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(524288));
-            Assert.That(result.Profile.Canonical.Historical.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(262144));
+            Assert.That(result.Profile.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(2752512));
+            Assert.That(result.Profile.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(1376256));
+            Assert.That(result.Profile.Raw.Historical.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(1310720));
+            Assert.That(result.Profile.Canonical.Historical.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(655360));
+            Assert.That(result.Profile.Raw.Historical.Raw.Historical.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(524288));
+            Assert.That(result.Profile.Canonical.Historical.Canonical.Historical.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(262144));
         }
 
         [Test]

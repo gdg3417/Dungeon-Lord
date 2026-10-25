@@ -1,0 +1,17 @@
+{
+  "baseline": "09a46810aeab7441a2ac09ac6220b0f4cc13d6dd",
+  "fixture_files_verified": 46,
+  "verdict_pairs": 35,
+  "schema15_limit_sha256": "aa162762f7c437ca58f8a4f8f4cccb22e6868801269dc6f04dd3d241482a9782",
+  "earlier_transformations_unchanged": [
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaEightToNineUpgrade.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaElevenToTwelveUpgrade.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaNineToTenUpgrade.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaSevenToEightUpgrade.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaTenToElevenUpgrade.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaThirteenToFourteenUpgrade.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaTwelveToThirteenUpgrade.cs"
+  ],
+  "current_writable_target": 15,
+  "diff_check": "passed"
+}

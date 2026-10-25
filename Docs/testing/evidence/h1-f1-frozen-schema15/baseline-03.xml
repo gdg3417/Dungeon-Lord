@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-25 19:02:25Z" end-time="2026-10-25 19:02:26Z" duration="0.2718322">
+  <test-suite type="TestSuite" id="1000" name="Dungeon Lord" fullname="Dungeon Lord" runstate="Runnable" testcasecount="2483" result="Failed" site="Child" start-time="2026-10-25 19:02:25Z" end-time="2026-10-25 19:02:26Z" duration="0.271832" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="3886" name="Assembly-CSharp-Editor.dll" fullname="C:/Dev/Dungeon-Lord/Temp/h1-f1-frozen-schema15/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="2483" result="Failed" site="Child" start-time="2026-10-25 19:02:26Z" end-time="2026-10-25 19:02:26Z" duration="0.238699" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="35008" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="3887" name="DungeonBuilder" fullname="DungeonBuilder" runstate="Runnable" testcasecount="2483" result="Failed" site="Child" start-time="2026-10-25 19:02:26Z" end-time="2026-10-25 19:02:26Z" duration="0.174776" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="3888" name="M0" fullname="DungeonBuilder.M0" runstate="Runnable" testcasecount="2483" result="Failed" site="Child" start-time="2026-10-25 19:02:26Z" end-time="2026-10-25 19:02:26Z" duration="0.150994" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="3895" name="EditorTools" fullname="DungeonBuilder.M0.EditorTools" runstate="Runnable" testcasecount="1040" result="Failed" site="Child" start-time="2026-10-25 19:02:26Z" end-time="2026-10-25 19:02:26Z" duration="0.131542" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestSuite" id="3898" name="Tests" fullname="DungeonBuilder.M0.EditorTools.Tests" runstate="Runnable" testcasecount="182" result="Failed" site="Child" start-time="2026-10-25 19:02:26Z" end-time="2026-10-25 19:02:26Z" duration="0.123354" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-suite type="TestFixture" id="3884" name="H1F1BaselineCapture" fullname="DungeonBuilder.M0.EditorTools.Tests.H1F1BaselineCapture" classname="DungeonBuilder.M0.EditorTools.Tests.H1F1BaselineCapture" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2026-10-25 19:02:26Z" end-time="2026-10-25 19:02:26Z" duration="0.120600" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <failure>
+                  <message><![CDATA[One or more child tests had errors]]></message>
+                </failure>
+                <test-case id="3885" name="CaptureVerifiedBaseline" fullname="DungeonBuilder.M0.EditorTools.Tests.H1F1BaselineCapture.CaptureVerifiedBaseline" methodname="CaptureVerifiedBaseline" classname="DungeonBuilder.M0.Tests.EditMode.H1F1BaselineCaptureTests" runstate="Runnable" seed="1069683821" result="Failed" start-time="2026-10-25 19:02:26Z" end-time="2026-10-25 19:02:26Z" duration="0.107215" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  gd66.transaction.input_fingerprint_mismatch
+  Expected: True
+  But was:  False
+]]></message>
+                    <stack-trace><![CDATA[at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Create (System.String primaryUnknown, System.String rootUnknown, DungeonBuilder.M0.Gameplay.DungeonSpatial.SaveSpatialMigrationLimitsProfile workloadProfile) [0x000af] in C:\Dev\Dungeon-Lord\Temp\h1-f1-frozen-schema15\Assets\_Project\Tests\EditMode\DetachedCanonicalWriteAuthorityTests.cs:1492
+at DungeonBuilder.M0.Tests.EditMode.H1F1BaselineCaptureTests.CaptureVerifiedBaseline () [0x0000b] in C:\Dev\Dungeon-Lord\Temp\h1-f1-frozen-schema15\Assets\_Project\Tests\EditMode\H1F1BaselineCaptureTests.cs:61
+]]></stack-trace>
+                  </failure>
+                  <output><![CDATA[Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

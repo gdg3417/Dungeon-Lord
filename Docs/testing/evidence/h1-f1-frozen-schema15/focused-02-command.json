@@ -1,0 +1,29 @@
+{
+  "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+  "arguments": [
+    "test",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15",
+    "--mode",
+    "EditMode",
+    "--filter",
+    "FrozenSchemaFifteen",
+    "--output",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15\\TestResults\\h1-f1\\focused-02.xml",
+    "--timeout",
+    "1800",
+    "--no-color",
+    "--",
+    "-logFile",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15\\TestResults\\h1-f1\\focused-02.log"
+  ],
+  "startedUtc": "2026-10-25T19:17:22.3978314Z",
+  "sourceCommit": "09a46810aeab7441a2ac09ac6220b0f4cc13d6dd",
+  "exitCode": 0,
+  "finishedUtc": "2026-10-25T19:17:49.2066180Z",
+  "verdict": {
+    "total": "63",
+    "passed": "63",
+    "failed": "0",
+    "skipped": "0"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+  "arguments": [
+    "test",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15",
+    "--mode",
+    "EditMode",
+    "--filter",
+    "FrozenSchemaFifteen;PhaseSevenA2WindowsSpatialMigration",
+    "--output",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15\\TestResults\\h1-f1\\migration-01.xml",
+    "--timeout",
+    "1800",
+    "--no-color",
+    "--",
+    "-logFile",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15\\TestResults\\h1-f1\\migration-01.log"
+  ],
+  "startedUtc": "2026-10-25T19:39:38.5050101Z",
+  "sourceCommit": "09a46810aeab7441a2ac09ac6220b0f4cc13d6dd",
+  "exitCode": 0,
+  "finishedUtc": "2026-10-25T19:40:02.5778815Z",
+  "verdict": {
+    "total": "118",
+    "passed": "117",
+    "failed": "0",
+    "skipped": "1"
+  }
+}

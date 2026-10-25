@@ -10,6 +10,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             MonsterRecoveryRules rules, out byte[] candidate, IReadOnlyList<LivingDungeonProfile> profiles = null)
         {
             candidate = null;
+            limits = limits.ForSchema(CanonicalSaveSchemaVersions.FrozenSchemaFifteen);
             var frozen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(source, limits, profiles);
             if (!frozen.IsValid) return false;
             try
@@ -39,7 +40,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 w.Token("}"); var bytes = w.Finish();
                 // Current semantic/context validation is repeated by the coordinator before any write.
-                if (!DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, limits).IsValid) return false;
+                if (!DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(bytes, limits).IsValid) return false;
                 candidate = bytes; return true;
             }
             catch { return false; }

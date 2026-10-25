@@ -189,3 +189,17 @@ Unfinished parties, automatic arrival/scheduling state and catch-up progress eve
 # 13. Open questions
 
 None.
+
+## Schema-15 frozen historical source contract (H1-F1, 2026-10-25)
+
+Schema 15 remains the writable target. Its historical reader is now explicitly pinned to the schema-15 contract at `09a46810aeab7441a2ac09ac6220b0f4cc13d6dd` (PR #254), independently of `CurrentWritableTarget`. This prerequisite does not select or activate a later schema or implement hybrid time provenance.
+
+`ParseValidateFrozenSchemaFifteenAndRoundTrip` preserves the exact canonical root/primary ordering, lifecycle and ownership, structural investment, corridor/branch/floor knowledge, strict `livingDungeon` owner, and `monsterContinuity` tail owner. Dormant owners and registered historical v1/v2 executable profiles remain supported, including accepted-but-unclosed horizons. Complete bytes, allocator, party sequence, start/checkpoint identity, ordinals and checkpoints remain unchanged. Compatible unknown root/primary extensions retain their original canonical bytes; reserved-member case collisions, malformed/reordered owners, unsupported formats/profiles/executables and unsupported schema versions fail closed. No time-provenance field is required for schema 15.
+
+The structural overload proves the byte/structural contract only. The contextual overload additionally retains production configuration, occupancy, compatibility selection, monster-recovery consistency and historical executable/profile requirements. It never grants `CurrentTargetValidated`; writable-target validation remains a separate call. Recovery can recognize a contextually valid frozen-15 predecessor after a later target change. The load coordinator refuses to reinterpret that source through legacy projection; a reviewed later migration is still required.
+
+`Resources/save_spatial_migration_limits_schema15.json` is an exact copy of the baseline production limits, chained above the existing frozen-14 and frozen-13 profiles. Both raw classification (including the schema-15 monster-record exception) and canonical/contextual validation select that historical envelope through schema 15 inclusively. Changes to target budgets cannot reinterpret it. Existing injected test limits remain supported. No new budget values are introduced.
+
+The 14→15 transformation retains its bytes and rejection behavior, with only its output limits/validation bound to frozen 15. In particular, the baseline output check has no executable profiles and rejects active schema-14 owners even when source preparation receives profiles; H1-F1 preserves this behavior. Dormant empty and populated candidates are pinned byte-for-byte. Exact predecessor/candidate comparison, atomic replacement, readback and uncertainty handling retain their existing authorities.
+
+See [qualification evidence](testing/evidence/h1-f1-frozen-schema15/implementation-evidence.md). Remaining H1 work includes the separately reviewed provenance representation/target, legacy activation mapping, ordinary-save/passive-time integration, and recovery/transition qualification. This prerequisite does not implement the H1 owner decisions, H2 retention/batching, or O1 simulation. No player-visible gameplay behavior or Windows filesystem primitive changes, so this change alone requires no manual gameplay UAT or additional native Windows durability qualification; automated migration qualification remains required before merge.

@@ -165,29 +165,40 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public static class DetachedCompleteSaveContract
     {
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,
-            DetachedCurrentTargetValidationContext context)
+            DetachedCurrentTargetValidationContext context) =>
+            ParseValidateContextAndRoundTrip(bytes, context, CanonicalSaveSchemaVersions.CurrentWritableTarget, true);
+
+        // Historical context validation proves production semantics, but grants no writable session authority.
+        internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaFifteenAndRoundTrip(
+            byte[] bytes, DetachedCurrentTargetValidationContext context) =>
+            ParseValidateContextAndRoundTrip(bytes, context, CanonicalSaveSchemaVersions.FrozenSchemaFifteen, false);
+
+        private static DetachedCompleteSaveValidationResult ParseValidateContextAndRoundTrip(byte[] bytes,
+            DetachedCurrentTargetValidationContext context, int schemaVersion, bool currentTarget)
         {
             using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.CompleteValidation);
             if (context == null) return Failure();
+            var limits = context.Limits.ForSchema(schemaVersion);
             DetachedCompleteSaveValidationResult result = ParseValidateAndRoundTripCore(bytes,
-                context.Limits, CanonicalSaveSchemaVersions.CurrentWritableTarget, true,
+                limits, schemaVersion, true,
                 null, null, context.LivingDungeonProfiles);
             if (!result.IsValid || !result.LayoutContractVersion.HasValue) return Failure();
-            if (!MonsterContinuity.Valid(result.MonsterContinuity, result.State, context.MonsterRecovery, context.Limits.Spatial.MaximumRecords)) return Failure();
+            if (!MonsterContinuity.Valid(result.MonsterContinuity, result.State, context.MonsterRecovery, limits.Spatial.MaximumRecords)) return Failure();
             if (!DetachedCanonicalProductionSemanticValidation.Validate(result.State, context.Production,
-                context.Configuration, context.Limits.Spatial, context.RoomContentOccupancy, true).IsValid)
+                context.Configuration, limits.Spatial, context.RoomContentOccupancy, true).IsValid)
                 return Failure();
             if (!PhaseFiveSaveContracts.Validate(result.CorridorContent, result.BranchKnowledge,
-                    result.State, context.Production, context.Configuration, context.Limits.Spatial))
+                    result.State, context.Production, context.Configuration, limits.Spatial))
                 return Failure();
             if (!PhaseSixFloorKnowledge.Validate(result.FloorKnowledge, result.State,
                     DungeonBuilder.M0.Gameplay.RunSimulation.PhaseSixRunConfigValidation.MaximumSupportedActiveFloors)) return Failure();
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
-                context.Compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
+                context.Compatibility.SelectContract(schemaVersion);
             return selected.Success && selected.Value.CanonicalLayoutContractVersion ==
                 result.LayoutContractVersion.Value
                 ? new DetachedCompleteSaveValidationResult(result.GetBytes(), null,
-                    result.LayoutContractVersion, result.State, true,
+                    result.LayoutContractVersion, result.State,
+                    currentTarget && schemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget,
                     result.ResearchPendingExplicitNull, result.ResearchProgressExplicitNull,
                     result.LastOfflineSummaryExplicitNull, result.CorridorContent,
                     result.BranchKnowledge, result.FloorKnowledge) { Investment = result.Investment,
@@ -256,6 +267,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             byte[] bytes, CanonicalSpatialSerializationLimits limits, IReadOnlyList<LivingDungeonProfile> profiles = null) =>
             ParseValidateAndRoundTripCore(bytes, limits, 14, true, null, null, profiles);
 
+        internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaFifteenAndRoundTrip(
+            byte[] bytes, CanonicalSpatialSerializationLimits limits, IReadOnlyList<LivingDungeonProfile> profiles = null) =>
+            ParseValidateAndRoundTripCore(bytes, limits, CanonicalSaveSchemaVersions.FrozenSchemaFifteen,
+                true, null, null, profiles);
+
         private static DetachedCompleteSaveValidationResult ParseValidateAndRoundTripCore(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, int schemaVersion, bool requireLifecycle,
             string expectedTransactionId, string expectedDescriptorFingerprint,
@@ -318,6 +334,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
                     !requireLifecycle ? CanonicalSpatialSaveSerializer.ParseFrozenSchemaSeven(
                         spatialWriter.Finish(), limits) :
+                    schemaVersion != CanonicalSaveSchemaVersions.FrozenSchemaFifteen &&
                     schemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget
                         ? CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits) :
                     CanonicalSpatialSaveSerializer.ParseFrozenWithLifecycle(
@@ -325,6 +342,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 CanonicalSpatialSaveValidationResult structuralValidation = !parsedSpatial.IsValid ? null :
                     !requireLifecycle ? CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
                         parsedSpatial.Value, limits.Spatial, true) :
+                    schemaVersion != CanonicalSaveSchemaVersions.FrozenSchemaFifteen &&
                     schemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget
                         ? CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
                         limits.Spatial, true) : CanonicalSpatialSaveContracts.ValidateFrozenWithLifecycle(

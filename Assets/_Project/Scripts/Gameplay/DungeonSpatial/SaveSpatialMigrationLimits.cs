@@ -117,11 +117,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         raw14.MaximumNestingDepth, raw14.MaximumObjectMembers, raw14.MaximumArrayElements, raw14.MaximumStringBytes,
                         raw14.MaximumScanWork, prior), new CanonicalSpatialSerializationLimits(schema14.Profile.Canonical.Serialized,
                         schema14.Profile.Canonical.Spatial, prior), schema14.Profile.Whole);
+                    var schema15 = LoadCore(Resources.Load<TextAsset>("save_spatial_migration_limits_schema15")?.bytes, false);
+                    if (!schema15.IsSuccess) { historical = null; return Failure(schema15.Reason); }
+                    var raw15 = schema15.Profile.Raw;
+                    var prior14 = historical;
+                    // Preserve the exact schema-15 envelope, including the monster-record exception.
+                    historical = new SaveSpatialMigrationLimitsProfile(new RawSavePayloadClassificationLimits(
+                        raw15.MaximumInputBytes, raw15.MaximumNestingDepth, raw15.MaximumObjectMembers,
+                        raw15.MaximumArrayElements, raw15.MaximumStringBytes, raw15.MaximumScanWork,
+                        prior14, CanonicalSaveSchemaVersions.FrozenSchemaFifteen,
+                        schema15.Profile.Canonical.Spatial.MaximumRecords),
+                        new CanonicalSpatialSerializationLimits(schema15.Profile.Canonical.Serialized,
+                            schema15.Profile.Canonical.Spatial, prior14, CanonicalSaveSchemaVersions.FrozenSchemaFifteen),
+                        schema15.Profile.Whole);
                 }
-                raw = new RawSavePayloadClassificationLimits(values[0], values[1], values[2], values[3], values[4], values[5], historical, 15, values[11]);
+                raw = new RawSavePayloadClassificationLimits(values[0], values[1], values[2], values[3], values[4], values[5],
+                    historical, CanonicalSaveSchemaVersions.FrozenSchemaFifteen, values[11], true);
             }
             return new SaveSpatialMigrationLimitsLoadResult(new SaveSpatialMigrationLimitsProfile(raw,
-                new CanonicalSpatialSerializationLimits(serialized, spatial, includeHistorical ? historical : null, 15), whole), null);
+                new CanonicalSpatialSerializationLimits(serialized, spatial, includeHistorical ? historical : null,
+                    CanonicalSaveSchemaVersions.FrozenSchemaFifteen, true), whole), null);
         }
 
         private static SaveSpatialMigrationLimitsLoadResult Failure(string reason) =>

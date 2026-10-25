@@ -1,0 +1,29 @@
+{
+  "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+  "arguments": [
+    "test",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15",
+    "--mode",
+    "EditMode",
+    "--filter",
+    "Gd66;PhaseFour;PhaseFiveADurableBranch;PhaseSix;CombatC2;LivingDungeonPhaseB2;LivingDungeonB3B2;LivingDungeonTwoFloor;SaveSpatialMigration;DetachedCanonical;MigrationRunner",
+    "--output",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15\\TestResults\\h1-f1\\regression-01.xml",
+    "--timeout",
+    "1800",
+    "--no-color",
+    "--",
+    "-logFile",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15\\TestResults\\h1-f1\\regression-01.log"
+  ],
+  "startedUtc": "2026-10-25T19:22:06.1705543Z",
+  "sourceCommit": "09a46810aeab7441a2ac09ac6220b0f4cc13d6dd",
+  "exitCode": 8,
+  "finishedUtc": "2026-10-25T19:37:53.6159801Z",
+  "verdict": {
+    "total": "1223",
+    "passed": "1220",
+    "failed": "3",
+    "skipped": "0"
+  }
+}

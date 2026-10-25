@@ -1,0 +1,826 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="118" result="Skipped:Ignored" total="118" passed="117" failed="0" inconclusive="0" skipped="1" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:59Z" duration="5.189226">
+  <test-suite type="TestSuite" id="1000" name="Dungeon Lord" fullname="Dungeon Lord" runstate="Runnable" testcasecount="2568" result="Skipped" label="Ignored" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:59Z" duration="5.189226" total="118" passed="117" failed="0" inconclusive="0" skipped="1" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <reason>
+      <message><![CDATA[One or more child tests were ignored]]></message>
+    </reason>
+    <test-suite type="Assembly" id="3984" name="Assembly-CSharp-Editor.dll" fullname="C:/Dev/Dungeon-Lord/Temp/h1-f1-frozen-schema15/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="2568" result="Skipped" label="Ignored" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:59Z" duration="5.158884" total="118" passed="117" failed="0" inconclusive="0" skipped="1" asserts="0">
+      <properties>
+        <property name="_PID" value="49020" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <reason>
+        <message><![CDATA[One or more child tests were ignored]]></message>
+      </reason>
+      <test-suite type="TestSuite" id="3985" name="DungeonBuilder" fullname="DungeonBuilder" runstate="Runnable" testcasecount="2568" result="Skipped" label="Ignored" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:59Z" duration="5.122584" total="118" passed="117" failed="0" inconclusive="0" skipped="1" asserts="0">
+        <properties />
+        <reason>
+          <message><![CDATA[One or more child tests were ignored]]></message>
+        </reason>
+        <test-suite type="TestSuite" id="3986" name="M0" fullname="DungeonBuilder.M0" runstate="Runnable" testcasecount="2568" result="Skipped" label="Ignored" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:59Z" duration="5.062273" total="118" passed="117" failed="0" inconclusive="0" skipped="1" asserts="0">
+          <properties />
+          <reason>
+            <message><![CDATA[One or more child tests were ignored]]></message>
+          </reason>
+          <test-suite type="TestSuite" id="3989" name="Editor" fullname="DungeonBuilder.M0.Editor" runstate="Runnable" testcasecount="1301" result="Skipped" label="Ignored" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:55Z" duration="1.280399" total="32" passed="31" failed="0" inconclusive="0" skipped="1" asserts="0">
+            <properties />
+            <reason>
+              <message><![CDATA[One or more child tests were ignored]]></message>
+            </reason>
+            <test-suite type="TestSuite" id="3990" name="Tests" fullname="DungeonBuilder.M0.Editor.Tests" runstate="Runnable" testcasecount="1179" result="Skipped" label="Ignored" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:55Z" duration="1.261083" total="32" passed="31" failed="0" inconclusive="0" skipped="1" asserts="0">
+              <properties />
+              <reason>
+                <message><![CDATA[One or more child tests were ignored]]></message>
+              </reason>
+              <test-suite type="TestFixture" id="2230" name="PhaseSevenA2WindowsSpatialMigration" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration" classname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration" runstate="Runnable" testcasecount="32" result="Skipped" label="Ignored" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:55Z" duration="1.244556" total="32" passed="31" failed="0" inconclusive="0" skipped="1" asserts="0">
+                <properties />
+                <reason>
+                  <message><![CDATA[One or more child tests were ignored]]></message>
+                </reason>
+                <test-case id="2236" name="CurrentNonWindowsRuntimeFailsClosed" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed" methodname="CurrentNonWindowsRuntimeFailsClosed" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="100272948" result="Skipped" label="Ignored" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.006510" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <reason>
+                    <message><![CDATA[gd66.test.windows_only_inverse]]></message>
+                  </reason>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="2263" name="EveryProbeCapabilityCodeHasAnExactEmissionTest" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.EveryProbeCapabilityCodeHasAnExactEmissionTest" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.011941" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="2259" name="EveryProbeCapabilityCodeHasAnExactEmissionTest(&quot;gd66.preflight.ready&quot;,True)" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.EveryProbeCapabilityCodeHasAnExactEmissionTest(&quot;gd66.preflight.ready&quot;,True)" methodname="EveryProbeCapabilityCodeHasAnExactEmissionTest" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="618218016" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.008754" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="2260" name="EveryProbeCapabilityCodeHasAnExactEmissionTest(&quot;gd66.preflight.path_redirected&quot;,False)" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.EveryProbeCapabilityCodeHasAnExactEmissionTest(&quot;gd66.preflight.path_redirected&quot;,False)" methodname="EveryProbeCapabilityCodeHasAnExactEmissionTest" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1991689363" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.000172" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="2261" name="EveryProbeCapabilityCodeHasAnExactEmissionTest(&quot;gd66.preflight.volume_unsupported&quot;,False)" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.EveryProbeCapabilityCodeHasAnExactEmissionTest(&quot;gd66.preflight.volume_unsupported&quot;,False)" methodname="EveryProbeCapabilityCodeHasAnExactEmissionTest" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="902394292" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.000078" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="2262" name="EveryProbeCapabilityCodeHasAnExactEmissionTest(&quot;gd66.preflight.native_probe_failed&quot;,False)" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.EveryProbeCapabilityCodeHasAnExactEmissionTest(&quot;gd66.preflight.native_probe_failed&quot;,False)" methodname="EveryProbeCapabilityCodeHasAnExactEmissionTest" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="781635592" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.000058" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-case id="2231" name="EvidenceProbeAndTransactionShareExtensionlessSaveStemGrammar" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.EvidenceProbeAndTransactionShareExtensionlessSaveStemGrammar" methodname="EvidenceProbeAndTransactionShareExtensionlessSaveStemGrammar" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1767287179" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.003314" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2265" name="ProbeExceptionFailsClosedAsNativeProbeFailure" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.ProbeExceptionFailsClosedAsNativeProbeFailure" methodname="ProbeExceptionFailsClosedAsNativeProbeFailure" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="2118806773" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.000228" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2247" name="ProductionRenameInteropUsesSetFileInformationByHandleNotMoveFileEx" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.ProductionRenameInteropUsesSetFileInformationByHandleNotMoveFileEx" methodname="ProductionRenameInteropUsesSetFileInformationByHandleNotMoveFileEx" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="923248301" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.001205" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2264" name="RedirectedContainmentHasDistinctExactEmission" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.RedirectedContainmentHasDistinctExactEmission" methodname="RedirectedContainmentHasDistinctExactEmission" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1388903979" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.000246" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2248" name="RenameInfoBufferUsesRuntimeLayoutExactUtf16LengthAndTrailingNull" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.RenameInfoBufferUsesRuntimeLayoutExactUtf16LengthAndTrailingNull" methodname="RenameInfoBufferUsesRuntimeLayoutExactUtf16LengthAndTrailingNull" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1285861864" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.006133" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2232" name="UnsupportedPlatformSelectionFailsClosedWithoutFileSystem" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.UnsupportedPlatformSelectionFailsClosedWithoutFileSystem" methodname="UnsupportedPlatformSelectionFailsClosedWithoutFileSystem" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1799305500" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.000297" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2242" name="WindowsCreateNewFailureReleasesHandleForCleanup" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsCreateNewFailureReleasesHandleForCleanup" methodname="WindowsCreateNewFailureReleasesHandleForCleanup" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="2140576923" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.020535" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2237" name="WindowsDurableCreateMoveReplaceAndReadback" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsDurableCreateMoveReplaceAndReadback" methodname="WindowsDurableCreateMoveReplaceAndReadback" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="653721668" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.015550" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2241" name="WindowsExistingIdenticalQuarantineCollapsesThroughOneReplacement" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsExistingIdenticalQuarantineCollapsesThroughOneReplacement" methodname="WindowsExistingIdenticalQuarantineCollapsesThroughOneReplacement" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1108319505" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.007218" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2240" name="WindowsImplementationRejectsCrossDirectoryMove" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsImplementationRejectsCrossDirectoryMove" methodname="WindowsImplementationRejectsCrossDirectoryMove" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="656663424" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.000448" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2245" name="WindowsLockedDestinationReplacementFailsThenSucceedsAfterRelease" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsLockedDestinationReplacementFailsThenSucceedsAfterRelease" methodname="WindowsLockedDestinationReplacementFailsThenSucceedsAfterRelease" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="549524909" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.005617" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2243" name="WindowsLockedSourceMoveFailsThenSucceedsAfterRelease" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsLockedSourceMoveFailsThenSucceedsAfterRelease" methodname="WindowsLockedSourceMoveFailsThenSucceedsAfterRelease" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1201023172" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.004393" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2249" name="WindowsLongBoundedJournalReplacementUsesExactDestination" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsLongBoundedJournalReplacementUsesExactDestination" methodname="WindowsLongBoundedJournalReplacementUsesExactDestination" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="484020633" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.007178" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2246" name="WindowsMissingSourceFailsWithoutCreatingDestination" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsMissingSourceFailsWithoutCreatingDestination" methodname="WindowsMissingSourceFailsWithoutCreatingDestination" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="2057458844" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.001197" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2244" name="WindowsNonReplacingMoveRejectsExistingDestinationAndReleasesSourceHandle" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsNonReplacingMoveRejectsExistingDestinationAndReleasesSourceHandle" methodname="WindowsNonReplacingMoveRejectsExistingDestinationAndReleasesSourceHandle" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1183908184" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.005244" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2251" name="WindowsPathBoundFailurePreservesSourceBeforeNativeMutation" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsPathBoundFailurePreservesSourceBeforeNativeMutation" methodname="WindowsPathBoundFailurePreservesSourceBeforeNativeMutation" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1085133193" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.002942" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="2258" name="WindowsPersistedReplacedRecoveryFinalizesWithoutRepeatingActiveReplacement" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsPersistedReplacedRecoveryFinalizesWithoutRepeatingActiveReplacement" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.285022" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="2256" name="WindowsPersistedReplacedRecoveryFinalizesWithoutRepeatingActiveReplacement(True)" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsPersistedReplacedRecoveryFinalizesWithoutRepeatingActiveReplacement(True)" methodname="WindowsPersistedReplacedRecoveryFinalizesWithoutRepeatingActiveReplacement" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1622345552" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.226798" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="2257" name="WindowsPersistedReplacedRecoveryFinalizesWithoutRepeatingActiveReplacement(False)" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsPersistedReplacedRecoveryFinalizesWithoutRepeatingActiveReplacement(False)" methodname="WindowsPersistedReplacedRecoveryFinalizesWithoutRepeatingActiveReplacement" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1658430614" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.057324" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-case id="2252" name="WindowsPreflightRejectsReparseAncestor" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsPreflightRejectsReparseAncestor" methodname="WindowsPreflightRejectsReparseAncestor" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1414073087" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.031687" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2234" name="WindowsSelectionAcceptsCanonicalAlternateAndMixedEquivalentSeparators" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsSelectionAcceptsCanonicalAlternateAndMixedEquivalentSeparators" methodname="WindowsSelectionAcceptsCanonicalAlternateAndMixedEquivalentSeparators" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="277849322" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.000750" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2233" name="WindowsSelectionRejectsNonNormalizedPathBeforeNativeProbe" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsSelectionRejectsNonNormalizedPathBeforeNativeProbe" methodname="WindowsSelectionRejectsNonNormalizedPathBeforeNativeProbe" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1878046525" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.000307" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2235" name="WindowsSelectionStillRejectsDotDotDotAndOverLimitPaths" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsSelectionStillRejectsDotDotDotAndOverLimitPaths" methodname="WindowsSelectionStillRejectsDotDotDotAndOverLimitPaths" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="598268233" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.000434" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2250" name="WindowsSuccessfulReplacementPreservesExactSourceFileIdentity" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsSuccessfulReplacementPreservesExactSourceFileIdentity" methodname="WindowsSuccessfulReplacementPreservesExactSourceFileIdentity" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1227569425" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:54Z" duration="0.007553" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="2255" name="WindowsTransactionExecutesLegacyFixtureToFinalizedAndReopens" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsTransactionExecutesLegacyFixtureToFinalizedAndReopens" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:55Z" duration="0.261619" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="2253" name="WindowsTransactionExecutesLegacyFixtureToFinalizedAndReopens(False)" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsTransactionExecutesLegacyFixtureToFinalizedAndReopens(False)" methodname="WindowsTransactionExecutesLegacyFixtureToFinalizedAndReopens" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="144828038" result="Passed" start-time="2026-10-25 19:39:54Z" end-time="2026-10-25 19:39:55Z" duration="0.102419" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="2254" name="WindowsTransactionExecutesLegacyFixtureToFinalizedAndReopens(True)" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsTransactionExecutesLegacyFixtureToFinalizedAndReopens(True)" methodname="WindowsTransactionExecutesLegacyFixtureToFinalizedAndReopens" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="321751600" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:55Z" duration="0.157948" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-case id="2238" name="WindowsUnityPersistentDataPathRepresentationQualifiesAndSupportsCreateReadDelete" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsUnityPersistentDataPathRepresentationQualifiesAndSupportsCreateReadDelete" methodname="WindowsUnityPersistentDataPathRepresentationQualifiesAndSupportsCreateReadDelete" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="1150099174" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:55Z" duration="0.007299" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="2239" name="WindowsUnityPersistentDataPathRunsLegacyMigrationReopenDeleteAndNativeCreate" fullname="DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsUnityPersistentDataPathRunsLegacyMigrationReopenDeleteAndNativeCreate" methodname="WindowsUnityPersistentDataPathRunsLegacyMigrationReopenDeleteAndNativeCreate" classname="DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests" runstate="Runnable" seed="968238670" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:55Z" duration="0.533769" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[[WARN] Save deleted by dev command.
+[WARN] Save deleted by dev command.
+[WARN] Save deleted by dev command.
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestSuite" id="3993" name="EditorTools" fullname="DungeonBuilder.M0.EditorTools" runstate="Runnable" testcasecount="1125" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:59Z" duration="3.749949" total="86" passed="86" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="3996" name="Tests" fullname="DungeonBuilder.M0.EditorTools.Tests" runstate="Runnable" testcasecount="267" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:59Z" duration="3.737807" total="86" passed="86" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="3884" name="FrozenSchemaFifteen" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen" runstate="Runnable" testcasecount="63" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:59Z" duration="3.296707" total="63" passed="63" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-suite type="ParameterizedMethod" id="3924" name="ActiveOwnerPreservesExactCheckpointAllocatorAndUnclosedHorizon" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.ActiveOwnerPreservesExactCheckpointAllocatorAndUnclosedHorizon" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:55Z" duration="0.211119" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3922" name="ActiveOwnerPreservesExactCheckpointAllocatorAndUnclosedHorizon(&quot;active-v1&quot;,2)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.ActiveOwnerPreservesExactCheckpointAllocatorAndUnclosedHorizon(&quot;active-v1&quot;,2)" methodname="ActiveOwnerPreservesExactCheckpointAllocatorAndUnclosedHorizon" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1536323310" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:55Z" duration="0.130046" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3923" name="ActiveOwnerPreservesExactCheckpointAllocatorAndUnclosedHorizon(&quot;active-v2&quot;,3)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.ActiveOwnerPreservesExactCheckpointAllocatorAndUnclosedHorizon(&quot;active-v2&quot;,3)" methodname="ActiveOwnerPreservesExactCheckpointAllocatorAndUnclosedHorizon" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="128646981" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:55Z" duration="0.080496" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-suite type="ParameterizedMethod" id="3944" name="FourteenUpgradePreservesBaselineBytesAndRejection" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FourteenUpgradePreservesBaselineBytesAndRejection" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:56Z" duration="0.229450" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3940" name="FourteenUpgradePreservesBaselineBytesAndRejection(&quot;dormant&quot;,True)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FourteenUpgradePreservesBaselineBytesAndRejection(&quot;dormant&quot;,True)" methodname="FourteenUpgradePreservesBaselineBytesAndRejection" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="961077204" result="Passed" start-time="2026-10-25 19:39:55Z" end-time="2026-10-25 19:39:56Z" duration="0.045384" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3941" name="FourteenUpgradePreservesBaselineBytesAndRejection(&quot;dormant-monsters&quot;,True)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FourteenUpgradePreservesBaselineBytesAndRejection(&quot;dormant-monsters&quot;,True)" methodname="FourteenUpgradePreservesBaselineBytesAndRejection" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="16069147" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.070924" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3942" name="FourteenUpgradePreservesBaselineBytesAndRejection(&quot;active-v1&quot;,False)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FourteenUpgradePreservesBaselineBytesAndRejection(&quot;active-v1&quot;,False)" methodname="FourteenUpgradePreservesBaselineBytesAndRejection" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="63975725" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.054264" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3943" name="FourteenUpgradePreservesBaselineBytesAndRejection(&quot;active-v2&quot;,False)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FourteenUpgradePreservesBaselineBytesAndRejection(&quot;active-v2&quot;,False)" methodname="FourteenUpgradePreservesBaselineBytesAndRejection" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="308853049" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.057341" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-suite type="ParameterizedMethod" id="3947" name="FutureTargetLimitsCannotChangeHistoricalEnvelope" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FutureTargetLimitsCannotChangeHistoricalEnvelope" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.366225" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3945" name="FutureTargetLimitsCannotChangeHistoricalEnvelope(2)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FutureTargetLimitsCannotChangeHistoricalEnvelope(2)" methodname="FutureTargetLimitsCannotChangeHistoricalEnvelope" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="981038577" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.198488" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3946" name="FutureTargetLimitsCannotChangeHistoricalEnvelope(-2)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FutureTargetLimitsCannotChangeHistoricalEnvelope(-2)" methodname="FutureTargetLimitsCannotChangeHistoricalEnvelope" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="421373751" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.166897" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-suite type="ParameterizedMethod" id="3920" name="HistoricalAcceptanceAndRejectionMatchBaseline" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="35" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:58Z" duration="1.592596" total="35" passed="35" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3885" name="FrozenSchemaFifteen.BaselineEquivalence.dormant" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="282081674" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.035389" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3886" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-bad-owner" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-bad-owner" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="204687309" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.034352" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3887" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-bad-order" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-bad-order" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1699804263" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.055914" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3888" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-living-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-living-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1656838211" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.043008" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3889" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-monster-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-monster-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="519315629" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.034396" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3890" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-spatial-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-spatial-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1436518053" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.033414" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3891" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-owner-extension" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-owner-extension" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="2145253188" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.033340" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3892" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-unsupported-schema" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-unsupported-schema" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="476593192" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.033210" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3893" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1456209258" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.046957" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3894" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-bad-owner" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-bad-owner" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1801974327" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.038031" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3895" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-bad-order" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-bad-order" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1856483295" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:56Z" duration="0.035982" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3896" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-living-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-living-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="908671280" result="Passed" start-time="2026-10-25 19:39:56Z" end-time="2026-10-25 19:39:57Z" duration="0.063364" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3897" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-monster-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-monster-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="726511080" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.034622" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3898" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-spatial-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-spatial-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="656156112" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.034264" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3899" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-owner-extension" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-owner-extension" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="27638505" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.036187" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3900" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-unsupported-schema" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-unsupported-schema" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="196414797" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.033373" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3901" name="FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-inconsistent-monster" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.dormant-monsters-inconsistent-monster" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1545302607" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.044542" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3902" name="FrozenSchemaFifteen.BaselineEquivalence.active-v1" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v1" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1837969157" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.084191" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3903" name="FrozenSchemaFifteen.BaselineEquivalence.active-v1-bad-owner" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v1-bad-owner" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="970110919" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.038581" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3904" name="FrozenSchemaFifteen.BaselineEquivalence.active-v1-living-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v1-living-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="78021286" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.067655" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3905" name="FrozenSchemaFifteen.BaselineEquivalence.active-v1-monster-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v1-monster-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1590410343" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.035135" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3906" name="FrozenSchemaFifteen.BaselineEquivalence.active-v1-spatial-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v1-spatial-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="486539784" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.034849" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3907" name="FrozenSchemaFifteen.BaselineEquivalence.active-v1-owner-extension" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v1-owner-extension" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1837887219" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.037330" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3908" name="FrozenSchemaFifteen.BaselineEquivalence.active-v1-unsupported-schema" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v1-unsupported-schema" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="801296156" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.034407" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3909" name="FrozenSchemaFifteen.BaselineEquivalence.active-v1-inconsistent-monster" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v1-inconsistent-monster" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1172043976" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.065981" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3910" name="FrozenSchemaFifteen.BaselineEquivalence.active-v1-unsupported-profile" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v1-unsupported-profile" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1979180220" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.039164" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3911" name="FrozenSchemaFifteen.BaselineEquivalence.active-v2" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v2" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="713716141" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.123593" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3912" name="FrozenSchemaFifteen.BaselineEquivalence.active-v2-bad-owner" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v2-bad-owner" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="128786100" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.038792" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3913" name="FrozenSchemaFifteen.BaselineEquivalence.active-v2-living-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v2-living-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1653522617" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.034584" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3914" name="FrozenSchemaFifteen.BaselineEquivalence.active-v2-monster-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v2-monster-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1328681207" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.035060" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3915" name="FrozenSchemaFifteen.BaselineEquivalence.active-v2-spatial-alias" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v2-spatial-alias" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="852154470" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.034976" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3916" name="FrozenSchemaFifteen.BaselineEquivalence.active-v2-owner-extension" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v2-owner-extension" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="966609615" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:57Z" duration="0.037985" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3917" name="FrozenSchemaFifteen.BaselineEquivalence.active-v2-unsupported-schema" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v2-unsupported-schema" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="734962500" result="Passed" start-time="2026-10-25 19:39:57Z" end-time="2026-10-25 19:39:58Z" duration="0.035076" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3918" name="FrozenSchemaFifteen.BaselineEquivalence.active-v2-inconsistent-monster" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v2-inconsistent-monster" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1535848763" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.075836" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3919" name="FrozenSchemaFifteen.BaselineEquivalence.active-v2-unsupported-profile" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.FrozenSchemaFifteen.BaselineEquivalence.active-v2-unsupported-profile" methodname="HistoricalAcceptanceAndRejectionMatchBaseline" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="301687795" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.063543" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-suite type="ParameterizedMethod" id="3927" name="HistoricalDormantOwnerHasNoSynthesizedSchedulerOrParty" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.HistoricalDormantOwnerHasNoSynthesizedSchedulerOrParty" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.073811" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3925" name="HistoricalDormantOwnerHasNoSynthesizedSchedulerOrParty(&quot;dormant&quot;)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.HistoricalDormantOwnerHasNoSynthesizedSchedulerOrParty(&quot;dormant&quot;)" methodname="HistoricalDormantOwnerHasNoSynthesizedSchedulerOrParty" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1849471366" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.035736" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3926" name="HistoricalDormantOwnerHasNoSynthesizedSchedulerOrParty(&quot;dormant-monsters&quot;)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.HistoricalDormantOwnerHasNoSynthesizedSchedulerOrParty(&quot;dormant-monsters&quot;)" methodname="HistoricalDormantOwnerHasNoSynthesizedSchedulerOrParty" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="147908971" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.037260" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-suite type="ParameterizedMethod" id="3957" name="MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.018583" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3954" name="MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty(False,False)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty(False,False)" methodname="MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1387630745" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.007846" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3955" name="MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty(True,False)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty(True,False)" methodname="MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1100781490" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.004886" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3956" name="MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty(True,True)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty(True,True)" methodname="MigrationAtomicFailureRequiresExactPredecessorOrReportsUncertainty" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1617513540" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.004953" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-case id="3958" name="MigrationReadbackMismatchRollsBackAndExactCandidateIsIdempotent" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MigrationReadbackMismatchRollsBackAndExactCandidateIsIdempotent" methodname="MigrationReadbackMismatchRollsBackAndExactCandidateIsIdempotent" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1504560010" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.001787" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="3930" name="MissingExecutableProfileCannotBeAccepted" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingExecutableProfileCannotBeAccepted" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.074860" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3928" name="MissingExecutableProfileCannotBeAccepted(&quot;active-v1&quot;)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingExecutableProfileCannotBeAccepted(&quot;active-v1&quot;)" methodname="MissingExecutableProfileCannotBeAccepted" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="746545535" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.037478" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3929" name="MissingExecutableProfileCannotBeAccepted(&quot;active-v2&quot;)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingExecutableProfileCannotBeAccepted(&quot;active-v2&quot;)" methodname="MissingExecutableProfileCannotBeAccepted" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1677346237" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.036711" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-suite type="ParameterizedMethod" id="3939" name="MissingOrRetiredSchema15CompatibilityContractFailsContext" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingOrRetiredSchema15CompatibilityContractFailsContext" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.163015" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3937" name="MissingOrRetiredSchema15CompatibilityContractFailsContext(False)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingOrRetiredSchema15CompatibilityContractFailsContext(False)" methodname="MissingOrRetiredSchema15CompatibilityContractFailsContext" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1167890940" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.065659" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3938" name="MissingOrRetiredSchema15CompatibilityContractFailsContext(True)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingOrRetiredSchema15CompatibilityContractFailsContext(True)" methodname="MissingOrRetiredSchema15CompatibilityContractFailsContext" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="95543570" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.096556" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-suite type="ParameterizedMethod" id="3933" name="MissingOrUnsupportedCheckpointExecutableFailsDespiteRecomputedHash" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingOrUnsupportedCheckpointExecutableFailsDespiteRecomputedHash" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.102475" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3931" name="MissingOrUnsupportedCheckpointExecutableFailsDespiteRecomputedHash(null)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingOrUnsupportedCheckpointExecutableFailsDespiteRecomputedHash(null)" methodname="MissingOrUnsupportedCheckpointExecutableFailsDespiteRecomputedHash" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1890903805" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.051353" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3932" name="MissingOrUnsupportedCheckpointExecutableFailsDespiteRecomputedHash(&quot;run.executable.unsupported.v1&quot;)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingOrUnsupportedCheckpointExecutableFailsDespiteRecomputedHash(&quot;run.executable.unsupported.v1&quot;)" methodname="MissingOrUnsupportedCheckpointExecutableFailsDespiteRecomputedHash" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="351212533" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.050329" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-suite type="ParameterizedMethod" id="3936" name="MissingProductionConfigurationOrOccupancyFailsContext" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingProductionConfigurationOrOccupancyFailsContext" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.074772" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3934" name="MissingProductionConfigurationOrOccupancyFailsContext(False,True)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingProductionConfigurationOrOccupancyFailsContext(False,True)" methodname="MissingProductionConfigurationOrOccupancyFailsContext" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="29050672" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.036381" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3935" name="MissingProductionConfigurationOrOccupancyFailsContext(True,False)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.MissingProductionConfigurationOrOccupancyFailsContext(True,False)" methodname="MissingProductionConfigurationOrOccupancyFailsContext" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="247435916" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.037592" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-case id="3921" name="OriginalBytesAndLimitsRetainCapturedHashes" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.OriginalBytesAndLimitsRetainCapturedHashes" methodname="OriginalBytesAndLimitsRetainCapturedHashes" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1017078297" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.016892" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="3953" name="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:59Z" duration="0.368767" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3948" name="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes(&quot;active-v1&quot;,True)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes(&quot;active-v1&quot;,True)" methodname="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1524499655" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.067264" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3949" name="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes(&quot;active-v2&quot;,True)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes(&quot;active-v2&quot;,True)" methodname="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="109772364" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.100634" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3950" name="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes(&quot;active-v1-inconsistent-monster&quot;,False)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes(&quot;active-v1-inconsistent-monster&quot;,False)" methodname="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="143221528" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.074055" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3951" name="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes(&quot;active-v2-unsupported-profile&quot;,False)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes(&quot;active-v2-unsupported-profile&quot;,False)" methodname="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="1574118081" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:58Z" duration="0.064827" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3952" name="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes(&quot;active-v2-unsupported-schema&quot;,False)" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteen.RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes(&quot;active-v2-unsupported-schema&quot;,False)" methodname="RecoveryRequiresHistoricalContextAndNeverWritesUnprovenBytes" classname="DungeonBuilder.M0.Tests.EditMode.FrozenSchemaFifteenTests" runstate="Runnable" seed="846113413" result="Passed" start-time="2026-10-25 19:39:58Z" end-time="2026-10-25 19:39:59Z" duration="0.060730" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+              </test-suite>
+              <test-suite type="TestFixture" id="3959" name="FrozenSchemaFifteenMigrationRegression" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" testcasecount="23" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.437791" total="23" passed="23" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="3983" name="EstablishedHistoricalLimitLoaderAssertions" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.EstablishedHistoricalLimitLoaderAssertions" methodname="EstablishedHistoricalLimitLoaderAssertions" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="487864728" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.008958" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="3981" name="EstablishedMigrationFailureMatrix" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" testcasecount="21" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.425975" total="21" passed="21" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="3960" name="FrozenSchemaFifteen.EstablishedFailureMatrix.fresh-containment-exception" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.fresh-containment-exception" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="1521492253" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.020145" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3961" name="FrozenSchemaFifteen.EstablishedFailureMatrix.fresh-journal-write" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.fresh-journal-write" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="8310293" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.015995" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3962" name="FrozenSchemaFifteen.EstablishedFailureMatrix.fresh-enumeration" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.fresh-enumeration" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="917613588" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.015770" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3963" name="FrozenSchemaFifteen.EstablishedFailureMatrix.descriptor-backup-write" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.descriptor-backup-write" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="1180994139" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.016835" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3964" name="FrozenSchemaFifteen.EstablishedFailureMatrix.descriptor-backup-exists" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.descriptor-backup-exists" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="888818507" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.016547" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3965" name="FrozenSchemaFifteen.EstablishedFailureMatrix.descriptor-backup-mismatch" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.descriptor-backup-mismatch" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="75813707" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.020816" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3966" name="FrozenSchemaFifteen.EstablishedFailureMatrix.backup-candidate-write" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.backup-candidate-write" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="967057097" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.046191" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3967" name="FrozenSchemaFifteen.EstablishedFailureMatrix.backup-candidate-flush" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.backup-candidate-flush" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="923038561" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.017020" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3968" name="FrozenSchemaFifteen.EstablishedFailureMatrix.backup-candidate-mismatch" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.backup-candidate-mismatch" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="687170213" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.016617" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3969" name="FrozenSchemaFifteen.EstablishedFailureMatrix.candidate-active-replace-before" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.candidate-active-replace-before" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="763284744" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.026042" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3970" name="FrozenSchemaFifteen.EstablishedFailureMatrix.replaced-directory-flush" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.replaced-directory-flush" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="1815457123" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.020905" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3971" name="FrozenSchemaFifteen.EstablishedFailureMatrix.replaced-active-read-exception" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.replaced-active-read-exception" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="1131970338" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.024049" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3972" name="FrozenSchemaFifteen.EstablishedFailureMatrix.finalization-receipt-write" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.finalization-receipt-write" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="717625214" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.021179" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3973" name="FrozenSchemaFifteen.EstablishedFailureMatrix.durable-final-journal-advance" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.durable-final-journal-advance" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="1218298760" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.025873" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3974" name="FrozenSchemaFifteen.EstablishedFailureMatrix.restoration-intent-write" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.restoration-intent-write" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="661342553" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.018114" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3975" name="FrozenSchemaFifteen.EstablishedFailureMatrix.restoration-intent-mismatch" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.restoration-intent-mismatch" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="146467121" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.016688" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3976" name="FrozenSchemaFifteen.EstablishedFailureMatrix.restore-staging-quarantine-move" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.restore-staging-quarantine-move" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="395006011" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.017324" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3977" name="FrozenSchemaFifteen.EstablishedFailureMatrix.restore-staging-mismatch" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.restore-staging-mismatch" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="499356069" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.016852" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3978" name="FrozenSchemaFifteen.EstablishedFailureMatrix.restore-active-replace-before" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.restore-active-replace-before" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="998794451" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.017262" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3979" name="FrozenSchemaFifteen.EstablishedFailureMatrix.restore-exact-quarantine-replace" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.restore-exact-quarantine-replace" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="484536628" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.016904" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="3980" name="FrozenSchemaFifteen.EstablishedFailureMatrix.restore-originalrestored-advance" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.FrozenSchemaFifteen.EstablishedFailureMatrix.restore-originalrestored-advance" methodname="EstablishedMigrationFailureMatrix" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="1566506005" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.015632" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-case id="3982" name="EstablishedMigrationMatrixDimensionsAndChronology" fullname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.EstablishedMigrationMatrixDimensionsAndChronology" methodname="EstablishedMigrationMatrixDimensionsAndChronology" classname="DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression" runstate="Runnable" seed="1090891414" result="Passed" start-time="2026-10-25 19:39:59Z" end-time="2026-10-25 19:39:59Z" duration="0.001514" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Saving results to: C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord\TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
