@@ -330,7 +330,7 @@ All future labels, notices, error states and accessibility descriptions come fro
 
 ## 11. Outstanding owner decisions and recommended defaults
 
-| Decision requiring approval | Recommended default | Gate |
+| Policy decision / remaining design gate | Approved direction or proposed default | Remaining approval/qualification gate |
 | --- | --- | --- |
 | **Owner-approved: durability guarantee** | Exact accepted-work recovery; bounded provisional rollback; no rollback of confirmed permanent transactions | **Policy approved 2026-10-24.** Numeric exposure limits, durable encoding and fault qualification remain unapproved |
 | **Owner-approved: unknown crash gap** | Before O1, preserve existing passive offline behavior and accept no absent-party debt. After qualified O1, process valid unaccounted unknown absence under offline restrictions, without asserting a definitive background/foreground split | **Policy approved 2026-10-24.** W/passive-boundary mapping, time anomalies, interval eligibility and O1 activation remain technical gates |
@@ -425,7 +425,7 @@ Packets below are future work, not authorization to start now. Each must inspect
 
 ### H2 — Retained foreground execution and bounded hybrid checkpoints
 
-**Objective/dependency:** After H1 and approved numeric/profile/UX limits, retain private executions and publish at mandatory/limit cuts. Integrate provisional live feedback and confirmed-only Analysis in this same coherent behavioral packet. Approve the known-foreground stall/accrual policy before enabling batching.
+**Objective/dependency:** After H1 and approved numeric/profile/UX limits, retain private executions and publish at mandatory/limit cuts. Integrate provisional live feedback and confirmed-only Analysis in this same coherent behavioral packet. The owner-approved prospective foreground stall policy must be implemented with reviewed cut, clock and bounded-work mechanics before enabling batching.
 
 **Scope:** Foreground root/service/authority, private bounded working-set helper within existing coordination, `RunExecution` lifecycle/inspection/export interfaces, transfer lineage, current settlement/reconciliation/history validation, technical config loader/resource, production foreground/world/Analysis projections, localization and relevant tests/metrics. Do not redesign compatible combat/checkpoint executables merely to retain an iterator.
 
@@ -433,7 +433,7 @@ Packets below are future work, not authorization to start now. Each must inspect
 
 **Constraints/config/localization:** One caller, exact session binding/rebind proof, immutable starts, independent mutable parties, unchanged total order and C2 reconciliation. Complete mandatory timestamps publish before later work/acknowledgement. All age/work/memory/flush thresholds are validated config, all durability feedback localized. Failure discards speculative successors and retains accepted work. W and the passive source boundary retain H1's approved atomic relationship.
 
-**Pre-O1 runtime behavior:** Genuine background/closed time and unknown crash absence use existing passive offline rules without party progression. Reopen resumes supported parties from their proven foreground state after accepted work drains; lost provisional activity is not automatically recomputed offline. Normal gameplay does not depend on future O1 capability. Known foreground persistence stalls cannot silently become offline intervals. If the owner approves prospective technical simulation suspension, record its cut and apply that policy without retroactively erasing accepted/observed work or issuing offline credit for the stall.
+**Pre-O1 runtime behavior:** Genuine background/closed time and unknown crash absence use existing passive offline rules without party progression. Reopen resumes supported parties from their proven foreground state after accepted work drains; lost provisional activity is not automatically recomputed offline. Normal gameplay does not depend on future O1 capability. Known foreground persistence stalls cannot silently become offline intervals. The owner-approved prospective technical suspension must record a validated safe cut and cannot retroactively erase accepted/observed work or issue offline credit for the stall; exact cut/clock/accounting implementation still requires H1/H2 qualification.
 
 **Acceptance/automated tests:** Every-prefix retained-versus-restored futures; random pump partitions and reopen points with identical accepted inputs; full one/two-floor EXIT/DESCEND/Blocked/Released order; active edits/manual overlap; duplicate/stale settlement/release; admission reservation; condition-only recovery; no terminal Analysis before publication. Fault every matrix cut, including outcome-taken rollback, commit-before-ack, stale rebind, corrupt party and changed executable/config. Test just below/at/above approved age/work/heap/storage limits, zero-time event chains, lookahead charges, indefinite waiting, repeated failed checkpoints, no growing buffers or per-frame write loop. Separately test genuine background absence, unknown crash absence and a known foreground storage stall. Assert correct passive boundaries, no duplicated/lost accepted credit, no silent time-class conversion and no unsupported offline-party backlog.
 
