@@ -11,15 +11,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public readonly struct CanonicalSpatialSerializationLimits
     {
         public CanonicalSpatialSerializationLimits(SpatialSerializedInputLimits serialized,
-            CanonicalSpatialSaveWorkloadLimits spatial, SaveSpatialMigrationLimitsProfile historical = null, int historicalBoundary = 14)
-        { Serialized = serialized; Spatial = spatial; Historical = historical; HistoricalBoundary = historicalBoundary; }
+            CanonicalSpatialSaveWorkloadLimits spatial, SaveSpatialMigrationLimitsProfile historical = null,
+            int historicalBoundary = 14, bool includeHistoricalBoundary = false)
+        { Serialized = serialized; Spatial = spatial; Historical = historical; HistoricalBoundary = historicalBoundary;
+          IncludeHistoricalBoundary = includeHistoricalBoundary; }
 
         public SpatialSerializedInputLimits Serialized { get; }
         public CanonicalSpatialSaveWorkloadLimits Spatial { get; }
         internal SaveSpatialMigrationLimitsProfile Historical { get; }
         private int HistoricalBoundary { get; }
+        private bool IncludeHistoricalBoundary { get; }
         internal CanonicalSpatialSerializationLimits ForSchema(int schema) =>
-            schema < HistoricalBoundary && Historical != null ? Historical.Canonical.ForSchema(schema) : this;
+            Historical != null && (schema < HistoricalBoundary || IncludeHistoricalBoundary && schema == HistoricalBoundary)
+                ? Historical.Canonical.ForSchema(schema) : this;
         public bool IsValid => Serialized.IsValid && Spatial.IsValid;
     }
 
@@ -221,7 +225,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static CanonicalSpatialSaveValidationResult ValidateForSchema(
             DetachedCanonicalSpatialSaveState state, CanonicalSpatialSerializationLimits limits,
-            bool ordered, int schemaVersion) => schemaVersion < CanonicalSaveSchemaVersions.CurrentWritableTarget
+            bool ordered, int schemaVersion) => schemaVersion <= CanonicalSaveSchemaVersions.FrozenSchemaFifteen
                 ? CanonicalSpatialSaveContracts.ValidateFrozenWithLifecycle(state, limits.Spatial, schemaVersion, ordered)
                 : CanonicalSpatialSaveContracts.Validate(state, limits.Spatial, ordered);
 

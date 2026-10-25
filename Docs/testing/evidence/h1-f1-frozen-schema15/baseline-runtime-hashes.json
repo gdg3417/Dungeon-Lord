@@ -1,0 +1,42 @@
+[
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSaveSchemaVersions.cs",
+    "SHA256": "64b2791a6e305234de6d3c2855d0c82a6f414865a8993b9802bb4e7b69fd1c80"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCompleteSaveContract.cs",
+    "SHA256": "46578f59923e686414f7cf4f76bdb11647bcbc863477934054e79aedc7705bff"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSpatialSaveContracts.cs",
+    "SHA256": "92930c0f5a85d778ba1bee2d7e2ec3e79e846590fa7994363bcb2fe9cb43c0d8"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSpatialSaveSerializer.cs",
+    "SHA256": "2003f9ead8085ec8092f2f13be3017d8e5d79fa9dbf7f2d4a65b8b0de8ffff63"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaFourteenToFifteenUpgrade.cs",
+    "SHA256": "ef593939573e406acd1bb620817152fa49c746b590427084892d65225c2bddf6"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialSaveLoadCoordinator.cs",
+    "SHA256": "f4018c4e9dfa1e258606eec1f0cb918af086a9a23a85073b70f45b28ac4408fc"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialMigrationTransaction.cs",
+    "SHA256": "d478dd2e2aec49e3991febc372594e474dd247fcbb410ac97755055986c4121a"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SpatialLayoutCompatibilityProfiles.cs",
+    "SHA256": "ad7c328a27e413ff7920524461e3434dccea0dee2ec0ac076090728ae7d7dee0"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SaveSpatialMigrationLimits.cs",
+    "SHA256": "9478fbb45f8bb0d9661626f37c529b296b19c1fe88a4e866421cca5831a5c1e2"
+  },
+  {
+    "Path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RawSavePayloadClassifier.cs",
+    "SHA256": "9b01be89686a32c84df5cf1ae6f2659f2070273f811370ddaf0d6078fb716626"
+  }
+]

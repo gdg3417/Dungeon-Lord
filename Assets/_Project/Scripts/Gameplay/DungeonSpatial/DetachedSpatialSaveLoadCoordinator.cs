@@ -225,6 +225,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return PublishValidated(trusted, currentContext,
                     DetachedSpatialSaveLoadDisposition.CurrentTarget, recovered, null);
 
+            // A recognized historical 15 is never a schemas 1-6 legacy projection.
+            // A later writable target must supply its reviewed migration before this can load.
+            if (schema == CanonicalSaveSchemaVersions.FrozenSchemaFifteen)
+                return Failure(SchemaSevenToEightUpgrade.InvalidReason, recovered.TrustedPayload, recovered);
+
             // Reject the new owner collision before the frozen legacy transaction can commit schema 7.
             // Frozen readers/preparation still recognize this as an extension; the current target cannot.
             if (classification.UnknownPrimaryMembers.Any(member => string.Equals(member.Name,

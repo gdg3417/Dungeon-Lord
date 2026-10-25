@@ -1,0 +1,23 @@
+{
+  "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+  "arguments": [
+    "test",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15",
+    "--mode",
+    "EditMode",
+    "--filter",
+    "LivingDungeonTwoFloorProductionProfileSceneTests",
+    "--output",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15\\TestResults\\h1-f1\\scene-profile-01.xml",
+    "--timeout",
+    "1800",
+    "--no-color",
+    "--",
+    "-logFile",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\h1-f1-frozen-schema15\\TestResults\\h1-f1\\scene-profile-01.log"
+  ],
+  "startedUtc": "2026-10-25T19:40:41.7292426Z",
+  "sourceCommit": "09a46810aeab7441a2ac09ac6220b0f4cc13d6dd",
+  "exitCode": 14,
+  "finishedUtc": "2026-10-25T20:10:47.1202528Z"
+}

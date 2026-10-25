@@ -1395,10 +1395,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     productionContent, configuration, completeLimits.Spatial, recoveryContext.RoomContentOccupancy, true).IsValid &&
                 PhaseFiveSaveContracts.Validate(fourteen.CorridorContent, fourteen.BranchKnowledge, fourteen.State,
                     productionContent, configuration, completeLimits.Spatial)) return true;
-            return DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,
-                new DetachedCurrentTargetValidationContext(recoveryContext.Compatibility,
+            var context = new DetachedCurrentTargetValidationContext(recoveryContext.Compatibility,
                     productionContent, recoveryContext.LegacyConfigurationBytes, completeLimits,
-                    recoveryContext.RoomContentOccupancy, false, recoveryContext.LivingDungeonProfiles, recoveryContext.MonsterRecovery)).IsValid;
+                    recoveryContext.RoomContentOccupancy, false, recoveryContext.LivingDungeonProfiles, recoveryContext.MonsterRecovery);
+            return DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(bytes, context).IsValid ||
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, context).IsValid;
         }
 
         private SpatialTrustedPayload TrustedActive(string activePath, byte[] original, byte[] candidate)

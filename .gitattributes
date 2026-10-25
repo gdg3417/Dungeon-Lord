@@ -4,4 +4,7 @@ Assets/_Project/Data/Production/DungeonSpatial/*.json text eol=lf
 Assets/_Project/Data/Production/Save/*.json text eol=lf
 Assets/_Project/Resources/save_spatial_migration_limits_schema13.json text eol=lf
 Assets/_Project/Resources/save_spatial_migration_limits_schema14.json text eol=lf
+Assets/_Project/Resources/save_spatial_migration_limits_schema15.json text eol=lf
+Tools/Presentation/Fixtures/schema15-09a46810/*.json -text
+Tools/Presentation/Fixtures/schema15-09a46810/*.tsv -text
 Assets/_Project/Tests/EditMode/phase-a-baseline.txt text eol=lf

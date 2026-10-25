@@ -230,7 +230,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSpatialSaveState state, CanonicalSpatialSaveWorkloadLimits limits,
             int schemaVersion, bool requireCanonicalOrdering = false) =>
             schemaVersion == 8 || schemaVersion == 9 || schemaVersion == 10 || schemaVersion == 11 ||
-            schemaVersion == 12 || schemaVersion == 13 || schemaVersion == 14
+            schemaVersion == 12 || schemaVersion == 13 || schemaVersion == 14 ||
+            schemaVersion == CanonicalSaveSchemaVersions.FrozenSchemaFifteen
                 ? ValidateCore(state, limits, requireCanonicalOrdering, true, schemaVersion)
                 : new CanonicalSpatialSaveValidationResult(new[]
                     { CanonicalSpatialSaveValidationIssue.InvalidSource });

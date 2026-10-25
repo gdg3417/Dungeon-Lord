@@ -1,0 +1,563 @@
+{
+    "PhaseFiveB": {
+        "Version": 1,
+        "PartyRuleSourceId": "run.party.phase5b.v1",
+        "BehaviorRuleSourceId": "run.behavior.phase5b.v1",
+        "IntelligenceRuleSourceId": "run.intelligence.phase5b.v1",
+        "EncounterRuleSourceId": "run.encounter.phase5b.v1",
+        "MinPartySize": 3,
+        "MaxPartySize": 5,
+        "InitialLevel": 1,
+        "CapabilityId": "adventurer.capability.trap_expertise",
+        "TrapMitigationCoefficient": 0.5,
+        "Classes": [
+            {
+                "ClassId": "adventurer.class.warrior",
+                "LevelOneMaxHealth": 100,
+                "TrapExpertise": 0.0,
+                "FormationPriority": 1
+            },
+            {
+                "ClassId": "adventurer.class.cleric",
+                "LevelOneMaxHealth": 100,
+                "TrapExpertise": 0.0,
+                "FormationPriority": 4
+            },
+            {
+                "ClassId": "adventurer.class.rogue",
+                "LevelOneMaxHealth": 100,
+                "TrapExpertise": 1.0,
+                "FormationPriority": 2
+            },
+            {
+                "ClassId": "adventurer.class.ranger",
+                "LevelOneMaxHealth": 100,
+                "TrapExpertise": 0.5,
+                "FormationPriority": 3
+            },
+            {
+                "ClassId": "adventurer.class.mage",
+                "LevelOneMaxHealth": 100,
+                "TrapExpertise": 0.0,
+                "FormationPriority": 5
+            }
+        ],
+        "Behaviors": [
+            {
+                "Id": "adventurer.behavior_profile.cautious",
+                "Weight": 0.2,
+                "RewardAppetite": 0.4,
+                "RiskTolerance": 0.2,
+                "UncertaintyTolerance": 0.2,
+                "RequiredRouteCommitment": 0.8
+            },
+            {
+                "Id": "adventurer.behavior_profile.greedy",
+                "Weight": 0.2,
+                "RewardAppetite": 0.9,
+                "RiskTolerance": 0.6,
+                "UncertaintyTolerance": 0.45,
+                "RequiredRouteCommitment": 0.35
+            },
+            {
+                "Id": "adventurer.behavior_profile.curious",
+                "Weight": 0.2,
+                "RewardAppetite": 0.55,
+                "RiskTolerance": 0.5,
+                "UncertaintyTolerance": 0.9,
+                "RequiredRouteCommitment": 0.35
+            },
+            {
+                "Id": "adventurer.behavior_profile.goal_oriented",
+                "Weight": 0.2,
+                "RewardAppetite": 0.35,
+                "RiskTolerance": 0.45,
+                "UncertaintyTolerance": 0.4,
+                "RequiredRouteCommitment": 0.95
+            },
+            {
+                "Id": "adventurer.behavior_profile.gambler",
+                "Weight": 0.2,
+                "RewardAppetite": 0.75,
+                "RiskTolerance": 0.9,
+                "UncertaintyTolerance": 0.85,
+                "RequiredRouteCommitment": 0.2
+            }
+        ],
+        "IntelligenceBands": [
+            {
+                "Id": "adventurer.intelligence.poor",
+                "InterpretationFactor": 0.6,
+                "Weight": 0.25
+            },
+            {
+                "Id": "adventurer.intelligence.standard",
+                "InterpretationFactor": 0.8,
+                "Weight": 0.5
+            },
+            {
+                "Id": "adventurer.intelligence.good",
+                "InterpretationFactor": 1.0,
+                "Weight": 0.25
+            }
+        ],
+        "DamageProfiles": [
+            {
+                "OptionId": "placement.option.monster.goblin",
+                "CategoryId": "placement.category.monster",
+                "TargetingPolicyId": "run.targeting.lead_active",
+                "MinimumDamage": 1,
+                "MaximumDamage": 2
+            },
+            {
+                "OptionId": "placement.option.monster.skeleton",
+                "CategoryId": "placement.category.monster",
+                "TargetingPolicyId": "run.targeting.lead_active",
+                "MinimumDamage": 1,
+                "MaximumDamage": 3
+            },
+            {
+                "OptionId": "placement.option.trap.snare",
+                "CategoryId": "placement.category.trap",
+                "TargetingPolicyId": "run.targeting.lead_active",
+                "MinimumDamage": 1,
+                "MaximumDamage": 2
+            },
+            {
+                "OptionId": "placement.option.trap.spike",
+                "CategoryId": "placement.category.trap",
+                "TargetingPolicyId": "run.targeting.lead_active",
+                "MinimumDamage": 2,
+                "MaximumDamage": 4
+            },
+            {
+                "OptionId": "placement.option.trap.chilling_sigil",
+                "CategoryId": "placement.category.trap",
+                "TargetingPolicyId": "run.targeting.lead_active",
+                "MinimumDamage": 0,
+                "MaximumDamage": 0
+            }
+        ],
+        "BranchDecision": {
+            "RuleSourceId": "run.branch_decision.rule.phase5b.v2",
+            "TrapInterpretationConfidenceBonus": 0.15,
+            "IncentiveReferenceLootBonus": 6.0,
+            "DangerReferenceValue": 3.0,
+            "RequiredRouteDangerReference": 6.0,
+            "InitialInclination": 0.0,
+            "ConditionHealthWeight": 0.65,
+            "ConditionActiveMemberWeight": 0.35,
+            "ThreatDangerWeight": 0.7,
+            "ThreatUncertaintyWeight": 0.3,
+            "TrapExpertiseThreatMitigation": 0.35,
+            "SurvivabilityThreatPenalty": 0.6,
+            "ProfileMinimums": [
+                {
+                    "ProfileId": "adventurer.behavior_profile.cautious",
+                    "MinimumSurvivability": 0.7
+                },
+                {
+                    "ProfileId": "adventurer.behavior_profile.greedy",
+                    "MinimumSurvivability": 0.45
+                },
+                {
+                    "ProfileId": "adventurer.behavior_profile.curious",
+                    "MinimumSurvivability": 0.5
+                },
+                {
+                    "ProfileId": "adventurer.behavior_profile.goal_oriented",
+                    "MinimumSurvivability": 0.6
+                },
+                {
+                    "ProfileId": "adventurer.behavior_profile.gambler",
+                    "MinimumSurvivability": 0.35
+                }
+            ],
+            "RewardWeight": 1.25,
+            "DangerWeight": 1.0,
+            "UncertaintyWeight": 0.75,
+            "ReserveWeight": 0.5,
+            "IntentWeight": 0.0,
+            "SkipThreshold": -0.15,
+            "EnterThreshold": 0.15,
+            "InitialObservationConfidence": 0.75,
+            "ReconfirmationConfidenceIncrease": 0.125,
+            "MaximumDecisionsPerFloor": 1,
+            "MaximumDecisionsPerRun": 5,
+            "MaximumAssignmentsPerBranch": 2,
+            "MaximumKnowledgeUpdatesPerRun": 5
+        }
+    },
+    "PhaseSix": {
+        "TransitionRuleSourceId": "run.floor_transition_decision.phase6.v1",
+        "ObjectiveRuleSourceId": "run.depth_objective.phase6.v1",
+        "ConditionHealthWeight": 0.65,
+        "SurvivorFractionWeight": 0.35,
+        "PerceivedDangerWeight": 0.7,
+        "UncertaintyWeight": 0.3,
+        "SurvivabilityThreatPenalty": 0.6,
+        "ProfileMinimums": [
+            {
+                "ProfileId": "adventurer.behavior_profile.cautious",
+                "MinimumSurvivability": 0.0
+            },
+            {
+                "ProfileId": "adventurer.behavior_profile.greedy",
+                "MinimumSurvivability": 0.0
+            },
+            {
+                "ProfileId": "adventurer.behavior_profile.curious",
+                "MinimumSurvivability": 0.0
+            },
+            {
+                "ProfileId": "adventurer.behavior_profile.goal_oriented",
+                "MinimumSurvivability": 0.0
+            },
+            {
+                "ProfileId": "adventurer.behavior_profile.gambler",
+                "MinimumSurvivability": 0.0
+            }
+        ],
+        "RewardWeight": 1.0,
+        "SurvivabilityMarginWeight": 1.25,
+        "ObjectiveWeight": 1.0,
+        "DangerAppealWeight": 1.0,
+        "UncertaintyAppealWeight": 0.75,
+        "CarriedLootPreservationWeight": 0.75,
+        "ExitThreshold": -1.0,
+        "DescendThreshold": -0.9,
+        "RewardReference": 12.0,
+        "DangerReference": 9.0,
+        "CarriedLootReference": 12.0,
+        "UnknownInformationUncertainty": 1.0,
+        "InitialObservationConfidence": 0.75,
+        "ReconfirmationConfidenceIncrease": 0.125,
+        "ConfidenceClamp": 1.0,
+        "Objectives": [
+            {
+                "Mode": "shallow",
+                "Weight": 0.2,
+                "PullStrength": 0.0,
+                "TargetFloorIndex": -1
+            },
+            {
+                "Mode": "target_depth",
+                "Weight": 0.5,
+                "PullStrength": 0.75,
+                "TargetFloorIndex": 1
+            },
+            {
+                "Mode": "deepest_reasonable",
+                "Weight": 0.3,
+                "PullStrength": 0.5,
+                "TargetFloorIndex": -1
+            }
+        ],
+        "MaximumActiveFloors": 5,
+        "MaximumTransitions": 4
+    },
+    "BaseSuccessChance": 1.0,
+    "HeatPenaltyPerPoint": 0.0,
+    "ManaReserveBonusPerPoint": 0.0,
+    "CrisisFailurePenalty": 0.3,
+    "SuccessThreshold": 0.0,
+    "BaseScoreOnSuccess": 100,
+    "ScorePerManaPoint": 2,
+    "MaxRunHistoryEntries": 10,
+    "HighHeatFeedbackThreshold": 75.0,
+    "LowManaFeedbackThreshold": 5.0,
+    "StrongManaReserveFeedbackThreshold": 50.0,
+    "LootTableId": "loot.table.run.basic",
+    "MinPartySize": 3,
+    "MaxPartySize": 5,
+    "MaxAllowedPartySize": 100,
+    "SuccessSurvivorRatio": 1.0,
+    "FailureSurvivorRatio": 0.0,
+    "CasualtyPressureRuleSourceId": "run.casualty_pressure.rule.gd22.v1",
+    "CasualtyPressurePerDanger": 0.08,
+    "CasualtyPressureReductionPerPathCapacity": 0.05,
+    "CasualtyPressurePerManaPressure": 0.02,
+    "CautiousCasualtyPressureMultiplier": 0.55,
+    "BalancedCasualtyPressureMultiplier": 1.0,
+    "GreedyCasualtyPressureMultiplier": 1.45,
+    "CasualtyPressureMinimum": 0.0,
+    "CasualtyPressureMaximum": 1.0,
+    "CasualtyLootExtractionPenaltyPerCasualty": 0.2,
+    "CasualtyHeatDeltaPerCasualty": 0.75,
+    "PartyWipeCasualtyPressureThreshold": 0.85,
+    "MvpPlacementEffectsRuleSourceId": "mvp.placement_effects.rule.gd10.v1",
+    "MvpPlacementEffects": [
+        {
+            "CategoryId": "placement.category.room",
+            "OptionId": "placement.option.room.basic",
+            "PathCapacity": 2,
+            "Danger": 0,
+            "ManaPressure": 0,
+            "HeatPressure": 0,
+            "LootBonus": 0,
+            "Attraction": 0,
+            "ExplanationKey": "ui.mvp_placement_effects.explanation.room.basic"
+        },
+        {
+            "CategoryId": "placement.category.monster",
+            "OptionId": "placement.option.monster.skeleton",
+            "PathCapacity": 0,
+            "Danger": 3,
+            "ManaPressure": 2,
+            "HeatPressure": 0,
+            "LootBonus": 0,
+            "Attraction": 0,
+            "ExplanationKey": "ui.mvp_placement_effects.explanation.monster.skeleton"
+        },
+        {
+            "CategoryId": "placement.category.trap",
+            "OptionId": "placement.option.trap.spike",
+            "PathCapacity": 0,
+            "Danger": 2,
+            "ManaPressure": 0,
+            "HeatPressure": 1,
+            "LootBonus": 0,
+            "Attraction": 0,
+            "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.spike"
+        },
+        {
+            "CategoryId": "placement.category.loot_node",
+            "OptionId": "placement.option.loot_node.basic",
+            "PathCapacity": 0,
+            "Danger": 0,
+            "ManaPressure": 0,
+            "HeatPressure": 0,
+            "LootBonus": 4,
+            "Attraction": 2,
+            "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.basic"
+        },
+        {
+            "CategoryId": "placement.category.room",
+            "OptionId": "placement.option.room.narrow_hall",
+            "PathCapacity": 1,
+            "Danger": 0,
+            "ManaPressure": 0,
+            "HeatPressure": 0,
+            "LootBonus": 0,
+            "Attraction": 0,
+            "ExplanationKey": "ui.mvp_placement_effects.explanation.room.narrow_hall"
+        },
+        {
+            "CategoryId": "placement.category.monster",
+            "OptionId": "placement.option.monster.goblin",
+            "PathCapacity": 0,
+            "Danger": 2,
+            "ManaPressure": 1,
+            "HeatPressure": 0,
+            "LootBonus": 1,
+            "Attraction": 1,
+            "ExplanationKey": "ui.mvp_placement_effects.explanation.monster.goblin"
+        },
+        {
+            "CategoryId": "placement.category.trap",
+            "OptionId": "placement.option.trap.snare",
+            "PathCapacity": 0,
+            "Danger": 1,
+            "ManaPressure": 0,
+            "HeatPressure": 0,
+            "LootBonus": 0,
+            "Attraction": 0,
+            "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.snare"
+        },
+        {
+            "CategoryId": "placement.category.trap",
+            "OptionId": "placement.option.trap.chilling_sigil",
+            "PathCapacity": 0,
+            "Danger": 0,
+            "ManaPressure": 0,
+            "HeatPressure": -1,
+            "LootBonus": 0,
+            "Attraction": 0,
+            "ExplanationKey": "ui.mvp_placement_effects.explanation.trap.chilling_sigil"
+        },
+        {
+            "CategoryId": "placement.category.loot_node",
+            "OptionId": "placement.option.loot_node.hidden_cache",
+            "PathCapacity": 0,
+            "Danger": 0,
+            "ManaPressure": 0,
+            "HeatPressure": 0,
+            "LootBonus": 3,
+            "Attraction": 1,
+            "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.hidden_cache"
+        },
+        {
+            "CategoryId": "placement.category.loot_node",
+            "OptionId": "placement.option.loot_node.glittering_hoard",
+            "PathCapacity": 0,
+            "Danger": 0,
+            "ManaPressure": 0,
+            "HeatPressure": 1,
+            "LootBonus": 6,
+            "Attraction": 4,
+            "ExplanationKey": "ui.mvp_placement_effects.explanation.loot_node.glittering_hoard"
+        }
+    ],
+    "MvpRoomSlotCapacities": [
+        {
+            "RoomOptionId": "placement.option.room.narrow_hall",
+            "MonsterCapacity": 1,
+            "TrapCapacity": 1,
+            "LootCapacity": 0
+        },
+        {
+            "RoomOptionId": "placement.option.room.basic",
+            "MonsterCapacity": 1,
+            "TrapCapacity": 1,
+            "LootCapacity": 1
+        }
+    ],
+    "MvpCompositionOutcomeTuning": {
+        "RuleSourceId": "mvp.composition_outcome.rule.gd11.v1",
+        "SuccessChancePerPathCapacity": 0.02,
+        "SuccessChancePenaltyPerDanger": 0.015,
+        "ManaReserveCostPerManaPressure": 1.0,
+        "SurvivorRatioBonusPerPathCapacity": 0.03,
+        "SurvivorRatioPenaltyPerDanger": 0.04,
+        "GeneratedLootMultiplierPerLootBonus": 0.05,
+        "ExtractedLootMultiplierPerLootBonus": 0.05,
+        "HeatDeltaPerHeatPressure": 0.5,
+        "AttractionSignalPerAttraction": 1.0
+    },
+    "LootExtractionRoundingPolicyId": "loot_extraction.round_floor",
+    "LootExtractionRuleSourceId": "run.loot_extraction.rule.v1",
+    "LootHeatCoolingRuleSourceId": "run.loot_heat_cooling.rule.v1",
+    "LootHeatCoolingPerTradeableWorldValue": 0.1,
+    "MaxLootHeatCoolingPerRun": 25.0,
+    "AdventurerAttractionRuleSourceId": "run.adventurer_attraction.rule.v1",
+    "AdventurerAttractionPerExtractedWorldValue": 1.0,
+    "AdventurerInterestForecastRuleSourceId": "run.adventurer_interest_forecast.rule.v1",
+    "AdventurerInterestLowThreshold": 5.0,
+    "AdventurerInterestMediumThreshold": 10.0,
+    "AdventurerInterestHighThreshold": 20.0,
+    "AdventurerInterestScorePerAttractionSignal": 1.0,
+    "AdventurerDemandBudgetRuleSourceId": "run.adventurer_demand_budget.rule.v1",
+    "AdventurerDemandBudgetScorePerForecastScore": 1.0,
+    "AdventurerDemandBudgetLowThreshold": 5.0,
+    "AdventurerDemandBudgetMediumThreshold": 10.0,
+    "AdventurerDemandBudgetHighThreshold": 20.0,
+    "RunHeatNormalDeathDelta": 1.0,
+    "RunHeatEliteDeathDelta": 3.0,
+    "RunHeatMultipleDeathBonusDelta": 1.0,
+    "RunHeatSurvivorCoolingPerSurvivor": 0.5,
+    "RunHeatLootCoolingPerExtractedValue": 0.1,
+    "RunHeatDeltaMinimum": -10.0,
+    "RunHeatDeltaMaximum": 10.0,
+    "RunHeatDeltaRuleSourceId": "run.heat_delta.rule.v1",
+    "HeatPeaceMinimum": 0.0,
+    "HeatPeaceMaximum": 9.0,
+    "HeatNoticeMinimum": 10.0,
+    "HeatNoticeMaximum": 24.0,
+    "HeatConcernMinimum": 25.0,
+    "HeatConcernMaximum": 49.0,
+    "RunHeatApplicationRuleSourceId": "run.heat_application.rule.v1",
+    "AdventurerPartyCompositionRuleSourceId": "run.adventurer_party_composition.mvp_preview.v1",
+    "AdventurerPartyCompositionMinSize": 1,
+    "AdventurerPartyCompositionMaxSize": 3,
+    "AdventurerPartyCompositionMaxAllowedSize": 5,
+    "AdventurerPartyCompositionClassIds": [
+        "adventurer.class.warrior",
+        "adventurer.class.rogue",
+        "adventurer.class.mage",
+        "adventurer.class.cleric",
+        "adventurer.class.ranger"
+    ],
+    "RunPostures": [
+        {
+            "Id": "run.posture.cautious",
+            "DisplayNameKey": "run.posture.cautious.name",
+            "GeneratedLootWorldValueMultiplier": 0.8,
+            "ExtractedLootWorldValueMultiplier": 0.8,
+            "HeatDeltaOffset": -1.0
+        },
+        {
+            "Id": "run.posture.balanced",
+            "DisplayNameKey": "run.posture.balanced.name",
+            "GeneratedLootWorldValueMultiplier": 1.0,
+            "ExtractedLootWorldValueMultiplier": 1.0,
+            "HeatDeltaOffset": 0.0
+        },
+        {
+            "Id": "run.posture.greedy",
+            "DisplayNameKey": "run.posture.greedy.name",
+            "GeneratedLootWorldValueMultiplier": 1.25,
+            "ExtractedLootWorldValueMultiplier": 1.25,
+            "HeatDeltaOffset": 1.0
+        }
+    ],
+    "AdventurerIntentRuleSourceId": "run.adventurer_intent.rule.gd23.v1",
+    "IntentGreedyScorePerLoot": 2.0,
+    "IntentGreedyScorePerAttraction": 1.5,
+    "IntentGreedyPenaltyPerHeatTierRank": 3.0,
+    "IntentGreedyPenaltyPerRecentDeath": 4.0,
+    "IntentGreedyPenaltyPerDanger": 0.75,
+    "IntentCautiousScorePerDanger": 1.5,
+    "IntentCautiousScorePerHeatPressure": 2.0,
+    "IntentCautiousScorePerHeatTierRank": 3.0,
+    "IntentCautiousScorePerRecentDeath": 4.0,
+    "IntentCautiousReductionPerPathCapacity": 0.75,
+    "IntentBalancedBaseScore": 7.0,
+    "IntentBalancedPenaltyPerExtremeScoreDelta": 0.2,
+    "IntentModerateRiskTarget": 4.0,
+    "IntentModerateRewardTarget": 4.0,
+    "IntentBalancedPenaltyPerModerateDistance": 0.6,
+    "IntentMinimumScore": 0.0,
+    "IntentMaximumScore": 20.0,
+    "AdventurerArrivalPressureRuleSourceId": "run.adventurer_arrival_pressure.rule.gd24.v1",
+    "ArrivalPressureScorePerLoot": 2.0,
+    "ArrivalPressureScorePerAttraction": 1.0,
+    "ArrivalPressureScorePerDanger": 0.25,
+    "ArrivalPressureScorePerHeatPressure": 0.5,
+    "ArrivalPressureScorePerRecentRecoveredLoot": 0.05,
+    "ArrivalPressureLatestSuccessBonus": 1.0,
+    "ArrivalPressureLatestFailurePenalty": 1.0,
+    "ArrivalPressurePathCompleteBonus": 2.0,
+    "ArrivalPressureIncompletePathPenalty": 4.0,
+    "ArrivalPressureHeatNoticePenalty": 2.0,
+    "ArrivalPressureHeatConcernPenalty": 5.0,
+    "ArrivalPressureRecentDeathPenalty": 3.0,
+    "ArrivalPressureNoneThreshold": 0.0,
+    "ArrivalPressureLowThreshold": 2.0,
+    "ArrivalPressureCautiousThreshold": 5.0,
+    "ArrivalPressureBuildingThreshold": 8.0,
+    "ArrivalPressureLikelySoonThreshold": 12.0,
+    "AdventurerTrafficPressureRuleSourceId": "run.adventurer_traffic_pressure.rule.gd25.v1",
+    "TrafficScoreWeightArrivalPressure": 1.0,
+    "TrafficScoreWeightLootSignal": 0.75,
+    "TrafficScoreWeightAttractionSignal": 1.0,
+    "TrafficScoreWeightDangerSignal": 0.25,
+    "TrafficScoreWeightHeatPressureSignal": 0.25,
+    "TrafficScoreWeightRecentRecoveredLoot": 0.02,
+    "TrafficPathCompleteBonus": 1.0,
+    "TrafficIncompletePathPenalty": 3.0,
+    "TrafficRecentDeathCautionModifier": 1.0,
+    "TrafficHeatCautionModifier": 0.5,
+    "TrafficNoneThreshold": 0.0,
+    "TrafficLowThreshold": 2.0,
+    "TrafficBuildingThreshold": 8.0,
+    "TrafficSteadyThreshold": 14.0,
+    "TrafficHeavyThreshold": 20.0,
+    "TrafficDangerousChurnRecentDeathThreshold": 1,
+    "TrafficDangerousChurnMinimumInterestScore": 8.0,
+    "TrafficEstimatedPartyCountMultiplier": 1.0,
+    "TrafficEstimatedPartyCountScoreDivisor": 8.0,
+    "TrafficEstimatedPartyCountLowThreshold": 1,
+    "TrafficEstimatedPartyCountMediumThreshold": 3,
+    "TrafficMinimumEstimatedConcurrentParties": 0,
+    "TrafficMaximumEstimatedConcurrentParties": 4,
+    "MvpFirstSessionObjective": {
+        "ObjectiveId": "objective.first_dungeon_contract",
+        "RequiredCompletePath": true,
+        "RequiredRunCount": 1,
+        "RequiredRecoveredLootValue": 8,
+        "AllowedMaxHeatTierId": "heat_tier.peace",
+        "RequireResearchAnalysisUnlocked": true,
+        "AnalysisUnlockId": "research.unlock.basic_run_analysis",
+        "AnalysisResearchProjectId": "research.project.m7_a2_scaffold"
+    }
+}
