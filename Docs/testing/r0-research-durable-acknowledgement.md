@@ -194,7 +194,7 @@ No manual disk-failure injection is requested: deterministic fixtures own it.
    diagnostics feature flag so **Development tools** and the setup control are
    available; do not change it in the normal project. Keep the qualification Product
    Name. With Editor stopped, preserve/rename its isolated save for evidence so the
-   player starts fresh. Launch `Dungeon Lord.exe` and repeat steps 2â€“7, closing and
+   player starts fresh. Launch `Dungeon Lord.exe` and repeat steps 2Ã¢â‚¬â€œ7, closing and
    relaunching the executable at both reopen checkpoints. Do not run Editor and
    player against the same qualification save simultaneously.
 9. Report pass/fail for Editor and Windows separately. Supply commit/build
@@ -284,3 +284,69 @@ Blocked before completion, Available after a real run, and usable Start/Claim
 feedback. No file/save/build/log management or repeated full manual journey.
 Overlapping diagnostics/dense controls remain separate Phase 7 usability work.
 This correction does not authorize merge; independent review remains required.
+
+
+### Corrected runtime closeout (2026-10-25)
+
+Implementation commit: `54b0ad93382df6090d9b235b6d652a7759bc1db6`; old defective reviewed head:
+`4c13b9dbfe3e1ee167cedb9c3328a69c21c08a0a`. The documentation/evidence-only
+closeout commit following the implementation has identical Assets, Packages,
+ProjectSettings, ContentAuthoring and Tools trees; source-specific test applicability
+is checked by committed input trees and per-file manifests, not assumed from names.
+
+Corrected-source isolated Editor **PASS** and Windows native **PASS**: canonical
+prebuilt room/monster/trap/loot, valid resources/readiness, empty research and zero
+runs survive native save/reopen; Blocked/no Start before a completed run; admission
+remains Blocked; actual automatic terminal settlement makes Available; localized
+Start, duplicate Start rejection, detached partial progress/reopen, completion-pending,
+localized Claim, duplicate Claim rejection, objective/Analysis unlock and completed
+reopen all pass. Scripted tests use separate copied saves; owner checkpoints remain
+pre-run/pre-research and exact bytes are checkpointed. No manual storage-failure
+simulation is requested; the passing deterministic suites own that coverage.
+
+Windows x86_64 candidate Development Build: **Succeeded, 0 errors, 1 warning**,
+Bootstrap only, Unity 6000.3.2f1. Warning is unavailable optional native-symbol upload
+to Unity services, not a build/content failure. Independent Editor/Windows products
+and save namespaces retain strict local identity validation; the production build
+utility differs only in its two expected identity constants. Bootstrap-only,
+development-build and production-content gates remain intact. Runtime Windows
+Application.identifier is unsupported/empty; configured identity is build-validated,
+and product/persistent path are checked at runtime. The disposable harness alone
+initializes explicit absent research via the supported development canonical action,
+and uses configured gameplay with injected technical clocks only in automated modes.
+
+Exact runtime runner invocations (Python is the bundled local Python executable):
+
+```text
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Editor candidate-starter-prepare-01 starter-prepare
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Editor candidate-starter-reopen-01 starter-verify
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Editor candidate-starter-run-01 smoke-starter-run
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Editor candidate-claim-01 smoke-claim
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Editor candidate-completed-reopen-01 verify-completed
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Windows candidate-build-01 build
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Windows candidate-starter-prepare-01 starter-prepare
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Windows candidate-starter-reopen-01 starter-verify
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Windows candidate-starter-run-01 smoke-starter-run
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Windows candidate-claim-01 smoke-claim
+python -B <campaign>/Tools/r0_run_stage.py <campaign> Windows candidate-completed-reopen-01 verify-completed
+```
+
+Here `<campaign>` is `C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440`.
+Each stage's committed `command.json` in [runtime receipts](evidence/r0-research-prerequisite-correction/runtime-reports.zip)
+contains its exact expanded Unity/player command, timeout, source SHA, profile and
+qualification-code hashes; raw logs remain local. The final documentation head also
+receives a fresh exact-head build (`Windows-Player-02`) and independent smoke namespaces;
+their new `final-*` receipts and source/preservation seals are appended under the
+campaign Evidence directory and linked in the PR closeout, without replacing these
+implementation-commit receipts. No old 4c13b9db result is counted for corrected code.
+
+Only owner visual checks remain, after independent review: use the prepared
+**R0 Corrected — Unity Editor UAT** (press Play) and **R0 Corrected — Windows Game UAT**
+launchers; inspect research Blocked before a completed run, Available after genuine
+settlement, and readable/usable Start and Claim success feedback. The dungeon is
+already built. Logs and safe lifecycle snapshots are automatic. Full manual
+partial/completed persistence journeys need not be repeated: automated corrected
+source checks cover them, and the older owner PASS remains dated historical evidence.
+Corrected-source owner visual UAT is **pending**, not claimed passed. PR #254 stays
+unmerged and awaits independent review. Phase 7 diagnostic overlap/control density
+and later Living Dungeon/Phase 8 work remain outside this correction.
