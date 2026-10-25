@@ -134,7 +134,7 @@ namespace DungeonBuilder.M0
             var research = new PlayerResearchActionHandler(candidate, GetResearchPendingScaffoldConfig(), GetResearchProgressScaffoldConfig(),
                 GetResearchCompletionEligibilityScaffoldConfig(), GetResearchCompletionClaimScaffoldConfig(), GetResearchVerificationScaffoldConfig(),
                 RunSimulationConfig?.MvpFirstSessionObjective?.AnalysisResearchProjectId, _restrictedActionGate,
-                () => candidate.runHistory?.LatestOutcome != null || (candidate.runHistory?.RecentOutcomes?.Length ?? 0) > 0,
+                () => RunHistoryState.HasCompletedAdventurerRun(candidate.runHistory),
                 () => IsOnline, () => VerificationPending, null);
             research.ApplyActiveTick(_configuredSimulationTickSeconds);
             _passiveManaService?.ApplyTick(candidate, RunSimulationConfig, tick);

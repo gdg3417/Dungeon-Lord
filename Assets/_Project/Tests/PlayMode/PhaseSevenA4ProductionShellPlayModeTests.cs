@@ -18,6 +18,8 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         private object fixture;
         private Type fixtureType;
 
+        [UnityTest] public IEnumerator R0ResearchPrerequisiteNativeShellBlocks() { yield return Invoke("R0ResearchPrerequisiteNativeShellBlocksWithoutResearchWrite"); }
+        [UnityTest] public IEnumerator R0ResearchPrerequisiteAutomaticSettlement() { yield return Invoke("R0ResearchPrerequisiteRequiresAutomaticTerminalSettlement"); }
         [UnityTest] public IEnumerator R0ResearchStartProgressClaimAndReopen() { yield return Invoke("R0ResearchStartProgressClaimAndReopenUseCommittedPublication"); }
         [UnityTest] public IEnumerator R0ResearchStartProvenRollback() { yield return Invoke("R0ResearchStartProvenRollback"); }
         [UnityTest] public IEnumerator R0ResearchClaimProvenRollback() { yield return Invoke("R0ResearchClaimProvenRollback"); }

@@ -194,7 +194,7 @@ No manual disk-failure injection is requested: deterministic fixtures own it.
    diagnostics feature flag so **Development tools** and the setup control are
    available; do not change it in the normal project. Keep the qualification Product
    Name. With Editor stopped, preserve/rename its isolated save for evidence so the
-   player starts fresh. Launch `Dungeon Lord.exe` and repeat steps 2–7, closing and
+   player starts fresh. Launch `Dungeon Lord.exe` and repeat steps 2â€“7, closing and
    relaunching the executable at both reopen checkpoints. Do not run Editor and
    player against the same qualification save simultaneously.
 9. Report pass/fail for Editor and Windows separately. Supply commit/build
@@ -207,3 +207,80 @@ retain coherent unrelated state and localized feedback, and show no exceptions.
 Fail: false success, lost acknowledged research, duplicate effect, stale active
 project after claim, unrelated-state loss or broken feedback. Report the first
 failing step with its save/log evidence; do not modify the normal player save.
+
+
+## 2026-10-25 prerequisite correction and requalification
+
+The original reviewed head `4c13b9dbfe3e1ee167cedb9c3328a69c21c08a0a`
+passed owner Start/partial-reopen/Claim/completed-reopen UAT in both isolated
+Editor and Windows environments. That remains historical evidence for that head.
+The separate pre-run prerequisite failure was real: contemporaneous Available
+receipts had zero completed outcomes, NextRunSequence 1, an empty LatestOutcome
+serialization shell, no parties and a horizon before the first arrival. Later
+automatic settlements explain later normal availability, not those observations.
+The weak predicate also existed in baseline `fd9917f5c4c22c37fc5d22c8617eb2c0ca8f7394`.
+
+Correction execution: GPT-6.1 Sol Medium, Standard focused correction; known
+cause and two established eligibility adapters. No fallback/escalation was needed.
+The protected primary checkout and its unrelated proposal edit remain untouched;
+implementation uses an independent clone on the existing PR branch.
+
+`RunHistoryState.HasCompletedAdventurerRun` is the shared pure existence predicate.
+It ignores shells and allocator/admission alone, reuses canonical `run-N` identity
+parsing and requires a positive allocated sequence below NextRunSequence. Success
+is deliberately irrelevant: a completed unsuccessful run qualifies. Latest-only
+historical history and recent fallback are recognized. Complete canonical validation
+continues to own latest/recent aliases, duplicates and complete record validity;
+this existence predicate does not legitimize contradictory history. The existing
+parser is exposed internally and uses spans with explicit ASCII-digit rejection
+to retain its exact grammar, including no leading zero, overflow or trailing NUL,
+without allocation. Normal generated historical run IDs/allocators are unchanged.
+
+Both `GameRoot.HasValidAdventurerRun` and the detached handler in
+`ApplyForegroundPassiveTick` call that predicate. No persistence API, mutation,
+publication order, completion/claim rule, localization key, config, field, save
+schema (15), migration or serializer changes. Tick progression stays callback-free.
+The broader fresh-research nullable-serialization issue remains deferred.
+
+The new Bootstrap native-shell regression was run before the correction: one
+discovered case failed with Expected Blocked, actual Available. On corrected source,
+the two new production-scene cases pass: fresh native reopen blocks UI/direct Start
+without a research write/publication; automatic admission stays blocked until
+terminal settlement appends history, after which Start and detached progress work.
+The rejected-action fixture closes legitimate foreground preparation first and
+uses existing deterministic filesystem operation evidence to distinguish writes.
+Seventeen new predicate cases cover null/empty/whitespace shells, real Unity
+roundtrip, allocator-only state, recent null/shell entries, canonical identities,
+success/failure outcomes, reopen, aliases/fallback and zero foreground allocation.
+
+Final corrected runtime-source automated results (graphics enabled throughout):
+
+| Report | Mode | Passed / failed / skipped |
+| --- | --- | --- |
+| edit-final-02 | EditMode research/objective/lifecycle and required graphics case | 95 / 0 / 0 |
+| play-final-02 | Bootstrap research and foreground/reopen | 11 / 0 / 0 |
+| canonical-final-02 | Canonical complete-save/readback/recovery/foreground | 264 / 0 / 0 |
+
+All reports have exact discovery totals equal to pass totals, no inconclusive
+cases, and source-hash manifests. Previous iterations are retained; the earlier
+94-case run preceded the final parser trailing-NUL preservation case. The original
+R0 staging, replacement, semantic/readback, rollback, uncertainty/recovery and unsafe
+retry tests remain passing; no failure-injection guard or assertion was weakened.
+
+Exact commands run (CLI 1.0.0-beta.14, Unity 6000.3.2f1; qualification root
+`C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440`):
+
+```powershell
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440/TestProject' --editor-version 6000.3.2f1 --mode EditMode --filter 'R0ResearchDurability;R0ResearchHandler;R0ResearchSaveIntegration;R0ResearchJourney;R0ResearchDiagnostics;R0ResearchObjectives;PhaseFourOfflineSaveLifecycle;LivingDungeonB3B2LiveLabelsSessionReplayAndLargeLayoutsObserveOnlyCommittedState' --output 'C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440/Evidence/edit-final-02/results.xml' --timeout 900 --no-color -- -logFile 'C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440/Evidence/edit-final-02/unity.log'
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440/TestProject' --editor-version 6000.3.2f1 --mode PlayMode --filter 'PhaseSevenA4ProductionShellPlayModeTests.R0Research;LivingDungeonPhaseB3APlayModeTests;LivingDungeonB3B2PlayModeTests' --output 'C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440/Evidence/play-final-02/results.xml' --timeout 900 --no-color -- -logFile 'C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440/Evidence/play-final-02/unity.log'
+& 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe' test 'C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440/TestProject' --editor-version 6000.3.2f1 --mode EditMode --filter 'PhaseFourWrites;PhaseFourCompleteSave;PhaseFourSaveSemantics;PhaseFourLoad;LivingDungeonPhaseB3A;LivingDungeonB3B2' --output 'C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440/Evidence/canonical-final-02/results.xml' --timeout 900 --no-color -- -logFile 'C:/Dev/Dungeon-Lord-R0-Corrected-20261025T1440/Evidence/canonical-final-02/unity.log'
+```
+
+Committed supplemental reports: [prerequisite correction evidence](evidence/r0-research-prerequisite-correction/reports.zip).
+Fresh isolated Editor/native build and lifecycle qualification is recorded in the
+dated runtime closeout below. Old 4c13b9db build/UAT evidence is not relabeled.
+Owner visual qualification on the corrected build remains pending; only observe
+Blocked before completion, Available after a real run, and usable Start/Claim
+feedback. No file/save/build/log management or repeated full manual journey.
+Overlapping diagnostics/dense controls remain separate Phase 7 usability work.
+This correction does not authorize merge; independent review remains required.

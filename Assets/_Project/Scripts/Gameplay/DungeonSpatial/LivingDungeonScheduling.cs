@@ -96,12 +96,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (p.Sequence >= history.NextRunSequence || !ids.Add(p.Sequence)) return false;
             return true;
         }
-        private static bool Sequence(string id, out int sequence)
+        // Shared canonical run identity grammar; spans avoid allocation in research ticks.
+        internal static bool Sequence(string id, out int sequence)
         {
             sequence = 0;
-            return id != null && id.StartsWith("run-", StringComparison.Ordinal) &&
-                int.TryParse(id.Substring(4), NumberStyles.None, CultureInfo.InvariantCulture, out sequence) && sequence > 0 &&
-                id == "run-" + sequence.ToString(CultureInfo.InvariantCulture);
+            if (id == null || id.Length <= 4 || !id.StartsWith("run-", StringComparison.Ordinal) || id[4] == '0') return false;
+            // TryParse accepts trailing NULs; the original canonical string equality did not.
+            for (int i = 4; i < id.Length; i++) if (id[i] < '0' || id[i] > '9') return false;
+            return int.TryParse(id.AsSpan(4), NumberStyles.None, CultureInfo.InvariantCulture, out sequence) && sequence > 0;
         }
         internal static void Pin(LivingDungeonParty party, RunExecution execution, LivingDungeonProfile profile)
         {

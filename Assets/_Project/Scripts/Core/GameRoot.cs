@@ -2547,8 +2547,7 @@ namespace DungeonBuilder.M0
 
         private bool HasValidAdventurerRun()
         {
-            return Save?.runHistory?.LatestOutcome != null ||
-                   (Save?.runHistory?.RecentOutcomes != null && Save.runHistory.RecentOutcomes.Any(outcome => outcome != null));
+            return RunHistoryState.HasCompletedAdventurerRun(Save?.runHistory);
         }
 
         private void SavePlayerResearchTransition()
