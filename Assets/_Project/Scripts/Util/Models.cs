@@ -1235,6 +1235,23 @@ namespace DungeonBuilder.M0
         public RunOutcomeRecord LatestOutcome;
         public RunOutcomeRecord[] RecentOutcomes = Array.Empty<RunOutcomeRecord>();
 
+        // Existence within authoritative completed history, not admission/party state.
+        // Canonical validation still owns alias consistency and complete record validity;
+        // reuse its identity/allocator contract rather than accepting serialization shells.
+        public static bool HasCompletedAdventurerRun(RunHistoryState history)
+        {
+            if (history == null) return false;
+            if (CompletedIdentity(history.LatestOutcome, history.NextRunSequence)) return true;
+            var recent = history.RecentOutcomes;
+            if (recent != null)
+                for (int i = 0; i < recent.Length; i++)
+                    if (CompletedIdentity(recent[i], history.NextRunSequence)) return true;
+            return false;
+        }
+
+        private static bool CompletedIdentity(RunOutcomeRecord outcome, int nextSequence) =>
+            outcome != null && LivingDungeonScheduling.Sequence(outcome.RunId, out int sequence) && sequence < nextSequence;
+
         public void AppendOutcome(RunOutcomeRecord outcome, int maxEntries)
         {
             if (outcome == null)

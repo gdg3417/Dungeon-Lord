@@ -212,16 +212,16 @@ namespace DungeonBuilder.M0
 
         public PlayerResearchActionResult StartConfiguredPlayerResearch()
         {
-            if (!FlushForeground()) return new PlayerResearchActionResult { FeedbackLocalizationKey = "ui.living.blocked" };
             PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Start();
+            if (result.RecoveryRequired) ForegroundFault(result.PersistenceReason);
             RefreshOfflineSummaryLines();
             return result;
         }
 
         public PlayerResearchActionResult ClaimConfiguredPlayerResearch()
         {
-            if (!FlushForeground()) return new PlayerResearchActionResult { FeedbackLocalizationKey = "ui.living.blocked" };
             PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Claim();
+            if (result.RecoveryRequired) ForegroundFault(result.PersistenceReason);
             RefreshOfflineSummaryLines();
             return result;
         }
@@ -2526,13 +2526,28 @@ namespace DungeonBuilder.M0
                 HasValidAdventurerRun,
                 () => IsOnline,
                 () => VerificationPending,
-                saveTransition);
+                saveTransition,
+                CommitPlayerResearchTransition,
+                () => Save,
+                () => SaveService?.RequiresCanonicalRecovery == true);
+        }
+
+        private PlayerResearchActionResult CommitPlayerResearchTransition(Func<SaveData, PlayerResearchActionResult> stage)
+        {
+            if (_explicitSaveDeleteQuiesced || SaveService == null)
+                return PlayerResearchActionHandler.PersistenceFailure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            return SaveService.CommitPlayerResearchTransition(Save, candidate =>
+            {
+                var action = stage(candidate);
+                if (action.Succeeded && action.StateChanged)
+                    MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(candidate, RunSimulationConfig, Content?.ProductionSpatialContent);
+                return action;
+            });
         }
 
         private bool HasValidAdventurerRun()
         {
-            return Save?.runHistory?.LatestOutcome != null ||
-                   (Save?.runHistory?.RecentOutcomes != null && Save.runHistory.RecentOutcomes.Any(outcome => outcome != null));
+            return RunHistoryState.HasCompletedAdventurerRun(Save?.runHistory);
         }
 
         private void SavePlayerResearchTransition()

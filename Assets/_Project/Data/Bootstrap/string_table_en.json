@@ -26,6 +26,7 @@
     {"key":"ui.living.not_eligible","text":"No arrival opportunity yet."},
     {"key":"ui.living.unsupported_layout","text":"Automatic visitors support one or two Active floors, starting on Floor 1."},
     {"key":"ui.living.unsupported_profile","text":"This saved run uses a different scheduling contract. Automatic visitors are unavailable."},
+    {"key":"ui.player_research.save_failed","text":"Research could not be saved. Your previous research state is unchanged."},
     {"key":"ui.living.blocked","text":"Visitor progress could not be saved safely. Existing run evidence is preserved."},
     {"key":"ui.living.retryable","text":"Visitor progress could not be saved. Save changes or pause and resume to retry. Existing progress is preserved."},
     {"key":"ui.living.active","text":"Visitors exploring the dungeon."},

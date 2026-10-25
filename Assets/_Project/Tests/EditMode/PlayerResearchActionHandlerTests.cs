@@ -17,6 +17,61 @@ namespace DungeonBuilder.Tests.EditMode
         private bool _allowLocalClaim;
         private bool _includeGate;
 
+        [Test] public void CompletedHistoryPrerequisiteRejectsNullEmptyAndAdmissionOnlyHistory()
+        {
+            Assert.That(RunHistoryState.HasCompletedAdventurerRun(null), Is.False);
+            foreach (int next in new[] { 1, 2, 3 }) // allocator advance/admitted or retained parties is not completion
+                Assert.That(RunHistoryState.HasCompletedAdventurerRun(new RunHistoryState { NextRunSequence = next }), Is.False);
+            Assert.That(RunHistoryState.HasCompletedAdventurerRun(new RunHistoryState {
+                LatestOutcome = null, RecentOutcomes = null }), Is.False);
+        }
+
+        [TestCase(null)] [TestCase("")] [TestCase(" \t\r\n")] [TestCase("arbitrary")]
+        [TestCase("run-0")] [TestCase("run-01")] [TestCase("run-+1")] [TestCase("run-2147483648")]
+        [TestCase("run-2")] [TestCase("RUN-1")] [TestCase("run-1 ")] [TestCase("run-1\0")]
+        public void CompletedHistoryPrerequisiteRejectsShellAndNonCanonicalOrUnallocatedIdentity(string id)
+        {
+            var shell = new RunOutcomeRecord { RunId = id };
+            Assert.That(RunHistoryState.HasCompletedAdventurerRun(new RunHistoryState { NextRunSequence = 2, LatestOutcome = shell }), Is.False);
+            Assert.That(RunHistoryState.HasCompletedAdventurerRun(new RunHistoryState { NextRunSequence = 2,
+                RecentOutcomes = new[] { null, new RunOutcomeRecord(), shell } }), Is.False);
+        }
+
+        [Test] public void CompletedHistoryPrerequisiteRejectsActualUnityRoundtripShell()
+        {
+            var history = UnityEngine.JsonUtility.FromJson<RunHistoryState>(UnityEngine.JsonUtility.ToJson(new RunHistoryState()));
+            Assert.That(history.LatestOutcome, Is.Not.Null, "Reproduce native Unity null-class serialization");
+            Assert.That(history.LatestOutcome.RunId, Is.Null.Or.Empty);
+            Assert.That(RunHistoryState.HasCompletedAdventurerRun(history), Is.False);
+        }
+
+        [TestCase(true)] [TestCase(false)]
+        public void CompletedHistoryPrerequisiteAcceptsSettledHistoryAndNativeReopenRegardlessOfVictory(bool success)
+        {
+            var history = new RunHistoryState { NextRunSequence = 2 };
+            history.AppendOutcome(new RunOutcomeRecord { RunId = "run-1", Success = success }, 5);
+            Assert.That(history.LatestOutcome, Is.SameAs(history.RecentOutcomes[0]));
+            Assert.That(RunHistoryState.HasCompletedAdventurerRun(history), Is.True);
+            var reopened = UnityEngine.JsonUtility.FromJson<RunHistoryState>(UnityEngine.JsonUtility.ToJson(history));
+            Assert.That(RunHistoryState.HasCompletedAdventurerRun(reopened), Is.True);
+            // A retained legacy latest-only outcome remains eligible; full canonical
+            // validation, not this existence predicate, rejects contradictory aliases.
+            reopened.RecentOutcomes = null;
+            Assert.That(RunHistoryState.HasCompletedAdventurerRun(reopened), Is.True);
+            reopened.RecentOutcomes = new[] { reopened.LatestOutcome }; reopened.LatestOutcome = null;
+            Assert.That(RunHistoryState.HasCompletedAdventurerRun(reopened), Is.True);
+        }
+
+        [Test] public void CompletedHistoryPrerequisiteDoesNotAllocate()
+        {
+            var history = new RunHistoryState { NextRunSequence = 2, RecentOutcomes = new[] { new RunOutcomeRecord { RunId = "run-1" } } };
+            for (int i = 0; i < 100; i++) RunHistoryState.HasCompletedAdventurerRun(history);
+            long before = GC.GetAllocatedBytesForCurrentThread(); int found = 0;
+            for (int i = 0; i < 1000; i++) if (RunHistoryState.HasCompletedAdventurerRun(history)) found++;
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            Assert.That(found, Is.EqualTo(1000)); Assert.That(allocated, Is.Zero);
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -248,7 +303,17 @@ namespace DungeonBuilder.Tests.EditMode
                 () => _hasRun,
                 () => _online,
                 () => _verificationPending,
-                () => _saveCount++);
+                () => _saveCount++,
+                stage =>
+                {
+                    // Unit-only durable owner fake; production coverage uses SaveService.
+                    var candidate = UnityEngine.JsonUtility.FromJson<SaveData>(UnityEngine.JsonUtility.ToJson(_save));
+                    if (_save.researchPending == null) candidate.researchPending = null;
+                    if (_save.researchProgress == null) candidate.researchProgress = null;
+                    var result = stage(candidate);
+                    if (result.Succeeded && result.StateChanged) { _save = candidate; _saveCount++; }
+                    return result;
+                }, () => _save);
         }
     }
 }

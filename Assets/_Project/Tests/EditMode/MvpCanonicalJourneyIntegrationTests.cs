@@ -205,6 +205,7 @@ namespace DungeonBuilder.Tests.EditMode
 
         private void CompleteResearchThroughRootBoundary()
         {
+            using var canonicalResearch = new ResearchDurableAcknowledgementTests.CanonicalRootScope(_root, starterDungeon: true);
             Assert.That(_root.DevPanelEnabled, Is.False);
             PlayerResearchActionResult available = _root.ResolvePlayerResearchState();
             Assert.That(available.State, Is.EqualTo(PlayerResearchState.Available));

@@ -14,6 +14,209 @@ namespace DungeonBuilder.M0.Tests
 {
     public abstract partial class PhaseSevenA4ProductionSceneTests
     {
+        private BootstrapOverlay ResearchOverlay()
+        {
+            var root = GameRoot.Instance;
+            var overlay = root.overlay;
+            Assert.That(overlay, Is.Not.Null);
+            typeof(ProductionDungeonController).GetMethod("SetLegacy", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(controller, new object[] { true });
+            overlay.Bind(root);
+            return overlay;
+        }
+        [UnityTest] public IEnumerator R0ResearchPrerequisiteNativeShellBlocksWithoutResearchWrite()
+        {
+            var root = GameRoot.Instance; var service = root.SaveService;
+            InstallForegroundBoundaryTestClock();
+            Assert.That(root.ClearResearchPendingScaffold(), Is.True);
+            var reopened = service.LoadOrCreate("r0-prerequisite", out string banner);
+            Assert.That(reopened, Is.Not.Null, banner);
+            typeof(GameRoot).GetMethod("PublishCanonicalRuntime", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(root, new object[] { reopened });
+            Assert.That(root.Save.runHistory.NextRunSequence, Is.EqualTo(1));
+            Assert.That(root.Save.runHistory.RecentOutcomes, Is.Empty);
+            Assert.That(string.IsNullOrWhiteSpace(root.Save.runHistory.LatestOutcome?.RunId), Is.True);
+            Assert.That(service.BeforeForegroundAction(), Is.True, "Close separately authorized foreground preparation before measuring research writes");
+            var overlay = ResearchOverlay();
+            Assert.That(root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.Blocked));
+            Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.False);
+            var bytes = service.CanonicalSession.GetCurrentBytes(); var session = service.CanonicalSession;
+            var original = root.Save; string state = UnityEngine.JsonUtility.ToJson(root.Save);
+            var flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            var field = typeof(SaveService).GetField("_canonicalFileSystem", flags); var native = field.GetValue(service);
+            var fs = new EditMode.Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem(); fs.Seed(service.SavePath, bytes);
+            field.SetValue(service, fs);
+            int publications = 0; service.CanonicalRuntimePublished += save => publications++;
+            try
+            {
+                var result = overlay.StartPlayerResearch();
+                Assert.That(result.Succeeded || result.StateChanged, Is.False);
+                Assert.That(result.FeedbackLocalizationKey, Is.EqualTo(PlayerResearchActionHandler.BlockedPrerequisiteKey));
+                Assert.That(root.Save.researchPending, Is.Null); Assert.That(root.Save.researchProgress, Is.Null);
+                Assert.That(root.ResolveMvpPlayerLoopSummary().HasResearchUnlock, Is.False);
+                Assert.That(root.Save.completedResearch?.ProjectIds ?? Array.Empty<string>(), Is.Empty);
+                Assert.That(UnityEngine.JsonUtility.ToJson(root.Save), Is.EqualTo(state));
+                Assert.That(root.Save, Is.SameAs(original)); Assert.That(service.CanonicalSession, Is.SameAs(session));
+                Assert.That(publications, Is.Zero);
+                Assert.That(fs.Operations.Any(op => op.Type == EditMode.Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write ||
+                    op.Type == EditMode.Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace), Is.False);
+                CollectionAssert.AreEqual(bytes, fs.ReadAllBytes(service.SavePath));
+            }
+            finally { field.SetValue(service, native); }
+            yield return null;
+        }
+
+        [UnityTest] public IEnumerator R0ResearchPrerequisiteRequiresAutomaticTerminalSettlement()
+        {
+            var root = GameRoot.Instance; var service = root.SaveService;
+            var advance = InstallForegroundBoundaryTestClock();
+            Assert.That(root.ClearResearchPendingScaffold(), Is.True);
+            Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+            var floor = root.Save.validatedCanonicalSpatialState.Floors[0];
+            Assert.That(service.ExecuteCanonicalMutation(root.Save, DetachedCanonicalMutationRequest.Place(
+                MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId,
+                floor.Layout.Rooms[0].RoomInstanceId, floor.FloorInstanceId, new TileCoordinate(0, 1))).IsSuccess, Is.True);
+            var update = (Action)Delegate.CreateDelegate(typeof(Action), root, typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.Instance | BindingFlags.NonPublic));
+            update();
+            Assert.That(root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.Blocked));
+            long due = root.Save.livingDungeon.Scheduler.NextOpportunityTime.Value;
+            advance((due - root.TimeService.SampleForeground()) / 1000d + .001); update();
+            Assert.That(root.Save.livingDungeon.Parties.Count, Is.EqualTo(1));
+            Assert.That(root.Save.runHistory.RecentOutcomes, Is.Empty);
+            Assert.That(root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.Blocked));
+            var overlay = ResearchOverlay(); Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.False);
+            Assert.That(service.BeforeForegroundAction(), Is.True);
+            var session = service.CanonicalSession;
+            var rejected = overlay.StartPlayerResearch();
+            Assert.That(rejected.Succeeded, Is.False);
+            Assert.That(rejected.FeedbackLocalizationKey, Is.EqualTo(PlayerResearchActionHandler.BlockedPrerequisiteKey));
+            Assert.That(service.CanonicalSession, Is.SameAs(session), "No extra research write after foreground barrier");
+            var party = root.Save.livingDungeon.Parties.Single();
+            var profile = service.ForegroundConfiguration.CreateProfile(root.SaveSpatialMigrationLimits.Canonical.ForSchema(13).Serialized);
+            var execution = LivingDungeonContracts.Restore(party, profile); long finish;
+            try { execution.DrainToCompletion(); finish = party.AdmittedAt + execution.Inspect().LogicalTime; }
+            finally { execution.Abandon(); }
+            advance((finish - root.TimeService.SampleForeground()) / 1000d + .001); update();
+            Assert.That(service.BeforeForegroundAction(), Is.True);
+            Assert.That(root.Save.runHistory.RecentOutcomes.Any(o => o.RunId == "run-1"), Is.True);
+            Assert.That(root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.Available));
+            Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.True);
+            Assert.That(overlay.StartPlayerResearch().Succeeded, Is.True);
+            Assert.That(overlay.StartPlayerResearch().Succeeded, Is.False);
+            advance(root.Content.Bootstrap.tickSeconds); update();
+            Assert.That(service.BeforeForegroundAction(), Is.True);
+            Assert.That(root.Save.researchProgress.ProgressUnits, Is.GreaterThan(0), "Detached foreground callback still progresses research");
+            yield return null;
+        }
+
+        [UnityTest] public IEnumerator R0ResearchStartProgressClaimAndReopenUseCommittedPublication()
+        {
+            var root = GameRoot.Instance;
+            Assert.That(root.ClearResearchPendingScaffold(), Is.True, "Seed explicit absent research through the existing development control");
+            Assert.That(root.SimulateRunOnce(RunPostureResolver.BalancedId), Is.True);
+            var advance = InstallForegroundBoundaryTestClock();
+            var overlay = ResearchOverlay();
+            var before = root.Save;
+            var start = overlay.StartPlayerResearch();
+            Assert.That(start.Succeeded, Is.True, start.PersistenceReason ?? start.FeedbackLocalizationKey);
+            Assert.That(root.Save, Is.Not.SameAs(before)); Assert.That(before.researchPending, Is.Null);
+            Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(PlayerResearchActionHandler.StartSucceededKey, null)));
+            Assert.That(overlay.StartPlayerResearch().Succeeded, Is.False);
+            var reopened = root.SaveService.LoadOrCreate("r0-scene", out string banner);
+            Assert.That(reopened, Is.Not.Null, banner);
+            typeof(GameRoot).GetMethod("PublishCanonicalRuntime", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(root, new object[] { reopened });
+            Assert.That(root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.InProgress));
+            before = root.Save;
+            int published = 0; root.SaveService.CanonicalRuntimePublished += save => published++;
+            var bootstrap = root.Content.Bootstrap;
+            advance(bootstrap.researchCompletionEligibilityScaffold.requiredProgressUnits / bootstrap.researchProgressScaffold.progressPerActiveSecond + bootstrap.tickSeconds);
+            typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(root, null);
+            Assert.That(root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.ReadyToClaim));
+            Assert.That(before.researchProgress.ProgressUnits, Is.Zero);
+            Assert.That(published, Is.EqualTo(1), "Detached passive ticks are included in one foreground publication");
+            var claim = overlay.ClaimPlayerResearch();
+            Assert.That(claim.Succeeded, Is.True, claim.PersistenceReason ?? claim.FeedbackLocalizationKey);
+            Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(PlayerResearchActionHandler.ClaimSucceededKey, null)));
+            Assert.That(root.ResolveMvpPlayerLoopSummary().HasResearchUnlock, Is.True);
+            Assert.That(overlay.ClaimPlayerResearch().Succeeded, Is.False);
+            reopened = root.SaveService.LoadOrCreate("r0-scene", out banner);
+            Assert.That(reopened, Is.Not.Null, banner);
+            typeof(GameRoot).GetMethod("PublishCanonicalRuntime", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(root, new object[] { reopened });
+            Assert.That(root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.Completed));
+            Assert.That(root.Save.researchPending, Is.Null); Assert.That(root.Save.researchProgress, Is.Null);
+            yield return null;
+        }
+
+        [UnityTest] public IEnumerator R0ResearchStartProvenRollback() => ResearchActionFailure(false, false);
+        [UnityTest] public IEnumerator R0ResearchClaimProvenRollback() => ResearchActionFailure(true, false);
+        [UnityTest] public IEnumerator R0ResearchStartUncertainRecovery() => ResearchActionFailure(false, true);
+        [UnityTest] public IEnumerator R0ResearchClaimUncertainRecovery() => ResearchActionFailure(true, true);
+        [UnityTest] public IEnumerator R0ResearchForegroundRollbackBlocksAction() => ResearchActionFailure(false, false, true);
+        private IEnumerator ResearchActionFailure(bool claim, bool uncertain, bool failForeground = false)
+        {
+            var root = GameRoot.Instance; var service = root.SaveService;
+            Assert.That(root.ClearResearchPendingScaffold(), Is.True);
+            Assert.That(root.SimulateRunOnce(RunPostureResolver.BalancedId), Is.True);
+            var advance = InstallForegroundBoundaryTestClock();
+            if (claim)
+            {
+                var start = root.StartConfiguredPlayerResearch();
+                Assert.That(start.Succeeded, Is.True, UnityEngine.JsonUtility.ToJson(start));
+                var bootstrap = root.Content.Bootstrap;
+                root.ApplyConfiguredPlayerResearchActiveTick((long)Math.Ceiling(
+                    bootstrap.researchCompletionEligibilityScaffold.requiredProgressUnits / bootstrap.researchProgressScaffold.progressPerActiveSecond));
+            }
+            Assert.That(service.BeforeForegroundAction(), Is.True);
+            var original = root.Save; var session = service.CanonicalSession;
+            string state = UnityEngine.JsonUtility.ToJson(original); byte[] bytes = session.GetCurrentBytes();
+            var fsField = typeof(SaveService).GetField("_canonicalFileSystem", BindingFlags.Instance | BindingFlags.NonPublic);
+            var native = fsField.GetValue(service);
+            var fs = new EditMode.Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            fs.Seed(service.SavePath, bytes); fsField.SetValue(service, fs);
+            if (uncertain) fs.EnableFailureSequence(EditMode.Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1,
+                EditMode.Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 2);
+            else fs.EnableFailure(EditMode.Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1);
+            if (failForeground) advance(root.Content.Bootstrap.tickSeconds);
+            int published = 0; service.CanonicalRuntimePublished += save => published++;
+            try
+            {
+                var overlay = ResearchOverlay();
+                var result = claim ? overlay.ClaimPlayerResearch() : overlay.StartPlayerResearch();
+                Assert.That(result.Succeeded || result.StateChanged, Is.False);
+                Assert.That(result.RecoveryRequired, Is.EqualTo(uncertain));
+                Assert.That(result.PersistenceReason, Is.EqualTo(uncertain ? DetachedCanonicalWriteAuthority.RecoveryRequiredReason :
+                    failForeground ? "living.foreground.boundary_pending" : DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
+                if (failForeground) Assert.That(fs.Operations.Count(o => o.Type == EditMode.Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write), Is.EqualTo(2),
+                    "Only the failed foreground protocol writes; research is never staged/persisted");
+                Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(result.FeedbackLocalizationKey, null)));
+                Assert.That(root.Save, Is.SameAs(original)); Assert.That(UnityEngine.JsonUtility.ToJson(root.Save), Is.EqualTo(state));
+                Assert.That(published, Is.Zero);
+                fs.DisableFailure(); int operations = fs.Operations.Count();
+                if (uncertain)
+                {
+                    Assert.That(root.StartConfiguredPlayerResearch().RecoveryRequired, Is.True);
+                    Assert.That(root.ClaimConfiguredPlayerResearch().RecoveryRequired, Is.True);
+                    typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(root, null);
+                    Assert.That(fs.Operations.Count(), Is.EqualTo(operations));
+                    Assert.That(root.ForegroundActivity.StateKey, Is.EqualTo("ui.living.blocked"));
+                    Assert.That(root.ResolvePlayerResearchState().RecoveryRequired, Is.True);
+                }
+                else
+                {
+                    CollectionAssert.AreEqual(bytes, fs.ReadAllBytes(service.SavePath));
+                    Assert.That(claim ? root.ClaimConfiguredPlayerResearch().Succeeded : root.StartConfiguredPlayerResearch().Succeeded, Is.True);
+                    Assert.That(claim ? root.ClaimConfiguredPlayerResearch().Succeeded : root.StartConfiguredPlayerResearch().Succeeded, Is.False);
+                }
+            }
+            finally
+            {
+                fsField.SetValue(service, native);
+                typeof(SaveService).GetField("_canonicalSession", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(service, session);
+                typeof(GameRoot).GetProperty(nameof(GameRoot.Save)).SetValue(root, original);
+                typeof(GameRoot).GetField("_explicitSaveDeleteQuiesced", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(root, true);
+            }
+            yield return null;
+        }
+
         [UnityTest, Timeout(1800000)] public IEnumerator ForegroundPerformanceSustainedProduction68Runs()
         {
             var root = GameRoot.Instance;
