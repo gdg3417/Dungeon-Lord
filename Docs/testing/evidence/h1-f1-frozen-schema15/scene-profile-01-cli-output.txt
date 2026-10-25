@@ -1,0 +1,4 @@
+Unity process timed out after 1800 seconds. Terminating.
+The Editor log reported the following errors:
+  [license] [Licensing::Module] LicensingClient has failed validation; ignoring
+Error: Unity process timed out after 1800 seconds. Terminating.

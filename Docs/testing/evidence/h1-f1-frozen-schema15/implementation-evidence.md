@@ -42,7 +42,7 @@ Baseline command form (attempt 04 is the successful capture):
 | Focused 02 | **63/63 passed**, including the full 35-case verdict corpus |
 | Broader regression 01 | **1220 passed, 3 failed**, 0 skipped; the three scene-profile cases rejected the ordinary product identity with `b3b2.profile.isolation_required` / `two_floor.smoke.isolation_required` |
 | Migration 01 | **117 passed, 0 failed, 1 skipped**; includes frozen-15 tests, existing sealed migration failure matrix, limit-loader assertions and native Windows migration fixtures |
-| Scene-profile 01 | Pending final report |
+| Scene-profile 01 | **CLI timeout, incomplete**: 1800-second limit, CLI exit 14, no NUnit XML. Single-floor capture passed 68 runs; two-floor profile incomplete and layout case unverified. Not restarted. |
 
 The single migration skip is `PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed`, with reason `gd66.test.windows_only_inverse`, expected on this Windows host.
 
@@ -72,3 +72,22 @@ The focused suite covers dormant and active v1/v2 owners; A>C; exact bytes/ident
 No runtime changes followed successful focused qualification. Later changes only added the established-fixture Editor adapter and qualification/evidence tooling. No Windows filesystem implementation or persistence protocol changed. Additional isolated Windows standalone durability qualification is not required solely for this packet; native Windows EditMode coverage is included. No manual gameplay UAT is required solely for this historical validation change.
 
 This is not a complete unfiltered EditMode/PlayMode/player-build qualification. A later schema still needs a reviewed migration, retained executable/content/config compatibility, and separate end-to-end H1 qualification. No later writable schema, time provenance, ordinary-save clock/passive-mana change, H2 retention/batching, O1 simulation or UI change is implemented.
+
+
+## Continuation closeout
+
+The original execution session (8899) returned `Unity process timed out after 1800 seconds. Terminating.` The saved command records CLI exit **14**, start `2026-10-25T19:40:41.7292426Z` and finish `2026-10-25T20:10:47.1202528Z` (1805.3910102 seconds including shutdown). There is no `scene-profile-01.xml`. This is a CLI execution-limit outcome, not a Unity compilation failure or a completed failing NUnit run. The recurring licensing warning also appears in successful runs and is not the timeout verdict. See `scene-profile-01-cli-output.txt`, `scene-profile-01-command.json` and the preserved log archive.
+
+The completed single-floor capture reports `Passed=true`, `CompletedRuns=68`, empty failure, and the disposable product identity. Its original report and SHA-256 are preserved in `scene-profile-captures.zip` / `scene-profile-captures.json`. No completed two-floor capture was produced. The interrupted campaign does not establish a pass for the two-floor profile or final layout case. No restart or unrelated performance investigation was performed. Process inspection found no remaining qualification Editor, only an unrelated Unity Hub `serve` process, which was left untouched.
+
+These profiling/layout cases are supplementary to H1-F1's historical validation scope: no gameplay, UI, clock accrual or filesystem primitive changed. The mandatory frozen-source, historical-limit, 14-to-15 byte-equivalence, recovery/failure-matrix and Windows migration checks have completed passing results. The broader run remains accurately recorded as **1220 passed / 3 isolation-guard failures**; its failed suite status has not been relabeled as green. Incomplete supplementary profiling remains a non-blocking limitation for independent review, subject to the reviewer's judgment. This is not merge approval or full gameplay/performance qualification.
+
+Before cleanup, all qualified source/configuration inputs matched `d42be511fc17b3ac41c81ed9e2ba4f8a22d6fe7b`; no later implementation commits existed. The only differences were the disposable product name in `ProjectSettings/ProjectSettings.asset` and line-ending-only Unity rewrites in `EditorBuildSettings.asset` / `ShaderGraphSettings.asset`. All three were individually compared and restored from the isolated branch's committed versions, using normal Git checkout line endings. No source fixture, approved resource or owner file was removed. `qualified-input-hashes.json` pins the unchanged qualified Assets inputs, and `closeout-verification.json` records the report verification and restored settings. Static validation was rerun; no Unity suite was rerun during closeout.
+
+The original owner checkout is still `codex/r0-research-durable-acknowledgement` at `4c13b9dbfe3e1ee167cedb9c3328a69c21c08a0a`, with only its pre-existing planning-document modification; its SHA-256 still matches the value above. The separately attached app-managed worktree is a clean detached baseline checkout, not the implementation worktree. All implementation and qualification cleanup remains in the original isolated Temp worktree.
+
+**READY FOR INDEPENDENT PR REVIEW.** Runtime implementation remains at the qualified source commit; this continuation adds only evidence/documentation. PR #255 remains a draft, is not merged, and no next H1 component is started. No manual gameplay UAT or additional Windows standalone durability qualification is required solely for H1-F1; optional performance/layout completion remains unverified as stated above. The existing active-schema-14 upgrade rejection and future H1 migration/provenance dependencies remain unchanged.
+
+The log archive also preserves the original NUnit XML, command records and recovered timeout output as raw bytes; their hashes remain verifiable across Git line-ending settings. Archive integrity and XML per-case counts were checked during closeout.
+
+The original command records retain sourceCommit 09a46810 because qualification ran with the implementation uncommitted on that parent. The same implementation was subsequently committed as d42be511; the closeout input hashes verify the current files against that commit, rather than claiming a new hash snapshot was captured at test launch. Original records and expected fixtures were not rewritten.

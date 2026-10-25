@@ -1,0 +1,69 @@
+{
+  "source_commit": "d42be511fc17b3ac41c81ed9e2ba4f8a22d6fe7b",
+  "inputs": [
+    {
+      "path": "Assets/_Project/Editor/DungeonSpatial/Tests/FrozenSchemaFifteenEditModeFixtures.cs",
+      "normalized_sha256": "5bf039a4e45022f8f6a5650949bc3ba054ccc73deea14511752dff20cbb4e34c"
+    },
+    {
+      "path": "Assets/_Project/Editor/DungeonSpatial/Tests/FrozenSchemaFifteenEditModeFixtures.cs.meta",
+      "normalized_sha256": "177dcd443ee75d2bd3b35930ed87cb978d5be593494170653edbd75ddd7e28b9"
+    },
+    {
+      "path": "Assets/_Project/Resources/save_spatial_migration_limits_schema15.json",
+      "normalized_sha256": "aa162762f7c437ca58f8a4f8f4cccb22e6868801269dc6f04dd3d241482a9782"
+    },
+    {
+      "path": "Assets/_Project/Resources/save_spatial_migration_limits_schema15.json.meta",
+      "normalized_sha256": "602d1d0ce86b1fea083f40ea94390644c5b2764377812c5a309ed852ef8eca71"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSaveSchemaVersions.cs",
+      "normalized_sha256": "2732b91da21b8249d3ed36b5de7f9391ba8478cfe439c116bada542b5bbf1975"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSpatialSaveContracts.cs",
+      "normalized_sha256": "266ceed7585a242542f9e39c396a8ee080ca88b55bbd9973a0b1b5d31be2b2a4"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSpatialSaveSerializer.cs",
+      "normalized_sha256": "748dbabda84109be5e6030ab6e3417660ee0b378195f4a97460ec37cfb615ece"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCompleteSaveContract.cs",
+      "normalized_sha256": "453e57881299dc2c0a9004e56fd7a5e6b18911d2aa8645e658687b71ab938586"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialMigrationTransaction.cs",
+      "normalized_sha256": "cfbff2ef2f303ea0b8bb857650c06837f4a9261bdcf227beea8936157b56aa37"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialSaveLoadCoordinator.cs",
+      "normalized_sha256": "9125a7a180971428e918e8131f5db1d1c38be9f918bc206cda7c0cf6670ae813"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RawSavePayloadClassifier.cs",
+      "normalized_sha256": "4db6ca4b69e4401d9690e14c2222d3eb8bc09d7b76a5f1e915d2a89e2e6e571e"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SaveSpatialMigrationLimits.cs",
+      "normalized_sha256": "84b3a78bf8f5130ad1af93da16f726c3befd3b94ea09a2496f2f569674cf480c"
+    },
+    {
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaFourteenToFifteenUpgrade.cs",
+      "normalized_sha256": "3aa5bf88ff837b6423d316c197b5bfe4b68958d155ed8e9e685a731644ef1e7b"
+    },
+    {
+      "path": "Assets/_Project/Tests/EditMode/FrozenSchemaFifteenTests.cs",
+      "normalized_sha256": "a204577f9a88d011dff6e6902b9b3950f83bab65158f22f46c431e10a27f900d"
+    },
+    {
+      "path": "Assets/_Project/Tests/EditMode/FrozenSchemaFifteenTests.cs.meta",
+      "normalized_sha256": "c2cbf704fafe4e2c46a7ac3535ac6b3c3b54a03dfe783b0a4c765e2056ad0c8e"
+    },
+    {
+      "path": "Assets/_Project/Tests/EditMode/SaveSpatialMigrationLimitsTests.cs",
+      "normalized_sha256": "b0806093d00adfe44b974503986d71303b8c39f5c0948b276a29a2137f315a36"
+    }
+  ]
+}

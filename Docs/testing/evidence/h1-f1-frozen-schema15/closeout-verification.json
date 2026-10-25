@@ -1,0 +1,94 @@
+{
+  "qualified_source_commit": "d42be511fc17b3ac41c81ed9e2ba4f8a22d6fe7b",
+  "main_sha": "09a46810aeab7441a2ac09ac6220b0f4cc13d6dd",
+  "source_changed_since_qualification": false,
+  "temporary_settings_restored": [
+    "EditorBuildSettings.asset",
+    "ProjectSettings.asset",
+    "ShaderGraphSettings.asset"
+  ],
+  "profiler": {
+    "classification": "supplementary_performance_qualification",
+    "outcome": "cli_timeout_incomplete",
+    "cli_exit_code": 14,
+    "timeout_seconds": 1800,
+    "started_utc": "2026-10-25T19:40:41.7292426Z",
+    "finished_utc": "2026-10-25T20:10:47.1202528Z",
+    "elapsed_seconds": 1805.39101,
+    "nunit_report_produced": false,
+    "restarted": false,
+    "compilation_failure_reported": false,
+    "test_failure_verdict_available": false,
+    "single_floor_capture_passed": true,
+    "single_floor_completed_runs": 68,
+    "two_floor_profile": "incomplete",
+    "layout_case": "unverified"
+  },
+  "reports": [
+    {
+      "file": "baseline-02.xml",
+      "sha256": "a0c9b680cb5f639e9086066cd5deefe7d13e9126a7617f7e08ec5fa0550d0223",
+      "result": "Passed",
+      "total": "0",
+      "passed": "0",
+      "failed": "0",
+      "skipped": "0"
+    },
+    {
+      "file": "baseline-03.xml",
+      "sha256": "1d47569dc02514aab009ac4f61dc762ab0937db71f474e706a00008cd6f652c1",
+      "result": "Failed(Child)",
+      "total": "1",
+      "passed": "0",
+      "failed": "1",
+      "skipped": "0"
+    },
+    {
+      "file": "baseline-04.xml",
+      "sha256": "4e9d13354a320b49f62ea08ae923de7e74301164435a05ced34b088c37cd1a24",
+      "result": "Passed",
+      "total": "1",
+      "passed": "1",
+      "failed": "0",
+      "skipped": "0"
+    },
+    {
+      "file": "focused-01.xml",
+      "sha256": "5a67d41beadbbf9ecced0d9c4f7a37846b7590c8ec3de9450d064cc05ffda93d",
+      "result": "Failed(Child)",
+      "total": "27",
+      "passed": "24",
+      "failed": "3",
+      "skipped": "0"
+    },
+    {
+      "file": "focused-02.xml",
+      "sha256": "80a18643d222eec273a516a47f727c7d6821de88401bbd9a33edbfb0985c8dfc",
+      "result": "Passed",
+      "total": "63",
+      "passed": "63",
+      "failed": "0",
+      "skipped": "0"
+    },
+    {
+      "file": "migration-01.xml",
+      "sha256": "e8f378a310164aadba8936b7eb9013e35abb314cc7b86d6b205a3417a89d0e8a",
+      "result": "Skipped:Ignored",
+      "total": "118",
+      "passed": "117",
+      "failed": "0",
+      "skipped": "1"
+    },
+    {
+      "file": "regression-01.xml",
+      "sha256": "08e49d845fca421ace397dabbecbced4e0a883abecbb5ba54a6e57a34086fccc",
+      "result": "Failed(Child)",
+      "total": "1223",
+      "passed": "1220",
+      "failed": "3",
+      "skipped": "0"
+    }
+  ],
+  "review_verdict": "READY FOR INDEPENDENT PR REVIEW",
+  "merge_approval_claimed": false
+}
