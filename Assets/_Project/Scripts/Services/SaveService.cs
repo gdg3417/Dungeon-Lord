@@ -404,6 +404,56 @@ namespace DungeonBuilder.M0
             { banner = "Save load failed. Created a new save."; ArchiveCorruptSave(); return CreateNew(contentVersion); }
         }
 
+        internal PlayerResearchActionResult CommitPlayerResearchTransition(SaveData current,
+            Func<SaveData, PlayerResearchActionResult> stage)
+        {
+            if (!PrepareForegroundAction(ref current))
+                return PlayerResearchActionHandler.PersistenceFailure(ForegroundBlocked().Reason);
+            // Unconfigured services are schema <= 6 test/repair compatibility only.
+            // Supported Bootstrap play loads/migrates through the canonical authority.
+            if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null || stage == null)
+                return PlayerResearchActionHandler.PersistenceFailure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+
+            SaveData candidate;
+            PlayerResearchActionResult action;
+            try
+            {
+                var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(_canonicalSession.GetCurrentBytes(), _validationContext);
+                if (owned?.CurrentTargetValidated != true || !owned.IsValid)
+                    return PlayerResearchActionHandler.PersistenceFailure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+                var snapshot = DetachedRecognizedSaveStateSnapshot.Capture(current, _limits);
+                var prepared = _canonicalSession.PrepareLiveReplacement(snapshot, owned.State);
+                if (!prepared.IsSuccess)
+                    return PlayerResearchActionHandler.PersistenceFailure(prepared.Reason);
+                var validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(prepared.Update.GetBytes(), _validationContext);
+                if (!CanonicalMvpRouteProjection.TryPublishValidated(validated, _production, out candidate, out string reason))
+                    return PlayerResearchActionHandler.PersistenceFailure(reason);
+                action = stage(candidate);
+                if (action == null)
+                    return PlayerResearchActionHandler.PersistenceFailure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+                if (!action.Succeeded || !action.StateChanged) return action;
+                candidate.lastSavedUtcUnix = CaptureMonotonicSaveBoundary(candidate.lastSavedUtcUnix);
+            }
+            catch (Exception)
+            {
+                return PlayerResearchActionHandler.PersistenceFailure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            }
+
+            // Do not call Save(candidate): its foreground preparation can replace
+            // the staged transition. This writer preserves the session's other owners
+            // and extension members, then verifies exact bytes and semantic readback.
+            var write = CreateWriteAuthority().SaveRecognizedState(SavePath, _canonicalFileSystem, _canonicalSession, candidate);
+            if (!write.IsSuccess)
+            {
+                if (write.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason) foregroundRecoveryRequired = true;
+                return PlayerResearchActionHandler.PersistenceFailure(write.Reason);
+            }
+            _undo = null;
+            _canonicalSession = write.Session;
+            CanonicalRuntimePublished?.Invoke(write.RuntimeProjection);
+            return action;
+        }
+
         public bool Save(SaveData data, SaveReason reason)
         {
             if (!PrepareForegroundAction(ref data)) return false;

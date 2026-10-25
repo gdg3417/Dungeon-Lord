@@ -224,6 +224,8 @@ namespace DungeonBuilder.Tests.EditMode
             InvokeResearchProgressApply();
             _root.RefreshOfflineSummaryLines();
 
+            using var canonicalResearch = new ResearchDurableAcknowledgementTests.CanonicalRootScope(_root);
+
             PlayerResearchActionResult claim = _root.ClaimConfiguredPlayerResearch();
             Assert.That(claim.Succeeded, Is.True);
             Assert.That(claim.CanClaimProduction, Is.False);

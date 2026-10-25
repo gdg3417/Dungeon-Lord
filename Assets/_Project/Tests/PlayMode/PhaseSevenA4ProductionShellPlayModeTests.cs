@@ -18,6 +18,13 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         private object fixture;
         private Type fixtureType;
 
+        [UnityTest] public IEnumerator R0ResearchStartProgressClaimAndReopen() { yield return Invoke("R0ResearchStartProgressClaimAndReopenUseCommittedPublication"); }
+        [UnityTest] public IEnumerator R0ResearchStartProvenRollback() { yield return Invoke("R0ResearchStartProvenRollback"); }
+        [UnityTest] public IEnumerator R0ResearchClaimProvenRollback() { yield return Invoke("R0ResearchClaimProvenRollback"); }
+        [UnityTest] public IEnumerator R0ResearchStartUncertainRecovery() { yield return Invoke("R0ResearchStartUncertainRecovery"); }
+        [UnityTest] public IEnumerator R0ResearchClaimUncertainRecovery() { yield return Invoke("R0ResearchClaimUncertainRecovery"); }
+        [UnityTest] public IEnumerator R0ResearchForegroundRollbackBlocksAction() { yield return Invoke("R0ResearchForegroundRollbackBlocksAction"); }
+
         [UnityTest] public IEnumerator AnalysisPhoneNavigationAndCoveredInput()
         { yield return Invoke("AnalysisPhoneNavigationSafeAreaAndCoveredInput"); }
         [UnityTest] public IEnumerator AnalysisPhoneValidDraftChoices()

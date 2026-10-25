@@ -248,7 +248,17 @@ namespace DungeonBuilder.Tests.EditMode
                 () => _hasRun,
                 () => _online,
                 () => _verificationPending,
-                () => _saveCount++);
+                () => _saveCount++,
+                stage =>
+                {
+                    // Unit-only durable owner fake; production coverage uses SaveService.
+                    var candidate = UnityEngine.JsonUtility.FromJson<SaveData>(UnityEngine.JsonUtility.ToJson(_save));
+                    if (_save.researchPending == null) candidate.researchPending = null;
+                    if (_save.researchProgress == null) candidate.researchProgress = null;
+                    var result = stage(candidate);
+                    if (result.Succeeded && result.StateChanged) { _save = candidate; _saveCount++; }
+                    return result;
+                }, () => _save);
         }
     }
 }

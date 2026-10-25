@@ -12,6 +12,7 @@ namespace DungeonBuilder.M0
         internal Func<SaveData> ForegroundCurrent;
         internal bool ForegroundWriting { get; private set; }
         private bool foregroundRecoveryRequired;
+        internal bool RequiresCanonicalRecovery => foregroundRecoveryRequired;
         private bool PrepareForegroundAction(ref SaveData current)
         {
             if (foregroundRecoveryRequired) return false;

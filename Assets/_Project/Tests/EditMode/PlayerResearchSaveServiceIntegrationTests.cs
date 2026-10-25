@@ -5,6 +5,7 @@ using DungeonBuilder.M0;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
+using Fixture = DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests.Fixture;
 
 namespace DungeonBuilder.Tests.EditMode
 {
@@ -14,13 +15,17 @@ namespace DungeonBuilder.Tests.EditMode
         private string _directory;
         private SaveService _service;
         private int _saveCount;
+        private Fixture _fixture;
+        private SaveData _current;
 
         [SetUp]
         public void SetUp()
         {
             _directory = Path.Combine(Path.GetTempPath(), "DungeonLordGD59", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(_directory);
-            _service = new SaveService(new SimpleLogger(false), new SaveConfig { fileName = "gd59.json", useAtomicWrites = true }, _directory);
+            _fixture = Fixture.Create(null);
+            _service = ResearchDurableAcknowledgementTests.OpenService(_fixture, out _current);
+            _service.CanonicalRuntimePublished += save => _current = save;
             _saveCount = 0;
         }
 
@@ -36,7 +41,7 @@ namespace DungeonBuilder.Tests.EditMode
             SaveData save = NewSave();
             PlayerResearchActionHandler handler = Create(save);
             Assert.That(handler.Start().Succeeded, Is.True);
-            Assert.That(File.Exists(_service.SavePath), Is.True);
+            Assert.That(_fixture.FileSystem.Exists(_service.SavePath), Is.True);
             PlayerResearchActionResult partial = handler.ApplyActiveTick(4);
             Assert.That(partial.StateChanged, Is.True);
             Assert.That(partial.ProgressUnits, Is.EqualTo(0.4d));
@@ -56,7 +61,7 @@ namespace DungeonBuilder.Tests.EditMode
 
             Assert.That(Create(readyLoaded).Claim().Succeeded, Is.True);
             Assert.That(_saveCount, Is.EqualTo(4), "Start, partial progress, ready transition, and claim each own exactly one save.");
-            string claimedJson = File.ReadAllText(_service.SavePath);
+            string claimedJson = System.Text.Encoding.UTF8.GetString(_fixture.FileSystem.ReadAllBytes(_service.SavePath));
             TestContext.WriteLine("Claimed research JSON: " + claimedJson);
             SaveData completedLoaded = _service.LoadOrCreate("gd59", out _);
             Assert.That(completedLoaded.completedResearch.ProjectIds, Is.EqualTo(new[] { ProjectId }));
@@ -117,10 +122,20 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(save.researchProgress, Is.SameAs(progress));
         }
 
-        private PlayerResearchActionHandler Create(SaveData save) => new PlayerResearchActionHandler(
-            save, PendingConfig(), ProgressConfig(), EligibilityConfig(), ClaimConfig(), VerificationConfig(), ProjectId,
-            new RestrictedActionGateService(), () => true, () => true, () => false,
-            () => { _saveCount++; _service.Save(save, SaveReason.StateChange); });
+        private PlayerResearchActionHandler Create(SaveData save)
+        {
+            _current = save;
+            return new PlayerResearchActionHandler(
+                save, PendingConfig(), ProgressConfig(), EligibilityConfig(), ClaimConfig(), VerificationConfig(), ProjectId,
+                new RestrictedActionGateService(), () => true, () => true, () => false,
+                () => { _saveCount++; Assert.That(_service.Save(_current, SaveReason.StateChange), Is.True); },
+                stage =>
+                {
+                    var result = _service.CommitPlayerResearchTransition(_current, stage);
+                    if (result.Succeeded && result.StateChanged) _saveCount++;
+                    return result;
+                }, () => _current);
+        }
 
         private static SaveData NewSave() => new SaveData
         {
