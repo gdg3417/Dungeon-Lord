@@ -10,6 +10,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const string Owner = "timeProvenance";
         public const string LegacyMode = "legacyWholeSeconds";
         internal const string LegacyJson = "{\"FormatVersion\":1,\"Mode\":\"legacyWholeSeconds\",\"AccountedFraction100ns\":0}";
+        internal static readonly int LegacyMemberByteCount = ContractJson.Bytes(",\"" + Owner + "\":" + LegacyJson).Length;
         public UnixTimePoint AccountedBoundary { get; }
         public string Mode => LegacyMode;
         private TimeProvenance(UnixTimePoint boundary) { AccountedBoundary = boundary; }

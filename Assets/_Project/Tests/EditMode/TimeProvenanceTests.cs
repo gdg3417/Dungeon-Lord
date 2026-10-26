@@ -236,6 +236,52 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(1, 0)));
             f.Reopen(); CollectionAssert.AreEqual(f.Session.GetCurrentBytes(), fs.ReadAllBytes(path));
         }
+        [Test] public void TargetBudgetsReserveExactlyTheNewGrammarWithoutChangingFrozenFifteen()
+        {
+            var current = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            var historical = current.Canonical.ForSchema(15);
+            Assert.That(TimeProvenance.LegacyMemberByteCount, Is.EqualTo(92));
+            Assert.That(current.Canonical.Serialized.MaximumInputBytes - historical.Serialized.MaximumInputBytes, Is.EqualTo(92));
+            Assert.That(current.Whole.MaximumCandidateBytes - historical.Serialized.MaximumInputBytes, Is.EqualTo(92));
+            Assert.That(current.Canonical.Serialized.MaximumParsedNodes - historical.Serialized.MaximumParsedNodes, Is.EqualTo(4));
+            Assert.That(current.Canonical.Serialized.MaximumCollectionRecords - historical.Serialized.MaximumCollectionRecords, Is.EqualTo(4));
+            int strings = TimeProvenance.Owner.Length + "FormatVersion".Length + "Mode".Length +
+                "AccountedFraction100ns".Length + TimeProvenance.LegacyMode.Length;
+            Assert.That(strings, Is.EqualTo(71));
+            Assert.That(current.Canonical.Serialized.MaximumStringCharacters - historical.Serialized.MaximumStringCharacters, Is.EqualTo(strings));
+            Assert.That(current.Raw.MaximumInputBytes, Is.EqualTo(checked(current.Canonical.Serialized.MaximumInputBytes * 2)));
+            Assert.That(current.Raw.MaximumScanWork, Is.EqualTo(checked(current.Raw.MaximumInputBytes * 2)));
+            Assert.That(historical.Serialized.MaximumInputBytes, Is.EqualTo(1376256));
+        }
+        [Test] public void ExactLegacyByteCeilingMigratesAndRemainsWritableWithReservedOwnerBytes()
+        {
+            var f = Fixture.Create(null); f.Runtime.structureRuntime.ManaReserve = f.Acquisition.StartingMana;
+            // Stabilize pre-existing Unity nullable projections before the size-boundary test.
+            for (int i = 0; i < 3; i++) f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
+            var source = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(f.Session.GetCurrentBytes())
+                .Replace(",\"timeProvenance\":" + TimeProvenance.LegacyJson, "").Replace("\"schemaVersion\":16", "\"schemaVersion\":15"));
+            var s = f.Profile.Canonical.Serialized; var whole = f.Profile.Whole;
+            var oldCanonical = new CanonicalSpatialSerializationLimits(new SpatialSerializedInputLimits(source.Length,
+                s.MaximumParsedNodes, s.MaximumCollectionRecords, s.MaximumStringCharacters, s.MaximumDiagnostics), f.Profile.Canonical.Spatial);
+            var historical = new SaveSpatialMigrationLimitsProfile(f.Profile.Raw, oldCanonical,
+                new DetachedWholeSaveLimits(source.Length, whole.MaximumCopiedValueBytes, whole.MaximumUnknownMembers, whole.MaximumUnknownMemberBytes));
+            int targetBytes = checked(source.Length + TimeProvenance.LegacyMemberByteCount);
+            var target = new CanonicalSpatialSerializationLimits(new SpatialSerializedInputLimits(targetBytes,
+                s.MaximumParsedNodes + 4, s.MaximumCollectionRecords + 4, s.MaximumStringCharacters + 71, s.MaximumDiagnostics),
+                f.Profile.Canonical.Spatial, historical, 15, true);
+            var profile = new SaveSpatialMigrationLimitsProfile(f.Profile.Raw, target,
+                new DetachedWholeSaveLimits(targetBytes, whole.MaximumCopiedValueBytes, whole.MaximumUnknownMembers, whole.MaximumUnknownMemberBytes));
+            var context = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
+                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), target, f.Occupancy);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(source, context).IsValid, Is.True);
+            Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(source, context, out var candidate), Is.True);
+            Assert.That(candidate.Length, Is.EqualTo(targetBytes));
+            var opened = DetachedCanonicalSaveSession.Open(candidate, context, profile);
+            Assert.That(opened.IsSuccess, Is.True, opened.Reason);
+            f.Context = context; f.Profile = profile; f.Session = opened.Session; f.FileSystem.Seed(f.ActivePath, candidate);
+            f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
+            Assert.That(f.Session.GetCurrentBytes().Length, Is.EqualTo(targetBytes)); f.Reopen();
+        }
     }
 }
 #endif

@@ -19,7 +19,7 @@ public static class H1F2WindowsBuildQualification
         DevelopmentBuildUtility.EnsureActiveBuildTarget(BuildTarget.StandaloneWindows64);
         var scenes = DevelopmentBuildUtility.GetEnabledScenePathsFromEditorBuildSettings();
         DevelopmentBuildUtility.ValidateBootstrapOnlySceneAllowlist(scenes);
-        string output = "Builds/Development/Windows-h1-f2/Dungeon Lord.exe";
+        string output = "Builds/Development/Windows-h1-f2-headroom/Dungeon Lord.exe";
         Directory.CreateDirectory(Path.GetDirectoryName(output));
         var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = scenes, locationPathName = output,
             target = BuildTarget.StandaloneWindows64, options = BuildOptions.Development });

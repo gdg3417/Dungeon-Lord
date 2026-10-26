@@ -27,10 +27,12 @@ try {
     Push-Location -LiteralPath $taskRoot
     try { & $taskCli @taskBuildArgs; $taskRecord.buildExit = $LASTEXITCODE } finally { Pop-Location }
     if ($taskRecord.buildExit -ne 0) { throw 'Windows qualification build failed' }
-    $taskPlayer = Join-Path $taskRoot 'Builds/Development/Windows-h1-f2/Dungeon Lord.exe'
+    $taskPlayer = Join-Path $taskRoot 'Builds/Development/Windows-h1-f2-headroom/Dungeon Lord.exe'
     $taskRecord.binarySha256 = (Get-FileHash -LiteralPath $taskPlayer -Algorithm SHA256).Hash
     $taskPersistent = Join-Path $env:USERPROFILE 'AppData/LocalLow/gdg3417/Dungeon Lord H1F2 Windows 20261025'
-    if (Test-Path -LiteralPath $taskPersistent) { throw "Refuse reuse of existing isolated product saves: $taskPersistent" }
+    if ((Test-Path -LiteralPath $taskPersistent) -and @(Get-ChildItem -LiteralPath $taskPersistent -Force).Count -gt 0) {
+        throw "Refuse reuse of existing isolated product data: $taskPersistent"
+    }
     $taskSave = $null
     foreach ($taskPhase in @('create','reopen','migrate15','reopen16','future')) {
         if ($taskPhase -eq 'migrate15') {

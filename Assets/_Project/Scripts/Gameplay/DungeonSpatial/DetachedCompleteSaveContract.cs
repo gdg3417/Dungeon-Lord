@@ -410,7 +410,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         var monsterWriter = new ContractJsonWriter(limits.Serialized); MonsterContinuity.Write(monsterWriter, monsters);
                         monsterBytes = monsterWriter.Finish().Length + ContractJson.Bytes(",\"" + MonsterContinuity.Owner + "\":").Length;
                     }
-                    if (ownerBytes > profile.MaximumOwnerBytes || bytes.Length - ownerBytes - monsterBytes > profile.MaximumBaseSaveBytes) return Failure();
+                    int timeBytes = requireTime ? TimeProvenance.LegacyMemberByteCount : 0;
+                    if (ownerBytes > profile.MaximumOwnerBytes || bytes.Length - ownerBytes - monsterBytes - timeBytes > profile.MaximumBaseSaveBytes) return Failure();
                     var baseWriter = new ContractJsonWriter(profile.BaseBudget); baseWriter.Node(); baseWriter.Token("{");
                     for (int i = 0; i < root.Fields.Count; i++)
                     {
