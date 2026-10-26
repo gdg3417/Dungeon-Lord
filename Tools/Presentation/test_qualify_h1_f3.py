@@ -55,6 +55,46 @@ class H1F3RunnerTests(unittest.TestCase):
             with self.assertRaises(ValueError): q.run_test('migration', self.stage)
             run.assert_not_called()
 
+    def test_measured_integration_font_rewrite_is_retained_and_exactly_restored(self):
+        font = self.root / q.FALLBACK_FONT
+        font.parent.mkdir(parents=True)
+        font.write_bytes(b'original test font')
+        stage = self.stage.with_name('integration')
+        stage.mkdir()
+        def cli(*args, **kwargs):
+            font.write_bytes(b'Editor rewritten test font')
+            return SimpleNamespace(returncode=0)
+        with patch.object(q, 'ROOT', self.root), patch.object(q.subprocess, 'run', side_effect=cli):
+            self.assertEqual(0, q.run_test('integration', stage))
+        self.assertEqual(b'original test font', font.read_bytes())
+        self.assertEqual(b'Editor rewritten test font', (stage/'generated-inputs/fallback-font.asset').read_bytes())
+        self.assertTrue(json.loads((stage/'generated-inputs/manifest.json').read_text())['restored'])
+
+    def test_unknown_input_change_is_never_automatically_restored(self):
+        path = self.root / 'Assets/unexpected.txt'
+        path.parent.mkdir()
+        path.write_bytes(b'original')
+        def cli(*args, **kwargs):
+            path.write_bytes(b'changed')
+            return SimpleNamespace(returncode=0)
+        with patch.object(q, 'ROOT', self.root), patch.object(q.subprocess, 'run', side_effect=cli):
+            with self.assertRaisesRegex(ValueError, 'Unapproved Unity input'): q.run_test('focused', self.stage)
+        self.assertEqual(b'changed', path.read_bytes())
+
+    def test_failed_cli_preserves_generated_font_for_review(self):
+        font = self.root / q.FALLBACK_FONT
+        font.parent.mkdir(parents=True)
+        font.write_bytes(b'original')
+        stage = self.stage.with_name('integration')
+        stage.mkdir()
+        def cli(*args, **kwargs):
+            font.write_bytes(b'failed run evidence')
+            return SimpleNamespace(returncode=8)
+        with patch.object(q, 'ROOT', self.root), patch.object(q.subprocess, 'run', side_effect=cli):
+            self.assertEqual(8, q.run_test('integration', stage))
+        self.assertEqual(b'failed run evidence', font.read_bytes())
+        self.assertFalse(json.loads((stage/'generated-inputs/manifest.json').read_text())['restored'])
+
     def restoration_fixture(self, corrupt=False):
         prep = self.root / 'preparation'
         prep.mkdir()
