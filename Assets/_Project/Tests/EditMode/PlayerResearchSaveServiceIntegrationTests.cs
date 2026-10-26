@@ -139,6 +139,7 @@ namespace DungeonBuilder.Tests.EditMode
 
         private static SaveData NewSave() => new SaveData
         {
+            lastSavedUtcUnix = 1, // Explicit fake legacy boundary for the canonical integration session.
             completedResearch = new CompletedResearchState(),
             completedObjectives = new CompletedObjectiveState(),
             runHistory = new RunHistoryState(),

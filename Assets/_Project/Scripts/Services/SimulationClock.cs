@@ -14,8 +14,9 @@ namespace DungeonBuilder.M0
         long UtcNowUnixSeconds();
     }
 
-    public sealed class SystemTimeSource : ITimeSource
+    public sealed class SystemTimeSource : IPreciseTimeSource
     {
+        public UnixTimePoint UtcNow() => UnixTimePoint.FromDateTimeOffset(DateTimeOffset.UtcNow);
         public long UtcNowUnixSeconds()
         {
             return TimeUtil.UtcNowUnixSeconds();
@@ -29,6 +30,8 @@ namespace DungeonBuilder.M0
         private readonly ITimeSource _timeSource;
         private readonly Func<double> _monotonicSeconds;
         internal double MonotonicSeconds => _monotonicSeconds();
+        internal UnixTimePoint CaptureUtc() => _timeSource is IPreciseTimeSource precise
+            ? precise.UtcNow() : new UnixTimePoint(_timeSource.UtcNowUnixSeconds(), 0);
 
         private float _accum;
         private long _lastPausedUtc;

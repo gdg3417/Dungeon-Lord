@@ -1,0 +1,33 @@
+#if UNITY_EDITOR
+using System;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+using DungeonBuilder.M0.EditorTools;
+
+public static class H1F2WindowsBuildQualification
+{
+    [Serializable] sealed class Receipt { public string Result; public int Errors, Warnings; public string[] Scenes; }
+    public static void Build()
+    {
+        if (PlayerSettings.productName != "Dungeon Lord H1F2 Windows 20261025")
+            throw new InvalidOperationException("h1f2.build.isolation_required");
+        DevelopmentBuildUtility.ValidateEditModeTestsEditorGuarded();
+        DevelopmentBuildUtility.ValidateBuildSupport(BuildTarget.StandaloneWindows64);
+        DevelopmentBuildUtility.EnsureActiveBuildTarget(BuildTarget.StandaloneWindows64);
+        var scenes = DevelopmentBuildUtility.GetEnabledScenePathsFromEditorBuildSettings();
+        DevelopmentBuildUtility.ValidateBootstrapOnlySceneAllowlist(scenes);
+        string output = "Builds/Development/Windows-h1-f2-headroom/Dungeon Lord.exe";
+        Directory.CreateDirectory(Path.GetDirectoryName(output));
+        var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = scenes, locationPathName = output,
+            target = BuildTarget.StandaloneWindows64, options = BuildOptions.Development });
+        File.WriteAllText("TestResults/h1-f2/windows-build-report.json", JsonUtility.ToJson(new Receipt {
+            Result = report.summary.result.ToString(), Errors = (int)report.summary.totalErrors,
+            Warnings = (int)report.summary.totalWarnings, Scenes = scenes }, true));
+        File.WriteAllLines("TestResults/h1-f2/windows-build-messages.txt", report.steps.SelectMany(s => s.messages).Select(m => m.type + ": " + m.content));
+        if (report.summary.result != BuildResult.Succeeded) throw new InvalidOperationException("h1f2.build.failed");
+    }
+}
+#endif

@@ -13,8 +13,8 @@ namespace DungeonBuilder.M0.Tests.PlayMode
             yield return null;
             var type = Type.GetType("DungeonBuilder.M0.Tests.EditMode.AdmissionStartReconstructionTests, Assembly-CSharp", true);
             var suite = Activator.CreateInstance(type);
-            foreach (bool descend in new[] { false, true }) {
-                Assert.DoesNotThrow(() => type.GetMethod("ActualLifetimeOperationReusesPreparationAndRetainsEveryReader").Invoke(suite, new object[] { descend }));
+            foreach (var variant in new[] { (false, false), (true, false), (true, true) }) {
+                Assert.DoesNotThrow(() => type.GetMethod("ActualLifetimeOperationReusesPreparationAndRetainsEveryReader").Invoke(suite, new object[] { variant.Item1, variant.Item2 }));
                 yield return null;
             }
             Assert.DoesNotThrow(() => type.GetMethod("MutableExecutionStateAndDisposalCannotAffectAnotherRestoration").Invoke(suite, null));

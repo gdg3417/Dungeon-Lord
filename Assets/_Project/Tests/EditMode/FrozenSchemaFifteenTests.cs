@@ -66,7 +66,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var bytes = Read(name + ".json"); var context = Context(name);
             var frozen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(bytes, context);
-            var baselineView = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, context);
+            var baselineView = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(bytes, context.Limits, context.LivingDungeonProfiles);
             Assert.That(frozen.IsValid && baselineView.IsValid, Is.True);
             var owner = frozen.LivingDungeon; Assert.That(owner.IsDormant, Is.False);
             Assert.That(owner.Scheduler.AcceptedThrough, Is.EqualTo(100));

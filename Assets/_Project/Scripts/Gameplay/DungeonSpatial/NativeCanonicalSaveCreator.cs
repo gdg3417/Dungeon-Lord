@@ -105,6 +105,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 LivingDungeonContracts.Write(writer, LivingDungeonState.Empty());
                 writer.Token(","); writer.String(MonsterContinuity.Owner); writer.Token(":");
                 MonsterContinuity.Write(writer, MonsterContinuityState.Empty());
+                writer.Token(","); writer.String(TimeProvenance.Owner); writer.Token(":"); TimeProvenance.WriteLegacy(writer);
                 writer.Token("}}");
                 byte[] bytes = writer.Finish();
                 var context = new DetachedCurrentTargetValidationContext(compatibility, production,

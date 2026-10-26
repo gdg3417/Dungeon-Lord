@@ -160,6 +160,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal RoomContentSpatialOccupancySnapshot RoomContentOccupancy { get; set; }
         internal LivingDungeonState LivingDungeon { get; set; }
         internal MonsterContinuityState MonsterContinuity { get; set; }
+        internal TimeProvenance TimeProvenance { get; set; }
     }
 
     public static class DetachedCompleteSaveContract
@@ -202,7 +203,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     result.ResearchPendingExplicitNull, result.ResearchProgressExplicitNull,
                     result.LastOfflineSummaryExplicitNull, result.CorridorContent,
                     result.BranchKnowledge, result.FloorKnowledge) { Investment = result.Investment,
-                        RoomContentOccupancy = context.RoomContentOccupancy, LivingDungeon = result.LivingDungeon, MonsterContinuity = result.MonsterContinuity }
+                        RoomContentOccupancy = context.RoomContentOccupancy, LivingDungeon = result.LivingDungeon, MonsterContinuity = result.MonsterContinuity,
+                        TimeProvenance = result.TimeProvenance }
                 : Failure();
         }
 
@@ -296,7 +298,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 bool requireFloorKnowledge = schemaVersion >= CanonicalSaveSchemaVersions.FloorKnowledgeIntroduction;
                 bool requireLivingDungeon = schemaVersion >= CanonicalSaveSchemaVersions.LivingDungeonIntroduction;
                 bool requireMonsters = schemaVersion >= CanonicalSaveSchemaVersions.MonsterContinuityIntroduction;
-                int canonicalMembers = requireMonsters ? 9 : requireLivingDungeon ? 8 : requireFloorKnowledge ? 7 : requirePhaseFive ? 6 : requireInvestment ? 4 : requireLifecycle ? 3 : 2;
+                bool requireTime = schemaVersion >= CanonicalSaveSchemaVersions.TimeProvenanceIntroduction;
+                int canonicalMembers = requireTime ? 10 : requireMonsters ? 9 : requireLivingDungeon ? 8 : requireFloorKnowledge ? 7 : requirePhaseFive ? 6 : requireInvestment ? 4 : requireLifecycle ? 3 : 2;
                 int canonicalStart = primary.Fields.Count - canonicalMembers;
                 if (primary.Fields.Count < canonicalMembers ||
                     primary.Fields[canonicalStart].Key != "canonicalSpatialAuthority" ||
@@ -307,6 +310,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     (requireFloorKnowledge && primary.Fields[canonicalStart + 6].Key != PhaseSixFloorKnowledge.OwnerName) ||
                     (requireLivingDungeon && primary.Fields[canonicalStart + 7].Key != LivingDungeonContracts.OwnerName) ||
                     (requireMonsters && primary.Fields[canonicalStart + 8].Key != MonsterContinuity.Owner) ||
+                    (requireTime && primary.Fields[canonicalStart + 9].Key != TimeProvenance.Owner) ||
                     (requireLifecycle && primary.Fields[canonicalStart + 2].Key !=
                         "structuralLifecycleAndOwnership") || CaseAmbiguous(primary,
                         requireFloorKnowledge ? new[] { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership", "structuralInvestment", PhaseFiveSaveContracts.CorridorOwnerName, PhaseFiveSaveContracts.KnowledgeOwnerName, PhaseSixFloorKnowledge.OwnerName } :
@@ -320,6 +324,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     string.Equals(f.Key, LivingDungeonContracts.OwnerName, StringComparison.OrdinalIgnoreCase))) return Failure();
                 if (requireMonsters && primary.Fields.Take(canonicalStart).Any(f =>
                     string.Equals(f.Key, MonsterContinuity.Owner, StringComparison.OrdinalIgnoreCase))) return Failure();
+                TimeProvenance timeProvenance = null;
+                if (requireTime && (root.Fields.Any(f => string.Equals(f.Key, TimeProvenance.Owner, StringComparison.OrdinalIgnoreCase)) ||
+                    primary.Fields.Take(canonicalStart + 9).Any(f => string.Equals(f.Key, TimeProvenance.Owner, StringComparison.OrdinalIgnoreCase)) ||
+                    !TimeProvenance.TryRead(primary, out timeProvenance))) return Failure();
 
                 var spatialWriter = new ContractJsonWriter(limits.Serialized);
                 spatialWriter.Node(); spatialWriter.Token("{"); spatialWriter.String("Authority"); spatialWriter.Token(":");
@@ -402,7 +410,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         var monsterWriter = new ContractJsonWriter(limits.Serialized); MonsterContinuity.Write(monsterWriter, monsters);
                         monsterBytes = monsterWriter.Finish().Length + ContractJson.Bytes(",\"" + MonsterContinuity.Owner + "\":").Length;
                     }
-                    if (ownerBytes > profile.MaximumOwnerBytes || bytes.Length - ownerBytes - monsterBytes > profile.MaximumBaseSaveBytes) return Failure();
+                    int timeBytes = requireTime ? TimeProvenance.LegacyMemberByteCount : 0;
+                    if (ownerBytes > profile.MaximumOwnerBytes || bytes.Length - ownerBytes - monsterBytes - timeBytes > profile.MaximumBaseSaveBytes) return Failure();
                     var baseWriter = new ContractJsonWriter(profile.BaseBudget); baseWriter.Node(); baseWriter.Token("{");
                     for (int i = 0; i < root.Fields.Count; i++)
                     {
@@ -432,7 +441,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     false, ExplicitNull(primary, "researchPending"),
                     ExplicitNull(primary, "researchProgress"),
                     ExplicitNull(primary, "lastOfflineSummary"), corridorContent,
-                    branchKnowledge, floorKnowledge) { Investment = investment, LivingDungeon = livingDungeon, MonsterContinuity = monsters };
+                        branchKnowledge, floorKnowledge) { Investment = investment, LivingDungeon = livingDungeon, MonsterContinuity = monsters,
+                            TimeProvenance = timeProvenance };
             }
             catch { return Failure(); }
         }

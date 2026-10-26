@@ -134,7 +134,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length, Is.EqualTo(2));
             Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana - charge));
             Assert.That(store.Read(), Is.Null);
-            Assert.That(File.ReadAllText(root.SaveService.SavePath), Does.Contain("\"schemaVersion\":15"));
+            Assert.That(File.ReadAllText(root.SaveService.SavePath), Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget));
             controller.EnterEdit(); controller.TapWorld(new TileCoordinate(1, 3)); yield return null; yield return null;
             Assert.That(controller.SelectedRoomInstanceId, Is.Not.Null);
             Assert.That(ui.Q("contextDetails").style.display.value, Is.EqualTo(DisplayStyle.Flex), "Room selection restores the A5 contextual actions after collapsed construction");

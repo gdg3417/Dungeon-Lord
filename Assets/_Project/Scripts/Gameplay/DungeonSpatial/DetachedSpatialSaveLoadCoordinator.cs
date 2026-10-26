@@ -147,6 +147,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                 recovered.TrustedPayload, recovered); }
 
+            var schemaFifteen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(trusted, currentContext);
+            if (schemaFifteen.IsValid)
+                return UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, schemaFifteen,
+                    currentContext, DetachedSpatialSaveLoadDisposition.Migrated, recovered, null);
             var schemaFourteen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(trusted, limits.Canonical, livingDungeonProfiles);
             if (schemaFourteen.IsValid)
                 return UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, schemaFourteen,
@@ -234,7 +238,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             // Frozen readers/preparation still recognize this as an extension; the current target cannot.
             if (classification.UnknownPrimaryMembers.Any(member => string.Equals(member.Name,
                 LivingDungeonContracts.OwnerName, StringComparison.OrdinalIgnoreCase) || string.Equals(member.Name,
-                MonsterContinuity.Owner, StringComparison.OrdinalIgnoreCase)))
+                MonsterContinuity.Owner, StringComparison.OrdinalIgnoreCase) || string.Equals(member.Name,
+                TimeProvenance.Owner, StringComparison.OrdinalIgnoreCase)) || classification.UnknownRootMembers.Any(member =>
+                string.Equals(member.Name, TimeProvenance.Owner, StringComparison.OrdinalIgnoreCase)))
                 return Failure(SchemaSevenToEightUpgrade.InvalidReason, recovered.TrustedPayload, recovered);
 
             DescriptorSeedResult descriptorResult = CreateDescriptorSeed(trusted, classification, schema);
@@ -277,7 +283,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedSpatialSaveLoadDisposition disposition, DetachedSpatialMigrationOutcome recovery,
             DetachedSpatialMigrationOutcome transaction)
         {
-            int frozenSchema = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(source, limits.Canonical, livingDungeonProfiles).IsValid ? 14 : DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(
+            int frozenSchema = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(source, currentContext).IsValid ? 15 :
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(source, limits.Canonical, livingDungeonProfiles).IsValid ? 14 : DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(
                 source, limits.Canonical).IsValid ? 13 : DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(
                 source, limits.Canonical).IsValid ? 12 :
                 CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget;
@@ -288,7 +295,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !DetachedCanonicalProductionSemanticValidation.Validate(frozenValidation.State, production,
                     currentContext.Configuration, limits.Canonical.Spatial,
                     frozenSchema >= 13 ? currentContext.RoomContentOccupancy : null, frozenSchema >= 13).IsValid ||
-                !TryUpgradeToCurrent(source, limits.Canonical, out byte[] candidate))
+                !TryUpgradeToCurrent(source, limits.Canonical, currentContext, out byte[] candidate))
                 return Failure(SchemaSevenToEightUpgrade.InvalidReason,
                     transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
                     recovery, transaction);
@@ -319,6 +326,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private bool TryUpgradeToCurrent(byte[] source, CanonicalSpatialSerializationLimits limits,
+            DetachedCurrentTargetValidationContext currentContext, out byte[] candidate)
+        {
+            candidate = null;
+            if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(source, currentContext).IsValid)
+                return SchemaFifteenToSixteenUpgrade.TryPrepare(source, currentContext, out candidate);
+            return TryUpgradeToFifteen(source, limits, out var fifteen) &&
+                SchemaFifteenToSixteenUpgrade.TryPrepare(fifteen, currentContext, out candidate);
+        }
+
+        private bool TryUpgradeToFifteen(byte[] source, CanonicalSpatialSerializationLimits limits,
             out byte[] candidate)
         {
             candidate = null;

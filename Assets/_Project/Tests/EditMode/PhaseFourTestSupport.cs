@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.IO;
+using System.Linq;
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
@@ -10,6 +11,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         internal static bool Upgrade(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] current)
         {
+            source = WithTestTimestamp(source, limits);
             current = null;
             if (!SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight))
             { return false; }
@@ -25,7 +27,35 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     out byte[] thirteen))
             { return false; }
             return SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out var fourteen) &&
-                SchemaFourteenToFifteenUpgrade.TryPrepare(fourteen, limits, MonsterRecoveryRules.EditorFallback(), out current);
+                SchemaFourteenToFifteenUpgrade.TryPrepare(fourteen, limits, MonsterRecoveryRules.EditorFallback(), out var fifteen) &&
+                SchemaFifteenToSixteenUpgrade.TryPrepareStructure(fifteen, limits, null, out current);
+        }
+
+        // Disposable older scaffolds omitted optional historical time. Supply an
+        // explicit fake test boundary before testing the new strict writable owner.
+        internal static byte[] WithTestTimestamp(byte[] source, CanonicalSpatialSerializationLimits limits)
+        {
+            var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
+            if (!ContractJson.TryParse(source, limits.Serialized, issues, out var root)) return source;
+            var primary = root.Fields[2].Value;
+            if (primary.Fields.Any(f => f.Key == "lastSavedUtcUnix")) return source;
+            var w = new ContractJsonWriter(limits.Serialized); w.Node(); w.Token("{");
+            for (int i = 0; i < root.Fields.Count; i++) {
+                if (i != 0) w.Token(","); var f = root.Fields[i]; w.String(f.Key); w.Token(":");
+                if (f.Key != "primary") DetachedCompleteSaveContract.WriteCanonicalNode(w, f.Value);
+                else {
+                    w.Node(); w.Token("{"); bool first = true, added = false;
+                    foreach (var p in primary.Fields) {
+                        if (!added && p.Key != "saveVersion" && p.Key != "contentVersion" && p.Key != "createdUtcUnix") {
+                            if (!first) w.Token(","); w.String("lastSavedUtcUnix"); w.Token(":1"); first = false; added = true;
+                        }
+                        if (!first) w.Token(","); first = false; w.String(p.Key); w.Token(":"); DetachedCompleteSaveContract.WriteCanonicalNode(w, p.Value);
+                    }
+                    if (!added) { if (!first) w.Token(","); w.String("lastSavedUtcUnix"); w.Token(":1"); }
+                    w.Token("}");
+                }
+            }
+            w.Token("}"); return w.Finish();
         }
 
         internal static RoomContentPositionMigrationProfilesSnapshot PositionProfiles(
@@ -122,7 +152,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     writer.Node(); writer.Token("{"); bool first = true;
                     foreach (var p in f.Value.Fields)
                     {
-                        if (p.Key == MonsterContinuity.Owner) continue;
+                        if (p.Key == MonsterContinuity.Owner || p.Key == TimeProvenance.Owner) continue;
                         if (!first) writer.Token(","); first = false; writer.String(p.Key); writer.Token(":");
                         DetachedCompleteSaveContract.WriteCanonicalNode(writer, p.Value);
                     }

@@ -73,7 +73,13 @@ namespace DungeonBuilder.Tests.EditMode
                         (MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId) })
                         fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(pair.Item1, pair.Item2)));
                 }
-                fixture.Accept(fixture.Authority.SaveRecognizedState(fixture.ActivePath, fixture.FileSystem, fixture.Session, legacy));
+                // The presentation sandbox has no persisted time. Use the explicit
+                // fake canonical fixture boundary while copying its research state.
+                long presentationTime = legacy.lastSavedUtcUnix;
+                try {
+                    legacy.lastSavedUtcUnix = Math.Max(legacy.lastSavedUtcUnix, fixture.Runtime.lastSavedUtcUnix);
+                    fixture.Accept(fixture.Authority.SaveRecognizedState(fixture.ActivePath, fixture.FileSystem, fixture.Session, legacy));
+                } finally { legacy.lastSavedUtcUnix = presentationTime; }
                 var canonical = OpenService(fixture, out var save);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.SaveService)).SetValue(root, canonical);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.Save)).SetValue(root, save);
@@ -167,7 +173,7 @@ namespace DungeonBuilder.Tests.EditMode
             string durable = Encoding.UTF8.GetString(Bytes);
             Assert.That(durable, Does.Contain("\"unrelatedResearchEvidence\":{\"n\":1.00}"));
             Assert.That(durable, Does.Contain("\"unrelatedRoot\":[true,null]"));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(15));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
         }
 
         [TestCase(false, Faults.OperationType.Write, 1)]

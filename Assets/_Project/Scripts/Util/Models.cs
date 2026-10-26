@@ -1542,6 +1542,7 @@ namespace DungeonBuilder.M0
         [NonSerialized] public SharedFloorKnowledgeAuthority sharedFloorKnowledge;
         [NonSerialized] public LivingDungeonState livingDungeon;
         [NonSerialized] public MonsterContinuityState monsterContinuity;
+        [NonSerialized] public TimeProvenance timeProvenance;
         public int mvpSelectedRoomSlotIndex;
         public StructureRuntimeState structureRuntime = new StructureRuntimeState();
         public RunHistoryState runHistory = new RunHistoryState();

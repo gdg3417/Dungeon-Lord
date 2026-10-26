@@ -137,7 +137,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void FrozenSchemaSevenUpgrade_PreservesIssuedNativeRoomIdentityAndAdvancesHighWater()
         {
-            const string members = "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+            const string members = "\"lastSavedUtcUnix\":1,\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
                 "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.basic\"," +
                 "\"MonsterOptionIds\":[],\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}," +
                 "{\"FloorIndex\":0,\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.basic\"," +
@@ -206,6 +206,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(schemaEight, fixture.Limits).IsValid, Is.True);
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(schemaEight, fixture.Limits, out schemaEight), Is.True);
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(schemaEight,fixture.Limits,MonsterRecoveryRules.EditorFallback(),out schemaEight),Is.True);
+            Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(schemaEight, fixture.CurrentContext, out schemaEight), Is.True);
             DetachedCompleteSaveValidationResult contextual =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.CurrentContext);
             Assert.That(contextual.IsValid, Is.True, contextual.Reason);

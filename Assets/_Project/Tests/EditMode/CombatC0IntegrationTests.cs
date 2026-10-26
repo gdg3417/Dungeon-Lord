@@ -196,7 +196,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(CombatC0Diagnostics.Events(run).Count(e=>e.Kind==CombatC0EventKind.EncounterStart),Is.EqualTo(1));
             Assert.That(run.RunId,Is.EqualTo("run-"+sequence)); Assert.That(f.Runtime.runHistory.NextRunSequence,Is.EqualTo(sequence+1));
             double settledMana = mana - f.Runtime.monsterContinuity.Inspect().Sum(m => m.Health - run.CombatMonsters.Single(c => c.AssignmentId == m.AssignmentId).Health);
-            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(settledMana)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget,Is.EqualTo(15));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(settledMana)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget,Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
             string aggregate=JsonUtility.ToJson(run); Assert.That(aggregate,Does.Not.Contain("Combat").And.Not.Contain("Health"));
             var clone=JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(f.Runtime)); RunTransientEvidence.Retain(f.Runtime,clone);
             Assert.That(B.Structured(CombatC0Diagnostics.Events(clone.runHistory.LatestOutcome)),Is.EqualTo(B.Structured(CombatC0Diagnostics.Events(run))));

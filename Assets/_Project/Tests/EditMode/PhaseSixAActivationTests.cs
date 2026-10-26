@@ -19,8 +19,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CurrentConstantsAndNativeEmptyCreationUseThirteen()
         {
             Fixture f = Fixture.Create(null);
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(15));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(15));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
             var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(f.ActivePath, fs,
                 f.Runtime, f.Compatibility, f.Production,
@@ -29,7 +29,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(created.IsSuccess, Is.True, created.Reason);
             Assert.That(created.Validation.State.Floors, Is.Empty);
             Assert.That(Encoding.UTF8.GetString(created.Session.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":15"));
+                Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget));
             string native = Encoding.UTF8.GetString(created.Session.GetCurrentBytes());
             Assert.That(native.Split(new[] { "\"sharedFloorKnowledge\"" },
                 StringSplitOptions.None).Length, Is.EqualTo(2));
@@ -358,6 +358,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(current, f.Profile.Canonical).IsValid, Is.True);
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(current, f.Profile.Canonical, out current), Is.True);
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(current,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out current),Is.True);
+            Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(current, f.Context, out current), Is.True);
             var result = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current, f.Context);
             Assert.That(result.CurrentTargetValidated, Is.True);
             Assert.That(result.State.Floors.Single().ActivationState, Is.EqualTo(FloorActivationState.Active));

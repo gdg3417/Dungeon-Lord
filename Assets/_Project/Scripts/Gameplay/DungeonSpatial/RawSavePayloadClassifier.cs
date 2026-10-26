@@ -294,7 +294,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Find(payload, LivingDungeonContracts.OwnerName), owned));
             bool monsterOwner = envelope == RawSaveEnvelopeKind.WrappedSaveRoot && acceptedVersion.GetValueOrDefault() >= CanonicalSaveSchemaVersions.MonsterContinuityIntroduction;
             if (monsterOwner) evidence.Add(Evidence(MonsterContinuity.Owner, Find(payload, MonsterContinuity.Owner), owned));
-            var unknownPrimary = Unknown(payload, owned, false, true, livingOwner, monsterOwner);
+            bool timeOwner = envelope == RawSaveEnvelopeKind.WrappedSaveRoot && acceptedVersion.GetValueOrDefault() >= CanonicalSaveSchemaVersions.TimeProvenanceIntroduction;
+            if (timeOwner) evidence.Add(Evidence(TimeProvenance.Owner, Find(payload, TimeProvenance.Owner), owned));
+            var unknownPrimary = Unknown(payload, owned, false, true, livingOwner, monsterOwner, timeOwner);
             return new RawSavePayloadClassification(envelope, null, -1, acceptedVersion,
                 Evidence("schema", schema, owned), Evidence("schemaVersion", schemaVersion, owned),
                 Evidence("primary", primary, owned), evidence, unknownRoot, unknownPrimary,
@@ -370,7 +372,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         { for (int i = 0; i < node.Members.Count; i++) if (string.Equals(node.Members[i].Name, name, StringComparison.Ordinal)) return node.Members[i].Value; return null; }
         private static byte[] Slice(byte[] bytes, int start, int end)
         { var result = new byte[end - start]; Buffer.BlockCopy(bytes, start, result, 0, result.Length); return result; }
-        private static List<RawUnknownMemberEvidence> Unknown(Node node, byte[] bytes, bool root, bool saveData, bool livingOwner = false, bool monsterOwner = false)
+        private static List<RawUnknownMemberEvidence> Unknown(Node node, byte[] bytes, bool root, bool saveData, bool livingOwner = false, bool monsterOwner = false, bool timeOwner = false)
         {
             var result = new List<RawUnknownMemberEvidence>();
             for (int i = 0; i < node.Members.Count; i++)
@@ -379,7 +381,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     ? member.Name == "schema" || member.Name == "schemaVersion" || member.Name == "primary"
                     : saveData && (Array.IndexOf(SaveDataMembers, member.Name) >= 0 ||
                         (livingOwner && member.Name == LivingDungeonContracts.OwnerName) ||
-                        (monsterOwner && member.Name == MonsterContinuity.Owner));
+                        (monsterOwner && member.Name == MonsterContinuity.Owner) ||
+                        (timeOwner && member.Name == TimeProvenance.Owner));
                 if (!known) result.Add(new RawUnknownMemberEvidence(member.Name, member.Value.Kind,
                     member.Value.Start, Slice(bytes, member.Value.Start, member.Value.End)));
             }
@@ -494,6 +497,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                 f.Names.Contains("livingDungeon")) memberLimit = checked(memberLimit + 1);
                             if (ReferenceEquals(f.Node, Find(root, "primary")) && Find(root, "schemaVersion")?.Text == "15")
                                 memberLimit = checked(memberLimit + (f.Names.Contains("livingDungeon") ? 1 : 0) + (f.Names.Contains(MonsterContinuity.Owner) ? 1 : 0));
+                            if (ReferenceEquals(f.Node, Find(root, "primary")) && Find(root, "schemaVersion")?.Text == "16")
+                                memberLimit = checked(memberLimit + (f.Names.Contains("livingDungeon") ? 1 : 0) +
+                                    (f.Names.Contains(MonsterContinuity.Owner) ? 1 : 0) + (f.Names.Contains(TimeProvenance.Owner) ? 1 : 0));
                             if (f.Names.Count > memberLimit) { reason = WorkloadExceededReason; errorOffset = p; return false; }
                             f.Name = name;
                             if (!Skip(bytes, ref p, budget)) return BudgetFailure(budget, out reason, out errorOffset);
@@ -529,7 +535,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         Node child; if (!Value(bytes, ref p, limits, budget, out child)) return Failure(budget, p, out reason, out errorOffset);
                         f.Node.Elements.Add(child); f.CanClose = true;
                         int arrayLimit = limits.MaximumArrayElements;
-                        if (limits.MaximumMonsterRecords > arrayLimit && Find(root, "schemaVersion")?.Text == "15")
+                        if (limits.MaximumMonsterRecords > arrayLimit && (Find(root, "schemaVersion")?.Text == "15" || Find(root, "schemaVersion")?.Text == "16"))
                         {
                             var primaryOwner = Find(root, "primary");
                             var monsters = primaryOwner == null ? null : Find(primaryOwner, MonsterContinuity.Owner);

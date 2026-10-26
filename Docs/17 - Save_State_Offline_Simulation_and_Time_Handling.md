@@ -3,6 +3,8 @@
 Status: Locked (v1)\
 Scope: MVP with forward compatibility
 
+**H1-F2 candidate amendment (2026-10-25; independent review required):** The [contract/status table](planning/h1-f2-time-provenance-paired-cuts.md) records all eight approved H1 directions D1–D6, H1-C01-A and H1-C02-A separately from implementation. Proposed schema 16 has one compound accounted/passive boundary in whole-second legacy mode. Precise paired observations do not activate fractional grants. Existing passive mana, capacity, healing and action barriers remain. Original/residual grants, recovery episodes and overload remain deferred. Contrary older proposed precision/stall wording is superseded only as identified there. H1/H2/O1 and Phase 7 are not complete.
+
 ## 1. Time Model
 
 Hybrid time model with event-driven steps. Offline uses summarized approximations.

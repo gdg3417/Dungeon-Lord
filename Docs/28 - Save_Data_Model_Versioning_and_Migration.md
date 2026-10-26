@@ -1,5 +1,7 @@
 **System Spec 28: Save Data Model, Versioning, and Migration**
 
+**H1-F2 candidate amendment (2026-10-25; independent review required):** Proposed schema 16 appends `primary.timeProvenance` after nine owners: format 1, `legacyWholeSeconds`, integer `AccountedFraction100ns:0`. `lastSavedUtcUnix` is the sole seconds component. Contextual frozen-15→16 migration preserves values/extensions, refuses collisions and missing/invalid boundaries, and uses exact rollback/readback authority. Historical 7→15 transforms and pinned 14→15 bytes remain frozen. The [contract](planning/h1-f2-time-provenance-paired-cuts.md) records the eight approved directions, writer synchronization, activation fence and remaining dependencies. Schema/field choices require this PR's review. Fractional settlement and full recovery are deferred.
+
 *Dungeon Builder, locked design specification*
 
 **Phase 6 final implementation status (2026-10-01):** PR #220 is merged at `e9f93b8d742ccaba38c7de32b776970006791d93`; Phase 6 is complete and schema 12 is the writable baseline. `sharedFloorKnowledge` is durable, lifecycle activation alone does not invalidate it, and material gameplay-affecting floor changes make it inapplicable until fresh qualifying evidence replaces or reconfirms it. Coarse reporting is durable; detailed transition causes remain same-session/transient.
