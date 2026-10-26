@@ -1,0 +1,28 @@
+[
+  {
+    "session": "owner-session.log",
+    "entries": [
+      "[2026-10-26 12:09:32 UTC] [INFO] Offline passive mana grant persisted.",
+      "[2026-10-26 12:09:32 UTC] [INFO] Saved canonical complete save. Reason: Boot",
+      "[2026-10-26 12:09:32 UTC] [INFO] Saved canonical complete save. Reason: StateChange",
+      "[2026-10-26 12:09:38 UTC] [INFO] Saved canonical complete save. Reason: AppPause",
+      "[2026-10-26 13:49:03 UTC] [INFO] Saved canonical complete save. Reason: AppPause",
+      "[2026-10-26 14:00:06 UTC] [INFO] Offline passive mana grant persisted.",
+      "[2026-10-26 14:00:06 UTC] [WARN] Time delta looks large: 664 seconds.",
+      "[2026-10-26 14:00:54 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+    ],
+    "tailClassification": "first session exited normally"
+  },
+  {
+    "session": "reopen-1.log",
+    "entries": [
+      "[2026-10-26 14:02:51 UTC] [INFO] Offline passive mana grant persisted.",
+      "[2026-10-26 14:02:51 UTC] [INFO] Saved canonical complete save. Reason: Boot",
+      "[2026-10-26 14:02:52 UTC] [INFO] Saved canonical complete save. Reason: StateChange",
+      "[2026-10-26 14:03:20 UTC] [INFO] Saved canonical complete save. Reason: AppPause",
+      "[2026-10-26 14:03:34 UTC] [INFO] Offline passive mana grant persisted.",
+      "[2026-10-26 14:04:41 UTC] [INFO] Saved canonical complete save. Reason: AppQuit"
+    ],
+    "tailClassification": "second session ends after AppQuit at PlayerConnection::Cleanup"
+  }
+]

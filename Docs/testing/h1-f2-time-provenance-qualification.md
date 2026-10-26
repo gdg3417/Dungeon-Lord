@@ -1,5 +1,7 @@
 # H1-F2 qualification
 
+Subsequent owner gameplay passes and post-gameplay persistence observations are recorded in [the owner UAT closeout](pr256-owner-uat-closeout.md). That closeout found a second native process-shutdown failure after a successful AppQuit save; final closeout is blocked pending focused investigation and second-reopen qualification. The original results below remain unchanged historical evidence.
+
 Baseline: main `c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d`, merged #255. Branch: `codex/h1-f2-time-provenance-paired-cuts`. Isolated managed worktree: `C:/Users/gdg34/.codex/worktrees/h1-f2-time-provenance/Dungeon-Lord`.
 
 Final runtime/data implementation: `591b2c3cb27b6d71057cb648ae692609ab4346ab`. Earlier implementation `6e4fa27f162f0a3e19ad3bb37c99599377204c4e` and CLI-launcher correction `4cad8a87a0b241f0d1253befbb89efc4b4c2b8f5` are retained. The final implementation additionally reserves exact schema grammar overhead at historical limits. Source manifests distinguish dirty precommit launches from committed-head runs; they are not relabeled as later launches.

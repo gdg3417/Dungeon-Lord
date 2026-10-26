@@ -1,0 +1,667 @@
+{
+  "verdict": "BLOCKED — CORRECTIONS REQUIRED",
+  "implementationSourceCommit": "83254c8b857cfc26461cd72961a1114f5ce3cfe2",
+  "qualifiedRuntimeDataCommit": "591b2c3cb27b6d71057cb648ae692609ab4346ab",
+  "baseCommit": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+  "product": "Dungeon Lord PR256 UAT 20261026-112751-1198f0",
+  "executableRelative": "Builds/UAT/PR256-20261026-112751-1198f0/Dungeon Lord UAT.exe",
+  "payloadSha256": "36FA42D4985AA64C9E13B9D68EC36DF669A532437786AE9589A3A1C1E5B5727C",
+  "payloadFilesRechecked": 299,
+  "payloadMismatches": [],
+  "ownerResults": {
+    "appearance": "PASS",
+    "roomBuildingEditing": "PASS",
+    "monsterTrapLootPlacement": "PASS",
+    "adventurerSimulation": "PASS",
+    "phoneUsability": "PASS",
+    "researchAndManaCombined": "NOT TESTED; Research UI intentionally unavailable",
+    "playerPauseResume": "NOT TESTED; player-facing pause intentionally unavailable"
+  },
+  "phaseResults": [
+    {
+      "phase": "pre-close",
+      "permanentOwnersIdentical": true,
+      "researchIdentical": true,
+      "schema": 16,
+      "timeMode": "legacyWholeSeconds",
+      "fraction": 0,
+      "A": 8278618,
+      "C": 8278618,
+      "seconds": 1793022543,
+      "totalTicks": 827,
+      "wallet": 155.4216666666665,
+      "historyCount": 2,
+      "nextRunSequence": 4,
+      "saveSha256": "c247c7521d362213e37451bbfcf3faf9b5643b6a0851739e88e43c03b0bde82e",
+      "saveBytes": 74778,
+      "observedUtc": "2026-10-26T13:59:39.132618+00:00"
+    },
+    {
+      "phase": "pre-close-active",
+      "permanentOwnersIdentical": true,
+      "researchIdentical": true,
+      "schema": 16,
+      "timeMode": "legacyWholeSeconds",
+      "fraction": 0,
+      "A": 8311679,
+      "C": 8311679,
+      "seconds": 1793023239,
+      "totalTicks": 831,
+      "wallet": 149.3866666666665,
+      "historyCount": 3,
+      "nextRunSequence": 5,
+      "saveSha256": "b28156d880424fb32df0b61a397b3a06edf38d802ff3ab859b3027732f6ff82c",
+      "saveBytes": 85193,
+      "observedUtc": "2026-10-26T14:00:40.213683+00:00"
+    },
+    {
+      "phase": "post-close-1",
+      "permanentOwnersIdentical": true,
+      "researchIdentical": true,
+      "schema": 16,
+      "timeMode": "legacyWholeSeconds",
+      "fraction": 0,
+      "A": 8327310,
+      "C": 8327310,
+      "seconds": 1793023254,
+      "totalTicks": 832,
+      "wallet": 136.8866666666665,
+      "historyCount": 4,
+      "nextRunSequence": 6,
+      "saveSha256": "d891fc6cf0373180065a86f121eb60e4a1065a9d704ab7e6152d99d4231b781e",
+      "saveBytes": 94737,
+      "observedUtc": "2026-10-26T14:01:21.182528+00:00"
+    },
+    {
+      "phase": "reopen-1",
+      "permanentOwnersIdentical": true,
+      "researchIdentical": true,
+      "schema": 16,
+      "timeMode": "legacyWholeSeconds",
+      "fraction": 0,
+      "A": 8337673,
+      "C": 8337673,
+      "seconds": 1793023382,
+      "totalTicks": 833,
+      "wallet": 138.2641666666665,
+      "historyCount": 4,
+      "nextRunSequence": 6,
+      "saveSha256": "5c72723b8b16b39657437d7ee4e4de3f69b5006eb981e307b8c78e5a65a9e05f",
+      "saveBytes": 94737,
+      "observedUtc": "2026-10-26T14:03:03.529954+00:00"
+    },
+    {
+      "phase": "focus-lost-1",
+      "permanentOwnersIdentical": true,
+      "researchIdentical": true,
+      "schema": 16,
+      "timeMode": "legacyWholeSeconds",
+      "fraction": 0,
+      "A": 8355403,
+      "C": 8355403,
+      "seconds": 1793023400,
+      "totalTicks": 835,
+      "wallet": 126.26416666666653,
+      "historyCount": 5,
+      "nextRunSequence": 7,
+      "saveSha256": "25116cff5d7fcd7d92b2c806b50d709934465829b131072f3758372cff1da6c5",
+      "saveBytes": 104956,
+      "observedUtc": "2026-10-26T14:03:20.779002+00:00"
+    },
+    {
+      "phase": "focus-lost-2",
+      "permanentOwnersIdentical": true,
+      "researchIdentical": true,
+      "schema": 16,
+      "timeMode": "legacyWholeSeconds",
+      "fraction": 0,
+      "A": 8355403,
+      "C": 8355403,
+      "seconds": 1793023400,
+      "totalTicks": 835,
+      "wallet": 126.26416666666653,
+      "historyCount": 5,
+      "nextRunSequence": 7,
+      "saveSha256": "25116cff5d7fcd7d92b2c806b50d709934465829b131072f3758372cff1da6c5",
+      "saveBytes": 104956,
+      "observedUtc": "2026-10-26T14:03:34.320459+00:00"
+    },
+    {
+      "phase": "focus-return",
+      "permanentOwnersIdentical": true,
+      "researchIdentical": true,
+      "schema": 16,
+      "timeMode": "legacyWholeSeconds",
+      "fraction": 0,
+      "A": 8355671,
+      "C": 8355671,
+      "seconds": 1793023415,
+      "totalTicks": 835,
+      "wallet": 126.36916666666652,
+      "historyCount": 5,
+      "nextRunSequence": 7,
+      "saveSha256": "5f93bf1df02b0105a59c1977e8c425780d1922931f1307322402319d2ac06abe",
+      "saveBytes": 104956,
+      "observedUtc": "2026-10-26T14:03:36.180679+00:00"
+    },
+    {
+      "phase": "post-close-2",
+      "permanentOwnersIdentical": true,
+      "researchIdentical": true,
+      "schema": 16,
+      "timeMode": "legacyWholeSeconds",
+      "fraction": 0,
+      "A": 8421882,
+      "C": 8421882,
+      "seconds": 1793023481,
+      "totalTicks": 842,
+      "wallet": 103.86916666666652,
+      "historyCount": 7,
+      "nextRunSequence": 9,
+      "saveSha256": "7c48d4dace940c22e34dcd663414b5a811dc7bed17a2daadb63610d07378f520",
+      "saveBytes": 124849,
+      "observedUtc": "2026-10-26T14:05:15.782465+00:00"
+    }
+  ],
+  "historyComparisons": [
+    {
+      "from": "pre-close",
+      "to": "pre-close-active",
+      "priorOutcomeIdsRetained": true,
+      "retainedOutcomesUnchanged": true,
+      "uniqueOutcomeIds": true,
+      "AAndCMonotonic": true,
+      "accountedSecondsMonotonic": true,
+      "newOutcomes": [
+        "run-3"
+      ]
+    },
+    {
+      "from": "pre-close-active",
+      "to": "post-close-1",
+      "priorOutcomeIdsRetained": true,
+      "retainedOutcomesUnchanged": true,
+      "uniqueOutcomeIds": true,
+      "AAndCMonotonic": true,
+      "accountedSecondsMonotonic": true,
+      "newOutcomes": [
+        "run-4"
+      ]
+    },
+    {
+      "from": "post-close-1",
+      "to": "reopen-1",
+      "priorOutcomeIdsRetained": true,
+      "retainedOutcomesUnchanged": true,
+      "uniqueOutcomeIds": true,
+      "AAndCMonotonic": true,
+      "accountedSecondsMonotonic": true,
+      "newOutcomes": []
+    },
+    {
+      "from": "reopen-1",
+      "to": "focus-lost-1",
+      "priorOutcomeIdsRetained": true,
+      "retainedOutcomesUnchanged": true,
+      "uniqueOutcomeIds": true,
+      "AAndCMonotonic": true,
+      "accountedSecondsMonotonic": true,
+      "newOutcomes": [
+        "run-5"
+      ]
+    },
+    {
+      "from": "focus-lost-1",
+      "to": "focus-lost-2",
+      "priorOutcomeIdsRetained": true,
+      "retainedOutcomesUnchanged": true,
+      "uniqueOutcomeIds": true,
+      "AAndCMonotonic": true,
+      "accountedSecondsMonotonic": true,
+      "newOutcomes": []
+    },
+    {
+      "from": "focus-lost-2",
+      "to": "focus-return",
+      "priorOutcomeIdsRetained": true,
+      "retainedOutcomesUnchanged": true,
+      "uniqueOutcomeIds": true,
+      "AAndCMonotonic": true,
+      "accountedSecondsMonotonic": true,
+      "newOutcomes": []
+    },
+    {
+      "from": "focus-return",
+      "to": "post-close-2",
+      "priorOutcomeIdsRetained": true,
+      "retainedOutcomesUnchanged": true,
+      "uniqueOutcomeIds": true,
+      "AAndCMonotonic": true,
+      "accountedSecondsMonotonic": true,
+      "newOutcomes": [
+        "run-6",
+        "run-7"
+      ]
+    }
+  ],
+  "permanentOwnerSha256": "d6ccca2cfa1213f8fa7b1d2184be71e3212066644641a120f206b2b0b043adc2",
+  "researchOwnerSha256": "4171dc70fddcbf43725b3890571fe7cc05a91b386abce7d1a681c93eb905c58e",
+  "preservedFacts": {
+    "floors": 1,
+    "rooms": 2,
+    "assignments": 6,
+    "custodyCount": 0,
+    "structuralInvestmentMana": 105,
+    "assignmentCategories": {
+      "placement.category.monster": 2,
+      "placement.category.trap": 1,
+      "placement.category.loot_node": 3
+    },
+    "initialSettledRunIds": [
+      "run-1",
+      "run-2"
+    ],
+    "lastSettledRunIds": [
+      "run-1",
+      "run-2",
+      "run-3",
+      "run-4",
+      "run-5",
+      "run-6",
+      "run-7"
+    ],
+    "activePartyAcrossFirstReopen": {
+      "sequence": 5,
+      "startIdentityPreserved": true,
+      "nextOrdinalBefore": 10,
+      "nextOrdinalAfter": 22
+    },
+    "acceptedButUnclosedObserved": false
+  },
+  "manaReconciliation": [
+    {
+      "from": "pre-close",
+      "to": "pre-close-active",
+      "walletDelta": -6.034999999999997,
+      "newTicks": 4,
+      "onlineManaPerTick": 0.5,
+      "newClearedOutcomes": 1,
+      "recoveryManaPerClearedPair": 13,
+      "offlineAwardResidual": 4.965000000000003,
+      "equivalentOfflineSecondsAt27PerHour": 662.0,
+      "interpretation": "Arithmetic reconciliation under unchanged configured passive rules and two cleared monsters restored to readiness 6+7; not a new persisted accounting ledger. Event-local recovery debit logging was not instrumented."
+    },
+    {
+      "from": "pre-close-active",
+      "to": "post-close-1",
+      "walletDelta": -12.5,
+      "newTicks": 1,
+      "onlineManaPerTick": 0.5,
+      "newClearedOutcomes": 1,
+      "recoveryManaPerClearedPair": 13,
+      "offlineAwardResidual": 0.0,
+      "equivalentOfflineSecondsAt27PerHour": 0.0,
+      "interpretation": "Arithmetic reconciliation under unchanged configured passive rules and two cleared monsters restored to readiness 6+7; not a new persisted accounting ledger. Event-local recovery debit logging was not instrumented."
+    },
+    {
+      "from": "post-close-1",
+      "to": "reopen-1",
+      "walletDelta": 1.3774999999999977,
+      "newTicks": 1,
+      "onlineManaPerTick": 0.5,
+      "newClearedOutcomes": 0,
+      "recoveryManaPerClearedPair": 13,
+      "offlineAwardResidual": 0.8774999999999977,
+      "equivalentOfflineSecondsAt27PerHour": 117.0,
+      "interpretation": "Arithmetic reconciliation under unchanged configured passive rules and two cleared monsters restored to readiness 6+7; not a new persisted accounting ledger. Event-local recovery debit logging was not instrumented."
+    },
+    {
+      "from": "reopen-1",
+      "to": "focus-lost-1",
+      "walletDelta": -11.999999999999986,
+      "newTicks": 2,
+      "onlineManaPerTick": 0.5,
+      "newClearedOutcomes": 1,
+      "recoveryManaPerClearedPair": 13,
+      "offlineAwardResidual": 1.4210854715202004e-14,
+      "equivalentOfflineSecondsAt27PerHour": 0.0,
+      "interpretation": "Arithmetic reconciliation under unchanged configured passive rules and two cleared monsters restored to readiness 6+7; not a new persisted accounting ledger. Event-local recovery debit logging was not instrumented."
+    },
+    {
+      "from": "focus-lost-1",
+      "to": "focus-lost-2",
+      "walletDelta": 0.0,
+      "newTicks": 0,
+      "onlineManaPerTick": 0.5,
+      "newClearedOutcomes": 0,
+      "recoveryManaPerClearedPair": 13,
+      "offlineAwardResidual": 0.0,
+      "equivalentOfflineSecondsAt27PerHour": 0.0,
+      "interpretation": "Arithmetic reconciliation under unchanged configured passive rules and two cleared monsters restored to readiness 6+7; not a new persisted accounting ledger. Event-local recovery debit logging was not instrumented."
+    },
+    {
+      "from": "focus-lost-2",
+      "to": "focus-return",
+      "walletDelta": 0.10499999999998977,
+      "newTicks": 0,
+      "onlineManaPerTick": 0.5,
+      "newClearedOutcomes": 0,
+      "recoveryManaPerClearedPair": 13,
+      "offlineAwardResidual": 0.10499999999998977,
+      "equivalentOfflineSecondsAt27PerHour": 14.0,
+      "interpretation": "Arithmetic reconciliation under unchanged configured passive rules and two cleared monsters restored to readiness 6+7; not a new persisted accounting ledger. Event-local recovery debit logging was not instrumented."
+    },
+    {
+      "from": "focus-return",
+      "to": "post-close-2",
+      "walletDelta": -22.5,
+      "newTicks": 7,
+      "onlineManaPerTick": 0.5,
+      "newClearedOutcomes": 2,
+      "recoveryManaPerClearedPair": 13,
+      "offlineAwardResidual": 0.0,
+      "equivalentOfflineSecondsAt27PerHour": 0.0,
+      "interpretation": "Arithmetic reconciliation under unchanged configured passive rules and two cleared monsters restored to readiness 6+7; not a new persisted accounting ledger. Event-local recovery debit logging was not instrumented."
+    }
+  ],
+  "focusTest": {
+    "controlledMinimizeAndRestore": true,
+    "lostSnapshotsIdentical": true,
+    "lostSnapshotsObservedSecondsApart": 13.541457,
+    "returnOfflineAward": 0.10499999999998977,
+    "returnNewOutcomes": 0
+  },
+  "automatedCoverage": [
+    {
+      "report": "research-03",
+      "passed": 98,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "854f80574f16e4e42ac9251636da7ddf6b31a67402f519030f92b0fb4263c762",
+      "runtimeDataFilesCompared": 325,
+      "mismatches": [],
+      "passiveClockLifecycleSubsetInvocations": 0,
+      "passiveClockLifecycleSubsetFailed": 0,
+      "rerun": false
+    },
+    {
+      "report": "integration-04",
+      "passed": 436,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "1e95c3ac1ebbb4d6a318cce87cca2620da0cd45d337074ad73042fb87ea9fdfe",
+      "runtimeDataFilesCompared": 325,
+      "mismatches": [],
+      "passiveClockLifecycleSubsetInvocations": 96,
+      "passiveClockLifecycleSubsetFailed": 0,
+      "rerun": false
+    },
+    {
+      "report": "play-03",
+      "passed": 129,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "0993e06f85ba3386e8c4b55b50ca5d3abce1ab11365711d0473ad386983bddbb",
+      "runtimeDataFilesCompared": 325,
+      "mismatches": [],
+      "passiveClockLifecycleSubsetInvocations": 0,
+      "passiveClockLifecycleSubsetFailed": 0,
+      "rerun": false
+    },
+    {
+      "report": "focused-10",
+      "passed": 154,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "b45fcd579634ef53fba23255cbfd36ad503f2af06d50e04d81c1b6c7d368e42d",
+      "runtimeDataFilesCompared": 325,
+      "mismatches": [],
+      "passiveClockLifecycleSubsetInvocations": 0,
+      "passiveClockLifecycleSubsetFailed": 0,
+      "rerun": false
+    }
+  ],
+  "authorityErrorsObserved": [],
+  "close1": {
+    "phase": "close-1",
+    "processId": 54472,
+    "normalExitObserved": true,
+    "exitCode": 0,
+    "observedUtc": "2026-10-26T14:00:55.2527850Z"
+  },
+  "close2": {
+    "phase": "close-2",
+    "processId": 9616,
+    "normalExitObserved": false,
+    "exitCode": null,
+    "observedUtc": "2026-10-26T14:05:15.1487047Z"
+  },
+  "close2LaterObservation": {
+    "phase": "close-2-extended-observation",
+    "processId": 9616,
+    "normalExitObserved": false,
+    "exitCode": null,
+    "observedUtc": "2026-10-26T14:07:44.7239657Z"
+  },
+  "secondReopen": "NOT PERFORMED: process 9616 remained after normal AppQuit; guard refused concurrent launch. No forced termination or repair.",
+  "preservation": [
+    {
+      "category": "other-save-namespaces",
+      "checkedFiles": 477,
+      "changedCount": 0,
+      "addedCount": 0,
+      "activeSessionLogAppendOnlyCount": 0,
+      "unexpectedChanges": 0
+    },
+    {
+      "category": "earlier-qualification",
+      "checkedFiles": 304,
+      "changedCount": 1,
+      "addedCount": 0,
+      "activeSessionLogAppendOnlyCount": 1,
+      "unexpectedChanges": 0
+    }
+  ],
+  "sourceSavePolicy": "Raw saves, full semantic snapshots, paths and raw logs retained locally only. Published hashes, counts, sanitized app screenshots and allowlisted log events.",
+  "privateArtifactSeals": [
+    {
+      "artifact": "close-1-process.private.json",
+      "sha256": "4082af3c9989a8013d04548313a9c76ade88f8024c7eab0734f56c025da79538",
+      "bytes": 150
+    },
+    {
+      "artifact": "close-2-extended-process.private.json",
+      "sha256": "8205ca540a72abb28f75c3a2d6cde85d1e4838e9406ea41feafd6fc2d19bd156",
+      "bytes": 174
+    },
+    {
+      "artifact": "close-2-process.private.json",
+      "sha256": "b0f83f928453675f72b02b8bfb18ad78bd1cd1693ae2151fd55e6059df504729",
+      "bytes": 153
+    },
+    {
+      "artifact": "earlier-qualification-differences.private.json",
+      "sha256": "4fd2a47eafa80ef6d8ce9619d4c7c08821b3aa629c1c0c3afa7fc5316d2a6d57",
+      "bytes": 190
+    },
+    {
+      "artifact": "focus-lost-1-capture.json",
+      "sha256": "c849e8ad8d2d73409373cc37d849a567f059e26bfb4289ebbb6f7169041d8bcc",
+      "bytes": 632
+    },
+    {
+      "artifact": "focus-lost-1-save.private.json",
+      "sha256": "25116cff5d7fcd7d92b2c806b50d709934465829b131072f3758372cff1da6c5",
+      "bytes": 104956
+    },
+    {
+      "artifact": "focus-lost-1-semantic.json",
+      "sha256": "b830aaf754b5f46f93e823ff85938aab124543f159e44759008565d17861702f",
+      "bytes": 11785
+    },
+    {
+      "artifact": "focus-lost-2-capture.json",
+      "sha256": "7816e88648e3bbcae3701d3e12709be5fc8a272801f23782f54be9fc81bc6880",
+      "bytes": 632
+    },
+    {
+      "artifact": "focus-lost-2-save.private.json",
+      "sha256": "25116cff5d7fcd7d92b2c806b50d709934465829b131072f3758372cff1da6c5",
+      "bytes": 104956
+    },
+    {
+      "artifact": "focus-lost-2-semantic.json",
+      "sha256": "b830aaf754b5f46f93e823ff85938aab124543f159e44759008565d17861702f",
+      "bytes": 11785
+    },
+    {
+      "artifact": "focus-return-capture.json",
+      "sha256": "024b5ec2b3a243b6e9d1b9fc3e3f9fab24764848de79486cc08629ae04168871",
+      "bytes": 632
+    },
+    {
+      "artifact": "focus-return-save.private.json",
+      "sha256": "5f93bf1df02b0105a59c1977e8c425780d1922931f1307322402319d2ac06abe",
+      "bytes": 104956
+    },
+    {
+      "artifact": "focus-return-semantic.json",
+      "sha256": "6a75ecba506f0504bf70f38341ea00dbc6e4ca1f38665f6c2a28c70a0116bf70",
+      "bytes": 11785
+    },
+    {
+      "artifact": "focus-return.private.png",
+      "sha256": "a9f9674eb1d02cb4bc1df7c24c77b6e5a37936e0af7612e1c80d400ce2683931",
+      "bytes": 129775
+    },
+    {
+      "artifact": "owner-session.private.log",
+      "sha256": "7e5b2656539a6bc5786e30964e339b5cd604a63b48b4c4d3b0e2d56853a86211",
+      "bytes": 1310889
+    },
+    {
+      "artifact": "post-close-1-capture.json",
+      "sha256": "01cde3bfbb81f39f4e97df5e5f6671f579e1158b016b8b4b982d1312786ae624",
+      "bytes": 630
+    },
+    {
+      "artifact": "post-close-1-save.private.json",
+      "sha256": "d891fc6cf0373180065a86f121eb60e4a1065a9d704ab7e6152d99d4231b781e",
+      "bytes": 94737
+    },
+    {
+      "artifact": "post-close-1-semantic.json",
+      "sha256": "45ab554bb9dca90813ec17f61742e299ff50da5956e26b0e0fac613268e146c0",
+      "bytes": 11601
+    },
+    {
+      "artifact": "post-close-2-capture.json",
+      "sha256": "1cd5c38df3b94b8f01e04d6a99c5d6cbddf0850c6f3a47ff6853f737eee9e006",
+      "bytes": 632
+    },
+    {
+      "artifact": "post-close-2-save.private.json",
+      "sha256": "7c48d4dace940c22e34dcd663414b5a811dc7bed17a2daadb63610d07378f520",
+      "bytes": 124849
+    },
+    {
+      "artifact": "post-close-2-semantic.json",
+      "sha256": "61f438ef52102ae592b269dc55de1714ead09b7d6c4e2e34ccc6de2dfbef9142",
+      "bytes": 12154
+    },
+    {
+      "artifact": "pre-close-active-capture.json",
+      "sha256": "92d1fb500d6db29d4c85cf36ac704fbd39079c3fc40a327c1fff1bb2863188f0",
+      "bytes": 634
+    },
+    {
+      "artifact": "pre-close-active-save.private.json",
+      "sha256": "b28156d880424fb32df0b61a397b3a06edf38d802ff3ab859b3027732f6ff82c",
+      "bytes": 85193
+    },
+    {
+      "artifact": "pre-close-active-semantic.json",
+      "sha256": "de5cdc3a0a6d1a3493640bf4f11ed0378ef6d5d46810b9eb922949e1b94ed267",
+      "bytes": 11417
+    },
+    {
+      "artifact": "pre-close-capture.json",
+      "sha256": "73423aab723d729419b047365b5f08ff130903ed62b11c3d9ef87d3c3613843a",
+      "bytes": 627
+    },
+    {
+      "artifact": "pre-close-gameplay.private.png",
+      "sha256": "db19ae6b985dfe07605b31da81497c5e9e009448da0279b2d9392148579e4f6f",
+      "bytes": 125562
+    },
+    {
+      "artifact": "pre-close-save.private.json",
+      "sha256": "c247c7521d362213e37451bbfcf3faf9b5643b6a0851739e88e43c03b0bde82e",
+      "bytes": 74778
+    },
+    {
+      "artifact": "pre-close-semantic.json",
+      "sha256": "69289b92c927c9af0bcb2b2496ffd85d66fbc8395cc557bf424fd93a762a7515",
+      "bytes": 11233
+    },
+    {
+      "artifact": "preservation-final.json",
+      "sha256": "8cefb0e7a16f5ee545aa41b5aa7e10e9a28c7e79d22038eb092423614274600b",
+      "bytes": 397
+    },
+    {
+      "artifact": "prior-evidence-before.private.json",
+      "sha256": "cba1be57cd0527d827007068713702c82d82518638f788ceaf61d4480f3050c2",
+      "bytes": 77478
+    },
+    {
+      "artifact": "protected-save-files-before.private.json",
+      "sha256": "b7313ac778cb3f3f40ce63f3c96a939384ad13bdbec4d662da7f5001123eace1",
+      "bytes": 134717
+    },
+    {
+      "artifact": "reopen-1-capture.json",
+      "sha256": "40069a2066021dfc6099a3b8a672d127a332e9b3fa13c8043749bbe0b76baf5b",
+      "bytes": 626
+    },
+    {
+      "artifact": "reopen-1-gameplay.private.png",
+      "sha256": "72d0f26b2eda7c9df5e9fc7051cf93fa9cdb8e965de1e1bf0a4b8b4291b68725",
+      "bytes": 131413
+    },
+    {
+      "artifact": "reopen-1-launch.private.json",
+      "sha256": "337b511f5f13611144bd84512a7735e42b2e85b605e578ffff7d6239bd4d3779",
+      "bytes": 591
+    },
+    {
+      "artifact": "reopen-1-save.private.json",
+      "sha256": "5c72723b8b16b39657437d7ee4e4de3f69b5006eb981e307b8c78e5a65a9e05f",
+      "bytes": 94737
+    },
+    {
+      "artifact": "reopen-1-semantic.json",
+      "sha256": "23804ff42cd84e339b1d13b9c1e113367edff8644a196239e0c5c2ec8b9240b9",
+      "bytes": 11601
+    },
+    {
+      "artifact": "reopen-1.private.log",
+      "sha256": "666c2dcaaeb7527c754a7f8df7a987b9d4b3e69333e6c969ab6b98914a058b8b",
+      "bytes": 43454
+    }
+  ],
+  "commands": [
+    "Stable double-read snapshot with strict duplicate/finite JSON checks; separate read-only evidence copy",
+    "Computer Use Alt+F4 on uniquely identified UAT window; observe Process.WaitForExit(45000)",
+    "Launch exact existing executable -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -logFile <private UAT evidence>/reopen-1.private.log",
+    "Computer Use minimize title button, observe frozen save, restore same UAT window",
+    "Second ordinary Alt+F4; 45-second exit observation and later 30-second read-only observation",
+    "Second-launch guard refused because exact UAT process remained; no new player launched"
+  ],
+  "qualificationLimits": [
+    "Stable snapshots independently check JSON, schema/time owner, C<=A, uniqueness and references; actual successful application reopen establishes contextual canonical acceptance.",
+    "No A>C snapshot was encountered; existing exact accepted-work recovery tests remain applicable, not newly qualified by this UAT.",
+    "Second reopen and final usable environment could not be completed because native process cleanup did not finish.",
+    "No new runtime/data source, build, gameplay tuning or full test suite."
+  ]
+}

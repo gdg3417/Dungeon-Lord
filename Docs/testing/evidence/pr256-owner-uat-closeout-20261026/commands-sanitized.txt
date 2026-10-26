@@ -1,0 +1,50 @@
+Working directory: repository root on codex/h1-f2-time-provenance-paired-cuts
+Source HEAD: 83254c8b857cfc26461cd72961a1114f5ce3cfe2
+Build: existing unchanged Development player; no rebuild command executed.
+
+git status --short
+git branch --show-current
+git rev-parse HEAD
+git fetch origin
+git rev-parse origin/main
+
+Private local inspector invocations (Python executable resolved from the bundled runtime):
+python TestResults/pr256_owner_closeout.py init
+python TestResults/pr256_owner_closeout.py capture TestResults/pr256-owner-uat-closeout/20261026-135934 pre-close-active
+python TestResults/pr256_owner_closeout.py capture TestResults/pr256-owner-uat-closeout/20261026-135934 post-close-1
+python TestResults/pr256_owner_closeout.py capture TestResults/pr256-owner-uat-closeout/20261026-135934 reopen-1
+python TestResults/pr256_owner_closeout.py capture TestResults/pr256-owner-uat-closeout/20261026-135934 focus-lost-1
+python TestResults/pr256_owner_closeout.py capture TestResults/pr256-owner-uat-closeout/20261026-135934 focus-lost-2
+python TestResults/pr256_owner_closeout.py capture TestResults/pr256-owner-uat-closeout/20261026-135934 focus-return
+python TestResults/pr256_owner_closeout.py capture TestResults/pr256-owner-uat-closeout/20261026-135934 post-close-2
+python TestResults/pr256_owner_closeout.py preservation TestResults/pr256-owner-uat-closeout/20261026-135934
+
+Windows process identity query:
+Get-CimInstance Win32_Process -Filter "name = 'Dungeon Lord UAT.exe'"
+Only the returned exact executable path and UAT product window were selected.
+
+First ordinary close, Computer Use:
+sky.press_key({window: selectedUatWindow, key: 'Alt_L+F4'})
+Read-only exit observer: Get-Process -Id 54472; obtain Handle; WaitForExit(45000); record ExitCode.
+Observed exit code 0.
+
+First launch, executable path normalized relative to repository (machine path omitted):
+"Builds/UAT/PR256-20261026-112751-1198f0/Dungeon Lord UAT.exe" -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -logFile "<private-closeout>/reopen-1.private.log"
+Start-Process -PassThru; no hidden window; no qualification phases or save overrides.
+Observed process 9616.
+
+Controlled focus check, Computer Use:
+Click Minimize at (1165,14) using the just-observed UAT-window screenshot ID.
+Capture stable focus-lost-1 snapshot, sleep(3000), capture focus-lost-2 snapshot.
+sky.activate_window({window: selectedUatWindow}); capture focus-return snapshot.
+The actual two lost-focus observations were 13.541457 seconds apart.
+
+Second ordinary close, Computer Use:
+sky.press_key({window: selectedUatWindow, key: 'Alt_L+F4'})
+Read-only exit observer: Get-Process -Id 9616; obtain Handle; WaitForExit(45000).
+Observed timeout; exit code unavailable.
+Second launch precondition query found existing UAT process; guard threw "Unexpected UAT process remains" BEFORE Start-Process.
+Later read-only observer: Get-Process -Id 9616; obtain Handle; WaitForExit(30000).
+Observed timeout again; no termination command executed.
+
+No force-kill, repair, reset, save-file mutation, product-name change, alternate namespace, or concurrent UAT process was used.
