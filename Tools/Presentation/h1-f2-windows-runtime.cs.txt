@@ -1,0 +1,72 @@
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using UnityEngine;
+using DungeonBuilder.M0;
+
+// Qualification-only source, temporarily copied into Assets by the isolated runner.
+public sealed class H1F2WindowsQualification : MonoBehaviour
+{
+    [Serializable] public sealed class Receipt
+    {
+        public bool Passed, RejectedFuture;
+        public string Phase, Product, SavePath, Mode, Sha256, Failure;
+        public int Schema, Fraction100ns;
+        public long Seconds, Accepted, Closed;
+        public double Mana;
+    }
+    static string Argument(string key)
+    {
+        var args = Environment.GetCommandLineArgs(); int index = Array.IndexOf(args, key);
+        return index >= 0 && index + 1 < args.Length ? args[index + 1] : null;
+    }
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void Initialize()
+    {
+        if (Argument("-h1f2-evidence") == null) return;
+        if (Application.productName != "Dungeon Lord H1F2 Windows 20261025")
+            throw new InvalidOperationException("h1f2.qualification.isolation_required");
+        new GameObject("H1F2 qualification").AddComponent<H1F2WindowsQualification>();
+    }
+    IEnumerator Start()
+    {
+        var receipt = new Receipt { Phase = Argument("-h1f2-phase"), Product = Application.productName };
+        for (int i = 0; i < 10; i++) yield return null;
+        try {
+            var root = FindFirstObjectByType<GameRoot>();
+            if (root == null) throw new InvalidOperationException("h1f2.qualification.root_missing");
+            receipt.SavePath = root.SaveService?.SavePath ?? Argument("-h1f2-savepath");
+            if (receipt.SavePath == null || !Path.GetFullPath(receipt.SavePath).StartsWith(
+                Path.GetFullPath(Application.persistentDataPath) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("h1f2.qualification.path_invalid");
+            if (receipt.Phase == "future") {
+                receipt.RejectedFuture = root.Save == null;
+                if (!receipt.RejectedFuture) throw new InvalidOperationException("h1f2.qualification.future_accepted");
+            } else {
+                if (root.Save == null || !root.SaveService.Save(root.Save, SaveReason.ManualDev))
+                    throw new InvalidOperationException("h1f2.qualification.save_failed");
+                var current = root.Save; var provenance = current.timeProvenance;
+                receipt.Seconds = current.lastSavedUtcUnix; receipt.Mode = provenance?.Mode;
+                receipt.Fraction100ns = provenance?.AccountedBoundary.Fraction100ns ?? -1;
+                receipt.Mana = current.structureRuntime.ManaReserve;
+                receipt.Accepted = current.livingDungeon?.Scheduler?.AcceptedThrough ?? -1;
+                receipt.Closed = current.livingDungeon?.Scheduler?.ClosedThrough ?? -1;
+                var bytes = File.ReadAllBytes(receipt.SavePath);
+                receipt.Schema = JsonUtility.FromJson<SaveRoot>(System.Text.Encoding.UTF8.GetString(bytes)).schemaVersion;
+                if (receipt.Schema != 16 || receipt.Mode != "legacyWholeSeconds" || receipt.Fraction100ns != 0 ||
+                    provenance.AccountedBoundary.Seconds != receipt.Seconds ||
+                    !bytes.SequenceEqual(root.SaveService.CanonicalSession.GetCurrentBytes()))
+                    throw new InvalidOperationException("h1f2.qualification.readback_failed");
+            }
+            using (var sha = SHA256.Create()) receipt.Sha256 = BitConverter.ToString(sha.ComputeHash(
+                File.ReadAllBytes(receipt.SavePath))).Replace("-", "").ToLowerInvariant();
+            receipt.Passed = true;
+        } catch (Exception error) { receipt.Failure = error.ToString(); }
+        File.WriteAllText(Argument("-h1f2-evidence"), JsonUtility.ToJson(receipt, true));
+        Application.Quit(receipt.Passed ? 0 : 1);
+    }
+}
+#endif

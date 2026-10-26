@@ -270,7 +270,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private sealed class MutableUtc : ITimeSource { public long Now = 2000; public long UtcNowUnixSeconds() => Now; }
-        private static SaveService Service(Fixture f, ITimeSource utc)
+        internal static SaveService Service(Fixture f, ITimeSource utc)
         {
             var service = new SaveService(new SimpleLogger(false, (level, message) => { }),
                 new SaveConfig { fileName = Path.GetFileName(f.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(f.ActivePath));

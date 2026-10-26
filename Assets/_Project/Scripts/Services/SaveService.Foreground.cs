@@ -25,18 +25,32 @@ namespace DungeonBuilder.M0
             foregroundRecoveryRequired ? DetachedCanonicalWriteAuthority.RecoveryRequiredReason : "living.foreground.boundary_pending",
             false, false, null, null, null, null);
 
-        internal DetachedCanonicalWriteResult AdvanceForeground(SaveData current, long through, int tickSeconds, Action<SaveData, long> passiveTick,
+#if UNITY_EDITOR
+        // Historical deterministic service tests supply explicit clock cuts. Live
+        // coordination must use TimeService.CaptureForegroundObservation instead.
+        internal DetachedCanonicalWriteResult AdvanceForeground(SaveData current, long through, int tickSeconds,
+            Action<SaveData, long> passiveTick, long? suspendedSaveUtc = null) => AdvanceForeground(current,
+                ForegroundObservation.ForDeterministicServiceTest(_canonicalSession.GetCurrentBytes(), through,
+                    current.livingDungeon?.Scheduler?.AcceptedThrough ?? -1, current.livingDungeon?.Scheduler?.ClosedThrough ?? -1,
+                    new UnixTimePoint(CaptureMonotonicSaveBoundary(current.lastSavedUtcUnix), 0),
+                    suspendedSaveUtc.HasValue ? ForegroundObservationContext.Suspended : ForegroundObservationContext.EligibleForeground),
+                tickSeconds, passiveTick, suspendedSaveUtc);
+#endif
+
+        internal DetachedCanonicalWriteResult AdvanceForeground(SaveData current, ForegroundObservation observation, int tickSeconds, Action<SaveData, long> passiveTick,
             long? suspendedSaveUtc = null)
         {
             if (foregroundRecoveryRequired || ForegroundWriting || _canonicalSession == null || ForegroundConfiguration == null)
                 return ForegroundBlocked();
+            if (observation == null || !observation.Authorizes(_canonicalSession, current, observation.CapturedThrough)) return ForegroundBlocked();
+            long through = observation.CapturedThrough;
             ForegroundWriting = true;
             try {
                 // Closing/reinspecting already accepted time while suspended must
                 // retain the existing offline passive-mana boundary. Only newly
                 // observed eligible time advances it; ordinary Save owns pause UTC.
                 long savedBoundary = through > (current.livingDungeon?.Scheduler?.AcceptedThrough ?? -1)
-                    && current.livingDungeon?.IsClosed != false ? CaptureMonotonicSaveBoundary(current.lastSavedUtcUnix) : current.lastSavedUtcUnix;
+                    && current.livingDungeon?.IsClosed != false ? Math.Max(current.lastSavedUtcUnix, observation.WallEndpoint.Seconds) : current.lastSavedUtcUnix;
                 // Draining an older accepted horizon may defer admission of the
                 // final pre-pause sample. Preserve the pause UTC boundary even
                 // when that sample is accepted by a later suspended pump.

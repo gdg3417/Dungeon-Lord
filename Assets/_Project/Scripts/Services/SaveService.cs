@@ -857,7 +857,7 @@ namespace DungeonBuilder.M0
         private long CaptureMonotonicSaveBoundary(long durableBoundary)
         {
             long observed = _timeSource.UtcNowUnixSeconds();
-            if (observed <= 0 || observed < durableBoundary)
+            if (observed <= 0 || observed > UnixTimePoint.MaximumSeconds || observed < durableBoundary)
             {
                 _logger.Warn("Observed save time did not advance; preserving durable save boundary.");
                 return durableBoundary;

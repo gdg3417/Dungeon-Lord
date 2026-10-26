@@ -115,9 +115,9 @@ namespace DungeonBuilder.M0.Economy
                 Capacity = canonicalOnline.ManaCapacity
             };
 
-            if (observedCurrentUtcUnix <= 0)
+            if (observedCurrentUtcUnix <= 0 || observedCurrentUtcUnix > UnixTimePoint.MaximumSeconds)
                 return Reject(result, OfflinePassiveManaReason.CurrentTimestampInvalid);
-            if (sourceTimestamp <= 0)
+            if (sourceTimestamp <= 0 || sourceTimestamp > UnixTimePoint.MaximumSeconds)
                 return Reject(result, OfflinePassiveManaReason.SavedTimestampInvalid);
             if (observedCurrentUtcUnix < sourceTimestamp)
                 return Reject(result, OfflinePassiveManaReason.BackwardClockMovement);

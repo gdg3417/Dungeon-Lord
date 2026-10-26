@@ -1,5 +1,7 @@
 **System Spec 29: Time Model and Tick Resolution**
 
+**H1-F2 candidate amendment (2026-10-25):** [Eight approved H1 directions/status](planning/h1-f2-time-provenance-paired-cuts.md) govern the foundation. Checked seconds plus 100 ns fractions describe precision, not accuracy. Coordinator cuts pair full eligible monotonic horizons with captured wall endpoints and exact predecessors. UTC cannot schedule parties; partial cuts cannot invent wall timestamps. Storage elapsed time belongs to subsequent processing. Proposed schema 16 uses whole-second legacy mode until precision-aware settlement/classification is qualified. Recovery episodes and measured prospective overload remain deferred; independent review is required.
+
 *Dungeon Builder, locked design specification*
 
 | Status | Locked |

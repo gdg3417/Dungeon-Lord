@@ -298,6 +298,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(source, PhaseFourTestSupport.FrozenThirteen(migrated));
             Assert.That(HistoryBytes(migrated, f.Profile.Canonical.Serialized), Is.EqualTo(history));
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(migrated,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out migrated),Is.True);
+            Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(migrated, f.Context, out migrated), Is.True);
             f.FileSystem.Seed(f.ActivePath, migrated); f.Reopen(); var session = f.Session;
             var result = Writer(f).ConfigureLivingDungeon(f.ActivePath, f.FileSystem, session, ProfileA().Id, 1);
             Assert.That(result.IsSuccess, Is.False); Assert.That(result.Reason, Is.EqualTo(LivingDungeonScheduling.Invalid));
@@ -549,6 +550,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 b => DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(b, f.Profile.Canonical).IsValid), Is.Null);
             CollectionAssert.AreEqual(copy, source); CollectionAssert.AreEqual(migrated, fs.ReadAllBytes(path));
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(migrated,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out var fifteen),Is.True);
+            Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(fifteen, f.Context, out fifteen), Is.True);
             Assert.That(ExactCompleteSaveAtomicPersistence.Persist(path,fs,migrated,fifteen,64,
                 b=>DetachedCompleteSaveContract.ParseValidateAndRoundTrip(b,f.Context).IsValid),Is.Null);
             f.FileSystem.Seed(f.ActivePath,fifteen); f.Reopen();
@@ -633,6 +635,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(source, f.Profile.Canonical, out var candidate), Is.True);
             Assert.That(candidate.Length, Is.EqualTo(source.Length + 79)); CollectionAssert.AreEqual(source, PhaseFourTestSupport.FrozenThirteen(candidate));
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(candidate,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out candidate),Is.True);
+            Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(candidate, f.Context, out candidate), Is.True);
             // Independent complete-save parser/round-trip ceiling, using dormant synthetic extension padding.
             // This is not a claim that four active checkpoints can attain both ceilings simultaneously.
             int envelope = f.Profile.Whole.MaximumCandidateBytes;

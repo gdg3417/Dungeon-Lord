@@ -174,7 +174,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
             byte[] original = Encoding.UTF8.GetBytes(
-                "{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{" +
+                "{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{\"lastSavedUtcUnix\":1," +
                 "\"mvpRoomSlotAssignments\":{\"Rooms\":[{\"FloorIndex\":0,\"RoomIndex\":0," +
                 "\"RoomOptionId\":\"placement.option.room.basic\"," +
                 "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"]," +
@@ -196,7 +196,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(migrated, Is.Not.Null, migrationBanner);
                 Assert.That(migrated.validatedCanonicalSpatialState, Is.Not.Null);
                 Assert.That(migratedService.SavePath, Is.EqualTo(Path.GetFullPath(unityShapedPath)));
-                Assert.That(File.ReadAllText(migratedService.SavePath), Does.Contain("\"schemaVersion\":15"));
+                Assert.That(File.ReadAllText(migratedService.SavePath), Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget));
                 Assert.That(File.ReadAllText(migratedService.SavePath), Does.Contain("\"RoomLocalPosition\""));
                 Assert.That(migrated.validatedCanonicalSpatialState.Floors.Single().RoomContents.Assignments,
                     Has.Length.EqualTo(1));

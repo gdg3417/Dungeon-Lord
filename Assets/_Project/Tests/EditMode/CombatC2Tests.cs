@@ -62,7 +62,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] fourteen = PhaseFourTestSupport.FrozenFourteen(f.Session.GetCurrentBytes());
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(fourteen, f.Profile.Canonical, Rules, out var current), Is.True);
             CollectionAssert.AreEqual(fourteen, PhaseFourTestSupport.FrozenFourteen(current));
-            var validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current, f.Context);
+            var validated = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(current, f.Context);
             Assert.That(validated.IsValid, Is.True); var r = validated.MonsterContinuity.Records.Single();
             Assert.That(r.Health, Is.EqualTo(8)); Assert.That(r.Level, Is.EqualTo(1)); Assert.That(r.RevivalRequired, Is.False);
         }

@@ -1,5 +1,7 @@
 # Automatic two-floor foreground gameplay
 
+**H1-F2 candidate amendment (2026-10-25):** [Eight approved directions/status](h1-f2-time-provenance-paired-cuts.md) govern the time foundation. Coordinator observations bind full eligible monotonic horizons and fractional wall endpoints to exact predecessors; captured/accepted/closed work remain distinct. UTC does not schedule parties; partial cuts cannot invent wall timestamps. Storage elapsed time belongs to subsequent processing. Complete-boundary order, C≤A, v1/v2 preservation, lifecycle and action barriers remain. Proposed schema 16 uses whole-second legacy mode. Fractional settlement, original/residual recovery, episode closure and overload are deferred. H1/H2/O1 and Phase 7 are not complete; independent review is required.
+
 Owner-authorized Stage B baseline: `76f78c5c2d17d3aab916f297aecb5c25cf146d76`, merged PRs #245 and #246. Branch: `codex/living-dungeon-two-floor-foreground`. Recommended configuration: GPT-6.1 Sol High; Complex, specified deterministic execution/persistence integration. GPT-6 Sol High is an explicitly selected availability fallback only; none selected.
 
 ## Approved contract

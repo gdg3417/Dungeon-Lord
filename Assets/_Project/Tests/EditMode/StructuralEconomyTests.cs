@@ -485,6 +485,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(thirteen, f.Profile.Canonical).IsValid, Is.True);
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, f.Profile.Canonical, out thirteen), Is.True);
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(thirteen,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out thirteen),Is.True);
+            Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(thirteen, f.Context, out thirteen), Is.True);
             Assert.That(DetachedCanonicalSaveSession.Open(thirteen, f.Context, f.Profile).IsSuccess, Is.True);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(nine, f.Profile.Canonical, out _), Is.False);
             Assert.That(StructuralEconomyService.Preview(Delete(f), f.State, restored.Investment, 123.5, f.Economy).Refund, Is.Zero);

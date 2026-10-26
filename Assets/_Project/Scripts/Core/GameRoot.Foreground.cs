@@ -61,7 +61,7 @@ namespace DungeonBuilder.M0
             try {
                 long now = TimeService.SampleForeground();
                 if (foregroundDirty || ForegroundActivity == null || now >= ForegroundActivity.NextBoundary || Save.livingDungeon?.IsClosed == false)
-                    PumpForeground(now);
+                    PumpForeground(TimeService.CaptureForegroundObservation(SaveService.CanonicalSession));
                 if (foregroundResumePending && foregroundFailure == null && Save.livingDungeon.IsClosed &&
                     !foregroundApplicationPaused && foregroundApplicationFocused) ApplyPauseState(false);
             } catch { ForegroundFault("living.foreground.clock_invalid"); }
@@ -74,12 +74,12 @@ namespace DungeonBuilder.M0
             Logger?.Warn(reason);
         }
 
-        private bool PumpForeground(long through)
+        private bool PumpForeground(ForegroundObservation observation)
         {
             foregroundPumping = true;
             try {
                 long beforeTicks = Save.totalTicks;
-                var result = SaveService.AdvanceForeground(Save, through, _configuredSimulationTickSeconds, ApplyForegroundPassiveTick,
+                var result = SaveService.AdvanceForeground(Save, observation, _configuredSimulationTickSeconds, ApplyForegroundPassiveTick,
                     TimeService.IsPaused ? Save.lastPausedUtcUnix : (long?)null);
                 if (!result.IsSuccess) {
                     if (result.Reason == DetachedCanonicalWriteAuthority.AtomicSaveFailedReason) {
@@ -120,11 +120,17 @@ namespace DungeonBuilder.M0
             if (TimeService?.HasForegroundClock != true || foregroundPumping) return true;
             if (foregroundFailure != null || _explicitSaveDeleteQuiesced) return false;
             try {
-                long target = TimeService.SampleForeground();
+                var observation = TimeService.CaptureForegroundObservation(SaveService.CanonicalSession);
+                long target = observation.CapturedThrough;
                 int pumps = SaveService.ForegroundConfiguration.MaximumBoundaries;
                 while (pumps-- > 0 && (foregroundRetryPending || Save.livingDungeon.IsDormant ||
                     !Save.livingDungeon.IsClosed || target > Save.livingDungeon.Scheduler.AcceptedThrough))
-                    if (!PumpForeground(target)) return false;
+                {
+                    if (!PumpForeground(observation)) return false;
+                    // Rebind a new captured full observation after publication. Elapsed
+                    // storage time is retained for subsequent processing, never interpolated.
+                    observation = TimeService.CaptureForegroundObservation(SaveService.CanonicalSession);
+                }
                 return Save.livingDungeon.IsClosed && target <= Save.livingDungeon.Scheduler.AcceptedThrough;
             } catch { ForegroundFault("living.foreground.clock_invalid"); return false; }
         }

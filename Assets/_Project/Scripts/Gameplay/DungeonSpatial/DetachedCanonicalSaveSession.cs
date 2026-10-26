@@ -232,13 +232,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ContractJsonNode primary = root.Fields[2].Value;
                 if (settlement != null && !settlement.Matches(currentBytes, livingDungeon, limits.Canonical.Serialized))
                     return Failure("living.settlement.history_invalid");
-                var retainedOwner = primary.Fields[primary.Fields.Count - 2].Value;
+                var retainedOwner = primary.Fields[primary.Fields.Count - 3].Value;
                 bool activated = retainedOwner.Fields[2].Value.Kind != ContractJsonKind.Null;
                 bool unfinished = activated && retainedOwner.Fields[2].Value.Fields[2].Value.Text !=
                     retainedOwner.Fields[2].Value.Fields[3].Value.Text;
                 if (unfinished && livingDungeon == null)
                 {
-                    int start = primary.Fields.Count - 9;
+                    int start = primary.Fields.Count - 10;
                     if (!SerializeNode(primary.Fields[start].Value).AsSpan().SequenceEqual(spatial.Value.Authority) ||
                         !SerializeNode(primary.Fields[start + 1].Value).AsSpan().SequenceEqual(spatial.Value.Floors) ||
                         !SerializeNode(primary.Fields[start + 2].Value).AsSpan().SequenceEqual(spatial.Value.LifecycleAndOwnership) ||
@@ -307,7 +307,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         limits.Whole.MaximumCopiedValueBytes);
                     WriteRawField(writer, name, valueBytes, first); first = false;
                 }
-                const int canonicalMemberCount = 9;
+                const int canonicalMemberCount = 10;
                 int canonicalStart = primary.Fields.Count - canonicalMemberCount;
                 for (int index = 0; index < canonicalStart; index++)
                 {
@@ -345,6 +345,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!prior.IsValid) return Failure(MonsterRecoveryRules.Invalid);
                 var continuity = monsterContinuity ?? MonsterContinuity.Reconcile(prior.MonsterContinuity, prior.State, replacement, context.MonsterRecovery);
                 MonsterContinuity.Write(writer, continuity);
+                // Every writer shares this seam. In legacy mode changing the seconds
+                // advances the same boundary with an exact zero fraction; no resolver activates.
+                if (!TimeProvenance.TryRead(primary, out var priorTime))
+                    return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+                if (recognizedState != null && recognizedState.TryGet("lastSavedUtcUnix", out var savedBytes))
+                {
+                    var timeIssues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
+                    if (!ContractJson.TryParse(savedBytes, limits.Canonical.Serialized, timeIssues, out var savedNode) ||
+                        !TimeProvenance.TrySeconds(savedNode, out long savedSeconds) || savedSeconds < priorTime.AccountedBoundary.Seconds)
+                        return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+                }
+                writer.Token(","); writer.String(TimeProvenance.Owner); writer.Token(":"); TimeProvenance.WriteLegacy(writer);
                 writer.Token("}");
 
                 for (int index = 3; index < root.Fields.Count; index++)

@@ -22,7 +22,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(schema, unwrapped);
             string json = Encoding.UTF8.GetString(fixture.Original);
             byte[] source = Encoding.UTF8.GetBytes(unwrapped ? "{\"" + ownerName + "\":null," + json.Substring(1) :
-                json.Replace("\"primary\":{}", "\"primary\":{\"" + ownerName + "\":null}"));
+                json.Replace("\"primary\":{}", "\"primary\":{\"lastSavedUtcUnix\":1,\"" + ownerName + "\":null}"));
             Assert.That(RawSavePayloadClassifier.Classify(source,
                 Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator, new RawSaveEnvelopeVersionContract(1, 6),
                 Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator).IsSuccess, Is.True);
@@ -41,7 +41,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void NarrowHallRepairChangesOnlyRecognizedSpatialEvidenceAndPreservesUnknownBytes()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"contentVersion\":\"repair\",\"mvpDungeonPlacements\":{" +
+                "\"primary\":{\"lastSavedUtcUnix\":1,\"contentVersion\":\"repair\",\"mvpDungeonPlacements\":{" +
                 "\"Entries\":[{\"CategoryId\":\"placement.category.room\"," +
                 "\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1," +
                 "\"note\":\"placement.option.room.narrow_hall\"}]," +
@@ -71,7 +71,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void NarrowHallRepairPatchesOnlyEffectivePlacementWinner()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[" +
+                "\"primary\":{\"lastSavedUtcUnix\":1,\"mvpDungeonPlacements\":{\"Entries\":[" +
                 "{\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1}," +
                 "{\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":3}],\"NextRevision\":4}}}");
             RawSavePayloadClassification classification = ClassifyRepair(original);
@@ -91,7 +91,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void NarrowHallRepairTargetsOnlyRequestedEffectiveR2Assignment()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"mvpSelectedRoomSlotIndex\":1,\"unknown\":{\"n\":1.00}," +
+                "\"primary\":{\"lastSavedUtcUnix\":1,\"mvpSelectedRoomSlotIndex\":1,\"unknown\":{\"n\":1.00}," +
                 "\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
                 "{\"FloorIndex\":0,\"RoomIndex\":0,\"RoomOptionId\":\"placement.option.room.narrow_hall\"}," +
                 "{\"FloorIndex\":0,\"RoomIndex\":1,\"RoomOptionId\":\"placement.option.room.narrow_hall\"}]}}}");
@@ -214,7 +214,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void SaveServiceCleanNoSaveCreatesAndReloadsNativeCanonicalAuthority()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             SaveService first = ConfiguredService(fixture, fileSystem, "service-native.json");
 
@@ -235,7 +235,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(false)][TestCase(true)]
         public void SchemaEightLoadUpgradesAtomicallyAndRecoversFailedWrite(bool failPersistence)
         {
-            var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var fixture = TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             var first = ConfiguredService(fixture, fileSystem, "service-eight.json");
             Assert.That(first.LoadOrCreate("phase-four", out _), Is.Not.Null);
@@ -267,7 +267,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void SaveServiceSchemaSixUsesGd66MigrationAndRetainsCanonicalSession()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             SaveService service = ConfiguredService(fixture, fileSystem, "service-legacy.json");
             fileSystem.Seed(service.SavePath, fixture.Original);
@@ -278,14 +278,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
             Assert.That(service.CanonicalSession, Is.Not.Null);
             Assert.That(Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":15"));
+                Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget));
         }
 
         [Test]
         public void SaveServiceAdoptsQualifiedPreflightPathBeforeLegacyRecoveryAndMigration()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string canonicalDirectory = Path.GetFullPath(Path.Combine(Path.GetTempPath(),
                 "gd66-qualified-adoption"));
@@ -318,7 +318,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void SaveServiceRecoveryRelevantEvidenceBlocksNativeButLookalikeDoesNot()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var blockedFileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             var errors = new List<string>();
             SaveService blocked = ConfiguredService(fixture, blockedFileSystem,
@@ -343,7 +343,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void SaveServiceExplicitDeleteClearsExactEvidenceAndAllowsNativeRecreation()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             SaveService service = ConfiguredService(fixture, fileSystem, "service-delete.json");
             int preflightEvaluations = 0;
@@ -402,7 +402,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CanonicalDeleteQualifiesFilesystemBeforeAnyCleanupWhenNotCached()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             SaveService service = ConfiguredService(fixture, fileSystem, "service-delete-preflight.json");
             bool evaluated = false;
@@ -439,7 +439,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CanonicalDeleteUnsupportedPreflightNeverFallsBackToSystemFileDelete()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             string directory = Path.Combine(Path.GetTempPath(), "gd66-delete-unsupported-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(directory);
             try
@@ -495,7 +495,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void SaveServiceNarrowHallRepairRerunsGd66AndPreservesUnknownEvidence()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"contentVersion\":\"repair\",\"unknownPrimary\":{\"n\":1.00}," +
+                "\"primary\":{\"lastSavedUtcUnix\":1,\"contentVersion\":\"repair\",\"unknownPrimary\":{\"n\":1.00}," +
                 "\"mvpDungeonPlacements\":{\"Entries\":[{\"CategoryId\":\"placement.category.room\"," +
                 "\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1}],\"NextRevision\":2}}," +
                 "\"unknownRoot\":[true,null]}");
@@ -523,7 +523,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void SaveServiceTwoNarrowR2RepairsOneTargetAtATime()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"mvpSelectedRoomSlotIndex\":1,\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
+                "\"primary\":{\"lastSavedUtcUnix\":1,\"mvpSelectedRoomSlotIndex\":1,\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
                 Assignment(0, "narrow_hall") + "," + Assignment(1, "narrow_hall") +
                 "],\"NextRevision\":3}}}");
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
@@ -553,7 +553,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void SaveServiceChangedTrustedOriginalInvalidatesRepairAndReevaluatesAuthority()
         {
             byte[] narrow = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[{" +
+                "\"primary\":{\"lastSavedUtcUnix\":1,\"mvpDungeonPlacements\":{\"Entries\":[{" +
                 "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\"," +
                 "\"Revision\":1}],\"NextRevision\":2}}}");
             byte[] changed = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(narrow).Replace(
@@ -589,7 +589,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_WrappedLegacySchemas_MigrateBeforeRuntimeProjection(int schema)
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(schema);
+                TimedFixture(schema);
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(),
@@ -612,7 +612,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_UnwrappedLegacy_Migrates()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(1, true);
+                TimedFixture(1, true);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-unwrapped.json"));
             fileSystem.Seed(activePath, fixture.Original);
@@ -628,7 +628,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_AlreadyCommittedCandidate_DoesNotRunAnotherMigration()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-current.json"));
             Assert.That(PhaseFourTestSupport.Upgrade(fixture.Result.Attempt.Candidate.GetBytes(),
@@ -649,7 +649,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_UnfinishedVerifiedCandidateRecoversBeforePublication()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-recover-candidate.json"));
             Gd66DetachedSpatialMigrationTransactionTests.MaterializeJournal(fileSystem, fixture, activePath,
@@ -670,7 +670,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_LegacyUnknownEvidence_RemainsInValidatedSessionBytes()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"unknownPrimary\":[1,{\"n\":1.00}]}," +
+                "\"primary\":{\"lastSavedUtcUnix\":1,\"unknownPrimary\":[1,{\"n\":1.00}]}," +
                 "\"unknownRoot\":{\"nested\":[true,null]}}");
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
@@ -691,7 +691,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_UnsupportedPreflight_FailsBeforeReadingOrPublishing()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var result = Coordinator(fixture).Load(Path.GetFullPath(Path.Combine(Path.GetTempPath(),
                 "gd66-unsupported.json")), new SpatialMigrationActivationPreflight(false,
                     SpatialMigrationCapabilityReason.PlatformUnsupported,
@@ -708,7 +708,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_QualifiedPreflightCannotAuthorizeDifferentOrNoncanonicalActivePath()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string qualified = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-bound.json"));
             SpatialMigrationActivationPreflight preflight = Supported(fileSystem, qualified);
@@ -745,7 +745,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_MalformedRawPayload_FailsWithoutRuntimeProjection()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-malformed.json"));
             fileSystem.Seed(activePath, System.Text.Encoding.UTF8.GetBytes("{not-json"));
@@ -765,7 +765,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{" +
                 "\"mvpDungeonPlacements\":{\"Entries\":{},\"NextRevision\":0}}}");
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(),
                 "gd66-semantic-mismatch.json"));
@@ -788,7 +788,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_NarrowHallBlocksMigrationButRetainsByteExactTrustedOriginal()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[{" +
+                "\"primary\":{\"lastSavedUtcUnix\":1,\"mvpDungeonPlacements\":{\"Entries\":[{" +
                 "\"CategoryId\":\"placement.category.room\"," +
                 "\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1}]," +
                 "\"NextRevision\":2}}}");
@@ -817,7 +817,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_InvalidBlankFloorFailsBeforePreflightEvaluation()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var invalidBlank = new RawLegacyBlankFloorContract(1,
                 Array.Empty<RawLegacyBlankFloorNodeContract>(), true, true,
                 new[] { "Nodes", "NextRevision" },
@@ -837,7 +837,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_MissingMigrationProfilePreservesExactSelectionReason()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             SpatialLayoutCompatibilityProfilesData data = fixture.Compatibility.Value;
             data.MigrationProfiles = Array.Empty<SpatialMigrationCompatibilityProfile>();
             var compatibility = new SpatialLayoutCompatibilitySnapshot(data);
@@ -859,7 +859,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_RepresentativeTransactionFailureReturnsNoRuntimeAuthority()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+                TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-write-failure.json"));
             fileSystem.Seed(activePath, fixture.Original);
@@ -941,7 +941,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void Load_ActualPrettyJsonUtilitySaveRootMigrates()
         {
             var root = new SaveRoot { schema = "save_root", schemaVersion = 6,
-                primary = new SaveData { saveVersion = 6 } };
+                primary = new SaveData { saveVersion = 6, lastSavedUtcUnix = 1 } };
             byte[] pretty = Encoding.UTF8.GetBytes(JsonUtility.ToJson(root, true));
 
             DetachedSpatialSaveLoadResult result = LoadOriginal(6, pretty, "json-utility-pretty");
@@ -952,6 +952,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static DetachedSpatialSaveLoadResult LoadOriginal(int schema, byte[] original, string identity)
         {
+            // Explicit fake time for current-target integration, without changing
+            // any frozen migration fixture or manufacturing production history.
+            string json = Encoding.UTF8.GetString(original);
+            if (!json.Contains("\"lastSavedUtcUnix\"")) original = Encoding.UTF8.GetBytes(
+                System.Text.RegularExpressions.Regex.Replace(json, "(\"primary\"\\s*:\\s*\\{)", "$1\"lastSavedUtcUnix\":1,"));
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(schema, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
@@ -997,7 +1002,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("readback")]
         public void SchemaTenLoadUpgradesOnceAndFailuresPublishNoActivationOrRuntime(string failure)
         {
-            var source = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
+            var source = TimedFixture(6);
             var f = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
@@ -1039,6 +1044,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(again.IsSuccess, Is.True, again.Reason);
             CollectionAssert.AreEqual(expected, again.Session.GetCurrentBytes());
         }
+
+        private static Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture TimedFixture(int schema, bool unwrapped = false) =>
+            Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(schema, unwrapped,
+                Encoding.UTF8.GetBytes(unwrapped ? "{\"saveVersion\":1,\"lastSavedUtcUnix\":1}" :
+                    "{\"schema\":\"save_root\",\"schemaVersion\":" + schema + ",\"primary\":{\"lastSavedUtcUnix\":1}}"));
 
         private static DetachedSpatialSaveLoadCoordinator Coordinator(
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,

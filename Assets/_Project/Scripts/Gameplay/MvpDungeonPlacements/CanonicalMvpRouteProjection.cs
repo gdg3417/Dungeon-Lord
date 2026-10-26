@@ -72,6 +72,7 @@ namespace DungeonBuilder.M0.Gameplay.MvpDungeonPlacements
                 save.sharedFloorKnowledge = validation.FloorKnowledge;
                 save.livingDungeon = validation.LivingDungeon;
                 save.monsterContinuity = validation.MonsterContinuity;
+                save.timeProvenance = validation.TimeProvenance;
                 reason = null;
                 return true;
             }
