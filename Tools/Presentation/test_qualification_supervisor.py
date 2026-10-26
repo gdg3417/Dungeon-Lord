@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
 import sys
 import tempfile
 import time
@@ -233,6 +234,29 @@ class SupervisorTests(unittest.TestCase):
         value['selections']['focused'] = ['stage1']
         with self.assertRaisesRegex(ValueError, 'dependencies'): q.create(self.root, value, 'focused')
 
+    def test_reservation_survives_unity_temp_cleanup_and_blocks_replacement(self):
+        campaign = self.create()
+        scratch = self.root / 'Temp'
+        scratch.mkdir()
+        (scratch / 'unity-owned.txt').write_text('disposable Unity scratch')
+        # Only this test-owned fake repository's newly created scratch is removed.
+        self.assertTrue(scratch.resolve().is_relative_to(self.root.resolve()))
+        shutil.rmtree(scratch)
+        reservation = self.root / 'TestResults/qualification-supervisor-reservation/active.json'
+        self.assertEqual(str(campaign), q.read(reservation)['campaign'])
+        with self.assertRaisesRegex(ValueError, 'Conflicting'): self.create()
+        with q.Lease(self.root):
+            with self.assertRaisesRegex(ValueError, 'Another'): q.run(campaign)
+
+    def test_legacy_unresolved_reservation_never_migrates_automatically(self):
+        legacy = self.root / 'Temp/qualification-supervisor/active.json'
+        legacy.parent.mkdir(parents=True)
+        q.atomic(legacy, dict(campaign='preserved historical incomplete campaign'))
+        before = legacy.read_bytes()
+        with self.assertRaisesRegex(ValueError, 'Legacy unresolved'): self.create()
+        self.assertEqual(before, legacy.read_bytes())
+        self.assertFalse((self.root / 'TestResults/qualification-supervisor-reservation/active.json').exists())
+
     def test_report_tampering_and_missing_exit_status_rejected(self):
         campaign = self.create()
         q.run(campaign)
@@ -287,6 +311,9 @@ class SupervisorTests(unittest.TestCase):
         job_handle = None
         try:
             wait_file(campaign / 'stage0/child.json', worker)
+            # child.json proves Popen/identity, not that the fixture has reached
+            # its first instruction. Inject the crash after verified startup.
+            wait_file(campaign / 'stage0/invocations.log', worker)
             record = q.read(campaign / 'stage0/started.json')
             job_handle = win.checked(win.open_job(8, False, record['job']))
             worker.terminate(); worker.wait(timeout=10)  # exact fixture Popen handle

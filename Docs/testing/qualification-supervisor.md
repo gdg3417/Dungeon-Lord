@@ -125,6 +125,24 @@ requires a separate PR. Documentation-only changes do not select those workloads
 
 ## Resume, failure and cancellation
 
+### Persistent reservation location (H1-F3 completion correction, 2026-10-26)
+
+New campaigns keep `active.json` and the OS execution lock in
+`TestResults/qualification-supervisor-reservation`, outside Unity-owned `Temp`.
+The old `Temp/qualification-supervisor/active.json`, when present with an owner,
+blocks new claims; it is never migrated or cleared automatically. A missing old
+marker does not authorize replacement of a recorded INCOMPLETE campaign. Inspect
+its immutable evidence and exact process identities and obtain the exceptional
+recovery approval described below. Do not mix supervisor versions on one project.
+
+The five-second Job Object completion drain is unchanged. The installed Unity CLI
+documents a resident authentication broker with a two-minute idle lifetime. An
+explicit campaign-specific runner may set `UNITY_NO_AUTH_BROKER=1` only for its CLI
+child, using documented direct OS-keyring access, rather than creating that resident
+helper inside a test job. Pin the runner and record this invocation choice in the
+plan. This does not exempt any descendant from OS completion, extend waits, change
+authentication configuration globally, or retroactively complete an old campaign.
+
 A usage reset does not stop the detached supervisor. First use `status`; never
 create another campaign because the model stopped responding. If an interrupted
 supervisor is gone **between verified completed stages**, Codex can explicitly use:

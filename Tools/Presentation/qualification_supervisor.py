@@ -75,8 +75,12 @@ def inside(root, relative):
 class Lease:
     """OS lifetime lock plus persistent unresolved-campaign ownership."""
     def __init__(self, project):
-        self.base = project / 'Temp/qualification-supervisor'
+        # Unity owns and may clear Temp during Editor startup. Reservation and
+        # execution-lock identity must outlive that lifecycle, including failure.
+        self.base = project / 'TestResults/qualification-supervisor-reservation'
+        self.legacy_base = project / 'Temp/qualification-supervisor'
         inputs.no_redirect(self.base)
+        inputs.no_redirect(self.legacy_base)
         self.base.mkdir(parents=True, exist_ok=True)
 
     def __enter__(self):
@@ -95,6 +99,9 @@ class Lease:
         self.stream.close()
 
     def claim(self, campaign):
+        legacy = self.legacy_base / 'active.json'
+        if legacy.exists() and read(legacy).get('campaign') is not None:
+            raise ValueError('Legacy unresolved campaign requires approved recovery; no automatic migration')
         path = self.base / 'active.json'
         current = read(path) if path.exists() else {}
         if current.get('campaign') not in (None, str(campaign)):
