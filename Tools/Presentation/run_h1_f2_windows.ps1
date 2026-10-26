@@ -21,8 +21,8 @@ try {
     $taskSource | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $taskEvidence 'windows-source.json')
     $taskCli = 'C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe'
     $taskBuildArgs = @('build',$taskRoot,'--target','StandaloneWindows64','--execute-method','H1F2WindowsBuildQualification.Build',
-        '--output',(Join-Path $taskRoot 'Builds/Development/Windows-h1-f2/Dungeon Lord.exe'),'--allow-dirty-build','--timeout','1800',
-        '--log-file',(Join-Path $taskEvidence 'windows-build.log'),'--no-color')
+        '--allow-dirty-build','--timeout','1800',
+        '--log-file',(Join-Path $taskEvidence 'windows-build.log'),'--no-tail','--no-color')
     $taskRecord.buildArguments = $taskBuildArgs
     Push-Location -LiteralPath $taskRoot
     try { & $taskCli @taskBuildArgs; $taskRecord.buildExit = $LASTEXITCODE } finally { Pop-Location }
