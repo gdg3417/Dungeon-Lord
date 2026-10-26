@@ -129,11 +129,50 @@ namespace DungeonBuilder.M0.Economy
                 return result;
 
             PassiveManaRateSummary rate = canonicalOnline.ResolveRate(save, heatConfiguration);
-            return Calculate(result, rate);
+            return Calculate(result, rate, result.ObservedElapsedSeconds);
         }
 
-        // Shared by the one actual grant and read-only historical projections.
-        private static OfflinePassiveManaResult Calculate(OfflinePassiveManaResult result, PassiveManaRateSummary rate)
+        // Calculation only. This is deliberately not an overload of Resolve and
+        // does not return the result type accepted by canonical publication.
+        // Explicit endpoints do not establish interval eligibility or authority.
+        internal PreciseOfflinePassiveManaCalculation CalculatePrecise(SaveData intervalStart,
+            RunSimulationConfig heatConfiguration, UnixTimePoint source, UnixTimePoint endpoint,
+            double? effectiveOfflineEfficiency = null)
+        {
+            double wallet = intervalStart?.structureRuntime?.ManaReserve ?? double.NaN;
+            var result = new OfflinePassiveManaResult {
+                Reason = OfflinePassiveManaReason.CanonicalStateOrConfigurationInvalid,
+                WalletBefore = wallet, WalletAfter = wallet, Capacity = canonicalOnline.ManaCapacity,
+                ConfiguredBaseOfflineEfficiency = configuration.BaseOfflineEfficiency,
+                EffectiveOfflineEfficiency = effectiveOfflineEfficiency ?? configuration.BaseOfflineEfficiency };
+            long elapsed100ns = 0;
+            if (endpoint == null || endpoint.Seconds <= 0)
+                result.Reason = OfflinePassiveManaReason.CurrentTimestampInvalid;
+            else if (source == null || source.Seconds <= 0)
+                result.Reason = OfflinePassiveManaReason.SavedTimestampInvalid;
+            else if (endpoint.CompareTo(source) < 0)
+                result.Reason = OfflinePassiveManaReason.BackwardClockMovement;
+            else {
+                // UnixTimePoint validates representability. Subtract checked
+                // integers before entering the existing double formula domain.
+                try { elapsed100ns = endpoint.Elapsed100nsSince(source); }
+                catch (OverflowException) {
+                    return new PreciseOfflinePassiveManaCalculation(result, 0);
+                }
+                if (elapsed100ns == 0) result.Reason = OfflinePassiveManaReason.ZeroElapsedInterval;
+                else if (FiniteNonnegative(wallet) && wallet <= result.Capacity &&
+                    FiniteNonnegative(result.EffectiveOfflineEfficiency))
+                    Calculate(result, canonicalOnline.ResolveRate(intervalStart, heatConfiguration),
+                        elapsed100ns / UnixTimePoint.UnitsPerSecond +
+                        (double)(elapsed100ns % UnixTimePoint.UnitsPerSecond) / UnixTimePoint.UnitsPerSecond);
+            }
+            return new PreciseOfflinePassiveManaCalculation(result, elapsed100ns);
+        }
+
+        // One formula shared by live legacy grants and read-only calculations.
+        // Legacy callers still pass whole seconds with the original operation order.
+        private static OfflinePassiveManaResult Calculate(OfflinePassiveManaResult result,
+            PassiveManaRateSummary rate, double elapsedSeconds)
         {
             double wallet = result.WalletBefore;
             double effectiveOfflineEfficiency = result.EffectiveOfflineEfficiency;
@@ -144,7 +183,7 @@ namespace DungeonBuilder.M0.Economy
             result.ApplicableOnlineManaPerHour = rate.ManaPerHour;
             result.EffectiveOfflineManaPerHour = rate.ManaPerHour * effectiveOfflineEfficiency;
             result.CalculatedPreCapacityAward = result.EffectiveOfflineManaPerHour *
-                result.ObservedElapsedSeconds / SecondsPerHour;
+                elapsedSeconds / SecondsPerHour;
             if (!FiniteNonnegative(result.EffectiveOfflineManaPerHour) ||
                 !FiniteNonnegative(result.CalculatedPreCapacityAward))
                 return result;
@@ -181,7 +220,7 @@ namespace DungeonBuilder.M0.Economy
                 ConfiguredBaseOfflineEfficiency = interval.BaseEfficiency,
                 EffectiveOfflineEfficiency = interval.EffectiveEfficiency,
                 WalletBefore = interval.Wallet, WalletAfter = interval.Wallet, Capacity = interval.Capacity };
-            Calculate(result, interval.InspectRate());
+            Calculate(result, interval.InspectRate(), result.ObservedElapsedSeconds);
             result.PersistenceRequired = false;
             return result;
         }
@@ -195,6 +234,37 @@ namespace DungeonBuilder.M0.Economy
 
         private static bool FiniteNonnegative(double value) =>
             !double.IsNaN(value) && !double.IsInfinity(value) && value >= 0d;
+    }
+
+    // Immutable calculation evidence, never spendable or accepted by
+    // SaveService.CommitOfflinePassiveMana. No precise publication API exists.
+    internal sealed class PreciseOfflinePassiveManaCalculation
+    {
+        internal OfflinePassiveManaReason Reason { get; }
+        internal long Elapsed100ns { get; }
+        internal double ApplicableOnlineManaPerHour { get; }
+        internal double ConfiguredBaseOfflineEfficiency { get; }
+        internal double EffectiveOfflineEfficiency { get; }
+        internal double EffectiveOfflineManaPerHour { get; }
+        internal double CalculatedPreCapacityAward { get; }
+        internal double ActualAwardedMana { get; }
+        internal double WalletBefore { get; }
+        internal double WalletAfter { get; }
+        internal double Capacity { get; }
+        internal bool CapacityLimited { get; }
+
+        internal PreciseOfflinePassiveManaCalculation(OfflinePassiveManaResult result, long elapsed100ns)
+        {
+            Reason = result.Reason; Elapsed100ns = elapsed100ns;
+            ApplicableOnlineManaPerHour = result.ApplicableOnlineManaPerHour;
+            ConfiguredBaseOfflineEfficiency = result.ConfiguredBaseOfflineEfficiency;
+            EffectiveOfflineEfficiency = result.EffectiveOfflineEfficiency;
+            EffectiveOfflineManaPerHour = result.EffectiveOfflineManaPerHour;
+            CalculatedPreCapacityAward = result.CalculatedPreCapacityAward;
+            ActualAwardedMana = result.ActualAwardedMana;
+            WalletBefore = result.WalletBefore; WalletAfter = result.WalletAfter;
+            Capacity = result.Capacity; CapacityLimited = result.CapacityLimited;
+        }
     }
 
     // Retained interval-start calculation inputs only; neither a wallet nor a save owner.
