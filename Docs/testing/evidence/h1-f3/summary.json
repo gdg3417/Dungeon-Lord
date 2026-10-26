@@ -1,0 +1,118 @@
+{
+  "archive_sha256": "ec5f8f1750a6499f9d7420495318ee1bdcea1496a2b615490ff509e6c89e4218",
+  "base_sha": "443319983a746b4a1670bc8a87d7434a14f7a492",
+  "blocker": "Owned descendants still active; completion uncertain",
+  "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b343351f516b4a19b8992ad00910ae40",
+  "campaign_status": "INCOMPLETE",
+  "cleanup": "None; no processes terminated, settings restored, artifacts deleted, reservations released or campaigns duplicated",
+  "exact_inputs_unchanged": true,
+  "focused_xml": {
+    "accepted_gate": false,
+    "failed": 0,
+    "new_cases": 34,
+    "passed": 188,
+    "skipped": 0
+  },
+  "input_files": 1462,
+  "inventory": [
+    {
+      "owner": "Codex",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord",
+      "purpose": "isolated managed implementation/qualification project",
+      "retention": "preserve; incomplete qualification",
+      "source": "a68451bcebaab04a25dafeac223a075e4c190081"
+    },
+    {
+      "owner": "qualification supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b343351f516b4a19b8992ad00910ae40",
+      "purpose": "incomplete original campaign and raw evidence",
+      "retention": "unresolved; preserve unchanged; no relaunch/unlock",
+      "source": "a68451bcebaab04a25dafeac223a075e4c190081"
+    },
+    {
+      "owner": "Codex",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\h1-f3-preparation",
+      "purpose": "reviewed plan, input archive, protected hashes, import log and settings backup",
+      "retention": "preserve; private preservation manifest",
+      "source": "a68451bcebaab04a25dafeac223a075e4c190081"
+    },
+    {
+      "owner": "Codex qualification",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F3 20261026",
+      "purpose": "fresh isolated synthetic test save namespace",
+      "retention": "preserve; no cleanup after incomplete campaign",
+      "source": "a68451bcebaab04a25dafeac223a075e4c190081"
+    },
+    {
+      "owner": "Codex",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\Docs\\testing\\evidence\\h1-f3",
+      "purpose": "sanitized review evidence",
+      "retention": "retained evidence",
+      "source": "a68451bcebaab04a25dafeac223a075e4c190081"
+    },
+    {
+      "owner": "owner",
+      "path": "C:/Dev/Dungeon-Lord",
+      "purpose": "normal checkout and existing planning modification",
+      "retention": "protected; untouched",
+      "source": "owner checkout preserved; main baseline 443319983a746b4a1670bc8a87d7434a14f7a492"
+    },
+    {
+      "owner": "owner / prior qualification",
+      "path": "C:/Dev/Dungeon-Lord/Builds and TestResults; pre-existing managed worktrees/builds/evidence",
+      "purpose": "existing builds and retained evidence",
+      "retention": "protected; untouched",
+      "source": "historical; not used"
+    },
+    {
+      "owner": "owner / prior qualification",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417",
+      "purpose": "all other existing save namespaces",
+      "retention": "protected; hashes unchanged",
+      "source": "private pre-run hash inventory"
+    }
+  ],
+  "model": "GPT-6.1 Sol High; user confirmed",
+  "other_save_namespaces": 51,
+  "owner_proposal_sha256": "b04136e1b8375bef6dc2105bacd3e19062b4365be10e043b91c2d87670bd267d",
+  "precise_capture_production_active": false,
+  "precise_grant_production_active": false,
+  "preservation_comparison": "Read-only post-stop comparison passed; not the unexecuted campaign final stage",
+  "processes": [
+    {
+      "pid": 7992,
+      "role": "owned stage host",
+      "status": "exited zero; recorded"
+    },
+    {
+      "pid": 45544,
+      "role": "Unity CLI test child",
+      "status": "exited zero; recorded"
+    },
+    {
+      "created_local": "2026-10-26T13:27:05.261223-05:00",
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "parent": 45544,
+      "pid": 3568,
+      "role": "observed remaining CLI descendant",
+      "status": "subsequently absent; no termination"
+    },
+    {
+      "executable": "C:/Windows/system32/conhost.exe",
+      "parent": 3568,
+      "pid": 44988,
+      "role": "observed descendant console host",
+      "status": "subsequently absent; no termination"
+    }
+  ],
+  "protected_save_files": 503,
+  "qualified_attempt_source_sha": "a68451bcebaab04a25dafeac223a075e4c190081",
+  "runtime_implementation_commit": "17924ab2",
+  "schema": 16,
+  "status": "BLOCKED",
+  "unexecuted": [
+    "integration (planned 436)",
+    "migration (planned 224 including one named platform skip)",
+    "final preservation stage"
+  ]
+}

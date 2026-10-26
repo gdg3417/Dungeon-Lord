@@ -1,0 +1,37 @@
+{
+  "source": "C:\\Users\\gdg34\\AppData\\Roaming\\UnityHub\\logs\\cli-log.json",
+  "snapshot_sha256": "fe9621360de1c50d73d519885e0a1b6671b7ffcc35cea58fc4a1929174236421",
+  "records": [
+    {
+      "time": "2026-10-26T18:27:05.303Z",
+      "pid": 45544,
+      "moduleName": "CLI",
+      "msg": "CLI invocation started"
+    },
+    {
+      "time": "2026-10-26T18:27:05.418Z",
+      "pid": 3568,
+      "moduleName": "AuthBroker",
+      "msg": "Auth broker listening (activated=False, idleMs=120000)"
+    },
+    {
+      "time": "2026-10-26T18:27:34.778Z",
+      "pid": 45544,
+      "moduleName": "CLI",
+      "msg": "CLI invocation finished"
+    },
+    {
+      "time": "2026-10-26T18:29:05.381Z",
+      "pid": 3568,
+      "moduleName": "AuthBroker",
+      "msg": "Auth broker is idle; exiting"
+    },
+    {
+      "time": "2026-10-26T18:29:05.382Z",
+      "pid": 3568,
+      "moduleName": "AuthBroker",
+      "msg": "Auth broker stopped"
+    }
+  ],
+  "limitation": "Lifecycle logs, not OS exit receipts; original INCOMPLETE unchanged"
+}

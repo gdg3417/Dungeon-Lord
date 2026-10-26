@@ -1,0 +1,448 @@
+{
+  "archive_sha256": "c341ad3146f3ba54cd0c0cf6029487a5b96c7025cacbf231db38c860da2c3238",
+  "base_sha": "443319983a746b4a1670bc8a87d7434a14f7a492",
+  "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\dcc63c966bb444c98c4d59ae4ef12457",
+  "classification": "A: synchronous Editor test invocation spawned a documented resident CLI authentication helper inside the owned job; not evidence for a longer shutdown drain",
+  "cleanup": "No original evidence/build/save deleted. Unit-fixture cleanup only; worktree and both campaign evidence sets retained.",
+  "completed_processes": {
+    "focused": {
+      "child_finished_utc": "2026-10-26T19:31:19.281527+00:00",
+      "child_process": {
+        "created": 134375166505389707,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 33452
+      },
+      "exit_code": 0,
+      "finished_utc": "2026-10-26T19:31:19.292185+00:00",
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-c4dd4ec11e054450a76917d9236fe5f0",
+      "process": {
+        "created": 134375166504318421,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 34408
+      }
+    },
+    "focused-preflight": {
+      "child_finished_utc": "2026-10-26T19:30:45.889821+00:00",
+      "child_process": {
+        "created": 134375166435195529,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 43700
+      },
+      "exit_code": 0,
+      "finished_utc": "2026-10-26T19:30:45.899825+00:00",
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-a950a95ed7ca4f288e7b4fd337b84e5b",
+      "process": {
+        "created": 134375166434064407,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 37260
+      }
+    },
+    "integration": {
+      "child_finished_utc": "2026-10-26T19:38:25.074969+00:00",
+      "child_process": {
+        "created": 134375166907030594,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 49996
+      },
+      "exit_code": 0,
+      "finished_utc": "2026-10-26T19:38:25.085107+00:00",
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-6c03526dba64465a9c2abff056201ed4",
+      "process": {
+        "created": 134375166905981968,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 33256
+      }
+    },
+    "integration-preflight": {
+      "child_finished_utc": "2026-10-26T19:31:26.132381+00:00",
+      "child_process": {
+        "created": 134375166838064490,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 3360
+      },
+      "exit_code": 0,
+      "finished_utc": "2026-10-26T19:31:26.143187+00:00",
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-fefe8fc804e24d0e845df0e504d42de8",
+      "process": {
+        "created": 134375166836994696,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 53848
+      }
+    },
+    "migration": {
+      "child_finished_utc": "2026-10-26T19:39:11.755571+00:00",
+      "child_process": {
+        "created": 134375171165125839,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 54428
+      },
+      "exit_code": 0,
+      "finished_utc": "2026-10-26T19:39:11.764561+00:00",
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-dc2cdd3a745a4b7593da0d2f6f792e41",
+      "process": {
+        "created": 134375171164059955,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 50340
+      }
+    },
+    "migration-preflight": {
+      "child_finished_utc": "2026-10-26T19:38:32.046933+00:00",
+      "child_process": {
+        "created": 134375171097369359,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 53096
+      },
+      "exit_code": 0,
+      "finished_utc": "2026-10-26T19:38:32.055925+00:00",
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-54235cf11c6a4933b392d0a8490c9bc5",
+      "process": {
+        "created": 134375171096296521,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 45960
+      }
+    },
+    "preservation": {
+      "child_finished_utc": "2026-10-26T19:39:33.099081+00:00",
+      "child_process": {
+        "created": 134375171708530054,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 31844
+      },
+      "exit_code": 0,
+      "finished_utc": "2026-10-26T19:39:33.108436+00:00",
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-1fab3fe470664e77a795c8278d81d76c",
+      "process": {
+        "created": 134375171707437364,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 33460
+      }
+    },
+    "restore": {
+      "child_finished_utc": "2026-10-26T19:39:26.344058+00:00",
+      "child_process": {
+        "created": 134375171629984519,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 38716
+      },
+      "exit_code": 0,
+      "finished_utc": "2026-10-26T19:39:26.354478+00:00",
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-a58619171ac54f439572e6c0625b7a7d",
+      "process": {
+        "created": 134375171628962201,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 15000
+      }
+    },
+    "restore-preflight": {
+      "child_finished_utc": "2026-10-26T19:39:18.493870+00:00",
+      "child_process": {
+        "created": 134375171562699252,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 22340
+      },
+      "exit_code": 0,
+      "finished_utc": "2026-10-26T19:39:18.503900+00:00",
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-57cff67bc6ae46678d4f892de174a21e",
+      "process": {
+        "created": 134375171561660146,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 41944
+      }
+    }
+  },
+  "completion_drain_seconds": 5,
+  "counts": {
+    "focused": {
+      "discovered": 188,
+      "failed": 0,
+      "passed": 188,
+      "skipped": 0,
+      "skips": []
+    },
+    "integration": {
+      "discovered": 436,
+      "failed": 0,
+      "passed": 436,
+      "skipped": 0,
+      "skips": []
+    },
+    "migration": {
+      "discovered": 224,
+      "failed": 0,
+      "passed": 223,
+      "skipped": 1,
+      "skips": [
+        "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"
+      ]
+    }
+  },
+  "exact_input_files": 1462,
+  "exact_restored_input_hashes": {
+    "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+    "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+    "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+    "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+  },
+  "exact_settings_restored": true,
+  "generated_font_restoration": {
+    "changed": [
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset"
+    ],
+    "cli_returncode": 0,
+    "generated_sha256": "f53586850a70c4f308e7e71b99b63881a49f38de4bd40f4edb7fe7ae6ecf8a52",
+    "original_sha256": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+    "restored": true
+  },
+  "inventory": [
+    {
+      "owner": "Codex",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord",
+      "purpose": "implementation/review worktree",
+      "retention": "retained for independent review",
+      "source": "9e5f7aa7ddc08f192f70675b52c81b6c7a86e2e5"
+    },
+    {
+      "owner": "qualification supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\dcc63c966bb444c98c4d59ae4ef12457",
+      "purpose": "completed qualification/raw logs",
+      "retention": "retained evidence",
+      "source": "9e5f7aa7ddc08f192f70675b52c81b6c7a86e2e5"
+    },
+    {
+      "owner": "prior supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b343351f516b4a19b8992ad00910ae40",
+      "purpose": "historical INCOMPLETE attempt",
+      "retention": "preserved unchanged",
+      "source": "a68451bcebaab04a25dafeac223a075e4c190081"
+    },
+    {
+      "owner": "prior supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b227e498d4ef4f2a91cd7801fb915881",
+      "purpose": "historical font-input INCOMPLETE attempt",
+      "retention": "preserved unchanged",
+      "source": "6a2ac27e9daf7a943be2c7ea03643c539b9ce82f"
+    },
+    {
+      "owner": "Codex",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\h1-f3-recovery-20261026-r2",
+      "purpose": "exact qualified inputs and original settings archive",
+      "retention": "retained evidence",
+      "source": "9e5f7aa7ddc08f192f70675b52c81b6c7a86e2e5"
+    },
+    {
+      "owner": "Codex",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\h1-f3-completion-investigation",
+      "purpose": "diagnosis and approved recovery record",
+      "retention": "private retained evidence",
+      "source": "9e5f7aa7ddc08f192f70675b52c81b6c7a86e2e5"
+    },
+    {
+      "owner": "Codex qualification",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F3 Recovery R2 20261026",
+      "purpose": "fresh synthetic test namespace",
+      "retention": "retained",
+      "source": "9e5f7aa7ddc08f192f70675b52c81b6c7a86e2e5"
+    },
+    {
+      "owner": "Codex",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\Docs\\testing\\evidence\\h1-f3-completion",
+      "purpose": "sanitized publication evidence",
+      "retention": "retained",
+      "source": "9e5f7aa7ddc08f192f70675b52c81b6c7a86e2e5"
+    },
+    {
+      "owner": "owner",
+      "path": "C:/Dev/Dungeon-Lord",
+      "purpose": "normal checkout/planning/builds/evidence",
+      "retention": "protected; untouched",
+      "source": "preserved owner state"
+    },
+    {
+      "owner": "prior H1-F2 qualification",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f2-time-provenance\\Dungeon-Lord\\Builds\\Development\\Windows-h1-f2-headroom\\Dungeon Lord.exe",
+      "purpose": "existing qualified Windows player",
+      "retention": "protected; published executable hash unchanged",
+      "source": "591b2c3cb27b6d71057cb648ae692609ab4346ab"
+    },
+    {
+      "owner": "owner / prior qualification",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417",
+      "purpose": "other save namespaces (private hash manifest)",
+      "retention": "protected; hashes unchanged",
+      "source": "preparation snapshot"
+    }
+  ],
+  "model": "GPT-6.1 Sol High; Complex; no substitution",
+  "old_verdict_changed": false,
+  "original_campaign": {
+    "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b343351f516b4a19b8992ad00910ae40",
+    "source_sha": "a68451bcebaab04a25dafeac223a075e4c190081",
+    "status": "INCOMPLETE",
+    "unchanged": true
+  },
+  "original_cli_exit": {
+    "command": [
+      "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe",
+      "test",
+      "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord",
+      "--mode",
+      "EditMode",
+      "--filter",
+      "H1F3;H1F2;FrozenSchemaFifteen",
+      "--output",
+      "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b343351f516b4a19b8992ad00910ae40\\focused/results.xml",
+      "--timeout",
+      "900",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b343351f516b4a19b8992ad00910ae40\\focused/unity.log"
+    ],
+    "exit_code": 0,
+    "finished_utc": "2026-10-26T18:27:34.783646+00:00",
+    "process": {
+      "created": 134375128248283334,
+      "executable": "c:\\users\\gdg34\\appdata\\local\\unity\\bin\\unity.exe",
+      "pid": 45544
+    },
+    "started_utc": "2026-10-26T18:27:04.833001+00:00"
+  },
+  "original_descendants": [
+    {
+      "creation_utc": "2026-10-26T18:27:05.261223Z",
+      "exact_command_line": "Not retained; not reconstructed",
+      "executable": "C:/Users/gdg34/AppData/Local/Unity/bin/unity.exe",
+      "os_exit_receipt": "Not retained",
+      "parent": 45544,
+      "pid": 3568,
+      "role": "AuthBroker confirmed by correlated local log"
+    },
+    {
+      "creation_utc": "2026-10-26T18:27:05.266351Z",
+      "exact_command_line": "Not retained",
+      "executable": "C:/Windows/system32/conhost.exe",
+      "os_exit_receipt": "Not retained",
+      "parent": 3568,
+      "pid": 44988,
+      "role": "Observed console host"
+    }
+  ],
+  "original_processes_terminated": false,
+  "original_resume_attempted": false,
+  "original_stage": {
+    "campaign": "b343351f516b4a19b8992ad00910ae40",
+    "command": [
+      "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe",
+      "test",
+      "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord",
+      "--mode",
+      "EditMode",
+      "--filter",
+      "H1F3;H1F2;FrozenSchemaFifteen",
+      "--output",
+      "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b343351f516b4a19b8992ad00910ae40\\focused/results.xml",
+      "--timeout",
+      "900",
+      "--no-color",
+      "--",
+      "-logFile",
+      "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b343351f516b4a19b8992ad00910ae40\\focused/unity.log"
+    ],
+    "detail": "Owned descendants still active; completion uncertain",
+    "exit_code": null,
+    "failure": "UNCERTAIN",
+    "finished_utc": "2026-10-26T18:27:39.794464+00:00",
+    "host_exit_code": 0,
+    "input_identity": "bec21d0dfa7f58555fe284aa3b377e8ac7f25a9d98782a3f70b1f7bb51e81964",
+    "job": "Local\\DLQ-0760d35ff1d649298274a36666e586a5",
+    "process": {
+      "created": 134375128247144883,
+      "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      "pid": 7992
+    },
+    "source_sha": "a68451bcebaab04a25dafeac223a075e4c190081",
+    "stage": "focused",
+    "started_utc": "2026-10-26T18:27:04.702957+00:00",
+    "status": "INCOMPLETE",
+    "tests": {
+      "discovered": null,
+      "failed": null,
+      "passed": null,
+      "skipped": null
+    }
+  },
+  "owner_authorization": [
+    "Approve scoped recovery; private approved-recovery.json",
+    "H1-F3 \u2014 Authorization for Scoped Qualification Recovery; private approved-font-recovery.json"
+  ],
+  "owner_proposal_sha256": "b04136e1b8375bef6dc2105bacd3e19062b4365be10e043b91c2d87670bd267d",
+  "preserved_other_namespaces": 53,
+  "preserved_other_save_files": 506,
+  "prior_qualified_player": {
+    "matches_published": true,
+    "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f2-time-provenance\\Dungeon-Lord\\Builds\\Development\\Windows-h1-f2-headroom\\Dungeon Lord.exe",
+    "sha256": "abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6"
+  },
+  "qualified_input_identity": "983bf2fcba7639f02ef87da62c37b4ea63639987630849a246c16ab9d87530f0",
+  "remedy": "Child-local UNITY_NO_AUTH_BROKER=1, persistent reservation outside Temp, measured font rewrite retained/restored before successful integration return, predeclared exact settings restoration",
+  "restored_input_identity": "b8070243f931cf7b860cb846d4c705843df64a989850e6524b78cd67ed884b7a",
+  "source_sha": "9e5f7aa7ddc08f192f70675b52c81b6c7a86e2e5",
+  "stages": {
+    "focused": "PASSED",
+    "focused-preflight": "PASSED",
+    "integration": "PASSED",
+    "integration-preflight": "PASSED",
+    "migration": "PASSED",
+    "migration-preflight": "PASSED",
+    "preservation": "PASSED",
+    "restore": "PASSED",
+    "restore-preflight": "PASSED"
+  },
+  "status": "PASSED",
+  "stopped_replacement": {
+    "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b227e498d4ef4f2a91cd7801fb915881",
+    "source_sha": "6a2ac27e9daf7a943be2c7ea03643c539b9ce82f",
+    "status": "INCOMPLETE",
+    "unchanged": true
+  },
+  "supervisor_job_primitives_unchanged": true,
+  "tools": {
+    "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.2f1\\Editor\\Unity.exe": {
+      "sha256": "c2f3d552a9f9a4639b2e54e9d41f360614d512ba6a9816c8c934568ecc2ad93d",
+      "version": "6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe": {
+      "sha256": "4623dc531b0883c3e714da5cb30e9b73e12aa5145f0d92c7b191ab1dcf699dfe",
+      "version": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_inputs.py": {
+      "sha256": "34d3ff45cf7512e21f242bc0e4ede876e5c8b68eddba853ad9b1e69192270c92",
+      "version": "committed H1-F3 campaign tool"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_supervisor.py": {
+      "sha256": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a",
+      "version": "committed H1-F3 campaign tool"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_windows.py": {
+      "sha256": "234bce5f0ca8c7087bb999c603cfbb3d87f0eb4499501a1644dcbbabf3104db7",
+      "version": "committed H1-F3 campaign tool"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f3.py": {
+      "sha256": "14c4b4572bea7f4398339da5fc3ab6d3e823db81871e3d296861f931e370772e",
+      "version": "committed H1-F3 campaign tool"
+    },
+    "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe": {
+      "sha256": "78761a0547cd4a9bc212e27a217c66e6a621bf48c753ba440e4b2327ee7ff8ac",
+      "version": "1.0.0-beta.14; verified current"
+    }
+  }
+}

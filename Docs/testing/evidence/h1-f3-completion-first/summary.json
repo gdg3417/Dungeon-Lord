@@ -1,0 +1,81 @@
+{
+  "approval_state": "Additional recovery requested; no release/restoration/replacement performed before approval",
+  "archive_sha256": "a47a18abfde99fb40e99cae88dcf2ec3e07b4a6ddc4d7a77d9956cf66c562abb",
+  "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b227e498d4ef4f2a91cd7801fb915881",
+  "correction_head": "7eb26a8ddfc598d77f01c0dda9ac274a0272442f",
+  "correction_tests": {
+    "runner": {
+      "failed": 0,
+      "passed": 10,
+      "skipped": 0
+    },
+    "supervisor": {
+      "failed": 0,
+      "passed": 30,
+      "skipped": 0
+    }
+  },
+  "focused": {
+    "discovered": 188,
+    "failed": 0,
+    "passed": 188,
+    "skipped": 0,
+    "skips": []
+  },
+  "generated_font_sha256": "f53586850a70c4f308e7e71b99b63881a49f38de4bd40f4edb7fe7ae6ecf8a52",
+  "integration_gate": "INCOMPLETE: exact inputs changed; CLI and owned job completed successfully",
+  "integration_xml": {
+    "discovered": 436,
+    "failed": 0,
+    "passed": 436,
+    "skipped": 0,
+    "skips": []
+  },
+  "inventory": [
+    {
+      "owner": "supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b227e498d4ef4f2a91cd7801fb915881",
+      "purpose": "preserved stopped attempt, raw logs and process receipts",
+      "retention": "unresolved; preserve unchanged",
+      "source": "6a2ac27e9daf7a943be2c7ea03643c539b9ce82f"
+    },
+    {
+      "owner": "Codex",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\h1-f3-recovery-20261026",
+      "purpose": "qualified inputs and original settings archive",
+      "retention": "preserve",
+      "source": "6a2ac27e9daf7a943be2c7ea03643c539b9ce82f"
+    },
+    {
+      "owner": "Codex",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\h1-f3-completion-investigation",
+      "purpose": "broker diagnosis, original recovery authorization, generated font evidence and reviewed correction scripts",
+      "retention": "preserve privately",
+      "source": "6a2ac27e9daf7a943be2c7ea03643c539b9ce82f"
+    },
+    {
+      "owner": "supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor-reservation\\active.json",
+      "purpose": "idle unresolved campaign reservation",
+      "retention": "preserve; exceptional release requires owner approval",
+      "source": "6a2ac27e9daf7a943be2c7ea03643c539b9ce82f"
+    },
+    {
+      "owner": "Codex",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f3-stable-recovery\\Dungeon-Lord\\Docs\\testing\\evidence\\h1-f3-completion-first",
+      "purpose": "sanitized evidence archive",
+      "retention": "retained evidence",
+      "source": "6a2ac27e9daf7a943be2c7ea03643c539b9ce82f"
+    }
+  ],
+  "only_changed_input": "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset",
+  "original_b343_status": "INCOMPLETE",
+  "source": "6a2ac27e9daf7a943be2c7ea03643c539b9ce82f",
+  "status": "INCOMPLETE",
+  "unexecuted": [
+    "migration",
+    "restore-preflight",
+    "restore",
+    "preservation"
+  ]
+}
