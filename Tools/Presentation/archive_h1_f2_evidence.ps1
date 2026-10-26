@@ -34,7 +34,7 @@ $taskRuns = @(Get-ChildItem -LiteralPath $taskSource -Filter '*-command.json' | 
     $taskRecord = Get-Content -Raw -LiteralPath $_.FullName | ConvertFrom-Json
     [ordered]@{ record=$_.Name; sourceCommit=$taskRecord.sourceCommit; exitCode=$taskRecord.exitCode; verdict=$taskRecord.verdict }
 })
-$taskLatest = @('focused-08','migration-03','research-02','integration-03','play-02','schema-02')
+$taskLatest = @('focused-10','migration-04','research-03','integration-04','play-03','schema-03','windows')
 $taskRuntimeMatches = @(foreach ($taskName in $taskLatest) {
     $taskManifest = Get-Content -Raw -LiteralPath (Join-Path $taskSource "$taskName-source.json") | ConvertFrom-Json
     $taskRuntime = @($taskManifest | Where-Object { $_.path -match '^Assets[\\/]_Project[\\/](Scripts|Data|Resources|Scenes)[\\/]' })
