@@ -1,0 +1,32 @@
+{
+  "applicable_source": "9e5f7aa7ddc08f192f70675b52c81b6c7a86e2e5",
+  "commands": [
+    "python -B -m unittest discover -s Tools/Presentation -p test_qualification_supervisor.py -v",
+    "python -B -m unittest discover -s Tools/Presentation -p test_qualify_h1_f3.py -v"
+  ],
+  "earlier_attempts": [
+    "Runner sandbox attempt: temporary-directory access prevented setup (four methods, eight setup/cleanup errors); elevated rerun passed.",
+    "Initial 30-method supervisor run: 29 passed, one fixture-start race error; corrected bounded test synchronization, final 30 passed."
+  ],
+  "execution_evidence": "Counts observed in retained conversation tool outputs; this compact report pins the unchanged tested files, not a new test execution",
+  "files": {
+    "qualification_supervisor.py": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a",
+    "qualify_h1_f3.py": "14c4b4572bea7f4398339da5fc3ab6d3e823db81871e3d296861f931e370772e",
+    "test_qualification_supervisor.py": "4831f69a5d2c055d65e268714f4ef12c2bc7ffbb0a3c7d661dee740f5fb7b8a8",
+    "test_qualify_h1_f3.py": "6efead6b6ddc99f6b6f3486ec5ad1429685111e4b142407f2410ad78269870c4"
+  },
+  "final": {
+    "runner_restoration": {
+      "failed": 0,
+      "passed": 10,
+      "skipped": 0
+    },
+    "supervisor": {
+      "failed": 0,
+      "passed": 30,
+      "skipped": 0
+    }
+  },
+  "runner_execution_source": "Font correction uncommitted on 6a2ac27e, subsequently committed byte-identically as 7eb26a8d; 9e5f7aa7 adds evidence only",
+  "supervisor_executed_source": "6a2ac27e9daf7a943be2c7ea03643c539b9ce82f"
+}

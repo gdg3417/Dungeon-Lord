@@ -72,3 +72,54 @@ The first replacement proved CLI/job completion, then stopped on a distinct inpu
 The narrow runner correction retains the measured generated font bytes/hash and restores the exact captured pre-stage font bytes before a successful integration stage returns. Unknown input changes or failed CLI runs are preserved without automatic restoration. The ten runner regressions cover this allowlist, retained evidence, failed-run preservation, exact final restoration and failure propagation. The supervisor's identity and input checks remain unchanged. A further owner approval is required before releasing the first replacement's verified idle reservation, restoring its font/settings or launching the next isolated campaign.
 
 No Unity/runtime/content/schema/save-authority changes were made during correction. The inactive R and precise calculation seams, legacy zero fraction, existing wallet/publication, and deferred original/residual recovery remain unchanged. New PlayMode, Windows Development build and owner UAT remain N/A for this inactive technical slice; no omitted gate is counted as passed. No full-project/sustained profiling suite, new build, owner UAT session, H1-F4/H2/O1/Phase 8 work or merge is authorized here.
+
+## Authorized R2 qualification — current result: PASS
+
+The owner's subsequent **H1-F3 — Authorization for Scoped Qualification Recovery** explicitly approved verification of both stopped campaigns/processes, release only of b227's verified idle reservation through the reviewed procedure, exact restoration of the four archived inputs, retained generated-font evidence, and one fresh campaign. That authorization and the exact restoration results are retained privately in `TestResults/h1-f3-completion-investigation/approved-font-recovery.json` and `font-recovery-complete.json`. All identity/hash checks passed. Both old campaigns remain byte-identical and INCOMPLETE; neither was resumed or relabeled.
+
+Fresh campaign **`dcc63c966bb444c98c4d59ae4ef12457`** ran against the exact requested head **`9e5f7aa7ddc08f192f70675b52c81b6c7a86e2e5`**, using product `Dungeon Lord B3B2 Smoke H1F3 Recovery R2 20261026` and unused outputs. It returned authoritative supervisor **PASSED**, including every selected preflight, test, restoration and final preservation stage. Qualification completed at **19:39:33.108436 UTC** on 2026-10-26. Unity 6000.3.2f1, CLI 1.0.0-beta.14 and Python 3.12.14 remain pinned by executable/tool hashes in the reviewed plan and retained records.
+
+| R2 stage | Passed | Failed | Skipped | Supervisor |
+| --- | ---: | ---: | ---: | --- |
+| Focused Unit/SIT | 188 | 0 | 0 | PASS |
+| Integration/SIT | 436 | 0 | 0 | PASS |
+| Migration/regression and native Windows EditMode filesystem | 223 | 0 | 1 | PASS |
+| Exact settings restoration | N/A | N/A | N/A | PASS |
+| Final preservation | N/A | N/A | N/A | PASS |
+
+Counts describe invocations, with overlapping fixtures, not unique project tests. The 34 new H1-F3 cases are inside the 188; the 98 Research durability cases are inside the 436. The single expected Windows inverse-platform skip is `DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed`. No unexpected skip or inconclusive result occurred. The 30 supervisor and 10 runner regressions above remain applicable through exact unchanged tested tool-file hashes; their compact report distinguishes their actual execution source from the later evidence commit.
+
+The integration runner retained the generated font rewrite (`f53586850a70c4f308e7e71b99b63881a49f38de4bd40f4edb7fe7ae6ecf8a52`) as a sealed stage artifact and restored the original (`6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d`) before returning. The supervisor then independently verified exact inputs and owned-job completion. Migration changed no unapproved input. No timeout, completion-drain extension, process exemption, forced termination or additional recovery was used.
+
+All 1,462 inputs matched both predeclared states: qualified identity `983bf2fcba7639f02ef87da62c37b4ea63639987630849a246c16ab9d87530f0`, then restored identity `b8070243f931cf7b860cb846d4c705843df64a989850e6524b78cd67ed884b7a`. The four original input hashes after completion are:
+
+| Input | SHA-256 |
+| --- | --- |
+| `ProjectSettings/ProjectSettings.asset` | `34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993` |
+| `ProjectSettings/EditorBuildSettings.asset` | `53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9` |
+| `ProjectSettings/ShaderGraphSettings.asset` | `6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72` |
+| `Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset` | `6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d` |
+
+After completion, no recorded supervisor, stage host or child remained live, and the read-only Unity/player process guard was clear. The durable reservation was released by the normal successful supervisor path and names R2 as `previous`; no unrelated reservation was changed. The intended worktree was clean before adding this documentation/evidence closeout.
+
+### Evidence and preservation inventory
+
+Published [summary, exact process identities, hashes and inventory](evidence/h1-f3-completion/summary.json), [sealed XML/plan/receipt/generated-font archive](evidence/h1-f3-completion/qualification-records.zip), and [tool regression applicability](evidence/h1-f3-completion/tool-regressions.json). Archive SHA-256: **`c341ad3146f3ba54cd0c0cf6029487a5b96c7025cacbf231db38c860da2c3238`**. Raw logs, private preservation manifests and authorization records stay local. The old source-specific reports and archives remain unchanged.
+
+| Exact identity | Owner / purpose / source | Retention |
+| --- | --- | --- |
+| `C:/Users/gdg34/.codex/worktrees/h1-f3-stable-recovery/Dungeon-Lord` | Codex; managed implementation/review worktree; qualified source 9e5f7aa7 | Retain for independent review |
+| Worktree `TestResults/qualification-supervisor/dcc63c966bb444c98c4d59ae4ef12457` | Supervisor; authoritative passing campaign, native identities and raw evidence | Retained evidence |
+| Worktree `TestResults/h1-f3-recovery-20261026-r2` | Codex; exact input archive, reviewed plan, original settings | Retained evidence |
+| Worktree `TestResults/h1-f3-completion-investigation` | Codex; diagnosis, approvals, restoration proof, original generated font | Retain privately |
+| Worktree `TestResults/qualification-supervisor/b343351f516b4a19b8992ad00910ae40` and `b227e498d4ef4f2a91cd7801fb915881` | Prior supervisor; original stopped attempts at a68451bc and 6a2ac27e | Both INCOMPLETE, preserved byte-identically |
+| Worktree `TestResults/h1-f3-preparation` and `TestResults/h1-f3-recovery-20261026` | Codex; prior source/input/preparation archives | Preserved byte-identically |
+| `C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord B3B2 Smoke H1F3 Recovery R2 20261026` | Codex qualification; fresh synthetic test namespace | Retain for reproduction |
+| Other 53 save namespaces, 506 files, under `C:/Users/gdg34/AppData/LocalLow/gdg3417` | Owner/prior qualification; exact private baseline includes both earlier H1-F3 namespaces | Hash-identical |
+| `C:/Dev/Dungeon-Lord` | Owner checkout; still HEAD 4c13b9db with only original planning modification | Protected; untouched |
+| `C:/Users/gdg34/.codex/worktrees/h1-f2-time-provenance/Dungeon-Lord/Builds/Development/Windows-h1-f2-headroom/Dungeon Lord.exe` | Prior qualified player at runtime source 591b2c3c | Published executable SHA-256 still `abc8179e345b70c9d7ca423c54e02739ed9b9adca668c2c745ffb81aadc05cc6` |
+| `Docs/testing/evidence/h1-f3-completion` | Codex; sanitized review evidence from 9e5f7aa7 | Retained |
+
+The original owner planning-edit hash remains `b04136e1b8375bef6dc2105bacd3e19062b4365be10e043b91c2d87670bd267d`. No owner save, build or prior evidence was deleted or overwritten. Only existing test-owned disposable fixture cleanup occurred; retained project/build/save/evidence artifacts were not broadly cleaned. No owner-UAT setup or new Windows build was created, because those remain N/A for this inactive slice.
+
+This closeout adds documentation/evidence only after the qualified source. It does not relabel R2 as a run of a later SHA: the supervisor's exact-HEAD applicability check will reject a later commit, while its immutable recorded PASS remains attached to 9e5f7aa7. The PR head's executable/tool/input equality is checked separately, and no new Unity execution is claimed for the documentation commit. No blocking defect remains for included scope. The draft PR is eligible for independent ChatGPT review; owner testing/merge and all later H1/H2/O1 work remain separate.
