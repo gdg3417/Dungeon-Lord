@@ -39,15 +39,36 @@ namespace DungeonBuilder.Tests.EditMode
 
         internal static SaveService OpenService(Fixture fixture, out SaveData loaded)
         {
+            // This is a synthetic current-schema Research fixture, not historical
+            // activation evidence. Use its already-bound consumed inputs and a
+            // fixed test clock; metadata writes cannot move the fixture's W.
+            var inputs = fixture.Context.RecoveryInputs;
+            var wall = new ResearchFixtureClock(fixture.Runtime.timeProvenance.AccountedBoundary);
+            var time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
+                inputs.Bootstrap.timeRules.detectClockSkewSeconds, wall, () => 0);
+            time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);
             var result = new SaveService(new SimpleLogger(false, (level, message) => { }),
                 new SaveConfig { fileName = Path.GetFileName(fixture.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(fixture.ActivePath));
             result.ConfigureCanonical(fixture.Profile, fixture.Production, fixture.Compatibility, fixture.Configuration,
                 LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), fixture.PositionProfiles, fixture.Occupancy);
             result.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, fixture.FileSystem, path));
+            result.SetTimeSourceForTests(wall);
+            result.ConfigureRecovery(inputs, time);
             loaded = result.LoadOrCreate("r0-test", out string banner);
             Assert.That(loaded, Is.Not.Null, banner);
+            time.BindLoadedForegroundHorizon(loaded.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
+            time.AttachSave(loaded);
+            result.CanonicalRuntimePublished += time.AttachSave;
             return result;
+        }
+
+        private sealed class ResearchFixtureClock : IPreciseTimeSource
+        {
+            private readonly UnixTimePoint now;
+            internal ResearchFixtureClock(UnixTimePoint value) { now = value; }
+            public UnixTimePoint UtcNow() => now;
+            public long UtcNowUnixSeconds() => now.Seconds;
         }
 
         // Historical presentation fixtures use the schema-6 placement sandbox. Run

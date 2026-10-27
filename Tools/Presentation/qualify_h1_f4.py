@@ -132,8 +132,9 @@ def plan(attempt, discovery=False, full_edit=False):
         workload["artifacts"].append("inventory.json")
     else:
         # Discovery at c1054632: 2768 EditMode leaves. The only subsequent
-        # discovery changes are three root cases and one accepted-work case.
-        workload.update(xml="results.xml", expected_tests=2772 if full_edit else 102,
+        # discovery changes are three root cases, one accepted-work case and
+        # two shared current-schema fixture integration cases.
+        workload.update(xml="results.xml", expected_tests=2774 if full_edit else 104,
             allowed_skips=["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"] if full_edit else [])
     stages = [
         {"id": name + "-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/" + name + "-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
@@ -153,7 +154,7 @@ def plan(attempt, discovery=False, full_edit=False):
     if discovery:
         data["approved_substitutions"].append("Discovery only: pinned Editor directly, without -quit, for the asynchronous existing TestRunnerApi.RetrieveTestList callbacks; collector exits explicitly. No tests execute and no passing test gate is inferred.")
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 2772 if full_edit else 102,
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 2774 if full_edit else 104,
                       "skips": None if discovery else 1 if full_edit else 0}))
 
 

@@ -1,0 +1,85 @@
+{
+  "artifact_inventory": [
+    {
+      "owner": "H1-F4 exceptional recovery",
+      "path": "TestResults\\h1-f4-20261027-fulledit01\\owner-approved-recovery01",
+      "purpose": "Receipt, independently verified preservation and exact copies of four pre-restoration files",
+      "retention": "preserve"
+    },
+    {
+      "owner": "H1-F4 full EditMode campaign",
+      "path": "TestResults/qualification-supervisor/61c2a2cd452e4a5c837496834f680e55",
+      "purpose": "Original incomplete campaign and all failure evidence",
+      "retention": "preserve permanently; do not reinterpret"
+    },
+    {
+      "owner": "H1-F4 investigation",
+      "path": "TestResults\\h1-f4-20261027-fulledit01\\incomplete-investigation",
+      "purpose": "Pinned diagnostic, exact reviewed script, failure details and preservation checks",
+      "retention": "preserve"
+    }
+  ],
+  "authorization": "Owner approval in this conversation, limited to reviewed four-file restoration and existing Lease release",
+  "campaign": "61c2a2cd452e4a5c837496834f680e55",
+  "campaign_verdict_preserved": "INCOMPLETE / UNCERTAIN",
+  "independent_verification": {
+    "checks": {
+      "campaign_evidence_unchanged": true,
+      "earlier_incomplete_evidence_unchanged": true,
+      "four_restored_hashes": true,
+      "full_input_map_matches": true,
+      "preserved_current_copies": true,
+      "protected_unchanged": true,
+      "receipt_reports_complete": true,
+      "reservation_released_to_exact_previous": true,
+      "source_unchanged": true,
+      "verdict_unchanged": true
+    },
+    "receipt_sha256": "9b47948a32d8ebee969aa3f2408e6891e728150611bf5b61fe25395ca9a6c58a",
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\61c2a2cd452e4a5c837496834f680e55"
+    },
+    "restored_hashes": {
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+      "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+    },
+    "success": true,
+    "verified_utc": "2026-10-27T19:23:30.521148+00:00"
+  },
+  "operation_receipt": {
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\61c2a2cd452e4a5c837496834f680e55",
+    "diagnostic_sha256": "374f0c03f72c1d5ef9f5d7f19ca80ffe79390ffb27857a2e5e7b98dfb7a98134",
+    "execute_requested": true,
+    "final_reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\61c2a2cd452e4a5c837496834f680e55"
+    },
+    "final_target_hashes": {
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+      "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+    },
+    "modification_attempts": [
+      "ProjectSettings/ProjectSettings.asset",
+      "ProjectSettings/EditorBuildSettings.asset",
+      "ProjectSettings/ShaderGraphSettings.asset",
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset"
+    ],
+    "postchecks_passed": true,
+    "prechecks_passed": true,
+    "proposal_script_sha256": "52d72bc462b4f2b6ae7c47200e074471416e6e645c04fd4d512f94e513708dd6",
+    "released": true,
+    "restored": [
+      "ProjectSettings/ProjectSettings.asset",
+      "ProjectSettings/EditorBuildSettings.asset",
+      "ProjectSettings/ShaderGraphSettings.asset",
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset"
+    ],
+    "success": true,
+    "utc": "2026-10-27T19:22:49.456974+00:00"
+  }
+}

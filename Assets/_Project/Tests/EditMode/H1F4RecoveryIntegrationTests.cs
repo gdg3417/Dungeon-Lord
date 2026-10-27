@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Linq;
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
 using Fixture = DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests.Fixture;
 using Faults = DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests;
@@ -167,6 +168,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 LegacyGameplayConfigurationContract.SerializeCanonical(h.Inputs.Configuration), h.F.Profile.Canonical, h.Inputs.Occupancy,
                 livingDungeonProfiles: new[] { unsupported }, monsterRecovery: h.Inputs.Monsters);
             Assert.Throws<ArgumentException>(() => context.BindRecoveryInputs(h.Inputs));
+        }
+        [Test] public void SharedFloorContentWriterUsesTheValidatedLootOwner()
+        {
+            var h = new Harness();
+            h.F.Accept(h.F.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId)));
+            PhaseSixA4Tests.AddContent(h.F, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            Assert.That(h.F.State.Floors.SelectMany(f => f.RoomContents.Assignments)
+                .Any(a => a.OptionId == MvpDungeonPlacementIds.GoblinOptionId), Is.True);
+            Assert.That(h.F.Runtime.timeProvenance.RecoveryContextSha256, Is.EqualTo(h.Inputs.Identity.Digest));
+        }
+        [Test] public void SharedResearchServiceRetainsBoundContextAndTheMetadataTimeBoundary()
+        {
+            var h = new Harness();
+            var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(h.F, out var current);
+            var prior = current.timeProvenance.AccountedBoundary;
+            Assert.That(service.Save(current, SaveReason.StateChange), Is.True);
+            var reopened = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(service.CanonicalSession.GetCurrentBytes(), h.F.Context);
+            Assert.That(reopened.IsValid, Is.True, reopened.Reason);
+            Assert.That(reopened.TimeProvenance.AccountedBoundary, Is.EqualTo(prior));
+            Assert.That(reopened.TimeProvenance.RecoveryContextSha256, Is.EqualTo(h.Inputs.Identity.Digest));
         }
         [TestCase(false)] [TestCase(true)]
         public void CommittedSettlementWithInterruptedAcknowledgementResolvesWithoutAnotherGrant(bool residual)
