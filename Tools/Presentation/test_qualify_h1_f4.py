@@ -125,6 +125,24 @@ class H1F4CampaignTests(unittest.TestCase):
             self.assertEqual({}, json.loads((stage / "invocation.json").read_text())["environment_override"])
             self.assertTrue((stage / "editor-exit.json").exists())
 
+    def test_full_edit_selects_every_case_without_a_filter(self):
+        stage = self.stage.parent / "full-edit"; stage.mkdir()
+        with patch.object(q, "ROOT", self.root), patch.object(q.subprocess, "run", return_value=SimpleNamespace(returncode=0)) as run:
+            self.assertEqual(0, q.run_full_edit("fulltest", stage))
+        self.assertNotIn("--filter", run.call_args.args[0]); self.assertIn("3500", run.call_args.args[0])
+
+    def test_full_edit_plan_declares_exact_discovery_and_one_named_inverse_skip(self):
+        with patch.object(q, "ROOT", self.root):
+            prep, _, _ = q.identities("fulltest"); prep.mkdir(parents=True)
+            q.write(prep / "qualified-inputs.json", {}); q.write(prep / "original-inputs.json", {})
+            with patch.object(q, "check_protected"), patch.object(q, "inventory", return_value={}), \
+                    patch.object(q, "sha", return_value="a" * 64), patch.object(q.subprocess, "check_output", return_value="b" * 40):
+                q.plan("fulltest", full_edit=True)
+            plan = json.loads((prep / "plan.json").read_text()); supervisor.validate_plan(plan)
+            self.assertEqual(2772, plan["stages"][1]["expected_tests"])
+            self.assertEqual(["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"],
+                             plan["stages"][1]["allowed_skips"])
+
 
 if __name__ == "__main__":
     unittest.main()

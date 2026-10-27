@@ -106,7 +106,9 @@ def prepare(attempt):
     print(json.dumps({"preparation": str(prep), "product": product, "save": str(save)}))
 
 
-def plan(attempt, discovery=False):
+def plan(attempt, discovery=False, full_edit=False):
+    if discovery and full_edit:
+        raise ValueError("Choose one explicit workload")
     prep, product, save = identities(attempt)
     check_protected(prep, save)
     if inventory(ROOT) != json.loads((prep / "qualified-inputs.json").read_text()):
@@ -122,14 +124,17 @@ def plan(attempt, discovery=False):
     command = lambda mode: [sys.executable, "-B", str(helper), mode, "--attempt", attempt, "--stage", "{stage}"]
     restored = json.loads((prep / "original-inputs.json").read_text())
     restored_id = hashlib.sha256(json.dumps(restored, sort_keys=True).encode()).hexdigest()
-    name = "inventory" if discovery else "focused"
+    name = "inventory" if discovery else "full-edit" if full_edit else "focused"
     workload = {"id": name, "role": "report" if discovery else "test", "depends": [name + "-preflight"],
-                "command": command("run-inventory" if discovery else "run-test"), "timeout_seconds": 960,
+                "command": command("run-inventory" if discovery else "run-full-edit" if full_edit else "run-test"), "timeout_seconds": 3600 if full_edit else 960,
                 "artifacts": ["unity.log", "invocation.json", "editor-exit.json" if discovery else "cli-exit.json", "generated-inputs"]}
     if discovery:
         workload["artifacts"].append("inventory.json")
     else:
-        workload.update(xml="results.xml", expected_tests=102, allowed_skips=[])
+        # Discovery at c1054632: 2768 EditMode leaves. The only subsequent
+        # discovery changes are three root cases and one accepted-work case.
+        workload.update(xml="results.xml", expected_tests=2772 if full_edit else 102,
+            allowed_skips=["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"] if full_edit else [])
     stages = [
         {"id": name + "-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/" + name + "-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
         workload,
@@ -148,7 +153,8 @@ def plan(attempt, discovery=False):
     if discovery:
         data["approved_substitutions"].append("Discovery only: pinned Editor directly, without -quit, for the asynchronous existing TestRunnerApi.RetrieveTestList callbacks; collector exits explicitly. No tests execute and no passing test gate is inferred.")
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 102, "skips": None if discovery else 0}))
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 2772 if full_edit else 102,
+                      "skips": None if discovery else 1 if full_edit else 0}))
 
 
 def preflight(attempt, stage, restored=False):
@@ -167,6 +173,16 @@ def run_test(attempt, stage):
     command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--filter", "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract",
                "--output", str(stage / "results.xml"), "--timeout", "900", "--no-color", "--", "-logFile", str(stage / "unity.log")]
     return run_child(attempt, stage, command, "focused", "cli-exit.json")
+
+
+def run_full_edit(attempt, stage):
+    stage = Path(stage).resolve()
+    if any(os.environ.get(name) for name in ("DUNGEON_FOREGROUND_DIAGNOSTIC_OUTPUT_ROOT", "DUNGEON_FOREGROUND_DIAGNOSTIC_SOURCE",
+                                           "DUNGEON_ADMISSION_BENCHMARK_ROOT", "DUNGEON_ADMISSION_BENCHMARK_SOURCE")):
+        raise ValueError("Full regression requires optional exporter variables unset; use an explicit isolated benchmark plan")
+    command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--output", str(stage / "results.xml"),
+               "--timeout", "3500", "--no-color", "--", "-logFile", str(stage / "unity.log")]
+    return run_child(attempt, stage, command, "full-edit", "cli-exit.json")
 
 
 def run_inventory(attempt, stage):
@@ -234,14 +250,16 @@ def restore(attempt, stage):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "preflight", "run-test", "run-inventory", "restore", "finish"])
+    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "plan-full-edit", "preflight", "run-test", "run-inventory", "run-full-edit", "restore", "finish"])
     parser.add_argument("--attempt", required=True)
     parser.add_argument("--stage")
     args = parser.parse_args()
     if args.mode == "prepare": prepare(args.attempt)
     elif args.mode == "plan": plan(args.attempt)
     elif args.mode == "plan-inventory": plan(args.attempt, discovery=True)
+    elif args.mode == "plan-full-edit": plan(args.attempt, full_edit=True)
     elif args.mode == "run-test": raise SystemExit(run_test(args.attempt, args.stage))
     elif args.mode == "run-inventory": raise SystemExit(run_inventory(args.attempt, args.stage))
+    elif args.mode == "run-full-edit": raise SystemExit(run_full_edit(args.attempt, args.stage))
     elif args.mode == "restore": restore(args.attempt, args.stage)
     else: preflight(args.attempt, args.stage, restored=args.mode == "finish")
