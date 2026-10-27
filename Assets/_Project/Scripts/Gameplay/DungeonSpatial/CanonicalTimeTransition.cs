@@ -11,8 +11,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal TimeProvenance Successor { get; }
         internal bool Settles { get; }
         internal long SettlementEligible100ns { get; }
-        private CanonicalTimeTransition(byte[] source, TimeProvenance prior, TimeProvenance successor, bool settles, long settlementEligible100ns = 0)
-        { predecessor = SpatialContractSha256.Compute(source); expected = prior; Successor = successor; Settles = settles; SettlementEligible100ns = settlementEligible100ns; }
+        internal long? ForegroundThrough { get; }
+        private CanonicalTimeTransition(byte[] source, TimeProvenance prior, TimeProvenance successor, bool settles,
+            long settlementEligible100ns = 0, long? foregroundThrough = null)
+        { predecessor = SpatialContractSha256.Compute(source); expected = prior; Successor = successor; Settles = settles;
+          SettlementEligible100ns = settlementEligible100ns; ForegroundThrough = foregroundThrough; }
 
         internal bool Matches(byte[] source, TimeProvenance prior) =>
             prior?.Mode == TimeProvenance.PreciseMode && expected.SameAs(prior) && SpatialContractSha256.Compute(source) == predecessor &&
@@ -30,19 +33,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 cut.WallEndpoint.CompareTo(prior.AccountedBoundary) < 0)
                 throw new ArgumentException(RecoveryEpisode.Invalid);
             return new CanonicalTimeTransition(source, prior, new TimeProvenance(cut.WallEndpoint,
-                prior.RecoveryContextSha256, null), false);
+                prior.RecoveryContextSha256, null), false, foregroundThrough: cut.CapturedThrough);
         }
 
         internal static CanonicalTimeTransition Enter(byte[] source, TimeProvenance prior,
-            RecoveryEntryObservation entry, long eligible100ns)
+            RecoveryEntryObservation entry, long eligible100ns, UnixTimePoint through = null, long eligibleAfterEntry100ns = 0)
         {
+            through = through ?? entry?.WallEndpoint;
             if (prior?.Mode != TimeProvenance.PreciseMode || prior.Episode != null || entry == null ||
+                through == null || through.CompareTo(entry.WallEndpoint) < 0 || eligibleAfterEntry100ns < 0 ||
+                eligibleAfterEntry100ns > through.Elapsed100nsSince(entry.WallEndpoint) ||
                 eligible100ns < 0 || eligible100ns > entry.WallEndpoint.Elapsed100nsSince(prior.AccountedBoundary))
                 throw new ArgumentException(RecoveryEpisode.Invalid);
             var episode = new RecoveryEpisode(SpatialContractSha256.Compute(source), prior.AccountedBoundary,
                 entry.WallEndpoint, entry.Context == RecoveryEntryContext.KnownBackground ? RecoveryEpisode.KnownBackground :
-                RecoveryEpisode.UnknownPostCrash, RecoveryEpisode.Precise, RecoveryEpisode.OriginalPending, eligible100ns, 0);
-            return new CanonicalTimeTransition(source, prior, new TimeProvenance(entry.WallEndpoint,
+                RecoveryEpisode.UnknownPostCrash, RecoveryEpisode.Precise, RecoveryEpisode.OriginalPending, eligible100ns, eligibleAfterEntry100ns);
+            return new CanonicalTimeTransition(source, prior, new TimeProvenance(through,
                 prior.RecoveryContextSha256, episode), false);
         }
 

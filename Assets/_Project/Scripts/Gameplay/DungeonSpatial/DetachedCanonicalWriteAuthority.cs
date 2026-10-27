@@ -54,6 +54,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly FloorConstructionProfileSnapshot floorConstructionProfiles;
         private readonly FloorConstructionResearchSnapshot floorConstructionResearch;
         private readonly FormulaModifier[] economyModifiers;
+        internal Action<DetachedCanonicalSaveSession, DetachedCanonicalSaveSession, TimeProvenance> CandidatePrepared;
+        internal Action<DetachedCanonicalWriteResult> PublicationObserved;
 
         public DetachedCanonicalWriteAuthority(ProductionSpatialContentSnapshot production,
             SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
@@ -393,7 +395,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private DetachedCanonicalWriteResult PrepareAndPersist(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
-            DetachedCanonicalSaveSessionResult prepared, bool roomEffect, bool ordinarySpend = false, bool recover = false)
+            DetachedCanonicalSaveSessionResult prepared, bool roomEffect, bool ordinarySpend = false, bool recover = false,
+            Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null)
         {
             if (prepared == null || !prepared.IsSuccess || prepared.Update == null)
                 return Failure(prepared?.Reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
@@ -445,7 +448,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 catch { return Failure(MonsterRecoveryRules.Invalid); }
             }
             DetachedCanonicalSaveSessionResult reopened = validated.IsValid
-                ? (foregroundStage ? prepared : DetachedCanonicalSaveSession.Open(candidate, context, limits)) : null;
+                ? (foregroundStage && ExactCompleteSaveAtomicPersistence.Same(prepared.Session.GetCurrentBytes(), candidate)
+                    ? prepared : DetachedCanonicalSaveSession.Open(candidate, context, limits)) : null;
             if (!validated.IsValid || !validated.CurrentTargetValidated || reopened == null ||
                 !reopened.IsSuccess)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
@@ -460,6 +464,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     validated, production, configuration, limits.Canonical, runLoot); }
                 catch { return Failure("floor.lifecycle.invalid_state"); }
             }
+            // Retain the exact final candidate (including healing) before any IO.
+            // The observer receives an immutable session, never writable bytes.
+            candidatePrepared?.Invoke(reopened.Session, validated.TimeProvenance);
+            CandidatePrepared?.Invoke(session, reopened.Session, validated.TimeProvenance);
             string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
                 limits.Canonical.Serialized.MaximumCollectionRecords, durable =>
                 {
@@ -477,10 +485,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     validated = readValidation; reopened = readSession; runtime = readRuntime;
                     return true;
                 });
-            return persistenceReason == null
+            var result = persistenceReason == null
                 ? new DetachedCanonicalWriteResult(true, null, false, roomEffect, candidate,
                     reopened.Session, validated, runtime, recoveryManaSpent)
                 : Failure(persistenceReason);
+            PublicationObserved?.Invoke(result);
+            return result;
         }
 
         private DetachedCompleteSaveValidationResult ValidateSession(DetachedCanonicalSaveSession session) =>

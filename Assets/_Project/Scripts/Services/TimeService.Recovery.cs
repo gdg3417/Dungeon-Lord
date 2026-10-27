@@ -12,8 +12,9 @@ namespace DungeonBuilder.M0
         private double recoveryMonotonic;
         private long recoveryEligible100ns;
         private RecoveryEntryObservation retainedRecoveryEntry;
-        private UnixTimePoint recoveryEntrySource;
         private RecoveryPublicationObservation recoveryPublication;
+        private string recoveryExpectedPredecessorSha256;
+        private string recoveryBoundContextSha256;
         private long recoveryConditionalUnits, recoveryConditionalBackground100ns;
         private bool recoveryConditionalInterrupted, recoveryConditionalBackgroundObserved;
         private UnixTimePoint recoveryConditionalPrefixEnd;
@@ -21,7 +22,14 @@ namespace DungeonBuilder.M0
         internal bool RecoveryClockActive => recoveryClockActive;
         internal bool RecoveryFailureLatched => recoveryFailureLatched;
         internal RecoveryEntryObservation RetainedRecoveryEntry => retainedRecoveryEntry;
+        internal long RecoveryOriginalEligible100ns { get; private set; }
         private bool ObservedForeground => foregroundFocused && !_isPaused;
+        internal void BindRecoveryContext(string context)
+        {
+            if (!SpatialContractSha256.IsCanonical(context) || recoveryBoundContextSha256 != null && recoveryBoundContextSha256 != context)
+                throw new InvalidOperationException(RecoveryEpisode.ContextMismatch);
+            recoveryBoundContextSha256 = context;
+        }
 
         internal sealed class RecoveryPublicationObservation
         {
@@ -53,11 +61,13 @@ namespace DungeonBuilder.M0
             if (proven == null || recoveryClockActive || recoveryDeferredForegroundWall != null)
                 throw new InvalidOperationException(RecoveryEpisode.Invalid);
             var sample = ReadRecoverySample(proven.AccountedBoundary);
+            if (proven.RecoveryContextSha256 != null) BindRecoveryContext(proven.RecoveryContextSha256);
             recoveryClockActive = true; recoveryFailureLatched = false;
             recoveryWall = sample.Wall; recoveryMonotonic = sample.Monotonic;
             recoveryCoveredThrough = proven.AccountedBoundary;
+            recoveryExpectedPredecessorSha256 = null;
             recoveryEligible100ns = proven.Episode == null ? 0 : sample.Wall.Elapsed100nsSince(proven.AccountedBoundary);
-            recoveryEntrySource = proven.Episode == null ? proven.AccountedBoundary : null;
+            RecoveryOriginalEligible100ns = proven.Episode?.OriginalEligible100ns ?? sample.Wall.Elapsed100nsSince(proven.AccountedBoundary);
             retainedRecoveryEntry = proven.Episode == null
                 ? RecoveryEntryObservation.FromCaptured(sample.Wall, proven, RecoveryEntryContext.UnknownPostCrash) : null;
             return retainedRecoveryEntry;
@@ -103,9 +113,12 @@ namespace DungeonBuilder.M0
         {
             if (!recoveryClockActive || recoveryPublication != null || predecessor == null || proven == null ||
                 proven.AccountedBoundary.CompareTo(recoveryCoveredThrough) != 0 ||
+                recoveryExpectedPredecessorSha256 != null &&
+                    SpatialContractSha256.Compute(predecessor) != recoveryExpectedPredecessorSha256 ||
                 closeResidual && (!HasForegroundClock || proven.Episode?.Phase != RecoveryEpisode.ResidualPending))
                 throw new InvalidOperationException(RecoveryEpisode.Invalid);
             var sample = ObserveRecoveryClock();
+            recoveryExpectedPredecessorSha256 = SpatialContractSha256.Compute(predecessor);
             recoveryPublication = new RecoveryPublicationObservation(sample.Wall, recoveryEligible100ns, predecessor,
                 closeResidual, recoveryFailureLatched, proven.RecoveryContextSha256);
             recoveryConditionalUnits = 0; recoveryConditionalBackground100ns = 0;
@@ -118,12 +131,23 @@ namespace DungeonBuilder.M0
         private void RecoveryLifecycleObservation(bool nextFocused, bool nextPaused)
         {
             if (!recoveryClockActive) {
+                if (HasForegroundClock && _save?.timeProvenance?.Mode == TimeProvenance.PreciseMode &&
+                    ObservedForeground && (!nextFocused || nextPaused) &&
+                    (recoveryDeferredForegroundWall == null || !recoveryDeferredHasBackground && !recoveryDeferredStalled)) {
+                    var minimum = _save.timeProvenance.AccountedBoundary;
+                    if (foregroundWall != null && foregroundWall.CompareTo(minimum) > 0) minimum = foregroundWall;
+                    var pause = ReadRecoverySample(minimum);
+                    if (pause.Units < foregroundSample) throw new InvalidOperationException("living.foreground.clock_invalid");
+                    long through = checked(foregroundThrough + checked(pause.Units - foregroundSample));
+                    foregroundThrough = through; foregroundSample = pause.Units; foregroundWall = pause.Wall;
+                    recoveryDeferredForegroundWall = pause.Wall; recoveryDeferredForegroundThrough = through;
+                    recoveryDeferredBackgroundWall = pause.Wall; recoveryDeferredBackground100ns = 0;
+                    recoveryDeferredHasBackground = true; recoveryDeferredPreparing = false;
+                    recoveryMonotonic = pause.Monotonic;
+                }
                 if (recoveryDeferredForegroundWall != null) {
-                    var deferred = ReadRecoverySample(recoveryDeferredBackgroundWall);
-                    long eligible = ObservedForeground ? 0 : deferred.Wall.Elapsed100nsSince(recoveryDeferredBackgroundWall);
-                    long total = checked(recoveryDeferredBackground100ns + eligible);
-                    recoveryDeferredBackground100ns = total; recoveryDeferredBackgroundWall = deferred.Wall;
-                    recoveryMonotonic = deferred.Monotonic;
+                    ObserveDeferredRecovery();
+                    if (!nextFocused || nextPaused) recoveryDeferredHasBackground = true;
                 }
                 return;
             }
@@ -183,20 +207,107 @@ namespace DungeonBuilder.M0
                     recoveryDeferredForegroundThrough = next;
                     recoveryDeferredBackground100ns = recoveryConditionalBackground100ns;
                     recoveryDeferredBackgroundWall = sample.Wall;
+                    recoveryDeferredHasBackground = true; recoveryDeferredPreparing = false; recoveryDeferredStalled = false;
                 }
                 recoveryClockActive = false; recoveryEligible100ns = 0;
             } else {
                 recoveryEligible100ns -= observation.Eligible100ns;
                 recoveryCoveredThrough = observation.Through;
+                recoveryExpectedPredecessorSha256 = observation.CandidateSha256;
             }
             recoveryFailureLatched = false; recoveryPublication = null;
-            retainedRecoveryEntry = null; recoveryEntrySource = null;
+            retainedRecoveryEntry = null;
         }
 
         // At most one complete foreground prefix and one grouped background sum
         // wait behind closure. Later lifecycle integration drains that prefix first.
         private UnixTimePoint recoveryDeferredForegroundWall, recoveryDeferredBackgroundWall;
         private long recoveryDeferredForegroundThrough, recoveryDeferredBackground100ns;
+        private bool recoveryDeferredHasBackground, recoveryDeferredPreparing, recoveryDeferredStalled;
+        internal bool HasDeferredRecovery => recoveryDeferredForegroundWall != null;
+        private bool DeferredForegroundCanExtend => HasDeferredRecovery && !recoveryDeferredHasBackground && !recoveryDeferredStalled;
+
+        // F is observed prospectively. All foreground through F is retained as
+        // one full prefix; subsequent known foreground storage stalls earn no
+        // offline credit. A lifecycle callback can still add observed background.
+        internal void OrdinaryPublicationFailed()
+        {
+            if (recoveryClockActive || _save?.timeProvenance?.Mode != TimeProvenance.PreciseMode) return;
+            if (!HasForegroundClock) throw new InvalidOperationException(RecoveryEpisode.Invalid);
+            if (!HasDeferredRecovery || DeferredForegroundCanExtend) {
+                var minimum = _save.timeProvenance.AccountedBoundary;
+                if (foregroundWall != null && foregroundWall.CompareTo(minimum) > 0) minimum = foregroundWall;
+                var sample = ReadRecoverySample(minimum);
+                if (sample.Units < foregroundSample) throw new InvalidOperationException("living.foreground.clock_invalid");
+                long through = ObservedForeground ? checked(foregroundThrough + checked(sample.Units - foregroundSample)) : foregroundThrough;
+                foregroundThrough = through; foregroundSample = sample.Units; foregroundWall = sample.Wall;
+                recoveryDeferredForegroundWall = sample.Wall; recoveryDeferredForegroundThrough = through;
+                recoveryDeferredBackgroundWall = sample.Wall; recoveryDeferredBackground100ns = 0;
+                recoveryDeferredHasBackground = !ObservedForeground; recoveryMonotonic = sample.Monotonic;
+            } else ObserveDeferredRecovery();
+            recoveryDeferredStalled = true;
+        }
+
+        internal void OrdinaryPublicationSucceeded(DetachedCanonicalWriteResult proof)
+        {
+            if (proof?.IsSuccess != true || proof.Session == null || proof.Validation?.CurrentTargetValidated != true ||
+                proof.Validation.TimeProvenance?.Mode != TimeProvenance.PreciseMode ||
+                !ExactCompleteSaveAtomicPersistence.Same(proof.GetPersistedBytes(), proof.Session.GetCurrentBytes()))
+                throw new InvalidOperationException(RecoveryEpisode.Invalid);
+            CompleteOrdinaryPublication(proof.Validation.TimeProvenance, proof.Validation.LivingDungeon);
+        }
+
+        private void CompleteOrdinaryPublication(TimeProvenance proven, LivingDungeonState owner)
+        {
+            if (recoveryClockActive || !HasDeferredRecovery) return;
+            if (proven?.Mode != TimeProvenance.PreciseMode || proven.Episode != null ||
+                recoveryBoundContextSha256 != null && proven.RecoveryContextSha256 != recoveryBoundContextSha256)
+                throw new InvalidOperationException(RecoveryEpisode.Invalid);
+            var sample = ObserveDeferredRecovery();
+            if (recoveryDeferredStalled) foregroundSample = sample.Units; // Release at Q; never move W to Q.
+            recoveryDeferredStalled = false;
+            if (recoveryDeferredHasBackground) { recoveryDeferredPreparing = true; return; }
+            if (owner?.IsClosed == true && owner.Scheduler.AcceptedThrough >= recoveryDeferredForegroundThrough &&
+                proven.AccountedBoundary.CompareTo(recoveryDeferredForegroundWall) >= 0) {
+                recoveryDeferredForegroundWall = null; recoveryDeferredBackgroundWall = null;
+                recoveryDeferredPreparing = false; recoveryDeferredBackground100ns = 0;
+            }
+        }
+
+        private (UnixTimePoint Wall, double Monotonic, long Units) ObserveDeferredRecovery()
+        {
+            var sample = ReadRecoverySample(recoveryDeferredBackgroundWall);
+            bool eligible = !ObservedForeground || recoveryDeferredPreparing && !recoveryDeferredStalled;
+            long delta = eligible ? sample.Wall.Elapsed100nsSince(recoveryDeferredBackgroundWall) : 0;
+            long total = checked(recoveryDeferredBackground100ns + delta);
+            recoveryDeferredBackground100ns = total; recoveryDeferredBackgroundWall = sample.Wall;
+            recoveryMonotonic = sample.Monotonic; return sample;
+        }
+
+        internal void BeginDeferredRecoveryPreparation()
+        {
+            if (!HasDeferredRecovery || recoveryClockActive) throw new InvalidOperationException(RecoveryEpisode.Invalid);
+            ObserveDeferredRecovery();
+            if (recoveryDeferredHasBackground) recoveryDeferredPreparing = true;
+        }
+
+        internal RecoveryEntryObservation BeginObservedRecovery(SaveData proven)
+        {
+            if (!ReferenceEquals(proven, _save) || proven?.timeProvenance?.Mode != TimeProvenance.PreciseMode ||
+                proven.timeProvenance.Episode != null || recoveryClockActive || !HasDeferredRecovery || !recoveryDeferredHasBackground ||
+                proven.timeProvenance.AccountedBoundary.CompareTo(recoveryDeferredForegroundWall) != 0 ||
+                proven.livingDungeon?.IsClosed != true || (proven.livingDungeon.Scheduler?.AcceptedThrough ?? -1) < recoveryDeferredForegroundThrough)
+                throw new InvalidOperationException(RecoveryEpisode.Invalid);
+            var sample = ObserveDeferredRecovery();
+            var entry = RecoveryEntryObservation.FromCaptured(sample.Wall, proven.timeProvenance, RecoveryEntryContext.KnownBackground);
+            recoveryClockActive = true; recoveryFailureLatched = recoveryDeferredStalled;
+            recoveryCoveredThrough = proven.timeProvenance.AccountedBoundary; recoveryExpectedPredecessorSha256 = null;
+            recoveryWall = sample.Wall; recoveryMonotonic = sample.Monotonic; recoveryEligible100ns = 0;
+            retainedRecoveryEntry = entry; RecoveryOriginalEligible100ns = recoveryDeferredBackground100ns;
+            recoveryDeferredForegroundWall = null; recoveryDeferredBackgroundWall = null;
+            recoveryDeferredBackground100ns = 0; recoveryDeferredPreparing = false; recoveryDeferredHasBackground = false;
+            return entry;
+        }
 
 #if UNITY_EDITOR
         // Clock-only deterministic tests supply explicit durability disposition;
@@ -205,6 +316,7 @@ namespace DungeonBuilder.M0
         internal long RecoveryEligible100nsForClockTest => recoveryEligible100ns;
         internal UnixTimePoint RecoveryDeferredForegroundWallForClockTest => recoveryDeferredForegroundWall;
         internal long RecoveryDeferredBackground100nsForClockTest => recoveryDeferredBackground100ns;
+        internal void CompleteOrdinaryPublicationForClockTest(TimeProvenance proven, LivingDungeonState owner) => CompleteOrdinaryPublication(proven, owner);
 #endif
     }
 }

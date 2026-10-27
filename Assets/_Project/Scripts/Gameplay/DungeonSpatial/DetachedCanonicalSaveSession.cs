@@ -241,6 +241,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 bool unfinished = activated && retainedOwner.Fields[2].Value.Fields[2].Value.Text !=
                     retainedOwner.Fields[2].Value.Fields[3].Value.Text;
                 bool pendingRecovery = priorTime.Episode != null;
+                if (time?.ForegroundThrough.HasValue == true &&
+                    livingDungeon?.Scheduler?.AcceptedThrough != time.ForegroundThrough.Value)
+                    return Failure(RecoveryEpisode.Invalid);
+                if (pendingRecovery && livingDungeon != null) {
+                    long accepted = -1;
+                    if (activated && !ContractJson.Long(retainedOwner.Fields[2].Value.Fields[2].Value, out accepted))
+                        return Failure(RecoveryEpisode.Invalid);
+                    if ((livingDungeon.Scheduler?.AcceptedThrough ?? -1) != accepted)
+                        return Failure(LivingDungeonScheduling.Boundary);
+                }
                 if ((unfinished || pendingRecovery && time?.Settles != true) && livingDungeon == null)
                 {
                     int start = primary.Fields.Count - 10;

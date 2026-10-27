@@ -13,7 +13,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         // one final exact predecessor-to-candidate write publishes the whole pump.
         internal DetachedCanonicalWriteResult AdvanceForeground(string path, ISpatialMigrationFileSystem fs,
             DetachedCanonicalSaveSession session, SaveData current, LivingDungeonForegroundConfig policy,
-            long observedThrough, int tickSeconds, Action<SaveData, long> passiveTick, long savedUtcUnix)
+            long observedThrough, int tickSeconds, Action<SaveData, long> passiveTick, long savedUtcUnix,
+            CanonicalTimeTransition timeTransition = null, Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null)
         {
             using var pumpDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.Pump,
                 ForegroundQualificationMetrics.Origin.Pump);
@@ -35,6 +36,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 RunTransientEvidence.Retain(current, runtime);
                 runtime.lastSavedUtcUnix = savedUtcUnix;
                 var owner = owned.LivingDungeon;
+                if (owned.TimeProvenance?.Episode != null &&
+                    (owner.IsDormant || observedThrough != owner.Scheduler.AcceptedThrough)) return Failure(RecoveryEpisode.Invalid);
                 runtime.livingDungeon = owner;
                 DetachedCanonicalSaveSessionResult staged = null;
                 string admissionReason = null;
@@ -55,9 +58,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     var before = working.GetCurrentBytes();
                     var prepared = working.PrepareForegroundReplacement(DetachedRecognizedSaveStateSnapshot.Capture(runtime, limits),
                         owned, owner, monsters ?? runtime.monsterContinuity,
-                        knowledge ? runtime.sharedBranchKnowledge : null, knowledge ? runtime.sharedFloorKnowledge : null, history, lineage.Permit(before));
+                        knowledge ? runtime.sharedBranchKnowledge : null, knowledge ? runtime.sharedFloorKnowledge : null, history, lineage.Permit(before), timeTransition);
                     prepareMeasurement.Dispose();
                     if (!prepared.IsSuccess) throw new InvalidOperationException(prepared.Reason);
+                    timeTransition = null; // One full time cut belongs only to the first detached stage.
                     // Prepare already round-tripped these exact bytes under this
                     // context. Do not parse/replay the same candidate twice more.
                     staged = prepared; working = prepared.Session; owned = prepared.ForegroundValidation;
@@ -307,7 +311,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 // A bounded pump may retain an accepted horizon. It resumes that exact
                 // prefix before accepting additional observed time on a later invocation.
-                var result = PrepareAndPersist(path, fs, session, staged, false);
+                var result = PrepareAndPersist(path, fs, session, staged, false, candidatePrepared: candidatePrepared);
                 if (result.IsSuccess && recoveredManaSpent != 0) result = new DetachedCanonicalWriteResult(true, result.Reason,
                     result.IsNoOp, result.ApplyExplicitRoomEffect, result.GetPersistedBytes(), result.Session, result.Validation,
                     result.RuntimeProjection, result.RecoveryManaSpent + recoveredManaSpent);

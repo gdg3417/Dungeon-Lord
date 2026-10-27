@@ -11,7 +11,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         // seam; no independently writable recovery file or runtime wallet exists.
         internal DetachedCanonicalWriteResult PublishRecovery(string path, ISpatialMigrationFileSystem fs,
             DetachedCanonicalSaveSession session, CanonicalTimeTransition transition,
-            CanonicalOfflinePassiveManaService mana = null)
+            CanonicalOfflinePassiveManaService mana = null,
+            Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null)
         {
             if (fs == null || session == null || transition == null || context?.RecoveryContext == null)
                 return Failure(RecoveryEpisode.Invalid);
@@ -36,7 +37,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 var snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(current, wallet, limits);
                 var prepared = session.PrepareRecoveryReplacement(snapshot, owned, transition);
-                return PrepareAndPersist(path, fs, session, prepared, false, recover: transition.Settles);
+                return PrepareAndPersist(path, fs, session, prepared, false, recover: transition.Settles, candidatePrepared: candidatePrepared);
             } catch { return Failure(RecoveryEpisode.Invalid); }
         }
     }

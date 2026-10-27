@@ -135,6 +135,102 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(time.ForegroundThrough, Is.EqualTo(5000));
             Assert.That(cut.CandidateTime.AccountedBoundary, Is.EqualTo(new UnixTimePoint(110, 0)));
         }
+
+        static LivingDungeonState ClosedOwner(long through) => new LivingDungeonState {
+            Scheduler = new LivingDungeonScheduler { AcceptedThrough = through, ClosedThrough = through }
+        };
+        static SaveData Settled(TimeProvenance time, long through) => new SaveData {
+            lastSavedUtcUnix = time.AccountedBoundary.Seconds, timeProvenance = time, livingDungeon = ClosedOwner(through)
+        };
+        [Test] public void RecoveryRetryRetainsOriginalEntryAndRejectsChangedPredecessor()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var prior = Closed(80); var time = Service(clock, prior);
+            var entry = time.BeginRecoveryClock(prior); var cut = time.CaptureRecoveryPublication(Source, prior);
+            clock.Set(105, 5); time.RecoveryPublicationFailed(cut);
+            Assert.That(time.RetainedRecoveryEntry, Is.SameAs(entry));
+            Assert.Throws<InvalidOperationException>(() => time.CaptureRecoveryPublication(Candidate, prior));
+            var retry = time.CaptureRecoveryPublication(Source, prior);
+            Assert.That(retry.Eligible100ns, Is.EqualTo(50000000));
+            Assert.That(time.RetainedRecoveryEntry.WallEndpoint, Is.EqualTo(new UnixTimePoint(100, 0)));
+        }
+        [Test] public void RecoveryContextCannotRebindDuringRetryOrAfterClosure()
+        {
+            var clock = new Clock(); clock.Set(110, 0); var prior = Pending(110, 0); var time = Service(clock, prior);
+            time.BeginRecoveryClock(prior); time.BindRecoveryContext(Context);
+            Assert.Throws<InvalidOperationException>(() => time.BindRecoveryContext(new string('c', 64)));
+            var cut = time.CaptureRecoveryPublication(Source, prior, true); cut.Bind(Candidate, Closed(110));
+            time.CompleteRecoveryPublicationForClockTest(cut);
+            Assert.Throws<InvalidOperationException>(() => time.BindRecoveryContext(new string('c', 64)));
+        }
+        [Test] public void OrdinaryRollbackRetainsFullForegroundPrefixAndReleasesOnlyAtSuccessfulQ()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var time = Service(clock, Closed(100));
+            clock.Set(112, 12); time.OrdinaryPublicationFailed();
+            clock.Set(140, 40); var retained = time.ReadForegroundObservation();
+            Assert.That(retained.Through, Is.EqualTo(12000)); Assert.That(retained.Wall.Seconds, Is.EqualTo(112));
+            Assert.That(time.RecoveryDeferredBackground100nsForClockTest, Is.Zero);
+            clock.Set(143, 43); time.CompleteOrdinaryPublicationForClockTest(Closed(112), ClosedOwner(12000));
+            Assert.That(time.HasDeferredRecovery, Is.False);
+            clock.Set(145, 45); Assert.That(time.SampleForeground(), Is.EqualTo(14000));
+        }
+        [Test] public void OrdinaryRetryGroupsBackgroundAndExcludesKnownForegroundStalls()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var time = Service(clock, Closed(100));
+            clock.Set(112, 12); time.OrdinaryPublicationFailed();
+            clock.Set(120, 20); time.SetForegroundFocus(false);
+            clock.Set(130, 30); time.SetForegroundFocus(true);
+            clock.Set(140, 40); time.OrdinaryPublicationFailed();
+            clock.Set(143, 43); time.CompleteOrdinaryPublicationForClockTest(Closed(112), ClosedOwner(12000));
+            var proven = Settled(Closed(112), 12000); time.AttachSave(proven);
+            clock.Set(145, 45); var entry = time.BeginObservedRecovery(proven);
+            Assert.That(entry.Context, Is.EqualTo(RecoveryEntryContext.KnownBackground));
+            Assert.That(time.RecoveryOriginalEligible100ns, Is.EqualTo(120000000));
+            Assert.That(time.ForegroundThrough, Is.EqualTo(12000));
+            Assert.That(time.RecoveryEligible100nsForClockTest, Is.Zero);
+        }
+        [Test] public void OrdinaryPauseUsesObservedFullCutAndGroupsPreparationAfterReturn()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var time = Service(clock, Closed(100));
+            clock.Set(110, 10); time.SetForegroundFocus(false);
+            clock.Set(120, 20); time.SetForegroundFocus(true); time.BeginDeferredRecoveryPreparation();
+            clock.Set(125, 25); time.CompleteOrdinaryPublicationForClockTest(Closed(110), ClosedOwner(10000));
+            var proven = Settled(Closed(110), 10000); time.AttachSave(proven);
+            clock.Set(126, 26); var entry = time.BeginObservedRecovery(proven);
+            Assert.That(entry.WallEndpoint.Seconds, Is.EqualTo(126));
+            Assert.That(time.RecoveryOriginalEligible100ns, Is.EqualTo(160000000));
+            Assert.That(time.ForegroundThrough, Is.EqualTo(10000));
+        }
+        [Test] public void MultipleObservedBackgroundSegmentsDoNotReplacePendingForegroundCut()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var time = Service(clock, Closed(100));
+            clock.Set(110, 10); time.SetForegroundFocus(false);
+            clock.Set(120, 20); time.SetForegroundFocus(true);
+            clock.Set(122, 22); time.SetForegroundFocus(false);
+            clock.Set(126, 26); time.SetForegroundFocus(true);
+            var cut = time.ReadForegroundObservation();
+            Assert.That(cut.Wall.Seconds, Is.EqualTo(110)); Assert.That(cut.Through, Is.EqualTo(10000));
+            Assert.That(time.RecoveryDeferredBackground100nsForClockTest, Is.EqualTo(140000000));
+        }
+        [Test] public void ObservedRecoveryRequiresExactClosedForegroundPrefixBeforeCapturingR()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var time = Service(clock, Closed(100));
+            clock.Set(110, 10); time.SetForegroundFocus(false);
+            clock.Set(120, 20); time.SetForegroundFocus(true);
+            var stale = Settled(Closed(100), 10000); time.AttachSave(stale);
+            Assert.Throws<InvalidOperationException>(() => time.BeginObservedRecovery(stale));
+            var unfinished = Settled(Closed(110), 10000); unfinished.livingDungeon.Scheduler.ClosedThrough = 9000;
+            time.AttachSave(unfinished); Assert.Throws<InvalidOperationException>(() => time.BeginObservedRecovery(unfinished));
+            Assert.That(time.RecoveryClockActive, Is.False); Assert.That(time.HasDeferredRecovery, Is.True);
+        }
+        [Test] public void InvalidOrdinaryFailureObservationDoesNotLoseEligibleForeground()
+        {
+            var clock = new Clock(); clock.Set(100, 10); var time = Service(clock, Closed(100));
+            clock.Set(99, 11); Assert.Throws<InvalidOperationException>(() => time.OrdinaryPublicationFailed());
+            Assert.That(time.HasDeferredRecovery, Is.False);
+            clock.Set(102, 12); time.OrdinaryPublicationFailed();
+            Assert.That(time.ReadForegroundObservation().Through, Is.EqualTo(2000));
+            Assert.That(time.RecoveryDeferredForegroundWallForClockTest.Seconds, Is.EqualTo(102));
+        }
     }
 }
 #endif

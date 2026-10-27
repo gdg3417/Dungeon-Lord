@@ -59,6 +59,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
         internal IReadOnlyList<LivingDungeonProfile> LivingDungeonProfiles { get; }
         internal MonsterRecoveryRules MonsterRecovery { get; }
+        internal RecoveryRuntimeInputs RecoveryInputs { get; private set; }
+        internal void BindRecoveryInputs(RecoveryRuntimeInputs inputs)
+        {
+            if (RecoveryInputs != null || inputs == null) throw new ArgumentException(RecoveryEpisode.ContextMismatch);
+            RecoveryInputs = inputs;
+        }
 
         public SpatialLayoutCompatibilitySnapshot Compatibility { get; }
         public ProductionSpatialContentSnapshot ProductionContent { get; }
@@ -1398,7 +1404,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var context = new DetachedCurrentTargetValidationContext(recoveryContext.Compatibility,
                     productionContent, recoveryContext.LegacyConfigurationBytes, completeLimits,
                     recoveryContext.RoomContentOccupancy, false, recoveryContext.LivingDungeonProfiles, recoveryContext.MonsterRecovery);
+            if (recoveryContext.RecoveryInputs != null) {
+                try { context.BindRecoveryInputs(recoveryContext.RecoveryInputs); }
+                catch { return false; }
+            }
             return DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(bytes, context).IsValid ||
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(bytes, context).IsValid ||
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, context).IsValid;
         }
 

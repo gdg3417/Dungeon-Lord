@@ -16,6 +16,7 @@ namespace DungeonBuilder.M0
         private bool PrepareForegroundAction(ref SaveData current)
         {
             if (foregroundRecoveryRequired) return false;
+            if (current?.timeProvenance?.Episode != null && BeforeForegroundAction == null && !ForegroundWriting) return false;
             if (ForegroundWriting || BeforeForegroundAction == null) return true;
             if (!BeforeForegroundAction()) return false;
             current = ForegroundCurrent?.Invoke() ?? current;
@@ -56,8 +57,17 @@ namespace DungeonBuilder.M0
                 // when that sample is accepted by a later suspended pump.
                 if (suspendedSaveUtc.HasValue)
                     savedBoundary = Math.Max(current.lastSavedUtcUnix, Math.Min(savedBoundary, suspendedSaveUtc.Value));
+                CanonicalTimeTransition time = null;
+                if (current.timeProvenance?.Mode == TimeProvenance.PreciseMode) {
+                    if (current.timeProvenance.Episode != null || recoveryTime?.RecoveryClockActive == true) return ForegroundBlocked();
+                    savedBoundary = current.lastSavedUtcUnix;
+                    if (current.livingDungeon?.IsClosed != false && observation.Context == ForegroundObservationContext.EligibleForeground) {
+                        time = CanonicalTimeTransition.Foreground(_canonicalSession.GetCurrentBytes(), current.timeProvenance, observation, current.livingDungeon);
+                        savedBoundary = time.Successor.AccountedBoundary.Seconds;
+                    }
+                }
                 var result = CreateWriteAuthority().AdvanceForeground(SavePath, _canonicalFileSystem, _canonicalSession, current,
-                    ForegroundConfiguration, through, tickSeconds, passiveTick, savedBoundary);
+                    ForegroundConfiguration, through, tickSeconds, passiveTick, savedBoundary, time);
                 if (result.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason) foregroundRecoveryRequired = true;
                 if (result.IsSuccess) {
                     _canonicalSession = result.Session; _undo = null;

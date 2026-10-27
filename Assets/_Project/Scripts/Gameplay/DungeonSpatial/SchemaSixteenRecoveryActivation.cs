@@ -7,6 +7,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     // the actual original predecessor in ExactCompleteSaveAtomicPersistence.
     internal static class SchemaSixteenRecoveryActivation
     {
+        internal static string ValidateSource(byte[] exactSource, byte[] frozenSixteen,
+            DetachedCurrentTargetValidationContext context, out DetachedCompleteSaveValidationResult prior)
+        {
+            prior = null;
+            if (exactSource == null || context?.RecoveryContext == null || context.RecoveryInputs == null)
+                return RecoveryEpisode.Invalid;
+            prior = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(frozenSixteen, context);
+            if (!prior.IsValid || !DetachedCompleteSaveContract.ResearchStateValid(prior, context.RecoveryInputs))
+                return RecoveryEpisode.Invalid;
+            if (!prior.LivingDungeon.IsClosed) {
+                try {
+                    if (context.HistoricalRecoveryEvidence == null ||
+                        !context.HistoricalRecoveryEvidence.TryGetProvenInputs((byte[])exactSource.Clone(), out var producer) ||
+                        !context.RecoveryContext.SupportsHistorical(producer, context.Limits.Serialized))
+                        return RecoveryEpisode.HistoricalProofRequired;
+                } catch { return RecoveryEpisode.HistoricalProofRequired; }
+            }
+            return null;
+        }
+
         internal static string Prepare(byte[] exactSource, byte[] frozenSixteen,
             DetachedCurrentTargetValidationContext context, RecoveryEntryObservation entry,
             UnixTimePoint through, long eligibleAfterEntry100ns, out byte[] candidate)
@@ -16,15 +36,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 entry.Context != RecoveryEntryContext.UnknownPostCrash || through.CompareTo(entry.WallEndpoint) < 0 ||
                 eligibleAfterEntry100ns < 0 || eligibleAfterEntry100ns > through.Elapsed100nsSince(entry.WallEndpoint))
                 return RecoveryEpisode.Invalid;
-            var prior = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(frozenSixteen, context);
-            if (!prior.IsValid || context.RecoveryInputs == null ||
-                !DetachedCompleteSaveContract.ResearchStateValid(prior, context.RecoveryInputs)) return RecoveryEpisode.Invalid;
-            if (!prior.LivingDungeon.IsClosed) {
-                if (context.HistoricalRecoveryEvidence == null ||
-                    !context.HistoricalRecoveryEvidence.TryGetProvenInputs((byte[])exactSource.Clone(), out var producer) ||
-                    !context.RecoveryContext.SupportsHistorical(producer, context.Limits.Serialized))
-                    return RecoveryEpisode.HistoricalProofRequired;
-            }
+            string sourceReason = ValidateSource(exactSource, frozenSixteen, context, out var prior);
+            if (sourceReason != null) return sourceReason;
             try {
                 var source = prior.TimeProvenance.AccountedBoundary;
                 var originalEnd = new UnixTimePoint(entry.WallEndpoint.Seconds, 0);

@@ -310,6 +310,7 @@ namespace DungeonBuilder.M0
                 new RawSaveEnvelopeVersionContract(1, 6), CreateBlankFloorContract(),
                 _positionMigrationProfiles, _roomContentOccupancy,
                 livingDungeonProfiles: _validationContext.LivingDungeonProfiles, monsterRecovery: _validationContext.MonsterRecovery);
+            if (recoveryInputs != null) coordinator.ConfigureRecovery(recoveryInputs, recoveryTime, historicalRecoveryEvidence);
             DetachedSpatialSaveLoadResult loaded = coordinator.Load(SavePath, preflight);
             if (!loaded.IsSuccess)
             {
@@ -432,7 +433,8 @@ namespace DungeonBuilder.M0
                 if (action == null)
                     return PlayerResearchActionHandler.PersistenceFailure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
                 if (!action.Succeeded || !action.StateChanged) return action;
-                candidate.lastSavedUtcUnix = CaptureMonotonicSaveBoundary(candidate.lastSavedUtcUnix);
+                if (candidate.timeProvenance?.Mode != TimeProvenance.PreciseMode)
+                    candidate.lastSavedUtcUnix = CaptureMonotonicSaveBoundary(candidate.lastSavedUtcUnix);
             }
             catch (Exception)
             {
@@ -468,7 +470,8 @@ namespace DungeonBuilder.M0
                 if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null)
                 { _logger.Error("Canonical save authority is unavailable."); return false; }
                 long previous = data.lastSavedUtcUnix;
-                data.lastSavedUtcUnix = CaptureMonotonicSaveBoundary(previous);
+                if (data.timeProvenance?.Mode != TimeProvenance.PreciseMode)
+                    data.lastSavedUtcUnix = CaptureMonotonicSaveBoundary(previous);
                 DetachedCanonicalWriteResult result = CreateWriteAuthority().SaveRecognizedState(
                     SavePath, _canonicalFileSystem, _canonicalSession, data);
                 if (!result.IsSuccess)
@@ -524,7 +527,8 @@ namespace DungeonBuilder.M0
             if (!_canonicalConfigured || _canonicalSession == null || _canonicalFileSystem == null || current == null)
                 return new DetachedCanonicalWriteResult(false, "branch.run.invalid_state", false, false, null, null, null, null);
             var result = CreateWriteAuthority().CommitPhaseFiveBRun(SavePath, _canonicalFileSystem,
-                _canonicalSession, current, simulation, postureId, CaptureMonotonicSaveBoundary(current.lastSavedUtcUnix));
+                _canonicalSession, current, simulation, postureId, current.timeProvenance?.Mode == TimeProvenance.PreciseMode
+                    ? current.lastSavedUtcUnix : CaptureMonotonicSaveBoundary(current.lastSavedUtcUnix));
             if (result.IsSuccess)
             {
                 _undo = null; _canonicalSession = result.Session;
@@ -744,11 +748,18 @@ namespace DungeonBuilder.M0
         private LootConfig _runLoot;
         public void ConfigureRunLoot(LootConfig value) { _runLoot = value; FloorPreviewConfigurationVersion++; }
 
-        private DetachedCanonicalWriteAuthority CreateWriteAuthority() =>
-            new DetachedCanonicalWriteAuthority(_production, _compatibility,
+        private DetachedCanonicalWriteAuthority CreateWriteAuthority()
+        {
+            var writer = new DetachedCanonicalWriteAuthority(_production, _compatibility,
                 _legacyGameplayConfiguration,
                 _validationContext, _limits, _removalPolicy, _economy, _economyModifiers, _acquisition,
                 _branchingResearch, _floorConstructionProfiles, _floorConstructionResearch, _runLoot);
+            if (recoveryInputs != null) {
+                writer.CandidatePrepared = RetainPublication;
+                writer.PublicationObserved = ObservePublication;
+            }
+            return writer;
+        }
 
         private bool HasOwnedRecoveryEvidence()
         {
