@@ -146,8 +146,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var h = new Harness(); var bytes = h.Service.CanonicalSession.GetCurrentBytes();
             var bound = h.F.Context.RecoveryInputs;
-            var config = wrongLoot ? bound.Configuration : UnityEngine.JsonUtility.FromJson<RunSimulationConfig>(UnityEngine.JsonUtility.ToJson(bound.Configuration));
-            if (!wrongLoot) config.CombatC0.Monsters[0].MaxHealth += 2;
+            var config = bound.Configuration;
+            if (!wrongLoot) {
+                string changed = Encoding.UTF8.GetString(bound.Identity.GetInput(0)).Replace("\"MaxHealth\": 8,", "\"MaxHealth\": 10,");
+                Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(changed, out config), Is.True);
+                Assert.That(config.CombatC0, Is.Not.Null);
+            }
             var loot = wrongLoot ? UnityEngine.JsonUtility.FromJson<LootConfig>(UnityEngine.JsonUtility.ToJson(bound.Loot)) : bound.Loot;
             var writer = new DetachedCanonicalWriteAuthority(h.F.Production, h.F.Compatibility, config, h.F.Context, h.F.Profile,
                 economy: bound.Economy, runLoot: loot);
