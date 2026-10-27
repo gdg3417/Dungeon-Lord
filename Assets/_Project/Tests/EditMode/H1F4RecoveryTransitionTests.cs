@@ -23,7 +23,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void ConsumedBundleConstructsEveryRecoveryDependencyFromRetainedBytes()
         {
             var f = HistoricalFixture(); var inputs = Inputs(); var bundle = Bundle(f, inputs);
-            f.Context.BindRecoveryInputs(bundle);
+            var context = HistoricalContext(f, bundle);
             inputs[0][0] ^= 1;
             Assert.That(bundle.Identity.Digest, Is.EqualTo(new RecoveryContextIdentity(Inputs()).Digest));
             Assert.That(bundle.Configuration.CombatC0, Is.Not.Null); Assert.That(bundle.Bootstrap.tickSeconds, Is.EqualTo(10));
@@ -31,7 +31,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(bundle.ResearchValid(f.Runtime), Is.True);
             Assert.That(bundle.ResearchValid(new SaveData { researchPending = new ResearchPendingState(),
                 researchProgress = new ResearchProgressState() }), Is.False);
-            Assert.Throws<ArgumentException>(() => f.Context.BindRecoveryInputs(bundle));
+            Assert.Throws<ArgumentException>(() => context.BindRecoveryInputs(bundle));
         }
         [TestCase(0)] [TestCase(1)] [TestCase(8)] [TestCase(11)]
         public void MalformedDependencyCannotEstablishValidatedBundle(int index)
@@ -103,19 +103,31 @@ namespace DungeonBuilder.M0.Tests.EditMode
         static byte[] AcceptedSource(Fixture f, RecoveryRuntimeInputs bundle)
         {
             var context = HistoricalContext(f, bundle);
-            var session = DetachedCanonicalSaveSession.Open(f.Session.GetCurrentBytes(), context, f.Profile);
-            Assert.That(session.IsSuccess, Is.True, session.Reason);
             var owner = LivingDungeonState.Empty();
             LivingDungeonScheduling.Activate(owner, context.LivingDungeonProfiles[0], bundle.OneFloor.MinimumArrival, f.Runtime.runHistory);
             LivingDungeonScheduling.Accept(owner, 100);
-            var prepared = session.Session.PrepareLivingDungeonReplacement(DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile), f.State, owner);
-            Assert.That(prepared.IsSuccess, Is.True, prepared.Reason);
-            return prepared.Update.GetBytes(); // Synthetic test-produced legacy state, never production attribution.
+            var issues = new SpatialIssueCollector(8);
+            Assert.That(ContractJson.TryParse(f.FrozenSixteen, f.Profile.Canonical.Serialized, issues, out var root), Is.True);
+            var w = new ContractJsonWriter(f.Profile.Canonical.Serialized); w.Node(); w.Token("{");
+            for (int i = 0; i < root.Fields.Count; i++) {
+                if (i != 0) w.Token(","); var field = root.Fields[i]; w.String(field.Key); w.Token(":");
+                if (field.Key != "primary") DetachedCompleteSaveContract.WriteCanonicalNode(w, field.Value);
+                else {
+                    w.Node(); w.Token("{");
+                    for (int j = 0; j < field.Value.Fields.Count; j++) {
+                        if (j != 0) w.Token(","); var p = field.Value.Fields[j]; w.String(p.Key); w.Token(":");
+                        if (p.Key == LivingDungeonContracts.OwnerName) LivingDungeonContracts.Write(w, owner);
+                        else DetachedCompleteSaveContract.WriteCanonicalNode(w, p.Value);
+                    }
+                    w.Token("}");
+                }
+            }
+            w.Token("}"); return w.Finish(); // Test-produced history, never production attribution.
         }
         [Test] public void HistoricalClosedActivationRetainsRAndWholeSecondCarryWithoutProducerInference()
         {
             var f = HistoricalFixture(); var bundle = Bundle(f); var context = HistoricalContext(f, bundle);
-            var source = f.Session.GetCurrentBytes(); var untouched = (byte[])source.Clone();
+            var source = f.FrozenSixteen; var untouched = (byte[])source.Clone();
             var prior = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(source, context);
             var entry = RecoveryEntryObservation.Capture(new Clock(), prior.TimeProvenance, RecoveryEntryContext.UnknownPostCrash);
             Assert.That(SchemaSixteenRecoveryActivation.Prepare(source, source, context, entry, entry.WallEndpoint, 0, out var first), Is.Null);
@@ -163,9 +175,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void HistoricalTimestampZeroIsReaderHistoryAndNeverActivationEvidence()
         {
             var f = HistoricalFixture(); var bundle = Bundle(f); var context = HistoricalContext(f, bundle);
-            var prior = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(f.Session.GetCurrentBytes(), context);
+            var prior = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(f.FrozenSixteen, context);
             var entry = RecoveryEntryObservation.Capture(new Clock(), prior.TimeProvenance, RecoveryEntryContext.UnknownPostCrash);
-            var invalid = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace("\"lastSavedUtcUnix\":1,", "\"lastSavedUtcUnix\":0,"));
+            var invalid = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(f.FrozenSixteen).Replace("\"lastSavedUtcUnix\":1,", "\"lastSavedUtcUnix\":0,"));
             Assert.That(SchemaSixteenRecoveryActivation.Prepare(invalid, invalid, context, entry, entry.WallEndpoint, 0, out var candidate),
                 Is.EqualTo(RecoveryEpisode.Invalid)); Assert.That(candidate, Is.Null);
         }

@@ -37,7 +37,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void FrozenSixteenRemainsReadOnlyAndExact()
         {
-            var f = Fixture.Create(null); var source = f.Session.GetCurrentBytes();
+            var f = Fixture.Create(null); var source = f.FrozenSixteen;
             var historical = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(source, f.Context);
             Assert.That(historical.IsValid, Is.True); Assert.That(historical.CurrentTargetValidated, Is.False);
             CollectionAssert.AreEqual(source, historical.GetBytes());

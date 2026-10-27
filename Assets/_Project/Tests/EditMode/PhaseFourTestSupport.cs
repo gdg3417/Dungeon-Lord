@@ -11,6 +11,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         internal static bool Upgrade(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] current)
         {
+            current = null;
+            if (!UpgradeFrozenSixteen(source, limits, out var historical)) return false;
+            current = SyntheticCurrent(historical, limits); return true;
+        }
+
+        internal static bool UpgradeFrozenSixteen(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] current)
+        {
             source = WithTestTimestamp(source, limits);
             current = null;
             if (!SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight))
@@ -29,6 +36,56 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out var fourteen) &&
                 SchemaFourteenToFifteenUpgrade.TryPrepare(fourteen, limits, MonsterRecoveryRules.EditorFallback(), out var fifteen) &&
                 SchemaFifteenToSixteenUpgrade.TryPrepareStructure(fifteen, limits, null, out current);
+        }
+
+        // Explicitly synthetic current-schema fixtures, not migration or producer
+        // evidence. Frozen source bytes are retained separately. Absent Research
+        // is made explicit for these newly authored fixtures only; malformed
+        // historical shells are never repaired by production activation.
+        internal static byte[] SyntheticCurrent(byte[] frozen, CanonicalSpatialSerializationLimits limits,
+            RecoveryContextIdentity identity = null)
+        {
+            var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
+            Assert.That(ContractJson.TryParse(frozen, limits.Serialized, issues, out var root), Is.True);
+            var primary = root.Fields[2].Value;
+            Assert.That(TimeProvenance.TryRead(primary, 16, out var old), Is.True);
+            var time = new TimeProvenance(old.AccountedBoundary, (identity ?? new RecoveryContextIdentity(H1F4RecoveryContractTests.Inputs())).Digest, null);
+            var w = new ContractJsonWriter(limits.Serialized); w.Node(); w.Token("{");
+            for (int i = 0; i < root.Fields.Count; i++) {
+                if (i != 0) w.Token(","); var f = root.Fields[i]; w.String(f.Key); w.Token(":");
+                if (f.Key == "schemaVersion") w.Token("17");
+                else if (f.Key != "primary") DetachedCompleteSaveContract.WriteCanonicalNode(w, f.Value);
+                else {
+                    w.Node(); w.Token("{"); bool first = true;
+                    void Field(string name, ContractJsonNode node) {
+                        if (!first) w.Token(","); first = false; w.String(name); w.Token(":");
+                        if (name == TimeProvenance.Owner) time.Write(w);
+                        else if (node == null) w.Token("null");
+                        else DetachedCompleteSaveContract.WriteCanonicalNode(w, node);
+                    }
+                    foreach (string name in RawSavePayloadClassifier.RecognizedSaveDataMemberNames) {
+                        if (name == PhaseFiveSaveContracts.CorridorOwnerName || name == PhaseFiveSaveContracts.KnowledgeOwnerName || name == PhaseSixFloorKnowledge.OwnerName) continue;
+                        var found = primary.Fields.Where(p => p.Key == name).Select(p => p.Value).SingleOrDefault();
+                        if (found != null || name == "researchPending" || name == "researchProgress") Field(name, found);
+                    }
+                    foreach (var p in primary.Fields.Where(p => !RawSavePayloadClassifier.RecognizedSaveDataMemberNames.Contains(p.Key))) Field(p.Key, p.Value);
+                    w.Token("}");
+                }
+            }
+            w.Token("}"); return w.Finish();
+        }
+
+        internal static DetachedCurrentTargetValidationContext CurrentContext(SpatialLayoutCompatibilitySnapshot compatibility,
+            ProductionSpatialContentSnapshot production, byte[] legacyConfiguration, CanonicalSpatialSerializationLimits limits,
+            RoomContentSpatialOccupancySnapshot occupancy = null, bool allowEditorTestOccupancyFallback = true,
+            System.Collections.Generic.IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles = null, MonsterRecoveryRules monsterRecovery = null)
+        {
+            var context = new DetachedCurrentTargetValidationContext(compatibility, production, legacyConfiguration, limits,
+                occupancy, allowEditorTestOccupancyFallback, livingDungeonProfiles, monsterRecovery);
+            var inputs = new RecoveryRuntimeInputs(H1F4RecoveryContractTests.Inputs(), production,
+                ProductionSpatialContentWorkloadLimitParser.Parse(UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.TextAsset>(
+                    "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json")).Limits, limits);
+            context.BindRecoveryInputs(inputs); return context;
         }
 
         // Disposable older scaffolds omitted optional historical time. Supply an

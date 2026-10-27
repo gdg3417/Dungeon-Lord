@@ -206,9 +206,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 null, null, context.LivingDungeonProfiles);
             if (!result.IsValid || !result.LayoutContractVersion.HasValue) return Failure();
             if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction &&
-                (context.RecoveryContext?.Matches(result.TimeProvenance) != true ||
+                (context.RecoveryInputs == null || context.RecoveryContext?.Matches(result.TimeProvenance) != true ||
                  result.TimeProvenance.Episode?.Phase == RecoveryEpisode.ResidualPending && !result.LivingDungeon.IsClosed)) return Failure();
-            if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction && context.RecoveryInputs != null &&
+            if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction &&
                 !ResearchStateValid(result, context.RecoveryInputs)) return Failure();
             if (!MonsterContinuity.Valid(result.MonsterContinuity, result.State, context.MonsterRecovery, limits.Spatial.MaximumRecords)) return Failure();
             if (!DetachedCanonicalProductionSemanticValidation.Validate(result.State, context.Production,

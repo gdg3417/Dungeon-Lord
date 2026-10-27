@@ -1475,6 +1475,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal SaveData Runtime;
             internal Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem FileSystem;
             internal string ActivePath;
+            internal byte[] FrozenSixteen;
             internal DetachedCanonicalWriteAuthority Authority => new DetachedCanonicalWriteAuthority(
                 Production, Compatibility, Configuration, Context, Profile, RemovalPolicy, Economy,
                 acquisition: Acquisition, branchingResearch: BranchingResearch);
@@ -1491,12 +1492,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         workloadProfile?.Raw, workloadProfile?.Whole, workloadProfile?.Canonical);
                 Assert.That(source.Result.IsSuccess, Is.True, source.Result.Reason);
                 byte[] candidate = source.Result.Attempt.Candidate.GetBytes();
-                Assert.That(PhaseFourTestSupport.Upgrade(candidate, source.Limits,
-                    out candidate), Is.True);
+                Assert.That(PhaseFourTestSupport.UpgradeFrozenSixteen(candidate, source.Limits,
+                    out var frozenSixteen), Is.True);
+                candidate = PhaseFourTestSupport.SyntheticCurrent(frozenSixteen, source.Limits);
                 RoomContentSpatialOccupancySnapshot occupancy = PhaseFourTestSupport.Occupancy(source.Limits);
                 RoomContentPositionMigrationProfilesSnapshot positionProfiles =
                     PhaseFourTestSupport.PositionProfiles(source.Limits);
-                var context = new DetachedCurrentTargetValidationContext(source.Compatibility,
+                var context = PhaseFourTestSupport.CurrentContext(source.Compatibility,
                     source.Production, source.LegacyBytes, source.Limits, occupancy);
                 var profile = workloadProfile ?? new SaveSpatialMigrationLimitsProfile(
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
@@ -1539,7 +1541,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Economy = PhaseFourTestSupport.Economy(source.Production, source.Limits),
                     Acquisition = PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits),
                     BranchingResearch = branchingResearch, Occupancy = occupancy,
-                    PositionProfiles = positionProfiles };
+                    PositionProfiles = positionProfiles, FrozenSixteen = frozenSixteen };
             }
 
             internal DetachedCanonicalMutationResult Prepare(DetachedCanonicalMutationRequest request) =>

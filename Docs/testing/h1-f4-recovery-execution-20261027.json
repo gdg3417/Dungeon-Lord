@@ -286,6 +286,57 @@
         "skipped": 0,
         "skips": []
       }
+    },
+    {
+      "campaign": "TestResults\\qualification-supervisor\\f97d54bbe799475eb7a7e61ba8faace8",
+      "evidence": {
+        "child.json": "f4f80523a73025005c451b4dbbe8375e484b9bf234b55adb8b52935c000e01c9",
+        "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "exit.json": "6e64df22c80fdcac5d614a5d78ea3cd8c1580ddd62cbf420877e79c629d7b60c",
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "bf350c2853cbe4e25b80d5fdf66ac3c78beb8ea11f5d3fb6e706885ed278b469",
+        "results.xml": "687cd0c9a71486d81f04c845b3e98a8d4d443b3275b1cb7fbf76fa6df3b1520f",
+        "started.json": "bc7d0d7c673ce32ee1a1627e68c32ad3a5276f14861b8c77bc56e372b34d53f7",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unity.log": "52a69251c403ec61b8306711adf87d0181b3f081be1d0528f178ac529b9ba044"
+      },
+      "input_identity": "5329040938ed2d367d24f9dd4389012d6f53a0bb976bf29ade937312d97b5fda",
+      "preservation": {
+        "inputs": 1490,
+        "original_inputs_restored": true,
+        "passed": true,
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 bootstrap01",
+        "protected_evidence_unchanged": true,
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 bootstrap01"
+      },
+      "process_exit": {
+        "child_finished_utc": "2026-10-27T15:06:51.799133+00:00",
+        "child_process": {
+          "created": 134375871829725189,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 48460
+        },
+        "exit_code": 0,
+        "host_exit_code": 0,
+        "job": "Local\\DLQ-5543a0b63e064f909b0584b27b38b1a2",
+        "process": {
+          "created": 134375871828719234,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 31712
+        }
+      },
+      "scope": "Staged bootstrap compiled; focused clock/transition tests. Schema 17 inactive at this source; actual runtime qualification pending",
+      "source_sha": "c324a256da24064a1e38df10ce815576b85b51d1",
+      "status": "PASSED",
+      "tests": {
+        "discovered": 70,
+        "failed": 0,
+        "passed": 70,
+        "skipped": 0,
+        "skips": []
+      }
     }
   ]
 }

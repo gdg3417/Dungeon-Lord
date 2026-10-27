@@ -1848,7 +1848,8 @@ namespace DungeonBuilder.M0
             }
 
             CurrentHeat = Save.structureRuntime != null ? Save.structureRuntime.Heat : 0d;
-            Save.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
+            if (Save.timeProvenance?.Mode != TimeProvenance.PreciseMode)
+                Save.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
             CaptureOfflineSummaryDiagnostics();
             RefreshDashboardState();
             RefreshOfflineSummaryLines();
