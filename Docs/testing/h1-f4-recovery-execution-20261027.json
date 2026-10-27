@@ -1,6 +1,123 @@
 {
   "artifact_owner": "H1-F4 task",
   "correction": "Test fixtures now supply explicit null Research absence and the frozen production schema-13 base budget. Production limits, validation and gameplay tuning are unchanged. All 48 cases remain selected.",
+  "fixture_correction_qualification": {
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\59a5c7eef3504caeb1e56155246fbe99",
+    "final_preservation": {
+      "inputs": 1482,
+      "original_inputs_restored": true,
+      "passed": true,
+      "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 transitions03",
+      "protected_evidence_unchanged": true,
+      "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 transitions03"
+    },
+    "scope": "The 48 foundation/transition/historical activation fixtures only; not full H1-F4 runtime qualification",
+    "source_sha": "e75bd6807a583e501561fbb8a237388da453d417",
+    "stages": {
+      "focused": {
+        "evidence": {
+          "child.json": "4bb234c716bcaa7a595c181b96e82d1afd27927fabaac01fee56d6f872fe48cf",
+          "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+          "exit.json": "bfa4b178df93ca1ed629bdfa54c8cc4baef9ac4681c7f7170ed815a82055bac7",
+          "generated-inputs": {
+            "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+          },
+          "invocation.json": "36b30193e1ec6c48924dc50e3ed676af7e3d134f212a228cd9a420fdb11d74a7",
+          "results.xml": "b040be3fc0519d447641078ab6e97e868b89de7171ef3c6b7f3983b5b06d2661",
+          "started.json": "06a53f19245981c62f96d3d8c4d71ce672e85456929b330a4de965a7afdb8687",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "unity.log": "b6d6d209d40993b31eb3b7a4554b796172aed23cd590c46d2db19786627f8c84"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "source_sha": "e75bd6807a583e501561fbb8a237388da453d417",
+        "status": "PASSED",
+        "tests": {
+          "discovered": 48,
+          "failed": 0,
+          "passed": 48,
+          "skipped": 0,
+          "skips": []
+        }
+      },
+      "focused-preflight": {
+        "evidence": {
+          "child.json": "58bf4aa083a8decc55b5879db073b2ed683508e9cb9301af8b73ccecc8cba48a",
+          "exit.json": "20c2e962cdda508641d131e740e780f3a69d28c55b129dafd4b90c299b462eb6",
+          "preservation.json": "a7815ecf444b86a50e2b6bcae819d4770b98bc520902c8e385b1c84d3a73d5e1",
+          "started.json": "ef8360147e041f0cf1f4bfd9b1a1d11b3521408415da4353a49e70eb10be62a4",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "source_sha": "e75bd6807a583e501561fbb8a237388da453d417",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "preservation": {
+        "evidence": {
+          "child.json": "5825703ed38327d5f93b41d5550e5419034f6dd27690bddd2e0294b9eb3a446e",
+          "exit.json": "a2043d62da050ca5292a55de3896ce7cb5747a6bb3912307726860f936c0a323",
+          "preservation.json": "300fadbb7cd2a33cc1b005aa4207cf95e36cfaf55e2b899b050d3953618690da",
+          "started.json": "9b6fca7f9fdebfca44d68ef14d78eff535bfa9d40a348b6e4ebf0623f73c26c8",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "source_sha": "e75bd6807a583e501561fbb8a237388da453d417",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "restore": {
+        "evidence": {
+          "child.json": "71dba963c064074e56b35bace9e2bda916fed1829c9dfd4b8e9bca127b4c1336",
+          "exit.json": "2cf8b3675964ac0c15cccf9aaac9f3294264fa08e9f17499b51d266c0ed173c3",
+          "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+          "started.json": "5c141c84f902cd909993d410036c9f7a1f0dab0029f51bc6b9b6a7128bd56510",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "source_sha": "e75bd6807a583e501561fbb8a237388da453d417",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "restore-preflight": {
+        "evidence": {
+          "child.json": "0eb090cc73e9cbffcd07acd79a850d02e9aa32944e382508139e7d118823e4a4",
+          "exit.json": "df3d54f4a34beae1e1e08e4d78fe3d161c1e6ab1fd280878ae6a5e373a2e6142",
+          "preservation.json": "a7815ecf444b86a50e2b6bcae819d4770b98bc520902c8e385b1c84d3a73d5e1",
+          "started.json": "2c1f5819aaf13cf6f64733bc0a2c1e58456b734fd3c817b69a780e94b156f91b",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "source_sha": "e75bd6807a583e501561fbb8a237388da453d417",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      }
+    }
+  },
   "fresh_attempt": {
     "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\479fe5daf3974a68838f0a834f1e152d",
     "failed_cases": [
@@ -29,6 +146,7 @@
       "skips": []
     }
   },
+  "original_incomplete_campaign_reverified_after_passing_rerun": true,
   "recovery": {
     "artifact_owner": "H1-F4 task",
     "campaign_launched_by_recovery": false,

@@ -125,7 +125,7 @@ def plan(attempt):
     stages = [
         {"id": "focused-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/focused-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
         {"id": "focused", "role": "test", "depends": ["focused-preflight"], "command": command("run-test"), "timeout_seconds": 960,
-         "xml": "results.xml", "expected_tests": 48, "allowed_skips": [], "artifacts": ["unity.log", "invocation.json", "cli-exit.json", "generated-inputs"]},
+         "xml": "results.xml", "expected_tests": 56, "allowed_skips": [], "artifacts": ["unity.log", "invocation.json", "cli-exit.json", "generated-inputs"]},
         {"id": "restore-preflight", "role": "preflight", "depends": ["focused"], "command": command("preflight")[:-1] + ["{campaign}/restore-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
         {"id": "restore", "role": "report", "depends": ["restore-preflight"], "command": command("restore"), "timeout_seconds": 120,
          "artifacts": ["restoration.json"], "after_input_identity": restored_id},
@@ -139,7 +139,7 @@ def plan(attempt):
                                        "Only the previously measured TMP fallback-font rewrite may be retained then restored after a zero-exit CLI; any other change fails closed."],
             "stages": stages, "selections": {"focused": [s["id"] for s in stages]}}
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": 48, "skips": 0}))
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": 56, "skips": 0}))
 
 
 def preflight(attempt, stage, restored=False):

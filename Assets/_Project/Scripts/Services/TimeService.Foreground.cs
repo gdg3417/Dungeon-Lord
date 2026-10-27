@@ -12,7 +12,8 @@ namespace DungeonBuilder.M0
         private UnixTimePoint foregroundWall;
         internal bool HasForegroundClock => foregroundUnitsPerSecond > 0;
         internal long ForegroundThrough => foregroundThrough;
-        internal bool ForegroundPresentationActive => HasForegroundClock && foregroundFocused && !_isPaused && _save != null;
+        internal bool ForegroundPresentationActive => HasForegroundClock && foregroundFocused && !_isPaused && _save != null &&
+            !recoveryClockActive && recoveryDeferredForegroundWall == null;
         internal void BeginForeground(int unitsPerSecond, long acceptedThrough)
         {
             if (HasForegroundClock || unitsPerSecond <= 0 || acceptedThrough < -1) throw new InvalidOperationException("living.foreground.clock_invalid");
@@ -31,7 +32,7 @@ namespace DungeonBuilder.M0
             if (!HasForegroundClock) throw new InvalidOperationException("living.foreground.clock_invalid");
             long sample = ReadForegroundSample();
             if (sample < foregroundSample) throw new InvalidOperationException("living.foreground.clock_invalid");
-            if (_save != null && !_isPaused && foregroundFocused) foregroundThrough = checked(foregroundThrough + checked(sample - foregroundSample));
+            if (ForegroundPresentationActive) foregroundThrough = checked(foregroundThrough + checked(sample - foregroundSample));
             foregroundSample = sample; return foregroundThrough;
         }
         internal ForegroundObservation CaptureForegroundObservation(DetachedCanonicalSaveSession predecessor)
@@ -55,6 +56,7 @@ namespace DungeonBuilder.M0
         { foregroundSample = sample; foregroundThrough = through; foregroundWall = wall; }
         internal void SetForegroundFocus(bool focused)
         {
+            RecoveryLifecycleObservation(focused, _isPaused);
             if (HasForegroundClock) SampleForeground();
             foregroundFocused = focused;
         }
