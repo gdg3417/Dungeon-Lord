@@ -21,6 +21,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             const string invalid = "living.foreground.invalid_state";
             var executions = new Dictionary<int, RunExecution>();
             try {
+                var bound = context?.RecoveryInputs;
+                if (bound != null && ((!ReferenceEquals(policy, bound.OneFloor) && !ReferenceEquals(policy, bound.TwoFloor)) ||
+                    tickSeconds != bound.Bootstrap.tickSeconds)) return Failure(RecoveryEpisode.ContextMismatch);
                 if (policy == null || current == null || session == null || fs == null || observedThrough < 0 || tickSeconds <= 0 || passiveTick == null ||
                     !session.GetCurrentBytes().SequenceEqual(fs.ReadAllBytes(path))) return Failure(invalid);
                 var profile = context.LivingDungeonProfiles.SingleOrDefault(p => p.Id == (current.livingDungeon?.Scheduler?.ProfileId ?? policy.Id));

@@ -15,7 +15,7 @@ namespace DungeonBuilder.M0
         private RecoveryPublicationObservation recoveryPublication;
         private string recoveryExpectedPredecessorSha256;
         private string recoveryBoundContextSha256;
-        private long recoveryConditionalUnits, recoveryConditionalBackground100ns;
+        private long recoveryConditionalUnits, recoveryConditionalEligible100ns;
         private bool recoveryConditionalInterrupted, recoveryConditionalBackgroundObserved;
         private UnixTimePoint recoveryConditionalPrefixEnd;
 
@@ -84,7 +84,7 @@ namespace DungeonBuilder.M0
             var sample = ReadRecoverySample(null);
             recoveryWall = sample.Wall; recoveryMonotonic = sample.Monotonic; recoveryCoveredThrough = sample.Wall;
             recoveryClockActive = true; recoveryFailureLatched = false; recoveryEligible100ns = 0;
-            recoveryConditionalUnits = 0; recoveryConditionalBackground100ns = 0;
+            recoveryConditionalUnits = 0; recoveryConditionalEligible100ns = 0;
             recoveryConditionalBackgroundObserved = !ObservedForeground;
             recoveryConditionalInterrupted = !ObservedForeground;
             recoveryConditionalPrefixEnd = recoveryConditionalInterrupted ? sample.Wall : null;
@@ -112,9 +112,13 @@ namespace DungeonBuilder.M0
             long elapsed = sample.Wall.Elapsed100nsSince(recoveryWall);
             long eligible = !recoveryFailureLatched || !ObservedForeground ? elapsed : 0;
             long total = checked(recoveryEligible100ns + eligible);
-            long conditional = recoveryConditionalUnits, background = recoveryConditionalBackground100ns;
+            long conditional = recoveryConditionalUnits, background = recoveryConditionalEligible100ns;
             if (recoveryPublication?.Closure == true) {
-                if (!ObservedForeground) background = checked(background + elapsed);
+                // After the first observed background transition, ordinary
+                // progression stays behind the retained prefix. Non-stalled
+                // recovery processing on return joins the same grouped duration.
+                if (!ObservedForeground || recoveryConditionalBackgroundObserved && !recoveryFailureLatched)
+                    background = checked(background + elapsed);
                 if (!recoveryPublication.StartedStalled && !recoveryConditionalInterrupted && ObservedForeground) {
                     long before = checked((long)Math.Floor(recoveryMonotonic * foregroundUnitsPerSecond));
                     conditional = checked(conditional + checked(sample.Units - before));
@@ -122,7 +126,7 @@ namespace DungeonBuilder.M0
             }
             // Validation and all checked arithmetic precede mutation.
             recoveryEligible100ns = total; recoveryConditionalUnits = conditional;
-            recoveryConditionalBackground100ns = background;
+            recoveryConditionalEligible100ns = background;
             recoveryWall = sample.Wall; recoveryMonotonic = sample.Monotonic;
             return sample;
         }
@@ -140,7 +144,7 @@ namespace DungeonBuilder.M0
             recoveryExpectedPredecessorSha256 = SpatialContractSha256.Compute(predecessor);
             recoveryPublication = new RecoveryPublicationObservation(sample.Wall, recoveryEligible100ns, predecessor,
                 closeResidual, recoveryFailureLatched, proven.RecoveryContextSha256);
-            recoveryConditionalUnits = 0; recoveryConditionalBackground100ns = 0;
+            recoveryConditionalUnits = 0; recoveryConditionalEligible100ns = 0;
             recoveryConditionalBackgroundObserved = !ObservedForeground;
             recoveryConditionalInterrupted = !ObservedForeground || recoveryFailureLatched;
             recoveryConditionalPrefixEnd = recoveryConditionalInterrupted ? sample.Wall : null;
@@ -160,13 +164,14 @@ namespace DungeonBuilder.M0
                     long through = checked(foregroundThrough + checked(pause.Units - foregroundSample));
                     foregroundThrough = through; foregroundSample = pause.Units; foregroundWall = pause.Wall;
                     recoveryDeferredForegroundWall = pause.Wall; recoveryDeferredForegroundThrough = through;
-                    recoveryDeferredBackgroundWall = pause.Wall; recoveryDeferredBackground100ns = 0;
+                    recoveryDeferredBackgroundWall = pause.Wall; recoveryDeferredEligible100ns = 0;
                     recoveryDeferredHasBackground = true; recoveryDeferredPreparing = false;
                     recoveryMonotonic = pause.Monotonic;
                 }
                 if (recoveryDeferredForegroundWall != null) {
                     ObserveDeferredRecovery();
                     if (!nextFocused || nextPaused) recoveryDeferredHasBackground = true;
+                    else if (recoveryDeferredHasBackground) recoveryDeferredPreparing = true;
                 }
                 return;
             }
@@ -186,7 +191,7 @@ namespace DungeonBuilder.M0
             ObserveRecoveryClock();
             recoveryFailureLatched = true;
             recoveryPublication = null; // Attempted S grants no authority or foreground credit.
-            recoveryConditionalUnits = 0; recoveryConditionalBackground100ns = 0;
+            recoveryConditionalUnits = 0; recoveryConditionalEligible100ns = 0;
         }
 
         internal void RecoveryPublicationUncertain(RecoveryPublicationObservation observation)
@@ -224,9 +229,9 @@ namespace DungeonBuilder.M0
                 if (recoveryConditionalBackgroundObserved) {
                     recoveryDeferredForegroundWall = recoveryConditionalPrefixEnd ?? observation.Through;
                     recoveryDeferredForegroundThrough = next;
-                    recoveryDeferredBackground100ns = recoveryConditionalBackground100ns;
+                    recoveryDeferredEligible100ns = recoveryConditionalEligible100ns;
                     recoveryDeferredBackgroundWall = sample.Wall;
-                    recoveryDeferredHasBackground = true; recoveryDeferredPreparing = false; recoveryDeferredStalled = false;
+                    recoveryDeferredHasBackground = true; recoveryDeferredPreparing = true; recoveryDeferredStalled = false;
                 }
                 recoveryClockActive = false; recoveryEligible100ns = 0;
             } else {
@@ -241,7 +246,7 @@ namespace DungeonBuilder.M0
         // At most one complete foreground prefix and one grouped background sum
         // wait behind closure. Later lifecycle integration drains that prefix first.
         private UnixTimePoint recoveryDeferredForegroundWall, recoveryDeferredBackgroundWall;
-        private long recoveryDeferredForegroundThrough, recoveryDeferredBackground100ns;
+        private long recoveryDeferredForegroundThrough, recoveryDeferredEligible100ns;
         private bool recoveryDeferredHasBackground, recoveryDeferredPreparing, recoveryDeferredStalled;
         internal bool HasDeferredRecovery => recoveryDeferredForegroundWall != null;
         private bool DeferredForegroundCanExtend => HasDeferredRecovery && !recoveryDeferredHasBackground && !recoveryDeferredStalled;
@@ -261,7 +266,7 @@ namespace DungeonBuilder.M0
                 long through = ObservedForeground ? checked(foregroundThrough + checked(sample.Units - foregroundSample)) : foregroundThrough;
                 foregroundThrough = through; foregroundSample = sample.Units; foregroundWall = sample.Wall;
                 recoveryDeferredForegroundWall = sample.Wall; recoveryDeferredForegroundThrough = through;
-                recoveryDeferredBackgroundWall = sample.Wall; recoveryDeferredBackground100ns = 0;
+                recoveryDeferredBackgroundWall = sample.Wall; recoveryDeferredEligible100ns = 0;
                 recoveryDeferredHasBackground = !ObservedForeground; recoveryMonotonic = sample.Monotonic;
             } else ObserveDeferredRecovery();
             recoveryDeferredStalled = true;
@@ -289,7 +294,7 @@ namespace DungeonBuilder.M0
             if (owner?.IsClosed == true && owner.Scheduler.AcceptedThrough >= recoveryDeferredForegroundThrough &&
                 proven.AccountedBoundary.CompareTo(recoveryDeferredForegroundWall) >= 0) {
                 recoveryDeferredForegroundWall = null; recoveryDeferredBackgroundWall = null;
-                recoveryDeferredPreparing = false; recoveryDeferredBackground100ns = 0;
+                recoveryDeferredPreparing = false; recoveryDeferredEligible100ns = 0;
             }
         }
 
@@ -298,8 +303,8 @@ namespace DungeonBuilder.M0
             var sample = ReadRecoverySample(recoveryDeferredBackgroundWall);
             bool eligible = !ObservedForeground || recoveryDeferredPreparing && !recoveryDeferredStalled;
             long delta = eligible ? sample.Wall.Elapsed100nsSince(recoveryDeferredBackgroundWall) : 0;
-            long total = checked(recoveryDeferredBackground100ns + delta);
-            recoveryDeferredBackground100ns = total; recoveryDeferredBackgroundWall = sample.Wall;
+            long total = checked(recoveryDeferredEligible100ns + delta);
+            recoveryDeferredEligible100ns = total; recoveryDeferredBackgroundWall = sample.Wall;
             recoveryMonotonic = sample.Monotonic; return sample;
         }
 
@@ -322,9 +327,9 @@ namespace DungeonBuilder.M0
             recoveryClockActive = true; recoveryFailureLatched = recoveryDeferredStalled;
             recoveryCoveredThrough = proven.timeProvenance.AccountedBoundary; recoveryExpectedPredecessorSha256 = null;
             recoveryWall = sample.Wall; recoveryMonotonic = sample.Monotonic; recoveryEligible100ns = 0;
-            retainedRecoveryEntry = entry; RecoveryOriginalEligible100ns = recoveryDeferredBackground100ns;
+            retainedRecoveryEntry = entry; RecoveryOriginalEligible100ns = recoveryDeferredEligible100ns;
             recoveryDeferredForegroundWall = null; recoveryDeferredBackgroundWall = null;
-            recoveryDeferredBackground100ns = 0; recoveryDeferredPreparing = false; recoveryDeferredHasBackground = false;
+            recoveryDeferredEligible100ns = 0; recoveryDeferredPreparing = false; recoveryDeferredHasBackground = false;
             return entry;
         }
 
@@ -334,7 +339,7 @@ namespace DungeonBuilder.M0
         internal void CompleteRecoveryPublicationForClockTest(RecoveryPublicationObservation observation) => CompleteRecoveryPublication(observation);
         internal long RecoveryEligible100nsForClockTest => recoveryEligible100ns;
         internal UnixTimePoint RecoveryDeferredForegroundWallForClockTest => recoveryDeferredForegroundWall;
-        internal long RecoveryDeferredBackground100nsForClockTest => recoveryDeferredBackground100ns;
+        internal long RecoveryDeferredEligible100nsForClockTest => recoveryDeferredEligible100ns;
         internal void CompleteOrdinaryPublicationForClockTest(TimeProvenance proven, LivingDungeonState owner) => CompleteOrdinaryPublication(proven, owner);
 #endif
     }

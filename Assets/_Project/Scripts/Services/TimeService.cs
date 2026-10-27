@@ -59,7 +59,10 @@ namespace DungeonBuilder.M0
             if (HasForegroundClock) SampleForeground();
             if (_save == null || _isPaused)
             {
-                if (_save == null && (recoveryClockActive || HasForegroundClock)) _isPaused = true;
+                if (_save == null && (recoveryClockActive || HasForegroundClock)) {
+                    if (!_isPaused) _clock.MarkPaused();
+                    _isPaused = true;
+                }
                 return;
             }
 

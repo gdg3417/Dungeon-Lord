@@ -25,7 +25,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return Failure(RecoveryEpisode.Invalid);
                 double wallet = current.structureRuntime.ManaReserve;
                 if (transition.Settles) {
-                    if (!owned.LivingDungeon.IsClosed || owned.TimeProvenance.Episode == null || mana == null)
+                    if (!owned.LivingDungeon.IsClosed || owned.TimeProvenance.Episode == null || mana == null || !mana.MatchesRecoveryInputs(context.RecoveryInputs))
                         return Failure(RecoveryEpisode.Invalid);
                     var episode = owned.TimeProvenance.Episode;
                     bool original = transition.Successor.Episode != null;

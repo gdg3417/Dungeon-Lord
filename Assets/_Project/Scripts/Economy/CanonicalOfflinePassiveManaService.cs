@@ -83,6 +83,8 @@ namespace DungeonBuilder.M0.Economy
         private const double SecondsPerHour = 3600d;
         private readonly PassiveOnlineManaConfigurationSnapshot configuration;
         private readonly CanonicalPassiveManaService canonicalOnline;
+        internal bool MatchesRecoveryInputs(DungeonBuilder.M0.Gameplay.DungeonSpatial.RecoveryRuntimeInputs inputs) =>
+            inputs != null && ReferenceEquals(configuration, inputs.Passive) && canonicalOnline.MatchesRecoveryInputs(inputs);
 
         public CanonicalOfflinePassiveManaService(
             PassiveOnlineManaConfigurationSnapshot configuration,

@@ -115,7 +115,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             native.Time.OnPause(); fs.AfterFlush = () => native.Clock.Seconds = 105;
             Assert.That(native.Service.LoadOrCreate("native-paused", out _), Is.Not.Null);
             Assert.That(native.Time.ForegroundThrough, Is.Zero); Assert.That(native.Time.HasDeferredRecovery, Is.True);
-            Assert.That(native.Time.RecoveryDeferredBackground100nsForClockTest, Is.EqualTo(50000000));
+            Assert.That(native.Time.RecoveryDeferredEligible100nsForClockTest, Is.EqualTo(50000000));
         }
         [Test] public void NativeFailedFlushRemainsUncertainUntilFreshProofAndDoesNotBecomeNewOfflineAbsence()
         {
@@ -206,6 +206,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 monsterRecovery: h.Inputs.Monsters);
             context.BindRecoveryContext(h.Inputs.Identity);
             Assert.That(DetachedCanonicalSaveSession.Open(h.Service.CanonicalSession.GetCurrentBytes(), context, h.F.Profile).IsSuccess, Is.False);
+        }
+        [TestCase(false)] [TestCase(true)]
+        public void ForegroundRejectsForeignPolicyOrTickCadenceBeforeAcceptedWork(bool wrongTick)
+        {
+            var h = new Harness(); var bound = h.F.Context.RecoveryInputs;
+            var policy = wrongTick ? bound.TwoFloor : LivingDungeonForegroundConfig.Parse(bound.Identity.GetInput(7));
+            var before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            var result = h.F.Authority.AdvanceForeground(h.Service.SavePath, h.F.FileSystem, h.Service.CanonicalSession,
+                h.Current, policy, 100, bound.Bootstrap.tickSeconds + (wrongTick ? 1 : 0), (_, __) => Assert.Fail(), h.Current.lastSavedUtcUnix);
+            Assert.That(result.IsSuccess, Is.False); Assert.That(result.Reason, Is.EqualTo(RecoveryEpisode.ContextMismatch));
+            CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+        }
+        [TestCase(false)] [TestCase(true)]
+        public void RecoveryRejectsForeignPassiveRateOrCapacityBeforeGrant(bool wrongCapacity)
+        {
+            var h = new Harness(); h.Start(); h.Accept(100); var bound = h.F.Context.RecoveryInputs;
+            var passive = bound.Passive; var economy = bound.Economy;
+            if (wrongCapacity) {
+                var bytes = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(bound.Identity.GetInput(2)).Replace("\"ManaCapacity\": 1000", "\"ManaCapacity\": 2000"));
+                Assert.That(StructuralEconomySnapshot.TryParse(bytes, h.F.Production.Catalog, h.F.Profile.Canonical, out economy), Is.True);
+            } else {
+                var bytes = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(bound.Identity.GetInput(1)).Replace("\"ManaPerCoreLevelPerMinute\": 2", "\"ManaPerCoreLevelPerMinute\": 3"));
+                passive = PassiveOnlineManaConfigurationSnapshot.Load(bytes, h.F.Profile.Canonical).Value;
+            }
+            var online = new CanonicalPassiveManaService(passive, economy, new FormulaEngine(), h.F.Profile.Canonical.Spatial, bound.Bootstrap.tickSeconds);
+            var foreign = new CanonicalOfflinePassiveManaService(passive, online);
+            var before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            var transition = CanonicalTimeTransition.Recover(before, h.Current.timeProvenance, new UnixTimePoint(102, 0), 20000000,
+                h.Current.livingDungeon, settleOriginal: true);
+            Assert.That(h.F.Authority.PublishRecovery(h.Service.SavePath, h.F.FileSystem, h.Service.CanonicalSession, transition, foreign).IsSuccess, Is.False);
+            CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
         }
 
         [Test] public void ActualAtomicEntryOriginalAndResidualCloseOneCanonicalOwner()

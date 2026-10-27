@@ -92,7 +92,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             time.CompleteRecoveryPublicationForClockTest(cut);
             Assert.That(time.ForegroundThrough, Is.EqualTo(10000));
             Assert.That(time.RecoveryDeferredForegroundWallForClockTest, Is.EqualTo(new UnixTimePoint(210, 0)));
-            Assert.That(time.RecoveryDeferredBackground100nsForClockTest, Is.Zero);
+            Assert.That(time.RecoveryDeferredEligible100nsForClockTest, Is.Zero);
         }
         [Test] public void ObservedBackgroundSegmentsRemainGroupedBehindOneForegroundPrefix()
         {
@@ -103,10 +103,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             wall.Set(210, 10); time.CompleteRecoveryPublicationForClockTest(cut);
             Assert.That(time.ForegroundThrough, Is.EqualTo(4000));
             Assert.That(time.RecoveryDeferredForegroundWallForClockTest, Is.EqualTo(new UnixTimePoint(204, 0)));
-            Assert.That(time.RecoveryDeferredBackground100nsForClockTest, Is.EqualTo(40000000));
+            Assert.That(time.RecoveryDeferredEligible100nsForClockTest, Is.EqualTo(60000000));
+            Assert.That(time.ForegroundThrough * 10000 + time.RecoveryDeferredEligible100nsForClockTest,
+                Is.EqualTo(100000000), "The full S to Q interval is represented exactly once across the two eligible classes.");
             wall.Set(212, 12); time.SetForegroundFocus(false);
             wall.Set(214, 14); time.SetForegroundFocus(true);
-            Assert.That(time.RecoveryDeferredBackground100nsForClockTest, Is.EqualTo(60000000));
+            Assert.That(time.RecoveryDeferredEligible100nsForClockTest, Is.EqualTo(100000000));
             Assert.That(time.SampleForeground(), Is.EqualTo(4000));
         }
         [Test] public void InvalidClocksCannotMutateSampleOrManufacturePreciseRecoveryEntry()
@@ -168,7 +170,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             clock.Set(112, 12); time.OrdinaryPublicationFailed();
             clock.Set(140, 40); var retained = time.ReadForegroundObservation();
             Assert.That(retained.Through, Is.EqualTo(12000)); Assert.That(retained.Wall.Seconds, Is.EqualTo(112));
-            Assert.That(time.RecoveryDeferredBackground100nsForClockTest, Is.Zero);
+            Assert.That(time.RecoveryDeferredEligible100nsForClockTest, Is.Zero);
             clock.Set(143, 43); time.CompleteOrdinaryPublicationForClockTest(Closed(112), ClosedOwner(12000));
             Assert.That(time.HasDeferredRecovery, Is.False);
             clock.Set(145, 45); Assert.That(time.SampleForeground(), Is.EqualTo(14000));
@@ -209,7 +211,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             clock.Set(126, 26); time.SetForegroundFocus(true);
             var cut = time.ReadForegroundObservation();
             Assert.That(cut.Wall.Seconds, Is.EqualTo(110)); Assert.That(cut.Through, Is.EqualTo(10000));
-            Assert.That(time.RecoveryDeferredBackground100nsForClockTest, Is.EqualTo(140000000));
+            Assert.That(time.RecoveryDeferredEligible100nsForClockTest, Is.EqualTo(160000000));
         }
         [Test] public void ObservedRecoveryRequiresExactClosedForegroundPrefixBeforeCapturingR()
         {
@@ -274,7 +276,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             clock.Set(110, 10); time.CompleteRecoveryPublicationForClockTest(cut);
             Assert.That(time.ForegroundThrough, Is.Zero); Assert.That(time.HasDeferredRecovery, Is.True);
             Assert.That(time.RecoveryDeferredForegroundWallForClockTest.Seconds, Is.EqualTo(102));
-            Assert.That(time.RecoveryDeferredBackground100nsForClockTest, Is.EqualTo(80000000));
+            Assert.That(time.RecoveryDeferredEligible100nsForClockTest, Is.EqualTo(80000000));
             time.OnResume(); Assert.That(time.IsPaused, Is.False);
         }
         [Test] public void LoadedAcceptedHorizonBindsOnceWithoutUtcAdventureCredit()
