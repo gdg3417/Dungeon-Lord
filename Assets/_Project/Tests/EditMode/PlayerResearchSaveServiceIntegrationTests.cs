@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using DungeonBuilder.M0;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
@@ -23,7 +24,9 @@ namespace DungeonBuilder.Tests.EditMode
         {
             _directory = Path.Combine(Path.GetTempPath(), "DungeonLordGD59", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(_directory);
-            _fixture = Fixture.Create(null, recoveryInputBytes: ResearchDurableAcknowledgementTests.AuthoredResearchInputs());
+            _fixture = Fixture.Create(null,
+                workloadProfile: SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile,
+                recoveryInputBytes: ResearchDurableAcknowledgementTests.AuthoredResearchInputs());
             _service = ResearchDurableAcknowledgementTests.OpenService(_fixture, out _current);
             _service.CanonicalRuntimePublished += save => _current = save;
             _saveCount = 0;

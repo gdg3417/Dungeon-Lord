@@ -27,6 +27,7 @@ namespace DungeonBuilder.Tests.EditMode
         [SetUp] public void SetUp()
         {
             f = Fixture.Create("\"unrelatedResearchEvidence\":{\"n\":1.00}", "\"unrelatedRoot\":[true,null]",
+                workloadProfile: SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile,
                 recoveryInputBytes: AuthoredResearchInputs());
             service = OpenService(f, out current);
             current.researchPending = null; current.researchProgress = null;
