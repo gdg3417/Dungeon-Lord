@@ -508,3 +508,9 @@ The current approved correction/audit changes this Markdown file, the original b
 The historical authority decision is resolved as stated above. Producer-bound A>C activation and no automatic context rebinding are implementation requirements, not pending policy choices. The exact consumed-byte bundle and checked canonical time transitions are being implemented. Schema 16 remains the active writer until schema-17 integration is complete. Earlier statements about documentation-only work describe their dated review snapshots.
 
 Foundation qualification at `831b1acb159c11e885fe5039b5b26a6ea04c3b1d`: 30 passed, 0 failed, 0 skipped; supervised restoration and protected-evidence preservation passed. The first attempt had 29 passes and one test-assertion failure, retained and corrected without changing a production limit. See [source-pinned foundation receipt](../testing/evidence/h1-f4/foundation-20261027/qualification.json). This qualifies the foundation only. Boot/lifecycle integration, the full interruption matrix, PlayMode, Windows and all fresh performance measurements remain pending. No speedup, completed H1-F4 runtime or PR readiness is claimed.
+
+The next 48-case attempt stopped at a corrected compiler import error and,
+separately, unverified owned-process completion. Its campaign remains INCOMPLETE;
+the [specific operational blocker and exact recovery proposal](../testing/h1-f4-qualification-process-blocker.md)
+require the runbook's exceptional owner approval. No approved recovery semantic
+policy is reopened. No test count or benchmark is claimed for that attempt.

@@ -2,6 +2,11 @@
 
 2026-10-26 diagnosis; 2026-10-27 resolution. **CONTEXT AND HISTORICAL-ACTIVATION POLICIES RESOLVED.** The owner approves full CombatC0-inclusive bootstrap bytes, twelve context-v3 inputs, persistent owner-level identity and producer-bound evidence for historical A>C. Unproved historical sources fail closed; A=C proceeds only after applicable historical validations. Automatic schema-17 context rebinding remains unsupported. The diagnosis below is retained as historical evidence, not an outstanding implementation blocker. See the [current dependency audit](h1-f4-context-v2-dependency-audit.md).
 
+The subsequent implementation is currently held by a separate [qualification
+process-completion blocker](h1-f4-qualification-process-blocker.md), not this
+resolved context diagnosis. Exact evidence and exceptional recovery approval are
+recorded there. No H1-F4 PR readiness or completed benchmark is claimed.
+
 Branch: `codex/h1-f4-recovery`. Base and unchanged runtime HEAD:
 `3eb6ccf93558b8145d64e9e63cbefcbd73484602` (#258). Local `origin/main`
 also resolves to that commit. No successor schema or runtime change has started.

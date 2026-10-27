@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using DungeonBuilder.M0.Economy;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
