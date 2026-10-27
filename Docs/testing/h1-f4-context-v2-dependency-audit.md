@@ -553,3 +553,30 @@ budget where a frozen production profile budget is required; one supplies a
 synthetic empty Research class instead of explicit absent state. The fixture
 correction keeps all 48 cases and changes no production rules or frozen history.
 See the [source-pinned recovery/fresh-attempt receipt](h1-f4-recovery-execution-20261027.json).
+
+## Schema-17 executable checkpoint
+
+The authority decision above is implemented without a new digest component or
+durable field. Schema 17 is active in source; schema-16 resource/reader/migration
+dispatch remains frozen. The 82-case transaction gate passed at
+`38fd7320f4d31a0db5ff9f1f37035f4e13a8caa5`; the 98-case native/continuity gate
+passed at `982ff1dc7e2d36a5d2fadf22510e9093100e3da3`, both with zero failures
+or skips and verified process/restoration/preservation records in the receipt.
+
+Additional executable dependency checks reject actual configuration/loot,
+policy/tick cadence, passive-rate or capacity services outside the owned consumed
+bundle. Profile/context validation rejects unsupported executable profiles.
+Typed-object equivalence or a supplied digest alone does not create a writable
+current-schema session. Native creation and uncertain resolution require fresh
+durability/semantic proof before acknowledgement; matching candidate bytes after a
+failed flush alone no longer report native success. The legacy native branch is
+retained unchanged. Explicit synthetic current fixtures are separate from frozen
+source bytes and never count as historical producer evidence.
+
+The lifecycle conservation test exposed and corrected omitted non-stalled return
+processing after background interrupted a conditional foreground prefix. That
+processing now joins the existing grouped eligible duration; known foreground
+stalls stay excluded. This is an implementation correction under the approved
+L1/S/Q classifications, with no encoding or policy change. Live root, accepted
+A>C repeated-crash, broader regression, PlayMode/Windows and performance evidence
+remain required. These focused passes do not claim those missing gates passed.

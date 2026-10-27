@@ -106,7 +106,7 @@ def prepare(attempt):
     print(json.dumps({"preparation": str(prep), "product": product, "save": str(save)}))
 
 
-def plan(attempt):
+def plan(attempt, discovery=False):
     prep, product, save = identities(attempt)
     check_protected(prep, save)
     if inventory(ROOT) != json.loads((prep / "qualified-inputs.json").read_text()):
@@ -122,14 +122,21 @@ def plan(attempt):
     command = lambda mode: [sys.executable, "-B", str(helper), mode, "--attempt", attempt, "--stage", "{stage}"]
     restored = json.loads((prep / "original-inputs.json").read_text())
     restored_id = hashlib.sha256(json.dumps(restored, sort_keys=True).encode()).hexdigest()
+    name = "inventory" if discovery else "focused"
+    workload = {"id": name, "role": "report" if discovery else "test", "depends": [name + "-preflight"],
+                "command": command("run-inventory" if discovery else "run-test"), "timeout_seconds": 960,
+                "artifacts": ["unity.log", "invocation.json", "editor-exit.json" if discovery else "cli-exit.json", "generated-inputs"]}
+    if discovery:
+        workload["artifacts"].append("inventory.json")
+    else:
+        workload.update(xml="results.xml", expected_tests=98, allowed_skips=[])
     stages = [
-        {"id": "focused-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/focused-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
-        {"id": "focused", "role": "test", "depends": ["focused-preflight"], "command": command("run-test"), "timeout_seconds": 960,
-         "xml": "results.xml", "expected_tests": 98, "allowed_skips": [], "artifacts": ["unity.log", "invocation.json", "cli-exit.json", "generated-inputs"]},
-        {"id": "restore-preflight", "role": "preflight", "depends": ["focused"], "command": command("preflight")[:-1] + ["{campaign}/restore-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
+        {"id": name + "-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/" + name + "-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
+        workload,
+        {"id": "restore-preflight", "role": "preflight", "depends": [name], "command": command("preflight")[:-1] + ["{campaign}/restore-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
         {"id": "restore", "role": "report", "depends": ["restore-preflight"], "command": command("restore"), "timeout_seconds": 120,
          "artifacts": ["restoration.json"], "after_input_identity": restored_id},
-        {"id": "preservation", "role": "final", "depends": ["focused-preflight", "focused", "restore-preflight", "restore"],
+        {"id": "preservation", "role": "final", "depends": [name + "-preflight", name, "restore-preflight", "restore"],
          "command": command("finish"), "timeout_seconds": 120, "artifacts": ["preservation.json"], "input_identity": restored_id},
     ]
     data = {"purpose": "qualification", "source_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
@@ -137,9 +144,11 @@ def plan(attempt):
             "approved_substitutions": ["Temporary isolated productName; exact archived restoration. The two measured import-only LF settings rewrites are applied before sealing and restored afterward.",
                                        "UNITY_NO_AUTH_BROKER=1 in the CLI child only, as documented by installed CLI and approved supervisor runbook. No ownership/drain exemption.",
                                        "Only the previously measured TMP fallback-font rewrite may be retained then restored after a zero-exit CLI; any other change fails closed."],
-            "stages": stages, "selections": {"focused": [s["id"] for s in stages]}}
+            "stages": stages, "selections": {name: [s["id"] for s in stages]}}
+    if discovery:
+        data["approved_substitutions"].append("Discovery only: pinned Editor directly, without -quit, for the asynchronous existing TestRunnerApi.RetrieveTestList callbacks; collector exits explicitly. No tests execute and no passing test gate is inferred.")
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": 98, "skips": 0}))
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 98, "skips": None if discovery else 0}))
 
 
 def preflight(attempt, stage, restored=False):
@@ -154,17 +163,41 @@ def preflight(attempt, stage, restored=False):
 
 
 def run_test(attempt, stage):
+    stage = Path(stage).resolve()
+    command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--filter", "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract",
+               "--output", str(stage / "results.xml"), "--timeout", "900", "--no-color", "--", "-logFile", str(stage / "unity.log")]
+    return run_child(attempt, stage, command, "focused", "cli-exit.json")
+
+
+def run_inventory(attempt, stage):
+    stage = Path(stage).resolve()
+    command = [str(EDITOR), "-batchmode", "-nographics", "-projectPath", str(ROOT), "-executeMethod",
+               "DungeonBuilder.M0.EditorTools.H1F4QualificationInventory.Capture", "-h1F4Inventory", str(stage / "inventory.json"),
+               "-logFile", str(stage / "unity.log")]
+    code = run_child(attempt, stage, command, "inventory", "editor-exit.json")
+    if code == 0:
+        _, product, _ = identities(attempt)
+        report = json.loads((stage / "inventory.json").read_text())
+        if report["Product"] != product or Path(report["Project"]) != ROOT or report["UnityVersion"] != "6000.3.2f1":
+            raise ValueError("Inventory identity mismatch")
+        for mode in ("EditMode", "PlayMode"):
+            cases = report[mode]
+            if not cases or len({case["Id"] for case in cases}) != len(cases):
+                raise ValueError("Missing or duplicate discovery identities")
+    return code
+
+
+def run_child(attempt, stage, command, expected_stage, exit_name):
     prep, _, _ = identities(attempt)
     stage = Path(stage).resolve()
-    if stage.parent.parent != ROOT / "TestResults/qualification-supervisor" or stage.name != "focused":
+    if stage.parent.parent != ROOT / "TestResults/qualification-supervisor" or stage.name != expected_stage:
         raise ValueError("Require the supervisor's exact owned stage")
     before = inventory(ROOT)
     font = (ROOT / FONT).read_bytes()
-    command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--filter", "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract",
-               "--output", str(stage / "results.xml"), "--timeout", "900", "--no-color", "--", "-logFile", str(stage / "unity.log")]
     environment = os.environ.copy()
-    environment["UNITY_NO_AUTH_BROKER"] = "1"
-    write(stage / "invocation.json", {"command": command, "environment_override": {"UNITY_NO_AUTH_BROKER": "1"}, "ownership": "Enclosing unchanged supervisor job"})
+    override = {"UNITY_NO_AUTH_BROKER": "1"} if command[0] == str(CLI) else {}
+    environment.update(override)
+    write(stage / "invocation.json", {"command": command, "environment_override": override, "ownership": "Enclosing unchanged supervisor job"})
     result = subprocess.run(command, cwd=ROOT, env=environment, stdin=subprocess.DEVNULL)
     generated = stage / "generated-inputs"
     generated.mkdir()
@@ -182,7 +215,7 @@ def run_test(attempt, stage):
         if inventory(ROOT) != before:
             raise ValueError("Exact font restoration failed")
     write(generated / "manifest.json", {"changed": changed, "restored": restored})
-    write(stage / "cli-exit.json", {"exit_code": result.returncode})
+    write(stage / exit_name, {"exit_code": result.returncode})
     return result.returncode
 
 
@@ -201,12 +234,14 @@ def restore(attempt, stage):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["prepare", "plan", "preflight", "run-test", "restore", "finish"])
+    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "preflight", "run-test", "run-inventory", "restore", "finish"])
     parser.add_argument("--attempt", required=True)
     parser.add_argument("--stage")
     args = parser.parse_args()
     if args.mode == "prepare": prepare(args.attempt)
     elif args.mode == "plan": plan(args.attempt)
+    elif args.mode == "plan-inventory": plan(args.attempt, discovery=True)
     elif args.mode == "run-test": raise SystemExit(run_test(args.attempt, args.stage))
+    elif args.mode == "run-inventory": raise SystemExit(run_inventory(args.attempt, args.stage))
     elif args.mode == "restore": restore(args.attempt, args.stage)
     else: preflight(args.attempt, args.stage, restored=args.mode == "finish")

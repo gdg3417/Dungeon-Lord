@@ -96,6 +96,34 @@ class H1F4CampaignTests(unittest.TestCase):
                 self.assertEqual(data, (self.root / name).read_bytes())
             self.assertEqual(b"test-only original font", (self.root / q.FONT).read_bytes())
 
+    def test_inventory_plan_is_report_only_with_full_preservation(self):
+        with patch.object(q, "ROOT", self.root):
+            prep, _, _ = q.identities("inventorytest"); prep.mkdir(parents=True)
+            q.write(prep / "qualified-inputs.json", {}); q.write(prep / "original-inputs.json", {})
+            with patch.object(q, "check_protected"), patch.object(q, "inventory", return_value={}), \
+                    patch.object(q, "sha", return_value="a" * 64), patch.object(q.subprocess, "check_output", return_value="b" * 40):
+                q.plan("inventorytest", discovery=True)
+            plan = json.loads((prep / "plan.json").read_text()); supervisor.validate_plan(plan)
+            self.assertEqual("report", plan["stages"][1]["role"])
+            self.assertNotIn("expected_tests", plan["stages"][1]); self.assertNotIn("xml", plan["stages"][1])
+            self.assertEqual(set(plan["selections"]["inventory"][:-1]), set(plan["stages"][-1]["depends"]))
+
+    def test_inventory_uses_pinned_editor_without_quit_and_never_runs_tests(self):
+        stage = self.stage.parent / "inventory"; stage.mkdir()
+        with patch.object(q, "ROOT", self.root):
+            _, product, _ = q.identities("inventorytest")
+            def child(command, **kwargs):
+                q.write(stage / "inventory.json", {"Product": product, "Project": str(self.root), "UnityVersion": "6000.3.2f1",
+                    "EditMode": [{"Id": "edit-1"}], "PlayMode": [{"Id": "play-1"}]})
+                return SimpleNamespace(returncode=0)
+            with patch.object(q.subprocess, "run", side_effect=child) as run:
+                self.assertEqual(0, q.run_inventory("inventorytest", stage))
+            command = run.call_args.args[0]
+            self.assertEqual(str(q.EDITOR), command[0]); self.assertIn("-executeMethod", command)
+            self.assertNotIn("-quit", command); self.assertNotIn("-runTests", command)
+            self.assertEqual({}, json.loads((stage / "invocation.json").read_text())["environment_override"])
+            self.assertTrue((stage / "editor-exit.json").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

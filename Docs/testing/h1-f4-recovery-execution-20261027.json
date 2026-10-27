@@ -146,6 +146,12 @@
       "skips": []
     }
   },
+  "original_incomplete_campaign_reverified_after_98_case_gate": {
+    "file_count": 19,
+    "later_process_absence_not_reclassified": true,
+    "original_verdict": "INCOMPLETE / UNCERTAIN",
+    "unchanged": true
+  },
   "original_incomplete_campaign_reverified_after_passing_rerun": true,
   "recovery": {
     "artifact_owner": "H1-F4 task",
@@ -182,7 +188,7 @@
   },
   "recovery_authorization": "Explicit user approval, limited to the reviewed proposal for 9ed872130a134ce7a5627f6c001b8e2f",
   "recovery_receipt_sha256": "32d3353de6aa1f7a45357861e5f5dda4a9ccc26304a43ad2280c6045a17f2445",
-  "remaining_implementation": "Schema-17 activation and live recovery integration, full interruption qualification, PlayMode/Windows and three-way performance comparison pending",
+  "remaining_implementation": "Live root/lifecycle and accepted-work/repeated-crash coverage; broader regressions; PlayMode and isolated Windows; historical/main/H1-F4 benchmark; independent review and UAT handoff pending",
   "retention": "Preserve original INCOMPLETE campaign and all recovery/new-attempt evidence permanently; no native shutdown success inferred from later process absence",
   "subsequent_focused_qualification": [
     {
@@ -334,6 +340,196 @@
         "discovered": 70,
         "failed": 0,
         "passed": 70,
+        "skipped": 0,
+        "skips": []
+      }
+    },
+    {
+      "campaign": "TestResults\\qualification-supervisor\\b28c7e1e236b4cdeb479e2764d41ca5c",
+      "evidence": {
+        "child.json": "b3ecc685af9a8b5aea67f81068547a22b10f48f0f21aabf09df0c54d28cf5677",
+        "cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+        "exit.json": "19d9375ad7d5bd83a45fc653aa9e5c1f1ebd9c838a06bd583b8733ef8eb0cebf",
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "81356b38dd399ca791d5400fe6b112b54293f95e75079a542ceda964be976367",
+        "results.xml": "ad49fbe5a1e022ab94818b5ff5839bde452419d0e63bdb01cb2860f1c21d2f2f",
+        "started.json": "92ae88141dad11a7592f7645b5a1d554f7582cbd9f7b8efd0f7c7c72b0bf9af2",
+        "stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+        "unity.log": "8f1530b1cff0b5d48a814e09c105f550cb9d180d8b95198e03a73cbd308a9d64"
+      },
+      "input_identity": "d95984623f521445abeddbd278f74ea4e57c0ca0ec4ef04c6cf2a2961f725250",
+      "process_exit": {
+        "child_finished_utc": "2026-10-27T16:22:13.997053+00:00",
+        "child_process": {
+          "created": 134375916756870262,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 38852
+        },
+        "exit_code": 8,
+        "host_exit_code": 0,
+        "job": "Local\\DLQ-d91b319847574c0c9ddb69d6867fe3eb",
+        "process": {
+          "created": 134375916755748657,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 35244
+        }
+      },
+      "restoration_receipts": "TestResults/h1-f4-20261027-activation01/post-failure-final01",
+      "scope": "Focused schema-17 transaction, clock, native, dependency-binding and reopen gates; full regressions/PlayMode/Windows/performance pending",
+      "source_sha": "4b6a2ee0863b651e15aac81544c395a64e3da034",
+      "status": "FAILED",
+      "tests": {
+        "discovered": 82,
+        "failed": 27,
+        "passed": 55,
+        "skipped": 0,
+        "skips": []
+      }
+    },
+    {
+      "campaign": "TestResults\\qualification-supervisor\\a5631382db7a4087acedbafb64f4dde9",
+      "evidence": {
+        "child.json": "723b140e849ccfa8a6203b9b526dd5751bade4f6bce5662f7113c8d8b0cc4682",
+        "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "exit.json": "81ffea4a9aa07bc11d85366f7876122fc62b2021d247f5521cc072073c55d93d",
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "dcc998fc702d7ecf74eeb8358b539977fe1e968336da10701b520d34fb721495",
+        "results.xml": "f6d96dc0588cdc3236efbc74d445833bffebad2160f5b6f30af7ad209aa5945f",
+        "started.json": "fcea25ab68427f4d0d3310b85ddf7d375dcda6f9982fef55d98bac35108ee073",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unity.log": "b2fc38a6c0c94c4162196a5ace6a8ec30c4548a3bbf5360af75af42dd4d9459d"
+      },
+      "input_identity": "8f75196f042829c5298a9f299fa9387625abbf9d99978fbc0cb2392b2054b312",
+      "preservation": {
+        "inputs": 1492,
+        "original_inputs_restored": true,
+        "passed": true,
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 activation02",
+        "protected_evidence_unchanged": true,
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 activation02"
+      },
+      "process_exit": {
+        "child_finished_utc": "2026-10-27T16:28:33.348104+00:00",
+        "child_process": {
+          "created": 134375920843396770,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 48112
+        },
+        "exit_code": 0,
+        "host_exit_code": 0,
+        "job": "Local\\DLQ-4a0d5b96cf4348eaad533ac82c103ff7",
+        "process": {
+          "created": 134375920842150930,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 9520
+        }
+      },
+      "scope": "Focused schema-17 transaction, clock, native, dependency-binding and reopen gates; full regressions/PlayMode/Windows/performance pending",
+      "source_sha": "38fd7320f4d31a0db5ff9f1f37035f4e13a8caa5",
+      "status": "PASSED",
+      "tests": {
+        "discovered": 82,
+        "failed": 0,
+        "passed": 82,
+        "skipped": 0,
+        "skips": []
+      }
+    },
+    {
+      "campaign": "TestResults\\qualification-supervisor\\d5c9603b255341e3a6dc60d924277d8e",
+      "evidence": {
+        "child.json": "ddbead8b60137be845cb1a63e91564514958540ee91642c88e1001dfdba64bda",
+        "cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+        "exit.json": "1416d15bf3958fd4f4b143817a0757b361ef1c412a7bc3e811488d3f1a3e4c72",
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "f3065f5d7ca93407f52db608ec821d79bbb8fece507ecada10d84c8479351171",
+        "results.xml": "d0e72fb4c019d6d3cda80ea7f88c8f6e38cee3a1c2ddd15bd987424e21782155",
+        "started.json": "8cf9df7254b628cf94dc016f0cc8c8530255e736bf6ef4c12dfb8ddf497bf9c1",
+        "stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+        "unity.log": "db2204df4932c3f090f1fab500337ed94c6a5d5da4b607ff9bfa3f3defd23c5f"
+      },
+      "input_identity": "dfde9fa06cbe0ce3feaaa04e4c427780663c142010e6750f5ae3d6f829acde1b",
+      "process_exit": {
+        "child_finished_utc": "2026-10-27T17:09:47.579248+00:00",
+        "child_process": {
+          "created": 134375945555233008,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 54052
+        },
+        "exit_code": 8,
+        "host_exit_code": 0,
+        "job": "Local\\DLQ-399355fab843448da0eabfdbb91a5c0a",
+        "process": {
+          "created": 134375945553990715,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 54824
+        }
+      },
+      "restoration_receipts": "TestResults/h1-f4-20261027-continuity01/post-failure-final01",
+      "scope": "Focused schema-17 transaction, clock, native, dependency-binding and reopen gates; full regressions/PlayMode/Windows/performance pending",
+      "source_sha": "0d506fbdcd692c1d9171ac7f76652b00adbc9f91",
+      "status": "FAILED",
+      "tests": {
+        "discovered": 98,
+        "failed": 1,
+        "passed": 97,
+        "skipped": 0,
+        "skips": []
+      }
+    },
+    {
+      "campaign": "TestResults\\qualification-supervisor\\fcf1857543c0452d82509b9991cbbce7",
+      "evidence": {
+        "child.json": "4ea620d275214e42590e1ffbcee0b80c808b55422fd9e8c34099942b9a58efd1",
+        "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "exit.json": "93f6f7b35f3275f8876ba1ca9ba202a9c5ae62ae68f5e5c5713e99ac227809fe",
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "9296c78d141e7f0186bda5e02ad38d6730f0e2b661ef889652b8fea5acb4b46f",
+        "results.xml": "b9f003d2056074322d25121d9505fd8f2a7bbcf2fd2bbcadc0a060259e7e8b41",
+        "started.json": "1b589c87ed9b6e826f851984073ee627a1020c757caf635c3178109882517ec4",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unity.log": "c260ec2031642097f403d076d44d145e2e565233539bab3c11465657a40d095e"
+      },
+      "input_identity": "7f839a28f0c399110051637081603d05bcf19cc4ca813cf8aecaea8429badca6",
+      "preservation": {
+        "inputs": 1492,
+        "original_inputs_restored": true,
+        "passed": true,
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 continuity02",
+        "protected_evidence_unchanged": true,
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 continuity02"
+      },
+      "process_exit": {
+        "child_finished_utc": "2026-10-27T17:22:41.864475+00:00",
+        "child_process": {
+          "created": 134375953298623537,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 41816
+        },
+        "exit_code": 0,
+        "host_exit_code": 0,
+        "job": "Local\\DLQ-4858ca450b11448a8eabaf23fb9517fb",
+        "process": {
+          "created": 134375953297548757,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 25688
+        }
+      },
+      "scope": "Focused schema-17 transaction, clock, native, dependency-binding and reopen gates; full regressions/PlayMode/Windows/performance pending",
+      "source_sha": "982ff1dc7e2d36a5d2fadf22510e9093100e3da3",
+      "status": "PASSED",
+      "tests": {
+        "discovered": 98,
+        "failed": 0,
+        "passed": 98,
         "skipped": 0,
         "skips": []
       }

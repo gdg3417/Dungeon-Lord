@@ -2,7 +2,7 @@
 
 Semantic contract dated 2026-10-26. Final compatibility check updated 2026-10-27 after acceptance in principle of context-v3 and persistent context continuity.
 
-**Status: all historical-activation authority decisions resolved; implementation in progress.** The owner selects independently producer-bound evidence for historical A>C. A frozen release mapping is usable only when evidence ties the exact save to its original immutable inputs; schema/profile/defaults alone never suffice. Unproven A>C sources fail closed unchanged. A=C sources may activate after all applicable historical time/content/Research/monster/checkpoint/state validation succeeds. Twelve context-v3 inputs, one persistent owner hash, the 590-byte envelope, no automatic rebinding, W, L1, S/Q and original/residual ordering remain approved. The frozen-16 seam and format-2 foundation are being implemented; schema 16 remains the live target until the successor integration is complete. Expected refusal of unproven historical fixtures is not a design blocker.
+**Status: all historical-activation authority decisions resolved; schema 17 activated in source and under qualification.** The owner selects independently producer-bound evidence for historical A>C. A frozen release mapping is usable only when evidence ties the exact save to its original immutable inputs; schema/profile/defaults alone never suffice. Unproven A>C sources fail closed unchanged. A=C sources may activate after all applicable historical time/content/Research/monster/checkpoint/state validation succeeds. Twelve context-v3 inputs, one persistent owner hash, the 590-byte envelope, no automatic rebinding, W, L1, S/Q and original/residual ordering remain approved. Frozen schema-16 dispatch/resource bytes are retained. Expected refusal of unproven historical fixtures is not a design blocker. Focused gates are not complete runtime qualification.
 
 ## 1. Identity, authority and scope
 
@@ -536,3 +536,25 @@ ordinary rollback/deferred lifecycle clock tests. These are focused gates only;
 schema 17 is still staged and full runtime, interruption, PlayMode, Windows and
 performance qualification remain pending. The original INCOMPLETE evidence is
 unchanged and is not relabeled by any later successful campaign.
+
+Schema 17 was activated at `4b6a2ee0863b651e15aac81544c395a64e3da034`.
+The corrected transaction gate passed 82/82 at
+`38fd7320f4d31a0db5ff9f1f37035f4e13a8caa5`. The subsequent native/continuity
+gate passed 98/98 at `982ff1dc7e2d36a5d2fadf22510e9093100e3da3`, zero
+failures/skips, with verified process exit, restoration and preservation.
+Failed predecessor attempts (55/27 and 97/1) are retained separately in the
+source-pinned receipt; no failed result is relabeled. The original INCOMPLETE
+campaign's 19 file hashes were independently rechecked unchanged afterward.
+
+The implementation now checks consumed runtime configuration/loot/economy,
+foreground policy/tick cadence and mana-service bindings, rather than treating a
+digest string as sufficient authority. Native successor publication requires
+fresh semantic readback; failed flush/acknowledgement retains uncertainty until
+independent proof, including a fresh directory flush. Same-process activation
+resolution retains the original R and supported classifications. After a
+background interruption of S→Q, return-time recovery processing joins the same
+bounded eligible sum; the conservation test retains all ten seconds as a four
+second foreground prefix plus six eligible recovery seconds. Stalled foreground
+remains excluded. No owner grammar, tuning, time policy or historical serializer
+changed for these implementation corrections. Live root/accepted-work coverage,
+full regressions, PlayMode, Windows and three-way benchmarks remain pending.
