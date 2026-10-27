@@ -417,6 +417,61 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(current.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(1000));
             Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(wallet));
         }
+        [TestCase(false)] [TestCase(true)]
+        public void DormantOrdinaryRetryOrCommittedCandidateProofClosesOnlyTheZeroPrefix(bool uncertain)
+        {
+            var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
+            var fs = new ObservedFileSystem(h.F.FileSystem);
+            var service = CreateService(h.F, h.Inputs, h.Time, fs);
+            var current = service.LoadOrCreate("h1f4-dormant-acknowledgement", out var reason);
+            Assert.That(current, Is.Not.Null, reason); h.Time.AttachSave(current);
+            service.CanonicalRuntimePublished += value => current = value;
+            double wallet = current.structureRuntime.ManaReserve;
+            current.lastPausedUtcUnix = 104;
+            if (uncertain) fs.InterruptReplacement = true;
+            else h.F.FileSystem.EnableTargetedFailure(Faults.OperationType.Write,
+                paths => paths[0].EndsWith(".candidate", StringComparison.Ordinal), 1, false);
+            Assert.That(service.Save(current, SaveReason.StateChange), Is.False);
+            fs.InterruptReplacement = false; h.F.FileSystem.DisableFailure(); h.Wall.Seconds = 110;
+            if (uncertain) {
+                int writes = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
+                int replaces = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Replace);
+                var proof = service.ResolveUncertainRecoveryPublication();
+                Assert.That(proof.IsSuccess, Is.True, proof.Reason);
+                Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write), Is.EqualTo(writes));
+                Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Replace), Is.EqualTo(replaces));
+            } else Assert.That(service.Save(current, SaveReason.StateChange), Is.True);
+            Assert.That(current.livingDungeon.IsDormant, Is.True);
+            Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+            Assert.That(current.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(105, 0)));
+            Assert.That(h.Time.HasDeferredRecovery, Is.False);
+            Assert.That(h.Time.ForegroundThrough, Is.Zero);
+            h.Wall.Seconds = 111;
+            var cut = h.Time.CaptureForegroundObservation(service.CanonicalSession);
+            Assert.That(cut.CapturedThrough, Is.EqualTo(1000));
+            Assert.That(cut.AcceptedThrough, Is.EqualTo(-1));
+        }
+        [Test] public void LifecycleObservationDuringOrdinaryPublicationCannotStartAnotherWriter()
+        {
+            var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
+            using var scope = new RootScope(h); scope.Pulse(105);
+            var fs = new ObservedFileSystem(h.F.FileSystem);
+            var service = CreateService(h.F, h.Inputs, h.Time, fs);
+            var current = service.LoadOrCreate("h1f4-ordinary-reentrancy", out var reason);
+            Assert.That(current, Is.Not.Null, reason); h.Time.AttachSave(current);
+            scope.Rebind(service, h.Time, current); current.lastPausedUtcUnix = 104;
+            int before = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
+            int callbacks = 0;
+            fs.AfterFlush = () => { if (callbacks++ == 0) scope.Focus(false, 106); };
+            Assert.That(service.Save(current, SaveReason.StateChange), Is.True);
+            Assert.That(callbacks, Is.GreaterThan(0));
+            scope.Pulse(106);
+            Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write), Is.EqualTo(before + 2));
+            Assert.That(scope.Root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(105, 0)));
+            Assert.That(scope.Root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.Zero);
+            Assert.That(h.Time.HasDeferredBackground, Is.True);
+            Assert.That(h.Time.ForegroundThrough, Is.EqualTo(1000));
+        }
         [Test] public void KnownForegroundStallThenObservedBackgroundGrantsOnlyItsEligibleTimeAndReopens()
         {
             var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);

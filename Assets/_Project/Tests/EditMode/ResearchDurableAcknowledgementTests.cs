@@ -226,7 +226,7 @@ namespace DungeonBuilder.Tests.EditMode
             string durable = Encoding.UTF8.GetString(Bytes);
             Assert.That(durable, Does.Contain("\"unrelatedResearchEvidence\":{\"n\":1.00}"));
             Assert.That(durable, Does.Contain("\"unrelatedRoot\":[true,null]"));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
         }
 
         [TestCase(false, Faults.OperationType.Write, 1)]
