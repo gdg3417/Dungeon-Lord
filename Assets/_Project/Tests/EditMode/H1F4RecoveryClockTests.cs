@@ -231,6 +231,67 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(time.ReadForegroundObservation().Through, Is.EqualTo(2000));
             Assert.That(time.RecoveryDeferredForegroundWallForClockTest.Seconds, Is.EqualTo(102));
         }
+        static TimeService Native(Clock clock)
+        {
+            var time = new TimeService(new SimpleLogger(false), 10, 300, clock, () => clock.Mono);
+            time.BindRecoveryContext(Context); time.BeginRecoveryForeground(1000); return time;
+        }
+        [Test] public void NativePublicationHasNoOfflineEpisodeAndAdmitsOnlySuccessfulSuffix()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var time = Native(clock);
+            clock.Set(110, 10); var cut = time.BeginNativePublication(); cut.Bind(Candidate, Closed(110));
+            clock.Set(115, 14.5); time.CompleteRecoveryPublicationForClockTest(cut);
+            time.BindLoadedForegroundHorizon(-1); time.AttachSave(Settled(Closed(110), -1));
+            Assert.That(time.RetainedRecoveryEntry, Is.Null); Assert.That(time.ForegroundThrough, Is.EqualTo(4500));
+            Assert.That(cut.CandidateTime.Episode, Is.Null); Assert.That(cut.CandidateTime.AccountedBoundary.Seconds, Is.EqualTo(110));
+            clock.Set(116, 15.5); Assert.That(time.SampleForeground(), Is.EqualTo(5500));
+        }
+        [Test] public void NativeUncertaintyRetainsCandidateAndRejectsAnotherAttempt()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var time = Native(clock);
+            var cut = time.BeginNativePublication(); cut.Bind(Candidate, Closed(100));
+            clock.Set(105, 5); time.RecoveryPublicationUncertain(cut);
+            Assert.Throws<InvalidOperationException>(() => time.BeginNativePublication());
+            Assert.That(time.ForegroundThrough, Is.Zero);
+            clock.Set(115, 15); time.CompleteRecoveryPublicationForClockTest(cut);
+            Assert.That(time.ForegroundThrough, Is.EqualTo(5000));
+            Assert.Throws<InvalidOperationException>(() => time.CompleteRecoveryPublicationForClockTest(cut));
+        }
+        [Test] public void NativeCreationRequiresValidatedContextAndUnattachedForegroundOwner()
+        {
+            var clock = new Clock(); clock.Set(100, 0);
+            var time = new TimeService(new SimpleLogger(false), 10, 300, clock, () => clock.Mono);
+            time.BeginRecoveryForeground(1000);
+            Assert.Throws<InvalidOperationException>(() => time.BeginNativePublication());
+            time.BindRecoveryContext(Context); time.AttachSave(Settled(Closed(100), -1));
+            Assert.Throws<InvalidOperationException>(() => time.BeginNativePublication());
+        }
+        [Test] public void BootPauseObservationBeforeSaveAttachmentIsNotLost()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var time = Native(clock);
+            clock.Set(101, 1); time.OnPause(); Assert.That(time.IsPaused, Is.True);
+            clock.Set(102, 2); var cut = time.BeginNativePublication(); cut.Bind(Candidate, Closed(102));
+            clock.Set(110, 10); time.CompleteRecoveryPublicationForClockTest(cut);
+            Assert.That(time.ForegroundThrough, Is.Zero); Assert.That(time.HasDeferredRecovery, Is.True);
+            Assert.That(time.RecoveryDeferredForegroundWallForClockTest.Seconds, Is.EqualTo(102));
+            Assert.That(time.RecoveryDeferredBackground100nsForClockTest, Is.EqualTo(80000000));
+            time.OnResume(); Assert.That(time.IsPaused, Is.False);
+        }
+        [Test] public void LoadedAcceptedHorizonBindsOnceWithoutUtcAdventureCredit()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var time = Native(clock);
+            time.BeginRecoveryClock(Pending(100, 0)); clock.Set(200, 1);
+            time.BindLoadedForegroundHorizon(50000);
+            Assert.That(time.ForegroundThrough, Is.EqualTo(50000));
+            Assert.Throws<InvalidOperationException>(() => time.BindLoadedForegroundHorizon(50000));
+            Assert.That(time.ForegroundThrough, Is.EqualTo(50000));
+        }
+        [Test] public void LoadedHorizonCannotBeBoundByOrdinaryForegroundInitialization()
+        {
+            var clock = new Clock(); clock.Set(100, 0); var time = Service(clock, Closed(100));
+            Assert.Throws<InvalidOperationException>(() => time.BindLoadedForegroundHorizon(12));
+            Assert.That(time.ForegroundThrough, Is.Zero);
+        }
     }
 }
 #endif

@@ -10,6 +10,7 @@ namespace DungeonBuilder.M0
         private long foregroundSample, foregroundThrough;
         private bool foregroundFocused = true;
         private UnixTimePoint foregroundWall;
+        private bool recoveryAwaitingForegroundHorizon;
         internal bool HasForegroundClock => foregroundUnitsPerSecond > 0;
         internal long ForegroundThrough => foregroundThrough;
         internal bool ForegroundPresentationActive => HasForegroundClock && foregroundFocused && !_isPaused && _save != null &&
@@ -19,6 +20,16 @@ namespace DungeonBuilder.M0
             if (HasForegroundClock || unitsPerSecond <= 0 || acceptedThrough < -1) throw new InvalidOperationException("living.foreground.clock_invalid");
             foregroundUnitsPerSecond = unitsPerSecond;
             foregroundSample = ReadForegroundSample(); foregroundThrough = Math.Max(0, acceptedThrough);
+        }
+        internal void BeginRecoveryForeground(int unitsPerSecond)
+        {
+            BeginForeground(unitsPerSecond, -1); recoveryAwaitingForegroundHorizon = true;
+        }
+        internal void BindLoadedForegroundHorizon(long acceptedThrough)
+        {
+            if (!recoveryAwaitingForegroundHorizon || acceptedThrough < -1) throw new InvalidOperationException(RecoveryEpisode.Invalid);
+            foregroundThrough = checked(foregroundThrough + Math.Max(0, acceptedThrough));
+            recoveryAwaitingForegroundHorizon = false;
         }
         private long ReadForegroundSample()
         {

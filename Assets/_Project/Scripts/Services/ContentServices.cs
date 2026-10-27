@@ -17,6 +17,11 @@ namespace DungeonBuilder.M0
         public ProductionSpatialContentSnapshot ProductionSpatialContent { get; private set; }
         public SpatialLayoutCompatibilitySnapshot SpatialLayoutCompatibilityProfiles { get; private set; }
 
+        internal void BindRecoveryBootstrap(RecoveryRuntimeInputs inputs)
+        {
+            Bootstrap = inputs?.Bootstrap ?? throw new ArgumentNullException(nameof(inputs));
+        }
+
         private readonly Dictionary<string, string> _stringMap = new Dictionary<string, string>();
 
         public ProductionSpatialContentLoadResult LoadProductionSpatialContent(

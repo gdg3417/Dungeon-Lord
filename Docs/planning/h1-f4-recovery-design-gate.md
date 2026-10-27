@@ -525,3 +525,14 @@ INCOMPLETE / UNCERTAIN permanently. The fresh campaign
 0 skipped, with verified owned-process completion. Those fixture failures are
 being corrected without changing production limits or historical validation.
 See the [recovery receipt and fresh result](../testing/h1-f4-recovery-execution-20261027.json).
+
+The fixture correction passed all 48 cases at `e75bd6807a583e501561fbb8a237388da453d417`.
+Subsequent source-pinned focused gates passed 56/56 at
+`8d122017b22b5a50a45470c2e5e3fe62d2e16412` and 64/64 at
+`9e1e36376e95c867c6ea118a255970c16752065f`, with zero failures/skips,
+verified owned-process completion, exact input restoration and protected-evidence
+preservation. The latter includes staged writer/coordinator integration and
+ordinary rollback/deferred lifecycle clock tests. These are focused gates only;
+schema 17 is still staged and full runtime, interruption, PlayMode, Windows and
+performance qualification remain pending. The original INCOMPLETE evidence is
+unchanged and is not relabeled by any later successful campaign.

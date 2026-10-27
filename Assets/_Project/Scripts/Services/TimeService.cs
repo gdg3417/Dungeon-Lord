@@ -59,7 +59,7 @@ namespace DungeonBuilder.M0
             if (HasForegroundClock) SampleForeground();
             if (_save == null || _isPaused)
             {
-                if (_save == null && recoveryClockActive) _isPaused = true;
+                if (_save == null && (recoveryClockActive || HasForegroundClock)) _isPaused = true;
                 return;
             }
 
@@ -73,7 +73,7 @@ namespace DungeonBuilder.M0
             if (HasForegroundClock) SampleForeground(); // suspended sample reanchors without elapsed credit
             if (_save == null || !_isPaused)
             {
-                if (_save == null && recoveryClockActive) _isPaused = false;
+                if (_save == null && (recoveryClockActive || HasForegroundClock)) _isPaused = false;
                 return string.Empty;
             }
 

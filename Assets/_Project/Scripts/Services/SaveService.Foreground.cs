@@ -16,6 +16,7 @@ namespace DungeonBuilder.M0
         private bool PrepareForegroundAction(ref SaveData current)
         {
             if (foregroundRecoveryRequired) return false;
+            if (recoveryTime?.RecoveryClockActive == true && !ForegroundWriting) return false;
             if (current?.timeProvenance?.Episode != null && BeforeForegroundAction == null && !ForegroundWriting) return false;
             if (ForegroundWriting || BeforeForegroundAction == null) return true;
             if (!BeforeForegroundAction()) return false;

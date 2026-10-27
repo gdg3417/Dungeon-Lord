@@ -183,5 +183,109 @@
   "recovery_authorization": "Explicit user approval, limited to the reviewed proposal for 9ed872130a134ce7a5627f6c001b8e2f",
   "recovery_receipt_sha256": "32d3353de6aa1f7a45357861e5f5dda4a9ccc26304a43ad2280c6045a17f2445",
   "remaining_implementation": "Schema-17 activation and live recovery integration, full interruption qualification, PlayMode/Windows and three-way performance comparison pending",
-  "retention": "Preserve original INCOMPLETE campaign and all recovery/new-attempt evidence permanently; no native shutdown success inferred from later process absence"
+  "retention": "Preserve original INCOMPLETE campaign and all recovery/new-attempt evidence permanently; no native shutdown success inferred from later process absence",
+  "subsequent_focused_qualification": [
+    {
+      "campaign": "TestResults\\qualification-supervisor\\b7792ab9528a407c8456ec551a6802ea",
+      "evidence": {
+        "child.json": "0c2042adf76eb746460cedaf5bd68a148631e7c780cb4278b9c8b298c1f2a7b0",
+        "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "exit.json": "cc4c2fd9f565602e3261e228678e88b2e185a9266f4e72895144080533f6d416",
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "62c206d0fb69aad18015c540256395862a96dcf98ce45a3f935659cab06cfe27",
+        "results.xml": "576bef56a79f599c614bb83dc09b5bb3d15943cfc704201daec07d438901763e",
+        "started.json": "6918b2789491c5e83e055c55dbc5245b6f939d2829543c7e6c445b9de40c6c31",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unity.log": "5f511cd3352b3ec3778559089065218a23de2982adca98fef8ae247a4c835f51"
+      },
+      "input_identity": "ea98aa4ba2fa4ecd5420df2eaa0381ea0dd557734da26128880b93cd4b88c2f6",
+      "preservation": {
+        "inputs": 1486,
+        "original_inputs_restored": true,
+        "passed": true,
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 clock01",
+        "protected_evidence_unchanged": true,
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 clock01"
+      },
+      "process_exit": {
+        "child_finished_utc": "2026-10-27T13:55:30.322615+00:00",
+        "child_process": {
+          "created": 134375829012647252,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 54388
+        },
+        "exit_code": 0,
+        "host_exit_code": 0,
+        "job": "Local\\DLQ-9e96ab0394984c0db583d63f03e4af63",
+        "process": {
+          "created": 134375829011600535,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 13540
+        }
+      },
+      "scope": "Focused foundation, checked transitions and process-local clock tests; schema 17 remains staged, not complete runtime qualification",
+      "source_sha": "8d122017b22b5a50a45470c2e5e3fe62d2e16412",
+      "status": "PASSED",
+      "tests": {
+        "discovered": 56,
+        "failed": 0,
+        "passed": 56,
+        "skipped": 0,
+        "skips": []
+      }
+    },
+    {
+      "campaign": "TestResults\\qualification-supervisor\\1b7620f3cc874e2d815e6bb25a1b7eb0",
+      "evidence": {
+        "child.json": "da48c0f4d97f24d0e9a6c2737e04276612a6503e44db173d12b8cde2074333ca",
+        "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "exit.json": "5357a13dc74f22f8bb4f4ea5a214f1116b4f4add88b04742a266ccb218e410f2",
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "8ca28bb69fb40e51918eacd51c3104c1f03a67794316fb30ff5edc88dc0cde62",
+        "results.xml": "eed777f08c2369cee55190e8883af2f3c5393819921a739075704b458d597af7",
+        "started.json": "d19241fc392521b3c5ec98f8090917eab64d1ae5bacbb7a404422256ffd70a79",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unity.log": "ea85608a8f93a6d9cfa364268ccf66762c62bba7253834b295d80a254bfa0a48"
+      },
+      "input_identity": "69e858fd1afb7da71ef766602ebf2405c9d2942d86ca5e3607b81d50882cce10",
+      "preservation": {
+        "inputs": 1488,
+        "original_inputs_restored": true,
+        "passed": true,
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 integration01",
+        "protected_evidence_unchanged": true,
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 integration01"
+      },
+      "process_exit": {
+        "child_finished_utc": "2026-10-27T14:56:28.131748+00:00",
+        "child_process": {
+          "created": 134375865589737078,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 37548
+        },
+        "exit_code": 0,
+        "host_exit_code": 0,
+        "job": "Local\\DLQ-a4c0d0a43e64409489d493c7e44bf3c8",
+        "process": {
+          "created": 134375865588633947,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 10824
+        }
+      },
+      "scope": "Focused foundation, checked transitions and process-local clock tests; schema 17 remains staged, not complete runtime qualification",
+      "source_sha": "9e1e36376e95c867c6ea118a255970c16752065f",
+      "status": "PASSED",
+      "tests": {
+        "discovered": 64,
+        "failed": 0,
+        "passed": 64,
+        "skipped": 0,
+        "skips": []
+      }
+    }
+  ]
 }

@@ -271,6 +271,7 @@ namespace DungeonBuilder.M0
         public SaveData LoadOrCreate(string contentVersion, out string banner)
         {
             _undo = null;
+            LastLoadCreatedNative = false;
             banner = string.Empty;
 
             // Unconfigured instances are retained only for schema<=6 test/repair compatibility.
@@ -291,7 +292,23 @@ namespace DungeonBuilder.M0
             if (!activeExists && !evidenceExists)
             {
                 SaveData initial = CreateNew(contentVersion);
-                NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(SavePath,
+                NativeCanonicalSaveResult created;
+                if (recoveryInputs != null && UsesAtomicRecovery) {
+                    if (recoveryPublicationUncertain) { banner = RecoveryEpisode.Invalid; return null; }
+                    pendingRecoveryObservation = recoveryTime.BeginNativePublication();
+                    created = NativeCanonicalSaveCreator.CreatePrecise(SavePath, _canonicalFileSystem, initial,
+                        _production, _limits, _acquisition, recoveryInputs, pendingRecoveryObservation.Through,
+                        (session, time) => RetainPublication(null, session, time));
+                    if (created.IsSuccess) {
+                        var proof = new DetachedCanonicalWriteResult(true, null, false, false, created.Session.GetCurrentBytes(),
+                            created.Session, created.Validation, created.RuntimeProjection);
+                        recoveryTime.RecoveryPublicationSucceeded(pendingRecoveryObservation, proof);
+                        pendingRecoveryObservation = null; pendingCandidate = null;
+                    } else {
+                        recoveryTime.RecoveryPublicationUncertain(pendingRecoveryObservation);
+                        recoveryPublicationUncertain = true; foregroundRecoveryRequired = true;
+                    }
+                } else created = NativeCanonicalSaveCreator.Create(SavePath,
                     _canonicalFileSystem, initial, _compatibility, _production, _legacyConfiguration,
                     _limits, _acquisition, _roomContentOccupancy, _validationContext.MonsterRecovery);
                 if (!created.IsSuccess)
@@ -303,6 +320,7 @@ namespace DungeonBuilder.M0
                 var supported = DetachedCanonicalSaveSession.Open(created.Session.GetCurrentBytes(), _validationContext, _limits);
                 if (!supported.IsSuccess) { banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(supported.Reason); return null; }
                 _canonicalSession = supported.Session;
+                LastLoadCreatedNative = true;
                 return created.RuntimeProjection;
             }
             var coordinator = new DetachedSpatialSaveLoadCoordinator(_limits, _compatibility, _production,

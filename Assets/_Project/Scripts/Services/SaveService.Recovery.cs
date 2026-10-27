@@ -13,6 +13,8 @@ namespace DungeonBuilder.M0
         private DetachedCanonicalSaveSession pendingPredecessor, pendingCandidate;
         private TimeService.RecoveryPublicationObservation pendingRecoveryObservation;
         private bool recoveryPublicationUncertain;
+        private static bool UsesAtomicRecovery => CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
+        internal bool LastLoadCreatedNative { get; private set; }
 
         private void RetainPublication(DetachedCanonicalSaveSession predecessor, DetachedCanonicalSaveSession candidate, TimeProvenance time)
         {
@@ -113,12 +115,12 @@ namespace DungeonBuilder.M0
         // resolved by fresh active bytes and the existing persistence authority.
         internal DetachedCanonicalWriteResult ResolveUncertainRecoveryPublication()
         {
-            if (!recoveryPublicationUncertain || pendingPredecessor == null || pendingCandidate == null)
+            if (!recoveryPublicationUncertain || pendingCandidate == null)
                 return RecoveryFailure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
             try {
                 var active = _canonicalFileSystem.ReadAllBytes(SavePath);
                 bool committed = ExactCompleteSaveAtomicPersistence.Same(active, pendingCandidate.GetCurrentBytes());
-                if (!committed && !ExactCompleteSaveAtomicPersistence.Same(active, pendingPredecessor.GetCurrentBytes()))
+                if (!committed && (pendingPredecessor == null || !ExactCompleteSaveAtomicPersistence.Same(active, pendingPredecessor.GetCurrentBytes())))
                     return RecoveryFailure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
                 DetachedCompleteSaveValidationResult validation = null;
                 DetachedCanonicalSaveSessionResult opened = null; SaveData runtime = null;

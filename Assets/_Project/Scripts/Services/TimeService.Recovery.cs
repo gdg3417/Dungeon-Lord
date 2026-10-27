@@ -73,6 +73,24 @@ namespace DungeonBuilder.M0
             return retainedRecoveryEntry;
         }
 
+        // Native creation has no preceding absence or grant obligation. Its
+        // publication suffix is conditional foreground, using the same bounded
+        // S/Q handoff and exact candidate proof, without a synthetic episode.
+        internal RecoveryPublicationObservation BeginNativePublication()
+        {
+            if (recoveryClockActive || HasDeferredRecovery || _save != null || !HasForegroundClock ||
+                recoveryBoundContextSha256 == null) throw new InvalidOperationException(RecoveryEpisode.Invalid);
+            var sample = ReadRecoverySample(null);
+            recoveryWall = sample.Wall; recoveryMonotonic = sample.Monotonic; recoveryCoveredThrough = sample.Wall;
+            recoveryClockActive = true; recoveryFailureLatched = false; recoveryEligible100ns = 0;
+            recoveryConditionalUnits = 0; recoveryConditionalBackground100ns = 0;
+            recoveryConditionalBackgroundObserved = !ObservedForeground;
+            recoveryConditionalInterrupted = !ObservedForeground;
+            recoveryConditionalPrefixEnd = recoveryConditionalInterrupted ? sample.Wall : null;
+            recoveryPublication = new RecoveryPublicationObservation(sample.Wall, 0, Array.Empty<byte>(), true, false, recoveryBoundContextSha256);
+            return recoveryPublication;
+        }
+
         private (UnixTimePoint Wall, double Monotonic, long Units) ReadRecoverySample(UnixTimePoint minimum)
         {
             double monotonic = _clock.MonotonicSeconds;
