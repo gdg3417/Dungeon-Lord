@@ -129,7 +129,7 @@ def plan(attempt, discovery=False):
     if discovery:
         workload["artifacts"].append("inventory.json")
     else:
-        workload.update(xml="results.xml", expected_tests=98, allowed_skips=[])
+        workload.update(xml="results.xml", expected_tests=101, allowed_skips=[])
     stages = [
         {"id": name + "-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/" + name + "-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
         workload,
@@ -148,7 +148,7 @@ def plan(attempt, discovery=False):
     if discovery:
         data["approved_substitutions"].append("Discovery only: pinned Editor directly, without -quit, for the asynchronous existing TestRunnerApi.RetrieveTestList callbacks; collector exits explicitly. No tests execute and no passing test gate is inferred.")
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 98, "skips": None if discovery else 0}))
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 101, "skips": None if discovery else 0}))
 
 
 def preflight(attempt, stage, restored=False):
@@ -177,7 +177,7 @@ def run_inventory(attempt, stage):
     code = run_child(attempt, stage, command, "inventory", "editor-exit.json")
     if code == 0:
         _, product, _ = identities(attempt)
-        report = json.loads((stage / "inventory.json").read_text())
+        report = json.loads((stage / "inventory.json").read_text(encoding="utf-8"))
         if report["Product"] != product or Path(report["Project"]) != ROOT or report["UnityVersion"] != "6000.3.2f1":
             raise ValueError("Inventory identity mismatch")
         for mode in ("EditMode", "PlayMode"):

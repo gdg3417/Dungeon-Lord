@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Reflection;
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
@@ -241,6 +242,86 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 h.Current.livingDungeon, settleOriginal: true);
             Assert.That(h.F.Authority.PublishRecovery(h.Service.SavePath, h.F.FileSystem, h.Service.CanonicalSession, transition, foreign).IsSuccess, Is.False);
             CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+        }
+        sealed class RootScope : IDisposable
+        {
+            const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
+            readonly UnityEngine.GameObject host = new UnityEngine.GameObject("H1F4-owned-root-integration");
+            readonly Harness harness;
+            internal readonly GameRoot Root;
+            internal RootScope(Harness h, bool bootPending = false)
+            {
+                harness = h; Root = host.AddComponent<GameRoot>();
+                var content = new ContentService(); content.BindRecoveryBootstrap(h.Inputs);
+                typeof(ContentService).GetProperty("ProductionSpatialContent").SetValue(content, h.F.Production);
+                Property("Logger", new SimpleLogger(false, (_, __) => { })); Property("Content", content);
+                Property("Save", h.Current); Property("TimeService", h.Time);
+                Field("recoveryRuntimeInputs", h.Inputs); Field("bootRecoveryPending", bootPending);
+                Field("_configuredSimulationTickSeconds", h.Inputs.Bootstrap.tickSeconds);
+                Field("_offlineHeatConfiguration", h.Inputs.Configuration); Field("_offlinePassiveManaService", h.Mana);
+                Field("_passiveManaConfiguration", h.Inputs.Passive); Field("_structuralEconomy", h.Inputs.Economy);
+                Field("_passiveManaService", new CanonicalPassiveManaService(h.Inputs.Passive, h.Inputs.Economy, new FormulaEngine(),
+                    h.F.Profile.Canonical.Spatial, h.Inputs.Bootstrap.tickSeconds));
+                Root.AttachSaveServiceForTests(h.Service);
+                h.Service.BeforeForegroundAction = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), Root,
+                    typeof(GameRoot).GetMethod("FlushForeground", Private));
+                h.Service.ForegroundCurrent = () => Root.Save;
+            }
+            void Property(string name, object value) => typeof(GameRoot).GetProperty(name).SetValue(Root, value);
+            void Field(string name, object value) => typeof(GameRoot).GetField(name, Private).SetValue(Root, value);
+            internal void Pulse(long seconds) {
+                harness.Wall.Seconds = seconds;
+                typeof(GameRoot).GetMethod("UpdateForeground", Private).Invoke(Root, null);
+                Assert.That(typeof(GameRoot).GetField("foregroundFailure", Private).GetValue(Root), Is.Null);
+            }
+            internal void Focus(bool value, long seconds) {
+                harness.Wall.Seconds = seconds;
+                typeof(GameRoot).GetMethod("OnApplicationFocus", Private).Invoke(Root, new object[] { value });
+            }
+            public void Dispose() {
+                harness.Service.BeforeForegroundAction = null; harness.Service.ForegroundCurrent = null;
+                Root.AttachSaveServiceForTests(null); Property("TimeService", null);
+                UnityEngine.Object.DestroyImmediate(host);
+            }
+        }
+        [Test] public void RootCoordinatorKeepsActionsBehindEntryOriginalAndResidualClosure()
+        {
+            var h = new Harness(); h.Start(); using var scope = new RootScope(h);
+            Assert.That(h.Service.Save(h.Current, SaveReason.ManualDev), Is.False);
+            scope.Pulse(100); Assert.That(scope.Root.Save.timeProvenance.Episode.Phase, Is.EqualTo(RecoveryEpisode.OriginalPending));
+            Assert.That(h.Service.Save(h.Current, SaveReason.ManualDev), Is.False);
+            scope.Pulse(102); Assert.That(scope.Root.Save.timeProvenance.Episode.Phase, Is.EqualTo(RecoveryEpisode.ResidualPending));
+            Assert.That(h.Time.ForegroundThrough, Is.Zero);
+            scope.Pulse(105); Assert.That(scope.Root.Save.timeProvenance.Episode, Is.Null);
+            Assert.That(h.Service.Save(h.Current, SaveReason.ManualDev), Is.True);
+            Assert.That(scope.Root.Save.timeProvenance.AccountedBoundary.Seconds, Is.EqualTo(105));
+        }
+        [Test] public void RootRetainsOneBackgroundObligationUntilObservedReturnAndBlocksActions()
+        {
+            var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
+            using var scope = new RootScope(h); scope.Focus(false, 106);
+            Assert.That(h.Time.HasDeferredRecovery, Is.True); Assert.That(h.Time.RecoveryClockActive, Is.False);
+            var before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            scope.Pulse(110); scope.Pulse(115); scope.Pulse(120);
+            CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+            Assert.That(h.Service.Save(h.Current, SaveReason.ManualDev), Is.False);
+            scope.Focus(true, 120);
+            Assert.That(h.Time.RecoveryClockActive, Is.True);
+            scope.Pulse(120); scope.Pulse(121); scope.Pulse(122);
+            Assert.That(scope.Root.Save.timeProvenance.Episode, Is.Null); Assert.That(h.Time.HasDeferredRecovery, Is.False);
+            Assert.That(h.Time.ForegroundThrough, Is.EqualTo(1000), "Only the full foreground prefix before focus loss advances adventurers.");
+        }
+        [Test] public void RootDoesNotCreateRecoveryEpisodesEveryFrameWhileBootRemainsBackground()
+        {
+            var h = new Harness(); h.Start(); h.Time.SetForegroundFocus(false);
+            using var scope = new RootScope(h, bootPending: true);
+            scope.Pulse(100); scope.Pulse(102); scope.Pulse(105);
+            Assert.That(h.Time.HasDeferredRecovery, Is.True); Assert.That(h.Time.RecoveryClockActive, Is.False);
+            var before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            scope.Pulse(110); scope.Pulse(120);
+            CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+            Assert.That(scope.Root.GameplayServicesInitializedForTests, Is.False);
+            Assert.That(h.Time.ForegroundThrough, Is.Zero);
         }
 
         [Test] public void ActualAtomicEntryOriginalAndResidualCloseOneCanonicalOwner()

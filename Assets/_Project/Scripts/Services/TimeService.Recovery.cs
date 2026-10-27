@@ -21,6 +21,7 @@ namespace DungeonBuilder.M0
 
         internal bool RecoveryClockActive => recoveryClockActive;
         internal bool RecoveryFailureLatched => recoveryFailureLatched;
+        internal bool RecoveryForegroundObserved => ObservedForeground;
         internal RecoveryEntryObservation RetainedRecoveryEntry => retainedRecoveryEntry;
         internal long RecoveryOriginalEligible100ns { get; private set; }
         internal RecoveryPublicationObservation PendingRecoveryPublication => recoveryPublication;

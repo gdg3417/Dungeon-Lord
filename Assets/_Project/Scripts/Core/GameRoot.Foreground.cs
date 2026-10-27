@@ -62,6 +62,7 @@ namespace DungeonBuilder.M0
             try {
                 if (TimeService.RecoveryClockActive) { PumpCanonicalRecovery(); return; }
                 if (TimeService.HasDeferredRecovery) {
+                    if (!TimeService.RecoveryForegroundObserved) return; // Retain grouped absence until an observed return.
                     TimeService.BeginDeferredRecoveryPreparation();
                     if (!FlushForeground()) return;
                     if (TimeService.HasDeferredRecovery) { SaveService.BeginCanonicalRecovery(Save, observedBackground: true); return; }
@@ -143,8 +144,16 @@ namespace DungeonBuilder.M0
                     // storage time is retained for subsequent processing, never interpolated.
                     observation = TimeService.CaptureForegroundObservation(SaveService.CanonicalSession);
                 }
-                return Save.livingDungeon.IsClosed && target <= Save.livingDungeon.Scheduler.AcceptedThrough &&
+                bool complete = Save.livingDungeon.IsClosed && target <= Save.livingDungeon.Scheduler.AcceptedThrough &&
                     (wallTarget == null || Save.timeProvenance.AccountedBoundary.CompareTo(wallTarget) >= 0);
+                if (complete && TimeService.HasDeferredRecovery) {
+                    if (TimeService.RecoveryForegroundObserved) {
+                        TimeService.BeginDeferredRecoveryPreparation();
+                        SaveService.BeginCanonicalRecovery(Save, observedBackground: true);
+                    }
+                    return false; // An action cannot bypass the unresolved absence.
+                }
+                return complete;
             } catch { ForegroundFault("living.foreground.clock_invalid"); return false; }
         }
 

@@ -70,7 +70,7 @@ class H1F4CampaignTests(unittest.TestCase):
                 q.plan("test")
             plan = json.loads((prep / "plan.json").read_text())
             supervisor.validate_plan(plan)
-            self.assertEqual(98, plan["stages"][1]["expected_tests"])
+            self.assertEqual(101, plan["stages"][1]["expected_tests"])
             self.assertEqual([], plan["stages"][1]["allowed_skips"])
             self.assertEqual(set(plan["selections"]["focused"][:-1]), set(plan["stages"][-1]["depends"]))
 
@@ -113,8 +113,9 @@ class H1F4CampaignTests(unittest.TestCase):
         with patch.object(q, "ROOT", self.root):
             _, product, _ = q.identities("inventorytest")
             def child(command, **kwargs):
-                q.write(stage / "inventory.json", {"Product": product, "Project": str(self.root), "UnityVersion": "6000.3.2f1",
-                    "EditMode": [{"Id": "edit-1"}], "PlayMode": [{"Id": "play-1"}]})
+                report = {"Product": product, "Project": str(self.root), "UnityVersion": "6000.3.2f1",
+                    "EditMode": [{"Id": "edit-1", "Name": "\u500f"}], "PlayMode": [{"Id": "play-1"}]}
+                (stage / "inventory.json").write_bytes(json.dumps(report, ensure_ascii=False).encode("utf-8"))
                 return SimpleNamespace(returncode=0)
             with patch.object(q.subprocess, "run", side_effect=child) as run:
                 self.assertEqual(0, q.run_inventory("inventorytest", stage))
