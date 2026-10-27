@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import zipfile
@@ -111,17 +112,21 @@ def plan(attempt):
     if inventory(ROOT) != json.loads((prep / "qualified-inputs.json").read_text()):
         raise ValueError("Inputs changed since preparation")
     helper = Path(__file__).resolve()
-    pinned = [Path(sys.executable), CLI, EDITOR, helper, helper.with_name("qualification_supervisor.py"),
+    git = Path(shutil.which("git")); powershell = Path(shutil.which("powershell"))
+    pinned = [Path(sys.executable), CLI, EDITOR, git, powershell, helper, helper.with_name("qualification_supervisor.py"),
               helper.with_name("qualification_windows.py"), helper.with_name("qualification_inputs.py")]
     tools = {str(path): {"sha256": sha(path), "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"} for path in pinned}
+    tools[str(Path(sys.executable))]["version"] = sys.version
+    tools[str(git)]["version"] = subprocess.check_output([str(git), "--version"], text=True).strip()
+    tools[str(powershell)]["version"] = "Windows PowerShell 5.1; process-inspection dependency"
     command = lambda mode: [sys.executable, "-B", str(helper), mode, "--attempt", attempt, "--stage", "{stage}"]
     restored = json.loads((prep / "original-inputs.json").read_text())
     restored_id = hashlib.sha256(json.dumps(restored, sort_keys=True).encode()).hexdigest()
     stages = [
-        {"id": "focused-preflight", "role": "preflight", "depends": [], "command": command("preflight"), "timeout_seconds": 120, "artifacts": ["preservation.json"]},
+        {"id": "focused-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/focused-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
         {"id": "focused", "role": "test", "depends": ["focused-preflight"], "command": command("run-test"), "timeout_seconds": 960,
          "xml": "results.xml", "expected_tests": 30, "allowed_skips": [], "artifacts": ["unity.log", "invocation.json", "cli-exit.json", "generated-inputs"]},
-        {"id": "restore-preflight", "role": "preflight", "depends": ["focused"], "command": command("preflight"), "timeout_seconds": 120, "artifacts": ["preservation.json"]},
+        {"id": "restore-preflight", "role": "preflight", "depends": ["focused"], "command": command("preflight")[:-1] + ["{campaign}/restore-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
         {"id": "restore", "role": "report", "depends": ["restore-preflight"], "command": command("restore"), "timeout_seconds": 120,
          "artifacts": ["restoration.json"], "after_input_identity": restored_id},
         {"id": "preservation", "role": "final", "depends": ["focused-preflight", "focused", "restore-preflight", "restore"],
