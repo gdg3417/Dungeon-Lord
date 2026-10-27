@@ -201,14 +201,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.BeginCanonicalRecovery(current);
             int before = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
             int callbacks = 0;
-            fs.AfterFlush = () => { if (callbacks++ == 0) scope.Focus(false, 101); };
+            bool nestedSaveAllowed = true;
+            fs.AfterFlush = () => {
+                if (callbacks++ != 0) return;
+                Assert.That(service.ForegroundWriting, Is.True);
+                scope.Focus(false, 101);
+                nestedSaveAllowed = service.Save(scope.Root.Save, SaveReason.StateChange);
+            };
             scope.Pulse(100);
             Assert.That(callbacks, Is.GreaterThan(0));
             Assert.That(scope.Root.Save.timeProvenance.Episode.Phase, Is.EqualTo(RecoveryEpisode.OriginalPending));
             Assert.That(scope.Root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(100, 0)));
             Assert.That(scope.Root.Save.livingDungeon.IsDormant, Is.True);
             Assert.That(h.Time.RecoveryClockActive, Is.True);
-            Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write), Is.EqualTo(before + 1));
+            Assert.That(nestedSaveAllowed, Is.False);
+            var writes = h.F.FileSystem.Operations.Where(o => o.Type == Faults.OperationType.Write).Skip(before).ToArray();
+            Assert.That(writes.Length, Is.EqualTo(2), "The existing protocol writes one rollback and one candidate");
+            Assert.That(writes.Count(o => o.Paths[0].EndsWith(".rollback", StringComparison.Ordinal)), Is.EqualTo(1));
+            Assert.That(writes.Count(o => o.Paths[0].EndsWith(".candidate", StringComparison.Ordinal)), Is.EqualTo(1));
         }
         [TestCase(false)] [TestCase(true)]
         public void CommittedSettlementWithInterruptedAcknowledgementResolvesWithoutAnotherGrant(bool residual)
