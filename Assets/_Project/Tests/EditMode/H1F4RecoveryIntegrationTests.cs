@@ -401,6 +401,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(h.Time.HasDeferredRecovery, Is.False);
             Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(wallet));
             scope.Pulse(111);
+            Assert.That(h.Time.ForegroundThrough, Is.EqualTo(1000));
+            Assert.That(h.Service.Save(scope.Root.Save, SaveReason.ManualDev), Is.True,
+                "The explicit barrier publishes captured time before checking durable acceptance");
             Assert.That(scope.Root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(1000));
             Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(wallet));
             var clock = new Clock { Seconds = 111 };
