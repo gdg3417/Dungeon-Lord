@@ -184,6 +184,41 @@ class H1F4CampaignTests(unittest.TestCase):
             self.assertEqual(["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"],
                              plan["stages"][1]["allowed_skips"])
 
+    def test_living_cohort_exports_only_into_fresh_child_owned_artifacts(self):
+        stage = self.stage.parent / "living-regressions"; stage.mkdir()
+        before = os.environ.get("DUNGEON_H1F4_TEST_EXPORT_ROOT")
+        with patch.object(q, "ROOT", self.root), patch.object(q.subprocess, "run", return_value=SimpleNamespace(returncode=0)) as run:
+            self.assertEqual(0, q.run_living("living", stage))
+        command = run.call_args.args[0]
+        self.assertEqual(q.RESEARCH_FILTER + ";DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2;" +
+            "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor", command[command.index("--filter") + 1])
+        self.assertEqual(str(stage / "fixture-inputs"), run.call_args.kwargs["env"]["DUNGEON_H1F4_TEST_EXPORT_ROOT"])
+        self.assertTrue((stage / "fixture-inputs").is_dir())
+        self.assertEqual(before, os.environ.get("DUNGEON_H1F4_TEST_EXPORT_ROOT"))
+        self.assertFalse((self.root / "TestResults/living-dungeon-two-floor-20261020").exists())
+
+    def test_existing_fixture_output_prevents_launch_without_overwrite(self):
+        stage = self.stage.parent / "living-regressions"; stage.mkdir()
+        output = stage / "fixture-inputs"; output.mkdir()
+        (output / "evidence.txt").write_bytes(b"retained")
+        with patch.object(q, "ROOT", self.root), patch.object(q.subprocess, "run") as run:
+            with self.assertRaises(FileExistsError): q.run_living("living", stage)
+            run.assert_not_called()
+        self.assertEqual(b"retained", (output / "evidence.txt").read_bytes())
+
+    def test_living_plan_declares_count_and_seals_exported_inputs(self):
+        with patch.object(q, "ROOT", self.root):
+            prep, _, _ = q.identities("livingtest"); prep.mkdir(parents=True)
+            q.write(prep / "qualified-inputs.json", {}); q.write(prep / "original-inputs.json", {})
+            with patch.object(q, "check_protected"), patch.object(q, "inventory", return_value={}), \
+                    patch.object(q, "sha", return_value="a" * 64), patch.object(q.subprocess, "check_output", return_value="b" * 40):
+                q.plan("livingtest", living=True)
+            plan = json.loads((prep / "plan.json").read_text()); supervisor.validate_plan(plan)
+            self.assertEqual(356, plan["stages"][1]["expected_tests"])
+            self.assertEqual([], plan["stages"][1]["allowed_skips"])
+            self.assertIn("fixture-inputs", plan["stages"][1]["artifacts"])
+            self.assertEqual(set(plan["selections"]["living-regressions"][:-1]), set(plan["stages"][-1]["depends"]))
+
 
 if __name__ == "__main__":
     unittest.main()

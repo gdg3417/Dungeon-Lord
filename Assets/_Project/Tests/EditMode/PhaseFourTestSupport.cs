@@ -9,6 +9,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     internal static class PhaseFourTestSupport
     {
+        // Explicit producer for a fresh synthetic fixture. Its complete validated
+        // bytes, including the internal CombatC0 DTO, exist before a context or
+        // save owner is constructed; this never rebinds an existing save.
+        internal static byte[][] AuthoredInputs(System.Action<RunSimulationConfig, ContentBootstrap> author)
+        {
+            var bytes = H1F4RecoveryContractTests.Inputs();
+            if (author == null) return bytes;
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                System.Text.Encoding.UTF8.GetString(bytes[0]), out var config), Is.True);
+            var bootstrap = UnityEngine.JsonUtility.FromJson<ContentBootstrap>(System.Text.Encoding.UTF8.GetString(bytes[10]));
+            author(config, bootstrap);
+            string publicFields = UnityEngine.JsonUtility.ToJson(config);
+            Assert.That(publicFields, Does.Not.Contain("\"CombatC0\""));
+            Assert.That(config.CombatC0, Is.Not.Null);
+            bytes[0] = System.Text.Encoding.UTF8.GetBytes(publicFields.Substring(0, publicFields.Length - 1) +
+                ",\"CombatC0\":" + UnityEngine.JsonUtility.ToJson(config.CombatC0) + "}");
+            bytes[10] = System.Text.Encoding.UTF8.GetBytes(UnityEngine.JsonUtility.ToJson(bootstrap));
+            return bytes;
+        }
+
         internal static bool Upgrade(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] current)
         {
             current = null;

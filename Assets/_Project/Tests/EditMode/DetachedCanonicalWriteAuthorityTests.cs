@@ -1591,6 +1591,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 CollectionAssert.AreEqual(bytes, Session.GetCurrentBytes());
             }
 
+            internal void ReopenWithSupportedForegroundProfiles()
+            {
+                var inputs = Context.RecoveryInputs;
+                Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                    Encoding.UTF8.GetString(inputs.Identity.GetInput(0)), out var original), Is.True);
+                Assert.That(JsonUtility.ToJson(Configuration), Is.EqualTo(JsonUtility.ToJson(original)),
+                    "Author test configuration before creating its owner; do not change consumed inputs afterward");
+                Assert.That(JsonUtility.ToJson(Configuration.CombatC0), Is.EqualTo(JsonUtility.ToJson(original.CombatC0)));
+                Profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+                Context = new DetachedCurrentTargetValidationContext(inputs.Compatibility, Production,
+                    LegacyGameplayConfigurationContract.SerializeCanonical(inputs.Configuration), Profile.Canonical, inputs.Occupancy,
+                    livingDungeonProfiles: new[] { inputs.OneFloor.CreateProfile(Profile.Canonical.ForSchema(13).Serialized),
+                        inputs.TwoFloor.CreateProfile(Profile.Canonical.ForSchema(13).Serialized) }, monsterRecovery: inputs.Monsters);
+                Context.BindRecoveryInputs(inputs);
+                Reopen();
+            }
+
             internal Fixture Rebase(DetachedCanonicalSpatialSaveState state)
             {
                 DetachedRecognizedSaveStateSnapshotResult snapshot =

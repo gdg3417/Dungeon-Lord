@@ -77,9 +77,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             view.RecentInteraction = new RunStep(RunStepKind.LootInteraction, 0, "test.room", carriedLootValue: 17);
             Assert.That(Feedback(), Is.EqualTo("Loot reached · Carried value 17"));
         }
-        private static Fixture Dungeon()
+        private static Fixture Dungeon(Action<RunSimulationConfig> author = null)
         {
-            var f = Fixture.Create(null); f.Configuration = CombatC0IntegrationTests.Config();
+            var inputs = PhaseFourTestSupport.AuthoredInputs((config, _) => {
+                PhaseSixA4Tests.ForceDescent(config, true); author?.Invoke(config);
+            });
+            var f = Fixture.Create(null, recoveryInputBytes: inputs);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId);
@@ -88,17 +91,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         private static Fixture Support(Fixture f)
         {
-            f.Profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
-            f.Context = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
-                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile.Canonical, f.Occupancy,
-                livingDungeonProfiles: new[] { Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized) },
-                monsterRecovery: MonsterRecoveryRules.Capture(f.Configuration));
-            f.Reopen(); return f;
+            f.ReopenWithSupportedForegroundProfiles(); return f;
         }
-        private static RunExecution Start(Fixture f) => new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot())
-            .StartTimedCombatSnapshot(1, PhaseSixA4Tests.Snapshot(f), Policy.Timing);
+        private static RunExecution Start(Fixture f) => new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot)
+            .StartTimedCombatSnapshot(1, PhaseSixA4Tests.Snapshot(f), f.Context.RecoveryInputs.OneFloor.Timing);
         private static DetachedCanonicalWriteResult Pump(Fixture f, long target, LivingDungeonForegroundConfig policy = null) => PhaseSixA4Tests.Writer(f).AdvanceForeground(
-            f.ActivePath, f.FileSystem, f.Session, f.Runtime, policy ?? Policy, target, 10, (save, tick) => { }, 1000);
+            f.ActivePath, f.FileSystem, f.Session, f.Runtime, policy ?? f.Context.RecoveryInputs.OneFloor, target, 10, (save, tick) => { }, 1000);
         private static void Through(Fixture f, long target)
         {
             for (int i = 0; i < 100; i++) {
@@ -272,17 +270,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private sealed class MutableUtc : ITimeSource { public long Now = 2000; public long UtcNowUnixSeconds() => Now; }
         internal static SaveService Service(Fixture f, ITimeSource utc)
         {
+            var inputs = f.Context.RecoveryInputs;
+            var time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
+                inputs.Bootstrap.timeRules.detectClockSkewSeconds, utc, () => 0);
+            time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);
             var service = new SaveService(new SimpleLogger(false, (level, message) => { }),
                 new SaveConfig { fileName = Path.GetFileName(f.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(f.ActivePath));
             service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
                 LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.PositionProfiles, f.Occupancy);
             service.ConfigureStructuralEconomy(f.Economy); service.ConfigureContentAcquisitionEconomy(f.Acquisition);
-            service.ConfigureStructuralRemovalPolicy(f.RemovalPolicy); service.ConfigureRunLoot(PhaseSixA4Tests.Loot());
+            service.ConfigureStructuralRemovalPolicy(f.RemovalPolicy);
             service.SetTimeSourceForTests(utc);
             service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, f.FileSystem, path));
+            service.ConfigureRecovery(inputs, time);
             var loaded = service.LoadOrCreate("foreground-test", out string banner);
             Assert.That(loaded, Is.Not.Null, banner); f.Runtime = loaded; f.State = loaded.validatedCanonicalSpatialState;
+            time.BindLoadedForegroundHorizon(loaded.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
+            time.AttachSave(loaded); service.CanonicalRuntimePublished += time.AttachSave;
             return service;
         }
 
@@ -310,7 +315,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void UnsupportedCombatWorkConsumesOpportunityWithoutRunAllocationOrGameplayDamage()
         {
-            var f = Dungeon(); f.Configuration.CombatC0.MaximumWork = 1; Support(f);
+            var f = Dungeon(config => config.CombatC0.MaximumWork = 1);
             Through(f, 0); long due = f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value;
             string monsters = B.Structured(f.Runtime.monsterContinuity); int sequence = f.Runtime.runHistory.NextRunSequence;
             f.Accept(Pump(f, due));
@@ -541,7 +546,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(false)] [TestCase(true)]
         public void MoveToAnotherFloorPreservesIdentityAndOrdersCurrentVacantRecoveryBeforeHistoricalDamage(bool activateTarget)
         {
-            var f = PhaseSixA4Tests.Eligible(); f.Configuration = CombatC0IntegrationTests.Config();
+            var f = PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs((config, _) => PhaseSixA4Tests.ForceDescent(config, true)));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             Support(f); Admitted(f); long finish = Finish(f);

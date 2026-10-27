@@ -21,7 +21,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             acquisition: f.Acquisition, branchingResearch: f.BranchingResearch,
             floorConstructionProfiles: PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
             floorConstructionResearch: PhaseSixA3FloorActivationEligibilityTests.Research(f), runLoot: f.Context.RecoveryInputs.Loot);
-        internal static Fixture Eligible() => PhaseSixA3FloorActivationEligibilityTests.Eligible();
+        internal static Fixture Eligible(byte[][] recoveryInputBytes = null, long? initialTime = null) =>
+            PhaseSixA3FloorActivationEligibilityTests.Eligible(recoveryInputBytes, initialTime);
         internal static string FloorTwo(Fixture f) => f.State.Floors.Single(x => x.FloorIndex == 1).FloorInstanceId;
 
         [Test]

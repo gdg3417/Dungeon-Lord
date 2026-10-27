@@ -23,6 +23,9 @@ FIXTURE_FILTER = ";".join(["DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryCont
 RESEARCH_FILTER = FIXTURE_FILTER + ";" + ";".join([
     "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability",
     "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchSaveIntegration"])
+LIVING_FILTER = RESEARCH_FILTER + ";" + ";".join([
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor"])
 
 
 def sha(path):
@@ -72,6 +75,7 @@ def protected(save):
         "stopped_h1f3_replacement": tree(prior / "qualification-supervisor/b227e498d4ef4f2a91cd7801fb915881"),
         "historical_corpus": tree(ROOT / "Tools/Presentation/Fixtures"),
         "retained_review_evidence": tree(ROOT / "Docs/testing/evidence"),
+        "historical_two_floor_inputs": tree(ROOT / "TestResults/living-dungeon-two-floor-20261020/inputs"),
         "qualified_f2_executable": sha(executable) if executable.exists() else None,
     }
 
@@ -111,8 +115,8 @@ def prepare(attempt):
     print(json.dumps({"preparation": str(prep), "product": product, "save": str(save)}))
 
 
-def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=False):
-    if sum((discovery, full_edit, fixtures, research)) > 1:
+def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=False, living=False):
+    if sum((discovery, full_edit, fixtures, research, living)) > 1:
         raise ValueError("Choose one explicit workload")
     prep, product, save = identities(attempt)
     check_protected(prep, save)
@@ -129,9 +133,9 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     command = lambda mode: [sys.executable, "-B", str(helper), mode, "--attempt", attempt, "--stage", "{stage}"]
     restored = json.loads((prep / "original-inputs.json").read_text())
     restored_id = hashlib.sha256(json.dumps(restored, sort_keys=True).encode()).hexdigest()
-    name = "inventory" if discovery else "full-edit" if full_edit else "research-regressions" if research else "fixture-regressions" if fixtures else "focused"
+    name = "inventory" if discovery else "full-edit" if full_edit else "living-regressions" if living else "research-regressions" if research else "fixture-regressions" if fixtures else "focused"
     workload = {"id": name, "role": "report" if discovery else "test", "depends": [name + "-preflight"],
-                "command": command("run-inventory" if discovery else "run-full-edit" if full_edit else "run-research" if research else "run-fixtures" if fixtures else "run-test"), "timeout_seconds": 3600 if full_edit else 960,
+                "command": command("run-inventory" if discovery else "run-full-edit" if full_edit else "run-living" if living else "run-research" if research else "run-fixtures" if fixtures else "run-test"), "timeout_seconds": 3600 if full_edit else 960,
                 "artifacts": ["unity.log", "invocation.json", "editor-exit.json" if discovery else "cli-exit.json", "generated-inputs"]}
     if discovery:
         workload["artifacts"].append("inventory.json")
@@ -144,8 +148,11 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
         # leaves. Original source-pinned full XML proves the latter two counts;
         # the renamed native-creation case does not change leaf count.
         # Research adds its 18 durable-acknowledgement and three save cases.
-        workload.update(xml="results.xml", expected_tests=2781 if full_edit else 268 if research else 247 if fixtures else 111,
+        # Living adds its 51 one-floor and 37 two-floor leaves; no Editor
+        # sustained production-profile scene or Windows workload is selected.
+        workload.update(xml="results.xml", expected_tests=2781 if full_edit else 356 if living else 268 if research else 247 if fixtures else 111,
             allowed_skips=["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"] if full_edit else [])
+    if living or full_edit: workload["artifacts"].append("fixture-inputs")
     stages = [
         {"id": name + "-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/" + name + "-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
         workload,
@@ -164,7 +171,7 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     if discovery:
         data["approved_substitutions"].append("Discovery only: pinned Editor directly, without -quit, for the asynchronous existing TestRunnerApi.RetrieveTestList callbacks; collector exits explicitly. No tests execute and no passing test gate is inferred.")
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 2781 if full_edit else 268 if research else 247 if fixtures else 111,
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 2781 if full_edit else 356 if living else 268 if research else 247 if fixtures else 111,
                       "skips": None if discovery else 1 if full_edit else 0}))
 
 
@@ -198,6 +205,13 @@ def run_research(attempt, stage):
     command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--filter", RESEARCH_FILTER,
                "--output", str(stage / "results.xml"), "--timeout", "900", "--no-color", "--", "-logFile", str(stage / "unity.log")]
     return run_child(attempt, stage, command, "research-regressions", "cli-exit.json")
+
+
+def run_living(attempt, stage):
+    stage = Path(stage).resolve()
+    command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--filter", LIVING_FILTER,
+               "--output", str(stage / "results.xml"), "--timeout", "900", "--no-color", "--", "-logFile", str(stage / "unity.log")]
+    return run_child(attempt, stage, command, "living-regressions", "cli-exit.json")
 
 
 def run_full_edit(attempt, stage):
@@ -237,6 +251,11 @@ def run_child(attempt, stage, command, expected_stage, exit_name):
     font = (ROOT / FONT).read_bytes()
     environment = os.environ.copy()
     override = {"UNITY_NO_AUTH_BROKER": "1"} if command[0] == str(CLI) else {}
+    if expected_stage in ("living-regressions", "full-edit"):
+        # Fresh sealed artifact directory; old fixed-path fixture exports must
+        # never be reused or overwritten. Override is local to this child only.
+        export = stage / "fixture-inputs"; export.mkdir(exist_ok=False)
+        override["DUNGEON_H1F4_TEST_EXPORT_ROOT"] = str(export)
     environment.update(override)
     write(stage / "invocation.json", {"command": command, "environment_override": override, "ownership": "Enclosing unchanged supervisor job"})
     result = subprocess.run(command, cwd=ROOT, env=environment, stdin=subprocess.DEVNULL)
@@ -275,7 +294,7 @@ def restore(attempt, stage):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "plan-full-edit", "plan-fixtures", "plan-research", "preflight", "run-test", "run-inventory", "run-full-edit", "run-fixtures", "run-research", "restore", "finish"])
+    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "plan-full-edit", "plan-fixtures", "plan-research", "plan-living", "preflight", "run-test", "run-inventory", "run-full-edit", "run-fixtures", "run-research", "run-living", "restore", "finish"])
     parser.add_argument("--attempt", required=True)
     parser.add_argument("--stage")
     args = parser.parse_args()
@@ -285,10 +304,12 @@ if __name__ == "__main__":
     elif args.mode == "plan-full-edit": plan(args.attempt, full_edit=True)
     elif args.mode == "plan-fixtures": plan(args.attempt, fixtures=True)
     elif args.mode == "plan-research": plan(args.attempt, research=True)
+    elif args.mode == "plan-living": plan(args.attempt, living=True)
     elif args.mode == "run-test": raise SystemExit(run_test(args.attempt, args.stage))
     elif args.mode == "run-inventory": raise SystemExit(run_inventory(args.attempt, args.stage))
     elif args.mode == "run-full-edit": raise SystemExit(run_full_edit(args.attempt, args.stage))
     elif args.mode == "run-fixtures": raise SystemExit(run_fixtures(args.attempt, args.stage))
     elif args.mode == "run-research": raise SystemExit(run_research(args.attempt, args.stage))
+    elif args.mode == "run-living": raise SystemExit(run_living(args.attempt, args.stage))
     elif args.mode == "restore": restore(args.attempt, args.stage)
     else: preflight(args.attempt, args.stage, restored=args.mode == "finish")

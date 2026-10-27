@@ -357,9 +357,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.PrimaryBlocker, Is.EqualTo(FloorActivationEligibilityReasons.ResearchRequired));
         }
 
-        private static Fixture Start()
+        private static Fixture Start(byte[][] recoveryInputBytes = null, long? initialTime = null)
         {
-            Fixture fixture = Fixture.Create(null);
+            Fixture fixture = Fixture.Create(initialTime.HasValue ? "\"lastSavedUtcUnix\":" +
+                initialTime.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
+                recoveryInputBytes: recoveryInputBytes);
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             fixture.Runtime.completedResearch = new CompletedResearchState
@@ -367,9 +369,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return fixture;
         }
 
-        private static Fixture Constructed()
+        private static Fixture Constructed(byte[][] recoveryInputBytes = null, long? initialTime = null)
         {
-            Fixture fixture = Start();
+            Fixture fixture = Start(recoveryInputBytes, initialTime);
             FloorConstructionPreview preview = FloorConstructionService.Preview(
                 fixture.State, fixture.Runtime, fixture.Runtime.completedResearch, Profiles(fixture),
                 Research(fixture), fixture.Production, fixture.Configuration, fixture.Profile.Canonical);
@@ -384,9 +386,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return fixture;
         }
 
-        internal static Fixture Eligible()
+        internal static Fixture Eligible(byte[][] recoveryInputBytes = null, long? initialTime = null)
         {
-            Fixture fixture = Constructed();
+            Fixture fixture = Constructed(recoveryInputBytes, initialTime);
             BuildRoom(fixture);
             CanonicalSpatialSaveValidationResult validation = CanonicalSpatialSaveContracts.Validate(
                 fixture.State, fixture.Profile.Canonical.Spatial, true);

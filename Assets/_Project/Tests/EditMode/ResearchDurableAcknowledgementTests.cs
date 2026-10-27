@@ -154,10 +154,7 @@ namespace DungeonBuilder.Tests.EditMode
             // The existing test coefficients/project are authored before the
             // current owner exists. Do not alter production assets or historical
             // serialization, and never hash JsonUtility's incomplete run config.
-            var bytes = DungeonBuilder.M0.Tests.EditMode.H1F4RecoveryContractTests.Inputs();
-            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
-                Encoding.UTF8.GetString(bytes[0]), out var config), Is.True);
-            var bootstrap = JsonUtility.FromJson<ContentBootstrap>(Encoding.UTF8.GetString(bytes[10]));
+            return DungeonBuilder.M0.Tests.EditMode.PhaseFourTestSupport.AuthoredInputs((config, bootstrap) => {
             config.MvpFirstSessionObjective = ObjectiveConfig().MvpFirstSessionObjective;
             bootstrap.researchPendingScaffold = new ResearchPendingScaffoldConfig {
                 enabled = true, slotId = "slot", projectId = Project, ruleSourceId = "test.pending" };
@@ -169,13 +166,7 @@ namespace DungeonBuilder.Tests.EditMode
                 enabled = true, ruleSourceId = "test.claim", claimAuthorityMode = PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode };
             bootstrap.researchVerificationScaffold = new ResearchVerificationScaffoldConfig {
                 enabled = true, ruleSourceId = "test.verification", verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode };
-            string publicFields = JsonUtility.ToJson(config);
-            Assert.That(publicFields, Does.Not.Contain("\"CombatC0\""));
-            Assert.That(config.CombatC0, Is.Not.Null);
-            bytes[0] = Encoding.UTF8.GetBytes(publicFields.Substring(0, publicFields.Length - 1) +
-                ",\"CombatC0\":" + JsonUtility.ToJson(config.CombatC0) + "}");
-            bytes[10] = Encoding.UTF8.GetBytes(JsonUtility.ToJson(bootstrap));
-            return bytes;
+            });
         }
 
         private int Writes => f.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);

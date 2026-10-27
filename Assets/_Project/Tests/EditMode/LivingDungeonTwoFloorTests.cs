@@ -103,21 +103,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         internal static Fixture Dungeon(bool descend = true)
         {
-            var f = PhaseSixA4Tests.Eligible(); f.Configuration = CombatC0IntegrationTests.Config();
-            PhaseSixA4Tests.ForceDescent(f.Configuration, descend);
-            foreach (var c in f.Configuration.PhaseFiveB.Classes) c.LevelOneMaxHealth = 100; // isolated survival fixture
+            var f = PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs((config, _) => {
+                PhaseSixA4Tests.ForceDescent(config, descend);
+                foreach (var c in config.PhaseFiveB.Classes) c.LevelOneMaxHealth = 100; // isolated survival fixture
+            }));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             PhaseSixA4Tests.AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
             PhaseSixA4Tests.AddContent(f, 1, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                 FloorLifecycleAction.Activate, PhaseSixA4Tests.FloorTwo(f)));
-            f.Profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
-            f.Context = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
-                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile.Canonical, f.Occupancy,
-                livingDungeonProfiles: new[] { Profile(f), LivingDungeonForegroundConfig.Load().CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized) },
-                monsterRecovery: MonsterRecoveryRules.Capture(f.Configuration));
-            f.Reopen(); return f;
+            f.ReopenWithSupportedForegroundProfiles(); return f;
         }
         internal static LivingDungeonProfile Profile(Fixture f) => Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized);
         internal static RunExecution Start(Fixture f, int sequence = 1)
@@ -145,7 +141,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             for (int i = 0; i < 100; i++) {
                 var result = PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem, f.Session,
-                    f.Runtime, Policy, time, 10, (save, tick) => { }, 1000);
+                    f.Runtime, f.Context.RecoveryInputs.TwoFloor, time, 10, (save, tick) => { }, 1000);
                 Assert.That(result.IsSuccess, Is.True, result.Reason); f.Accept(result);
                 if (f.Runtime.livingDungeon.IsClosed && f.Runtime.livingDungeon.Scheduler.AcceptedThrough == time) return;
             }
@@ -346,7 +342,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var bytes = f.Session.GetCurrentBytes(); var live = JsonUtility.ToJson(f.Runtime);
             f.FileSystem.EnableFailure(operation, occurrence);
             var failed = PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
-                Policy, finish, 10, (save, tick) => { }, 1000); f.FileSystem.DisableFailure();
+                f.Context.RecoveryInputs.TwoFloor, finish, 10, (save, tick) => { }, 1000); f.FileSystem.DisableFailure();
             Assert.That(failed.IsSuccess, Is.False); Assert.That(failed.RuntimeProjection, Is.Null);
             CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(JsonUtility.ToJson(f.Runtime), Is.EqualTo(live));
             f.Reopen(); Through(f, finish);
@@ -509,7 +505,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.FileSystem.EnableFailureSequence(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush, 1,
                 Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 2);
             var failed = PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
-                Policy, finish, 10, (save, tick) => { }, 1000); f.FileSystem.DisableFailure();
+                f.Context.RecoveryInputs.TwoFloor, finish, 10, (save, tick) => { }, 1000); f.FileSystem.DisableFailure();
             Assert.That(failed.IsSuccess, Is.False); Assert.That(failed.Reason, Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
             Assert.That(failed.RuntimeProjection, Is.Null); Assert.That(failed.Session, Is.Null);
             Assert.That(f.Runtime, Is.SameAs(original)); Assert.That(JsonUtility.ToJson(f.Runtime), Is.EqualTo(structured));
@@ -624,11 +620,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             Assert.Fail("The bounded automatic production arrivals must exercise a surviving Floor 1 EXIT; no decision/HP/timing tuning may be overridden");
         }
-        internal static Fixture ProductionDungeon()
+        internal static Fixture ProductionDungeon(long? initialTime = null)
         {
-            var f = PhaseSixA4Tests.Eligible();
-            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
-                File.ReadAllText("Assets/_Project/Data/Bootstrap/run_simulation_config.json"), out f.Configuration), Is.True);
+            var f = PhaseSixA4Tests.Eligible(initialTime: initialTime);
+            CollectionAssert.AreEqual(File.ReadAllBytes("Assets/_Project/Data/Bootstrap/run_simulation_config.json"),
+                f.Context.RecoveryInputs.Identity.GetInput(0));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
@@ -649,18 +645,33 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(PhaseSixA4Tests.Writer(f).Execute(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                 DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId,
                     rooms.Last().RoomInstanceId, second, new TileCoordinate(1, 1))));
-            f.Profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
-            f.Context = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
-                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile.Canonical, f.Occupancy,
-                livingDungeonProfiles: new[] { Profile(f), LivingDungeonForegroundConfig.Load().CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized) },
-                monsterRecovery: MonsterRecoveryRules.Capture(f.Configuration)); f.Reopen();
+            f.ReopenWithSupportedForegroundProfiles();
             return f;
         }
         [Test] public void ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming()
         {
-            var f = ProductionDungeon(); string second = PhaseSixA4Tests.FloorTwo(f);
-            string directory = Path.GetFullPath("TestResults/living-dungeon-two-floor-20261020/inputs"); Directory.CreateDirectory(directory);
-            var utc = DateTimeOffset.UtcNow.ToUnixTimeSeconds(); f.Runtime.lastSavedUtcUnix = utc; f.Runtime.lastPausedUtcUnix = utc;
+            // This current-schema producer must not write into retained historical
+            // inputs. The explicit supervisor stage owns this fresh output root.
+            string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+            Assert.That(Application.isBatchMode, Is.True);
+            Assert.That(Application.productName, Does.StartWith("Dungeon Lord B3B2 Smoke H1F4 "));
+            Assert.That(export, Is.Not.Null.And.Not.Empty);
+            var output = new DirectoryInfo(Path.GetFullPath(export));
+            Assert.That(output.Name, Is.EqualTo("fixture-inputs"));
+            var stage = output.Parent; var campaign = stage?.Parent; var supervisor = campaign?.Parent;
+            Assert.That(supervisor?.FullName, Is.EqualTo(Path.GetFullPath(Path.Combine(Application.dataPath,
+                "../TestResults/qualification-supervisor"))).IgnoreCase);
+            Assert.That(Guid.TryParseExact(campaign?.Name, "N", out _), Is.True);
+            Assert.That(stage?.Name, Is.AnyOf("living-regressions", "full-edit", "full-play"));
+            foreach (var directoryInfo in new[] { supervisor, campaign, stage, output }) {
+                Assert.That(directoryInfo.Exists, Is.True);
+                Assert.That((directoryInfo.Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
+            }
+            string directory = Path.Combine(output.FullName, "two-floor");
+            Assert.That(Directory.Exists(directory), Is.False); Directory.CreateDirectory(directory);
+            var utc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var f = ProductionDungeon(utc); string second = PhaseSixA4Tests.FloorTwo(f);
+            f.Runtime.lastPausedUtcUnix = utc; // W was authored before the synthetic owner, not moved by this metadata write.
             f.Accept(PhaseSixA4Tests.Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
             WriteSeed(f, directory, "owner-inactive", null, 0);
             f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
