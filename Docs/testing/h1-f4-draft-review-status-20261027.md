@@ -6,6 +6,12 @@ The owner explicitly authorizes this unfinished draft before full implementation
 or passing all automated gates. Subsequent work continues on this same branch/PR.
 This authorization changes draft timing, not recovery semantics or merge/UAT gates.
 
+Review 1 milestone: the ordinary-save foreground-stall defect was reproduced and
+corrected, and the affected recovery suite passed 107/107 at runtime/test source
+`5c52f301bbe919611966347ef15dfe3640cfd358`. See the
+[source-pinned correction and remaining blockers](h1-f4-review1-ordinary-save-correction-20261027.md).
+The last full EditMode 805-failure report remains unresolved.
+
 ## Current implementation
 
 - Successor schema 17 is active in source; schema-16 validation/resource dispatch
@@ -19,9 +25,9 @@ This authorization changes draft timing, not recovery semantics or merge/UAT gat
   residual mana/monster effects, then closes the episode atomically at S.
 - TimeService owns monotonic S/Q eligibility and L1 lifecycle observations.
   Boot/lifecycle and native-creation paths are integrated and under qualification.
-- The latest runtime correction refuses ordinary reentrant saves during an active
-  canonical publication. Its test's write-count assertion was corrected to account
-  for the established rollback-plus-candidate protocol and still needs a fresh run.
+- Runtime corrections refuse ordinary reentrant saves during an active canonical
+  publication and keep known foreground save stalls behind explicit retry. The
+  reviewed-head 105-case and corrected 107-case suites passed with preservation.
 
 These are implementation descriptions, not full correctness or release claims.
 
@@ -33,17 +39,18 @@ These are implementation descriptions, not full correctness or release claims.
 | 16955152fcdd5a5f8af006dc38887a75f1f83266 | 61c2a2cd452e4a5c837496834f680e55 | Raw full EditMode 1966 passed, 805 failed, 1 skipped; campaign INCOMPLETE/UNCERTAIN |
 | d55139dacc338c08636bf607991c86d1b474297a | 09e4ca62452a4a6ba781debd85766018 | Focused 104 passed, 0 failed, 0 skipped; all stages passed |
 | 57096bebfc930595668dba372ae84b832007a8a8 | 19fdd2a03134484191251af755dc047d | Focused 104 passed, 1 failed, 0 skipped; terminal FAILED, verified exit, separately verified restoration/preservation |
+| eb95f2506b9982e675c5c53adc5545c1fc133205 | f87a3cd4f3594da0a320c88ad1054d19 | Focused 105 passed, 0 failed, 0 skipped; all stages passed |
+| 5c52f301bbe919611966347ef15dfe3640cfd358 | 6e05f8f9c07c46b4aacd601a1d754051 | Focused 107 passed, 0 failed, 0 skipped; all stages passed |
 
 Ten preparation-tool unit tests passed at each of the two latest correction stages.
-They are tooling checks, not gameplay/Unity qualification. The assertion correction
-included at this draft checkpoint has not been rerun. No passing result is relabelled
-for a newer commit.
+They are tooling checks, not gameplay/Unity qualification. No passing result is
+relabelled for a newer commit. The review-1 report also retains the intermediate
+105/106 defect reproduction and 106/107 assertion-failure campaigns as FAILED.
 
 ## Unresolved work and review priorities
 
-1. Requalify the reentrancy guard and investigate the source-backed ordinary-save
-   failure/deferred-time branch. Known foreground stalls must never become offline
-   mana or trigger per-frame storage retries.
+1. Broaden the qualified P0 stall/reentrancy and authority-resolution paths through
+   accepted work, lifecycle persistence and the remaining protocol-cut matrix.
 2. Resolve the 805 full-suite failures: shared first-write/context fixtures, actual
    lifecycle and Research regressions, four null references, explicit historical
    versus current-target assertions and remaining behavioral failures. A passing

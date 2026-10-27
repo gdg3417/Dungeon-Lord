@@ -74,13 +74,15 @@ service gate. Its deterministic integration case delivers focus loss from the
 actual filesystem flush callback and requires one entry candidate, preserved R/W,
 originalPending and no new acceptance. It uses the existing coordinator and clock.
 
-Still open: TimeService marks a metadata publication failure as deferred/stalled.
+Review 1 confirmed and corrected this concern: TimeService marks a metadata publication failure as deferred/stalled.
 GameRoot.UpdateForeground/FlushForeground also route deferred observations toward
 BeginCanonicalRecovery(observedBackground:true), while BeginObservedRecovery
-correctly requires actual observed background. Add a controlled ordinary-failure
-case and resolve this branch without per-frame storage retries or converting a
-known foreground stall to offline credit. This is a source-backed correctness
-concern, not yet a claim of a passing reproduction or a new policy decision.
+correctly requires actual observed background. A controlled ordinary-failure
+case demonstrated the root fault; the corrected branch excludes per-frame storage
+retries and requires genuine observed background. The corrected 107-case suite
+passed at 5c52f301, including foreground-only retry/reopen and genuine background
+eligibility. See the [review-1 report](h1-f4-review1-ordinary-save-correction-20261027.md).
+No new policy decision was required. The other failure categories below remain open.
 
 ### P1: shared first-write and context fixtures
 
