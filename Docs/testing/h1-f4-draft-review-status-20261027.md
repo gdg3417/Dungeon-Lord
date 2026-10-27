@@ -11,6 +11,9 @@ corrected, and the affected recovery suite passed 107/107 at runtime/test source
 `5c52f301bbe919611966347ef15dfe3640cfd358`. See the
 [source-pinned correction and remaining blockers](h1-f4-review1-ordinary-save-correction-20261027.md).
 The last full EditMode 805-failure report remains unresolved.
+The subsequent fixture-only source 9319d4bc passed the explicit 243-case recovery,
+structural-preview and canonical-write cohort, including 87 previously failing
+cases. This is still not a full-suite pass.
 
 ## Current implementation
 

@@ -89,13 +89,27 @@ No process was terminated or uncertain reservation released in this milestone.
 
 ## Remaining blockers and next checkpoint
 
+Subsequent fixture-only milestone `9319d4bce5ca3a57603cb5bbc194a3b59c653f30`
+passed **243/243, 0 failed, 0 skipped** in campaign
+`0c26db5fd0ad4bc89ca46241a095ce77`, all stages PASSED. The explicit cohort is
+107 recovery + 77 structural-preview + 59 canonical-write cases. It corrects
+unbound current-schema fixture contexts, current native creation, valid bound
+Research state for nullable clearing, and metadata expectations that previously
+advanced W. Production validation and frozen serializers are unchanged.
+
+The [fixture qualification report](h1-f4-review1-shared-fixtures-20261027.json)
+maps 87 earlier failed cases to passing affected cases (including the renamed
+current-schema native-creation test). Three earlier null-reference cases now pass.
+This does not establish a new full-suite failure count. Twelve preparation-tool
+unit tests passed. Preserve this campaign and its
+TestResults/h1-f4-20261027-sharedfixtures01 preparation/input archive and receipts.
+
 The last full EditMode report remains **1966 passed, 805 failed, 1 skipped** at
-16955152, campaign INCOMPLETE/UNCERTAIN. No broad rerun or reduced failure count
-is claimed. Next: correct shared consumed-configuration/current-schema fixtures
-and run an explicit structural-preview/canonical-write affected cohort before
-Research durability, lifecycle/clock identity, null references, historical/current
-schema assertions and remaining individual failures. Strict production validation
-and frozen history are unchanged.
+16955152, campaign INCOMPLETE/UNCERTAIN. No broad rerun or reduced full failure count
+is claimed. Next: complete remaining consumed-configuration fixture factories,
+Research durability, lifecycle/clock identity, the fourth null reference,
+historical/current schema assertions and remaining individual failures. Strict
+production validation and frozen history are unchanged.
 
 Keep draft PR #259; push coherent milestones and request independent review of
 the P0 transition and authority-resolution behavior. Full EditMode, complete SIT,
