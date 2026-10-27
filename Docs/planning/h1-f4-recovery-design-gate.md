@@ -514,3 +514,14 @@ separately, unverified owned-process completion. Its campaign remains INCOMPLETE
 the [specific operational blocker and exact recovery proposal](../testing/h1-f4-qualification-process-blocker.md)
 require the runbook's exceptional owner approval. No approved recovery semantic
 policy is reopened. No test count or benchmark is claimed for that attempt.
+
+The owner subsequently approved the exact exceptional recovery. At source
+`ad161252b316ee7788dd022c9c6283e3e4145d09`, all guards passed, only the three
+archived settings were restored, and the existing Lease authority released that
+reservation. Separate verification proved the exact restored input hashes and
+unchanged original campaign/protected evidence. The original verdict remains
+INCOMPLETE / UNCERTAIN permanently. The fresh campaign
+`479fe5daf3974a68838f0a834f1e152d` reached all 48 cases: 39 passed, 9 failed,
+0 skipped, with verified owned-process completion. Those fixture failures are
+being corrected without changing production limits or historical validation.
+See the [recovery receipt and fresh result](../testing/h1-f4-recovery-execution-20261027.json).

@@ -542,3 +542,14 @@ verify all descendants exited in its existing window. The campaign and reservati
 remain INCOMPLETE, preserved under the runbook. See the [specific operational
 blocker and reviewed recovery proposal](h1-f4-qualification-process-blocker.md).
 This does not reopen the resolved dependency or historical-activation policies.
+
+The owner approved the specific exceptional recovery. Its independent verification
+passed: only the three archived settings were restored, protected inputs/evidence
+and every original campaign file remained unchanged, and Lease released only that
+reservation. The original INCOMPLETE / UNCERTAIN verdict is permanent. A fresh
+48-case campaign at `ad161252b316ee7788dd022c9c6283e3e4145d09` completed with
+39 passes, 9 failures and no skips. Eight failures use an enlarged generic test
+budget where a frozen production profile budget is required; one supplies a
+synthetic empty Research class instead of explicit absent state. The fixture
+correction keeps all 48 cases and changes no production rules or frozen history.
+See the [source-pinned recovery/fresh-attempt receipt](h1-f4-recovery-execution-20261027.json).

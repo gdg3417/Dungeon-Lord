@@ -13,18 +13,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class H1F4RecoveryTransitionTests : H1F4RecoveryContractTests
     {
+        // Explicit absence, rather than Unity's synthetic default-class encoding.
+        // These are test-produced historical inputs, never producer evidence for
+        // an arbitrary production save.
+        static Fixture HistoricalFixture() => Fixture.Create("\"researchPending\":null,\"researchProgress\":null");
         internal static RecoveryRuntimeInputs Bundle(Fixture f, byte[][] bytes = null) => new RecoveryRuntimeInputs(bytes ?? Inputs(),
             f.Production, ProductionSpatialContentWorkloadLimitParser.Parse(AssetDatabase.LoadAssetAtPath<TextAsset>(
                 "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json")).Limits, f.Profile.Canonical);
         [Test] public void ConsumedBundleConstructsEveryRecoveryDependencyFromRetainedBytes()
         {
-            var f = Fixture.Create(null); var inputs = Inputs(); var bundle = Bundle(f, inputs);
+            var f = HistoricalFixture(); var inputs = Inputs(); var bundle = Bundle(f, inputs);
             f.Context.BindRecoveryInputs(bundle);
             inputs[0][0] ^= 1;
             Assert.That(bundle.Identity.Digest, Is.EqualTo(new RecoveryContextIdentity(Inputs()).Digest));
             Assert.That(bundle.Configuration.CombatC0, Is.Not.Null); Assert.That(bundle.Bootstrap.tickSeconds, Is.EqualTo(10));
             Assert.That(bundle.TwoFloor.TwoFloor, Is.True); Assert.That(bundle.OneFloor.TwoFloor, Is.False);
             Assert.That(bundle.ResearchValid(f.Runtime), Is.True);
+            Assert.That(bundle.ResearchValid(new SaveData { researchPending = new ResearchPendingState(),
+                researchProgress = new ResearchProgressState() }), Is.False);
             Assert.Throws<ArgumentException>(() => f.Context.BindRecoveryInputs(bundle));
         }
         [TestCase(0)] [TestCase(1)] [TestCase(8)] [TestCase(11)]
@@ -84,10 +90,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
         static DetachedCurrentTargetValidationContext HistoricalContext(Fixture f, RecoveryRuntimeInputs bundle,
             IHistoricalRecoveryEvidence evidence = null)
         {
+            var frozen = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(
+                "Assets/_Project/Resources/save_spatial_migration_limits_schema13.json"));
+            Assert.That(frozen.IsSuccess, Is.True);
+            var baseBudget = frozen.Profile.Canonical.ForSchema(13).Serialized;
             var context = new DetachedCurrentTargetValidationContext(bundle.Compatibility, f.Production,
                 LegacyGameplayConfigurationContract.SerializeCanonical(bundle.Configuration), f.Profile.Canonical, bundle.Occupancy,
-                livingDungeonProfiles: new[] { bundle.OneFloor.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized),
-                    bundle.TwoFloor.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized) }, monsterRecovery: bundle.Monsters);
+                livingDungeonProfiles: new[] { bundle.OneFloor.CreateProfile(baseBudget),
+                    bundle.TwoFloor.CreateProfile(baseBudget) }, monsterRecovery: bundle.Monsters);
             context.BindRecoveryInputs(bundle, evidence); return context;
         }
         static byte[] AcceptedSource(Fixture f, RecoveryRuntimeInputs bundle)
@@ -104,7 +114,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void HistoricalClosedActivationRetainsRAndWholeSecondCarryWithoutProducerInference()
         {
-            var f = Fixture.Create(null); var bundle = Bundle(f); var context = HistoricalContext(f, bundle);
+            var f = HistoricalFixture(); var bundle = Bundle(f); var context = HistoricalContext(f, bundle);
             var source = f.Session.GetCurrentBytes(); var untouched = (byte[])source.Clone();
             var prior = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(source, context);
             var entry = RecoveryEntryObservation.Capture(new Clock(), prior.TimeProvenance, RecoveryEntryContext.UnknownPostCrash);
@@ -122,7 +132,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(false)] [TestCase(true)]
         public void HistoricalAcceptedActivationRequiresExactProducerBinding(bool proved)
         {
-            var f = Fixture.Create(null); var bundle = Bundle(f); var source = AcceptedSource(f, bundle);
+            var f = HistoricalFixture(); var bundle = Bundle(f); var source = AcceptedSource(f, bundle);
             var context = HistoricalContext(f, bundle, proved ? new TestProducerEvidence(source, bundle.Identity) : null);
             var prior = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(source, context);
             Assert.That(prior.IsValid, Is.True); Assert.That(prior.LivingDungeon.IsClosed, Is.False);
@@ -139,7 +149,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(11, "\"worldValue\": 2,", "\"worldValue\": 3,")]
         public void HistoricalAcceptedProducerCannotAuthorizeChangedRules(int index, string from, string to)
         {
-            var f = Fixture.Create(null); var old = Bundle(f); var source = AcceptedSource(f, old); var changed = Inputs();
+            var f = HistoricalFixture(); var old = Bundle(f); var source = AcceptedSource(f, old); var changed = Inputs();
             string before = Encoding.UTF8.GetString(changed[index]); string after = before.Replace(from, to);
             Assert.That(after, Is.Not.EqualTo(before)); changed[index] = Encoding.UTF8.GetBytes(after);
             var next = Bundle(f, changed); var context = HistoricalContext(f, next, new TestProducerEvidence(source, old.Identity));
@@ -152,7 +162,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void HistoricalTimestampZeroIsReaderHistoryAndNeverActivationEvidence()
         {
-            var f = Fixture.Create(null); var bundle = Bundle(f); var context = HistoricalContext(f, bundle);
+            var f = HistoricalFixture(); var bundle = Bundle(f); var context = HistoricalContext(f, bundle);
             var prior = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(f.Session.GetCurrentBytes(), context);
             var entry = RecoveryEntryObservation.Capture(new Clock(), prior.TimeProvenance, RecoveryEntryContext.UnknownPostCrash);
             var invalid = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace("\"lastSavedUtcUnix\":1,", "\"lastSavedUtcUnix\":0,"));

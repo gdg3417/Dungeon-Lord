@@ -1,0 +1,69 @@
+{
+  "artifact_owner": "H1-F4 task",
+  "correction": "Test fixtures now supply explicit null Research absence and the frozen production schema-13 base budget. Production limits, validation and gameplay tuning are unchanged. All 48 cases remain selected.",
+  "fresh_attempt": {
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\479fe5daf3974a68838f0a834f1e152d",
+    "failed_cases": [
+      "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.ConsumedBundleConstructsEveryRecoveryDependencyFromRetainedBytes",
+      "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.HistoricalAcceptedActivationRequiresExactProducerBinding(False)",
+      "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.HistoricalAcceptedActivationRequiresExactProducerBinding(True)",
+      "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.HistoricalAcceptedProducerCannotAuthorizeChangedRules(0,\"\\\"MaxHealth\\\": 8,\",\"\\\"MaxHealth\\\": 10,\")",
+      "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.HistoricalAcceptedProducerCannotAuthorizeChangedRules(10,\"\\\"tickSeconds\\\": 10\",\"\\\"tickSeconds\\\": 5\")",
+      "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.HistoricalAcceptedProducerCannotAuthorizeChangedRules(10,\"\\\"progressPerActiveSecond\\\": 0.01\",\"\\\"progressPerActiveSecond\\\": 0.02\")",
+      "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.HistoricalAcceptedProducerCannotAuthorizeChangedRules(11,\"\\\"worldValue\\\": 2,\",\"\\\"worldValue\\\": 3,\")",
+      "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.HistoricalClosedActivationRetainsRAndWholeSecondCarryWithoutProducerInference",
+      "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.HistoricalTimestampZeroIsReaderHistoryAndNeverActivationEvidence"
+    ],
+    "failure": "CHILD_NONZERO",
+    "initial_restoration_guard_refusal": "A newly observed Unity CLI process caused refusal before restoration. It disappeared naturally. No process was terminated; the full preflight was rerun.",
+    "owned_descendant_completion": "Verified by the unchanged supervisor; terminal FAILED rather than INCOMPLETE",
+    "restoration": "TestResults/h1-f4-20261027-transitions02/post-failure-reviewed-restoration02",
+    "restoration_passed": true,
+    "source_sha": "ad161252b316ee7788dd022c9c6283e3e4145d09",
+    "status": "FAILED",
+    "tests": {
+      "discovered": 48,
+      "failed": 9,
+      "passed": 39,
+      "skipped": 0,
+      "skips": []
+    }
+  },
+  "recovery": {
+    "artifact_owner": "H1-F4 task",
+    "campaign_launched_by_recovery": false,
+    "full_input_map_matches_original_except_reviewed_import": true,
+    "later_process_absence_is_not_descendant_completion": true,
+    "original_campaign_file_set_and_hashes_unchanged": true,
+    "original_verdict": "INCOMPLETE / UNCERTAIN",
+    "passed": true,
+    "processes_terminated": false,
+    "protected_evidence_unchanged": true,
+    "receipt_files": {
+      "EditorBuildSettings.asset": "f72e8fd550133184822260c85b62c371189f88e1d390fb95839292e9247ee7cf",
+      "ProjectSettings.asset": "3f4257726b3c9a392cd68627901579ef82f76dd1ff2c40378a175ca158c5a6d5",
+      "ShaderGraphSettings.asset": "5c432c9c73fdf73fee91c8823ea02ab98e3b7a8edf341b5ae6901d699cce52a7",
+      "preflight.json": "ed526784e4fb080229ec5ea6a6727149c50e6445519d4fb14db7c0b4d1066c8a",
+      "reservation-after.json": "8749c5ecfeebaca2bf8545d731e2c7b837a58c7fcf7a2bd9f074a947fcc198ac",
+      "reservation-before.json": "40193a01b0e4e946deadc9c88521b4db39ee68049b0a17149a77b6ed54aec47b",
+      "restoration.json": "ae8b01714edc8cfb9eeac1ca733e4d9cb54603b47e994fc33025766b4033e977"
+    },
+    "released_reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\9ed872130a134ce7a5627f6c001b8e2f"
+    },
+    "restored_settings": {
+      "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+    },
+    "retention": "Preserve permanently with original incomplete campaign evidence",
+    "scope": "Independent post-recovery verification in a separate Python invocation",
+    "source_sha": "ad161252b316ee7788dd022c9c6283e3e4145d09",
+    "verified_utc": "2026-10-27T13:28:16.579706+00:00"
+  },
+  "recovery_authorization": "Explicit user approval, limited to the reviewed proposal for 9ed872130a134ce7a5627f6c001b8e2f",
+  "recovery_receipt_sha256": "32d3353de6aa1f7a45357861e5f5dda4a9ccc26304a43ad2280c6045a17f2445",
+  "remaining_implementation": "Schema-17 activation and live recovery integration, full interruption qualification, PlayMode/Windows and three-way performance comparison pending",
+  "retention": "Preserve original INCOMPLETE campaign and all recovery/new-attempt evidence permanently; no native shutdown success inferred from later process absence"
+}
