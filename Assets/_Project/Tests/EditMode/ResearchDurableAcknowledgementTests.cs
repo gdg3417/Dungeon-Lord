@@ -26,12 +26,14 @@ namespace DungeonBuilder.Tests.EditMode
 
         [SetUp] public void SetUp()
         {
-            f = Fixture.Create("\"unrelatedResearchEvidence\":{\"n\":1.00}", "\"unrelatedRoot\":[true,null]");
+            f = Fixture.Create("\"unrelatedResearchEvidence\":{\"n\":1.00}", "\"unrelatedRoot\":[true,null]",
+                recoveryInputBytes: AuthoredResearchInputs());
             service = OpenService(f, out current);
             current.researchPending = null; current.researchProgress = null;
             current.completedResearch = new CompletedResearchState(); current.completedObjectives = new CompletedObjectiveState();
             current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1",
                 LootExtractionSummary = new RunLootExtractionSummary { TotalExtractedWorldValue = 1 } }, 5);
+            current.runHistory.NextRunSequence = 2; // This synthetic confirmed run already owns run-1.
             service.CanonicalRuntimePublished += save => { current = save; publications++; };
             Assert.That(service.Save(current, SaveReason.StateChange), Is.True);
             publications = 0;
@@ -145,6 +147,35 @@ namespace DungeonBuilder.Tests.EditMode
             MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig { ObjectiveId = "test.objective", RequiredRecoveredLootValue = 1,
                 RequireResearchAnalysisUnlocked = true, AnalysisResearchProjectId = Project }
         };
+
+        internal static byte[][] AuthoredResearchInputs()
+        {
+            // The existing test coefficients/project are authored before the
+            // current owner exists. Do not alter production assets or historical
+            // serialization, and never hash JsonUtility's incomplete run config.
+            var bytes = DungeonBuilder.M0.Tests.EditMode.H1F4RecoveryContractTests.Inputs();
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                Encoding.UTF8.GetString(bytes[0]), out var config), Is.True);
+            var bootstrap = JsonUtility.FromJson<ContentBootstrap>(Encoding.UTF8.GetString(bytes[10]));
+            config.MvpFirstSessionObjective = ObjectiveConfig().MvpFirstSessionObjective;
+            bootstrap.researchPendingScaffold = new ResearchPendingScaffoldConfig {
+                enabled = true, slotId = "slot", projectId = Project, ruleSourceId = "test.pending" };
+            bootstrap.researchProgressScaffold = new ResearchProgressScaffoldConfig {
+                enabled = true, progressPerActiveSecond = .1, maxActiveSessionElapsedSeconds = 100, ruleSourceId = "test.progress" };
+            bootstrap.researchCompletionEligibilityScaffold = new ResearchCompletionEligibilityScaffoldConfig {
+                enabled = true, projectId = Project, requiredProgressUnits = 1, ruleSourceId = "test.eligibility" };
+            bootstrap.researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig {
+                enabled = true, ruleSourceId = "test.claim", claimAuthorityMode = PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode };
+            bootstrap.researchVerificationScaffold = new ResearchVerificationScaffoldConfig {
+                enabled = true, ruleSourceId = "test.verification", verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode };
+            string publicFields = JsonUtility.ToJson(config);
+            Assert.That(publicFields, Does.Not.Contain("\"CombatC0\""));
+            Assert.That(config.CombatC0, Is.Not.Null);
+            bytes[0] = Encoding.UTF8.GetBytes(publicFields.Substring(0, publicFields.Length - 1) +
+                ",\"CombatC0\":" + JsonUtility.ToJson(config.CombatC0) + "}");
+            bytes[10] = Encoding.UTF8.GetBytes(JsonUtility.ToJson(bootstrap));
+            return bytes;
+        }
 
         private int Writes => f.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
         private byte[] Bytes => f.FileSystem.ReadAllBytes(service.SavePath);

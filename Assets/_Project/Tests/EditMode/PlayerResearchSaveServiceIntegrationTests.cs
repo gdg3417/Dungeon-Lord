@@ -23,7 +23,7 @@ namespace DungeonBuilder.Tests.EditMode
         {
             _directory = Path.Combine(Path.GetTempPath(), "DungeonLordGD59", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(_directory);
-            _fixture = Fixture.Create(null);
+            _fixture = Fixture.Create(null, recoveryInputBytes: ResearchDurableAcknowledgementTests.AuthoredResearchInputs());
             _service = ResearchDurableAcknowledgementTests.OpenService(_fixture, out _current);
             _service.CanonicalRuntimePublished += save => _current = save;
             _saveCount = 0;

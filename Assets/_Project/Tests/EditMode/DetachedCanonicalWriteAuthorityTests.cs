@@ -1491,7 +1491,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 acquisition: Acquisition, branchingResearch: BranchingResearch);
 
             internal static Fixture Create(string primaryUnknown, string rootUnknown = null,
-                SaveSpatialMigrationLimitsProfile workloadProfile = null)
+                SaveSpatialMigrationLimitsProfile workloadProfile = null, byte[][] recoveryInputBytes = null)
             {
                 string primary = primaryUnknown == null ? string.Empty : primaryUnknown;
                 string root = rootUnknown == null ? string.Empty : "," + rootUnknown;
@@ -1504,12 +1504,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 byte[] candidate = source.Result.Attempt.Candidate.GetBytes();
                 Assert.That(PhaseFourTestSupport.UpgradeFrozenSixteen(candidate, source.Limits,
                     out var frozenSixteen), Is.True);
-                candidate = PhaseFourTestSupport.SyntheticCurrent(frozenSixteen, source.Limits);
-                RoomContentSpatialOccupancySnapshot occupancy = PhaseFourTestSupport.Occupancy(source.Limits);
+                // Explicit fresh test authorship, never production migration or
+                // rebinding of an admitted run. Immutable consumed bytes precede
+                // creation of the synthetic current-schema owner.
+                var inputs = new RecoveryRuntimeInputs(recoveryInputBytes ?? H1F4RecoveryContractTests.Inputs(), source.Production,
+                    ProductionSpatialContentWorkloadLimitParser.Parse(AssetDatabase.LoadAssetAtPath<TextAsset>(
+                        "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json")).Limits, source.Limits);
+                candidate = PhaseFourTestSupport.SyntheticCurrent(frozenSixteen, source.Limits, inputs.Identity);
+                RoomContentSpatialOccupancySnapshot occupancy = inputs.Occupancy;
                 RoomContentPositionMigrationProfilesSnapshot positionProfiles =
                     PhaseFourTestSupport.PositionProfiles(source.Limits);
-                var context = PhaseFourTestSupport.CurrentContext(source.Compatibility,
-                    source.Production, source.LegacyBytes, source.Limits, occupancy);
+                var context = new DetachedCurrentTargetValidationContext(inputs.Compatibility,
+                    source.Production, LegacyGameplayConfigurationContract.SerializeCanonical(inputs.Configuration),
+                    source.Limits, occupancy, monsterRecovery: inputs.Monsters);
+                context.BindRecoveryInputs(inputs);
                 var profile = workloadProfile ?? new SaveSpatialMigrationLimitsProfile(
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                     source.Limits, source.WholeLimits);
@@ -1546,7 +1554,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     AssetDatabase.LoadAssetAtPath<TextAsset>(
                         "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json"),
                     out var branchingResearch), Is.True);
-                return new Fixture { Production = source.Production, Compatibility = source.Compatibility,
+                return new Fixture { Production = source.Production, Compatibility = inputs.Compatibility,
                     Configuration = context.RecoveryInputs.Configuration,
                     Profile = profile, Context = context, Session = opened.Session, State = validation.State,
                     Runtime = runtime, FileSystem = fs, ActivePath = path, RemovalPolicy = removalPolicy,
