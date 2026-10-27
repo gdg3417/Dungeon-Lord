@@ -115,8 +115,8 @@ def prepare(attempt):
     print(json.dumps({"preparation": str(prep), "product": product, "save": str(save)}))
 
 
-def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=False, living=False):
-    if sum((discovery, full_edit, fixtures, research, living)) > 1:
+def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=False, living=False, common_repro=False):
+    if sum((discovery, full_edit, fixtures, research, living, common_repro)) > 1:
         raise ValueError("Choose one explicit workload")
     prep, product, save = identities(attempt)
     check_protected(prep, save)
@@ -133,9 +133,9 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     command = lambda mode: [sys.executable, "-B", str(helper), mode, "--attempt", attempt, "--stage", "{stage}"]
     restored = json.loads((prep / "original-inputs.json").read_text())
     restored_id = hashlib.sha256(json.dumps(restored, sort_keys=True).encode()).hexdigest()
-    name = "inventory" if discovery else "full-edit" if full_edit else "living-regressions" if living else "research-regressions" if research else "fixture-regressions" if fixtures else "focused"
+    name = "common-repro" if common_repro else "inventory" if discovery else "full-edit" if full_edit else "living-regressions" if living else "research-regressions" if research else "fixture-regressions" if fixtures else "focused"
     workload = {"id": name, "role": "report" if discovery else "test", "depends": [name + "-preflight"],
-                "command": command("run-inventory" if discovery else "run-full-edit" if full_edit else "run-living" if living else "run-research" if research else "run-fixtures" if fixtures else "run-test"), "timeout_seconds": 3600 if full_edit else 960,
+                "command": command("run-common-repro" if common_repro else "run-inventory" if discovery else "run-full-edit" if full_edit else "run-living" if living else "run-research" if research else "run-fixtures" if fixtures else "run-test"), "timeout_seconds": 3600 if full_edit else 960,
                 "artifacts": ["unity.log", "invocation.json", "editor-exit.json" if discovery else "cli-exit.json", "generated-inputs"]}
     if discovery:
         workload["artifacts"].append("inventory.json")
@@ -150,7 +150,7 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
         # Research adds its 18 durable-acknowledgement and three save cases.
         # Living adds its 51 one-floor and 37 two-floor leaves; no Editor
         # sustained production-profile scene or Windows workload is selected.
-        workload.update(xml="results.xml", expected_tests=2781 if full_edit else 356 if living else 268 if research else 247 if fixtures else 111,
+        workload.update(xml="results.xml", expected_tests=2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
             allowed_skips=["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"] if full_edit else [])
     if living or full_edit: workload["artifacts"].append("fixture-inputs")
     stages = [
@@ -171,7 +171,7 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     if discovery:
         data["approved_substitutions"].append("Discovery only: pinned Editor directly, without -quit, for the asynchronous existing TestRunnerApi.RetrieveTestList callbacks; collector exits explicitly. No tests execute and no passing test gate is inferred.")
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 2781 if full_edit else 356 if living else 268 if research else 247 if fixtures else 111,
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
                       "skips": None if discovery else 1 if full_edit else 0}))
 
 
@@ -205,6 +205,14 @@ def run_research(attempt, stage):
     command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--filter", RESEARCH_FILTER,
                "--output", str(stage / "results.xml"), "--timeout", "900", "--no-color", "--", "-logFile", str(stage / "unity.log")]
     return run_child(attempt, stage, command, "research-regressions", "cli-exit.json")
+
+
+def run_common_repro(attempt, stage):
+    stage = Path(stage).resolve()
+    command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--filter",
+               "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.SchemaSeventeenDirectPumpRequiresSourceBoundTimeCut",
+               "--output", str(stage / "results.xml"), "--timeout", "900", "--no-color", "--", "-logFile", str(stage / "unity.log")]
+    return run_child(attempt, stage, command, "common-repro", "cli-exit.json")
 
 
 def run_living(attempt, stage):
@@ -294,7 +302,7 @@ def restore(attempt, stage):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "plan-full-edit", "plan-fixtures", "plan-research", "plan-living", "preflight", "run-test", "run-inventory", "run-full-edit", "run-fixtures", "run-research", "run-living", "restore", "finish"])
+    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "plan-full-edit", "plan-fixtures", "plan-research", "plan-living", "plan-common-repro", "preflight", "run-test", "run-inventory", "run-full-edit", "run-fixtures", "run-research", "run-living", "run-common-repro", "restore", "finish"])
     parser.add_argument("--attempt", required=True)
     parser.add_argument("--stage")
     args = parser.parse_args()
@@ -305,11 +313,13 @@ if __name__ == "__main__":
     elif args.mode == "plan-fixtures": plan(args.attempt, fixtures=True)
     elif args.mode == "plan-research": plan(args.attempt, research=True)
     elif args.mode == "plan-living": plan(args.attempt, living=True)
+    elif args.mode == "plan-common-repro": plan(args.attempt, common_repro=True)
     elif args.mode == "run-test": raise SystemExit(run_test(args.attempt, args.stage))
     elif args.mode == "run-inventory": raise SystemExit(run_inventory(args.attempt, args.stage))
     elif args.mode == "run-full-edit": raise SystemExit(run_full_edit(args.attempt, args.stage))
     elif args.mode == "run-fixtures": raise SystemExit(run_fixtures(args.attempt, args.stage))
     elif args.mode == "run-research": raise SystemExit(run_research(args.attempt, args.stage))
     elif args.mode == "run-living": raise SystemExit(run_living(args.attempt, args.stage))
+    elif args.mode == "run-common-repro": raise SystemExit(run_common_repro(args.attempt, args.stage))
     elif args.mode == "restore": restore(args.attempt, args.stage)
     else: preflight(args.attempt, args.stage, restored=args.mode == "finish")

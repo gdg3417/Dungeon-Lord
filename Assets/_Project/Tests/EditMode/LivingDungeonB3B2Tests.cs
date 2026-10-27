@@ -93,6 +93,58 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             f.ReopenWithSupportedForegroundProfiles(); return f;
         }
+
+        [TestCase(false)] [TestCase(true)]
+        public void SchemaSeventeenDirectPumpRequiresSourceBoundTimeCut(bool twoFloor)
+        {
+            var f = twoFloor ? LivingDungeonTwoFloorTests.Dungeon() : Dungeon();
+            var inputs = f.Context.RecoveryInputs;
+            var policy = twoFloor ? inputs.TwoFloor : inputs.OneFloor;
+            var before = f.Session.GetCurrentBytes();
+            var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, f.Context);
+            Assert.That(owned.CurrentTargetValidated, Is.True, owned.Reason);
+            Assert.That(owned.LivingDungeon.IsDormant, Is.True);
+            Assert.That(f.Runtime.lastSavedUtcUnix, Is.Not.EqualTo(1000));
+
+            var rejected = PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem,
+                f.Session, f.Runtime, policy, 0, inputs.Bootstrap.tickSeconds, (_, __) => Assert.Fail(), 1000);
+            Assert.That(rejected.IsSuccess, Is.False);
+            Assert.That(rejected.Reason, Is.EqualTo("living.foreground.invalid_state"));
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+
+            // Reconstruct the first private activation/opportunity stage, before
+            // candidate serialization, IO, admission or passive consequences.
+            var owner = owned.LivingDungeon;
+            LivingDungeonScheduling.Activate(owner, policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized),
+                policy.MinimumArrival, f.Runtime.runHistory);
+            LivingDungeonScheduling.Accept(owner, 0);
+            owner.Scheduler.NextOpportunityTime = policy.MinimumArrival;
+            var saved = f.Runtime.lastSavedUtcUnix;
+            f.Runtime.lastSavedUtcUnix = 1000;
+            DetachedRecognizedSaveStateSnapshotResult recognized;
+            try { recognized = DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile); }
+            finally { f.Runtime.lastSavedUtcUnix = saved; }
+            Assert.That(recognized.IsSuccess, Is.True, recognized.Reason);
+            var lineage = new LivingDungeonForegroundLineage(before);
+            var failedStage = f.Session.PrepareForegroundReplacement(recognized, owned, owner,
+                f.Runtime.monsterContinuity, releases: lineage.Permit(before));
+            Assert.That(failedStage.IsSuccess, Is.False);
+            Assert.That(failedStage.Reason, Is.EqualTo(RecoveryEpisode.Invalid),
+                "First failed guard: supplied lastSavedUtcUnix differs from both prior and unchanged successor W");
+
+            var cut = ForegroundObservation.ForDeterministicServiceTest(before, 0, -1, -1,
+                new UnixTimePoint(1000, 0), ForegroundObservationContext.EligibleForeground);
+            var transition = CanonicalTimeTransition.Foreground(before, f.Runtime.timeProvenance, cut, f.Runtime.livingDungeon);
+            var prepared = f.Session.PrepareForegroundReplacement(recognized, owned, owner,
+                f.Runtime.monsterContinuity, releases: lineage.Permit(before), time: transition);
+            Assert.That(prepared.IsSuccess, Is.True, prepared.Reason);
+            var accepted = PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem,
+                f.Session, f.Runtime, policy, 0, inputs.Bootstrap.tickSeconds, (_, __) => Assert.Fail(), 1000, transition);
+            f.Accept(accepted);
+            Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(1000));
+            Assert.That(f.Runtime.livingDungeon.IsClosed, Is.True);
+            TestContext.WriteLine("schema17 direct pump: first Stage rejects unproved W; source-bound time cut prepares and publishes; twoFloor=" + twoFloor);
+        }
         private static RunExecution Start(Fixture f) => new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot)
             .StartTimedCombatSnapshot(1, PhaseSixA4Tests.Snapshot(f), f.Context.RecoveryInputs.OneFloor.Timing);
         private static DetachedCanonicalWriteResult Pump(Fixture f, long target, LivingDungeonForegroundConfig policy = null) => PhaseSixA4Tests.Writer(f).AdvanceForeground(
