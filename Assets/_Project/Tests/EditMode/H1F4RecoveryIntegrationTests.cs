@@ -190,6 +190,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(reopened.TimeProvenance.AccountedBoundary, Is.EqualTo(prior));
             Assert.That(reopened.TimeProvenance.RecoveryContextSha256, Is.EqualTo(h.Inputs.Identity.Digest));
         }
+        [Test] public void LifecycleSaveDuringEntryPublicationCannotReenterTheCanonicalWriter()
+        {
+            var h = new Harness(); var fs = new ObservedFileSystem(h.F.FileSystem);
+            var service = CreateService(h.F, h.Inputs, h.Time, fs);
+            var current = service.LoadOrCreate("h1f4-owned-reentrant-test", out var banner);
+            Assert.That(current, Is.Not.Null, banner);
+            using var scope = new RootScope(h);
+            scope.Rebind(service, h.Time, current);
+            service.BeginCanonicalRecovery(current);
+            int before = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
+            int callbacks = 0;
+            fs.AfterFlush = () => { if (callbacks++ == 0) scope.Focus(false, 101); };
+            scope.Pulse(100);
+            Assert.That(callbacks, Is.GreaterThan(0));
+            Assert.That(scope.Root.Save.timeProvenance.Episode.Phase, Is.EqualTo(RecoveryEpisode.OriginalPending));
+            Assert.That(scope.Root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(100, 0)));
+            Assert.That(scope.Root.Save.livingDungeon.IsDormant, Is.True);
+            Assert.That(h.Time.RecoveryClockActive, Is.True);
+            Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write), Is.EqualTo(before + 1));
+        }
         [TestCase(false)] [TestCase(true)]
         public void CommittedSettlementWithInterruptedAcknowledgementResolvesWithoutAnotherGrant(bool residual)
         {

@@ -15,10 +15,14 @@ namespace DungeonBuilder.M0
         internal bool RequiresCanonicalRecovery => foregroundRecoveryRequired;
         private bool PrepareForegroundAction(ref SaveData current)
         {
+            // A lifecycle callback can arrive while synchronous atomic IO is in
+            // flight. Observe its time through TimeService, but never start a
+            // second writer against the outstanding predecessor/candidate pair.
+            if (ForegroundWriting) return false;
             if (foregroundRecoveryRequired) return false;
-            if (recoveryTime?.RecoveryClockActive == true && !ForegroundWriting) return false;
-            if (current?.timeProvenance?.Episode != null && BeforeForegroundAction == null && !ForegroundWriting) return false;
-            if (ForegroundWriting || BeforeForegroundAction == null) return true;
+            if (recoveryTime?.RecoveryClockActive == true) return false;
+            if (current?.timeProvenance?.Episode != null && BeforeForegroundAction == null) return false;
+            if (BeforeForegroundAction == null) return true;
             if (!BeforeForegroundAction()) return false;
             current = ForegroundCurrent?.Invoke() ?? current;
             return current != null;
