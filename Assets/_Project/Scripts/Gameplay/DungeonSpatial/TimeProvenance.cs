@@ -18,6 +18,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private TimeProvenance(UnixTimePoint boundary) { AccountedBoundary = boundary; Mode = LegacyMode; }
 
         internal const string PreciseMode = "preciseRecovery";
+        internal bool SameAs(TimeProvenance other) => other != null && Mode == other.Mode &&
+            RecoveryContextSha256 == other.RecoveryContextSha256 && AccountedBoundary.CompareTo(other.AccountedBoundary) == 0 &&
+            (Episode == null ? other.Episode == null : Episode.SameAs(other.Episode));
         internal TimeProvenance(UnixTimePoint boundary, string context, RecoveryEpisode episode)
         {
             if (boundary == null || boundary.Seconds <= 0 || !SpatialContractSha256.IsCanonical(context) ||

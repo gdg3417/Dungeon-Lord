@@ -34,6 +34,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
           MonsterRecovery = monsterRecovery ?? MonsterRecoveryRules.EditorFallback(); }
         internal MonsterRecoveryRules MonsterRecovery { get; }
         internal RecoveryContextIdentity RecoveryContext { get; private set; }
+        internal RecoveryRuntimeInputs RecoveryInputs { get; private set; }
+        internal void BindRecoveryInputs(RecoveryRuntimeInputs inputs, IHistoricalRecoveryEvidence evidence = null)
+        { BindRecoveryContext(inputs?.Identity, evidence); RecoveryInputs = inputs; }
         internal IHistoricalRecoveryEvidence HistoricalRecoveryEvidence { get; private set; }
         internal void BindRecoveryContext(RecoveryContextIdentity inputs, IHistoricalRecoveryEvidence evidence = null)
         {
@@ -205,6 +208,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction &&
                 (context.RecoveryContext?.Matches(result.TimeProvenance) != true ||
                  result.TimeProvenance.Episode?.Phase == RecoveryEpisode.ResidualPending && !result.LivingDungeon.IsClosed)) return Failure();
+            if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction && context.RecoveryInputs != null &&
+                !ResearchStateValid(result, context.RecoveryInputs)) return Failure();
             if (!MonsterContinuity.Valid(result.MonsterContinuity, result.State, context.MonsterRecovery, limits.Spatial.MaximumRecords)) return Failure();
             if (!DetachedCanonicalProductionSemanticValidation.Validate(result.State, context.Production,
                 context.Configuration, limits.Spatial, context.RoomContentOccupancy, true).IsValid)
@@ -227,6 +232,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         RoomContentOccupancy = context.RoomContentOccupancy, LivingDungeon = result.LivingDungeon, MonsterContinuity = result.MonsterContinuity,
                         TimeProvenance = result.TimeProvenance }
                 : Failure();
+        }
+
+        internal static bool ResearchStateValid(DetachedCompleteSaveValidationResult result, RecoveryRuntimeInputs inputs)
+        {
+            try {
+                var save = UnityEngine.JsonUtility.FromJson<SaveRoot>(System.Text.Encoding.UTF8.GetString(result.GetBytes())).primary;
+                if (result.ResearchPendingExplicitNull) save.researchPending = null;
+                if (result.ResearchProgressExplicitNull) save.researchProgress = null;
+                return inputs.ResearchValid(save);
+            } catch { return false; }
         }
 
         public static DetachedCompleteSaveValidationResult ParseValidateAndRoundTrip(byte[] bytes,

@@ -21,6 +21,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal long OriginalEligible100ns { get; }
         internal long ResidualEligible100ns { get; }
         internal UnixTimePoint OriginalEndpoint => OriginalMode == Legacy ? new UnixTimePoint(Entry.Seconds, 0) : Entry;
+        internal bool SameAs(RecoveryEpisode other) => other != null && EntryPredecessorSha256 == other.EntryPredecessorSha256 &&
+            Source.CompareTo(other.Source) == 0 && Entry.CompareTo(other.Entry) == 0 && EntryContext == other.EntryContext &&
+            OriginalMode == other.OriginalMode && Phase == other.Phase && OriginalEligible100ns == other.OriginalEligible100ns &&
+            ResidualEligible100ns == other.ResidualEligible100ns;
 
         internal RecoveryEpisode(string predecessor, UnixTimePoint source, UnixTimePoint entry,
             string context, string mode, string phase, long original, long residual)

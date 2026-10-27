@@ -371,6 +371,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCompleteSaveValidationResult owned = ValidateSession(session);
             if (owned?.IsValid != true || !owned.CurrentTargetValidated)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            if (owned.TimeProvenance?.Mode == TimeProvenance.PreciseMode)
+                return Failure(RecoveryEpisode.Invalid);
             try
             {
                 if (!session.GetCurrentBytes().SequenceEqual(fileSystem.ReadAllBytes(activePath)))
