@@ -358,6 +358,42 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(h.Service.Save(h.Current, SaveReason.ManualDev), Is.True);
             Assert.That(scope.Root.Save.timeProvenance.AccountedBoundary.Seconds, Is.EqualTo(105));
         }
+        [Test] public void OrdinaryMetadataRollbackHoldsForegroundWithoutInventingBackground()
+        {
+            var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
+            using var scope = new RootScope(h); scope.Pulse(105);
+            var before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            double wallet = scope.Root.Save.structureRuntime.ManaReserve;
+            scope.Root.Save.lastPausedUtcUnix = 104; // Test-only metadata change; no physical pause is claimed.
+            h.F.FileSystem.EnableTargetedFailure(Faults.OperationType.Write,
+                paths => paths[0].EndsWith(".candidate", StringComparison.Ordinal), 1, false);
+            Assert.That(h.Service.Save(scope.Root.Save, SaveReason.StateChange), Is.False);
+            Assert.That(h.F.FileSystem.FailedOperation, Is.Not.Null);
+            CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+            h.F.FileSystem.DisableFailure();
+            int writes = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
+            scope.Pulse(110);
+            Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write), Is.EqualTo(writes));
+            Assert.That(h.Time.RecoveryClockActive, Is.False);
+            Assert.That(scope.Root.Save.timeProvenance.Episode, Is.Null);
+            Assert.That(h.Service.Save(scope.Root.Save, SaveReason.ManualDev), Is.True);
+            Assert.That(scope.Root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(105, 0)));
+            Assert.That(h.Time.HasDeferredRecovery, Is.False);
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+            scope.Pulse(111);
+            Assert.That(scope.Root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(1000));
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+            var clock = new Clock { Seconds = 111 };
+            var time = new TimeService(new SimpleLogger(false), h.Inputs.Bootstrap.tickSeconds,
+                h.Inputs.Bootstrap.timeRules.detectClockSkewSeconds, clock, () => 0);
+            time.BeginRecoveryForeground(h.Inputs.TwoFloor.UnitsPerSecond);
+            var reopened = CreateService(h.F, h.Inputs, time);
+            var current = reopened.LoadOrCreate("h1f4-known-stall-reopen", out var reason);
+            Assert.That(current, Is.Not.Null, reason);
+            Assert.That(current.timeProvenance.Episode, Is.Null);
+            Assert.That(current.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(1000));
+            Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+        }
         [Test] public void RootRetainsOneBackgroundObligationUntilObservedReturnAndBlocksActions()
         {
             var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);

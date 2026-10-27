@@ -70,7 +70,7 @@ class H1F4CampaignTests(unittest.TestCase):
                 q.plan("test")
             plan = json.loads((prep / "plan.json").read_text())
             supervisor.validate_plan(plan)
-            self.assertEqual(105, plan["stages"][1]["expected_tests"])
+            self.assertEqual(106, plan["stages"][1]["expected_tests"])
             self.assertEqual([], plan["stages"][1]["allowed_skips"])
             self.assertEqual(set(plan["selections"]["focused"][:-1]), set(plan["stages"][-1]["depends"]))
 
@@ -139,7 +139,7 @@ class H1F4CampaignTests(unittest.TestCase):
                     patch.object(q, "sha", return_value="a" * 64), patch.object(q.subprocess, "check_output", return_value="b" * 40):
                 q.plan("fulltest", full_edit=True)
             plan = json.loads((prep / "plan.json").read_text()); supervisor.validate_plan(plan)
-            self.assertEqual(2775, plan["stages"][1]["expected_tests"])
+            self.assertEqual(2776, plan["stages"][1]["expected_tests"])
             self.assertEqual(["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"],
                              plan["stages"][1]["allowed_skips"])
 
