@@ -140,11 +140,11 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
         # discovery changes are three root cases, one accepted-work case and
         # two shared fixture cases, one reentrant publication case and two
         # ordinary-save stall/background cases.
-        # Explicit affected cohort: 110 recovery + 77 structural + 59 write
+        # Explicit affected cohort: 111 recovery + 77 structural + 59 write
         # leaves. Original source-pinned full XML proves the latter two counts;
         # the renamed native-creation case does not change leaf count.
         # Research adds its 18 durable-acknowledgement and three save cases.
-        workload.update(xml="results.xml", expected_tests=2780 if full_edit else 267 if research else 246 if fixtures else 110,
+        workload.update(xml="results.xml", expected_tests=2781 if full_edit else 268 if research else 247 if fixtures else 111,
             allowed_skips=["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"] if full_edit else [])
     stages = [
         {"id": name + "-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/" + name + "-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
@@ -164,7 +164,7 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     if discovery:
         data["approved_substitutions"].append("Discovery only: pinned Editor directly, without -quit, for the asynchronous existing TestRunnerApi.RetrieveTestList callbacks; collector exits explicitly. No tests execute and no passing test gate is inferred.")
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 2780 if full_edit else 267 if research else 246 if fixtures else 110,
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 2781 if full_edit else 268 if research else 247 if fixtures else 111,
                       "skips": None if discovery else 1 if full_edit else 0}))
 
 

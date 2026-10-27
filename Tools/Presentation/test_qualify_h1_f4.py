@@ -70,7 +70,7 @@ class H1F4CampaignTests(unittest.TestCase):
                 q.plan("test")
             plan = json.loads((prep / "plan.json").read_text())
             supervisor.validate_plan(plan)
-            self.assertEqual(110, plan["stages"][1]["expected_tests"])
+            self.assertEqual(111, plan["stages"][1]["expected_tests"])
             self.assertEqual([], plan["stages"][1]["allowed_skips"])
             self.assertEqual(set(plan["selections"]["focused"][:-1]), set(plan["stages"][-1]["depends"]))
 
@@ -148,7 +148,7 @@ class H1F4CampaignTests(unittest.TestCase):
                     patch.object(q, "sha", return_value="a" * 64), patch.object(q.subprocess, "check_output", return_value="b" * 40):
                 q.plan("fixturetest", fixtures=True)
             plan = json.loads((prep / "plan.json").read_text()); supervisor.validate_plan(plan)
-            self.assertEqual(246, plan["stages"][1]["expected_tests"])
+            self.assertEqual(247, plan["stages"][1]["expected_tests"])
             self.assertEqual([], plan["stages"][1]["allowed_skips"])
             self.assertEqual(set(plan["selections"]["fixture-regressions"][:-1]), set(plan["stages"][-1]["depends"]))
 
@@ -168,7 +168,7 @@ class H1F4CampaignTests(unittest.TestCase):
                     patch.object(q, "sha", return_value="a" * 64), patch.object(q.subprocess, "check_output", return_value="b" * 40):
                 q.plan("researchtest", research=True)
             plan = json.loads((prep / "plan.json").read_text()); supervisor.validate_plan(plan)
-            self.assertEqual(267, plan["stages"][1]["expected_tests"])
+            self.assertEqual(268, plan["stages"][1]["expected_tests"])
             self.assertEqual([], plan["stages"][1]["allowed_skips"])
             self.assertEqual(set(plan["selections"]["research-regressions"][:-1]), set(plan["stages"][-1]["depends"]))
 
@@ -180,7 +180,7 @@ class H1F4CampaignTests(unittest.TestCase):
                     patch.object(q, "sha", return_value="a" * 64), patch.object(q.subprocess, "check_output", return_value="b" * 40):
                 q.plan("fulltest", full_edit=True)
             plan = json.loads((prep / "plan.json").read_text()); supervisor.validate_plan(plan)
-            self.assertEqual(2780, plan["stages"][1]["expected_tests"])
+            self.assertEqual(2781, plan["stages"][1]["expected_tests"])
             self.assertEqual(["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"],
                              plan["stages"][1]["allowed_skips"])
 

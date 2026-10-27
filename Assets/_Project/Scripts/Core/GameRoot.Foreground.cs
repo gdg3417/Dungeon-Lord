@@ -58,7 +58,8 @@ namespace DungeonBuilder.M0
 
         private void UpdateForeground()
         {
-            if (_explicitSaveDeleteQuiesced || foregroundFailure != null || foregroundRetryPending || foregroundPumping || Save == null) return;
+            if (_explicitSaveDeleteQuiesced || foregroundFailure != null || foregroundRetryPending || foregroundPumping ||
+                SaveService?.CanonicalPublicationPending == true || Save == null) return;
             try {
                 if (TimeService.RecoveryClockActive) { PumpCanonicalRecovery(); return; }
                 // A known foreground failure is held for an explicit action or
@@ -133,6 +134,7 @@ namespace DungeonBuilder.M0
         private bool FlushForeground()
         {
             if (TimeService?.HasForegroundClock != true || foregroundPumping) return true;
+            if (SaveService?.CanonicalPublicationPending == true) return false;
             if (foregroundFailure != null || _explicitSaveDeleteQuiesced) return false;
             if (TimeService.RecoveryClockActive) { PumpCanonicalRecovery(); return false; }
             try {

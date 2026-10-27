@@ -360,6 +360,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 harness.Wall.Seconds = seconds;
                 typeof(GameRoot).GetMethod("OnApplicationFocus", Private).Invoke(Root, new object[] { value });
             }
+            internal void Disable(long seconds) {
+                harness.Wall.Seconds = seconds;
+                typeof(GameRoot).GetMethod("OnDisable", Private).Invoke(Root, null);
+            }
             public void Dispose() {
                 attached.BeforeForegroundAction = null; attached.ForegroundCurrent = null;
                 Root.AttachSaveServiceForTests(null); Property("TimeService", null);
@@ -451,7 +455,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(cut.CapturedThrough, Is.EqualTo(1000));
             Assert.That(cut.AcceptedThrough, Is.EqualTo(-1));
         }
-        [Test] public void LifecycleObservationDuringOrdinaryPublicationCannotStartAnotherWriter()
+        [TestCase(false)] [TestCase(true)]
+        public void LifecycleObservationDuringOrdinaryPublicationCannotStartAnotherWriter(bool disable)
         {
             var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
             using var scope = new RootScope(h); scope.Pulse(105);
@@ -462,7 +467,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             scope.Rebind(service, h.Time, current); current.lastPausedUtcUnix = 104;
             int before = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
             int callbacks = 0;
-            fs.AfterFlush = () => { if (callbacks++ == 0) scope.Focus(false, 106); };
+            fs.AfterFlush = () => {
+                if (callbacks++ == 0) { if (disable) scope.Disable(106); else scope.Focus(false, 106); }
+            };
             Assert.That(service.Save(current, SaveReason.StateChange), Is.True);
             Assert.That(callbacks, Is.GreaterThan(0));
             scope.Pulse(106);

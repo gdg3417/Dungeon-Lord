@@ -294,7 +294,11 @@ namespace DungeonBuilder.M0
             if (recoveryDeferredStalled) foregroundSample = sample.Units; // Release at Q; never move W to Q.
             recoveryDeferredStalled = false;
             if (recoveryDeferredHasBackground) { recoveryDeferredPreparing = true; return; }
-            if (owner?.IsClosed == true && owner.Scheduler.AcceptedThrough >= recoveryDeferredForegroundThrough &&
+            // Dormant is a valid closed owner with no accepted scheduler. Only
+            // its zero baseline prefix can be proven here; nonzero captured work
+            // still requires the foreground authority to accept and close it.
+            long closedPrefix = owner?.Scheduler?.AcceptedThrough ?? (owner?.IsDormant == true ? 0 : -1);
+            if (owner?.IsClosed == true && closedPrefix >= recoveryDeferredForegroundThrough &&
                 proven.AccountedBoundary.CompareTo(recoveryDeferredForegroundWall) >= 0) {
                 recoveryDeferredForegroundWall = null; recoveryDeferredBackgroundWall = null;
                 recoveryDeferredPreparing = false; recoveryDeferredEligible100ns = 0;

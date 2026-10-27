@@ -11,6 +11,7 @@ namespace DungeonBuilder.M0
         internal Func<bool> BeforeForegroundAction;
         internal Func<SaveData> ForegroundCurrent;
         internal bool ForegroundWriting { get; private set; }
+        internal bool CanonicalPublicationPending => ForegroundWriting || pendingCandidate != null;
         private bool foregroundRecoveryRequired;
         internal bool RequiresCanonicalRecovery => foregroundRecoveryRequired;
         private bool PrepareForegroundAction(ref SaveData current)
@@ -18,7 +19,7 @@ namespace DungeonBuilder.M0
             // A lifecycle callback can arrive while synchronous atomic IO is in
             // flight. Observe its time through TimeService, but never start a
             // second writer against the outstanding predecessor/candidate pair.
-            if (ForegroundWriting) return false;
+            if (CanonicalPublicationPending) return false;
             if (foregroundRecoveryRequired) return false;
             if (recoveryTime?.RecoveryClockActive == true) return false;
             if (current?.timeProvenance?.Episode != null && BeforeForegroundAction == null) return false;
@@ -46,7 +47,7 @@ namespace DungeonBuilder.M0
         internal DetachedCanonicalWriteResult AdvanceForeground(SaveData current, ForegroundObservation observation, int tickSeconds, Action<SaveData, long> passiveTick,
             long? suspendedSaveUtc = null)
         {
-            if (foregroundRecoveryRequired || ForegroundWriting || _canonicalSession == null || ForegroundConfiguration == null)
+            if (foregroundRecoveryRequired || CanonicalPublicationPending || _canonicalSession == null || ForegroundConfiguration == null)
                 return ForegroundBlocked();
             if (observation == null || !observation.Authorizes(_canonicalSession, current, observation.CapturedThrough)) return ForegroundBlocked();
             long through = observation.CapturedThrough;
