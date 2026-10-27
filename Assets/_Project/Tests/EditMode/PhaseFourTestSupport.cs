@@ -81,6 +81,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             RoomContentSpatialOccupancySnapshot occupancy = null, bool allowEditorTestOccupancyFallback = true,
             System.Collections.Generic.IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles = null, MonsterRecoveryRules monsterRecovery = null)
         {
+            occupancy ??= Occupancy(limits);
             var context = new DetachedCurrentTargetValidationContext(compatibility, production, legacyConfiguration, limits,
                 occupancy, allowEditorTestOccupancyFallback, livingDungeonProfiles, monsterRecovery);
             var inputs = new RecoveryRuntimeInputs(H1F4RecoveryContractTests.Inputs(), production,

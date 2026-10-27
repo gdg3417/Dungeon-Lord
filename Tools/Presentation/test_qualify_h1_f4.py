@@ -131,6 +131,27 @@ class H1F4CampaignTests(unittest.TestCase):
             self.assertEqual(0, q.run_full_edit("fulltest", stage))
         self.assertNotIn("--filter", run.call_args.args[0]); self.assertIn("3500", run.call_args.args[0])
 
+    def test_fixture_cohort_selects_only_the_three_reviewed_fixtures(self):
+        stage = self.stage.parent / "fixture-regressions"; stage.mkdir()
+        with patch.object(q, "ROOT", self.root), patch.object(q.subprocess, "run", return_value=SimpleNamespace(returncode=0)) as run:
+            self.assertEqual(0, q.run_fixtures("fixtures", stage))
+        command = run.call_args.args[0]
+        self.assertEqual(";".join(["DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract",
+            "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial", "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites"]),
+            command[command.index("--filter") + 1])
+
+    def test_fixture_plan_keeps_exact_count_and_all_preservation_stages(self):
+        with patch.object(q, "ROOT", self.root):
+            prep, _, _ = q.identities("fixturetest"); prep.mkdir(parents=True)
+            q.write(prep / "qualified-inputs.json", {}); q.write(prep / "original-inputs.json", {})
+            with patch.object(q, "check_protected"), patch.object(q, "inventory", return_value={}), \
+                    patch.object(q, "sha", return_value="a" * 64), patch.object(q.subprocess, "check_output", return_value="b" * 40):
+                q.plan("fixturetest", fixtures=True)
+            plan = json.loads((prep / "plan.json").read_text()); supervisor.validate_plan(plan)
+            self.assertEqual(243, plan["stages"][1]["expected_tests"])
+            self.assertEqual([], plan["stages"][1]["allowed_skips"])
+            self.assertEqual(set(plan["selections"]["fixture-regressions"][:-1]), set(plan["stages"][-1]["depends"]))
+
     def test_full_edit_plan_declares_exact_discovery_and_one_named_inverse_skip(self):
         with patch.object(q, "ROOT", self.root):
             prep, _, _ = q.identities("fulltest"); prep.mkdir(parents=True)
