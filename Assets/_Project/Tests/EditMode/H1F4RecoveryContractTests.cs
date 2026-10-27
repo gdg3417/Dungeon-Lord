@@ -46,7 +46,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var frozen = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes("Assets/_Project/Resources/save_spatial_migration_limits_schema16.json"));
             Assert.That(frozen.IsSuccess, Is.True);
             Assert.That(frozen.Profile.Canonical.Serialized.MaximumInputBytes, Is.EqualTo(1376348));
-            Assert.That(f.Profile.Canonical.ForSchema(16).Serialized.MaximumParsedNodes, Is.EqualTo(10244));
+            Assert.That(frozen.Profile.Canonical.ForSchema(16).Serialized.MaximumParsedNodes, Is.EqualTo(10244));
         }
         [Test] public void TwelveExactInputsAreStableAndPrivatelyOwned()
         {
