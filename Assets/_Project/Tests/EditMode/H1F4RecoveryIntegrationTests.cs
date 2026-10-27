@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
@@ -248,6 +249,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
             readonly UnityEngine.GameObject host = new UnityEngine.GameObject("H1F4-owned-root-integration");
             readonly Harness harness;
+            SaveService attached;
             internal readonly GameRoot Root;
             internal RootScope(Harness h, bool bootPending = false)
             {
@@ -262,10 +264,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Field("_passiveManaConfiguration", h.Inputs.Passive); Field("_structuralEconomy", h.Inputs.Economy);
                 Field("_passiveManaService", new CanonicalPassiveManaService(h.Inputs.Passive, h.Inputs.Economy, new FormulaEngine(),
                     h.F.Profile.Canonical.Spatial, h.Inputs.Bootstrap.tickSeconds));
-                Root.AttachSaveServiceForTests(h.Service);
-                h.Service.BeforeForegroundAction = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), Root,
+                Rebind(h.Service, h.Time, h.Current);
+            }
+            internal Action<SaveData, long> PassiveTick => (Action<SaveData, long>)Delegate.CreateDelegate(typeof(Action<SaveData, long>), Root,
+                typeof(GameRoot).GetMethod("ApplyForegroundPassiveTick", Private));
+            internal void Rebind(SaveService service, TimeService time, SaveData current)
+            {
+                if (attached != null) { attached.BeforeForegroundAction = null; attached.ForegroundCurrent = null; }
+                Root.AttachSaveServiceForTests(service); attached = service;
+                Property("Save", current); Property("TimeService", time);
+                service.BeforeForegroundAction = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), Root,
                     typeof(GameRoot).GetMethod("FlushForeground", Private));
-                h.Service.ForegroundCurrent = () => Root.Save;
+                service.ForegroundCurrent = () => Root.Save;
             }
             void Property(string name, object value) => typeof(GameRoot).GetProperty(name).SetValue(Root, value);
             void Field(string name, object value) => typeof(GameRoot).GetField(name, Private).SetValue(Root, value);
@@ -279,7 +289,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 typeof(GameRoot).GetMethod("OnApplicationFocus", Private).Invoke(Root, new object[] { value });
             }
             public void Dispose() {
-                harness.Service.BeforeForegroundAction = null; harness.Service.ForegroundCurrent = null;
+                attached.BeforeForegroundAction = null; attached.ForegroundCurrent = null;
                 Root.AttachSaveServiceForTests(null); Property("TimeService", null);
                 UnityEngine.Object.DestroyImmediate(host);
             }
@@ -322,6 +332,82 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
             Assert.That(scope.Root.GameplayServicesInitializedForTests, Is.False);
             Assert.That(h.Time.ForegroundThrough, Is.Zero);
+        }
+        [Test] public void AcceptedTicksAndResearchDrainAcrossTwoCrashesWithoutReplayingClosedPrefix()
+        {
+            var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
+            // A declared synthetic prior confirmed record supplies this fixture's
+            // Research prerequisite. It is never historical producer evidence.
+            h.Current.runHistory.NextRunSequence = 2;
+            h.Current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1" }, 5);
+            Assert.That(h.Service.Save(h.Current, SaveReason.StateChange), Is.True);
+            using var scope = new RootScope(h);
+            var started = scope.Root.StartConfiguredPlayerResearch(); Assert.That(started.Succeeded, Is.True, started.FeedbackLocalizationKey);
+            var ticks = new List<long>(); var passive = scope.PassiveTick;
+            void Tick(SaveData candidate, long tick) { ticks.Add(tick); passive(candidate, tick); }
+            h.Wall.Seconds = 2105;
+            var accepted = h.Service.AdvanceForeground(h.Current, h.Time.CaptureForegroundObservation(h.Service.CanonicalSession),
+                h.Inputs.Bootstrap.tickSeconds, Tick);
+            Assert.That(accepted.IsSuccess, Is.True, accepted.Reason);
+            long acceptedHorizon = h.Current.livingDungeon.Scheduler.AcceptedThrough;
+            long firstClosed = h.Current.livingDungeon.Scheduler.ClosedThrough;
+            long firstTicks = h.Current.totalTicks;
+            Assert.That(acceptedHorizon, Is.EqualTo(2000000)); Assert.That(firstClosed, Is.LessThan(acceptedHorizon));
+            Assert.That(h.Current.researchProgress.CompletionPending, Is.True);
+
+            SaveService Open(Clock clock, out TimeService time, out SaveData current) {
+                time = new TimeService(new SimpleLogger(false), 10, 300, clock, () => 0);
+                time.BeginRecoveryForeground(h.Inputs.TwoFloor.UnitsPerSecond);
+                var service = CreateService(h.F, h.Inputs, time);
+                current = service.LoadOrCreate("accepted-reopen", out var reason); Assert.That(current, Is.Not.Null, reason);
+                Assert.That(time.RetainedRecoveryEntry, Is.Null, "Authority must be established before a new entry observation.");
+                time.BindLoadedForegroundHorizon(current.livingDungeon.Scheduler.AcceptedThrough);
+                scope.Rebind(service, time, current); service.BeginCanonicalRecovery(current); return service;
+            }
+            void Step(SaveService service, Clock clock, long at) {
+                clock.Seconds = at;
+                var result = service.AdvanceCanonicalRecovery(scope.Root.Save, h.Mana, Tick);
+                Assert.That(result.IsSuccess, Is.True, result.Reason);
+                Assert.That(scope.Root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(acceptedHorizon));
+            }
+            var one = new Clock { Seconds = 2200 };
+            var first = Open(one, out var firstTime, out var firstSave);
+            Assert.That(firstSave.totalTicks, Is.EqualTo(firstTicks)); Assert.That(firstSave.livingDungeon.Scheduler.ClosedThrough, Is.EqualTo(firstClosed));
+            Step(first, one, 2200); Assert.That(scope.Root.Save.timeProvenance.Episode.Entry.Seconds, Is.EqualTo(2200));
+            Assert.That(scope.Root.Save.totalTicks, Is.EqualTo(firstTicks), "Entry publication precedes any drain.");
+            Step(first, one, 2201);
+            long secondClosed = scope.Root.Save.livingDungeon.Scheduler.ClosedThrough;
+            Assert.That(secondClosed, Is.GreaterThan(firstClosed).And.LessThan(acceptedHorizon));
+            long secondTicks = scope.Root.Save.totalTicks;
+
+            var two = new Clock { Seconds = 2300 };
+            var second = Open(two, out var secondTime, out var secondSave);
+            Assert.That(secondTime.RetainedRecoveryEntry, Is.Null);
+            Assert.That(secondSave.timeProvenance.Episode.Entry.Seconds, Is.EqualTo(2200));
+            Assert.That(secondSave.totalTicks, Is.EqualTo(secondTicks)); Assert.That(secondSave.livingDungeon.Scheduler.ClosedThrough, Is.EqualTo(secondClosed));
+            int pumps = 0;
+            while (!scope.Root.Save.livingDungeon.IsClosed && pumps++ < 10) Step(second, two, 2300 + pumps);
+            Assert.That(scope.Root.Save.livingDungeon.IsClosed, Is.True);
+            Assert.That(scope.Root.Save.totalTicks, Is.EqualTo(200));
+            CollectionAssert.AreEqual(Enumerable.Range(1, 200).Select(n => (long)n).ToArray(), ticks);
+            Assert.That(scope.Root.Save.timeProvenance.Episode.Phase, Is.EqualTo(RecoveryEpisode.OriginalPending));
+            Assert.That(scope.Root.Save.timeProvenance.Episode.OriginalEligible100ns, Is.EqualTo(950000000));
+            Assert.That(scope.Root.ClaimConfiguredPlayerResearch().Succeeded, Is.False, "Recovery still owns the action barrier.");
+            double originalWallet = h.Mana.ResolveRecoveryDuration(scope.Root.Save, h.Inputs.Configuration, 950000000, false).WalletAfter;
+            Step(second, two, 2310);
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(originalWallet));
+            Assert.That(scope.Root.Save.timeProvenance.Episode.ResidualEligible100ns, Is.EqualTo(1100000000));
+            double residualWallet = h.Mana.ResolveRecoveryDuration(scope.Root.Save, h.Inputs.Configuration, 1110000000, false).WalletAfter;
+            Step(second, two, 2311);
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(residualWallet));
+            Assert.That(scope.Root.Save.timeProvenance.Episode, Is.Null);
+            Assert.That(secondTime.ForegroundThrough, Is.EqualTo(acceptedHorizon), "UTC recovery never creates new adventurer time.");
+            Assert.That(scope.Root.ClaimConfiguredPlayerResearch().Succeeded, Is.True);
+            string project = h.Inputs.Configuration.MvpFirstSessionObjective.AnalysisResearchProjectId;
+            Assert.That(scope.Root.Save.completedResearch.ProjectIds.Count(p => p == project), Is.EqualTo(1));
+            var once = h.F.FileSystem.ReadAllBytes(second.SavePath);
+            Assert.That(scope.Root.ClaimConfiguredPlayerResearch().Succeeded, Is.False);
+            CollectionAssert.AreEqual(once, h.F.FileSystem.ReadAllBytes(second.SavePath));
         }
 
         [Test] public void ActualAtomicEntryOriginalAndResidualCloseOneCanonicalOwner()
