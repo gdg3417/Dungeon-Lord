@@ -54,6 +54,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly FloorConstructionProfileSnapshot floorConstructionProfiles;
         private readonly FloorConstructionResearchSnapshot floorConstructionResearch;
         private readonly FormulaModifier[] economyModifiers;
+        private readonly bool recoveryBindingsValid = true;
         internal Action<DetachedCanonicalSaveSession, DetachedCanonicalSaveSession, TimeProvenance> CandidatePrepared;
         internal Action<DetachedCanonicalWriteResult> PublicationObserved;
 
@@ -75,6 +76,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             this.floorConstructionProfiles = floorConstructionProfiles;
             this.floorConstructionResearch = floorConstructionResearch;
             this.economyModifiers = economyModifiers?.ToArray() ?? Array.Empty<FormulaModifier>();
+            if (CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction) {
+                var bound = context?.RecoveryInputs;
+                recoveryBindingsValid = bound != null && ReferenceEquals(production, context.Production) &&
+                    compatibility != null && compatibility.CanonicalBytes.AsSpan().SequenceEqual(context.Compatibility.CanonicalBytes) &&
+                    ReferenceEquals(configuration, bound.Configuration) &&
+                    (runLoot == null || ReferenceEquals(runLoot, bound.Loot)) && (economy == null || ReferenceEquals(economy, bound.Economy));
+                if (bound != null) { this.runLoot = bound.Loot; this.economy = bound.Economy; }
+            }
         }
 
         public DetachedCanonicalWriteResult ConstructFloor(string activePath,
@@ -398,6 +407,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSaveSessionResult prepared, bool roomEffect, bool ordinarySpend = false, bool recover = false,
             Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null)
         {
+            if (!recoveryBindingsValid) return Failure(RecoveryEpisode.ContextMismatch);
             if (prepared == null || !prepared.IsSuccess || prepared.Update == null)
                 return Failure(prepared?.Reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
             byte[] candidate = prepared.Update.GetBytes();
@@ -494,7 +504,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private DetachedCompleteSaveValidationResult ValidateSession(DetachedCanonicalSaveSession session) =>
-            session == null ? null : DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+            session == null || !recoveryBindingsValid ? null : DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 session.GetCurrentBytes(), context);
 
         private System.Collections.Generic.ISet<string> OccupiedFloors(DetachedCompleteSaveValidationResult owned)

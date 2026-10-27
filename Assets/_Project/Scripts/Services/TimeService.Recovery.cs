@@ -23,6 +23,7 @@ namespace DungeonBuilder.M0
         internal bool RecoveryFailureLatched => recoveryFailureLatched;
         internal RecoveryEntryObservation RetainedRecoveryEntry => retainedRecoveryEntry;
         internal long RecoveryOriginalEligible100ns { get; private set; }
+        internal RecoveryPublicationObservation PendingRecoveryPublication => recoveryPublication;
         private bool ObservedForeground => foregroundFocused && !_isPaused;
         internal void BindRecoveryContext(string context)
         {

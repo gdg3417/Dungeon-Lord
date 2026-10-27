@@ -36,7 +36,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal RecoveryContextIdentity RecoveryContext { get; private set; }
         internal RecoveryRuntimeInputs RecoveryInputs { get; private set; }
         internal void BindRecoveryInputs(RecoveryRuntimeInputs inputs, IHistoricalRecoveryEvidence evidence = null)
-        { BindRecoveryContext(inputs?.Identity, evidence); RecoveryInputs = inputs; }
+        {
+            if (inputs == null || !Compatibility.CanonicalBytes.AsSpan().SequenceEqual(inputs.Compatibility.CanonicalBytes) ||
+                RoomContentOccupancy == null || UnityEngine.JsonUtility.ToJson(RoomContentOccupancy.Value) != UnityEngine.JsonUtility.ToJson(inputs.Occupancy.Value) ||
+                LivingDungeonProfiles?.Any(p => !inputs.SupportsProfile(p)) == true)
+                throw new ArgumentException(RecoveryEpisode.ContextMismatch);
+            BindRecoveryContext(inputs.Identity, evidence); RecoveryInputs = inputs;
+        }
         internal IHistoricalRecoveryEvidence HistoricalRecoveryEvidence { get; private set; }
         internal void BindRecoveryContext(RecoveryContextIdentity inputs, IHistoricalRecoveryEvidence evidence = null)
         {

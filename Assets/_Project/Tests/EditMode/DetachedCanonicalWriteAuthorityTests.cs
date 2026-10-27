@@ -1537,10 +1537,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json"),
                     out var branchingResearch), Is.True);
                 return new Fixture { Production = source.Production, Compatibility = source.Compatibility,
-                    Configuration = LegacyGameplayConfigurationContract.Parse(source.LegacyBytes),
+                    Configuration = context.RecoveryInputs.Configuration,
                     Profile = profile, Context = context, Session = opened.Session, State = validation.State,
                     Runtime = runtime, FileSystem = fs, ActivePath = path, RemovalPolicy = removalPolicy,
-                    Economy = PhaseFourTestSupport.Economy(source.Production, source.Limits),
+                    Economy = context.RecoveryInputs.Economy,
                     Acquisition = PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits),
                     BranchingResearch = branchingResearch, Occupancy = occupancy,
                     PositionProfiles = positionProfiles, FrozenSixteen = frozenSixteen };

@@ -294,7 +294,7 @@ namespace DungeonBuilder.M0
                 SaveData initial = CreateNew(contentVersion);
                 NativeCanonicalSaveResult created;
                 if (recoveryInputs != null && UsesAtomicRecovery) {
-                    if (recoveryPublicationUncertain) { banner = RecoveryEpisode.Invalid; return null; }
+                    if (recoveryPublicationUncertain) { banner = RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.Invalid); return null; }
                     pendingRecoveryObservation = recoveryTime.BeginNativePublication();
                     created = NativeCanonicalSaveCreator.CreatePrecise(SavePath, _canonicalFileSystem, initial,
                         _production, _limits, _acquisition, recoveryInputs, pendingRecoveryObservation.Through,
@@ -329,6 +329,7 @@ namespace DungeonBuilder.M0
                 _positionMigrationProfiles, _roomContentOccupancy,
                 livingDungeonProfiles: _validationContext.LivingDungeonProfiles, monsterRecovery: _validationContext.MonsterRecovery);
             if (recoveryInputs != null) coordinator.ConfigureRecovery(recoveryInputs, recoveryTime, historicalRecoveryEvidence);
+            bool resolvingNativePublication = pendingCandidate != null && pendingPredecessor == null && pendingRecoveryObservation?.Closure == true;
             DetachedSpatialSaveLoadResult loaded = coordinator.Load(SavePath, preflight);
             if (!loaded.IsSuccess)
             {
@@ -352,10 +353,15 @@ namespace DungeonBuilder.M0
                     catch { ClearNarrowHallRepairAuthorization(); }
                 }
                 _logger.Error("GD66 load failed: " + loaded.Reason);
-                banner = Gd66MigrationReasonRegistry.PlayerLocalizationKey(loaded.Reason);
+                banner = RecoveryEpisode.PlayerLocalizationKey(loaded.Reason);
                 return null;
             }
             _canonicalSession = loaded.Session;
+            if (resolvingNativePublication && recoveryTime.PendingRecoveryPublication == null) {
+                LastLoadCreatedNative = true;
+                AdoptRecoveryPublication(new DetachedCanonicalWriteResult(true, null, false, false, loaded.GetValidatedBytes(),
+                    loaded.Session, loaded.Validation, loaded.RuntimeProjection));
+            }
             _narrowHallRepairAvailable = false;
             _narrowHallTrustedOriginalSha256 = null;
             return loaded.RuntimeProjection;

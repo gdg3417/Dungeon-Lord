@@ -72,5 +72,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return ResearchCompletionEligibilityResolver.Resolve(save.researchPending, save.researchProgress,
                 Bootstrap.researchCompletionEligibilityScaffold).RuleResolved;
         }
+
+        internal bool SupportsProfile(LivingDungeonProfile profile)
+        {
+            if (profile == null || !LivingDungeonForegroundConfig.IsProduction(profile.Id)) return false;
+            if (!profile.BaseBudget.IsValid) return false;
+            var expected = (profile.Id == OneFloor.Id ? OneFloor : TwoFloor).CreateProfile(profile.BaseBudget);
+            return profile.MaximumActive == expected.MaximumActive && profile.MaximumRetained == expected.MaximumRetained &&
+                profile.MaximumCheckpointBytes == expected.MaximumCheckpointBytes && profile.MaximumPartyReplay == expected.MaximumPartyReplay &&
+                profile.MaximumTotalReplay == expected.MaximumTotalReplay && profile.MaximumBaseSaveBytes == expected.MaximumBaseSaveBytes &&
+                profile.MaximumOwnerBytes == expected.MaximumOwnerBytes && profile.MaximumCombatWork == expected.MaximumCombatWork &&
+                profile.QualificationPostureId == expected.QualificationPostureId && profile.QualificationTiming != null &&
+                profile.QualificationTiming.UnitsPerTileEdge == expected.QualificationTiming.UnitsPerTileEdge &&
+                profile.QualificationTiming.MonsterInteractionUnits == expected.QualificationTiming.MonsterInteractionUnits &&
+                profile.QualificationTiming.TrapInteractionUnits == expected.QualificationTiming.TrapInteractionUnits &&
+                profile.QualificationTiming.LootInteractionUnits == expected.QualificationTiming.LootInteractionUnits &&
+                profile.QualificationTiming.FloorTransferUnits == expected.QualificationTiming.FloorTransferUnits;
+        }
     }
 }

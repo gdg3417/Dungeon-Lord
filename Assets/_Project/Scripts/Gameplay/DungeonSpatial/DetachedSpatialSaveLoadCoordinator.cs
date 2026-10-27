@@ -164,6 +164,31 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                 recovered.TrustedPayload, recovered); }
 
+            // Same-process entry acknowledgement can be lost without losing the
+            // retained cut/classifications. Resolve its exact candidate before
+            // attempting another activation; a crash instead has no local cut.
+            var pending = recoveryTime?.PendingRecoveryPublication;
+            if (pending != null && pending.CandidateSha256 != null &&
+                SpatialContractSha256.Compute(trusted) == pending.CandidateSha256) {
+                var proofValidation = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(trusted, currentContext);
+                if (!proofValidation.CurrentTargetValidated) return Failure(RecoveryEpisode.Invalid, recovery: recovered);
+                try { preflight.FileSystem.FlushDirectory(System.IO.Path.GetDirectoryName(activePath)); }
+                catch { return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason, recovery: recovered); }
+                string resolved = ExactCompleteSaveAtomicPersistence.Persist(activePath, preflight.FileSystem, trusted, trusted,
+                    limits.Canonical.Serialized.MaximumCollectionRecords, payload =>
+                        DetachedCompleteSaveContract.ParseValidateAndRoundTrip(payload, currentContext).CurrentTargetValidated);
+                if (resolved != null) return Failure(resolved, recovery: recovered);
+                var proven = PublishValidated(trusted, currentContext, DetachedSpatialSaveLoadDisposition.AlreadyCommitted, recovered, null);
+                if (!proven.IsSuccess) return proven;
+                try { recoveryTime.RecoveryPublicationSucceeded(pending, new DetachedCanonicalWriteResult(true, null, false, false,
+                    trusted, proven.Session, proven.Validation, proven.RuntimeProjection)); }
+                catch { return Failure(RecoveryEpisode.Invalid, recovery: recovered); }
+                return proven;
+            }
+            if (pending != null && pending.CandidateSha256 != null &&
+                SpatialContractSha256.Compute(trusted) != pending.PredecessorSha256)
+                return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason, recovery: recovered);
+
             if (UsesAtomicRecovery) {
                 var frozen16 = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(trusted, currentContext);
                 if (frozen16.IsValid)
@@ -331,6 +356,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 string sourceReason = SchemaSixteenRecoveryActivation.ValidateSource(source, candidate, currentContext, out var frozen);
                 if (sourceReason != null) return Failure(sourceReason, recovery: recovery, transaction: transaction);
                 try {
+                    var unresolved = recoveryTime.PendingRecoveryPublication;
+                    if (unresolved != null) {
+                        if (SpatialContractSha256.Compute(source) != unresolved.PredecessorSha256)
+                            return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason, recovery: recovery, transaction: transaction);
+                        fileSystem.FlushDirectory(System.IO.Path.GetDirectoryName(activePath));
+                        string rollbackProof = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, source, source,
+                            limits.Canonical.Serialized.MaximumCollectionRecords, payload => payload.AsSpan().SequenceEqual(source));
+                        if (rollbackProof != null) return Failure(rollbackProof, recovery: recovery, transaction: transaction);
+                        recoveryTime.RecoveryPublicationFailed(unresolved);
+                    }
                     var entry = recoveryTime.RecoveryClockActive ? recoveryTime.RetainedRecoveryEntry : recoveryTime.BeginRecoveryClock(frozen.TimeProvenance);
                     if (entry == null) return Failure(RecoveryEpisode.Invalid, recovery: recovery, transaction: transaction);
                     observation = recoveryTime.CaptureRecoveryPublication(source, frozen.TimeProvenance);

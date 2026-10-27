@@ -180,9 +180,21 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     byte[] readback = fileSystem.ReadAllBytes(activePath);
                     if (readback == null || SpatialContractSha256.Compute(readback) != hash)
                         throw new InvalidOperationException();
+                    if (precise) {
+                        var durableValidation = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(readback, context);
+                        var durableSession = DetachedCanonicalSaveSession.Open(readback, context, limits);
+                        if (!durableValidation.CurrentTargetValidated || !durableSession.IsSuccess ||
+                            !DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection.TryPublishValidated(
+                                durableValidation, production, out var durableRuntime, out _)) throw new InvalidOperationException();
+                        return new NativeCanonicalSaveResult(null, durableSession.Session, durableValidation, durableRuntime);
+                    }
                 }
                 catch
                 {
+                    // A failed successor flush/readback does not establish Q.
+                    // Retain its exact candidate/evidence for independent proof.
+                    // The frozen legacy creator's behavior remains below.
+                    if (precise) return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
                     try { if (fileSystem.Exists(staging)) fileSystem.DeleteFile(staging); } catch { }
                     try
                     {

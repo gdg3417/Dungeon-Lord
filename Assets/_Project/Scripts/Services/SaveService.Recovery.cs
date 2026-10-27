@@ -122,6 +122,7 @@ namespace DungeonBuilder.M0
                 bool committed = ExactCompleteSaveAtomicPersistence.Same(active, pendingCandidate.GetCurrentBytes());
                 if (!committed && (pendingPredecessor == null || !ExactCompleteSaveAtomicPersistence.Same(active, pendingPredecessor.GetCurrentBytes())))
                     return RecoveryFailure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
+                _canonicalFileSystem.FlushDirectory(System.IO.Path.GetDirectoryName(SavePath));
                 DetachedCompleteSaveValidationResult validation = null;
                 DetachedCanonicalSaveSessionResult opened = null; SaveData runtime = null;
                 string reason = ExactCompleteSaveAtomicPersistence.Persist(SavePath, _canonicalFileSystem, active, active,

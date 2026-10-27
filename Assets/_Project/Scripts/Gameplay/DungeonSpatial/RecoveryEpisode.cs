@@ -9,6 +9,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal const string Invalid = "time.recovery.invalid_state";
         internal const string ContextMismatch = "time.recovery.context_mismatch";
         internal const string HistoricalProofRequired = "time.recovery.historical_proof_required";
+        internal static string PlayerLocalizationKey(string reason) => reason == Invalid ? "ui.time.recovery.invalid_state" :
+            reason == ContextMismatch ? "ui.time.recovery.context_mismatch" : reason == HistoricalProofRequired ? "ui.time.recovery.historical_proof_required" :
+            Gd66MigrationReasonRegistry.PlayerLocalizationKey(reason);
         internal const string OriginalPending = "originalPending", ResidualPending = "residualPending";
         internal const string KnownBackground = "knownBackground", UnknownPostCrash = "unknownPostCrash";
         internal const string Precise = "precise", Legacy = "legacyWholeSeconds";

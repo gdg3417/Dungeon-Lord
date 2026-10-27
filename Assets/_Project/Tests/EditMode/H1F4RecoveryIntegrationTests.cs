@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Collections.Generic;
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
@@ -53,7 +54,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal void Accept(long seconds)
             { var result = Step(seconds); Assert.That(result.IsSuccess, Is.True, result.Reason); }
         }
-        static SaveService CreateService(Fixture f, RecoveryRuntimeInputs inputs, TimeService time)
+        static SaveService CreateService(Fixture f, RecoveryRuntimeInputs inputs, TimeService time,
+            ISpatialMigrationFileSystem fileSystem = null, ITimeSource source = null)
         {
             var service = new SaveService(new SimpleLogger(false, (_, __) => { }),
                 new SaveConfig { fileName = Path.GetFileName(f.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(f.ActivePath));
@@ -61,10 +63,150 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 LegacyGameplayConfigurationContract.SerializeCanonical(inputs.Configuration), f.PositionProfiles, inputs.Occupancy);
             service.ConfigureStructuralEconomy(inputs.Economy); service.ConfigureContentAcquisitionEconomy(f.Acquisition);
             service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
-                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, f.FileSystem, path));
+                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, fileSystem ?? f.FileSystem, path));
+            if (source != null) service.SetTimeSourceForTests(source);
             service.ConfigureRecovery(inputs, time); return service;
         }
         static void Expected(Harness h, double wallet) => Assert.That(h.Current.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+
+        sealed class ObservedFileSystem : ISpatialMigrationFileSystem
+        {
+            readonly ISpatialMigrationFileSystem inner;
+            internal Action AfterFlush;
+            internal bool InterruptReplacement;
+            int replacements;
+            internal ObservedFileSystem(ISpatialMigrationFileSystem value) { inner = value; }
+            public bool Exists(string path) => inner.Exists(path);
+            public byte[] ReadAllBytes(string path) => inner.ReadAllBytes(path);
+            public void WriteAllBytesDurable(string path, byte[] bytes) => inner.WriteAllBytesDurable(path, bytes);
+            public void ReplaceSameDirectoryAtomic(string staging, string active) {
+                if (InterruptReplacement && replacements++ > 0) throw new IOException("Test rollback interruption");
+                inner.ReplaceSameDirectoryAtomic(staging, active);
+                if (InterruptReplacement) throw new IOException("Test replacement acknowledgement interruption");
+            }
+            public void MoveSameDirectoryAtomic(string source, string destination) => inner.MoveSameDirectoryAtomic(source, destination);
+            public void DeleteFile(string path) => inner.DeleteFile(path);
+            public void FlushDirectory(string path) { inner.FlushDirectory(path); AfterFlush?.Invoke(); }
+            public IReadOnlyList<string> EnumerateFiles(string directory, string pattern, int maximum) => inner.EnumerateFiles(directory, pattern, maximum);
+            public bool IsPathContainedWithoutRedirection(string directory, string path) => inner.IsPathContainedWithoutRedirection(directory, path);
+        }
+        static (Clock Clock, TimeService Time, SaveService Service) NativeService(Harness h, ObservedFileSystem fs)
+        {
+            h.F.FileSystem.RemoveSeededEvidence(h.Service.SavePath);
+            var clock = new Clock();
+            var time = new TimeService(new SimpleLogger(false), 10, 300, clock, () => clock.Seconds - 100d);
+            time.BeginRecoveryForeground(h.Inputs.TwoFloor.UnitsPerSecond);
+            return (clock, time, CreateService(h.F, h.Inputs, time, fs, clock));
+        }
+
+        [Test] public void ActualNativeCreationUsesDurableSAndHandsOnlySuccessfulMonotonicSuffixToForeground()
+        {
+            var h = new Harness(); var fs = new ObservedFileSystem(h.F.FileSystem); var native = NativeService(h, fs);
+            fs.AfterFlush = () => native.Clock.Seconds = 105;
+            var created = native.Service.LoadOrCreate("native-test", out var reason);
+            Assert.That(created, Is.Not.Null, reason); Assert.That(native.Service.LastLoadCreatedNative, Is.True);
+            Assert.That(created.timeProvenance.Episode, Is.Null); Assert.That(created.timeProvenance.AccountedBoundary.Seconds, Is.EqualTo(100));
+            Assert.That(native.Time.ForegroundThrough, Is.EqualTo(5000));
+            Assert.That(native.Time.PendingRecoveryPublication, Is.Null); Assert.That(native.Time.RetainedRecoveryEntry, Is.Null);
+        }
+        [Test] public void ActualNativePauseBeforeSaveAttachmentProducesNoForegroundCredit()
+        {
+            var h = new Harness(); var fs = new ObservedFileSystem(h.F.FileSystem); var native = NativeService(h, fs);
+            native.Time.OnPause(); fs.AfterFlush = () => native.Clock.Seconds = 105;
+            Assert.That(native.Service.LoadOrCreate("native-paused", out _), Is.Not.Null);
+            Assert.That(native.Time.ForegroundThrough, Is.Zero); Assert.That(native.Time.HasDeferredRecovery, Is.True);
+            Assert.That(native.Time.RecoveryDeferredBackground100nsForClockTest, Is.EqualTo(50000000));
+        }
+        [Test] public void NativeFailedFlushRemainsUncertainUntilFreshProofAndDoesNotBecomeNewOfflineAbsence()
+        {
+            var h = new Harness(); var fs = new ObservedFileSystem(h.F.FileSystem); var native = NativeService(h, fs);
+            h.F.FileSystem.EnableFailure(Faults.OperationType.Flush, 1);
+            Assert.That(native.Service.LoadOrCreate("native-flush", out _), Is.Null);
+            Assert.That(native.Time.ForegroundThrough, Is.Zero); Assert.That(native.Time.PendingRecoveryPublication, Is.Not.Null);
+            Assert.That(h.F.FileSystem.Exists(native.Service.SavePath), Is.True);
+            h.F.FileSystem.DisableFailure(); native.Clock.Seconds = 110;
+            var resolved = native.Service.LoadOrCreate("native-flush", out var reason);
+            Assert.That(resolved, Is.Not.Null, reason); Assert.That(native.Service.LastLoadCreatedNative, Is.True);
+            Assert.That(resolved.timeProvenance.Episode, Is.Null); Assert.That(resolved.timeProvenance.AccountedBoundary.Seconds, Is.EqualTo(100));
+            Assert.That(native.Time.ForegroundThrough, Is.Zero); Assert.That(native.Time.RecoveryClockActive, Is.False);
+        }
+        [Test] public void FailedNativeWriteCannotStartASecondCandidateInTheSameProcess()
+        {
+            var h = new Harness(); var native = NativeService(h, new ObservedFileSystem(h.F.FileSystem));
+            h.F.FileSystem.EnableFailure(Faults.OperationType.Write, 1);
+            Assert.That(native.Service.LoadOrCreate("native-before-write", out _), Is.Null);
+            var retained = native.Time.PendingRecoveryPublication;
+            h.F.FileSystem.DisableFailure(); native.Clock.Seconds = 110;
+            Assert.That(native.Service.LoadOrCreate("native-before-write", out _), Is.Null);
+            Assert.That(native.Time.PendingRecoveryPublication, Is.SameAs(retained));
+            Assert.That(h.F.FileSystem.Exists(native.Service.SavePath), Is.False); Assert.That(native.Time.ForegroundThrough, Is.Zero);
+        }
+        [TestCase(false)] [TestCase(true)]
+        public void WriterRejectsConfigurationOrLootOutsideItsValidatedConsumedBundle(bool wrongLoot)
+        {
+            var h = new Harness(); var bytes = h.Service.CanonicalSession.GetCurrentBytes();
+            var bound = h.F.Context.RecoveryInputs;
+            var config = wrongLoot ? bound.Configuration : UnityEngine.JsonUtility.FromJson<RunSimulationConfig>(UnityEngine.JsonUtility.ToJson(bound.Configuration));
+            if (!wrongLoot) config.CombatC0.Monsters[0].MaxHealth += 2;
+            var loot = wrongLoot ? UnityEngine.JsonUtility.FromJson<LootConfig>(UnityEngine.JsonUtility.ToJson(bound.Loot)) : bound.Loot;
+            var writer = new DetachedCanonicalWriteAuthority(h.F.Production, h.F.Compatibility, config, h.F.Context, h.F.Profile,
+                economy: bound.Economy, runLoot: loot);
+            var result = writer.SaveRecognizedState(h.Service.SavePath, h.F.FileSystem, h.Service.CanonicalSession, h.Current);
+            Assert.That(result.IsSuccess, Is.False); CollectionAssert.AreEqual(bytes, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+        }
+        [Test] public void UnsupportedRuntimeProfileCannotBeBoundUnderProductionContextIdentity()
+        {
+            var h = new Harness(); var unsupported = new LivingDungeonProfile("unsupported-test-executable", 1, 1, 100, 100, 100, 100, 100);
+            var context = new DetachedCurrentTargetValidationContext(h.F.Compatibility, h.F.Production,
+                LegacyGameplayConfigurationContract.SerializeCanonical(h.Inputs.Configuration), h.F.Profile.Canonical, h.Inputs.Occupancy,
+                livingDungeonProfiles: new[] { unsupported }, monsterRecovery: h.Inputs.Monsters);
+            Assert.Throws<ArgumentException>(() => context.BindRecoveryInputs(h.Inputs));
+        }
+        [TestCase(false)] [TestCase(true)]
+        public void CommittedSettlementWithInterruptedAcknowledgementResolvesWithoutAnotherGrant(bool residual)
+        {
+            var h = new Harness(); var fs = new ObservedFileSystem(h.F.FileSystem);
+            var time = h.Time; var service = CreateService(h.F, h.Inputs, time, fs);
+            var current = service.LoadOrCreate("uncertain-settlement", out _);
+            service.CanonicalRuntimePublished += value => current = value;
+            service.BeginCanonicalRecovery(current);
+            Assert.That(service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail()).IsSuccess, Is.True);
+            if (residual) { h.Wall.Seconds = 102; Assert.That(service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail()).IsSuccess, Is.True); }
+            h.Wall.Seconds = residual ? 104 : 102; fs.InterruptReplacement = true;
+            var failed = service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail());
+            Assert.That(failed.Reason, Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+            fs.InterruptReplacement = false; h.Wall.Seconds = 110;
+            var proof = service.ResolveUncertainRecoveryPublication(); Assert.That(proof.IsSuccess, Is.True, proof.Reason);
+            Assert.That(current.timeProvenance.Episode?.Phase, Is.EqualTo(residual ? null : RecoveryEpisode.ResidualPending));
+            var once = h.F.FileSystem.ReadAllBytes(service.SavePath);
+            Assert.That(service.ResolveUncertainRecoveryPublication().IsSuccess, Is.False);
+            CollectionAssert.AreEqual(once, h.F.FileSystem.ReadAllBytes(service.SavePath));
+            Assert.That(time.ForegroundThrough, Is.Zero);
+        }
+        [TestCase(false)] [TestCase(true)]
+        public void ReopenedPendingPhaseRetainsOriginalEntryAndOnlyAddsUnknownSuffix(bool originalComplete)
+        {
+            var h = new Harness(); h.Start(); h.Accept(100); if (originalComplete) h.Accept(102);
+            var r = h.Current.timeProvenance.Episode.Entry;
+            long persisted = h.Current.lastSavedUtcUnix;
+            var clock = new Clock { Seconds = 110 }; var time = new TimeService(new SimpleLogger(false), 10, 300, clock, () => 0);
+            time.BeginRecoveryForeground(h.Inputs.TwoFloor.UnitsPerSecond); var reopened = CreateService(h.F, h.Inputs, time);
+            var current = reopened.LoadOrCreate("reopen-pending", out var reason); Assert.That(current, Is.Not.Null, reason);
+            time.BindLoadedForegroundHorizon(current.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
+            reopened.BeginCanonicalRecovery(current);
+            Assert.That(time.RetainedRecoveryEntry, Is.Null); Assert.That(current.timeProvenance.Episode.Entry, Is.EqualTo(r));
+            Assert.That(time.RecoveryEligible100nsForClockTest, Is.EqualTo((110 - persisted) * 10000000));
+            var result = reopened.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail()); Assert.That(result.IsSuccess, Is.True, result.Reason);
+            Assert.That(result.RuntimeProjection.timeProvenance.Episode?.Entry, Is.EqualTo(originalComplete ? null : r));
+        }
+        [Test] public void DigestAloneCannotGrantCurrentWriterAuthorityWithoutValidatedInputs()
+        {
+            var h = new Harness(); var context = new DetachedCurrentTargetValidationContext(h.F.Compatibility, h.F.Production,
+                LegacyGameplayConfigurationContract.SerializeCanonical(h.Inputs.Configuration), h.F.Profile.Canonical, h.Inputs.Occupancy,
+                monsterRecovery: h.Inputs.Monsters);
+            context.BindRecoveryContext(h.Inputs.Identity);
+            Assert.That(DetachedCanonicalSaveSession.Open(h.Service.CanonicalSession.GetCurrentBytes(), context, h.F.Profile).IsSuccess, Is.False);
+        }
 
         [Test] public void ActualAtomicEntryOriginalAndResidualCloseOneCanonicalOwner()
         {

@@ -43,7 +43,8 @@ namespace DungeonBuilder.M0
                 return true;
             } catch (Exception error) {
                 Logger?.Warn("Recovery bootstrap refused: " + error.Message);
-                SetBanner(Content.GetString(RecoveryEpisode.ContextMismatch, RecoveryEpisode.ContextMismatch));
+                string key = RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ContextMismatch);
+                SetBanner(Content.GetString(key, key));
                 return false;
             }
         }
