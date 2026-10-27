@@ -33,6 +33,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
           LivingDungeonProfiles = livingDungeonProfiles?.ToArray();
           MonsterRecovery = monsterRecovery ?? MonsterRecoveryRules.EditorFallback(); }
         internal MonsterRecoveryRules MonsterRecovery { get; }
+        internal RecoveryContextIdentity RecoveryContext { get; private set; }
+        internal IHistoricalRecoveryEvidence HistoricalRecoveryEvidence { get; private set; }
+        internal void BindRecoveryContext(RecoveryContextIdentity inputs, IHistoricalRecoveryEvidence evidence = null)
+        {
+            if (RecoveryContext != null || inputs == null ||
+                !BootstrapConfigValidationService.TryParseRunSimulationConfig(new System.Text.UTF8Encoding(false, true).GetString(inputs.GetInput(0)), out var full) ||
+                !LegacyGameplayConfigurationContract.SerializeCanonical(full).AsSpan().SequenceEqual(legacyConfiguration) ||
+                !MonsterRecovery.SameRules(MonsterRecoveryRules.CaptureBound(full, inputs.GetInput(3))) ||
+                !ProductionSpatialGeneratedSetParser.SerializeCanonical(Production.Manifest).AsSpan().SequenceEqual(inputs.GetInput(4)) ||
+                !ProductionSpatialGeneratedSetParser.SerializeCanonical(Production.Catalog).AsSpan().SequenceEqual(inputs.GetInput(5)))
+                throw new ArgumentException(RecoveryEpisode.ContextMismatch);
+            RecoveryContext = inputs; HistoricalRecoveryEvidence = evidence;
+        }
         internal IReadOnlyList<LivingDungeonProfile> LivingDungeonProfiles { get; }
         internal SpatialLayoutCompatibilitySnapshot Compatibility { get; }
         internal ProductionSpatialContentSnapshot Production { get; }
@@ -174,6 +187,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             byte[] bytes, DetachedCurrentTargetValidationContext context) =>
             ParseValidateContextAndRoundTrip(bytes, context, CanonicalSaveSchemaVersions.FrozenSchemaFifteen, false);
 
+        // Frozen source validation is never a writable target/session capability.
+        internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaSixteenAndRoundTrip(
+            byte[] bytes, DetachedCurrentTargetValidationContext context) =>
+            ParseValidateContextAndRoundTrip(bytes, context, CanonicalSaveSchemaVersions.FrozenSchemaSixteen, false);
+
         private static DetachedCompleteSaveValidationResult ParseValidateContextAndRoundTrip(byte[] bytes,
             DetachedCurrentTargetValidationContext context, int schemaVersion, bool currentTarget)
         {
@@ -184,6 +202,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 limits, schemaVersion, true,
                 null, null, context.LivingDungeonProfiles);
             if (!result.IsValid || !result.LayoutContractVersion.HasValue) return Failure();
+            if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction &&
+                (context.RecoveryContext?.Matches(result.TimeProvenance) != true ||
+                 result.TimeProvenance.Episode?.Phase == RecoveryEpisode.ResidualPending && !result.LivingDungeon.IsClosed)) return Failure();
             if (!MonsterContinuity.Valid(result.MonsterContinuity, result.State, context.MonsterRecovery, limits.Spatial.MaximumRecords)) return Failure();
             if (!DetachedCanonicalProductionSemanticValidation.Validate(result.State, context.Production,
                 context.Configuration, limits.Spatial, context.RoomContentOccupancy, true).IsValid)
@@ -274,6 +295,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             ParseValidateAndRoundTripCore(bytes, limits, CanonicalSaveSchemaVersions.FrozenSchemaFifteen,
                 true, null, null, profiles);
 
+        internal static DetachedCompleteSaveValidationResult ParseValidateFrozenSchemaSixteenAndRoundTrip(
+            byte[] bytes, CanonicalSpatialSerializationLimits limits, IReadOnlyList<LivingDungeonProfile> profiles = null) =>
+            ParseValidateAndRoundTripCore(bytes, limits, CanonicalSaveSchemaVersions.FrozenSchemaSixteen,
+                true, null, null, profiles);
+
         private static DetachedCompleteSaveValidationResult ParseValidateAndRoundTripCore(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, int schemaVersion, bool requireLifecycle,
             string expectedTransactionId, string expectedDescriptorFingerprint,
@@ -327,7 +353,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 TimeProvenance timeProvenance = null;
                 if (requireTime && (root.Fields.Any(f => string.Equals(f.Key, TimeProvenance.Owner, StringComparison.OrdinalIgnoreCase)) ||
                     primary.Fields.Take(canonicalStart + 9).Any(f => string.Equals(f.Key, TimeProvenance.Owner, StringComparison.OrdinalIgnoreCase)) ||
-                    !TimeProvenance.TryRead(primary, out timeProvenance))) return Failure();
+                    !TimeProvenance.TryRead(primary, schemaVersion, out timeProvenance))) return Failure();
 
                 var spatialWriter = new ContractJsonWriter(limits.Serialized);
                 spatialWriter.Node(); spatialWriter.Token("{"); spatialWriter.String("Authority"); spatialWriter.Token(":");
@@ -411,6 +437,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         monsterBytes = monsterWriter.Finish().Length + ContractJson.Bytes(",\"" + MonsterContinuity.Owner + "\":").Length;
                     }
                     int timeBytes = requireTime ? TimeProvenance.LegacyMemberByteCount : 0;
+                    if (schemaVersion >= CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction) {
+                        var timeWriter = new ContractJsonWriter(limits.Serialized); timeProvenance.Write(timeWriter);
+                        timeBytes = timeWriter.Finish().Length + ContractJson.Bytes(",\"" + TimeProvenance.Owner + "\":").Length;
+                    }
                     if (ownerBytes > profile.MaximumOwnerBytes || bytes.Length - ownerBytes - monsterBytes - timeBytes > profile.MaximumBaseSaveBytes) return Failure();
                     var baseWriter = new ContractJsonWriter(profile.BaseBudget); baseWriter.Node(); baseWriter.Token("{");
                     for (int i = 0; i < root.Fields.Count; i++)

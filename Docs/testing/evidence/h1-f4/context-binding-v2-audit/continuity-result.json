@@ -1,0 +1,116 @@
+{
+  "source_sha": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "probe_sha256": "e37fe540751d29dfc4a97016313f8a02212b7f179ebf56d7b3be3a79f115aba9",
+  "source_files_sha256": {
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonContracts.cs": "716494065b3a00cff33ecd93ed0ff3e2ddc83a98911afbce405ae89cc70dd984",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonForeground.cs": "cbde3630f54e2f55c914b368db27e6205ab4ee4e55712e3f311ead2d0af8c416",
+    "Assets/_Project/Scripts/Gameplay/RunSimulation/ActiveFloorRunSnapshot.cs": "16b52c3b0c5539e8a54268803f41361e8b9f72a11776c28e4a8b7361888496d8",
+    "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatCheckpointCodec.cs": "5e3fd0858db9862879929d11e46a655a349330229e9c4ccc58eef1a7398e06cd",
+    "Assets/_Project/Scripts/Gameplay/RunSimulation/RunCheckpoint.cs": "fb602bf8685f1d430b348214f4d478ae8652ceabbae25a05f8afc3a3e63a193c",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonOutcomeConsequences.cs": "d97900424d138a310d22d68e18537707f8aebf947c65e85fcc8f6abcee7d3586",
+    "Assets/_Project/Scripts/Util/Models.cs": "84a92977f6940d8b0cc093f7d1a07d993042ecdead363652a6e79c546903869f",
+    "Assets/_Project/Data/Bootstrap/content_manifest.json": "757dc615bb2d9a418ba947536617aba629e5efcdbd5589d1ad771fedc79af4d3",
+    "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227"
+  },
+  "source_assertions": {
+    "scheduler_has_horizons_not_global_config": true,
+    "unpaid_tick_uses_live_tick_seconds": true,
+    "admitted_loot_owned_in_start": true,
+    "captured_loot_not_live_getter": true,
+    "captured_run_rules_not_live_getter": true,
+    "supported_reader_retains_format_one": true,
+    "party_heat_uses_snapshot_rules": true,
+    "legacy_combat_exclusion_still_present": true
+  },
+  "encoding_envelope": {
+    "approved_open_bytes": 590,
+    "proposed_open_bytes": 590,
+    "approved_closed_bytes": 110,
+    "proposed_closed_bytes": 201,
+    "value_nodes_each": 16,
+    "member_record_reserve_each": 16,
+    "limitation": "Maximum syntactic envelope includes semantically invalid combinations; no ContractJson execution, migration or valid-save boundary test."
+  },
+  "closed_context_continuity": {
+    "approved_closed_owner_has_identity": false,
+    "proposed_closed_owner_has_identity": true,
+    "scope": "Proposed representation check only, not a validated canonical save"
+  },
+  "schema_fifteen_source_asset_comparison": [
+    {
+      "path": "Assets/_Project/Data/Bootstrap/run_simulation_config.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "43da828acf523f2904f2a62f619e4d615d5cdc1f152fa7d654589536c570e95a",
+      "matches_current": false
+    },
+    {
+      "path": "Assets/_Project/Resources/passive_online_mana.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "6da00556c2027723d2fd12633c47d7fe5414f23c5ff7ca19960c522c331347b3",
+      "matches_current": false
+    },
+    {
+      "path": "Assets/_Project/Resources/structural_economy.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "a285ddafcb4f430472f691fb4c25225a132feadaa6bc13feb74d430df33d2803",
+      "matches_current": false
+    },
+    {
+      "path": "Assets/_Project/Resources/monster_recovery.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "5d82724b0673c3ef1a2053b47c9282489857b67e5f4767910c8a5d6b9157c892",
+      "matches_current": false
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227",
+      "matches_current": true
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b",
+      "matches_current": true
+    },
+    {
+      "path": "Assets/_Project/Resources/living_dungeon_foreground.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "7edc60a6c06d4ce29678b5818a348b8bfc3fb78aff3f6367744eaa3a06c957f6",
+      "matches_current": false
+    },
+    {
+      "path": "Assets/_Project/Resources/living_dungeon_foreground_v2.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "3840464778ff2756f73920a5e5f414c9a1947fd1cd4ad62f6b9cd4319ea60b94",
+      "matches_current": false
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600",
+      "matches_current": true
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "8248d3037e24bd50f5a2df1f64292e6fa4f857949e5f4fcb37091a478f55443a",
+      "matches_current": false
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/content_bootstrap.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "37301db2165eca85f2567a0cc55968714497e12b71068e92bf74fdc0f3a7f17d",
+      "matches_current": false
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/loot_config.json",
+      "source_sha": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+      "sha256": "7f9f77ff7bcaacbf78027db9e70a7f62f03469df4275d2903cb03332ab4a09dd",
+      "matches_current": false
+    }
+  ],
+  "all_twelve_assets_equal_at_selected_source": false,
+  "legacy_mapping_limitation": "Two source trees with matching inputs do not prove every historical save's provenance or authorize a migration mapping.",
+  "runtime_or_unity_tests_executed": false
+}

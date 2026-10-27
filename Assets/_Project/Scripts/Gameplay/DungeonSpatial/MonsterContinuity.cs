@@ -58,13 +58,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (config?.CombatC0?.Capture() == null) return EditorFallback() ?? throw new ArgumentException(Invalid);
             var asset = Resources.Load<TextAsset>("monster_recovery");
             if (asset == null) throw new ArgumentException(Invalid);
+            return CaptureBound(config, asset.bytes);
+        }
+        internal static MonsterRecoveryRules CaptureBound(RunSimulationConfig config, byte[] exactPolicy)
+        {
+            if (exactPolicy == null || config?.CombatC0?.Capture() == null) throw new ArgumentException(Invalid);
             var limits = new SpatialSerializedInputLimits(4096, 32, 16, 2048, 8);
             var issues = new SpatialIssueCollector(8);
-            if (!ContractJson.TryParse(asset.bytes, limits, issues, out var node, true) ||
+            if (!ContractJson.TryParse(exactPolicy, limits, issues, out var node, true) ||
                 !ContractJson.ValidateShape(node, new[] { "FormatVersion", "InitialLevel", "ReadinessNumerator", "ReadinessDenominator", "ManaPerHealth" }, issues) ||
                 node.Fields.Any(f => !ContractJson.Int(f.Value, out _))) throw new ArgumentException(Invalid);
-            return new MonsterRecoveryRules(config?.CombatC0?.Capture(), JsonUtility.FromJson<Policy>(asset.text));
+            return new MonsterRecoveryRules(config.CombatC0.Capture(), JsonUtility.FromJson<Policy>(System.Text.Encoding.UTF8.GetString(exactPolicy)));
         }
+        internal bool SameRules(MonsterRecoveryRules other) => other != null && InitialLevel == other.InitialLevel &&
+            ReadinessNumerator == other.ReadinessNumerator && ReadinessDenominator == other.ReadinessDenominator &&
+            ManaPerHealth == other.ManaPerHealth && health.Count == other.health.Count &&
+            health.All(pair => other.health.TryGetValue(pair.Key, out int maximum) && maximum == pair.Value);
         internal static MonsterRecoveryRules EditorFallback()
         {
 #if UNITY_EDITOR
