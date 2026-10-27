@@ -113,10 +113,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 if (i != 0) w.Token(","); var field = root.Fields[i]; w.String(field.Key); w.Token(":");
                 if (field.Key != "primary") DetachedCompleteSaveContract.WriteCanonicalNode(w, field.Value);
                 else {
-                    w.Node(); w.Token("{");
+                    w.Node(); w.Token("{"); bool historyWritten = false;
                     for (int j = 0; j < field.Value.Fields.Count; j++) {
-                        if (j != 0) w.Token(","); var p = field.Value.Fields[j]; w.String(p.Key); w.Token(":");
+                        if (j != 0) w.Token(","); var p = field.Value.Fields[j];
+                        if (!historyWritten && p.Key == "researchPending") {
+                            w.String("runHistory"); w.Token(":"); w.Token(UnityEngine.JsonUtility.ToJson(f.Runtime.runHistory)); w.Token(","); historyWritten = true;
+                        }
+                        w.String(p.Key); w.Token(":");
                         if (p.Key == LivingDungeonContracts.OwnerName) LivingDungeonContracts.Write(w, owner);
+                        else if (p.Key == "runHistory") { w.Token(UnityEngine.JsonUtility.ToJson(f.Runtime.runHistory)); historyWritten = true; }
                         else DetachedCompleteSaveContract.WriteCanonicalNode(w, p.Value);
                     }
                     w.Token("}");

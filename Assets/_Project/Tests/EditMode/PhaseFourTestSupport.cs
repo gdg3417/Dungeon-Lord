@@ -68,7 +68,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         var found = primary.Fields.Where(p => p.Key == name).Select(p => p.Value).SingleOrDefault();
                         if (found != null || name == "researchPending" || name == "researchProgress") Field(name, found);
                     }
-                    foreach (var p in primary.Fields.Where(p => !RawSavePayloadClassifier.RecognizedSaveDataMemberNames.Contains(p.Key))) Field(p.Key, p.Value);
+                    foreach (var p in primary.Fields.Take(primary.Fields.Count - 10).Where(p => !RawSavePayloadClassifier.RecognizedSaveDataMemberNames.Contains(p.Key))) Field(p.Key, p.Value);
+                    foreach (var p in primary.Fields.Skip(primary.Fields.Count - 10)) Field(p.Key, p.Value);
                     w.Token("}");
                 }
             }

@@ -1505,8 +1505,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     source.Limits, source.WholeLimits);
                 DetachedCompleteSaveValidationResult validation =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
+                Assert.That(validation.IsValid, Is.True, validation.Reason);
                 DetachedCanonicalSaveSessionResult opened =
                     DetachedCanonicalSaveSession.Open(candidate, context, profile);
+                Assert.That(opened.IsSuccess, Is.True, opened.Reason);
                 if (primaryUnknown != null && primaryUnknown.Contains("mvpDungeonPlacements"))
                 {
                     var empty = new DetachedCanonicalSpatialSaveState
