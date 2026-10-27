@@ -114,10 +114,12 @@ inputs to one fixed test clock, configures recovery before loading, binds the
 loaded horizon once and attaches each published save to that owner.
 The new metadata integration case verifies a successful save retains context and W.
 
-The full 21 cases remain unqualified. Their test-specific Research project/rate
-scaffolds must also be represented in the exact authored bundle, rather than
-silently replacing production rules after binding. Original/progress/claim and
-fault/reopen behavior still require actual reruns and exact-once assertions.
+Review 1 now qualifies all 21 cases within the passing 268-case cohort at b9e455a4.
+Their test-specific Research project/rate scaffolds are represented in the exact
+authored bundle before the synthetic owner exists; supported production budgets
+and a valid prior-run allocator are used. Start/progress/claim, fault/reopen and
+exact-once assertions pass. See the source-pinned review-1 report; no new full-suite
+failure total is inferred from these affected cases.
 
 ### P1: four null references
 

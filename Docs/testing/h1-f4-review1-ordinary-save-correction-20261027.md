@@ -89,6 +89,46 @@ No process was terminated or uncertain reservation released in this milestone.
 
 ## Remaining blockers and next checkpoint
 
+### Research and additional authority milestone
+
+Runtime/test source `b9e455a430095326b02a704036296d5a54b52549` passed
+**268/268, 0 failed, 0 skipped** in campaign
+`7608b6e14bce46c5a2a8121cecd2fc20`, all stages PASSED. This contains 111 recovery,
+77 structural-preview, 59 canonical-write and all 21 durable Research cases.
+Fourteen preparation-tool tests passed. The
+[Research/authority qualification report](h1-f4-review1-research-authority-20261027.json)
+records the intermediate failures, complete process/stage evidence, input hashes
+and final passing result. It maps all 21 original Research failures to passing cases.
+
+The Research fixes are fixture-only: author the existing test project/scaffold
+rules into exact full input bytes before constructing a synthetic current owner;
+retain CombatC0 explicitly when authoring the test configuration; use supported
+production budgets; preserve run-1's allocator at NextRunSequence=2; assert schema
+17 for this current-writer test. No historical serializer or asset changed.
+Research01 remains FAILED at 243/264 (21 generic-budget setup failures), and
+research02 remains FAILED at 263/264 (one obsolete current-schema assertion).
+
+The targeted source `a878d6a03c0630b45266ac075aa7f414afeda454` then reproduced
+three actual runtime failures: 264/267 passed. TimeService dereferenced the absent
+scheduler of a valid dormant owner during ordinary acknowledgement; proven retry
+threw and committed-candidate/lost-ack proof could not complete. A focus callback
+during ordinary metadata publication could also attempt another writer and fault
+the root. All failed inputs were unchanged and restoration/preservation verified.
+
+Correction: only a dormant zero prefix can be acknowledged without a scheduler;
+any nonzero captured work still requires actual foreground closure. W stays at S,
+not Q. SaveService now exposes a read-only pending view of existing ForegroundWriting
+and pendingCandidate, and uses it at preparation/foreground entry points. GameRoot
+holds direct flush/frame entry while publication is pending. No second authority
+or new persisted field is added. Focus and disable observations still enter the
+one TimeService at their observation time; nested publication is denied.
+The 268-case pass verifies both dormant dispositions, zero-write committed-candidate
+proof, Q reanchoring without stalled credit, and focus/disable during ordinary IO.
+
+Preserve the four Research/authority campaigns named in the JSON and preparations
+TestResults/h1-f4-20261027-research01, -research02, -dormantrepro01 and -dormantfix01,
+including all archives and distinct post-failure preflight/restoration/final reports.
+
 Subsequent fixture-only milestone `9319d4bce5ca3a57603cb5bbc194a3b59c653f30`
 passed **243/243, 0 failed, 0 skipped** in campaign
 `0c26db5fd0ad4bc89ca46241a095ce77`, all stages PASSED. The explicit cohort is
@@ -106,8 +146,9 @@ TestResults/h1-f4-20261027-sharedfixtures01 preparation/input archive and receip
 
 The last full EditMode report remains **1966 passed, 805 failed, 1 skipped** at
 16955152, campaign INCOMPLETE/UNCERTAIN. No broad rerun or reduced full failure count
-is claimed. Next: complete remaining consumed-configuration fixture factories,
-Research durability, lifecycle/clock identity, the fourth null reference,
+is claimed. Across the two affected cohorts, 108 previously failing test positions
+now pass; no new full-suite total is inferred. Next: complete remaining
+consumed-configuration fixture factories, lifecycle/clock identity, the fourth null reference,
 historical/current schema assertions and remaining individual failures. Strict
 production validation and frozen history are unchanged.
 

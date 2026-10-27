@@ -14,6 +14,9 @@ The last full EditMode 805-failure report remains unresolved.
 The subsequent fixture-only source 9319d4bc passed the explicit 243-case recovery,
 structural-preview and canonical-write cohort, including 87 previously failing
 cases. This is still not a full-suite pass.
+The latest authority/Research source b9e455a4 passed 268/268, with all 21 Research
+cases and additional dormant/reentrant ordinary-publication coverage. See the
+review-1 report for the reproduced runtime defects and preserved intermediate failures.
 
 ## Current implementation
 
