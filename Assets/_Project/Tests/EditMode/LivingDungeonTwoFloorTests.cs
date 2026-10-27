@@ -662,7 +662,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(supervisor?.FullName, Is.EqualTo(Path.GetFullPath(Path.Combine(Application.dataPath,
                 "../TestResults/qualification-supervisor"))).IgnoreCase);
             Assert.That(Guid.TryParseExact(campaign?.Name, "N", out _), Is.True);
-            Assert.That(stage?.Name, Is.AnyOf("living-regressions", "full-edit", "full-play"));
+            Assert.That(stage?.Name, Is.EqualTo("living-regressions").Or.EqualTo("full-edit").Or.EqualTo("full-play"));
             foreach (var directoryInfo in new[] { supervisor, campaign, stage, output }) {
                 Assert.That(directoryInfo.Exists, Is.True);
                 Assert.That((directoryInfo.Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
