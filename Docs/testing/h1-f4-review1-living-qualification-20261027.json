@@ -1,0 +1,651 @@
+{
+  "actual_counts": {
+    "failed": 46,
+    "inconclusive": 0,
+    "passed": 310,
+    "skipped": 0,
+    "total": 356
+  },
+  "artifacts": {
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d8bd16dcfa604edfb082e525ccf91038",
+    "fixture_inputs": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d8bd16dcfa604edfb082e525ccf91038\\living-regressions\\fixture-inputs",
+    "owner": "H1-F4",
+    "preparation": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-living02",
+    "purpose": "Failed source-pinned affected regression, exact failure and preservation evidence; no cleanup authorized",
+    "retention": "preserve"
+  },
+  "base_sha": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d8bd16dcfa604edfb082e525ccf91038",
+  "campaign_file_hashes": {
+    "campaign.json": "73ba4d0ae89ebe507e93a82913b0c967f16f0f8df454c76240c85b553bcc4719",
+    "launch.claim": "e3c8497c63909d7260cf93c211ce4f2086061111254af0c10b5020a56c1f6e75",
+    "launch.json": "b3f84952b01051342eac41cc0539448b1dc142fef1ba736001976fc11317fcd5",
+    "launch.log": "3acc31a79a27e5a053ca84afc4be85759f1e5475af85cf7566e2ef0da7c48060",
+    "living-regressions-preflight\\child.json": "3f2a0bcf9632d10b3f79c149f02c4b63e8291c4dec28980d97de4294d3d5faa8",
+    "living-regressions-preflight\\exit.json": "5985fea73381a5c5a8b7a4f7bc6c59557a8ec5b6e595432bfd6c284420f4bada",
+    "living-regressions-preflight\\preservation.json": "0a08ff14728f504e6a7690f100753b98a39426e3f0d72d128b4f1bfb886e6b69",
+    "living-regressions-preflight\\result.json": "bd8f305aab2a2b8fc4aa350566434692a12e2097962b99264602512403674875",
+    "living-regressions-preflight\\started.json": "5c25f6c8389d6cfd8570b3e0f446db91f80e2dcc6fe17017c4c7f432879bf825",
+    "living-regressions-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "living-regressions\\child.json": "084741a893bc89e51de83af2db1e6b6f5f5e43a032e5eca8cacc635ead9607a3",
+    "living-regressions\\cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+    "living-regressions\\exit.json": "7b720bac74654acb7411fbbafda2c311caa80f674aff1a34b8ae0e10df92ee3f",
+    "living-regressions\\fixture-inputs\\two-floor\\owner-inactive-9e42de08bdc145bb902ff48a8d2188fb.manifest.json": "f8aa6ecff13073b2fc84400c110ddd93ff58f2f2766c06c286ae6b38939a935e",
+    "living-regressions\\fixture-inputs\\two-floor\\owner-inactive-9e42de08bdc145bb902ff48a8d2188fb.save.json": "e922fa2c908a3bce8a6143b850c23158758dcac74fa119fec1c52a58e2c9b55a",
+    "living-regressions\\fixture-inputs\\two-floor\\two-floor-bc46597d3b454ea699be1ce7f0d844af.manifest.json": "4f5bee8662f0239498e3c1fbb2fb7f36f903a853d5ee969180d12235b2c5ce63",
+    "living-regressions\\fixture-inputs\\two-floor\\two-floor-bc46597d3b454ea699be1ce7f0d844af.save.json": "6b875e48bad6cc50a97c47309c905fb04c0160b824e7994501289957cef95931",
+    "living-regressions\\fixture-inputs\\two-floor\\v1-63f8a054c0964dbd9fa6451d56261b1c.manifest.json": "f9e48cf443877d0936964edc43b2289d381c0d39441d855edf0df5b70f1c865b",
+    "living-regressions\\fixture-inputs\\two-floor\\v1-63f8a054c0964dbd9fa6451d56261b1c.save.json": "fc757636efe80fa073ad50645cdaf4534b48a0ee94492dd580b0b7d47dd3086b",
+    "living-regressions\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+    "living-regressions\\invocation.json": "ff7d4d6a54166534431bf95488ea6fbc93126a270ddb6a3e572d48f0411d87df",
+    "living-regressions\\result.json": "f4657f4f51874d1b5678886767538c4be73ca6f0ab82980b5dc202cb98e925b0",
+    "living-regressions\\results.xml": "46029e89d7690eea88e15cd8ac1936ab972d40bafff0da1b12167fe1143ecf80",
+    "living-regressions\\started.json": "d4c9cf7c6a54feb9953dfd3366ff3c80a48c3593821382c266a4a2a4837fd373",
+    "living-regressions\\stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+    "living-regressions\\unity.log": "0d5fe96e5faf3cec966f33c2df95f40a37332be2748eebeea82abde0a1b6ff34"
+  },
+  "cohorts": {
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial": {
+      "Passed": 77
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites": {
+      "Passed": 59
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2": {
+      "Failed": 27,
+      "Passed": 24
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor": {
+      "Failed": 19,
+      "Passed": 18
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability": {
+      "Passed": 18
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchSaveIntegration": {
+      "Passed": 3
+    },
+    "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract": {
+      "Passed": 111
+    }
+  },
+  "failure_message_groups": {
+    "Expected string length 32 but was 31. Strings differ at index 0.": 1,
+    "Expected: 2000": 1,
+    "System.ArgumentException : living.profile.invalid": 1,
+    "System.InvalidOperationException : living.foreground.clock_invalid": 2,
+    "gd66.transaction.candidate_invalid": 1,
+    "living.foreground.invalid_state": 38,
+    "time.recovery.context_mismatch": 2
+  },
+  "failures": [
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.AcceptedButUnclosedHorizonReopensWithoutDroppingTimeOrDuplicatingHistory",
+      "message": "  time.recovery.context_mismatch\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.AcceptedButUnclosedHorizonReopensWithoutDroppingTimeOrDuplicatingHistory () [0x00030] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:187\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ActualActiveRunAllowsSameFloorDraftCommitAndUsesSnapshotUntilSettlement",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.ActualActiveRunAllowsSameFloorDraftCommitAndUsesSnapshotUntilSettlement () [0x0000d] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:598\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ActualAdmissionRetainsAnUnfinishedTimedC2PrefixThenSettlesAndRetiresExactlyOnce",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.ActualAdmissionRetainsAnUnfinishedTimedC2PrefixThenSettlesAndRetiresExactlyOnce () [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:459\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ActualTerminalReconcilesCustodyOrRedeploymentAndRecoversOnlyAssignedVacantIdentity(False)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.ActualTerminalReconcilesCustodyOrRedeploymentAndRecoversOnlyAssignedVacantIdentity (System.Boolean redeploy) [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:529\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ActualTerminalReconcilesCustodyOrRedeploymentAndRecoversOnlyAssignedVacantIdentity(True)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.ActualTerminalReconcilesCustodyOrRedeploymentAndRecoversOnlyAssignedVacantIdentity (System.Boolean redeploy) [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:529\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.AutomaticSettlementRetainsSessionReplayWithoutChangingHistoricalSaveContract",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.AutomaticSettlementRetainsSessionReplayWithoutChangingHistoricalSaveContract () [0x0000d] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:154\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.CurrentRecoveryBeforeSettlementIsChargedOnceAndDamageIsThenAppliedToRecoveredIdentity",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.CurrentRecoveryBeforeSettlementIsChargedOnceAndDamageIsThenAppliedToRecoveredIdentity () [0x00018] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:224\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.DeferredPrePauseSampleDoesNotConsumeLaterOfflineInterval",
+      "message": "  time.recovery.context_mismatch\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.DeferredPrePauseSampleDoesNotConsumeLaterOfflineInterval () [0x00059] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:393\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.DirtyClosedActionBarrierRetainsSessionAndDisabledPauseDoesNotPublish",
+      "message": "System.InvalidOperationException : living.foreground.clock_invalid",
+      "stack": "  at DungeonBuilder.M0.TimeService.ReadRecoverySample (DungeonBuilder.M0.UnixTimePoint minimum) [0x000be] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Services\\TimeService.Recovery.cs:105 \n  at DungeonBuilder.M0.TimeService.RecoveryLifecycleObservation (System.Boolean nextFocused, System.Boolean nextPaused) [0x000a6] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Services\\TimeService.Recovery.cs:163 \n  at DungeonBuilder.M0.TimeService.OnPause () [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Services\\TimeService.cs:58 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.DirtyClosedActionBarrierRetainsSessionAndDisabledPauseDoesNotPublish () [0x001db] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:380 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Flush,1)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce (DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests+OperationType op, System.Int32 occurrence) [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:200\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Replace,1)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce (DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests+OperationType op, System.Int32 occurrence) [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:200\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Write,2)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce (DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests+OperationType op, System.Int32 occurrence) [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:200\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FirstOpportunityAndAllOutcomesAreIndependentOfForegroundPartitionAndReopen",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.FirstOpportunityAndAllOutcomesAreIndependentOfForegroundPartitionAndReopen () [0x0000e] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:483\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FreshNativeSessionBindsProductionProfilesBeforeDormantActivation",
+      "message": "System.InvalidOperationException : living.foreground.clock_invalid",
+      "stack": "  at DungeonBuilder.M0.TimeService.ReadRecoverySample (DungeonBuilder.M0.UnixTimePoint minimum) [0x000be] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Services\\TimeService.Recovery.cs:105 \n  at DungeonBuilder.M0.TimeService.BeginNativePublication () [0x00033] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Services\\TimeService.Recovery.cs:85 \n  at DungeonBuilder.M0.SaveService.LoadOrCreate (System.String contentVersion, System.String& banner) [0x000f7] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Services\\SaveService.cs:298 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Service (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, DungeonBuilder.M0.ITimeSource utc) [0x00181] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:287 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.FreshNativeSessionBindsProductionProfilesBeforeDormantActivation () [0x0001c] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:297 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.IndependentlyInjectedHistoricalLimitsDoNotAcquireProductionScheduling",
+      "message": "System.ArgumentException : living.profile.invalid",
+      "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.LivingDungeonProfile..ctor (System.String id, System.Int32 active, System.Int32 retained, System.Int32 checkpointBytes, System.Int64 partyReplay, System.Int64 totalReplay, System.Int32 baseSaveBytes, System.Int32 ownerBytes, DungeonBuilder.M0.Gameplay.RunSimulation.RunLogicalTiming qualificationTiming, System.String qualificationPostureId, DungeonBuilder.M0.Gameplay.DungeonSpatial.SpatialSerializedInputLimits baseBudget, System.Int64 maximumCombatWork) [0x000d9] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\LivingDungeonContracts.cs:41 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.LivingDungeonForegroundConfig.CreateProfile (DungeonBuilder.M0.Gameplay.DungeonSpatial.SpatialSerializedInputLimits baseBudget) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\LivingDungeonForegroundConfig.cs:82 \n  at DungeonBuilder.M0.SaveService.ConfigureRecovery (DungeonBuilder.M0.Gameplay.DungeonSpatial.RecoveryRuntimeInputs inputs, DungeonBuilder.M0.TimeService observationOwner, DungeonBuilder.M0.Gameplay.DungeonSpatial.IHistoricalRecoveryEvidence historicalEvidence) [0x00041] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Services\\SaveService.Recovery.cs:154 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Service (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, DungeonBuilder.M0.ITimeSource utc) [0x00178] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:286 \n  at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.IndependentlyInjectedHistoricalLimitsDoNotAcquireProductionScheduling () [0x0005b] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:310 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ManualC2CanFinishBeforeAnOlderAutomaticReservationWithoutDiscardingEitherResult",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.ManualC2CanFinishBeforeAnOlderAutomaticReservationWithoutDiscardingEitherResult () [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:615\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.MoveToAnotherFloorPreservesIdentityAndOrdersCurrentVacantRecoveryBeforeHistoricalDamage(False)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.MoveToAnotherFloorPreservesIdentityAndOrdersCurrentVacantRecoveryBeforeHistoricalDamage (System.Boolean activateTarget) [0x00063] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:552\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.MoveToAnotherFloorPreservesIdentityAndOrdersCurrentVacantRecoveryBeforeHistoricalDamage(True)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.MoveToAnotherFloorPreservesIdentityAndOrdersCurrentVacantRecoveryBeforeHistoricalDamage (System.Boolean activateTarget) [0x00063] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:552\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.PresentationObserverCannotChangeCheckpointBytesWorkReceiptsOrOutcome",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.PresentationObserverCannotChangeCheckpointBytesWorkReceiptsOrOutcome () [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:122\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.QualificationCannotConfigureProductionProfileAndTwoValidActivePrefixesCannotBypassCapacity",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.QualificationCannotConfigureProductionProfileAndTwoValidActivePrefixesCannotBypassCapacity () [0x00070] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:336\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.QualifiedProductionLifetimeMeasuresCheckpointReplayAndBoundaryWork",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.QualifiedProductionLifetimeMeasuresCheckpointReplayAndBoundaryWork () [0x0000d] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:435\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.RecoveryConditionChangesAreStagedBeforeAdmissionWhenDoubleWalletDebitRoundsAway",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.RecoveryConditionChangesAreStagedBeforeAdmissionWhenDoubleWalletDebitRoundsAway () [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:21\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ReinspectionAndPausedHorizonDrainRetainOfflineBoundary",
+      "message": "  Expected: 2000\n  But was:  9000\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.ReinspectionAndPausedHorizonDrainRetainOfflineBoundary () [0x000c0] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:355\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ServiceLatchesRecoveryRequiredAndBlocksAllLaterForegroundPublication",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.ServiceLatchesRecoveryRequiredAndBlocksAllLaterForegroundPublication () [0x0000d] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:409\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.TerminalSettlementPreservesTheCurrentSavedBoundary",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.TerminalSettlementPreservesTheCurrentSavedBoundary () [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:171\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.UnprovenRollbackRequiresRecoveryAndDoesNotPublishTerminalEffects",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Admitted (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:110\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.UnprovenRollbackRequiresRecoveryAndDoesNotPublishTerminalEffects () [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:211\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.UnsupportedCombatWorkConsumesOpportunityWithoutRunAllocationOrGameplayDamage",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 target) [0x00004] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:103\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonB3B2Tests.UnsupportedCombatWorkConsumesOpportunityWithoutRunAllocationOrGameplayDamage () [0x00024] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonB3B2Tests.cs:319\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.AutomaticProductionPartyCanChooseASurvivingFloorOneExitWithTwoCapturedFloors",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.AutomaticProductionPartyCanChooseASurvivingFloorOneExitWithTwoCapturedFloors () [0x00070] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:586\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.AutomaticTwoFloorAdmissionCompletesAndRetiresExactlyOnce",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.AutomaticTwoFloorAdmissionCompletesAndRetiresExactlyOnce () [0x00007] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:205\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.CurrentDeactivationDoesNotFabricateVacancyOrRewriteCapturedRoute",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.CurrentDeactivationDoesNotFabricateVacancyOrRewriteCapturedRoute () [0x000f6] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:330\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EmptyUnclosedV1DrainConsumesDueOpportunityWithoutReplacementAndRetainsTheFutureIdentity",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.EmptyUnclosedV1DrainConsumesDueOpportunityWithoutReplacementAndRetainsTheFutureIdentity () [0x001dd] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:552\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EqualTimeOrdinaryTransferAndBlockedReleaseRespectSequenceAndRecoveryPhases(True)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.EqualTimeOrdinaryTransferAndBlockedReleaseRespectSequenceAndRecoveryPhases (System.Boolean terminalFirst) [0x00282] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:477\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EqualTimeOrdinaryTransferAndBlockedReleaseRespectSequenceAndRecoveryPhases(False)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.EqualTimeOrdinaryTransferAndBlockedReleaseRespectSequenceAndRecoveryPhases (System.Boolean terminalFirst) [0x00282] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:477\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Write,2)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce (DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests+OperationType operation, System.Int32 occurrence) [0x00127] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:348\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Replace,1)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce (DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests+OperationType operation, System.Int32 occurrence) [0x00127] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:348\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Flush,1)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce (DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests+OperationType operation, System.Int32 occurrence) [0x00127] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:348\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalV1DrainsOnceAndUpgradesWithoutEligibility(False)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.HistoricalV1DrainsOnceAndUpgradesWithoutEligibility (System.Boolean removeLoot) [0x0016a] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:281\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalV1DrainsOnceAndUpgradesWithoutEligibility(True)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.HistoricalV1DrainsOnceAndUpgradesWithoutEligibility (System.Boolean removeLoot) [0x0016a] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:281\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OneBoundaryPumpsAndReopenMatchTheSameAcceptedTwoPartyHorizon",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.OneBoundaryPumpsAndReopenMatchTheSameAcceptedTwoPartyHorizon () [0x000a0] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:523\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements(False)",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements (System.Boolean partial) [0x0010c] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:392\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements(True)",
+      "message": "  gd66.transaction.candidate_invalid\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Fund (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Double wallet) [0x00059] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:415\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements (System.Boolean partial) [0x000c5] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:390\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.ReopenOneUnitBeforeVacancyAndImmediatelyAfterReleasePreservesExactPrefixes",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.ReopenOneUnitBeforeVacancyAndImmediatelyAfterReleasePreservesExactPrefixes () [0x0004b] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:370\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.UnprovenWaitingReleaseRollbackRequiresRecoveryWithoutPublishingEitherParty",
+      "message": "  Expected string length 32 but was 31. Strings differ at index 0.\n  Expected: \"gd66.transaction.recovery_failed\"\n  But was:  \"living.foreground.invalid_state\"\n  -----------^\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.UnprovenWaitingReleaseRollbackRequiresRecoveryWithoutPublishingEitherParty () [0x00112] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:509\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.WaitingProtectsBothFloorsFromRecoveryAndThrottlesAdmissionAfterReopen",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.WaitingProtectsBothFloorsFromRecoveryAndThrottlesAdmissionAfterReopen () [0x000ed] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:317\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.WaitingReleaseIsEquivalentAcrossForegroundPartitionsAndReopen",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.WaitingReleaseIsEquivalentAcrossForegroundPartitionsAndReopen () [0x00059] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:358\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.WaitingReopensAndRealRetirementReleasesItWithAuthenticatedCause",
+      "message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.Through (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f, System.Int64 time) [0x00065] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:145\nat DungeonBuilder.M0.Tests.EditMode.LivingDungeonTwoFloorTests.WaitingReopensAndRealRetirementReleasesItWithAuthenticatedCause () [0x000a0] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonTwoFloorTests.cs:246\n"
+    }
+  ],
+  "isolation": {
+    "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 living02",
+    "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+    "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 living02\\save_primary.json"
+  },
+  "no_new_full_suite_total_inferred": true,
+  "nunit_fix": "Replace unsupported Is.AnyOf with supported Is.EqualTo(...).Or.EqualTo(...) only",
+  "nunit_root": {
+    "asserts": "0",
+    "clr-version": "4.0.30319.42000",
+    "duration": "62.4207763",
+    "end-time": "2026-10-27 23:37:13Z",
+    "engine-version": "3.5.0.0",
+    "failed": "46",
+    "id": "2",
+    "inconclusive": "0",
+    "passed": "310",
+    "result": "Failed(Child)",
+    "skipped": "0",
+    "start-time": "2026-10-27 23:36:10Z",
+    "testcasecount": "356",
+    "total": "356"
+  },
+  "old_failed_now_passed": [
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.ApprovedBasicRoomPreview_IsDeterministicAndProducesCanonicalR2",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.CapacityExceeded_IncludesFixedStructuresUsingTestOnlyCapacity",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.ConstructionExcludesOnlyRetiringRequiredEdge_NotUnrelatedProductionCorridor",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.CorridorRequiresBothEndpointSocketTypesInDefinition",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.CorridorTileAloneCanExceedTestOnlyCapacity",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.CurrentProjection_UsesApprovedProductionRoomDefinitionCapacity(\"spatial.room.basic\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.CurrentProjection_UsesApprovedProductionRoomDefinitionCapacity(\"spatial.room.large_chamber\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.CurrentProjection_UsesApprovedProductionRoomDefinitionCapacity(\"spatial.room.rectangle\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.DeletionPreview_IsStaleAfterContentOrStructuralMutation",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_ApprovedLootReturnsAlongsideMonsterWithoutChangingSource(\"placement.option.loot_node.basic\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_ApprovedLootReturnsAlongsideMonsterWithoutChangingSource(\"placement.option.loot_node.glittering_hoard\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_ApprovedLootReturnsAlongsideMonsterWithoutChangingSource(\"placement.option.loot_node.hidden_cache\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_CorridorSocketAuthorityFailureLeavesSourceUnchanged",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_LastRoomAndNonLeafTargetsFailWithoutMutation",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_MigratedExplicitRoomIsBuildableButImplicitContainerIsRejected",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_MissingAndDuplicateLifecycleFailClosedWithoutThrowing",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_PhysicalCorridorInverseTailPreservesExactAuthoredRelationship",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_ReportsEveryUnresolvedAssignmentInCanonicalOrder",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_ReturnsMonsterAndTrapWithStableIdentityAndRoundTrips",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_TestOwnedDestructivePolicyProducesRemovedNotReturnedConsequence",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_ValidTwoRoomTailPreservesCompletionAndRetiresIdentitiesDeterministically",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Deletion_ZeroAndMultipleDerivedRelationshipsFailWithoutMutation",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.DerivedIncomingCorridorCannotOverlapExistingPhysicalCorridor",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.ExistingPhysicalCorridorOverlap_HasStableReason",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.InvalidNativePlacement_HasStableReasonAndDoesNotMutateSource(\"spatial.room.basic\",Ninety,0,6,\"north\",\"structural.edit.orientation_invalid\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.InvalidNativePlacement_HasStableReasonAndDoesNotMutateSource(\"spatial.room.basic\",Zero,-1,6,\"north\",\"structural.edit.out_of_bounds\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.InvalidNativePlacement_HasStableReasonAndDoesNotMutateSource(\"spatial.room.basic\",Zero,0,2,\"north\",\"structural.edit.room_overlap\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.InvalidNativePlacement_HasStableReasonAndDoesNotMutateSource(\"spatial.room.basic\",Zero,0,6,\"missing\",\"structural.edit.connection_point_invalid\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.InvalidNativePlacement_HasStableReasonAndDoesNotMutateSource(\"spatial.room.basic\",Zero,5,6,\"north\",\"structural.edit.connection_unavailable\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.InvalidNativePlacement_HasStableReasonAndDoesNotMutateSource(\"spatial.room.rectangle\",Zero,4,1,\"south\",\"structural.edit.terminal_placement_invalid\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.InvalidNativePlacement_HasStableReasonAndDoesNotMutateSource(\"spatial.room.rectangle\",Zero,4,1,\"west\",\"structural.edit.terminal_placement_invalid\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.InvalidNativePlacement_HasStableReasonAndDoesNotMutateSource(\"unknown\",Zero,0,6,\"north\",\"structural.edit.room_definition_invalid\")",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.InvalidPlacement_DoesNotExposeCandidate",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_AboveMaximumCorridorLengthUsesInBoundsTestOwnedFloorGeometry",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_BoundaryConnectionConvertsDirectAndCorridorWithoutChangingEdgeIdentity",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_ContentConsequencesIncludeOnlyMovedGroupAndLeaveUpstreamAssignmentUnchanged",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_DuplicateConnectionPairIsAmbiguous",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_FixedAndPhysicalCorridorOverlapsFailWithoutMutation",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_FloorCapacityFailureUsesIsolatedTestOwnedSnapshot",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_InvalidBoundsOverlapAndCapacityNeverMutateSource",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_MultipleApprovedCorridorDefinitionsAreInvalid",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_PreservesStableIdentitiesAndRejectsStalePreview",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_RepeatedPreviewIsByteAndConsequenceDeterministic",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_UnsupportedCorridorSocketIsConnectionUnavailable",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_UpstreamTargetListsTargetAndTranslatedDownstreamContentsInOrdinalOrder",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_UsesProductionCorridorLengthBoundaries(5,2,1)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Movement_UsesProductionCorridorLengthBoundaries(8,2,4)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.NativeRoomAppend_UsesProductionGeometry(\"spatial.room.large_chamber\",Ninety,4,1,\"west\",True)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.NativeRoomAppend_UsesProductionGeometry(\"spatial.room.large_chamber\",Zero,4,1,\"north\",True)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.NativeRoomAppend_UsesProductionGeometry(\"spatial.room.rectangle\",Ninety,4,2,\"west\",True)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.NativeRoomAppend_UsesProductionGeometry(\"spatial.room.rectangle\",Zero,4,1,\"north\",True)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Preview_DerivedIdentityCollisionFailsBeforeCandidatePublication",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.RenovationMutationsRoundTripCanonicalStateWithoutSchemaOrLegacyMutation",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.ReplacementPreviewBecomesStaleAfterInterveningTrapPlacement",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.ReplacementRejectsRetainedContentWhoseRoomLocalPositionWouldBecomeInvalid",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_CapacityFailureDoesNotMutateSource",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_ContentConsequencesAreTargetScopedAndCandidateRetainsUnrelatedAssignment",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_GenuinelyAmbiguousSavedRelationshipOrMappingRejects(False)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_GenuinelyAmbiguousSavedRelationshipOrMappingRejects(True)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_MissingConnectionPointFailsWithoutMutation",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_OrientationFailureUsesIsolatedTestOwnedSnapshot",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_PreservesEveryIdentityAndIsDeterministic",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_PreservesRoomNodeAndAssignments",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_ProductionSavedOutgoingRelationshipTranslatesDescendants(4,55)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_ProductionSavedOutgoingRelationshipTranslatesDescendants(5,56)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.Replacement_SameDefinitionIsRejectedWithoutCandidateOrSourceMutation",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.RoomNotAllowed_UsesTestOnlyCatalogAndStableReason",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.RotatedConnectionGeometry_DerivesExpectedTerminal(\"spatial.room.basic\",Zero,4,2,\"east\",8,2,42,18)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.RotatedConnectionGeometry_DerivesExpectedTerminal(\"spatial.room.large_chamber\",Ninety,4,1,\"west\",6,6,56,4)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.RotatedConnectionGeometry_DerivesExpectedTerminal(\"spatial.room.rectangle\",Ninety,4,2,\"west\",6,5,41,19)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.SocketIncompatible_UsesTestOnlySocketMatrix",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.StraightStoneCorridor_AboveMaximumHasLengthReason",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.StraightStoneCorridor_MaximumLengthUsesProductionLimit",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.StraightStoneCorridor_OneTileAppendIsDeterministic(0,7,\"east\",1,6)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.StraightStoneCorridor_OneTileAppendIsDeterministic(5,2,\"east\",4,3)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial.WorkloadExceeded_FailsBeforeRoomMaterialization",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.LiveCanonicalTargetUsesSelectedRoomAuthorityNotEconomicSlot(0)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.LiveCanonicalTargetUsesSelectedRoomAuthorityNotEconomicSlot(1)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.R2ContentMutationTargetsStableRoomIdentity(0)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.R2ContentMutationTargetsStableRoomIdentity(1)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.R2ReplacementCapacityIgnoresOtherRoomAssignments",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RecognizedStateOnlySaveKeepsCanonicalAndUnknownEvidence",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RecognizedStateSavePersistsExplicitNullableClearsAndReopensThemAsNull",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RollbackDeleteFailureAfterCandidateProofReturnsCandidateSuccessAndNextSaveSettlesEvidence",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.StructuralDeletionReturnedCustodySurvivesCompleteSaveReopen",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.SuccessfulWritePersistsExactCompleteBytesThenPublishesRuntime",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.CapturedDefeatAppliesNetDamageToCurrentConditionWithoutHistoricalOverwrite(\"injured\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.CapturedDefeatAppliesNetDamageToCurrentConditionWithoutHistoricalOverwrite(\"recovered\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.CapturedDefeatAppliesNetDamageToCurrentConditionWithoutHistoricalOverwrite(\"revival\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.CapturedDefeatAppliesNetDamageToCurrentConditionWithoutHistoricalOverwrite(\"unchanged\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ContradictoryTerminalReceiptsOrMonsterSetRejectWithoutCanonicalPublication(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ContradictoryTerminalReceiptsOrMonsterSetRejectWithoutCanonicalPublication(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.RetiredCapturedIdentityIsNeverRecreatedAndReplacementIsUntouched",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.UnassignedAndRedeployedIdentitiesKeepDamageWithoutDuplicatingOwnership(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.UnassignedAndRedeployedIdentitiesKeepDamageWithoutDuplicatingOwnership(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.BlockReleaseAndTransferReplayRetainSourceUntilCompletionWithoutCombatWork",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.CompletedForgedReleaseCannotRetireItsBlockerOrBypassVacancyPermit",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.CorruptFormatThreeReturnsFailureWithoutThrowingOrPublishing",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EmptyProjectionAndStaleLineageCannotAuthorizeRelease",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.InspectionReusePreservesOriginalFoldAndCheckpointAtEveryPrefix(False,False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.InspectionReusePreservesOriginalFoldAndCheckpointAtEveryPrefix(True,False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.InspectionReusePreservesOriginalFoldAndCheckpointAtEveryPrefix(True,True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.LifetimeAssuranceUsesAuthenticExitOrDescentAndFitsAllPrefixes(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.LifetimeAssuranceUsesAuthenticExitOrDescentAndFitsAllPrefixes(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.SelfConsistentReleaseWithoutVacancyCannotPublishThroughSession",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.SynchronousWaitingHelpersFailWithoutConsumingOrPoisoningThePrefix",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.TerminalPrefixOnlyFitsAnUnclosedV2Boundary(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.TerminalPrefixOnlyFitsAnUnclosedV2Boundary(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.CandidatePreparationFailureAndRejectedActions_DoNotWriteOrPublish",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.DetachedProgression_RemainsCallbackFreeAndDoesNotWritePerTick",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ForegroundFailureBlocksResearchBeforeStaging",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ForegroundPreparationReplacesStateBeforeValidationAndStaging",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.PostReplacementReadbackFailure_RestoresCompletePredecessor(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.PostReplacementReadbackFailure_RestoresCompletePredecessor(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(False,Flush,1)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(False,Replace,1)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(False,Write,1)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(False,Write,2)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(True,Flush,1)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(True,Replace,1)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(True,Write,2)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.SemanticallyInvalidCandidate_IsRejectedBeforeAnyWrite",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.StartProgressClaimReopen_PublishesOnlyDurableStateAndAtomicObjectiveUnlock",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.UncertainRollback_LatchesAuthorityAndRequiresReopenWithoutAutomaticRetry(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.UncertainRollback_LatchesAuthorityAndRequiresReopenWithoutAutomaticRetry(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.UnconfiguredLegacyService_RejectsResearchWithoutChangingLegacySaveCompatibility",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchSaveIntegration.EmptyResearchSerializationShells_NormalizeToNull",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchSaveIntegration.PartiallyPopulatedAndMismatchedResearchState_IsPreserved",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchSaveIntegration.StartPartialReadyAndClaim_RoundTripThroughActualSaveService"
+  ],
+  "old_passed_now_failed": [],
+  "planned_restoration_stages": "NOT_STARTED after test failure; distinct fresh post-failure checks below",
+  "post_failure_file_hashes": {
+    "post-failure-final01": {
+      "preservation.json": "7570986f0debe10d9bbe552f3029d3dbe2fbdcc9ccb8714bfcd3fa2b50f964b6"
+    },
+    "post-failure-preflight01": {
+      "preservation.json": "0a08ff14728f504e6a7690f100753b98a39426e3f0d72d128b4f1bfb886e6b69"
+    },
+    "post-failure-restore01": {
+      "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886"
+    }
+  },
+  "post_failure_preservation": {
+    "final": {
+      "inputs": 1494,
+      "original_inputs_restored": true,
+      "passed": true,
+      "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 living02",
+      "protected_evidence_unchanged": true,
+      "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 living02"
+    },
+    "preflight": {
+      "inputs": 1494,
+      "original_inputs_restored": false,
+      "passed": true,
+      "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 living02",
+      "protected_evidence_unchanged": true,
+      "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 living02"
+    },
+    "restore": {
+      "passed": true,
+      "restored": [
+        "ProjectSettings/ProjectSettings.asset",
+        "ProjectSettings/EditorBuildSettings.asset",
+        "ProjectSettings/ShaderGraphSettings.asset"
+      ]
+    }
+  },
+  "preparation_map_hashes": {
+    "original-inputs.json": "8e36e3ac3f21e58d7490514dee10dd3c84d1ce9499b4b4b7c3a988964ffe109a",
+    "original-inputs.zip": "6201eb71ef66cd84bea955f6f1faf3fd39d4489bea0e813c10222a09c509567c",
+    "plan.json": "3f552fb9e47b483deb772ee6a4d8ab8484eebc05ea928537002e4aa520da8755",
+    "protected.json": "0bc3d1a2988d25c8daaa8b1079eb3f913fda6338d9d4bb15e333a76e41b0d368",
+    "qualified-inputs.json": "add6850d216fea04452a48c7e6548a041773db9e2428de4ed0ae8d6b3e2dbfe3"
+  },
+  "prior_full_suite": {
+    "counts": {
+      "failed": 805,
+      "passed": 1966,
+      "skipped": 1,
+      "total": 2772
+    },
+    "source_sha": "16955152fcdd5a5f8af006dc38887a75f1f83266",
+    "status": "INCOMPLETE / UNCERTAIN retained"
+  },
+  "recorded_status": "FAILED",
+  "remaining_investigation": [
+    "38 generic foreground invalid-state failures: trace shared direct-writer/time-transition fixture path before classifying runtime versus setup.",
+    "Two tests supply replacement foreground-policy instances after context binding; strict bound reference validation refuses the changed policy. Author supported input bytes before owner instead of weakening validation.",
+    "Native/lifecycle helpers use old clock seams or replace a TimeService after save attachment; verify one precise owner.",
+    "Reinspection changes W to 9000 while test expects 2000; establish the exact observation/transition path rather than waive the assertion.",
+    "Historical-budget test configures production recovery profiles with generic limits, rejected at ConfigureRecovery; preserve historical reader and distinguish its supported scope.",
+    "Fund cloning/candidate rejection and unproven release fault assertion remain unresolved.",
+    "Fourth scene null reference, historical/current-schema and remaining full-suite failures not selected by this cohort remain open."
+  ],
+  "runtime_changes_in_233d3fbe": false,
+  "scope_hold": "No broad Windows, final benchmark, owner UAT, merge, H2 or O1; full suite not rerun against shared failures.",
+  "source_sha": "233d3fbe7516c542d1b1c570e8cad0afa8ba2048",
+  "stages": {
+    "living-regressions": {
+      "campaign": "d8bd16dcfa604edfb082e525ccf91038",
+      "child_finished_utc": "2026-10-27T23:37:21.218468+00:00",
+      "child_process": {
+        "created": 134376177223025091,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 34664
+      },
+      "child_started_utc": "2026-10-27T23:35:22.306534+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "run-living",
+        "--attempt",
+        "living02",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d8bd16dcfa604edfb082e525ccf91038\\living-regressions"
+      ],
+      "evidence": {
+        "child.json": "084741a893bc89e51de83af2db1e6b6f5f5e43a032e5eca8cacc635ead9607a3",
+        "cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+        "exit.json": "7b720bac74654acb7411fbbafda2c311caa80f674aff1a34b8ae0e10df92ee3f",
+        "fixture-inputs": {
+          "two-floor/owner-inactive-9e42de08bdc145bb902ff48a8d2188fb.manifest.json": "f8aa6ecff13073b2fc84400c110ddd93ff58f2f2766c06c286ae6b38939a935e",
+          "two-floor/owner-inactive-9e42de08bdc145bb902ff48a8d2188fb.save.json": "e922fa2c908a3bce8a6143b850c23158758dcac74fa119fec1c52a58e2c9b55a",
+          "two-floor/two-floor-bc46597d3b454ea699be1ce7f0d844af.manifest.json": "4f5bee8662f0239498e3c1fbb2fb7f36f903a853d5ee969180d12235b2c5ce63",
+          "two-floor/two-floor-bc46597d3b454ea699be1ce7f0d844af.save.json": "6b875e48bad6cc50a97c47309c905fb04c0160b824e7994501289957cef95931",
+          "two-floor/v1-63f8a054c0964dbd9fa6451d56261b1c.manifest.json": "f9e48cf443877d0936964edc43b2289d381c0d39441d855edf0df5b70f1c865b",
+          "two-floor/v1-63f8a054c0964dbd9fa6451d56261b1c.save.json": "fc757636efe80fa073ad50645cdaf4534b48a0ee94492dd580b0b7d47dd3086b"
+        },
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "ff7d4d6a54166534431bf95488ea6fbc93126a270ddb6a3e572d48f0411d87df",
+        "results.xml": "46029e89d7690eea88e15cd8ac1936ab972d40bafff0da1b12167fe1143ecf80",
+        "started.json": "d4c9cf7c6a54feb9953dfd3366ff3c80a48c3593821382c266a4a2a4837fd373",
+        "stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+        "unity.log": "0d5fe96e5faf3cec966f33c2df95f40a37332be2748eebeea82abde0a1b6ff34"
+      },
+      "evidence_error": "Incomplete NUnit test-run",
+      "exit_code": 8,
+      "failure": "CHILD_NONZERO",
+      "finished_utc": "2026-10-27T23:37:21.227631+00:00",
+      "host_exit_code": 0,
+      "input_identity": "84eab524af90304aa14df1ac18e1445be062ba8762ec66e166878e75855c6448",
+      "job": "Local\\DLQ-5b9081f5b40f465bafc5b2f3b37c30c4",
+      "process": {
+        "created": 134376177221879357,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 53044
+      },
+      "source_sha": "233d3fbe7516c542d1b1c570e8cad0afa8ba2048",
+      "stage": "living-regressions",
+      "started_utc": "2026-10-27T23:35:22.181065+00:00",
+      "status": "FAILED",
+      "tests": {
+        "discovered": 356,
+        "failed": 46,
+        "passed": 310,
+        "skipped": 0,
+        "skips": []
+      }
+    },
+    "living-regressions-preflight": {
+      "campaign": "d8bd16dcfa604edfb082e525ccf91038",
+      "child_finished_utc": "2026-10-27T23:35:16.994162+00:00",
+      "child_process": {
+        "created": 134376177125547493,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 27384
+      },
+      "child_started_utc": "2026-10-27T23:35:12.558178+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "preflight",
+        "--attempt",
+        "living02",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d8bd16dcfa604edfb082e525ccf91038/living-regressions-preflight"
+      ],
+      "evidence": {
+        "child.json": "3f2a0bcf9632d10b3f79c149f02c4b63e8291c4dec28980d97de4294d3d5faa8",
+        "exit.json": "5985fea73381a5c5a8b7a4f7bc6c59557a8ec5b6e595432bfd6c284420f4bada",
+        "preservation.json": "0a08ff14728f504e6a7690f100753b98a39426e3f0d72d128b4f1bfb886e6b69",
+        "started.json": "5c25f6c8389d6cfd8570b3e0f446db91f80e2dcc6fe17017c4c7f432879bf825",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-27T23:35:17.003150+00:00",
+      "host_exit_code": 0,
+      "input_identity": "84eab524af90304aa14df1ac18e1445be062ba8762ec66e166878e75855c6448",
+      "job": "Local\\DLQ-fc122bfc312b47b79f6ab444741e0c3b",
+      "process": {
+        "created": 134376177124463682,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 22676
+      },
+      "source_sha": "233d3fbe7516c542d1b1c570e8cad0afa8ba2048",
+      "stage": "living-regressions-preflight",
+      "started_utc": "2026-10-27T23:35:12.439486+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    }
+  }
+}
