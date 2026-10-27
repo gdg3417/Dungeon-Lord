@@ -250,6 +250,8 @@ namespace DungeonBuilder.M0
         private long recoveryDeferredForegroundThrough, recoveryDeferredEligible100ns;
         private bool recoveryDeferredHasBackground, recoveryDeferredPreparing, recoveryDeferredStalled;
         internal bool HasDeferredRecovery => recoveryDeferredForegroundWall != null;
+        internal bool HasDeferredBackground => HasDeferredRecovery && recoveryDeferredHasBackground;
+        internal bool HasForegroundPersistenceStall => HasDeferredRecovery && recoveryDeferredStalled;
         private bool DeferredForegroundCanExtend => HasDeferredRecovery && !recoveryDeferredHasBackground && !recoveryDeferredStalled;
 
         // F is observed prospectively. All foreground through F is retained as

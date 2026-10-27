@@ -233,8 +233,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
             h.Wall.Seconds = residual ? 104 : 102; fs.InterruptReplacement = true;
             var failed = service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail());
             Assert.That(failed.Reason, Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+            var committed = h.F.FileSystem.ReadAllBytes(service.SavePath);
+            var committedState = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(committed, h.F.Context);
+            Assert.That(committedState.CurrentTargetValidated, Is.True);
+            int writes = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
+            int replaces = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Replace);
+            int deletes = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Delete);
+            h.F.FileSystem.Seed(service.SavePath, Encoding.UTF8.GetBytes("test-only unrecognized authority"));
+            Assert.That(service.ResolveUncertainRecoveryPublication().IsSuccess, Is.False);
+            Assert.That(service.RequiresCanonicalRecovery, Is.True);
+            Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write), Is.EqualTo(writes));
+            Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Replace), Is.EqualTo(replaces));
+            Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Delete), Is.EqualTo(deletes));
+            h.F.FileSystem.Seed(service.SavePath, committed);
             fs.InterruptReplacement = false; h.Wall.Seconds = 110;
             var proof = service.ResolveUncertainRecoveryPublication(); Assert.That(proof.IsSuccess, Is.True, proof.Reason);
+            CollectionAssert.AreEqual(committed, proof.GetPersistedBytes());
+            Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write), Is.EqualTo(writes));
+            Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Replace), Is.EqualTo(replaces));
+            Assert.That(proof.Validation.LivingDungeon.Scheduler?.AcceptedThrough ?? -1,
+                Is.EqualTo(committedState.LivingDungeon.Scheduler?.AcceptedThrough ?? -1));
+            Assert.That(proof.Validation.LivingDungeon.Scheduler?.ClosedThrough ?? -1,
+                Is.EqualTo(committedState.LivingDungeon.Scheduler?.ClosedThrough ?? -1));
             Assert.That(current.timeProvenance.Episode?.Phase, Is.EqualTo(residual ? null : RecoveryEpisode.ResidualPending));
             var once = h.F.FileSystem.ReadAllBytes(service.SavePath);
             Assert.That(service.ResolveUncertainRecoveryPublication().IsSuccess, Is.False);
@@ -393,6 +413,51 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(current.timeProvenance.Episode, Is.Null);
             Assert.That(current.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(1000));
             Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+        }
+        [Test] public void KnownForegroundStallThenObservedBackgroundGrantsOnlyItsEligibleTimeAndReopens()
+        {
+            var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
+            using var scope = new RootScope(h); scope.Pulse(105);
+            double wallet = scope.Root.Save.structureRuntime.ManaReserve;
+            scope.Root.Save.lastPausedUtcUnix = 104;
+            h.F.FileSystem.EnableTargetedFailure(Faults.OperationType.Write,
+                paths => paths[0].EndsWith(".candidate", StringComparison.Ordinal), 1, false);
+            Assert.That(h.Service.Save(scope.Root.Save, SaveReason.StateChange), Is.False);
+            h.F.FileSystem.DisableFailure();
+            scope.Pulse(110); // Five known stalled foreground seconds: no grant or automatic retry.
+            Assert.That(h.Time.HasForegroundPersistenceStall, Is.True);
+            scope.Focus(false, 110); // Explicit lifecycle retry proves the held foreground prefix.
+            Assert.That(h.Time.RecoveryClockActive, Is.False);
+            Assert.That(h.Time.HasDeferredBackground, Is.True);
+            int writes = h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
+            scope.Pulse(115);
+            Assert.That(h.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write), Is.EqualTo(writes));
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+            scope.Focus(true, 120);
+            Assert.That(h.Time.RecoveryClockActive, Is.True);
+            Assert.That(h.Time.RecoveryOriginalEligible100ns, Is.EqualTo(100000000));
+            scope.Pulse(120);
+            Assert.That(scope.Root.Save.timeProvenance.Episode.EntryContext, Is.EqualTo(RecoveryEpisode.KnownBackground));
+            double original = h.Mana.ResolveRecoveryDuration(scope.Root.Save, h.Inputs.Configuration, 100000000, false).WalletAfter;
+            scope.Pulse(121);
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(original));
+            double residual = h.Mana.ResolveRecoveryDuration(scope.Root.Save, h.Inputs.Configuration, 20000000, false).WalletAfter;
+            scope.Pulse(122);
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(residual));
+            Assert.That(scope.Root.Save.timeProvenance.Episode, Is.Null);
+            Assert.That(scope.Root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.Zero);
+            var clock = new Clock { Seconds = 130 };
+            var time = new TimeService(new SimpleLogger(false), h.Inputs.Bootstrap.tickSeconds,
+                h.Inputs.Bootstrap.timeRules.detectClockSkewSeconds, clock, () => 0);
+            time.BeginRecoveryForeground(h.Inputs.TwoFloor.UnitsPerSecond);
+            var reopened = CreateService(h.F, h.Inputs, time);
+            var current = reopened.LoadOrCreate("h1f4-background-after-stall-reopen", out var reason);
+            Assert.That(current, Is.Not.Null, reason);
+            Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(residual));
+            time.BindLoadedForegroundHorizon(current.livingDungeon.Scheduler.AcceptedThrough);
+            reopened.BeginCanonicalRecovery(current);
+            Assert.That(time.RecoveryOriginalEligible100ns, Is.EqualTo(80000000)); // Only the unrecorded W=122 -> R=130 suffix.
+            Assert.That(time.ForegroundThrough, Is.Zero);
         }
         [Test] public void RootRetainsOneBackgroundObligationUntilObservedReturnAndBlocksActions()
         {

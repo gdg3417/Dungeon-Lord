@@ -61,11 +61,17 @@ namespace DungeonBuilder.M0
             if (_explicitSaveDeleteQuiesced || foregroundFailure != null || foregroundRetryPending || foregroundPumping || Save == null) return;
             try {
                 if (TimeService.RecoveryClockActive) { PumpCanonicalRecovery(); return; }
+                // A known foreground failure is held for an explicit action or
+                // lifecycle retry, never retried by the frame loop as absence.
+                if (TimeService.HasForegroundPersistenceStall) return;
                 if (TimeService.HasDeferredRecovery) {
                     if (!TimeService.RecoveryForegroundObserved) return; // Retain grouped absence until an observed return.
                     TimeService.BeginDeferredRecoveryPreparation();
                     if (!FlushForeground()) return;
-                    if (TimeService.HasDeferredRecovery) { SaveService.BeginCanonicalRecovery(Save, observedBackground: true); return; }
+                    if (TimeService.HasDeferredRecovery) {
+                        if (TimeService.HasDeferredBackground) SaveService.BeginCanonicalRecovery(Save, observedBackground: true);
+                        return;
+                    }
                 }
                 if (bootRecoveryPending) { FinishRecoveryBoot(); return; }
                 long now = TimeService.SampleForeground();
@@ -135,7 +141,7 @@ namespace DungeonBuilder.M0
                 var wallTarget = Save.timeProvenance?.Mode == TimeProvenance.PreciseMode &&
                     observation.Context == ForegroundObservationContext.EligibleForeground ? observation.WallEndpoint : null;
                 int pumps = SaveService.ForegroundConfiguration.MaximumBoundaries;
-                while (pumps-- > 0 && (foregroundRetryPending || Save.livingDungeon.IsDormant ||
+                while (pumps-- > 0 && (foregroundRetryPending || TimeService.HasForegroundPersistenceStall || Save.livingDungeon.IsDormant ||
                     !Save.livingDungeon.IsClosed || target > Save.livingDungeon.Scheduler.AcceptedThrough ||
                     wallTarget != null && Save.timeProvenance.AccountedBoundary.CompareTo(wallTarget) < 0))
                 {
@@ -147,7 +153,7 @@ namespace DungeonBuilder.M0
                 bool complete = Save.livingDungeon.IsClosed && target <= Save.livingDungeon.Scheduler.AcceptedThrough &&
                     (wallTarget == null || Save.timeProvenance.AccountedBoundary.CompareTo(wallTarget) >= 0);
                 if (complete && TimeService.HasDeferredRecovery) {
-                    if (TimeService.RecoveryForegroundObserved) {
+                    if (TimeService.HasDeferredBackground && TimeService.RecoveryForegroundObserved) {
                         TimeService.BeginDeferredRecoveryPreparation();
                         SaveService.BeginCanonicalRecovery(Save, observedBackground: true);
                     }
