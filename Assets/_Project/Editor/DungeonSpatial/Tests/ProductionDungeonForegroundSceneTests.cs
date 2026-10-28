@@ -245,11 +245,13 @@ namespace DungeonBuilder.M0.Tests
         }
         private Action<double> InstallForegroundBoundaryTestClock(ITimeSource utc = null)
         {
+            TraceSceneState("clock.before-replacement");
             var root = GameRoot.Instance; double sample = 100;
             var time = new TimeService(root.Logger, 10, 300, utc ?? new SystemTimeSource(), () => sample);
             time.AttachSave(root.Save);
             time.BeginForeground(1000, root.Save.livingDungeon.Scheduler.AcceptedThrough);
             typeof(GameRoot).GetProperty(nameof(GameRoot.TimeService)).SetValue(root, time);
+            TraceSceneState("clock.after-replacement");
             return delta => sample += delta;
         }
 

@@ -24,6 +24,34 @@ namespace DungeonBuilder.M0.Tests
         private ProductionDungeonController controller;
         private Touchscreen simulatedTouch;
         private bool missingThemeWarning;
+        private bool TraceSceneRecovery => TestContext.CurrentContext.Test.Name.Contains("RoomContentMapReassignmentCapacity") ||
+            TestContext.CurrentContext.Test.Name.Contains("LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish");
+        // Read-only diagnosis: never sample/advance time, invoke a barrier, or
+        // serialize a mutable runtime back into the canonical owner.
+        private void TraceSceneState(string phase)
+        {
+            if (!TraceSceneRecovery) return;
+            object Field(object value, string name) => value?.GetType().GetField(name,
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?.GetValue(value);
+            int Id(object value) => value == null ? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(value);
+            var root = GameRoot.Instance; var service = root?.SaveService; var save = root?.Save;
+            var time = root?.TimeService; var session = service?.CanonicalSession; var draft = controller?.Draft;
+            TestContext.WriteLine("H1F4_SCENE " + phase + " frame=" + Time.frameCount +
+                " controller=" + Id(controller) + " initialized=" + Field(controller, "initialized") + " quiesced=" + controller?.IsQuiesced +
+                " draft=" + Id(draft) + " editing=" + controller?.IsEditing + " durability=" + draft?.Durability +
+                " commands=" + draft?.CommandCount + " draftReason=" + draft?.Reason + " feedback=" + Field(controller, "feedback") +
+                " rootEnabled=" + root?.enabled + " focused=" + Application.isFocused + " observedFocus=" + Field(root, "foregroundApplicationFocused") +
+                " observedPause=" + Field(root, "foregroundApplicationPaused") + " paused=" + time?.IsPaused +
+                " time=" + Id(time) + " boundTime=" + Id(Field(service, "recoveryTime")) + " recovery=" + time?.RecoveryClockActive +
+                " deferred=" + time?.HasDeferredRecovery + " failure=" + Field(root, "foregroundFailure") +
+                " retry=" + Field(root, "foregroundRetryPending") + " publication=" + service?.CanonicalPublicationPending +
+                " recoveryRequired=" + service?.RequiresCanonicalRecovery + " save=" + Id(save) + " session=" + Id(session) +
+                " bytes=" + (session == null ? "null" : SpatialContractSha256.Compute(session.GetCurrentBytes())) +
+                " W=" + save?.timeProvenance?.AccountedBoundary?.Seconds + "." + save?.timeProvenance?.AccountedBoundary?.Fraction100ns +
+                " A=" + save?.livingDungeon?.Scheduler?.AcceptedThrough + " C=" + save?.livingDungeon?.Scheduler?.ClosedThrough +
+                " banner=" + root?.BannerMessage + " pauseLine=" + root?.PauseLine +
+                " mouseUp=" + Mouse.current?.leftButton.wasReleasedThisFrame + " escape=" + Keyboard.current?.escapeKey.wasPressedThisFrame);
+        }
         private void RecordThemeWarning(string message, string stack, LogType type)
         { if (message.Contains("No Theme Style Sheet set to PanelSettings")) missingThemeWarning = true; }
         [UnitySetUp]
@@ -57,8 +85,17 @@ namespace DungeonBuilder.M0.Tests
             controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
             for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
             Assert.That(controller.World, Is.Not.Null);
+            if (TraceSceneRecovery) {
+                root.SaveService.CanonicalRuntimePublished += _ => TraceSceneState("canonical-publication");
+                var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+                foreach (string name in new[] { "save", "discard", "confirm", "cancel", "edit", "legacy" })
+                    ui.Q<Button>(name).clicked += () => TraceSceneState("ui-click-" + name);
+            }
+            TraceSceneState("setup.before-disable");
             root.enabled = false; // Stable test HUD/economy; runtime presentation remains active.
+            TraceSceneState("setup.after-disable");
             yield return null;
+            TraceSceneState("setup.after-yield");
         }
         private void Isolate(Scene scene, LoadSceneMode mode)
         {

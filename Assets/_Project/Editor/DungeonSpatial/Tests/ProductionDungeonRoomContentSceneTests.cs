@@ -18,8 +18,14 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(x,y), definition.GrossFootprint, room.Anchor, room.Orientation, out var cell), Is.True);
             return cell;
         }
-        private IEnumerator SettleContentPanel()
-        { for (int i=0;i<12;i++) yield return null; }
+        private IEnumerator SettleContentPanel(bool trace = false)
+        {
+            for (int i=0;i<12;i++) {
+                if (trace) TraceSceneState("construction.before-yield-" + i);
+                yield return null;
+                if (trace) TraceSceneState("construction.after-yield-" + i);
+            }
+        }
         private void AssertCompactContentPanel(string state, bool compact = true)
         {
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
@@ -219,11 +225,14 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.World.transform.Find("Selection").gameObject.activeSelf,Is.False);
             Assert.That(controller.ContentPreview,Is.Null);
         }
-        private IEnumerator ConstructReassignmentDestination()
+        private IEnumerator ConstructReassignmentDestination(bool trace = false)
         {
+            if (trace) TraceSceneState("construction.before-enter-edit");
             controller.EnterEdit(); Assert.That(controller.SelectConstructionRoom("spatial.room.basic"),Is.True);
+            if (trace) TraceSceneState("construction.after-enter-edit");
             controller.TapWorld(controller.World.MoveGuidanceAnchors.First()); Assert.That(controller.ConfirmConstructionPlacement(),Is.True);
-            yield return SettleContentPanel();
+            if (trace) TraceSceneState("construction.after-confirm");
+            yield return SettleContentPanel(trace);
         }
         [UnityTest]
         public IEnumerator RoomContentMapReassignmentCategoriesInvalidRetryAndSave()
@@ -297,10 +306,12 @@ namespace DungeonBuilder.M0.Tests
         [UnityTest]
         public IEnumerator RoomContentMapReassignmentCapacityMoveOwnedAndDiscard()
         {
+            TraceSceneState("case.before-funding");
             var root=GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
             var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var source=floor.Layout.Rooms[0]; var original=floor.RoomContents.Assignments.Single();
-            yield return ConstructReassignmentDestination();
+            yield return ConstructReassignmentDestination(trace: true);
+            TraceSceneState("case.after-construction-coroutine");
             var destination=controller.Draft.ReadModel.Floors[0].Layout.Rooms.Single(r=>r.RoomInstanceId!=source.RoomInstanceId);
             Assert.That(CanonicalRoomCapacityResolver.TryResolve(root.ProductionSpatialContent,destination.RoomDefinitionId,out var capacity,out _),Is.True);
             for(int i=0;i<capacity.MonsterCapacity;i++)
