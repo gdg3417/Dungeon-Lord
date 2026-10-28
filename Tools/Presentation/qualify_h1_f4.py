@@ -320,6 +320,9 @@ def run_child(attempt, stage, command, expected_stage, exit_name):
         # Fresh sealed artifact directory; old fixed-path fixture exports must
         # never be reused or overwritten. Override is local to this child only.
         export = stage / "fixture-inputs"; export.mkdir(exist_ok=False)
+        write(export / "ownership.json", {"owner": "H1-F4 qualification", "retention": "preserve", "stage": str(stage),
+              "source_sha": json.loads((prep / "inventory.json").read_text())["source_sha"],
+              "purpose": "Campaign-owned exports and failed-scene snapshots; no extra files means none were produced"})
         override["DUNGEON_H1F4_TEST_EXPORT_ROOT"] = str(export)
     environment.update(override)
     write(stage / "invocation.json", {"command": command, "environment_override": override, "ownership": "Enclosing unchanged supervisor job"})
