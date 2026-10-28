@@ -83,3 +83,36 @@ The expanded 63-case cohort adds original/residual funding and fault tests
 (write, partial write, replace, readback, uncertain rollback), exact reopen/no
 second grant checks, and scanner boundaries for schemas 15/16/17. Results are
 pending; no full-suite result or readiness claim follows from these changes.
+
+### Qualified C2 corrections
+
+Campaign faa2f0ee0d7f4906946410b0e7ee17e9 at
+2175ba53 passed **63/0/0**, all five stages and independent verification.
+The companion JSON pins the complete source SHA, tools, XML and receipts.
+Campaign b948cc1857cf4795851712434747122e retains its earlier 59/4/0
+FAILED result: four newly added fault cases initially targeted the evidence
+precheck instead of committed readback, or used a relative replacement index
+where the deterministic filesystem requires an absolute index. Source-traced
+cuts now assert the exact failed operation/path/index. That failed campaign's
+guarded normal finalization restored originals and preserved 102 prior
+directories without changing its verdict.
+
+### Time-provenance historical/current fixture correction
+
+The original H1-F2 NUnit method identities are retained for reconciliation.
+Their frozen 15->16 migration, byte-exact readback, legacy grammar and 92-byte
+budget assertions remain positive checks against the explicit frozen reader.
+Schema 16 cannot create a current writable session. Historical active v1/v2
+corpus bytes and checkpoints remain unchanged and readable; without a full
+producer-bound context they cannot be drained through today's writer. The
+tests now require no writes and preserved A/C/checkpoints rather than treating
+schema/profile identity as producer proof.
+
+The ordinary-writer case verifies approved schema-17 behavior: an unchanged
+timestamp retains W; independent forward, backward or invalid timestamp
+changes reject without publication. Coordinator interruption tests use newly
+authored dormant historical fixtures with complete validated current inputs
+bound before load, preserving their actual atomic migration/reopen assertions.
+Existing H1-F4 producer-bound positive/negative activation and accepted-drain
+tests run alongside them. No frozen serializer, historical bytes or production
+activation rule is modified by these fixture corrections.

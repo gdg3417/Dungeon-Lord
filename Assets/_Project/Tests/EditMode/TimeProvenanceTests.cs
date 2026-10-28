@@ -71,8 +71,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string tail = ",\"timeProvenance\":" + TimeProvenance.LegacyJson;
             Assert.That(Encoding.UTF8.GetString(candidate).Replace(tail, ""), Is.EqualTo(expected));
             var prior = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(source, context);
-            var next = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
-            Assert.That(next.CurrentTargetValidated, Is.True);
+            var next = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(candidate, context);
+            Assert.That(next.IsValid, Is.True, next.Reason);
+            Assert.That(next.CurrentTargetValidated, Is.False, "Frozen migration is reader authority, not a current writable session");
             Assert.That(next.TimeProvenance.Mode, Is.EqualTo(TimeProvenance.LegacyMode));
             Assert.That(next.TimeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(1, 0)));
             Assert.That(next.LivingDungeon.IsDormant, Is.EqualTo(prior.LivingDungeon.IsDormant));
@@ -84,7 +85,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(b.StartIdentity, Is.EqualTo(a.StartIdentity)); Assert.That(b.CheckpointIdentity, Is.EqualTo(a.CheckpointIdentity));
                 CollectionAssert.AreEqual(a.Checkpoint, b.Checkpoint);
             }
-            Assert.That(DetachedCanonicalSaveSession.Open(candidate, context, f.Profile).IsSuccess, Is.True);
+            Assert.That(DetachedCanonicalSaveSession.Open(candidate, context, f.Profile).IsSuccess, Is.False);
             Assert.That(DetachedCanonicalSaveSession.Open(source, context, f.Profile).IsSuccess, Is.False);
             CollectionAssert.AreEqual(source, Source(f, name));
         }
@@ -100,9 +101,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("AccountedFraction100ns", "0", "0.0")] [TestCase("AccountedFraction100ns", "0", "0e0")]
         public void UnsupportedOrMalformedOwnerFailsClosed(string field, string oldValue, string nextValue)
         {
-            var f = Fixture.Create(null); var text = Encoding.UTF8.GetString(f.Session.GetCurrentBytes());
+            var f = Fixture.Create(null); var text = Encoding.UTF8.GetString(f.FrozenSixteen);
             text = text.Replace("\"" + field + "\":" + oldValue, "\"" + field + "\":" + nextValue);
-            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(Encoding.UTF8.GetBytes(text), f.Context).IsValid, Is.False);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(Encoding.UTF8.GetBytes(text), f.Context).IsValid, Is.False);
         }
         [TestCase("0")] [TestCase("-1")] [TestCase("253402300800")] [TestCase("9223372036854775808")]
         [TestCase("1.0")] [TestCase("1e0")] [TestCase("\"1\"")] [TestCase("null")]
@@ -122,24 +123,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void DuplicateOwnerAndFutureSchemaAndIndependentActivationAreRejected()
         {
-            var f = Fixture.Create(null); string text = Encoding.UTF8.GetString(f.Session.GetCurrentBytes());
+            var f = Fixture.Create(null); string text = Encoding.UTF8.GetString(f.FrozenSixteen);
             string owner = "\"timeProvenance\":" + TimeProvenance.LegacyJson;
             foreach (string malformed in new[] { text.Replace(owner, owner + "," + owner),
                 text.Replace("legacyWholeSeconds", "fractional"), text.Replace("\"schemaVersion\":16", "\"schemaVersion\":17"),
                 text.Replace("\"AccountedFraction100ns\":0", "\"AccountedFraction100ns\":0,\"extra\":1") })
-                Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(Encoding.UTF8.GetBytes(malformed), f.Context).IsValid, Is.False);
+                Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(Encoding.UTF8.GetBytes(malformed), f.Context).IsValid, Is.False);
         }
         [Test] public void EveryRecognizedWriterSynchronizesTheOneLegacyBoundaryAndRejectsBackwardWrites()
         {
             var f = Fixture.Create(null);
-            foreach (long seconds in new[] { 1L, 2L, 1000L }) {
+            // The frozen legacy owner is still read exactly. Since activation,
+            // ordinary current writers retain W and cannot invent a time cut.
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(f.FrozenSixteen,f.Context).IsValid,Is.True);
+            foreach (long seconds in new[] { 1L, 2L, 1000L, 0L }) {
+                var before=f.Session.GetCurrentBytes();
                 f.Runtime.lastSavedUtcUnix = seconds;
-                f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime)); f.Reopen();
-                Assert.That(f.Runtime.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(seconds, 0)));
+                var result=f.Authority.SaveRecognizedState(f.ActivePath,f.FileSystem,f.Session,f.Runtime);
+                Assert.That(result.IsSuccess,Is.EqualTo(seconds==1),result.Reason);
+                if(result.IsSuccess) f.Accept(result);
+                else CollectionAssert.AreEqual(before,f.FileSystem.ReadAllBytes(f.ActivePath));
+                f.Reopen(); Assert.That(f.Runtime.timeProvenance.AccountedBoundary,Is.EqualTo(new UnixTimePoint(1,0)));
             }
-            var prior = f.Session.GetCurrentBytes(); f.Runtime.lastSavedUtcUnix = 999;
-            Assert.That(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime).IsSuccess, Is.False);
-            CollectionAssert.AreEqual(prior, f.FileSystem.ReadAllBytes(f.ActivePath));
         }
         [TestCase("active-v1")] [TestCase("active-v2")]
         public void MigrationRequiresExecutableAndConfiguration(string name)
@@ -160,11 +165,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (uncertain) fs.EnableFailureSequence(FS.OperationType.Flush, 1, FS.OperationType.Replace, 2);
             else fs.EnableTargetedFailure(FS.OperationType.Replace, _ => true, 1, afterReplace);
             string result = ExactCompleteSaveAtomicPersistence.Persist(path, fs, source, candidate, 64,
-                bytes => DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, context).CurrentTargetValidated);
+                bytes => DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(bytes, context).IsValid);
             Assert.That(result, Is.EqualTo(uncertain ? DetachedCanonicalWriteAuthority.RecoveryRequiredReason : DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
             CollectionAssert.AreEqual(uncertain ? candidate : source, fs.ReadAllBytes(path)); fs.DisableFailure();
             var recovered = fs.ReadAllBytes(path);
-            if (uncertain) Assert.That(DetachedCanonicalSaveSession.Open(recovered, context, f.Profile).IsSuccess, Is.True);
+            if (uncertain) {
+                Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(recovered, context).IsValid,Is.True);
+                Assert.That(DetachedCanonicalSaveSession.Open(recovered,context,f.Profile).IsSuccess,Is.False);
+            }
             else Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(recovered, context, out var retried) && retried.SequenceEqual(candidate), Is.True);
         }
         static DetachedSpatialSaveLoadCoordinator Coordinator(Fixture f, DetachedCurrentTargetValidationContext context) =>
@@ -179,39 +187,61 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Fixture.Create(null); var context = Context(f, name); var source = Source(f, name);
             Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(source, context, out var expected), Is.True);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(expected,context).IsValid,Is.True);
             var fs = new FS.DeterministicFileSystem(); string path = FS.ActivePath("h1-f2-load-" + name); fs.Seed(path, source);
             var loaded = Coordinator(f, context).Load(path, Supported(fs, path));
-            Assert.That(loaded.IsSuccess, Is.True, loaded.Reason);
-            Assert.That(loaded.Disposition, Is.EqualTo(DetachedSpatialSaveLoadDisposition.Migrated));
-            CollectionAssert.AreEqual(expected, loaded.Session.GetCurrentBytes());
-            CollectionAssert.AreEqual(expected, fs.ReadAllBytes(path));
+            // This frozen corpus proves its historical reader/executable, not
+            // a full bootstrap producer binding for current activation.
+            Assert.That(loaded.IsSuccess,Is.False); Assert.That(loaded.Reason,Is.EqualTo(RecoveryEpisode.ContextMismatch));
+            Assert.That(loaded.Session,Is.Null); Assert.That(loaded.RuntimeProjection,Is.Null);
+            CollectionAssert.AreEqual(source,fs.ReadAllBytes(path));
             var reopened = Coordinator(f, context).Load(path, Supported(fs, path));
-            Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
-            CollectionAssert.AreEqual(expected, reopened.Session.GetCurrentBytes());
-            Assert.That(reopened.RuntimeProjection.lastSavedUtcUnix, Is.EqualTo(1));
-            Assert.That(reopened.RuntimeProjection.timeProvenance.AccountedBoundary.Fraction100ns, Is.Zero);
+            Assert.That(reopened.IsSuccess,Is.False); CollectionAssert.AreEqual(source,fs.ReadAllBytes(path));
+            Assert.That(fs.Operations.Any(o=>o.Type==FS.OperationType.Write || o.Type==FS.OperationType.Replace),Is.False);
+        }
+        private sealed class ActivationClock : IPreciseTimeSource
+        {
+            public UnixTimePoint UtcNow() => new UnixTimePoint(1,0);
+            public long UtcNowUnixSeconds() => 1;
+        }
+        static DetachedSpatialSaveLoadCoordinator BoundCoordinator(Fixture f)
+        {
+            var inputs=f.Context.RecoveryInputs;
+            var coordinator=new DetachedSpatialSaveLoadCoordinator(f.Profile,inputs.Compatibility,f.Production,
+                LegacyGameplayConfigurationContract.SerializeCanonical(inputs.Configuration),new Dictionary<string,byte[]>(),
+                new RawSaveEnvelopeVersionContract(1,CanonicalSaveSchemaVersions.CurrentWritableTarget),FS.BlankFloorForCoordinator,
+                f.PositionProfiles,inputs.Occupancy,new[] { inputs.OneFloor.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized),
+                    inputs.TwoFloor.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized) },inputs.Monsters);
+            var time=new TimeService(new SimpleLogger(false),inputs.Bootstrap.tickSeconds,inputs.Bootstrap.timeRules.detectClockSkewSeconds,new ActivationClock(),()=>0);
+            time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);coordinator.ConfigureRecovery(inputs,time);return coordinator;
         }
         [TestCase(false)] [TestCase(true)]
         public void CoordinatorFailureThenIndependentRecoveryNeverPublishesPartialAuthority(bool uncertain)
         {
-            var f = Fixture.Create(null); var context = Context(f, "dormant"); var source = Source(f, "dormant");
+            var profile=SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            var f=Fixture.Create("\"researchPending\":null,\"researchProgress\":null",workloadProfile:profile);
+            // Newly authored dormant source, with validated full current inputs;
+            // never attribution of the old active corpus to today's defaults.
+            var source=f.FrozenSixteen;
             var fs = new FS.DeterministicFileSystem(); string path = FS.ActivePath("h1-f2-load-failure"); fs.Seed(path, source);
             if (uncertain) fs.EnableFailureSequence(FS.OperationType.Flush, 1, FS.OperationType.Replace, 2);
             else fs.EnableTargetedFailure(FS.OperationType.Replace, _ => true, 1, false);
-            var failed = Coordinator(f, context).Load(path, Supported(fs, path));
+            var failed = BoundCoordinator(f).Load(path, Supported(fs, path));
             Assert.That(failed.IsSuccess, Is.False); Assert.That(failed.RuntimeProjection, Is.Null); Assert.That(failed.Session, Is.Null);
             if (!uncertain) CollectionAssert.AreEqual(source, fs.ReadAllBytes(path));
             fs.DisableFailure();
-            var recovered = Coordinator(f, context).Load(path, Supported(fs, path));
+            var recovered = BoundCoordinator(f).Load(path, Supported(fs, path));
             Assert.That(recovered.IsSuccess, Is.True, recovered.Reason);
             Assert.That(recovered.RuntimeProjection.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(1, 0)));
+            Assert.That(recovered.RuntimeProjection.timeProvenance.Episode.Phase,Is.EqualTo(RecoveryEpisode.OriginalPending));
+            Assert.That(recovered.RuntimeProjection.timeProvenance.RecoveryContextSha256,Is.EqualTo(f.Context.RecoveryInputs.Identity.Digest));
             CollectionAssert.AreEqual(recovered.Session.GetCurrentBytes(), fs.ReadAllBytes(path));
         }
         [Test] public void FutureSchemaAndInvalidHistoricalBoundaryLeaveExactSourceUntouched()
         {
             var f = Fixture.Create(null); var context = Context(f, "dormant");
             foreach (var bytes in new[] { Read("dormant"), Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(f.Session.GetCurrentBytes())
-                .Replace("\"schemaVersion\":16", "\"schemaVersion\":17")) }) {
+                .Replace("\"schemaVersion\":17", "\"schemaVersion\":18")) }) {
                 var fs = new FS.DeterministicFileSystem(); string path = FS.ActivePath("h1-f2-refuse"); fs.Seed(path, bytes);
                 var result = Coordinator(f, context).Load(path, Supported(fs, path));
                 Assert.That(result.IsSuccess, Is.False); Assert.That(result.RuntimeProjection, Is.Null);
@@ -224,21 +254,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Fixture.Create(null); var context = Context(f, name); var source = Source(f, name);
             var fs = new FS.DeterministicFileSystem(); string path = FS.ActivePath("h1-f2-drain-" + name); fs.Seed(path, source);
+            Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(source,context,out var historical),Is.True);
+            var frozen=DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(historical,context);
+            Assert.That(frozen.IsValid,Is.True,frozen.Reason);
+            long accepted=frozen.LivingDungeon.Scheduler.AcceptedThrough;
+            long closed=frozen.LivingDungeon.Scheduler.ClosedThrough;
             var loaded = Coordinator(f, context).Load(path, Supported(fs, path));
-            Assert.That(loaded.IsSuccess, Is.True, loaded.Reason);
-            f.Context = context; f.Configuration = context.Configuration; f.FileSystem = fs; f.ActivePath = path;
-            f.Session = loaded.Session; f.State = loaded.Validation.State; f.Runtime = loaded.RuntimeProjection;
-            long accepted = f.Runtime.livingDungeon.Scheduler.AcceptedThrough;
-            f.Accept(PhaseSixA4Tests.Writer(f).AdvanceForeground(path, fs, f.Session, f.Runtime,
-                LivingDungeonForegroundConfig.LoadTwoFloor(), accepted, 10, (candidate, tick) => { }, 1));
-            Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(accepted));
-            Assert.That(f.Runtime.livingDungeon.Scheduler.ClosedThrough, Is.EqualTo(accepted));
-            Assert.That(f.Runtime.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(1, 0)));
-            f.Reopen(); CollectionAssert.AreEqual(f.Session.GetCurrentBytes(), fs.ReadAllBytes(path));
+            Assert.That(loaded.IsSuccess,Is.False);Assert.That(loaded.Reason,Is.EqualTo(RecoveryEpisode.ContextMismatch));
+            CollectionAssert.AreEqual(source,fs.ReadAllBytes(path));
+            Assert.That(accepted,Is.EqualTo(100));Assert.That(closed,Is.EqualTo(-1));
+            foreach(var party in frozen.LivingDungeon.Parties) {
+                var execution=LivingDungeonContracts.Restore(party,LivingDungeonContracts.Profile(frozen.LivingDungeon,context.LivingDungeonProfiles));
+                try { Assert.That(execution.NextOrdinal,Is.EqualTo(party.NextOrdinal)); }
+                finally { execution.Abandon(); }
+            }
+            Assert.That(fs.Operations.Any(o=>o.Type==FS.OperationType.Write || o.Type==FS.OperationType.Replace),Is.False,
+                "Do not drain unproved historical inputs or abandon their accepted work");
         }
         [Test] public void TargetBudgetsReserveExactlyTheNewGrammarWithoutChangingFrozenFifteen()
         {
-            var current = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            var current = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes("Assets/_Project/Resources/save_spatial_migration_limits_schema16.json")).Profile;
             var historical = current.Canonical.ForSchema(15);
             Assert.That(TimeProvenance.LegacyMemberByteCount, Is.EqualTo(92));
             Assert.That(current.Canonical.Serialized.MaximumInputBytes - historical.Serialized.MaximumInputBytes, Is.EqualTo(92));
@@ -258,7 +293,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = Fixture.Create(null); f.Runtime.structureRuntime.ManaReserve = f.Acquisition.StartingMana;
             // Stabilize pre-existing Unity nullable projections before the size-boundary test.
             for (int i = 0; i < 3; i++) f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
-            var source = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(f.Session.GetCurrentBytes())
+            var source = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(f.FrozenSixteen)
                 .Replace(",\"timeProvenance\":" + TimeProvenance.LegacyJson, "").Replace("\"schemaVersion\":16", "\"schemaVersion\":15"));
             var s = f.Profile.Canonical.Serialized; var whole = f.Profile.Whole;
             var oldCanonical = new CanonicalSpatialSerializationLimits(new SpatialSerializedInputLimits(source.Length,
@@ -277,10 +312,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(source, context, out var candidate), Is.True);
             Assert.That(candidate.Length, Is.EqualTo(targetBytes));
             var opened = DetachedCanonicalSaveSession.Open(candidate, context, profile);
-            Assert.That(opened.IsSuccess, Is.True, opened.Reason);
-            f.Context = context; f.Profile = profile; f.Session = opened.Session; f.FileSystem.Seed(f.ActivePath, candidate);
-            f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
-            Assert.That(f.Session.GetCurrentBytes().Length, Is.EqualTo(targetBytes)); f.Reopen();
+            Assert.That(opened.IsSuccess,Is.False,"Frozen schema 16 no longer creates a writable session");
+            var frozen=DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(candidate,context);
+            Assert.That(frozen.IsValid,Is.True,frozen.Reason);
+            CollectionAssert.AreEqual(candidate,frozen.GetBytes());
+            Assert.That(frozen.GetBytes().Length,Is.EqualTo(targetBytes));
         }
     }
 }
