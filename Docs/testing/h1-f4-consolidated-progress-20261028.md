@@ -116,3 +116,21 @@ bound before load, preserving their actual atomic migration/reopen assertions.
 Existing H1-F4 producer-bound positive/negative activation and accepted-drain
 tests run alongside them. No frozen serializer, historical bytes or production
 activation rule is modified by these fixture corrections.
+
+### Qualified combined recovery gate
+
+Campaign 820b541efc694fb98f7a997023a2e86e at d5389f8c passed **234/0/0**:
+111 H1-F4 recovery, 60 H1-F2 provenance and 63 C2 cases. All five stages,
+independent process/Job checks, exact restoration, reservation release and
+protected/prior-evidence verification passed. This overlaps the earlier
+63-case result and is not added to it as new independent coverage.
+
+The next shared fixture correction replaces reflection-injected, unbound
+SaveService sessions with the already-qualified Research initialization path:
+one precise fixed provider before recovery configuration/load, one horizon
+binding and one save observation owner. Canonical bytes cannot change on
+attachment. Structural undo retains its separate existing window measurement.
+Native economy fixtures now call the current precise creator with complete
+consumed inputs and explicit test creation time. Production code is unchanged.
+The four dependent economy/projection/acquisition/passive cohorts contain
+236 discovered cases; qualification is pending.

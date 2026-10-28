@@ -842,12 +842,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Fixture.Create(null);
             f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            var native = NativeCanonicalSaveCreator.Create(f.ActivePath, f.FileSystem,
+            var native = NativeCanonicalSaveCreator.CreatePrecise(f.ActivePath, f.FileSystem,
                 new SaveData { createdUtcUnix = 1, lastSavedUtcUnix = 1,
                     dungeonLayout = new DungeonBuilder.M0.Gameplay.DungeonLayout.DungeonLayoutState(),
                     structureRuntime = new StructureRuntimeState { ManaReserve = mana } },
-                f.Compatibility, f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile,
-                PhaseFourTestSupport.Acquisition(f.Economy, f.Profile.Canonical, mana), f.Occupancy);
+                f.Production,f.Profile,PhaseFourTestSupport.Acquisition(f.Economy,f.Profile.Canonical,mana),
+                f.Context.RecoveryInputs,new UnixTimePoint(1,0));
             Assert.That(native.IsSuccess, Is.True, native.Reason);
             f.Session = native.Session; f.State = native.Validation.State; f.Runtime = native.RuntimeProjection;
             f.Reopen(); return f;
@@ -881,16 +881,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static SaveService Service(Fixture f, Func<double> clock)
         {
-            var service = new SaveService(new SimpleLogger(false), null, Path.GetDirectoryName(f.ActivePath));
-            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
-                Encoding.UTF8.GetBytes(JsonUtility.ToJson(f.Configuration)),
-                f.PositionProfiles, f.Occupancy);
+            var service=PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
             service.ConfigureStructuralEconomy(f.Economy, clock); service.ConfigureStructuralRemovalPolicy(f.RemovalPolicy);
             service.ConfigureContentAcquisitionEconomy(f.Acquisition);
-            typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);
-            foreach (var pair in new[] { Tuple.Create("_canonicalSession", (object)f.Session), Tuple.Create("_canonicalFileSystem", (object)f.FileSystem),
-                Tuple.Create("_validationContext", (object)f.Context) })
-                typeof(SaveService).GetField(pair.Item1, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(service, pair.Item2);
             return service;
         }
     }

@@ -46,15 +46,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         internal static SaveService CanonicalSaveService(DetachedCanonicalWriteAuthorityTests.Fixture f)
         {
-            var service = new SaveService(new SimpleLogger(false, (level, message) => { }), null, Path.GetDirectoryName(f.ActivePath));
-            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
-                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration),
-                f.PositionProfiles, f.Occupancy);
-            typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);
-            foreach (var pair in new[] { new System.Collections.Generic.KeyValuePair<string, object>("_canonicalSession", f.Session),
-                new System.Collections.Generic.KeyValuePair<string, object>("_canonicalFileSystem", f.FileSystem),
-                new System.Collections.Generic.KeyValuePair<string, object>("_validationContext", f.Context) })
-                typeof(SaveService).GetField(pair.Key, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(service, pair.Value);
+            var before=f.Session.GetCurrentBytes();
+            var service=DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(f,out _);
+            service.ConfigureStructuralEconomy(f.Economy);
+            service.ConfigureContentAcquisitionEconomy(f.Acquisition);
+            service.ConfigureStructuralRemovalPolicy(f.RemovalPolicy);
+            CollectionAssert.AreEqual(before,service.CanonicalSession.GetCurrentBytes(),"Binding an existing fixture cannot publish a time or gameplay change");
             return service;
         }
 
