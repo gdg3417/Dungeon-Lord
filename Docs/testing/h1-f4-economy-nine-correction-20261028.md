@@ -69,3 +69,33 @@ Independent verification must require all nine original exact names, not merely
 a total of 12. Then execute and independently verify the unchanged 236-case
 cohort. The selector correction changes no Unity/test source or discovery
 identity. It does not relax the supervisor's expected counts.
+
+## Qualified economy gate
+
+Qualified source: 9bc0fd0c63fd9d58d326260b43b3c1c88e3dca3c.
+
+| Campaign | Selection | Passed | Failed | Skipped |
+| --- | --- | ---: | ---: | ---: |
+| f42e1a6fc259482a9320fb3a8d9f1865 | Original nine plus three adjacent authority negatives | 12 | 0 | 0 |
+| 5cafddf384f54da0aaa52633e440ebf3 | Complete affected economy/projection/acquisition/passive cohort | 236 | 0 | 0 |
+
+Both campaigns completed all five stages and independent process/Job, exact
+restoration, reservation and protected/prior-evidence verification. The complete
+236 leaf-ID set matches fresh discovery; all nine original identities passed
+in both runs. The 12 overlap the 236 and are not added together.
+
+The initial independent check compared discovery display names and found one
+source-backed duplicate-label difference. The unchanged 5d and 5.0d TestCase
+attributes both compile to the same parameters. Discovery labels ID1435 with
+GeneratedTestCase2; NUnit XML reports IDs1434/1435 under the same fullname.
+A separately retained second checker requires every original ID, both passes
+and exactly that one documented alias. The failed first checker is preserved;
+no campaign, validator, skip or expected count was changed to resolve it.
+
+Original failed campaigns and raw evidence remain unchanged. All Unity inputs
+and the TMP fallback font are restored, and the reservation is null with
+previous=5cafddf384f54da0aaa52633e440ebf3. The JSON companion contains complete
+stage results, tool identities, exact receipts and every original nine-case
+result. This qualifies the affected economy gate, not full H1-F4 completion.
+The consolidated floor, schema, scene, full-suite, Windows and matched
+performance work continues without owner UAT or merge.
