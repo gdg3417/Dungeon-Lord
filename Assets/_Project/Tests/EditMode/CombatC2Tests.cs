@@ -275,11 +275,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 if(residual && phase==2) clock.Seconds=1500;
                 bool interrupted=failure!=null && phase==(residual ? 2 : 1);
                 byte[] before=service.CanonicalSession.GetCurrentBytes();
+                int replacementsBefore=f.FileSystem.Operations.Count(o=>o.Type==Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace);
                 if(interrupted) {
                     if(failure=="partial") f.FileSystem.EnablePartialWriteFailure(10);
                     else if(failure=="rollback") f.FileSystem.EnableFailureSequence(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush,1,
-                        Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace,2);
-                    else if(failure=="readback") f.FileSystem.EnableTargetedFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read,p=>p[0]==f.ActivePath,3,false);
+                        Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace,replacementsBefore+2);
+                    // Active reads: stale proof, protocol predecessor, evidence
+                    // settlement recheck, then committed-candidate readback.
+                    else if(failure=="readback") f.FileSystem.EnableTargetedFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read,p=>p[0]==f.ActivePath,4,false);
                     else f.FileSystem.EnableTargetedFailure(failure=="replace" ? Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace :
                         Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write,p=>true,1,false);
                 }
@@ -288,6 +291,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Assert.That(result.IsSuccess,Is.False); Assert.That(Monster(f).Health,Is.Zero);
                     Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.Zero);
                     CollectionAssert.AreEqual(before,service.CanonicalSession.GetCurrentBytes());
+                    var failedOperation=f.FileSystem.FailedOperation;
+                    if(failure=="readback") {
+                        Assert.That(failedOperation.Type,Is.EqualTo(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read));
+                        Assert.That(f.FileSystem.FailedTargetOccurrence,Is.EqualTo(4));
+                        Assert.That(failedOperation.Paths[0],Is.EqualTo(f.ActivePath));
+                    }
+                    if(failure=="rollback") {
+                        Assert.That(failedOperation.Type,Is.EqualTo(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace));
+                        Assert.That(failedOperation.Index,Is.EqualTo(replacementsBefore+2));
+                    }
                     f.FileSystem.DisableFailure();
                     if(failure=="rollback") {
                         Assert.That(result.Reason,Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
