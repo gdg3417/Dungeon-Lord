@@ -47,8 +47,15 @@ namespace DungeonBuilder.Tests.EditMode
             // fixed test clock; metadata writes cannot move the fixture's W.
             var inputs = fixture.Context.RecoveryInputs;
             var wall = new ResearchFixtureClock(fixture.Runtime.timeProvenance.AccountedBoundary);
-            var time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
-                inputs.Bootstrap.timeRules.detectClockSkewSeconds, wall, () => 0);
+            return OpenService(fixture, out loaded, wall, () => 0, out _);
+        }
+
+        internal static SaveService OpenService(Fixture fixture, out SaveData loaded,
+            IPreciseTimeSource wall, Func<double> monotonic, out TimeService time)
+        {
+            var inputs = fixture.Context.RecoveryInputs;
+            time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
+                inputs.Bootstrap.timeRules.detectClockSkewSeconds, wall, monotonic);
             time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);
             var result = new SaveService(new SimpleLogger(false, (level, message) => { }),
                 new SaveConfig { fileName = Path.GetFileName(fixture.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(fixture.ActivePath));

@@ -22,7 +22,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private const string FloorId = "canonical.floor.01";
         private static Fixture Start(bool permitted = true)
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null, workloadProfile: PhaseFourTestSupport.ProductionProfile());
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             f.Runtime.completedResearch = new CompletedResearchState { ProjectIds = permitted ? new[] { "ac_100" } : Array.Empty<string>() };

@@ -26,9 +26,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             public bool Delete(byte[] expected) { if (FailDelete) return false; Bytes = null; return true; }
         }
         internal static Fixture Content(string category = CanonicalSpatialSaveContracts.MonsterCategoryId,
-            string option = "placement.option.monster.skeleton")
+            string option = "placement.option.monster.skeleton", SaveSpatialMigrationLimitsProfile profile = null)
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null, workloadProfile: profile);
             var room = f.Prepare(DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic", null, null, null));
             Assert.That(room.IsSuccess, Is.True, room.Reason);
             f = f.Rebase(room.State);

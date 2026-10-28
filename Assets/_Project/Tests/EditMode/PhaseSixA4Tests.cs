@@ -25,6 +25,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
             PhaseSixA3FloorActivationEligibilityTests.Eligible(recoveryInputBytes, initialTime);
         private static Fixture Authored(Action<RunSimulationConfig> author, long? initialTime = null) =>
             Eligible(PhaseFourTestSupport.AuthoredInputs((config, _) => author(config)), initialTime);
+        private sealed class RecoveryClock : IPreciseTimeSource
+        {
+            private readonly long now;
+            internal RecoveryClock(long value) { now = value; }
+            public UnixTimePoint UtcNow() => new UnixTimePoint(now, 0);
+            public long UtcNowUnixSeconds() => now;
+        }
+        private static SaveService RecoveryService(Fixture f, long now)
+        {
+            var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(f, out _,
+                new RecoveryClock(now), () => 0, out _);
+            service.ConfigureRunLoot(f.Context.RecoveryInputs.Loot);
+            service.ConfigureStructuralEconomy(f.Economy);
+            service.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
+                PhaseSixA3FloorActivationEligibilityTests.Research(f));
+            return service;
+        }
+        private static CanonicalOfflinePassiveManaService Offline(Fixture f, out CanonicalPassiveManaService online)
+        {
+            var inputs = f.Context.RecoveryInputs;
+            online = new CanonicalPassiveManaService(inputs.Passive, inputs.Economy, new FormulaEngine(),
+                f.Profile.Canonical.Spatial, inputs.Bootstrap.tickSeconds);
+            return new CanonicalOfflinePassiveManaService(inputs.Passive, online);
+        }
         internal static string FloorTwo(Fixture f) => f.State.Floors.Single(x => x.FloorIndex == 1).FloorInstanceId;
 
         [Test]
@@ -300,7 +324,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Eligible();
             var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
-            service.ConfigureRunLoot(Loot()); service.ConfigureStructuralEconomy(f.Economy);
+            service.ConfigureRunLoot(f.Context.RecoveryInputs.Loot); service.ConfigureStructuralEconomy(f.Economy);
             service.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
                 PhaseSixA3FloorActivationEligibilityTests.Research(f));
             int publications = 0; service.CanonicalRuntimePublished += _ => publications++;
@@ -502,7 +526,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Authored(c => ForceDescent(c, true)); AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, FloorTwo(f)));
-            var snapshot = Snapshot(f); var engine = new RunSimulationService(f.Configuration, Loot());
+            var snapshot = Snapshot(f); var engine = new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot);
             var first = engine.SimulateSnapshot(1, snapshot);
             AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
             var second = engine.SimulateSnapshot(1, Snapshot(f));
@@ -519,17 +543,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(0)] [TestCase(1)]
         public void WipeTerminatesWithoutDecisionAtThatFloor(int wipeFloor)
         {
-            var f = Eligible();
+            var f = Authored(c => {
+                ForceDescent(c, true); c.PhaseFiveB.MinPartySize = c.PhaseFiveB.MaxPartySize = 3;
+                foreach (var profile in c.PhaseFiveB.DamageProfiles)
+                    if (profile.OptionId == MvpDungeonPlacementIds.SkeletonOptionId || profile.OptionId == MvpDungeonPlacementIds.SpikeTrapOptionId)
+                        profile.MinimumDamage = profile.MaximumDamage = 100;
+            });
             foreach (int floor in new[] { 0, 1 })
             {
                 AddContent(f, floor, MvpDungeonPlacementIds.MonsterCategoryId, floor == wipeFloor ? MvpDungeonPlacementIds.SkeletonOptionId : MvpDungeonPlacementIds.GoblinOptionId);
                 AddContent(f, floor, MvpDungeonPlacementIds.MonsterCategoryId, floor == wipeFloor ? MvpDungeonPlacementIds.SkeletonOptionId : MvpDungeonPlacementIds.GoblinOptionId);
                 if (floor == wipeFloor) AddContent(f, floor, MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId);
             }
-            ForceDescent(f.Configuration, true); f.Configuration.PhaseFiveB.MinPartySize = f.Configuration.PhaseFiveB.MaxPartySize = 3;
-            foreach (var p in f.Configuration.PhaseFiveB.DamageProfiles)
-                if (p.OptionId == MvpDungeonPlacementIds.SkeletonOptionId || p.OptionId == MvpDungeonPlacementIds.SpikeTrapOptionId)
-                    p.MinimumDamage = p.MaximumDamage = 100;
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, FloorTwo(f)));
             // This fixture requires a reached lethal trap. A3 no longer encounters off-path traps.
             var spatialRoom = Snapshot(f).Floors.Single(value => value.FloorIndex == wipeFloor)
@@ -540,7 +565,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             targetFloor.RoomContents.Assignments.Single(a => a.CategoryId == MvpDungeonPlacementIds.TrapCategoryId)
                 .RoomLocalPosition = IntraroomTraversal.Plan(spatialRoom).Path.First(tile => !monsterStarts.Contains(tile));
             f = f.Rebase(f.State);
-            var result = new RunSimulationService(f.Configuration, Loot()).SimulateSnapshot(1, Snapshot(f));
+            var result = new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot).SimulateSnapshot(1, Snapshot(f));
             Assert.That(result.Party.IsWiped, Is.True); Assert.That(result.FloorTransitions.Length, Is.EqualTo(wipeFloor));
             Assert.That(result.FinalRouteOutcomeKey, Is.EqualTo(RunSimulationService.RouteWipedKey));
             Assert.That(result.LootExtractionSummary.TotalExtractedWorldValue, Is.Zero);
@@ -595,15 +620,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(0)] [TestCase(1)]
         public void RetreatBeforeCompletionHasNoDecisionAtThatFloor(int retreatFloor)
         {
-            var f = Eligible(); AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            var f = Authored(c => {
+                ForceDescent(c, true); c.SuccessThreshold = .5;
+                c.MvpCompositionOutcomeTuning.SuccessChancePerPathCapacity = 0;
+                c.MvpCompositionOutcomeTuning.SuccessChancePenaltyPerDanger = .1;
+                foreach (var effect in c.MvpPlacementEffects)
+                    effect.Danger = effect.OptionId == (retreatFloor == 0 ? MvpDungeonPlacementIds.GoblinOptionId : MvpDungeonPlacementIds.SkeletonOptionId) ? 10 : 0;
+            }); AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
-            ForceDescent(f.Configuration, true); f.Configuration.SuccessThreshold = .5;
-            f.Configuration.MvpCompositionOutcomeTuning.SuccessChancePerPathCapacity = 0;
-            f.Configuration.MvpCompositionOutcomeTuning.SuccessChancePenaltyPerDanger = .1;
-            foreach (var e in f.Configuration.MvpPlacementEffects)
-                e.Danger = e.OptionId == (retreatFloor == 0 ? MvpDungeonPlacementIds.GoblinOptionId : MvpDungeonPlacementIds.SkeletonOptionId) ? 10 : 0;
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, FloorTwo(f)));
-            var run = new RunSimulationService(f.Configuration, Loot()).SimulateSnapshot(1, Snapshot(f));
+            var run = new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot).SimulateSnapshot(1, Snapshot(f));
             Assert.That(run.Party.IsWiped, Is.False); Assert.That(run.Success, Is.False);
             Assert.That(run.FloorTransitions.Length, Is.EqualTo(retreatFloor));
             Assert.That(run.RoomResolutions.Last().FloorIndex, Is.EqualTo(retreatFloor));
@@ -613,14 +639,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void CasualtiesStayDeadAndOriginalMemberTraitsAndFormationPersist()
         {
-            var f = Eligible(); AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            var f = Authored(c => {
+                ForceDescent(c, true);
+                var goblin = c.PhaseFiveB.DamageProfiles.Single(p => p.OptionId == MvpDungeonPlacementIds.GoblinOptionId);
+                goblin.MinimumDamage = goblin.MaximumDamage = 100;
+            }); AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
-            ForceDescent(f.Configuration, true);
-            var goblin = f.Configuration.PhaseFiveB.DamageProfiles.Single(p => p.OptionId == MvpDungeonPlacementIds.GoblinOptionId);
-            goblin.MinimumDamage = goblin.MaximumDamage = 100;
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, FloorTwo(f)));
             var expected = RunPartyGenerator.Create(f.Configuration.PhaseFiveB, "run-1");
-            var run = new RunSimulationService(f.Configuration, Loot()).SimulateSnapshot(1, Snapshot(f));
+            var run = new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot).SimulateSnapshot(1, Snapshot(f));
             var transfer = run.FloorTransitions[0];
             Assert.That(transfer.Descend, Is.True);
             Assert.That(transfer.MemberHealth.Count(h => h == 0), Is.EqualTo(1));
@@ -645,7 +672,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void BranchPlansAreFloorLocalAndFloorTwoDangerCannotChangeFloorOneDecision()
         {
-            var f = Eligible(); f.Runtime.completedResearch.ProjectIds = new[] { "ac_100", "ac_300" };
+            var f = Authored(c => ForceDescent(c, true)); f.Runtime.completedResearch.ProjectIds = new[] { "ac_100", "ac_300" };
             var first = f.State.Floors.Single(x => x.FloorIndex == 0);
             var room = StructuralEditService.Preview(f.State, new StructuralConstructionRequest {
                 FloorInstanceId = first.FloorInstanceId, RoomDefinitionId = "spatial.room.basic", Anchor = new TileCoordinate(0, 6),
@@ -663,7 +690,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(branch.IsSpatiallyValid, Is.True, string.Join(",", branch.ReasonCodes));
                 f.Accept(f.Execute(DetachedCanonicalMutationRequest.ConstructBranch(branch)));
             }
-            ForceDescent(f.Configuration, true);
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, FloorTwo(f)));
             var before = Snapshot(f); var floorOne = before.Floors[0].MaterializePlan().Forks.Single();
             Assert.That(floorOne.RequiredSuffix.Length, Is.EqualTo(1));
@@ -673,7 +699,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var after = Snapshot(f); var newFloorOne = after.Floors[0].MaterializePlan().Forks.Single();
             Assert.That(newFloorOne.RemainingRequiredDanger, Is.EqualTo(floorOne.RemainingRequiredDanger));
             Assert.That(newFloorOne.Fingerprint, Is.EqualTo(floorOne.Fingerprint));
-            var engine = new RunSimulationService(f.Configuration, Loot());
+            var engine = new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot);
             var a = engine.SimulateSnapshot(1, before).BranchOutcomes.First().Decision;
             var b = engine.SimulateSnapshot(1, after).BranchOutcomes.First().Decision;
             Assert.That(b.Q, Is.EqualTo(a.Q)); Assert.That(b.Enter, Is.EqualTo(a.Enter)); Assert.That(b.DecisionRoll, Is.EqualTo(a.DecisionRoll));
@@ -684,7 +710,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = PhaseFiveBBranchIntegrationTests.Fixture();
             var plan = Snapshot(f).Floors[0].MaterializePlan();
-            var engine = new RunSimulationService(f.Configuration, Loot());
+            var engine = new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot);
             var expected = engine.SimulateRoute(JsonUtility.FromJson<Gameplay.Structures.StructureRuntimeState>(JsonUtility.ToJson(f.Runtime.structureRuntime)),
                 f.Runtime.totalTicks, 1, RunPostureResolver.BalancedId, plan.RequiredRooms.Select(r => r.Room).ToArray(),
                 new RunSimulationService.BranchTraversal { Forks = plan.Forks, Workload = new BranchRunWorkload(f.Configuration.PhaseFiveB.BranchDecision) });
@@ -842,24 +868,25 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void TwoActiveFloorsSupportOfflinePublicationBeforeRunServiceStarts()
         {
-            var f = Eligible();
-            var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
-            service.ConfigureRunLoot(Loot());
-            service.ConfigureStructuralEconomy(f.Economy);
-            service.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f), PhaseSixA3FloorActivationEligibilityTests.Research(f));
+            var f = Eligible(initialTime: 1000);
+            f.Runtime.structureRuntime.ManaReserve = 0;
+            f.Accept(Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
+            var service = RecoveryService(f, 4600);
             SaveData published = null; service.CanonicalRuntimePublished += value => published = value;
             var activation = service.CommitFloorLifecycle(f.Runtime, FloorLifecycleAction.ActivateAllEligible, null);
             Assert.That(activation.IsSuccess, Is.True, activation.Reason); f.Accept(activation);
             Assert.That(published, Is.SameAs(activation.RuntimeProjection));
-            var config = PhaseFourTestSupport.PassiveMana(f.Profile.Canonical);
-            var online = new CanonicalPassiveManaService(config, f.Economy, new FormulaEngine(), f.Profile.Canonical.Spatial, 1);
-            var offline = new CanonicalOfflinePassiveManaService(config, online);
-            f.Runtime.lastSavedUtcUnix = 1000; f.Runtime.structureRuntime.ManaReserve = 0;
+            var offline = Offline(f, out var online);
             var calculated = offline.Resolve(f.Runtime, f.Configuration, 4600);
             Assert.That(calculated.CanonicalRate.ActiveFloorCount, Is.EqualTo(2));
             Assert.That(calculated.ApplicableOnlineManaPerHour, Is.EqualTo(online.ResolveRate(f.Runtime, f.Configuration).ManaPerHour));
-            var committed = service.CommitOfflinePassiveMana(f.Runtime, calculated);
-            Assert.That(committed.Persisted, Is.True, committed.Reason.ToString());
+            service.BeginCanonicalRecovery(f.Runtime);
+            for (int phase = 0; phase < 3; phase++) {
+                var committed = service.AdvanceCanonicalRecovery(f.Runtime, offline, (_, __) => Assert.Fail("Dormant fixture has no accepted ticks"));
+                Assert.That(committed.IsSuccess, Is.True, committed.Reason); f.Accept(committed);
+            }
+            Assert.That(published.timeProvenance.Episode, Is.Null);
+            Assert.That(published.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(4600, 0)));
             Assert.That(published.structureRuntime.ManaReserve, Is.EqualTo(calculated.WalletAfter));
             var deactivation = service.CommitFloorLifecycle(published, FloorLifecycleAction.Deactivate, FloorTwo(f));
             Assert.That(deactivation.IsSuccess, Is.True, deactivation.Reason);
@@ -870,17 +897,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void SameSessionOfflinePublicationRetainsAllTransientRunEvidenceButReopenDoesNotFabricateIt()
         {
-            var f = Eligible();
+            var f = Authored(c => ForceDescent(c, true));
             AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
-            ForceDescent(f.Configuration, true);
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                 FloorLifecycleAction.Activate, FloorTwo(f)));
+            // The supported B1 reader/executable still provides legacy transient
+            // evidence. It is read-only and cannot grant historical producer proof.
+            var legacy = new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot).SimulateSnapshot(1, Snapshot(f));
+            Assert.That(legacy.Party, Is.Not.Null); Assert.That(legacy.EncounterEvents, Is.Not.Empty);
             f.Accept(Writer(f).CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
-                new RunSimulationService(f.Configuration, Loot()), RunPostureResolver.BalancedId,
+                new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot), RunPostureResolver.BalancedId,
                 Math.Max(1, f.Runtime.lastSavedUtcUnix)));
             var before = f.Runtime.runHistory.LatestOutcome;
-            Assert.That(before.Party, Is.Not.Null); Assert.That(before.EncounterEvents, Is.Not.Empty);
+            Assert.That(before.Party, Is.Not.Null); Assert.That(before.CombatEvents, Is.Not.Empty);
+            Assert.That(CombatC0Diagnostics.IsCombatC2(before), Is.True);
             Assert.That(before.BranchOutcomes, Is.Not.Null); Assert.That(before.FloorTransitions, Is.Not.Empty);
             Assert.That(before.DepthObjective, Is.Not.Null);
             Assert.That(before.SpatialEvents, Is.Not.Empty);
@@ -891,25 +922,25 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(serialized, Does.Not.Contain("\"FloorTransitions\""));
             Assert.That(serialized, Does.Not.Contain("\"DepthObjective\""));
 
-            var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
-            service.ConfigureRunLoot(Loot()); service.ConfigureStructuralEconomy(f.Economy);
-            service.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
-                PhaseSixA3FloorActivationEligibilityTests.Research(f));
+            var service = RecoveryService(f, f.Runtime.lastSavedUtcUnix + 3600);
             var go = new GameObject("PhaseSixA4TransientEvidenceRetention");
             try
             {
                 var root = go.AddComponent<GameRoot>();
                 typeof(GameRoot).GetProperty("Save").SetValue(root, f.Runtime);
                 root.AttachSaveServiceForTests(service);
-                var passive = PhaseFourTestSupport.PassiveMana(f.Profile.Canonical);
-                var online = new CanonicalPassiveManaService(passive, f.Economy, new FormulaEngine(), f.Profile.Canonical.Spatial, 1);
-                var calculated = new CanonicalOfflinePassiveManaService(passive, online).Resolve(f.Runtime, f.Configuration,
-                    Math.Max(1, f.Runtime.lastSavedUtcUnix) + 3600);
-                var committed = service.CommitOfflinePassiveMana(f.Runtime, calculated);
-                Assert.That(committed.Persisted, Is.True, committed.Reason.ToString());
+                var offline = Offline(f, out _);
+                service.BeginCanonicalRecovery(root.Save);
+                for (int phase = 0; phase < 3; phase++) {
+                    var committed = service.AdvanceCanonicalRecovery(root.Save, offline, (_, __) => Assert.Fail("Dormant fixture has no accepted ticks"));
+                    Assert.That(committed.IsSuccess, Is.True, committed.Reason);
+                }
+                Assert.That(root.Save.timeProvenance.Episode, Is.Null);
                 var after = root.Save.runHistory.LatestOutcome;
                 Assert.That(after.Party, Is.SameAs(before.Party));
                 Assert.That(after.EncounterEvents, Is.SameAs(before.EncounterEvents));
+                Assert.That(after.CombatEvents, Is.SameAs(before.CombatEvents));
+                Assert.That(after.CombatMonsters, Is.SameAs(before.CombatMonsters));
                 Assert.That(after.BranchOutcomes, Is.SameAs(before.BranchOutcomes));
                 Assert.That(after.FloorTransitions, Is.SameAs(before.FloorTransitions));
                 Assert.That(after.DepthObjective, Is.SameAs(before.DepthObjective));
@@ -933,7 +964,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void EmptyRequiredRoomsStillReachFinalCompletionWithoutInventingEncounters()
         {
-            var f = Eligible();
+            var f = Authored(c => ForceDescent(c, true));
             foreach (int floorIndex in new[] { 0, 1 })
             {
                 var floor = f.State.Floors.Single(x => x.FloorIndex == floorIndex);
@@ -944,9 +975,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
                 f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(preview)));
             }
-            ForceDescent(f.Configuration, true);
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.ActivateAllEligible, null));
-            var result = new RunSimulationService(f.Configuration, Loot()).SimulateSnapshot(1, Snapshot(f));
+            var result = new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot).SimulateSnapshot(1, Snapshot(f));
             Assert.That(result.Success, Is.True); Assert.That(result.FinalRouteOutcomeKey, Is.EqualTo(RunSimulationService.RouteClearedKey));
             Assert.That(result.RoomResolutions.Length, Is.EqualTo(4)); Assert.That(result.EncounterEvents, Is.Empty);
             Assert.That(result.Party.Members.All(m => m.CurrentHealth == m.MaxHealth), Is.True);

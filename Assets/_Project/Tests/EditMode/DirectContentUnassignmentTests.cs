@@ -16,7 +16,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static Fixture Active(string option = MvpDungeonPlacementIds.GoblinOptionId,
             SaveSpatialMigrationLimitsProfile profile = null)
         {
-            var f = Fixture.Create(null, workloadProfile: profile);
+            var f = Fixture.Create(null, workloadProfile: profile ?? PhaseFourTestSupport.ProductionProfile());
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             Assert.That(MvpDungeonPlacementIds.TryGetCategoryForOption(option, out string category), Is.True);

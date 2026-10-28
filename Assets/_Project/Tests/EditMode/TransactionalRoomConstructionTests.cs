@@ -409,7 +409,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void BootstrapConstructionVisibilityIsDiagnosticOnlyWithOtherCapabilitiesRetained()
         {
-            var f = Room(); var go = new GameObject("ConstructionRetirementSmoke"); go.SetActive(false);
+            var f = PhaseSevenA4TransactionalEditorTests.Content(profile: PhaseFourTestSupport.ProductionProfile());
+            var go = new GameObject("ConstructionRetirementSmoke"); go.SetActive(false);
             try
             {
                 var root = StructuralConstructionGameRootTests.PurchaseRoot(go, f);
@@ -428,7 +429,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void BootstrapUnmigratedActiveFloorStarterSetupRemainsAvailable()
         {
-            var f = Fixture.Create(null); var go = new GameObject("StarterSetupBoundary"); go.SetActive(false);
+            var f = Fixture.Create(null, workloadProfile: PhaseFourTestSupport.ProductionProfile());
+            var go = new GameObject("StarterSetupBoundary"); go.SetActive(false);
             try
             {
                 var root = StructuralConstructionGameRootTests.PurchaseRoot(go, f);
