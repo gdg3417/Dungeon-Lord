@@ -37,6 +37,7 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         [UnityTest] public IEnumerator SceneClockInvalidUtcFailsClosed() { yield return Invoke("SceneClockInvalidUtcFailsClosed"); }
         [UnityTest] public IEnumerator SceneClockNativeFractionAndOwnerRemainBound() { yield return Invoke("SceneClockNativeFractionAndOwnerRemainBound"); }
         [UnityTest] public IEnumerator SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit() { yield return Invoke("SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit"); }
+        [UnityTest] public IEnumerator SceneClockQualificationAdvanceRetainsTheCanonicalOwner() { yield return Invoke("SceneClockQualificationAdvanceRetainsTheCanonicalOwner"); }
 
         [UnityTest] public IEnumerator R0ResearchPrerequisiteNativeShellBlocks() { yield return Invoke("R0ResearchPrerequisiteNativeShellBlocksWithoutResearchWrite"); }
         [UnityTest] public IEnumerator R0ResearchPrerequisiteAutomaticSettlement() { yield return Invoke("R0ResearchPrerequisiteRequiresAutomaticTerminalSettlement"); }

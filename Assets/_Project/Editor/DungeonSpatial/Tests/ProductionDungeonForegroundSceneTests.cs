@@ -253,6 +253,36 @@ namespace DungeonBuilder.M0.Tests
             return sceneClock.Advance;
         }
 
+        [UnityTest] public IEnumerator SceneClockQualificationAdvanceRetainsTheCanonicalOwner()
+        {
+            var root = GameRoot.Instance; var owner = root.TimeService;
+            var method = typeof(GameRoot).GetMethod("QualificationAdvance", BindingFlags.Instance | BindingFlags.NonPublic);
+            byte[] before = root.SaveService.CanonicalSession.GetCurrentBytes();
+            var foreign = new SceneClock();
+            foreach (Action<double> unsupported in new Action<double>[] { null, foreign.Advance }) {
+                var error = Assert.Throws<TargetInvocationException>(() => method.Invoke(root, new object[] { unsupported }));
+                Assert.That(error.InnerException, Is.TypeOf<InvalidOperationException>());
+                CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
+            }
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(foreign, foreign.Monotonic));
+            var advance = (Action<double>)method.Invoke(root, new object[] { (Action<double>)sceneClock.Advance });
+            long through = owner.ForegroundThrough, ticks = root.Save.totalTicks;
+            advance(.125); yield return null; yield return null;
+            Assert.That(root.TimeService, Is.SameAs(owner));
+            Assert.That(typeof(SaveService).GetField("recoveryTime", BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(root.SaveService), Is.SameAs(owner));
+            Assert.That(owner.ForegroundThrough, Is.EqualTo(through + 125));
+            Assert.That(root.Save.totalTicks, Is.EqualTo(ticks));
+            Assert.That(root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(through + 125));
+            before = root.SaveService.CanonicalSession.GetCurrentBytes();
+            advance(0); yield return null; yield return null;
+            CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
+            Assert.Throws<ArgumentException>(() => DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.CapturePath("../unowned.png"));
+            string capture = DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.CapturePath("clock-owner.png");
+            Assert.That(capture, Does.StartWith(Path.GetFullPath(Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT")) + Path.DirectorySeparatorChar));
+            Assert.That(File.Exists(capture), Is.False);
+        }
+
         [UnityTest] public IEnumerator LivingDungeonB3B2ProvenRollbackRetriesThroughRealSaveBarrier()
             => ForegroundFailureRetry(false);
 

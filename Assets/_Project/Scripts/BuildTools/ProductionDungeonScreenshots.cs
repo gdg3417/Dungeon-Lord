@@ -29,9 +29,39 @@ namespace DungeonBuilder.M0.EditorTools
         }
         public static void Capture(string filename)
         {
-            string root = Path.GetFullPath("TestResults/phase7a4-screenshots"); Directory.CreateDirectory(root);
-            string path = Path.Combine(root, Path.GetFileName(filename));
+            string path = CapturePath(filename);
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            if ((new DirectoryInfo(Path.GetDirectoryName(path)).Attributes & FileAttributes.ReparsePoint) != 0 || File.Exists(path))
+                throw new IOException("qualification.capture.output_exists_or_redirected");
             ScreenCapture.CaptureScreenshot(path);
+            Debug.Log("Qualification capture: " + path);
+        }
+        internal static string CapturePath(string filename)
+        {
+            if (string.IsNullOrWhiteSpace(filename) || filename != Path.GetFileName(filename) ||
+                filename.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                throw new ArgumentException("qualification.capture.filename_invalid");
+            string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+            bool qualification = Application.productName.StartsWith("Dungeon Lord B3B2 Smoke H1F4 ", StringComparison.Ordinal);
+            if (qualification || !string.IsNullOrEmpty(export)) {
+                if (!qualification || !Application.isBatchMode || string.IsNullOrEmpty(export))
+                    throw new InvalidOperationException("qualification.capture.isolation_required");
+                var output = new DirectoryInfo(Path.GetFullPath(export));
+                var stage = output.Parent; var campaign = stage?.Parent; var supervisor = campaign?.Parent;
+                if (output.Name != "fixture-inputs" || !output.Exists ||
+                    !string.Equals(supervisor?.FullName, Path.GetFullPath(Path.Combine(Application.dataPath, "../TestResults/qualification-supervisor")), StringComparison.OrdinalIgnoreCase) ||
+                    !Guid.TryParseExact(campaign?.Name, "N", out _) || !File.Exists(Path.Combine(output.FullName, "ownership.json")))
+                    throw new InvalidOperationException("qualification.capture.output_invalid");
+                foreach (var parent in new[] { supervisor, campaign, stage, output })
+                    if (!parent.Exists || (parent.Attributes & FileAttributes.ReparsePoint) != 0)
+                        throw new InvalidOperationException("qualification.capture.output_redirected");
+                return Path.Combine(output.FullName, "screenshots", Guid.NewGuid().ToString("N").Substring(0, 8) + "-" + filename);
+            }
+            // Existing manual capture location remains available, with a fresh
+            // name if its requested historical capture already exists.
+            string root = Path.GetFullPath("TestResults/phase7a4-screenshots");
+            string path = Path.Combine(root, filename);
+            return File.Exists(path) ? Path.Combine(root, Guid.NewGuid().ToString("N").Substring(0, 8) + "-" + filename) : path;
         }
     }
 }
