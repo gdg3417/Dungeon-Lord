@@ -21,8 +21,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static RunSimulationService Service => new RunSimulationService(CombatC0IntegrationTests.Config(), PhaseSixA4Tests.Loot());
         private static Fixture Dungeon(bool two = false, int hp = 8, bool revival = false)
         {
-            var f = two ? PhaseSixA4Tests.Eligible() : Fixture.Create(null);
-            f.Configuration = CombatC0IntegrationTests.Config();
+            var inputs = PhaseFourTestSupport.AuthoredInputs((config, _) => PhaseSixA4Tests.ForceDescent(config, true));
+            var f = two ? PhaseSixA4Tests.Eligible(inputs) : Fixture.Create(null, recoveryInputBytes: inputs);
             if (!two) f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             if (two) {
@@ -33,6 +33,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             if (!two) CombatC2Tests.SetState(f, hp, revival, 0);
             return f;
+        }
+        [Test] public void SchemaSeventeenWriterRejectsReloadedConfigurationBeforeCandidatePreparation()
+        {
+            var f = Fixture.Create(null);
+            var before = f.Session.GetCurrentBytes();
+            var bound = f.Context.RecoveryInputs.Configuration;
+            Assert.That(f.Configuration, Is.SameAs(bound));
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, f.Context).CurrentTargetValidated, Is.True);
+            // Even an equal legacy projection is not proof that a later reload
+            // produced the immutable configuration consumed by this owner.
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                Encoding.UTF8.GetString(f.Context.RecoveryInputs.Identity.GetInput(0)), out var reloaded), Is.True);
+            f.Configuration = reloaded;
+            CollectionAssert.AreEqual(LegacyGameplayConfigurationContract.SerializeCanonical(bound),
+                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration));
+            var writer = f.Authority;
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            Assert.That(typeof(DetachedCanonicalWriteAuthority).GetField("recoveryBindingsValid", flags).GetValue(writer), Is.False);
+            Assert.That(typeof(DetachedCanonicalWriteAuthority).GetMethod("ValidateSession", flags).Invoke(writer, new object[] { f.Session }), Is.Null);
+            var rejected = f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(rejected.IsSuccess, Is.False);
+            Assert.That(rejected.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.ValidationFailedReason));
+            CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            // Restoring the actual consumed object permits the identical write;
+            // this does not rebind a save or change its persistent digest.
+            f.Configuration = bound;
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId)));
+            Assert.That(f.Runtime.timeProvenance.RecoveryContextSha256, Is.EqualTo(f.Context.RecoveryInputs.Identity.Digest));
+            TestContext.WriteLine("First guard: recoveryBindingsValid=false; ValidateSession=null before preparation; consumed object succeeds.");
         }
         private static RunExecution Start(ActiveFloorRunSnapshot snapshot, bool persistent = true, int sequence = 1) =>
             Service.StartTimedCombatSnapshot(sequence, snapshot, Timing, persistent);
