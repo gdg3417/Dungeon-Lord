@@ -301,8 +301,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 TestContext.WriteLine("Combat variant=" + (persistent ? "C2" : "C0") + " terminalBytes=" + final.ExportCheckpoint(Limits).GetBytes().Length +
                     " events=" + final.NextOrdinal + " work=" + final.CommittedCombatWork);
             }
-            string folder = "TestResults/living-dungeon-b3b1-20261018/smoke-input-" + Guid.NewGuid().ToString("N");
-            Directory.CreateDirectory(folder);
+            string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+            Assert.That(UnityEngine.Application.isBatchMode, Is.True);
+            Assert.That(UnityEngine.Application.productName, Does.StartWith("Dungeon Lord B3B2 Smoke H1F4 "));
+            Assert.That(export, Is.Not.Null.And.Not.Empty);
+            var output = new DirectoryInfo(Path.GetFullPath(export));
+            var stage = output.Parent; var campaign = stage?.Parent; var supervisor = campaign?.Parent;
+            Assert.That(output.Name, Is.EqualTo("fixture-inputs"));
+            Assert.That(supervisor?.FullName, Is.EqualTo(Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath,
+                "../TestResults/qualification-supervisor"))).IgnoreCase);
+            Assert.That(Guid.TryParseExact(campaign?.Name, "N", out _), Is.True);
+            Assert.That(stage?.Name, Is.EqualTo("b3b1-regressions").Or.EqualTo("full-edit").Or.EqualTo("full-play"));
+            foreach (var directory in new[] { supervisor, campaign, stage, output }) {
+                Assert.That(directory.Exists, Is.True);
+                Assert.That((directory.Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
+            }
+            string folder = Path.Combine(output.FullName, "b3b1-smoke-input");
+            Assert.That(Directory.Exists(folder), Is.False); Directory.CreateDirectory(folder);
             File.WriteAllText(folder + "/input.json", UnityEngine.JsonUtility.ToJson(new DungeonBuilder.M0.BuildTools.CombatCheckpointDevelopmentSmoke.Input {
                 MaximumBytes = Limits.MaximumBytes, MaximumReplayEvents = Limits.MaximumReplayEvents, MaximumCombatWork = Limits.MaximumCombatWork, Rows = rows.ToArray() }));
             TestContext.WriteLine("Standalone input=" + Path.GetFullPath(folder + "/input.json"));
@@ -342,22 +357,59 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(LivingDungeonContracts.Validate(owner, new[] { b1 }), Is.False);
             Assert.Throws<InvalidOperationException>(() => LivingDungeonTerminalSettlement.Select(owner, profile));
             var original = owner.Parties.Select(p => p.Checkpoint).ToArray();
-            f.Context = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
+            var historicalContext = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
                 LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile.Canonical,
                 f.Occupancy, livingDungeonProfiles: new[] { profile });
-            f.Reopen(); // owner was still dormant on disk
-            var recognized = DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile);
+            // Historical synthetic profiles retain their reader contract; they
+            // cannot acquire schema-17 writer or producer-bound activation authority.
+            Assert.That(Assert.Throws<ArgumentException>(() => historicalContext.BindRecoveryInputs(f.Context.RecoveryInputs)).Message,
+                Is.EqualTo(RecoveryEpisode.ContextMismatch));
             // The shared allocator was advanced by the real scheduler above.
             f.Runtime.runHistory.NextRunSequence = 4;
-            recognized = DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile);
+            var recognized = DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile);
+            Assert.That(recognized.IsSuccess, Is.True, recognized.Reason);
+            var before = f.Session.GetCurrentBytes();
             var candidate = f.Session.PrepareLivingDungeonReplacement(recognized, f.State, owner);
-            Assert.That(candidate.IsSuccess, Is.True, candidate.Reason);
-            f.FileSystem.Seed(f.ActivePath, candidate.Update.GetBytes()); f.Reopen();
-            var reopened = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context);
+            Assert.That(candidate.IsSuccess, Is.False, "Unsupported historical profile must not become a current writer");
+            CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            var historical = SyntheticHistoricalMixedOwner(f, recognized.Snapshot, owner);
+            var reopened = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(historical, historicalContext);
             Assert.That(reopened.IsValid, Is.True, reopened.Reason);
+            Assert.That(reopened.CurrentTargetValidated, Is.False);
+            Assert.That(DetachedCanonicalSaveSession.Open(historical, historicalContext, f.Profile).IsSuccess, Is.False);
             for (int i = 0; i < original.Length; i++) CollectionAssert.AreEqual(original[i], reopened.LivingDungeon.Parties[i].Checkpoint);
             Assert.That(reopened.LivingDungeon.Parties.Select(p => BitConverter.ToInt32(p.Checkpoint, 0)), Is.EqualTo(new[] { 1, 2, 2 }));
-            TestContext.WriteLine("Mixed owner completeSaveBytes=" + f.Session.GetCurrentBytes().Length + " aggregateReplay=" + owner.Parties.Sum(p => p.NextOrdinal));
+            TestContext.WriteLine("Synthetic schema-16 reader fixture only; no production producer proof: completeSaveBytes=" + historical.Length + " aggregateReplay=" + owner.Parties.Sum(p => p.NextOrdinal));
+        }
+
+        // Authored test-only historical reader input, never migration output or
+        // historical producer evidence. Frozen serializers and sources are unchanged.
+        private static byte[] SyntheticHistoricalMixedOwner(Fixture f, DetachedRecognizedSaveStateSnapshot recognized,
+            LivingDungeonState owner)
+        {
+            var limits = f.Profile.Canonical.ForSchema(16).Serialized;
+            var issues = new SpatialIssueCollector(limits.MaximumDiagnostics);
+            Assert.That(ContractJson.TryParse(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized, issues, out var root), Is.True);
+            Assert.That(recognized.TryGet("runHistory", out var history), Is.True);
+            var w = new ContractJsonWriter(limits); w.Node(); w.Token("{");
+            for (int i = 0; i < root.Fields.Count; i++) {
+                if (i != 0) w.Token(","); var field = root.Fields[i]; w.String(field.Key); w.Token(":");
+                if (field.Key == "schemaVersion") w.Token("16");
+                else if (field.Key != "primary") DetachedCompleteSaveContract.WriteCanonicalNode(w, field.Value);
+                else {
+                    w.Node(); w.Token("{");
+                    for (int j = 0; j < field.Value.Fields.Count; j++) {
+                        if (j != 0) w.Token(","); var p = field.Value.Fields[j]; w.String(p.Key); w.Token(":");
+                        if (p.Key == TimeProvenance.Owner) w.Token(TimeProvenance.LegacyJson);
+                        else if (p.Key == "livingDungeon") LivingDungeonContracts.Write(w, owner);
+                        else if (p.Key == "runHistory") w.Token(Encoding.UTF8.GetString(history));
+                        else DetachedCompleteSaveContract.WriteCanonicalNode(w, p.Value);
+                    }
+                    w.Token("}");
+                }
+            }
+            w.Token("}"); return w.Finish();
         }
 
         [Test] public void PendingGeometryWorkExhaustionIsTheSameBeforeAndAfterReopen()

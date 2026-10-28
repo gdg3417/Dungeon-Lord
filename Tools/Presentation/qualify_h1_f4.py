@@ -121,8 +121,8 @@ def prepare(attempt):
     print(json.dumps({"preparation": str(prep), "product": product, "save": str(save)}))
 
 
-def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=False, living=False, common_repro=False, configuration_repro=False, instrumentation=False):
-    if sum((discovery, full_edit, fixtures, research, living, common_repro, configuration_repro, instrumentation)) > 1:
+def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=False, living=False, common_repro=False, configuration_repro=False, instrumentation=False, b3b1=False):
+    if sum((discovery, full_edit, fixtures, research, living, common_repro, configuration_repro, instrumentation, b3b1)) > 1:
         raise ValueError("Choose one explicit workload")
     prep, product, save = identities(attempt)
     check_protected(prep, save)
@@ -139,9 +139,9 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     command = lambda mode: [sys.executable, "-B", str(helper), mode, "--attempt", attempt, "--stage", "{stage}"]
     restored = json.loads((prep / "original-inputs.json").read_text())
     restored_id = hashlib.sha256(json.dumps(restored, sort_keys=True).encode()).hexdigest()
-    name = "instrumentation-regressions" if instrumentation else "configuration-repro" if configuration_repro else "common-repro" if common_repro else "inventory" if discovery else "full-edit" if full_edit else "living-regressions" if living else "research-regressions" if research else "fixture-regressions" if fixtures else "focused"
+    name = "b3b1-regressions" if b3b1 else "instrumentation-regressions" if instrumentation else "configuration-repro" if configuration_repro else "common-repro" if common_repro else "inventory" if discovery else "full-edit" if full_edit else "living-regressions" if living else "research-regressions" if research else "fixture-regressions" if fixtures else "focused"
     workload = {"id": name, "role": "report" if discovery else "test", "depends": [name + "-preflight"],
-                "command": command("run-instrumentation" if instrumentation else "run-configuration-repro" if configuration_repro else "run-common-repro" if common_repro else "run-inventory" if discovery else "run-full-edit" if full_edit else "run-living" if living else "run-research" if research else "run-fixtures" if fixtures else "run-test"), "timeout_seconds": 3600 if full_edit else 960,
+                "command": command("run-b3b1" if b3b1 else "run-instrumentation" if instrumentation else "run-configuration-repro" if configuration_repro else "run-common-repro" if common_repro else "run-inventory" if discovery else "run-full-edit" if full_edit else "run-living" if living else "run-research" if research else "run-fixtures" if fixtures else "run-test"), "timeout_seconds": 3600 if full_edit else 960,
                 "artifacts": ["unity.log", "invocation.json", "editor-exit.json" if discovery else "cli-exit.json", "generated-inputs"]}
     if discovery:
         workload["artifacts"].append("inventory.json")
@@ -156,9 +156,9 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
         # Research adds its 18 durable-acknowledgement and three save cases.
         # Living adds its 51 one-floor and 37 two-floor leaves; no Editor
         # sustained production-profile scene or Windows workload is selected.
-        workload.update(xml="results.xml", expected_tests=28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
+        workload.update(xml="results.xml", expected_tests=51 if b3b1 else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
             allowed_skips=["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"] if full_edit else [])
-    if living or full_edit: workload["artifacts"].append("fixture-inputs")
+    if b3b1 or living or full_edit: workload["artifacts"].append("fixture-inputs")
     stages = [
         {"id": name + "-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/" + name + "-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
         workload,
@@ -177,7 +177,7 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     if discovery:
         data["approved_substitutions"].append("Discovery only: pinned Editor directly, without -quit, for the asynchronous existing TestRunnerApi.RetrieveTestList callbacks; collector exits explicitly. No tests execute and no passing test gate is inferred.")
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 51 if b3b1 else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
                       "skips": None if discovery else 1 if full_edit else 0}))
 
 
@@ -235,6 +235,14 @@ def run_instrumentation(attempt, stage):
     return run_child(attempt, stage, command, "instrumentation-regressions", "cli-exit.json")
 
 
+def run_b3b1(attempt, stage):
+    stage = Path(stage).resolve()
+    command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--filter",
+               "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B1",
+               "--output", str(stage / "results.xml"), "--timeout", "900", "--no-color", "--", "-logFile", str(stage / "unity.log")]
+    return run_child(attempt, stage, command, "b3b1-regressions", "cli-exit.json")
+
+
 def run_living(attempt, stage):
     stage = Path(stage).resolve()
     command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--filter", LIVING_FILTER,
@@ -279,7 +287,7 @@ def run_child(attempt, stage, command, expected_stage, exit_name):
     font = (ROOT / FONT).read_bytes()
     environment = os.environ.copy()
     override = {"UNITY_NO_AUTH_BROKER": "1"} if command[0] == str(CLI) else {}
-    if expected_stage in ("living-regressions", "full-edit"):
+    if expected_stage in ("b3b1-regressions", "living-regressions", "full-edit"):
         # Fresh sealed artifact directory; old fixed-path fixture exports must
         # never be reused or overwritten. Override is local to this child only.
         export = stage / "fixture-inputs"; export.mkdir(exist_ok=False)
@@ -322,7 +330,7 @@ def restore(attempt, stage):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "plan-full-edit", "plan-fixtures", "plan-research", "plan-living", "plan-common-repro", "plan-configuration-repro", "plan-instrumentation", "preflight", "run-test", "run-inventory", "run-full-edit", "run-fixtures", "run-research", "run-living", "run-common-repro", "run-configuration-repro", "run-instrumentation", "restore", "finish"])
+    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "plan-full-edit", "plan-fixtures", "plan-research", "plan-living", "plan-common-repro", "plan-configuration-repro", "plan-instrumentation", "plan-b3b1", "preflight", "run-test", "run-inventory", "run-full-edit", "run-fixtures", "run-research", "run-living", "run-common-repro", "run-configuration-repro", "run-instrumentation", "run-b3b1", "restore", "finish"])
     parser.add_argument("--attempt", required=True)
     parser.add_argument("--stage")
     args = parser.parse_args()
@@ -336,6 +344,7 @@ if __name__ == "__main__":
     elif args.mode == "plan-common-repro": plan(args.attempt, common_repro=True)
     elif args.mode == "plan-configuration-repro": plan(args.attempt, configuration_repro=True)
     elif args.mode == "plan-instrumentation": plan(args.attempt, instrumentation=True)
+    elif args.mode == "plan-b3b1": plan(args.attempt, b3b1=True)
     elif args.mode == "run-test": raise SystemExit(run_test(args.attempt, args.stage))
     elif args.mode == "run-inventory": raise SystemExit(run_inventory(args.attempt, args.stage))
     elif args.mode == "run-full-edit": raise SystemExit(run_full_edit(args.attempt, args.stage))
@@ -345,5 +354,6 @@ if __name__ == "__main__":
     elif args.mode == "run-common-repro": raise SystemExit(run_common_repro(args.attempt, args.stage))
     elif args.mode == "run-configuration-repro": raise SystemExit(run_configuration_repro(args.attempt, args.stage))
     elif args.mode == "run-instrumentation": raise SystemExit(run_instrumentation(args.attempt, args.stage))
+    elif args.mode == "run-b3b1": raise SystemExit(run_b3b1(args.attempt, args.stage))
     elif args.mode == "restore": restore(args.attempt, args.stage)
     else: preflight(args.attempt, args.stage, restored=args.mode == "finish")
