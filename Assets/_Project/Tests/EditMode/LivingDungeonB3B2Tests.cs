@@ -325,7 +325,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             public UnixTimePoint UtcNow() => new UnixTimePoint(Now, 0);
         }
         internal static SaveService Service(Fixture f, ITimeSource utc) => Service(f, utc, out _);
-        private static SaveService Service(Fixture f, ITimeSource utc, out TimeService time, Func<double> monotonic = null)
+        internal static SaveService Service(Fixture f, ITimeSource utc, out TimeService time, Func<double> monotonic = null)
         {
             var inputs = f.Context.RecoveryInputs;
             time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
