@@ -95,12 +95,7 @@ namespace DungeonBuilder.M0.Tests
             for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
             var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null);
             Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename), "Disposable scene save isolation");
-            // A validated observation-time foreground return, through the real
-            // coordinator; no private lifecycle flags or canonical cuts are reset.
-            typeof(GameRoot).GetMethod("OnApplicationFocus", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                .Invoke(root, new object[] { true });
-            root.ApplyPauseState(false);
-            PumpSceneToClosed();
+            PumpSceneToClosed(establishForeground: true);
             var placed = root.SaveService.ExecuteCanonicalMutation(root.Save,
                 DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic", null, null, null));
             Assert.That(placed.IsSuccess, Is.True, placed.Reason);
@@ -160,12 +155,19 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.TimeService, Is.Null, "Injection supplies providers, never an early/replacement owner");
             TestContext.WriteLine("Isolated scene boot " + isolationCallbacks + ": " + config.save.fileName);
         }
-        private void PumpSceneToClosed()
+        private void PumpSceneToClosed(bool establishForeground = false)
         {
             var root = GameRoot.Instance;
             var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
             TraceSceneState("drain.begin");
             for (int pump = 0; pump < 128; pump++) {
+                // Completing boot samples the platform's actual focus again.
+                // Establish this fixture's foreground observation after that
+                // initialization too, using callbacks at the same valid cut.
+                if (establishForeground && !root.TimeService.RecoveryForegroundObserved) {
+                    typeof(GameRoot).GetMethod("OnApplicationPause", flags).Invoke(root, new object[] { false });
+                    typeof(GameRoot).GetMethod("OnApplicationFocus", flags).Invoke(root, new object[] { true });
+                }
                 typeof(GameRoot).GetMethod("UpdateForeground", flags).Invoke(root, null);
                 Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root), Is.Null);
                 if (root.Save.livingDungeon.IsClosed && !root.TimeService.RecoveryClockActive && !root.TimeService.HasDeferredRecovery) return;
