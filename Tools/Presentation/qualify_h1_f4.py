@@ -38,6 +38,7 @@ SCENE_REPRO_FILTER = ";".join([
 
 SCENE_CLOCK_FILTER = SCENE_REPRO_FILTER + ";" + ";".join([
     "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClock",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentLootRejectionReasons",
     "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentCategoriesInvalidRetryAndSave"])
 
 

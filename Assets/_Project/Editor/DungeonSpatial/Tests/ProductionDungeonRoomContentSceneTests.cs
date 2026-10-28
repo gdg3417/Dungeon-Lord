@@ -308,6 +308,10 @@ namespace DungeonBuilder.M0.Tests
         {
             TraceSceneState("case.before-funding");
             var root=GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
+            // Complete the normal foreground publication queued by QA funding before
+            // measuring draft isolation. Its numeric serialization may differ even
+            // at this unchanged controlled time cut; draft actions must not write.
+            PumpSceneToClosed();
             var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var source=floor.Layout.Rooms[0]; var original=floor.RoomContents.Assignments.Single();
             yield return ConstructReassignmentDestination(trace: true);

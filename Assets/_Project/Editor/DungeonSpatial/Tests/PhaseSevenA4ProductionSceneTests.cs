@@ -223,12 +223,6 @@ namespace DungeonBuilder.M0.Tests
             } finally { sceneClock.InvalidUtc = sceneClock.InvalidMonotonic = false; }
             yield return null;
         }
-        [UnityTest] public IEnumerator SceneClockHistoricalOrderLootCapacityAndSaveReopen()
-        {
-            yield return RoomContentLootRejectionReasons(); yield return TearDown(); yield return SetUp();
-            yield return RoomContentMapReassignmentCapacityMoveOwnedAndDiscard(); yield return TearDown(); yield return SetUp();
-            yield return RoomContentMapReassignmentCategoriesInvalidRetryAndSave();
-        }
         [UnityTearDown]
         public IEnumerator TearDown()
         {
