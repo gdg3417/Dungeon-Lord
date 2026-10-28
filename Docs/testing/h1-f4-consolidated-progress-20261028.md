@@ -134,3 +134,27 @@ Native economy fixtures now call the current precise creator with complete
 consumed inputs and explicit test creation time. Production code is unchanged.
 The four dependent economy/projection/acquisition/passive cohorts contain
 236 discovered cases; qualification is pending.
+
+### First dependent economy run and follow-up
+
+Campaign cbfdb5284e484a55b529739c62739089 at 8ce457d5 completed
+186 passed / 50 failed / 0 skipped, with unchanged Unity inputs. Its guarded
+normal finalization restored settings, verified process/Job completion and
+preserved 108 prior evidence directories. The FAILED verdict is retained.
+
+45 cases reached living.profile.invalid because their small synthetic
+serialization profiles could not construct the production foreground profile.
+Dependent service fixtures now select the production resource profile before
+canonical ownership; the general Fixture.Create default remains unchanged.
+
+The other five failures were traced separately. A missing optional economy
+argument cannot erase the immutable bound economy, so the test retains the
+pure missing-config rejection and exercises an actually unproved writer context.
+Changed-catalog quotes still use paid investment; a changed economy cannot
+publish under the old digest, and legal writes retain the original consumed
+economy. Synthetic 101-mana pricing is authored into validated bootstrap bytes
+before creation. Frozen schema-16 migration is checked through its reader,
+not opened as a current writer. The empty-runtime projection now uses its
+complete current validation context. Gameplay, wallet, investment, undo and
+canonical-byte assertions are retained. Results of the corrected 236-case
+cohort remain pending.

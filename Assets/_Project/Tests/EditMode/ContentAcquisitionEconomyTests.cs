@@ -20,7 +20,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             JsonUtility.FromJson<ContentAcquisitionEconomyConfiguration>(File.ReadAllText(ConfigPath));
         private static Fixture Room()
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null,workloadProfile:PhaseFourTestSupport.ProductionProfile());
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             return f;
@@ -433,7 +433,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static Fixture Native()
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null,workloadProfile:PhaseFourTestSupport.ProductionProfile());
             f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             var recognized = new SaveData { contentVersion = "test", createdUtcUnix = 1, lastSavedUtcUnix = 1,
                 structureRuntime = new StructureRuntimeState { ManaReserve = 123 } };

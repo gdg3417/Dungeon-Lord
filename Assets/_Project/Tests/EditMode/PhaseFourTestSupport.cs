@@ -9,6 +9,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     internal static class PhaseFourTestSupport
     {
+        internal static SaveSpatialMigrationLimitsProfile ProductionProfile() =>
+            SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
         // Explicit producer for a fresh synthetic fixture. Its complete validated
         // bytes, including the internal CombatC0 DTO, exist before a context or
         // save owner is constructed; this never rebinds an existing save.

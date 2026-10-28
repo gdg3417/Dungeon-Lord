@@ -19,9 +19,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         private static StructuralEconomyConfiguration Config() => JsonUtility.FromJson<StructuralEconomyConfiguration>(
             File.ReadAllText("Assets/_Project/Resources/structural_economy.json"));
-        private static Fixture R1()
+        private static Fixture R1(Action<StructuralEconomyConfiguration> author = null)
         {
-            var f = Fixture.Create(null);
+            var bytes=H1F4RecoveryContractTests.Inputs();
+            if(author!=null) {
+                var config=JsonUtility.FromJson<StructuralEconomyConfiguration>(Encoding.UTF8.GetString(bytes[2]));
+                author(config);bytes[2]=Encoding.UTF8.GetBytes(JsonUtility.ToJson(config));
+            }
+            var f = Fixture.Create(null,workloadProfile:PhaseFourTestSupport.ProductionProfile(),recoveryInputBytes:bytes);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             return f;
@@ -143,7 +148,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void MissingConfigAndInvalidGeometryNeverSpend()
         {
             var f = R1(); var valid = Build(f); byte[] before = f.Session.GetCurrentBytes(); f.Economy = null;
-            Assert.That(f.Execute(DetachedCanonicalMutationRequest.Construct(valid)).Reason, Is.EqualTo(StructuralEconomyService.InvalidReason));
+            Assert.That(StructuralEconomyService.Preview(valid,f.State,Ledger(f),1000,null).Reason,Is.EqualTo(StructuralEconomyService.InvalidReason));
+            // Omitting an optional writer argument cannot erase its bound
+            // economy. An actually unproved context must reject publication.
+            var unbound=new DetachedCanonicalWriteAuthority(f.Production,f.Compatibility,f.Configuration,null,f.Profile);
+            Assert.That(unbound.Execute(f.ActivePath,f.FileSystem,f.Session,f.State,f.Runtime,
+                DetachedCanonicalMutationRequest.Construct(valid)).IsSuccess,Is.False);
             Assert.That(f.Execute(DetachedCanonicalMutationRequest.Construct(Build(f, x: -10))).IsSuccess, Is.False);
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(1000));
@@ -159,13 +169,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(StructuralEconomySnapshot.TryCreate(c, f.Production.Catalog, out f.Economy), Is.True);
             var deletion = Delete(f); var p = Price(f, deletion);
             Assert.That(p.RefundBasis, Is.EqualTo(100)); Assert.That(p.Refund, Is.EqualTo(75));
+            byte[] before=f.Session.GetCurrentBytes();
+            Assert.That(f.Execute(DetachedCanonicalMutationRequest.Delete(deletion)).IsSuccess,Is.False,"A different price snapshot cannot rebind persisted context");
+            CollectionAssert.AreEqual(before,f.FileSystem.ReadAllBytes(f.ActivePath));
+            f.Economy=f.Context.RecoveryInputs.Economy;
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Delete(deletion))); f.Reopen();
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(970));
             Assert.That(Ledger(f).Sum(r => r.ConstructionMana), Is.EqualTo(5));
             FloorRouteEdge retained = f.State.Floors[0].Layout.Edges.Single(e =>
                 Ledger(f).Single(r => r.ConstructionMana == 5).StructureId == e.EdgeId);
             Assert.That(retained.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
-            f.Economy = PhaseFourTestSupport.Economy(f.Production, f.Profile.Canonical);
+            f.Economy = f.Context.RecoveryInputs.Economy;
             StructuralEconomyPreview rebuild = Price(f, Build(f, x: 5, y: 2));
             FloorRouteEdge incoming = rebuild.Spatial.DetachedCandidate.Floors[0].Layout.Edges.Single(e =>
                 e.EdgeId.EndsWith(".edge.incoming"));
@@ -409,8 +423,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void RefundFloorsPaidInvestmentAndMovementDoesNotCompound()
         {
-            var f = R1(); var c = Config(); c.Rooms.Single(r => r.DefinitionId == "spatial.room.basic").Mana = 101;
-            Assert.That(StructuralEconomySnapshot.TryCreate(c, f.Production.Catalog, out f.Economy), Is.True);
+            var f = R1(c=>c.Rooms.Single(r=>r.DefinitionId=="spatial.room.basic").Mana=101);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(Build(f))));
             Assert.That(Price(f, Delete(f)).Refund, Is.EqualTo(75));
             var first = R1(); var movement = Move(first); first.Accept(first.Execute(DetachedCanonicalMutationRequest.Move(movement)));
@@ -486,7 +499,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, f.Profile.Canonical, out thirteen), Is.True);
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(thirteen,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out thirteen),Is.True);
             Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(thirteen, f.Context, out thirteen), Is.True);
-            Assert.That(DetachedCanonicalSaveSession.Open(thirteen, f.Context, f.Profile).IsSuccess, Is.True);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(thirteen,f.Context).IsValid,Is.True);
+            Assert.That(DetachedCanonicalSaveSession.Open(thirteen,f.Context,f.Profile).IsSuccess,Is.False);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(nine, f.Profile.Canonical, out _), Is.False);
             Assert.That(StructuralEconomyService.Preview(Delete(f), f.State, restored.Investment, 123.5, f.Economy).Refund, Is.Zero);
         }
@@ -735,7 +749,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Fixture.Create("\"mvpDungeonPlacements\":{\"Entries\":[{\"CategoryId\":\"placement.category.room\"," +
                 "\"OptionId\":\"placement.option.room.basic\",\"Revision\":1}],\"NextRevision\":2}," +
-                "\"qaExtension\":{\"evidence\":7}", "\"qaRootExtension\":[3,2,1]");
+                "\"qaExtension\":{\"evidence\":7}", "\"qaRootExtension\":[3,2,1]",workloadProfile:PhaseFourTestSupport.ProductionProfile());
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             var construction = Build(f, x: 5, y: 2);
@@ -840,7 +854,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static Fixture QaNative(double mana = 0)
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null,workloadProfile:PhaseFourTestSupport.ProductionProfile());
             f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             var native = NativeCanonicalSaveCreator.CreatePrecise(f.ActivePath, f.FileSystem,
                 new SaveData { createdUtcUnix = 1, lastSavedUtcUnix = 1,

@@ -76,7 +76,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void PopulatedValidatedCanonicalAuthorityContinuesThroughRunResolution()
         {
-            var fixture = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
+            var fixture = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null,workloadProfile:PhaseFourTestSupport.ProductionProfile());
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId)));
             SaveData save = fixture.Runtime;
@@ -89,7 +89,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(fixture);
                 SetRootField(root, "<Save>k__BackingField", save);
                 root.AttachSaveServiceForTests(service);
-                SetRootField(root, "_runSimulationService", PhaseFiveBBranchIntegrationTests.Service(config));
+                SetRootField(root, "_runSimulationService", PhaseFiveBBranchIntegrationTests.Service(fixture));
                 SetRootField(root, "<CurrentHeat>k__BackingField", save.structureRuntime.Heat);
                 bool loggingEnabled = Debug.unityLogger.logEnabled;
                 bool ran;
@@ -309,7 +309,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
-            var context = new DetachedCurrentTargetValidationContext(fixture.Compatibility,
+            var context = PhaseFourTestSupport.CurrentContext(fixture.Compatibility,
                 fixture.Production, fixture.LegacyBytes, fixture.Limits);
             DetachedCompleteSaveValidationResult validated =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
