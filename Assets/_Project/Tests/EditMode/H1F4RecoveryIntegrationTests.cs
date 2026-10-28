@@ -182,6 +182,54 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 bound.Configuration.SuccessThreshold = threshold;
                 bound.Loot.items[0].worldValue = value;
             }
+
+            for (int phase = 0; phase < 3; phase++) {
+                var owned = new Harness();
+                if (phase > 0) { owned.Start(); owned.Accept(100); }
+                if (phase > 1) owned.Accept(102);
+                var inputs = owned.Inputs;
+                void RejectMutation(Action change, Action restore)
+                {
+                    byte[] before = owned.Service.CanonicalSession.GetCurrentBytes();
+                    var entry = owned.Time.RetainedRecoveryEntry;
+                    var boundary = owned.Current.timeProvenance.AccountedBoundary;
+                    int writes = owned.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
+                    // Construct first: late DTO mutation must also invalidate an
+                    // existing writer, not only a newly constructed one.
+                    var existing = new DetachedCanonicalWriteAuthority(owned.F.Production, owned.F.Compatibility,
+                        inputs.Configuration, owned.F.Context, owned.F.Profile, economy: inputs.Economy, runLoot: inputs.Loot);
+                    try {
+                        change();
+                        Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, owned.F.Context).IsValid, Is.False);
+                        Assert.That(existing.SaveRecognizedState(owned.Service.SavePath, owned.F.FileSystem,
+                            owned.Service.CanonicalSession, owned.Current).IsSuccess, Is.False);
+                        Assert.Throws<InvalidOperationException>(() => owned.Service.BeginCanonicalRecovery(owned.Current));
+                        Assert.That(owned.Time.RetainedRecoveryEntry, Is.SameAs(entry));
+                        Assert.That(owned.Current.timeProvenance.AccountedBoundary, Is.EqualTo(boundary));
+                        Assert.That(owned.F.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write), Is.EqualTo(writes));
+                        CollectionAssert.AreEqual(before, owned.F.FileSystem.ReadAllBytes(owned.Service.SavePath));
+                    }
+                    finally { restore(); }
+                    Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, owned.F.Context).IsValid, Is.True);
+                }
+                if (wrongLoot) {
+                    int original = inputs.Loot.items[0].worldValue;
+                    RejectMutation(() => inputs.Loot.items[0].worldValue++, () => inputs.Loot.items[0].worldValue = original);
+                } else {
+                    var goblin = inputs.Configuration.CombatC0.Monsters.Single(m => m.Id == MvpDungeonPlacementIds.GoblinOptionId);
+                    int health = goblin.MaxHealth, tick = inputs.Bootstrap.tickSeconds;
+                    double progress = inputs.Bootstrap.researchProgressScaffold.progressPerActiveSecond;
+                    int occupancyVersion = inputs.Occupancy.Value.SchemaVersion;
+                    int contextVersion = owned.F.Context.RoomContentOccupancy.Value.SchemaVersion;
+                    RejectMutation(() => goblin.MaxHealth++, () => goblin.MaxHealth = health);
+                    RejectMutation(() => inputs.Bootstrap.tickSeconds++, () => inputs.Bootstrap.tickSeconds = tick);
+                    RejectMutation(() => inputs.Bootstrap.researchProgressScaffold.progressPerActiveSecond++,
+                        () => inputs.Bootstrap.researchProgressScaffold.progressPerActiveSecond = progress);
+                    RejectMutation(() => inputs.Occupancy.Value.SchemaVersion++, () => inputs.Occupancy.Value.SchemaVersion = occupancyVersion);
+                    RejectMutation(() => owned.F.Context.RoomContentOccupancy.Value.SchemaVersion++,
+                        () => owned.F.Context.RoomContentOccupancy.Value.SchemaVersion = contextVersion);
+                }
+            }
         }
         [Test] public void UnsupportedRuntimeProfileCannotBeBoundUnderProductionContextIdentity()
         {

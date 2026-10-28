@@ -21,6 +21,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal LivingDungeonForegroundConfig TwoFloor { get; }
         internal RoomContentSpatialOccupancySnapshot Occupancy { get; }
         internal SpatialLayoutCompatibilitySnapshot Compatibility { get; }
+        private readonly string configurationValues, combatValues, bootstrapValues, lootValues, occupancyValues;
 
         internal RecoveryRuntimeInputs(byte[][] bytes, ProductionSpatialContentSnapshot production,
             SpatialContentValidationWorkloadLimits structuralLimits, CanonicalSpatialSerializationLimits limits)
@@ -56,6 +57,29 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !LootRollResolver.Resolve(Loot, config.LootTableId, 0).success ||
                 Loot.tables?.Any(t => t.id == config.LootTableId) != true || !ResearchValid(null))
                 throw new ArgumentException(RecoveryEpisode.ContextMismatch);
+            // Derived process-local mutation guards, never digest inputs or save
+            // authority. Identity continues to bind the exact validated bytes.
+            configurationValues = JsonUtility.ToJson(Configuration);
+            combatValues = JsonUtility.ToJson(Configuration.CombatC0);
+            bootstrapValues = JsonUtility.ToJson(Bootstrap);
+            lootValues = JsonUtility.ToJson(Loot);
+            occupancyValues = JsonUtility.ToJson(Occupancy.Value);
+        }
+
+        // These legacy DTOs expose mutable fields. Reference identity alone must
+        // not let a changed value execute under the original immutable digest.
+        // CombatC0 is explicitly included because the legacy config serializer
+        // intentionally excludes it. No reload, rebinding or repaired value.
+        internal bool ConsumedValuesStillBound(RoomContentSpatialOccupancySnapshot contextOccupancy)
+        {
+            try {
+                return string.Equals(configurationValues, JsonUtility.ToJson(Configuration), StringComparison.Ordinal) &&
+                    string.Equals(combatValues, JsonUtility.ToJson(Configuration.CombatC0), StringComparison.Ordinal) &&
+                    string.Equals(bootstrapValues, JsonUtility.ToJson(Bootstrap), StringComparison.Ordinal) &&
+                    string.Equals(lootValues, JsonUtility.ToJson(Loot), StringComparison.Ordinal) &&
+                    string.Equals(occupancyValues, JsonUtility.ToJson(Occupancy.Value), StringComparison.Ordinal) &&
+                    contextOccupancy != null && string.Equals(occupancyValues, JsonUtility.ToJson(contextOccupancy.Value), StringComparison.Ordinal);
+            } catch { return false; }
         }
 
         // Existing pure Research authorities validate the actual saved state.

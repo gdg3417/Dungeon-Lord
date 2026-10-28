@@ -558,3 +558,18 @@ second foreground prefix plus six eligible recovery seconds. Stalled foreground
 remains excluded. No owner grammar, tuning, time policy or historical serializer
 changed for these implementation corrections. Live root/accepted-work coverage,
 full regressions, PlayMode, Windows and three-way benchmarks remain pending.
+
+### 2026-10-28 implementation enforcement: retained DTO values
+
+The persistent v3 digest still derives exclusively from the twelve exact
+validated input byte arrays. Reference equality of a mutable parsed DTO is not
+proof that it continues to represent those bytes. A two-case actual-writer
+reproduction at `1a2fa9a8` demonstrated publication after same-reference config
+or loot mutation under the unchanged digest. Current-schema validation and
+recovery entry therefore check derived process-local value representations of
+the consumed mutable DTOs, including CombatC0, bootstrap/Research, loot and
+occupancy, before granting authority. No reload, repair, context adoption or
+durable representation change is authorized. Unchanged values retain the same
+authority; modified values fail closed. This implements the existing immutable
+context requirement and introduces no new time or migration policy. See the
+dependency audit for exact reproduction, coverage and pending cost assessment.

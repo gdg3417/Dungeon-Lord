@@ -45,7 +45,8 @@ namespace DungeonBuilder.M0
 
         internal void BeginCanonicalRecovery(SaveData proven, bool observedBackground = false)
         {
-            if (recoveryInputs == null || recoveryTime == null || proven?.timeProvenance?.Mode != TimeProvenance.PreciseMode ||
+            if (recoveryInputs == null || !recoveryInputs.ConsumedValuesStillBound(_validationContext?.RoomContentOccupancy) ||
+                recoveryTime == null || proven?.timeProvenance?.Mode != TimeProvenance.PreciseMode ||
                 _canonicalSession == null || recoveryPublicationUncertain)
                 throw new InvalidOperationException(RecoveryEpisode.Invalid);
             recoveryTime.AttachSave(proven);

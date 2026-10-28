@@ -580,3 +580,32 @@ stalls stay excluded. This is an implementation correction under the approved
 L1/S/Q classifications, with no encoding or policy change. Live root, accepted
 A>C repeated-crash, broader regression, PlayMode/Windows and performance evidence
 remain required. These focused passes do not claim those missing gates passed.
+
+## 2026-10-28: consumed DTO mutation enforcement
+
+Source `1a2fa9a8ecf68fce53faec0033097de4b2892fd5`, campaign
+`337bb7e8b7f2435887508649cd0c2fa6`, reproduced two actual writer omissions:
+changing the already-bound success threshold or loot world value allowed an
+ordinary canonical publication with the original context digest. Both tests
+failed at H1F4RecoveryIntegrationTests.cs:178 with `published=True` and
+`digestUnchanged=True`. This differs from the previously qualified rejection
+of foreign object references. The campaign remains FAILED (0/2/0); process/Job
+completion, unchanged qualified inputs and guarded original-settings restoration
+were verified, with 122 prior evidence directories unchanged.
+
+The correction enforces the approved immutable-input contract without changing
+the twelve digest inputs, persistent identity, owner grammar or migration policy.
+RecoveryRuntimeInputs captures derived value representations immediately after
+parsing its retained validated bytes. Current-schema validation and prebinding
+reject changed configuration (including separately serialized CombatC0), content
+bootstrap, loot or occupancy DTOs. The separately held context occupancy is also
+checked. These strings are process-local mutation checks, never replacement
+digest inputs, durable authority, a configuration reload or automatic rebinding.
+Historical schemas 7–16 retain their existing readers and serializers.
+
+Tests cover existing and newly constructed writers, closed/originalPending/
+residualPending saves, tick cadence, Research progression, Goblin health, loot
+and both occupancy references. Rejection must precede writes and new R capture,
+preserve bytes/W/retained R, and leave unchanged inputs valid. Qualification is
+pending; repeated validation serialization cost must be included in the required
+matched runtime assessment. No performance conclusion is inferred here.

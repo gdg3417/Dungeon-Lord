@@ -37,7 +37,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal RecoveryRuntimeInputs RecoveryInputs { get; private set; }
         internal void BindRecoveryInputs(RecoveryRuntimeInputs inputs, IHistoricalRecoveryEvidence evidence = null)
         {
-            if (inputs == null || !Compatibility.CanonicalBytes.AsSpan().SequenceEqual(inputs.Compatibility.CanonicalBytes) ||
+            if (inputs == null || !inputs.ConsumedValuesStillBound(RoomContentOccupancy) ||
+                !Compatibility.CanonicalBytes.AsSpan().SequenceEqual(inputs.Compatibility.CanonicalBytes) ||
                 RoomContentOccupancy == null || UnityEngine.JsonUtility.ToJson(RoomContentOccupancy.Value) != UnityEngine.JsonUtility.ToJson(inputs.Occupancy.Value) ||
                 LivingDungeonProfiles?.Any(p => !inputs.SupportsProfile(p)) == true)
                 throw new ArgumentException(RecoveryEpisode.ContextMismatch);
@@ -212,7 +213,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 null, null, context.LivingDungeonProfiles);
             if (!result.IsValid || !result.LayoutContractVersion.HasValue) return Failure();
             if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction &&
-                (context.RecoveryInputs == null || context.RecoveryContext?.Matches(result.TimeProvenance) != true ||
+                (context.RecoveryInputs == null || !context.RecoveryInputs.ConsumedValuesStillBound(context.RoomContentOccupancy) ||
+                 context.RecoveryContext?.Matches(result.TimeProvenance) != true ||
                  result.TimeProvenance.Episode?.Phase == RecoveryEpisode.ResidualPending && !result.LivingDungeon.IsClosed)) return Failure();
             if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction &&
                 !ResearchStateValid(result, context.RecoveryInputs)) return Failure();
