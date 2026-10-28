@@ -12,6 +12,62 @@ import qualification_supervisor as supervisor
 
 
 class H1F4CampaignTests(unittest.TestCase):
+    @staticmethod
+    def measured_settings():
+        # Read the verified source; every operation below uses bytes/disposable
+        # files. Never write the project/owner settings from these tests.
+        return (Path(__file__).resolve().parents[2] / q.SETTINGS[0]).read_bytes()
+
+    def test_measured_settings_preparation_reproduces_exact_playmode_bytes(self):
+        original = self.measured_settings()
+        prepared = q.qualification_player_settings(original,
+            "Dungeon Lord B3B2 Smoke H1F4 20261027 complete-scene-play01")
+        self.assertEqual("9748e7d76082d943f194386d65ed978175f30fe013f96f360815eb82df4ea56d",
+                         q.hashlib.sha256(prepared).hexdigest())
+        self.assertNotIn(b"\r", prepared)
+        self.assertEqual(original, self.measured_settings())
+
+    def test_measured_settings_reject_changed_order_values_structure_and_other_bytes(self):
+        original = self.measured_settings()
+        first = b"    Standalone: com.gdg3417.dungeonlord\r\n    Android: com.gdg3417.dungeonlord\r\n"
+        reverse = b"    Android: com.gdg3417.dungeonlord\r\n    Standalone: com.gdg3417.dungeonlord\r\n"
+        values = {"order": original.replace(first, reverse),
+                  "identifier": original.replace(b"com.gdg3417.dungeonlord", b"com.unproven.other", 1),
+                  "structure": original.replace(first, first + first),
+                  "additional_difference": original + b"# unexpected source change\r\n",
+                  "line_endings": original.replace(b"\r\n", b"\n")}
+        for name, value in values.items():
+            with self.subTest(name=name):
+                self.assertNotEqual(original, value)
+                with self.assertRaisesRegex(ValueError, "Unqualified original"):
+                    q.qualification_player_settings(value, "Dungeon Lord B3B2 Smoke H1F4 20261027 disposable")
+
+    def test_measured_settings_reject_nonisolated_or_injected_product(self):
+        for product in ("Dungeon Lord", "Dungeon Lord B3B2 Smoke H1F4 20261027 invalid\nfield: value", ""):
+            with self.subTest(product=product), self.assertRaisesRegex(ValueError, "isolated product"):
+                q.qualification_player_settings(self.measured_settings(), product)
+
+    def test_measured_preparation_archive_and_restoration_are_exact(self):
+        original = self.measured_settings()
+        with patch.object(q, "ROOT", self.root):
+            prep, product, _ = q.identities("measured-restore"); prep.mkdir(parents=True)
+            originals = {name: original if name == q.SETTINGS[0] else ("disposable " + name + "\r\n").encode()
+                         for name in q.SETTINGS}
+            for name, data in originals.items():
+                path = self.root / name; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(data)
+            before = q.inventory(self.root); q.write(prep / "original-inputs.json", before)
+            with zipfile.ZipFile(prep / "original-inputs.zip", "x") as archive:
+                for name in q.SETTINGS: archive.write(self.root / name, name)
+            archive_hash = q.sha(prep / "original-inputs.zip")
+            (self.root / q.SETTINGS[0]).write_bytes(q.qualification_player_settings(original, product))
+            for name in q.SETTINGS[1:]:
+                (self.root / name).write_bytes(originals[name].replace(b"\r\n", b"\n"))
+            q.write(prep / "qualified-inputs.json", q.inventory(self.root))
+            with patch.object(q, "check_protected"): q.restore("measured-restore", self.stage)
+            self.assertEqual(before, q.inventory(self.root))
+            self.assertEqual(archive_hash, q.sha(prep / "original-inputs.zip"))
+            for name in q.SETTINGS: self.assertEqual(originals[name], (self.root / name).read_bytes())
+
     def setUp(self):
         parent = q.ROOT / "TestResults/h1-f4-tool-fixtures"
         parent.mkdir(parents=True, exist_ok=True)
@@ -57,6 +113,21 @@ class H1F4CampaignTests(unittest.TestCase):
                 q.run_test("test", self.stage)
         self.assertEqual(b"changed test bytes", path.read_bytes())
         self.assertFalse(json.loads((self.stage / "generated-inputs/manifest.json").read_text())["restored"])
+
+    def test_unexpected_postseal_settings_change_is_still_preserved_and_rejected(self):
+        prepared = q.qualification_player_settings(self.measured_settings(),
+            "Dungeon Lord B3B2 Smoke H1F4 20261027 disposable")
+        path = self.root / q.SETTINGS[0]; path.parent.mkdir(parents=True); path.write_bytes(prepared)
+        changed = prepared.replace(b"com.gdg3417.dungeonlord", b"com.unproven.other", 1)
+        def child(*args, **kwargs):
+            path.write_bytes(changed)
+            return SimpleNamespace(returncode=0)
+        with patch.object(q, "ROOT", self.root), patch.object(q.subprocess, "run", side_effect=child):
+            with self.assertRaisesRegex(ValueError, "Unapproved input change"):
+                q.run_test("test", self.stage)
+        self.assertEqual(changed, path.read_bytes())
+        self.assertEqual({"changed": [q.SETTINGS[0]], "restored": False},
+                         json.loads((self.stage / "generated-inputs/manifest.json").read_text()))
 
     def test_plan_has_unique_commands_and_complete_preservation_dependencies(self):
         with patch.object(q, "ROOT", self.root):
@@ -128,6 +199,8 @@ class H1F4CampaignTests(unittest.TestCase):
     def test_full_edit_selects_every_case_without_a_filter(self):
         stage = self.stage.parent / "full-edit"; stage.mkdir()
         with patch.object(q, "ROOT", self.root), patch.object(q.subprocess, "run", return_value=SimpleNamespace(returncode=0)) as run:
+            prep, _, _ = q.identities("fulltest"); prep.mkdir(parents=True)
+            q.write(prep / "inventory.json", {"source_sha": "b" * 40})
             self.assertEqual(0, q.run_full_edit("fulltest", stage))
         self.assertNotIn("--filter", run.call_args.args[0]); self.assertIn("3500", run.call_args.args[0])
 
@@ -188,12 +261,15 @@ class H1F4CampaignTests(unittest.TestCase):
         stage = self.stage.parent / "living-regressions"; stage.mkdir()
         before = os.environ.get("DUNGEON_H1F4_TEST_EXPORT_ROOT")
         with patch.object(q, "ROOT", self.root), patch.object(q.subprocess, "run", return_value=SimpleNamespace(returncode=0)) as run:
+            prep, _, _ = q.identities("living"); prep.mkdir(parents=True)
+            q.write(prep / "inventory.json", {"source_sha": "b" * 40})
             self.assertEqual(0, q.run_living("living", stage))
         command = run.call_args.args[0]
         self.assertEqual(q.RESEARCH_FILTER + ";DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2;" +
             "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor", command[command.index("--filter") + 1])
         self.assertEqual(str(stage / "fixture-inputs"), run.call_args.kwargs["env"]["DUNGEON_H1F4_TEST_EXPORT_ROOT"])
         self.assertTrue((stage / "fixture-inputs").is_dir())
+        self.assertEqual("b" * 40, json.loads((stage / "fixture-inputs/ownership.json").read_text())["source_sha"])
         self.assertEqual(before, os.environ.get("DUNGEON_H1F4_TEST_EXPORT_ROOT"))
         self.assertFalse((self.root / "TestResults/living-dungeon-two-floor-20261020").exists())
 

@@ -111,6 +111,32 @@ def check_protected(prep, save):
         raise ValueError("Protected owner/save/historical evidence changed")
 
 
+def qualification_player_settings(original, product):
+    # Measured d16c05a4 input, not a general YAML canonicalizer. Any source
+    # change requires qualification of its preparation instead of normalizing it.
+    if hashlib.sha256(original).hexdigest() != "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993":
+        raise ValueError("Unqualified original PlayerSettings bytes")
+    if not re.fullmatch(r"Dungeon Lord B3B2 Smoke H1F4 20261027 [a-z0-9-]{1,40}", product):
+        raise ValueError("Unexpected isolated product identity")
+    owner = b"  productName: Dungeon Lord\r\n"
+    before = (b"  applicationIdentifier:\r\n"
+              b"    Standalone: com.gdg3417.dungeonlord\r\n"
+              b"    Android: com.gdg3417.dungeonlord\r\n")
+    after = (b"  applicationIdentifier:\n"
+             b"    Android: com.gdg3417.dungeonlord\n"
+             b"    Standalone: com.gdg3417.dungeonlord\n")
+    if original.count(owner) != 1 or original.count(before) != 1:
+        raise ValueError("Unexpected measured PlayerSettings structure")
+    isolated = ("  productName: " + product + "\n").encode("utf-8")
+    prepared = original.replace(b"\r\n", b"\n").replace(owner.replace(b"\r\n", b"\n"), isolated)
+    prepared = prepared.replace(before.replace(b"\r\n", b"\n"), after)
+    # Independently reverse precisely the declared edits. Nothing else may move.
+    restored = prepared.replace(after, before.replace(b"\r\n", b"\n")).replace(isolated, owner.replace(b"\r\n", b"\n"))
+    if b"\r" in prepared or restored.replace(b"\n", b"\r\n") != original:
+        raise ValueError("Unexpected PlayerSettings preparation difference")
+    return prepared
+
+
 def prepare(attempt):
     prep, product, save = identities(attempt)
     if ROOT == OWNER or "/.codex/worktrees/h1-f4-recovery/" not in ROOT.as_posix():
@@ -125,10 +151,7 @@ def prepare(attempt):
         for name in inventory(ROOT):
             archive.write(ROOT / name, name)
     path = ROOT / SETTINGS[0]
-    text = path.read_bytes().decode("utf-8-sig")
-    if text.count("  productName: Dungeon Lord\n") + text.count("  productName: Dungeon Lord\r\n") != 1:
-        raise ValueError("Unexpected owner product identity")
-    path.write_bytes(text.replace("  productName: Dungeon Lord", "  productName: " + product).encode("utf-8"))
+    path.write_bytes(qualification_player_settings(path.read_bytes(), product))
     for name in SETTINGS[1:]:
         path = ROOT / name
         path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n"))
@@ -137,6 +160,11 @@ def prepare(attempt):
           "retention": "preserve", "project": str(ROOT), "preparation": str(prep),
           "product": product, "save": str(save), "build": None,
           "generated_project_paths": [str(ROOT / "Library"), str(ROOT / "Temp"), str(ROOT / "Logs")],
+          "player_settings_preparation": {
+              "measured_campaign": "d16c05a430f7404189ab22034383ec50",
+              "original_sha256": json.loads((prep / "original-inputs.json").read_text())[SETTINGS[0]],
+              "qualified_sha256": sha(ROOT / SETTINGS[0]),
+              "edits": ["isolated productName", "CRLF to LF", "unchanged applicationIdentifier entries reordered Android then Standalone"]},
           "source_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()})
     print(json.dumps({"preparation": str(prep), "product": product, "save": str(save)}))
 
@@ -190,7 +218,7 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     ]
     data = {"purpose": "qualification", "source_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
             "tools": tools, "isolation": {"product": product, "save": str(save / "save_primary.json"), "project": str(ROOT)},
-            "approved_substitutions": ["Temporary isolated productName; exact archived restoration. The two measured import-only LF settings rewrites are applied before sealing and restored afterward.",
+            "approved_substitutions": ["Temporary isolated productName; exact archived restoration. Only the measured original PlayerSettings bytes are prepared as LF with unchanged Android/Standalone identifier entries in measured order before sealing. The two other measured import-only LF settings rewrites are likewise presealed; all three original files are restored afterward.",
                                        "UNITY_NO_AUTH_BROKER=1 in the CLI child only, as documented by installed CLI and approved supervisor runbook. No ownership/drain exemption.",
                                        "Only the previously measured TMP fallback-font rewrite may be retained then restored after a zero-exit CLI; any other change fails closed."],
             "stages": stages, "selections": {name: [s["id"] for s in stages]}}
