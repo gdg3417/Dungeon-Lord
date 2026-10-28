@@ -77,11 +77,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             view.RecentInteraction = new RunStep(RunStepKind.LootInteraction, 0, "test.room", carriedLootValue: 17);
             Assert.That(Feedback(), Is.EqualTo("Loot reached · Carried value 17"));
         }
-        private static Fixture Dungeon(Action<RunSimulationConfig> author = null)
+        private static Fixture Dungeon(Action<RunSimulationConfig> author = null, bool oneBoundary = false, int? tickSeconds = null)
         {
-            var inputs = PhaseFourTestSupport.AuthoredInputs((config, _) => {
+            var inputs = PhaseFourTestSupport.AuthoredInputs((config, bootstrap) => {
                 PhaseSixA4Tests.ForceDescent(config, true); author?.Invoke(config);
+                if (tickSeconds.HasValue) bootstrap.tickSeconds = tickSeconds.Value;
             });
+            if (oneBoundary) PhaseFourTestSupport.OneBoundaryInputs(inputs);
             var f = Fixture.Create(null, recoveryInputBytes: inputs);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
@@ -147,8 +149,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         private static RunExecution Start(Fixture f) => new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot)
             .StartTimedCombatSnapshot(1, PhaseSixA4Tests.Snapshot(f), f.Context.RecoveryInputs.OneFloor.Timing);
-        private static DetachedCanonicalWriteResult Pump(Fixture f, long target, LivingDungeonForegroundConfig policy = null) => PhaseSixA4Tests.Writer(f).AdvanceForeground(
-            f.ActivePath, f.FileSystem, f.Session, f.Runtime, policy ?? f.Context.RecoveryInputs.OneFloor, target, 10, (save, tick) => { }, 1000);
+        private static DetachedCanonicalWriteResult Pump(Fixture f, long target) =>
+            PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, target);
         private static void Through(Fixture f, long target)
         {
             for (int i = 0; i < 100; i++) {
@@ -224,8 +226,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             // Test-only passive period is derived beyond this run's terminal
             // boundary so a coincident tick cannot mask lost lifecycle metadata.
             int tickSeconds = checked((int)(finish / Policy.UnitsPerSecond + 1));
-            var result = PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem, f.Session,
-                f.Runtime, Policy, finish, tickSeconds, (save, tick) => { }, 2000);
+            f = Dungeon(tickSeconds: tickSeconds); Admitted(f); finish = Finish(f); Through(f, finish - 1);
+            Assert.That(finish, Is.LessThan((long)tickSeconds * Policy.UnitsPerSecond));
+            var result = PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, finish, 2000);
             f.Accept(result);
             Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.EqualTo("run-1"));
             Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(2000));
@@ -234,9 +237,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void AcceptedButUnclosedHorizonReopensWithoutDroppingTimeOrDuplicatingHistory()
         {
-            var budget = LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(
-                File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json").Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1")));
-            var f = Dungeon(); f.Accept(Pump(f, 20000, budget));
+            var f = Dungeon(oneBoundary: true); f.Accept(Pump(f, 20000));
             Assert.That(f.Runtime.livingDungeon.IsClosed, Is.False);
             Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(20000));
             f.Reopen(); Through(f, 20000);
@@ -319,12 +320,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Does.StartWith(LivingDungeonForegroundConfig.Invalid));
         }
 
-        private sealed class MutableUtc : ITimeSource { public long Now = 2000; public long UtcNowUnixSeconds() => Now; }
-        internal static SaveService Service(Fixture f, ITimeSource utc)
+        private sealed class MutableUtc : IPreciseTimeSource {
+            public long Now = 2000; public long UtcNowUnixSeconds() => Now;
+            public UnixTimePoint UtcNow() => new UnixTimePoint(Now, 0);
+        }
+        internal static SaveService Service(Fixture f, ITimeSource utc) => Service(f, utc, out _);
+        private static SaveService Service(Fixture f, ITimeSource utc, out TimeService time, Func<double> monotonic = null)
         {
             var inputs = f.Context.RecoveryInputs;
-            var time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
-                inputs.Bootstrap.timeRules.detectClockSkewSeconds, utc, () => 0);
+            time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
+                inputs.Bootstrap.timeRules.detectClockSkewSeconds, utc, monotonic ?? (() => 0));
             time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);
             var service = new SaveService(new SimpleLogger(false, (level, message) => { }),
                 new SaveConfig { fileName = Path.GetFileName(f.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(f.ActivePath));
@@ -359,10 +364,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Fixture.Create(null);
             Assert.That(f.Profile.Canonical.ForSchema(13).Serialized.MaximumInputBytes, Is.Not.EqualTo(Policy.CreateProfile(default).MaximumBaseSaveBytes));
-            var service = Service(f, new Utc());
-            Assert.That(service.ForegroundConfiguration, Is.Null);
+            var before = f.FileSystem.ReadAllBytes(f.ActivePath);
+            // This reader-only fixture's generic schema-13 budget cannot own the
+            // production foreground executable. Recovery configuration must fail
+            // before load/write rather than silently install another profile.
+            Assert.Throws<ArgumentException>(() => Service(f, new Utc()));
             Assert.That(f.Runtime.livingDungeon.IsDormant, Is.True);
-            Assert.That(service.Save(f.Runtime, SaveReason.ManualDev), Is.True);
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
         }
 
         [Test] public void UnsupportedCombatWorkConsumesOpportunityWithoutRunAllocationOrGameplayDamage()
@@ -403,7 +411,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = Dungeon(); var utc = new MutableUtc(); var service = Service(f, utc);
             f.Accept(service.AdvanceForeground(f.Runtime, 0, 10, (save, tick) => { }));
             long boundary = f.Runtime.lastSavedUtcUnix; Assert.That(boundary, Is.EqualTo(2000));
-            utc.Now = 9000; f.Accept(service.AdvanceForeground(f.Runtime, 0, 10, (save, tick) => { }));
+            utc.Now = 9000;
+            var before = f.Session.GetCurrentBytes();
+            Assert.That(service.InspectForeground(f.Runtime, 10), Is.Not.Null);
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
             Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(boundary));
             f.Accept(service.AdvanceForeground(f.Runtime, 1, 10, (save, tick) => { }));
             Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(9000));
@@ -411,11 +422,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void DirtyClosedActionBarrierRetainsSessionAndDisabledPauseDoesNotPublish()
         {
-            var f = Dungeon(); var service = Service(f, new Utc());
-            f.Accept(service.AdvanceForeground(f.Runtime, 0, 10, (save, tick) => { }));
             double now = 0;
-            var time = new TimeService(new SimpleLogger(false), 10, 300, new Utc(), () => now);
-            time.AttachSave(f.Runtime); time.BeginForeground(1000, 0);
+            var f = Dungeon(); var service = Service(f, new Utc(), out var time, () => now);
+            f.Accept(service.AdvanceForeground(f.Runtime, 0, 10, (save, tick) => { }));
             var host = new GameObject("foreground-disabled-root-test"); host.SetActive(false);
             var root = host.AddComponent<GameRoot>();
             try {
@@ -438,21 +447,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void DeferredPrePauseSampleDoesNotConsumeLaterOfflineInterval()
         {
-            var f = Dungeon(); var utc = new MutableUtc(); var service = Service(f, utc);
-            var budget = LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(
-                File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json").Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1")));
-            typeof(SaveService).GetProperty(nameof(SaveService.ForegroundConfiguration)).SetValue(service, budget);
+            double monotonic = 0;
+            var f = Dungeon(oneBoundary: true); var utc = new MutableUtc();
+            var service = Service(f, utc, out var time, () => monotonic);
             f.Accept(service.AdvanceForeground(f.Runtime, 20000, 10, (save, tick) => { }));
             Assert.That(f.Runtime.livingDungeon.IsClosed, Is.False);
             Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(2000));
-            utc.Now = 9000;
-            f.Accept(service.AdvanceForeground(f.Runtime, 30000, 10, (save, tick) => { }, 3000));
+            // Capture the full eligible pre-pause horizon once through the real
+            // TimeService. Later suspended pumps rebind its retained wall/cut,
+            // not the later background UTC or a reclassified interval.
+            utc.Now = 3000; monotonic = 30;
+            Assert.That(time.CaptureForegroundObservation(service.CanonicalSession).CapturedThrough, Is.EqualTo(30000));
+            time.OnPause();
+            utc.Now = 9000; monotonic = 6030;
+            f.Accept(service.AdvanceForeground(f.Runtime, time.CaptureForegroundObservation(service.CanonicalSession), 10, (save, tick) => { }, 3000));
             Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(20000));
             Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(2000));
-            f.Accept(service.AdvanceForeground(f.Runtime, 30000, 10, (save, tick) => { }, 3000));
+            f.Accept(service.AdvanceForeground(f.Runtime, time.CaptureForegroundObservation(service.CanonicalSession), 10, (save, tick) => { }, 3000));
             Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(30000));
             Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(3000));
-            f.Accept(service.AdvanceForeground(f.Runtime, 30000, 10, (save, tick) => { }, 3000));
+            f.Accept(service.AdvanceForeground(f.Runtime, time.CaptureForegroundObservation(service.CanonicalSession), 10, (save, tick) => { }, 3000));
             Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(3000));
         }
 
@@ -694,7 +708,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath)); e.Abandon();
         }
 
-        private sealed class Utc : ITimeSource { public long UtcNowUnixSeconds() => 1000; }
+        private sealed class Utc : IPreciseTimeSource {
+            public long UtcNowUnixSeconds() => 1000;
+            public UnixTimePoint UtcNow() => new UnixTimePoint(1000, 0);
+        }
         [Test] public void DevelopmentReopenClockIsOptInAndPreservesRestoredHorizon()
         {
             string product = "Dungeon Lord B3B2 Smoke 20261018";

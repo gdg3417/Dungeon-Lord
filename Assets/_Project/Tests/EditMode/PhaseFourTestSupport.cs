@@ -29,6 +29,36 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return bytes;
         }
 
+        internal static byte[][] OneBoundaryInputs(byte[][] inputs)
+        {
+            foreach (int index in new[] { 6, 7 }) {
+                string original = System.Text.Encoding.UTF8.GetString(inputs[index]);
+                string bounded = original.Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1");
+                Assert.That(bounded, Is.Not.EqualTo(original));
+                inputs[index] = System.Text.Encoding.UTF8.GetBytes(bounded);
+            }
+            return inputs;
+        }
+
+        // Explicit synthetic observation, bound to the exact source and horizons.
+        // This uses the same transition capability as SaveService, never a raw W
+        // assignment or a production bypass. An old A>C drain retains its W.
+        internal static DetachedCanonicalWriteResult PumpForeground(DetachedCanonicalWriteAuthorityTests.Fixture f,
+            LivingDungeonForegroundConfig policy, long through, long? wallSeconds = null)
+        {
+            var prior = f.Runtime.timeProvenance;
+            long wall = wallSeconds ?? System.Math.Max(1000, prior.AccountedBoundary.Seconds);
+            var endpoint = new UnixTimePoint(wall, wall == prior.AccountedBoundary.Seconds ? prior.AccountedBoundary.Fraction100ns : 0);
+            var observation = ForegroundObservation.ForDeterministicServiceTest(f.Session.GetCurrentBytes(), through,
+                f.Runtime.livingDungeon.Scheduler?.AcceptedThrough ?? -1,
+                f.Runtime.livingDungeon.Scheduler?.ClosedThrough ?? -1, endpoint, ForegroundObservationContext.EligibleForeground);
+            var transition = f.Runtime.livingDungeon.IsClosed
+                ? CanonicalTimeTransition.Foreground(f.Session.GetCurrentBytes(), prior, observation, f.Runtime.livingDungeon) : null;
+            return PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+                policy, through, f.Context.RecoveryInputs.Bootstrap.tickSeconds, (_, __) => { },
+                transition?.Successor.AccountedBoundary.Seconds ?? prior.AccountedBoundary.Seconds, transition);
+        }
+
         internal static bool Upgrade(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] current)
         {
             current = null;
