@@ -54,10 +54,11 @@ namespace DungeonBuilder.M0.Tests
                 long accepted = root.Save.livingDungeon.Scheduler.AcceptedThrough;
                 var checkpoints = root.Save.livingDungeon.Parties.Select(p => p.CheckpointIdentity).ToArray();
                 double balance = root.Save.structureRuntime.ManaReserve;
+                // Read-only layouts use the real enabled root with its stationary
+                // provider, including legitimate pause/focus return barriers.
+                root.enabled = true;
                 root.ApplyPauseState(false);
-                var update = typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.Instance | BindingFlags.NonPublic);
-                for (int pump = 0; pump < 20 && (root.TimeService.RecoveryClockActive || root.TimeService.HasDeferredRecovery); pump++)
-                    update.Invoke(root, null);
+                yield return AwaitRecoveryReady();
                 Assert.That(root.TimeService.RecoveryClockActive || root.TimeService.HasDeferredRecovery, Is.False);
                 Assert.That(root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(accepted));
                 CollectionAssert.AreEqual(checkpoints, root.Save.livingDungeon.Parties.Select(p => p.CheckpointIdentity));
