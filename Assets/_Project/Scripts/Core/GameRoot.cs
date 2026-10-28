@@ -265,6 +265,9 @@ namespace DungeonBuilder.M0
 
         private void Start()
         {
+#if UNITY_EDITOR
+            editorRecoveryStartEntered = true;
+#endif
             _sm.SetState(new BootState(this));
         }
 

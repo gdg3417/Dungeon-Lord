@@ -24,7 +24,24 @@ namespace DungeonBuilder.M0.Tests
         private ProductionDungeonController controller;
         private Touchscreen simulatedTouch;
         private bool missingThemeWarning;
+        private SceneClock sceneClock;
+        private sealed class SceneClock : IPreciseTimeSource
+        {
+            internal UnixTimePoint Now = new UnixTimePoint(2000, 2500000);
+            internal long Elapsed100ns;
+            internal bool InvalidUtc, InvalidMonotonic;
+            public UnixTimePoint UtcNow() => InvalidUtc ? new UnixTimePoint(0, 0) : Now;
+            public long UtcNowUnixSeconds() => UtcNow().Seconds;
+            internal double Monotonic() => InvalidMonotonic ? double.NaN : Elapsed100ns / (double)UnixTimePoint.UnitsPerSecond;
+            internal void Advance(double seconds)
+            {
+                Assert.That(double.IsNaN(seconds) || double.IsInfinity(seconds) || seconds < 0, Is.False);
+                long ticks = checked((long)Math.Round(seconds * UnixTimePoint.UnitsPerSecond));
+                Now = Now.Add100ns(ticks); Elapsed100ns = checked(Elapsed100ns + ticks);
+            }
+        }
         private bool TraceSceneRecovery => TestContext.CurrentContext.Test.Name.Contains("RoomContentMapReassignmentCapacity") ||
+            TestContext.CurrentContext.Test.Name.Contains("SceneClockHistoricalOrder") ||
             TestContext.CurrentContext.Test.Name.Contains("LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish");
         // Read-only diagnosis: never sample/advance time, invoke a barrier, or
         // serialize a mutable runtime back into the canonical owner.
@@ -68,12 +85,19 @@ namespace DungeonBuilder.M0.Tests
                 yield return new EnterPlayMode();
             }
             if (GameRoot.Instance != null) { UnityEngine.Object.Destroy(GameRoot.Instance.gameObject); yield return null; }
+            sceneClock = new SceneClock();
             filename = "phase7a4-scene-" + Guid.NewGuid().ToString("N") + ".json";
             SceneManager.sceneLoaded += Isolate;
             yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
             for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
             var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null);
             Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename), "Disposable scene save isolation");
+            // A validated observation-time foreground return, through the real
+            // coordinator; no private lifecycle flags or canonical cuts are reset.
+            typeof(GameRoot).GetMethod("OnApplicationFocus", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(root, new object[] { true });
+            root.ApplyPauseState(false);
+            PumpSceneToClosed();
             var placed = root.SaveService.ExecuteCanonicalMutation(root.Save,
                 DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic", null, null, null));
             Assert.That(placed.IsSuccess, Is.True, placed.Reason);
@@ -91,9 +115,9 @@ namespace DungeonBuilder.M0.Tests
                 foreach (string name in new[] { "save", "discard", "confirm", "cancel", "edit", "legacy" })
                     ui.Q<Button>(name).clicked += () => TraceSceneState("ui-click-" + name);
             }
-            TraceSceneState("setup.before-disable");
-            root.enabled = false; // Stable test HUD/economy; runtime presentation remains active.
-            TraceSceneState("setup.after-disable");
+            // The controlled provider is stationary until an explicit Advance.
+            // Keep the real root enabled instead of fabricating a suspension.
+            TraceSceneState("setup.prebound-clock-ready");
             yield return null;
             TraceSceneState("setup.after-yield");
         }
@@ -106,8 +130,97 @@ namespace DungeonBuilder.M0.Tests
             isolationCallbacks++;
             var config = JsonUtility.FromJson<BuildConfig>(root.buildConfigJson.text);
             config.save.fileName = filename;
+            if (disposableConfig != null) UnityEngine.Object.DestroyImmediate(disposableConfig);
             disposableConfig = new TextAsset(JsonUtility.ToJson(config)); root.buildConfigJson = disposableConfig;
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(null, sceneClock.Monotonic));
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(sceneClock, null));
+            // Exercise the non-isolated save refusal before any provider is owned.
+            var validConfig = disposableConfig;
+            config.save.fileName = "save_primary.json";
+            var invalid = new TextAsset(JsonUtility.ToJson(config)); root.buildConfigJson = invalid;
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(sceneClock, sceneClock.Monotonic));
+            root.buildConfigJson = validConfig; UnityEngine.Object.DestroyImmediate(invalid);
+            config.save.fileName = filename;
+            byte[] one = null, two = null;
+            string test = TestContext.CurrentContext.Test.Name;
+            if (test.Contains("ResumeCompletesSeveralBoundedPasses") || test.Contains("SuspendedDrainRecognizes") ||
+                test.Contains("ProvenRollbackRetriesThroughRealSaveBarrier") || test.Contains("UncertainRollbackKeepsRealRootRecoveryLatch")) {
+                byte[] Bounded(string name) {
+                    string original = File.ReadAllText("Assets/_Project/Resources/" + name + ".json");
+                    string bounded = original.Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1");
+                    Assert.That(bounded, Is.Not.EqualTo(original)); return System.Text.Encoding.UTF8.GetBytes(bounded);
+                }
+                one = Bounded("living_dungeon_foreground"); two = Bounded("living_dungeon_foreground_v2");
+            }
+            root.InjectSceneRecoveryClockForTests(sceneClock, sceneClock.Monotonic, one, two);
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(sceneClock, sceneClock.Monotonic));
+            Assert.That(root.TimeService, Is.Null, "Injection supplies providers, never an early/replacement owner");
             TestContext.WriteLine("Isolated scene boot " + isolationCallbacks + ": " + config.save.fileName);
+        }
+        private void PumpSceneToClosed()
+        {
+            var root = GameRoot.Instance;
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            for (int pump = 0; pump < 128; pump++) {
+                typeof(GameRoot).GetMethod("UpdateForeground", flags).Invoke(root, null);
+                Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root), Is.Null);
+                if (root.Save.livingDungeon.IsClosed && !root.TimeService.RecoveryClockActive && !root.TimeService.HasDeferredRecovery) return;
+            }
+            Assert.Fail("Controlled scene failed to close its existing cut/recovery within the fixture bound");
+        }
+
+        [UnityTest] public IEnumerator SceneClockNativeFractionAndOwnerRemainBound()
+        {
+            var root = GameRoot.Instance; var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            Assert.That(root.TimeService, Is.SameAs(typeof(SaveService).GetField("recoveryTime", flags).GetValue(root.SaveService)));
+            Assert.That(typeof(SaveService).GetField("_timeSource", flags).GetValue(root.SaveService), Is.SameAs(sceneClock));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(sceneClock.Now));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary.Fraction100ns, Is.EqualTo(2500000));
+            var bytes = root.SaveService.CanonicalSession.GetCurrentBytes();
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(sceneClock, sceneClock.Monotonic));
+            CollectionAssert.AreEqual(bytes, root.SaveService.CanonicalSession.GetCurrentBytes());
+            yield return null;
+        }
+        [UnityTest] public IEnumerator SceneClockEligibilityRejectsOwnerProductAndNonBatchContext()
+        {
+            var method = typeof(GameRoot).GetMethod("IsIsolatedSceneClockContext", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            Assert.That(method.Invoke(null, new object[] { "Dungeon Lord", true, filename }), Is.False);
+            Assert.That(method.Invoke(null, new object[] { Application.productName, false, filename }), Is.False);
+            Assert.That(method.Invoke(null, new object[] { Application.productName, true, "../" + filename }), Is.False);
+            Assert.That(method.Invoke(null, new object[] { Application.productName, true, filename }), Is.True);
+            yield return null;
+        }
+        [UnityTest] public IEnumerator SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit()
+        {
+            var root = GameRoot.Instance; double mana = root.Save.structureRuntime.ManaReserve; long ticks = root.Save.totalTicks;
+            var bound = root.TimeService; sceneClock.Advance(.0000001);
+            Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.True);
+            Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(2000, 2500001)));
+            for (int i = 0; i < 3; i++) Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.True);
+            Assert.That(root.TimeService, Is.SameAs(bound)); Assert.That(root.Save.totalTicks, Is.EqualTo(ticks));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(sceneClock.Now));
+            yield return null;
+        }
+        [UnityTest] public IEnumerator SceneClockInvalidUtcFailsClosed() { yield return SceneClockInvalidObservationsFailClosed(true); }
+        [UnityTest] public IEnumerator SceneClockInvalidMonotonicFailsClosed() { yield return SceneClockInvalidObservationsFailClosed(false); }
+        private IEnumerator SceneClockInvalidObservationsFailClosed(bool utc)
+        {
+            var root = GameRoot.Instance; var before = root.SaveService.CanonicalSession.GetCurrentBytes();
+            var wall = root.Save.timeProvenance.AccountedBoundary;
+            try {
+                sceneClock.InvalidUtc = utc; sceneClock.InvalidMonotonic = !utc;
+                Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.False);
+                CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
+                Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(wall));
+            } finally { sceneClock.InvalidUtc = sceneClock.InvalidMonotonic = false; }
+            yield return null;
+        }
+        [UnityTest] public IEnumerator SceneClockHistoricalOrderLootCapacityAndSaveReopen()
+        {
+            yield return RoomContentLootRejectionReasons(); yield return TearDown(); yield return SetUp();
+            yield return RoomContentMapReassignmentCapacityMoveOwnedAndDiscard(); yield return TearDown(); yield return SetUp();
+            yield return RoomContentMapReassignmentCategoriesInvalidRetryAndSave();
         }
         [UnityTearDown]
         public IEnumerator TearDown()

@@ -243,22 +243,14 @@ namespace DungeonBuilder.M0.Tests
             }
             Assert.That(report.Passed, Is.True, report.Failure);
         }
-        private Action<double> InstallForegroundBoundaryTestClock(ITimeSource utc = null)
+        private Action<double> InstallForegroundBoundaryTestClock()
         {
-            TraceSceneState("clock.before-replacement");
-            var root = GameRoot.Instance; double sample = 100;
-            var time = new TimeService(root.Logger, 10, 300, utc ?? new SystemTimeSource(), () => sample);
-            time.AttachSave(root.Save);
-            time.BeginForeground(1000, root.Save.livingDungeon.Scheduler.AcceptedThrough);
-            typeof(GameRoot).GetProperty(nameof(GameRoot.TimeService)).SetValue(root, time);
-            TraceSceneState("clock.after-replacement");
-            return delta => sample += delta;
-        }
-
-        private sealed class ForegroundBoundaryUtc : ITimeSource
-        {
-            public long Now;
-            public long UtcNowUnixSeconds() => Now;
+            var root = GameRoot.Instance;
+            Assert.That(sceneClock, Is.Not.Null);
+            Assert.That(root.TimeService, Is.SameAs(typeof(SaveService).GetField("recoveryTime",
+                BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root.SaveService)));
+            TraceSceneState("clock.verify-prebound-owner");
+            return sceneClock.Advance;
         }
 
         [UnityTest] public IEnumerator LivingDungeonB3B2ProvenRollbackRetriesThroughRealSaveBarrier()
@@ -280,7 +272,7 @@ namespace DungeonBuilder.M0.Tests
             var update = (Action)Delegate.CreateDelegate(typeof(Action), root, typeof(GameRoot).GetMethod("UpdateForeground", flags));
             update();
             advance((root.Save.livingDungeon.Scheduler.NextOpportunityTime.Value - root.TimeService.SampleForeground()) / 1000d + .001);
-            update(); Assert.That(root.Save.livingDungeon.Parties.Count, Is.EqualTo(1));
+            update(); PumpSceneToClosed(); Assert.That(root.Save.livingDungeon.Parties.Count, Is.EqualTo(1));
             var profile = service.ForegroundConfiguration.CreateProfile(root.SaveSpatialMigrationLimits.Canonical.ForSchema(13).Serialized);
             var execution = LivingDungeonContracts.Restore(root.Save.livingDungeon.Parties.Single(), profile);
             long finish; RunOutcomeRecord expected;
@@ -288,10 +280,7 @@ namespace DungeonBuilder.M0.Tests
                 expected = execution.DrainToCompletion();
                 finish = root.Save.livingDungeon.Parties.Single().AdmittedAt + execution.Inspect().LogicalTime;
             } finally { execution.Abandon(); }
-            var bounded = LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(
-                File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json")
-                    .Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1")));
-            typeof(SaveService).GetProperty(nameof(SaveService.ForegroundConfiguration)).SetValue(service, bounded);
+            Assert.That(service.ForegroundConfiguration.MaximumBoundaries, Is.EqualTo(1), "Bounded policy was consumed before ownership");
             advance((finish - root.TimeService.SampleForeground()) / 1000d + .001); update();
             Assert.That(root.Save.livingDungeon.IsClosed, Is.False, "Accept a horizon that needs several bounded passes");
             var original = root.Save; var session = service.CanonicalSession; var before = session.GetCurrentBytes();
@@ -417,22 +406,17 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator LivingDungeonB3B2ResumeCompletesSeveralBoundedPassesBeforeRunningAgain()
         {
             var root = GameRoot.Instance;
-            var bounded = LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(
-                File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json")
-                    .Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1")));
-            typeof(SaveService).GetProperty(nameof(SaveService.ForegroundConfiguration)).SetValue(root.SaveService, bounded);
-            var utc = new ForegroundBoundaryUtc { Now = root.Save.lastSavedUtcUnix };
-            root.SaveService.SetTimeSourceForTests(utc); root.SetOfflineTimeSourceForTests(utc);
-            var advance = InstallForegroundBoundaryTestClock(utc);
+            Assert.That(root.SaveService.ForegroundConfiguration.MaximumBoundaries, Is.EqualTo(1));
+            var advance = InstallForegroundBoundaryTestClock();
             var flags = BindingFlags.Instance | BindingFlags.NonPublic;
-            typeof(GameRoot).GetField("foregroundApplicationFocused", flags).SetValue(root, true);
-            typeof(GameRoot).GetField("foregroundApplicationPaused", flags).SetValue(root, false);
             var update = (Action)Delegate.CreateDelegate(typeof(Action), root, typeof(GameRoot).GetMethod("UpdateForeground", flags));
             long before = root.Save.livingDungeon.Scheduler.AcceptedThrough, ticks = root.Save.totalTicks;
             advance(35); root.ApplyPauseState(true); root.ApplyPauseState(false);
-            Assert.That(root.TimeService.IsPaused, Is.True);
-            Assert.That(typeof(GameRoot).GetField("foregroundResumePending", flags).GetValue(root), Is.True);
-            for (int pump = 0; pump < 8 && root.TimeService.IsPaused; pump++) update();
+            // Schema 17 observes the return immediately; foreground eligibility
+            // remains blocked by accepted work and the durable recovery barrier.
+            Assert.That(root.TimeService.ForegroundPresentationActive, Is.False);
+            Assert.That(root.TimeService.HasDeferredRecovery || root.TimeService.RecoveryClockActive, Is.True);
+            PumpSceneToClosed();
             Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root), Is.Null);
             Assert.That(root.TimeService.IsPaused, Is.False);
             Assert.That(root.Save.livingDungeon.IsClosed, Is.True);
@@ -491,10 +475,7 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator LivingDungeonB3B2SuspendedDrainRecognizesItsDurablyPersistedPauseBoundary()
         {
             var root = GameRoot.Instance;
-            var bounded = LivingDungeonForegroundConfig.Parse(System.Text.Encoding.UTF8.GetBytes(
-                File.ReadAllText("Assets/_Project/Resources/living_dungeon_foreground.json")
-                    .Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1")));
-            typeof(SaveService).GetProperty(nameof(SaveService.ForegroundConfiguration)).SetValue(root.SaveService, bounded);
+            Assert.That(root.SaveService.ForegroundConfiguration.MaximumBoundaries, Is.EqualTo(1));
             var advance = InstallForegroundBoundaryTestClock();
             long before = root.Save.livingDungeon.Scheduler.AcceptedThrough;
             advance(35); root.ApplyPauseState(true);
