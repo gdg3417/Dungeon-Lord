@@ -155,15 +155,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ConstructionSaveRechecksConfiguredPricesAndInsufficientManaPreservesEvidence()
         {
-            var f = Room(); var d = TransactionalDungeonDraft.Create(f.State, Context(f), new Store()); Build(f, d);
+            var inputs = H1F4RecoveryContractTests.Inputs();
             var config = JsonUtility.FromJson<StructuralEconomyConfiguration>(File.ReadAllText("Assets/_Project/Resources/structural_economy.json"));
             config.Rooms.Single(r => r.DefinitionId == "spatial.room.basic").Mana = 333;
+            inputs[2] = Encoding.UTF8.GetBytes(JsonUtility.ToJson(config));
+            var f = PhaseSevenA4TransactionalEditorTests.Content(recoveryInputBytes: inputs);
+            var d = TransactionalDungeonDraft.Create(f.State, Context(f), new Store()); Build(f, d);
+            var consumed = f.Economy;
+            var before = f.Session.GetCurrentBytes();
+            config.Rooms.Single(r => r.DefinitionId == "spatial.room.basic").Mana = 334;
             Assert.That(StructuralEconomySnapshot.TryCreate(config, f.Production.Catalog, out f.Economy), Is.True);
-            f.Runtime.structureRuntime.ManaReserve = 332; var before = f.Session.GetCurrentBytes();
+            Assert.That(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d).IsSuccess, Is.False,
+                "A replacement price owner cannot be adopted after context binding");
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            Assert.That(d.CanSave, Is.True);
+            f.Economy = consumed;
+            f.Runtime.structureRuntime.ManaReserve = 332;
             var result = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d);
             Assert.That(result.Reason, Is.EqualTo(StructuralEconomyService.InsufficientReason)); Assert.That(d.CanSave, Is.True);
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
-            long reserve = MonsterContinuity.RequiredReserve(f.State, MonsterRecoveryRules.EditorFallback());
+            long reserve = MonsterContinuity.RequiredReserve(f.State, f.Context.MonsterRecovery);
             f.Runtime.structureRuntime.ManaReserve = 333 + reserve; result = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d);
             Assert.That(result.IsSuccess, Is.True, result.Reason); Assert.That(result.RuntimeProjection.structureRuntime.ManaReserve, Is.EqualTo(reserve));
         }

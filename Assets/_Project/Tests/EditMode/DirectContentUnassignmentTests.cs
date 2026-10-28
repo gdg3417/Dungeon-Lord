@@ -61,7 +61,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = Active(option); var item = Item(f);
             f.Runtime.structureRuntime.ManaReserve = 0; // No purchase balance is required for an ownership move.
             f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
-            string stateBefore = Json(f.State), runtimeBefore = Json(f.Runtime), ledger = Investment(f);
+            string stateBefore = Json(f.State), structureBefore = Json(f.Runtime.structureRuntime),
+                historyBefore = Json(f.Runtime.runHistory), ledger = Investment(f);
+            var beforeSnapshot = DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile);
             long next = f.State.Floors[0].RoomContents.NextSequence;
             var request = DetachedCanonicalMutationRequest.Unassign(item.AssignmentId);
             Assert.That(request.CategoryId, Is.Null); Assert.That(request.OptionId, Is.Null);
@@ -88,8 +90,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
             restored.LifecycleAndOwnership.ReturnedContents = Array.Empty<ReturnedStructuralContent>();
             Assert.That(Json(restored), Is.EqualTo(stateBefore));
             // Recognized runtime fields include mana, run history and resolved loot; projections are compared separately.
-            var beforeRuntime = JsonUtility.FromJson<SaveData>(runtimeBefore);
-            var beforeSnapshot = DetachedRecognizedSaveStateSnapshot.Capture(beforeRuntime, f.Profile);
             var afterSnapshot = DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile);
             Assert.That(beforeSnapshot.IsSuccess && afterSnapshot.IsSuccess, Is.True);
             foreach (var field in typeof(SaveData).GetFields().Where(field =>
@@ -99,9 +99,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(afterSnapshot.Snapshot.TryGet(field.Name, out var after), Is.True);
                 CollectionAssert.AreEqual(before, after, field.Name);
             }
-            Assert.That(Json(f.Runtime.structureRuntime), Is.EqualTo(Json(beforeRuntime.structureRuntime)));
-            Assert.That(Json(f.Runtime.runHistory), Is.EqualTo(Json(beforeRuntime.runHistory)));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(Json(f.Runtime.structureRuntime), Is.EqualTo(structureBefore));
+            Assert.That(Json(f.Runtime.runHistory), Is.EqualTo(historyBefore));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
             Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget));
             AssertRejected(f, item.AssignmentId, DetachedCanonicalSpatialMutation.ActiveAssignmentMissingReason);
         }

@@ -468,7 +468,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     source.Result.Attempt.Candidate.GetBytes(), source.Limits, out byte[] current), Is.True);
                 DetachedCompleteSaveValidationResult parsed =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current,
-                        new DetachedCurrentTargetValidationContext(source.Compatibility,
+                        PhaseFourTestSupport.CurrentContext(source.Compatibility,
                             source.Production, source.LegacyBytes, source.Limits));
                 Assert.That(parsed.IsValid, Is.True, parsed.Reason);
                 RunSimulationConfig configuration =

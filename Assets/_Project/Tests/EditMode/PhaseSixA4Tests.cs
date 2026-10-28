@@ -176,7 +176,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void IncompleteConstructedFloorShowsExactReadableBlockerThroughGameRoot()
         {
-            var f = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
+            var f = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null, workloadProfile: PhaseFourTestSupport.ProductionProfile());
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             f.Runtime.completedResearch = new CompletedResearchState { ProjectIds = new[] { "ac_100" } };
