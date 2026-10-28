@@ -284,6 +284,8 @@ namespace DungeonBuilder.M0.Tests
             advance((finish - root.TimeService.SampleForeground()) / 1000d + .001); update();
             Assert.That(root.Save.livingDungeon.IsClosed, Is.False, "Accept a horizon that needs several bounded passes");
             var original = root.Save; var session = service.CanonicalSession; var before = session.GetCurrentBytes();
+            var blockedObservation = root.TimeService.CaptureForegroundObservation(session);
+            Assert.That(blockedObservation.CapturedThrough, Is.GreaterThanOrEqualTo(blockedObservation.AcceptedThrough));
             string state = EditMode.LivingDungeonPhaseABaselineTests.Structured(root.Save);
             var fsField = typeof(SaveService).GetField("_canonicalFileSystem", flags);
             var native = fsField.GetValue(service);
@@ -305,8 +307,9 @@ namespace DungeonBuilder.M0.Tests
                     fs.DisableFailure(); Assert.That(service.BeforeForegroundAction(), Is.False);
                     Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root),
                         Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
-                    Assert.That(service.AdvanceForeground(root.Save, finish, 10, (save, tick) => { }).Reason,
+                    Assert.That(service.AdvanceForeground(root.Save, blockedObservation, 10, (save, tick) => { }).Reason,
                         Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+                    Assert.That(fs.Operations.Count(), Is.EqualTo(operations), "Uncertain authority rejects even a valid captured cut without IO");
                     Assert.That(published, Is.Zero);
                 } else {
                     fs.EnableTargetedFailure(flush, paths => true, 1, false);
@@ -477,18 +480,36 @@ namespace DungeonBuilder.M0.Tests
             var root = GameRoot.Instance;
             Assert.That(root.SaveService.ForegroundConfiguration.MaximumBoundaries, Is.EqualTo(1));
             var advance = InstallForegroundBoundaryTestClock();
-            long before = root.Save.livingDungeon.Scheduler.AcceptedThrough;
-            advance(35); root.ApplyPauseState(true);
+            long before = root.Save.livingDungeon.Scheduler.AcceptedThrough, ticks = root.Save.totalTicks;
+            advance(35); var pause = sceneClock.Now; root.ApplyPauseState(true);
             Assert.That(root.TimeService.IsPaused, Is.True);
             Assert.That(root.Save.livingDungeon.IsClosed, Is.False, "One bounded pause flush cannot close three ticks");
+            long pausedClosed = root.Save.livingDungeon.Scheduler.ClosedThrough;
+            var pausedBytes = root.SaveService.CanonicalSession.GetCurrentBytes();
             var flags = BindingFlags.Instance | BindingFlags.NonPublic;
             var update = typeof(GameRoot).GetMethod("UpdateForeground", flags);
-            for (int pump = 0; pump < 8 && !root.Save.livingDungeon.IsClosed; pump++) update.Invoke(root, null);
+            for (int pump = 0; pump < 8; pump++) update.Invoke(root, null);
             Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root), Is.Null);
+            // An observed background interval waits for an observed return. It
+            // does not run a new episode or execute adventurers in background.
+            Assert.That(root.TimeService.HasDeferredBackground, Is.True);
+            Assert.That(root.TimeService.RecoveryClockActive, Is.False);
+            Assert.That(root.Save.livingDungeon.Scheduler.ClosedThrough, Is.EqualTo(pausedClosed));
+            CollectionAssert.AreEqual(pausedBytes, File.ReadAllBytes(root.SaveService.SavePath));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(pause));
+            root.ApplyPauseState(false); PumpSceneToClosed();
+            Assert.That(root.TimeService.IsPaused, Is.False);
+            Assert.That(root.TimeService.HasDeferredRecovery || root.TimeService.RecoveryClockActive, Is.False);
             Assert.That(root.Save.livingDungeon.IsClosed, Is.True);
             Assert.That(root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(before + 35000));
-            Assert.That(typeof(GameRoot).GetField("_resumeOfflineBoundaryPersisted", flags).GetValue(root), Is.True,
-                "The completed suspended transaction persisted the original pause boundary; resume must retain its existing offline policy");
+            Assert.That(root.Save.totalTicks - ticks, Is.EqualTo((before + 35000) / 10000 - before / 10000));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(pause));
+            Assert.That(root.Save.timeProvenance.Episode, Is.Null);
+            CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(), File.ReadAllBytes(root.SaveService.SavePath));
+            ticks = root.Save.totalTicks; double mana = root.Save.structureRuntime.ManaReserve;
+            for (int pump = 0; pump < 8; pump++) update.Invoke(root, null);
+            Assert.That(root.Save.totalTicks, Is.EqualTo(ticks));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana));
             yield return null;
         }
     }

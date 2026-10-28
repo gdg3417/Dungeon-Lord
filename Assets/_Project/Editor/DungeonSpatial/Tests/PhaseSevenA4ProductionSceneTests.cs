@@ -155,6 +155,10 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.TimeService, Is.Null, "Injection supplies providers, never an early/replacement owner");
             TestContext.WriteLine("Isolated scene boot " + isolationCallbacks + ": " + config.save.fileName);
         }
+        private void ObserveSceneFocus(bool focused) => typeof(GameRoot).GetMethod("OnApplicationFocus",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            .Invoke(GameRoot.Instance, new object[] { focused });
+
         private void PumpSceneToClosed(bool establishForeground = false)
         {
             var root = GameRoot.Instance;
