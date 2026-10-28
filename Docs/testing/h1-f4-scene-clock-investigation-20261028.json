@@ -1,0 +1,895 @@
+{
+  "base": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+  "changed_source_files": [
+    "Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonForegroundSceneTests.cs",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs",
+    "Tools/Presentation/qualify_h1_f4.py"
+  ],
+  "clock_finding": {
+    "after": "H1F4_SCENE clock.after-replacement frame=1558 controller=-1487391744 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=1332210424 boundTime=1996960050 recovery=False deferred=False failure= retry=False publication=False recoveryRequired=False save=2029081216 session=1917540450 bytes=424ab7d9bdbb559e507d3f3531a59c1d133cd04857082f83bdb1239294685b43 W=1793186278.4403463 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+    "before": "H1F4_SCENE clock.before-replacement frame=1558 controller=-1487391744 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=1996960050 boundTime=1996960050 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=2029081216 session=1917540450 bytes=424ab7d9bdbb559e507d3f3531a59c1d133cd04857082f83bdb1239294685b43 W=1793186278.4403463 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+    "cached_test_does_not_assert_recovery_owner_identity": true,
+    "canonical_bytes_unchanged_by_replacement": true,
+    "correction_implemented": false,
+    "mismatch_confirmed": true
+  },
+  "diagnostic_and_test_source": "895e40f990e902052dcc76c0f163a96d9631742b",
+  "direct_helper_calls": [
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "[UnityTest] public IEnumerator AnalysisDoesNotInterruptAuthoritativeForegroundAdmissionAndSettlement()",
+      "line": 453,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "[UnityTest] public IEnumerator LivingDungeonB3B2LiveLabelsSessionReplayAndLargeLayoutsObserveOnlyCommittedState()",
+      "line": 125,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundReadabilityTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "[UnityTest] public IEnumerator LivingDungeonB3B2ActiveIdleFramesDoNotReconstructSaveOrRebuildUi()",
+      "line": 243,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundReadabilityTests.cs"
+    },
+    {
+      "call": "InstallForegroundBoundaryTestClock();",
+      "declaration": "[UnityTest] public IEnumerator R0ResearchPrerequisiteNativeShellBlocksWithoutResearchWrite()",
+      "line": 30,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "[UnityTest] public IEnumerator R0ResearchPrerequisiteRequiresAutomaticTerminalSettlement()",
+      "line": 71,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "[UnityTest] public IEnumerator R0ResearchStartProgressClaimAndReopenUseCommittedPublication()",
+      "line": 116,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "private IEnumerator ResearchActionFailure(bool claim, bool uncertain, bool failForeground = false)",
+      "line": 159,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "private IEnumerator ForegroundFailureRetry(bool uncertain)",
+      "line": 278,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "public IEnumerator LivingDungeonB3B2AutomaticSceneLoopSettlesAndAdmitsAgainstCommittedEdit()",
+      "line": 366,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock(utc);",
+      "declaration": "public IEnumerator LivingDungeonB3B2ResumeCompletesSeveralBoundedPassesBeforeRunningAgain()",
+      "line": 426,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "public IEnumerator LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish()",
+      "line": 454,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "public IEnumerator LivingDungeonB3B2LiveFloorActionsValidateAfterTheirElapsedTimeBarrier()",
+      "line": 482,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs"
+    },
+    {
+      "call": "var advance = InstallForegroundBoundaryTestClock();",
+      "declaration": "public IEnumerator LivingDungeonB3B2SuspendedDrainRecognizesItsDurablyPersistedPauseBoundary()",
+      "line": 498,
+      "path": "Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonForegroundSceneTests.cs"
+    }
+  ],
+  "draft_finding": {
+    "correction_implemented": false,
+    "current_case_passed_original_assertions": true,
+    "current_transition": "Pending after construction, Acknowledged on first yield, same draft/session through remaining yields",
+    "disabled_root_alone_not_proven_cause": true,
+    "historical_loss_reproduced": false,
+    "root_cause_established": false,
+    "same_draft_survived_all_12_yields": true
+  },
+  "full_suites_windows_benchmarks_owner_uat_merge_started": false,
+  "historical_cases": [
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish",
+      "message": null,
+      "result": "Passed",
+      "stack": null
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentCapacityMoveOwnedAndDiscard",
+      "message": "System.NullReferenceException : Object reference not set to an instance of an object",
+      "result": "Failed",
+      "stack": "  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMapReassignmentCapacityMoveOwnedAndDiscard>d__164.MoveNext () [0x0010a] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:304 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 "
+    }
+  ],
+  "historical_source": "16955152fcdd5a5f8af006dc38887a75f1f83266",
+  "historical_verdict_preserved": "INCOMPLETE / UNCERTAIN",
+  "historical_xml_sha256": "aac1bab11bf2ba8b942c5c9828250f02cec636f29456b70921c87a2abc0a1f53",
+  "independent_receipt_sha256": "8704ad249f8b9308c8d1854761d6f9989072c8f8712c53a50babfbc3c7538b73",
+  "independent_verification": {
+    "all_checks_passed": true,
+    "all_stage_job_queries_absent_error2": true,
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4",
+    "font_sha256": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+    "historical_descendant_completion_reinterpreted": false,
+    "historical_full_xml_unchanged": true,
+    "input_count": 1494,
+    "later_process_absences": {
+      "preservation/child_process": {
+        "current": null,
+        "recorded": {
+          "created": 134376599159674443,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 9168
+        }
+      },
+      "preservation/process": {
+        "current": null,
+        "recorded": {
+          "created": 134376599158608657,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 35896
+        }
+      },
+      "restore-preflight/child_process": {
+        "current": null,
+        "recorded": {
+          "created": 134376598952804527,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 41060
+        }
+      },
+      "restore-preflight/process": {
+        "current": null,
+        "recorded": {
+          "created": 134376598951738513,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 53924
+        }
+      },
+      "restore/child_process": {
+        "current": null,
+        "recorded": {
+          "created": 134376599054863848,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 16152
+        }
+      },
+      "restore/process": {
+        "current": null,
+        "recorded": {
+          "created": 134376599053818763,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 21444
+        }
+      },
+      "scene-repro-preflight/child_process": {
+        "current": null,
+        "recorded": {
+          "created": 134376598151698897,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 27096
+        }
+      },
+      "scene-repro-preflight/process": {
+        "current": null,
+        "recorded": {
+          "created": 134376598150488881,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 52016
+        }
+      },
+      "scene-repro/child_process": {
+        "current": null,
+        "recorded": {
+          "created": 134376598252069336,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 8612
+        }
+      },
+      "scene-repro/process": {
+        "current": null,
+        "recorded": {
+          "created": 134376598250934577,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 52620
+        }
+      }
+    },
+    "original_inputs_restored": true,
+    "prior_evidence_directories_verified": 73,
+    "protected_evidence_unchanged": true,
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4"
+    },
+    "stages": {
+      "preservation": {
+        "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+        "child_finished_utc": "2026-10-28T11:18:40.508774+00:00",
+        "child_process": {
+          "created": 134376599159674443,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 9168
+        },
+        "child_started_utc": "2026-10-28T11:18:36.277062+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+          "finish",
+          "--attempt",
+          "scene-repro01",
+          "--stage",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4\\preservation"
+        ],
+        "evidence": {
+          "child.json": "6f291e2a1269d6cfefc0cb6417f8ead4f38afe9b240a43bf50da0b619021afdb",
+          "exit.json": "40b62c0d91eb4b159d1fb99b2f504631ccf89533a9bdf91b540bb73f4567c3fe",
+          "preservation.json": "e521058ef3fb73112147b8a8443320941fe04e7d9d1d30a11e53bbc304372e3a",
+          "started.json": "3a2c7e1f17f806e603fc21876c39dd511a814cad3aee32b581e380b10f4c9bfa",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-28T11:18:40.518779+00:00",
+        "host_exit_code": 0,
+        "input_identity": "0135999c15d6378d37da09339f855e30be74c016719a543834d4849cc6a83a2d",
+        "job": "Local\\DLQ-1154605791ce42b5b998b112ef5fe0ae",
+        "process": {
+          "created": 134376599158608657,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 35896
+        },
+        "source_sha": "895e40f990e902052dcc76c0f163a96d9631742b",
+        "stage": "preservation",
+        "started_utc": "2026-10-28T11:18:35.853073+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "restore": {
+        "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+        "child_finished_utc": "2026-10-28T11:18:31.113755+00:00",
+        "child_process": {
+          "created": 134376599054863848,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 16152
+        },
+        "child_started_utc": "2026-10-28T11:18:25.741923+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+          "restore",
+          "--attempt",
+          "scene-repro01",
+          "--stage",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4\\restore"
+        ],
+        "evidence": {
+          "child.json": "43cb8168b59b1305c9239e965b0274e6f0e2c2a3fda72149d60a029bdbf19c1d",
+          "exit.json": "847b82043be38ef09701f50991d1ecf75083a6e316045b8c55ea07367c7a51b6",
+          "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+          "started.json": "0f9a8485ef1fade51f1f57bb5cdba394a7c11fdc6a1e45f792ea34e93806bb4d",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-28T11:18:31.123756+00:00",
+        "host_exit_code": 0,
+        "input_identity": "82de179bc04d064037d521d604b0fb683f20eece5b9b8a042b109f6223c61f5f",
+        "job": "Local\\DLQ-922a8962866d4a7abf7140d70fdc2907",
+        "process": {
+          "created": 134376599053818763,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 21444
+        },
+        "source_sha": "895e40f990e902052dcc76c0f163a96d9631742b",
+        "stage": "restore",
+        "started_utc": "2026-10-28T11:18:25.374772+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "restore-preflight": {
+        "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+        "child_finished_utc": "2026-10-28T11:18:20.260659+00:00",
+        "child_process": {
+          "created": 134376598952804527,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 41060
+        },
+        "child_started_utc": "2026-10-28T11:18:15.677176+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+          "preflight",
+          "--attempt",
+          "scene-repro01",
+          "--stage",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4/restore-preflight"
+        ],
+        "evidence": {
+          "child.json": "4529f876e85834555ba6add743452b89097f7ccc94af17eeaad667c29cd7904d",
+          "exit.json": "a2209b615730563b75033d8fbffc8824df33382ce2f3cd25e251f271de2881e3",
+          "preservation.json": "4fc7293fd564b7b4d0ff9c3f2eff5d25e0c9c7537cf2fd091482b793e0af413e",
+          "started.json": "fd4017dac3e4da6dbe2a65776c258c82682a03ab8bee9a9c4b4bbbb54c6900df",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-28T11:18:20.270326+00:00",
+        "host_exit_code": 0,
+        "input_identity": "82de179bc04d064037d521d604b0fb683f20eece5b9b8a042b109f6223c61f5f",
+        "job": "Local\\DLQ-4c416fe8c66c431287081854be0303a7",
+        "process": {
+          "created": 134376598951738513,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 53924
+        },
+        "source_sha": "895e40f990e902052dcc76c0f163a96d9631742b",
+        "stage": "restore-preflight",
+        "started_utc": "2026-10-28T11:18:15.166187+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "scene-repro": {
+        "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+        "child_finished_utc": "2026-10-28T11:18:10.025836+00:00",
+        "child_process": {
+          "created": 134376598252069336,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 8612
+        },
+        "child_started_utc": "2026-10-28T11:17:05.453976+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+          "run-scene-repro",
+          "--attempt",
+          "scene-repro01",
+          "--stage",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4\\scene-repro"
+        ],
+        "evidence": {
+          "child.json": "add8cfb831a100acf4559972812c66c4f9b2ed1ea624af4eb37a3a99310acc78",
+          "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+          "exit.json": "7d340c56d5f3c6064d6ab17c059b0751ad605f736fc75d8616542e5aaf1d4022",
+          "generated-inputs": {
+            "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+          },
+          "invocation.json": "57ae73c1078d1c04266cb5a32bdb97953d54eb35b4d8a21034d559d970a01ea8",
+          "results.xml": "d85336a244d0de5c37d1f09f306d87fd0d3b5fd91fabb713ed76864db80db58e",
+          "started.json": "28387a97eb969994502f71a7f98a3c4b8daea04b02d9897695d6a255128d9d62",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "unity.log": "5e182617295526374c151db91fc08074bf8fe87d2832b74a793df0c9dbe7c567"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-28T11:18:10.033835+00:00",
+        "host_exit_code": 0,
+        "input_identity": "82de179bc04d064037d521d604b0fb683f20eece5b9b8a042b109f6223c61f5f",
+        "job": "Local\\DLQ-7c46bd5123a049428835b86b493da04b",
+        "process": {
+          "created": 134376598250934577,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 52620
+        },
+        "source_sha": "895e40f990e902052dcc76c0f163a96d9631742b",
+        "stage": "scene-repro",
+        "started_utc": "2026-10-28T11:17:05.084940+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": 2,
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0,
+          "skips": []
+        }
+      },
+      "scene-repro-preflight": {
+        "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+        "child_finished_utc": "2026-10-28T11:16:59.969225+00:00",
+        "child_process": {
+          "created": 134376598151698897,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 27096
+        },
+        "child_started_utc": "2026-10-28T11:16:55.564764+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+          "preflight",
+          "--attempt",
+          "scene-repro01",
+          "--stage",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4/scene-repro-preflight"
+        ],
+        "evidence": {
+          "child.json": "76995233c562583640e52f2e9b8c6124dba11f46cb1eca46b55bed65841affdf",
+          "exit.json": "aa946a944a16a2952e108cf7f5256b1bb6c2be5770ecf0a3064fad5412e78fc3",
+          "preservation.json": "4fc7293fd564b7b4d0ff9c3f2eff5d25e0c9c7537cf2fd091482b793e0af413e",
+          "started.json": "fbf0c1534b0bebd1802a9ccc4e613cbaa8024020db71e822e4f9bad6152be221",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-28T11:16:59.979216+00:00",
+        "host_exit_code": 0,
+        "input_identity": "82de179bc04d064037d521d604b0fb683f20eece5b9b8a042b109f6223c61f5f",
+        "job": "Local\\DLQ-2f03b4c3841d4781be49c18665c7c1c4",
+        "process": {
+          "created": 134376598150488881,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 52016
+        },
+        "source_sha": "895e40f990e902052dcc76c0f163a96d9631742b",
+        "stage": "scene-repro-preflight",
+        "started_utc": "2026-10-28T11:16:55.041732+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      }
+    },
+    "status": {
+      "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4",
+      "recorded_status": "PASSED",
+      "stages": {
+        "preservation": "PASSED",
+        "restore": "PASSED",
+        "restore-preflight": "PASSED",
+        "scene-repro": "PASSED",
+        "scene-repro-preflight": "PASSED"
+      },
+      "status": "PASSED"
+    },
+    "tests": [
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish",
+        "result": "Passed"
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentCapacityMoveOwnedAndDiscard",
+        "result": "Passed"
+      }
+    ],
+    "tools_reverified": 9,
+    "verified_utc": "2026-10-28T11:22:41.591492+00:00",
+    "xml_sha256": "d85336a244d0de5c37d1f09f306d87fd0d3b5fd91fabb713ed76864db80db58e"
+  },
+  "input_count": 1494,
+  "isolation": {
+    "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 scene-repro01",
+    "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+    "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 scene-repro01\\save_primary.json"
+  },
+  "model_recommendation": "GPT-6.1 Sol High, Complex; GPT-6 Sol High availability fallback",
+  "observations": {
+    "cases": [
+      {
+        "failure": null,
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish",
+        "observations": [
+          "H1F4_SCENE setup.before-disable frame=1556 controller=-1487391744 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=True focused=False observedFocus=True observedPause=False paused=False time=1996960050 boundTime=1996960050 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1332868256 session=-797955408 bytes=a45e14ba01e5f2bbbf5b211714e71593e8f6c8535d14b2a1ca65b70bf8c1ded4 W=1793186278.4403463 A= C= banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE canonical-publication frame=1556 controller=-1487391744 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=1996960050 boundTime=1996960050 recovery=False deferred=True failure= retry=False publication=True recoveryRequired=False save=2029081216 session=1917540450 bytes=424ab7d9bdbb559e507d3f3531a59c1d133cd04857082f83bdb1239294685b43 W=1793186278.4403463 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE setup.after-disable frame=1556 controller=-1487391744 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=1996960050 boundTime=1996960050 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=2029081216 session=1917540450 bytes=424ab7d9bdbb559e507d3f3531a59c1d133cd04857082f83bdb1239294685b43 W=1793186278.4403463 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE setup.after-yield frame=1557 controller=-1487391744 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=1996960050 boundTime=1996960050 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=2029081216 session=1917540450 bytes=424ab7d9bdbb559e507d3f3531a59c1d133cd04857082f83bdb1239294685b43 W=1793186278.4403463 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE clock.before-replacement frame=1558 controller=-1487391744 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=1996960050 boundTime=1996960050 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=2029081216 session=1917540450 bytes=424ab7d9bdbb559e507d3f3531a59c1d133cd04857082f83bdb1239294685b43 W=1793186278.4403463 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE clock.after-replacement frame=1558 controller=-1487391744 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=1332210424 boundTime=1996960050 recovery=False deferred=False failure= retry=False publication=False recoveryRequired=False save=2029081216 session=1917540450 bytes=424ab7d9bdbb559e507d3f3531a59c1d133cd04857082f83bdb1239294685b43 W=1793186278.4403463 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE canonical-publication frame=1558 controller=-1487391744 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=False observedPause=False paused=True time=1332210424 boundTime=1996960050 recovery=False deferred=True failure= retry=False publication=True recoveryRequired=False save=219888000 session=-830934204 bytes=276b3b00e68d73498b10a90e3225fec1f55fa164b96db85c1f2c5d1b8cd2a14c W=1793186279.8522700 A=0 C=0 banner= pauseLine=Pause: Paused mouseUp= escape="
+        ],
+        "result": "Passed",
+        "stack": null
+      },
+      {
+        "failure": null,
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentCapacityMoveOwnedAndDiscard",
+        "observations": [
+          "H1F4_SCENE setup.before-disable frame=41 controller=-973513728 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=True focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-867507232 session=2001952806 bytes=6a93bf53ad8dd7a75b272f431b885fa1f44377c9d7bf1cd4706967415a260673 W=1793186283.7588154 A= C= banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE canonical-publication frame=41 controller=-973513728 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=True recoveryRequired=False save=2029081216 session=1438335224 bytes=a824267a9c8f453521d89809f79d545e72ae19c86e4e45f00276e1a5ee40bbc3 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE setup.after-disable frame=41 controller=-973513728 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=2029081216 session=1438335224 bytes=a824267a9c8f453521d89809f79d545e72ae19c86e4e45f00276e1a5ee40bbc3 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE setup.after-yield frame=42 controller=-973513728 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=2029081216 session=1438335224 bytes=a824267a9c8f453521d89809f79d545e72ae19c86e4e45f00276e1a5ee40bbc3 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE case.before-funding frame=43 controller=-973513728 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=2029081216 session=1438335224 bytes=a824267a9c8f453521d89809f79d545e72ae19c86e4e45f00276e1a5ee40bbc3 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE canonical-publication frame=43 controller=-973513728 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-enter-edit frame=43 controller=-973513728 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-enter-edit frame=43 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=0 draftReason= feedback=ui.dungeon.construction.hint rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-confirm frame=43 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Pending commands=1 draftReason=ui.dungeon.draft.pending feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-0 frame=43 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Pending commands=1 draftReason=ui.dungeon.draft.pending feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-0 frame=44 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-1 frame=44 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-1 frame=45 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-2 frame=45 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-2 frame=46 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-3 frame=46 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-3 frame=47 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-4 frame=47 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-4 frame=48 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-5 frame=48 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-5 frame=49 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-6 frame=49 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-6 frame=50 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-7 frame=50 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-7 frame=51 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-8 frame=51 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-8 frame=52 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-9 frame=52 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-9 frame=53 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-10 frame=53 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-10 frame=54 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.before-yield-11 frame=54 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE construction.after-yield-11 frame=55 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+          "H1F4_SCENE case.after-construction-coroutine frame=55 controller=-973513728 initialized=True quiesced=False draft=692215016 editing=True durability=Acknowledged commands=1 draftReason= feedback=ui.dungeon.construction.confirmed rootEnabled=False focused=False observedFocus=True observedPause=False paused=False time=730365672 boundTime=730365672 recovery=False deferred=True failure= retry=False publication=False recoveryRequired=False save=-1202874592 session=85268424 bytes=967a4306a078ef3fc5e0495cea40aaa4700e82345f80959614e5ecd38a1f70d8 W=1793186283.7588154 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape="
+        ],
+        "result": "Passed",
+        "stack": null
+      }
+    ],
+    "xml_sha256": "d85336a244d0de5c37d1f09f306d87fd0d3b5fd91fabb713ed76864db80db58e"
+  },
+  "original_archive_sha256": "9b37b4642d52454b44b85558b0a0fab062b1ceced31317c959abb1df66234f3b",
+  "original_input_map_sha256": "cb22eb317ffa659fb41eec94d803d1154412acce3ac1cdac5f0af9f7b7f083e9",
+  "plan_sha256": "cb17480d30f1816255ae70f65af4fdcab5d6744a980dd5fdda4f73efebad1879",
+  "playmode_run": false,
+  "playmode_wrapper": "Assets/_Project/Tests/PlayMode/PhaseSevenA4ProductionShellPlayModeTests.cs",
+  "prebinding_constraint": [
+    "GameRoot.TryConfigureRecoveryRuntime refuses non-null existing TimeService/recovery inputs, constructs its own clock from SystemTimeSource, begins recovery foreground and immediately calls SaveService.ConfigureRecovery.",
+    "SaveService.ConfigureRecovery binds one observationOwner and refuses a loaded canonical session or existing binding.",
+    "SimulationClock and TimeService retain readonly providers/clock; no supported post-binding provider setter exists.",
+    "SetOfflineTimeSourceForTests controls the legacy offline resolver, not the schema-17 boot clock.",
+    "AttachSaveServiceForTests/CompleteSuccessfulBootForTests and synthetic RootScope do not inject clock providers into normal production-scene bootstrap.",
+    "Development ReopenClock is a separately isolated smoke-only constant monotonic source, not a precise controllable UTC/monotonic scene seam; no smoke/profiling expansion was performed."
+  ],
+  "prior_evidence_map_sha256": "bd7da2a08d08a876440c97a455f8fd52d788d65ea95857aa36370a12ae517c2a",
+  "production_files_changed": false,
+  "protected_map_sha256": "ceb1b2c9ef4e82bace0fac9128614bbf9848f483d9f005d4e3be973a67ffa7bf",
+  "qualified_input_map_sha256": "b26dad2f97877b4c5350c015a272618a0c8d435dbfa73833d60df4c568f4a4bb",
+  "remaining": [
+    "Historical draft-loss cause unknown; bounded test-order/input investigation remains.",
+    "Prebinding clock seam decision before lifecycle corrections/qualification.",
+    "Adjacent invalid placement/save/reopen, pause/focus/retry/Research and directly affected PlayMode cohorts not qualified by this two-case run."
+  ],
+  "restored_settings_and_font": {
+    "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+    "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset.meta": "0a7cce8a8d21c28bc719e5842c3fb8a3de8eac864a577160d7413d1df08d79d1",
+    "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+    "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+    "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+  },
+  "review_proposal_not_implemented": "An instance-local UNITY_EDITOR-only one-shot precise UTC + monotonic provider injection before GameRoot.Start, guarded against existing SaveService/TimeService/recovery binding and limited to the isolated scene test identity. GameRoot constructs its one TimeService and passes that same instance through existing ConfigureRecovery/load/attach paths. No runtime state, W/R/A/C fields or post-binding owner replacement. Owner must review or identify an existing supported alternative before implementation.",
+  "scope": "Only missing scene Draft and directly related lifecycle clock ownership; diagnostic changes only; no correction claimed.",
+  "stages": {
+    "preservation": {
+      "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+      "child_finished_utc": "2026-10-28T11:18:40.508774+00:00",
+      "child_process": {
+        "created": 134376599159674443,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 9168
+      },
+      "child_started_utc": "2026-10-28T11:18:36.277062+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "finish",
+        "--attempt",
+        "scene-repro01",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4\\preservation"
+      ],
+      "evidence": {
+        "child.json": "6f291e2a1269d6cfefc0cb6417f8ead4f38afe9b240a43bf50da0b619021afdb",
+        "exit.json": "40b62c0d91eb4b159d1fb99b2f504631ccf89533a9bdf91b540bb73f4567c3fe",
+        "preservation.json": "e521058ef3fb73112147b8a8443320941fe04e7d9d1d30a11e53bbc304372e3a",
+        "started.json": "3a2c7e1f17f806e603fc21876c39dd511a814cad3aee32b581e380b10f4c9bfa",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-28T11:18:40.518779+00:00",
+      "host_exit_code": 0,
+      "input_identity": "0135999c15d6378d37da09339f855e30be74c016719a543834d4849cc6a83a2d",
+      "job": "Local\\DLQ-1154605791ce42b5b998b112ef5fe0ae",
+      "process": {
+        "created": 134376599158608657,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 35896
+      },
+      "source_sha": "895e40f990e902052dcc76c0f163a96d9631742b",
+      "stage": "preservation",
+      "started_utc": "2026-10-28T11:18:35.853073+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    },
+    "restore": {
+      "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+      "child_finished_utc": "2026-10-28T11:18:31.113755+00:00",
+      "child_process": {
+        "created": 134376599054863848,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 16152
+      },
+      "child_started_utc": "2026-10-28T11:18:25.741923+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "restore",
+        "--attempt",
+        "scene-repro01",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4\\restore"
+      ],
+      "evidence": {
+        "child.json": "43cb8168b59b1305c9239e965b0274e6f0e2c2a3fda72149d60a029bdbf19c1d",
+        "exit.json": "847b82043be38ef09701f50991d1ecf75083a6e316045b8c55ea07367c7a51b6",
+        "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+        "started.json": "0f9a8485ef1fade51f1f57bb5cdba394a7c11fdc6a1e45f792ea34e93806bb4d",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-28T11:18:31.123756+00:00",
+      "host_exit_code": 0,
+      "input_identity": "82de179bc04d064037d521d604b0fb683f20eece5b9b8a042b109f6223c61f5f",
+      "job": "Local\\DLQ-922a8962866d4a7abf7140d70fdc2907",
+      "process": {
+        "created": 134376599053818763,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 21444
+      },
+      "source_sha": "895e40f990e902052dcc76c0f163a96d9631742b",
+      "stage": "restore",
+      "started_utc": "2026-10-28T11:18:25.374772+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    },
+    "restore-preflight": {
+      "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+      "child_finished_utc": "2026-10-28T11:18:20.260659+00:00",
+      "child_process": {
+        "created": 134376598952804527,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 41060
+      },
+      "child_started_utc": "2026-10-28T11:18:15.677176+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "preflight",
+        "--attempt",
+        "scene-repro01",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4/restore-preflight"
+      ],
+      "evidence": {
+        "child.json": "4529f876e85834555ba6add743452b89097f7ccc94af17eeaad667c29cd7904d",
+        "exit.json": "a2209b615730563b75033d8fbffc8824df33382ce2f3cd25e251f271de2881e3",
+        "preservation.json": "4fc7293fd564b7b4d0ff9c3f2eff5d25e0c9c7537cf2fd091482b793e0af413e",
+        "started.json": "fd4017dac3e4da6dbe2a65776c258c82682a03ab8bee9a9c4b4bbbb54c6900df",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-28T11:18:20.270326+00:00",
+      "host_exit_code": 0,
+      "input_identity": "82de179bc04d064037d521d604b0fb683f20eece5b9b8a042b109f6223c61f5f",
+      "job": "Local\\DLQ-4c416fe8c66c431287081854be0303a7",
+      "process": {
+        "created": 134376598951738513,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 53924
+      },
+      "source_sha": "895e40f990e902052dcc76c0f163a96d9631742b",
+      "stage": "restore-preflight",
+      "started_utc": "2026-10-28T11:18:15.166187+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    },
+    "scene-repro": {
+      "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+      "child_finished_utc": "2026-10-28T11:18:10.025836+00:00",
+      "child_process": {
+        "created": 134376598252069336,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 8612
+      },
+      "child_started_utc": "2026-10-28T11:17:05.453976+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "run-scene-repro",
+        "--attempt",
+        "scene-repro01",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4\\scene-repro"
+      ],
+      "evidence": {
+        "child.json": "add8cfb831a100acf4559972812c66c4f9b2ed1ea624af4eb37a3a99310acc78",
+        "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "exit.json": "7d340c56d5f3c6064d6ab17c059b0751ad605f736fc75d8616542e5aaf1d4022",
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "57ae73c1078d1c04266cb5a32bdb97953d54eb35b4d8a21034d559d970a01ea8",
+        "results.xml": "d85336a244d0de5c37d1f09f306d87fd0d3b5fd91fabb713ed76864db80db58e",
+        "started.json": "28387a97eb969994502f71a7f98a3c4b8daea04b02d9897695d6a255128d9d62",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unity.log": "5e182617295526374c151db91fc08074bf8fe87d2832b74a793df0c9dbe7c567"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-28T11:18:10.033835+00:00",
+      "host_exit_code": 0,
+      "input_identity": "82de179bc04d064037d521d604b0fb683f20eece5b9b8a042b109f6223c61f5f",
+      "job": "Local\\DLQ-7c46bd5123a049428835b86b493da04b",
+      "process": {
+        "created": 134376598250934577,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 52620
+      },
+      "source_sha": "895e40f990e902052dcc76c0f163a96d9631742b",
+      "stage": "scene-repro",
+      "started_utc": "2026-10-28T11:17:05.084940+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": 2,
+        "failed": 0,
+        "passed": 2,
+        "skipped": 0,
+        "skips": []
+      }
+    },
+    "scene-repro-preflight": {
+      "campaign": "2c2f6e2c5b0d477ba951871ba02d08e4",
+      "child_finished_utc": "2026-10-28T11:16:59.969225+00:00",
+      "child_process": {
+        "created": 134376598151698897,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 27096
+      },
+      "child_started_utc": "2026-10-28T11:16:55.564764+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "preflight",
+        "--attempt",
+        "scene-repro01",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2c2f6e2c5b0d477ba951871ba02d08e4/scene-repro-preflight"
+      ],
+      "evidence": {
+        "child.json": "76995233c562583640e52f2e9b8c6124dba11f46cb1eca46b55bed65841affdf",
+        "exit.json": "aa946a944a16a2952e108cf7f5256b1bb6c2be5770ecf0a3064fad5412e78fc3",
+        "preservation.json": "4fc7293fd564b7b4d0ff9c3f2eff5d25e0c9c7537cf2fd091482b793e0af413e",
+        "started.json": "fbf0c1534b0bebd1802a9ccc4e613cbaa8024020db71e822e4f9bad6152be221",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-28T11:16:59.979216+00:00",
+      "host_exit_code": 0,
+      "input_identity": "82de179bc04d064037d521d604b0fb683f20eece5b9b8a042b109f6223c61f5f",
+      "job": "Local\\DLQ-2f03b4c3841d4781be49c18665c7c1c4",
+      "process": {
+        "created": 134376598150488881,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 52016
+      },
+      "source_sha": "895e40f990e902052dcc76c0f163a96d9631742b",
+      "stage": "scene-repro-preflight",
+      "started_utc": "2026-10-28T11:16:55.041732+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    }
+  },
+  "starting_head": "bdc88cd418a85a6bd5770a244d6484d4685b8fcf",
+  "tests": {
+    "failed": 0,
+    "inconclusive": 0,
+    "passed": 2,
+    "skipped": 0
+  },
+  "tools": {
+    "C:\\Program Files\\Git\\cmd\\git.EXE": {
+      "sha256": "81ef35ae005ca9318018d18e3327578ce939fb99feaad6b2d7c8ab15f3de8db5",
+      "version": "git version 2.54.0.windows.1"
+    },
+    "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.2f1\\Editor\\Unity.exe": {
+      "sha256": "c2f3d552a9f9a4639b2e54e9d41f360614d512ba6a9816c8c934568ecc2ad93d",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe": {
+      "sha256": "73dbf1f40507275d6fa636b49eb80b4753e313f649f52591abba86b31f1a1bce",
+      "version": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_inputs.py": {
+      "sha256": "34d3ff45cf7512e21f242bc0e4ede876e5c8b68eddba853ad9b1e69192270c92",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_supervisor.py": {
+      "sha256": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_windows.py": {
+      "sha256": "234bce5f0ca8c7087bb999c603cfbb3d87f0eb4499501a1644dcbbabf3104db7",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py": {
+      "sha256": "58771c9fdcc40372c01a6bcbe2bbd990c8840393f84cf7c029e27a83537f9cd7",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe": {
+      "sha256": "78761a0547cd4a9bc212e27a217c66e6a621bf48c753ba440e4b2327ee7ff8ac",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE": {
+      "sha256": "60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f",
+      "version": "Windows PowerShell 5.1; process-inspection dependency"
+    }
+  }
+}
