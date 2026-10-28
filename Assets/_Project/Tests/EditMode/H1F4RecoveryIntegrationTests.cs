@@ -160,6 +160,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 economy: bound.Economy, runLoot: loot);
             var result = writer.SaveRecognizedState(h.Service.SavePath, h.F.FileSystem, h.Service.CanonicalSession, h.Current);
             Assert.That(result.IsSuccess, Is.False); CollectionAssert.AreEqual(bytes, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+
+            // A retained reference is not proof that its mutable DTO still
+            // represents the immutable bytes consumed before owner creation.
+            double threshold = bound.Configuration.SuccessThreshold;
+            int value = bound.Loot.items[0].worldValue;
+            string digest = bound.Identity.Digest;
+            try {
+                if (wrongLoot) bound.Loot.items[0].worldValue = checked(value + 1);
+                else bound.Configuration.SuccessThreshold = threshold == 0d ? .01d : 0d;
+                var sameReference = new DetachedCanonicalWriteAuthority(h.F.Production, h.F.Compatibility,
+                    bound.Configuration, h.F.Context, h.F.Profile, economy: bound.Economy, runLoot: bound.Loot);
+                var changedResult = sameReference.SaveRecognizedState(h.Service.SavePath, h.F.FileSystem,
+                    h.Service.CanonicalSession, h.Current);
+                TestContext.WriteLine("Same consumed reference: loot=" + wrongLoot + ", digestUnchanged=" +
+                    (bound.Identity.Digest == digest) + ", published=" + changedResult.IsSuccess + ", reason=" + changedResult.Reason);
+                Assert.That(changedResult.IsSuccess, Is.False, "Mutable consumed DTO must not authorize publication under the old digest");
+                CollectionAssert.AreEqual(bytes, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+            }
+            finally {
+                bound.Configuration.SuccessThreshold = threshold;
+                bound.Loot.items[0].worldValue = value;
+            }
         }
         [Test] public void UnsupportedRuntimeProfileCannotBeBoundUnderProductionContextIdentity()
         {
