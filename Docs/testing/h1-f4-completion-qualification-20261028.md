@@ -81,3 +81,51 @@ count, Windows correctness or a performance improvement.
 
 Schemas 7–16, schema-17 grammar, persistent twelve-component context-v3 digest,
 single W and recovery semantics are unchanged by these corrections.
+
+## Lifecycle recovery and corrections — subsequent qualified milestone
+
+The owner approved the exact reviewed recovery proposal for b481fef13741433dbb359899f757c09e.
+Operation receipt c049cbf64898244d608e565d838d79d82eb845ad78c6e4dd65b48040883981dc
+and independent verification e754c7c6988abfc28e0d9ab6a20b9dea8f03bca3d282e932d22bb26731a92bad
+confirm complete four-file preservation/restoration, all 1,494 original inputs,
+exact reservation release, nine tools and 85 prior evidence directories. The
+campaign remains INCOMPLETE / UNCERTAIN, raw 17/3/0; nothing was relabelled.
+See [complete recovery receipt](h1-f4-lifecycle-recovery-receipt-20261028.json).
+The published original blocker/proposal is retained as historical evidence.
+
+The three failures were fixture defects, corrected at 872ce751 without production
+or schema changes:
+
+- Focus return asserted visibility after one frame, bypassing root lifecycle and
+  the episode-closure barrier. Actual root callbacks now observe focus, and the
+  test proves presentation is blocked until durable closure, then visible with
+  unchanged accepted horizon, ticks and wallet for the zero-duration absence.
+- The suspended case expected UpdateForeground to execute accepted work while
+  observed background and checked an older resume guard. The approved coordinator
+  explicitly retains absence until an observed return. It now proves no background
+  writes or closed-prefix movement, exact durable fractional pause W, preserved A,
+  then exact accepted-tick draining and episode closure on return. Repeated updates
+  grant no extra ticks/mana. The assertion is on canonical durable state, not the
+  superseded legacy guard.
+- The uncertainty case passed finish below A (the accepted cut includes the final
+  millisecond). ForegroundObservation rejected it before the intended latch guard.
+  A real source-bound cut captured before fault injection now reaches that guard
+  and proves recovery-required rejection without additional IO or publications.
+
+| Campaign | Source | Passed / failed / skipped |
+| --- | --- | --- |
+| a0e6d370cee54cd7bed21b75b88cda60 | fb9f19795410ae2412a0bed5c980ab7b8e4c64d9 | 3 / 0 / 0 |
+| f1719fcee34142f8ac2814817bab5cc7 | fb9f19795410ae2412a0bed5c980ab7b8e4c64d9 | 20 / 0 / 0 |
+
+The three overlap the twenty: no summed coverage claim. Every selected supervisor
+stage and independent verification passed. The 20-case run's known TMP rewrite
+was retained and restored through the existing zero-exit rule. Original settings,
+complete input inventories, process/Job exits, released reservation and protected
+historical/owner evidence were independently checked. [Complete source-pinned
+stage/test/tool/input evidence](h1-f4-lifecycle-results-20261028.json).
+
+Direct PlayMode scene coverage is the next gate. Sixteen wrappers reuse the actual
+scene methods (eleven foreground and five clock cases), alongside the existing
+Research/Analysis and three room-content wrappers. The explicit 28-case PlayMode
+cohort is not yet qualified. Remaining shared fixtures, full EditMode/PlayMode,
+interruption, Windows runtime and matched performance remain pending.
