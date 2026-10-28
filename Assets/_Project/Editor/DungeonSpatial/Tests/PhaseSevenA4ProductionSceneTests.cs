@@ -25,7 +25,7 @@ namespace DungeonBuilder.M0.Tests
         private Touchscreen simulatedTouch;
         private bool missingThemeWarning;
         private SceneClock sceneClock;
-        private sealed class SceneClock : IPreciseTimeSource
+        internal sealed class SceneClock : IPreciseTimeSource
         {
             internal UnixTimePoint Now = new UnixTimePoint(2000, 2500000);
             internal long Elapsed100ns;

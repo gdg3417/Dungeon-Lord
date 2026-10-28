@@ -44,17 +44,7 @@ namespace DungeonBuilder.M0.EditorTools
             string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
             bool qualification = Application.productName.StartsWith("Dungeon Lord B3B2 Smoke H1F4 ", StringComparison.Ordinal);
             if (qualification || !string.IsNullOrEmpty(export)) {
-                if (!qualification || !Application.isBatchMode || string.IsNullOrEmpty(export))
-                    throw new InvalidOperationException("qualification.capture.isolation_required");
-                var output = new DirectoryInfo(Path.GetFullPath(export));
-                var stage = output.Parent; var campaign = stage?.Parent; var supervisor = campaign?.Parent;
-                if (output.Name != "fixture-inputs" || !output.Exists ||
-                    !string.Equals(supervisor?.FullName, Path.GetFullPath(Path.Combine(Application.dataPath, "../TestResults/qualification-supervisor")), StringComparison.OrdinalIgnoreCase) ||
-                    !Guid.TryParseExact(campaign?.Name, "N", out _) || !File.Exists(Path.Combine(output.FullName, "ownership.json")))
-                    throw new InvalidOperationException("qualification.capture.output_invalid");
-                foreach (var parent in new[] { supervisor, campaign, stage, output })
-                    if (!parent.Exists || (parent.Attributes & FileAttributes.ReparsePoint) != 0)
-                        throw new InvalidOperationException("qualification.capture.output_redirected");
+                var output = H1F4QualificationArtifacts.RequireOutputRoot();
                 return Path.Combine(output.FullName, "screenshots", Guid.NewGuid().ToString("N").Substring(0, 8) + "-" + filename);
             }
             // Existing manual capture location remains available, with a fresh
@@ -62,6 +52,37 @@ namespace DungeonBuilder.M0.EditorTools
             string root = Path.GetFullPath("TestResults/phase7a4-screenshots");
             string path = Path.Combine(root, filename);
             return File.Exists(path) ? Path.Combine(root, Guid.NewGuid().ToString("N").Substring(0, 8) + "-" + filename) : path;
+        }
+    }
+
+    // Read-only verification of the existing supervisor's artifact ownership.
+    // No reservation mutation, lock substitution or independent execution owner.
+    internal static class H1F4QualificationArtifacts
+    {
+        [Serializable] private sealed class Ownership { public string owner, stage, retention; }
+        [Serializable] private sealed class Reservation { public string campaign; }
+        internal static DirectoryInfo RequireOutputRoot()
+        {
+            string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+            if (!Application.isBatchMode || !Application.productName.StartsWith("Dungeon Lord B3B2 Smoke H1F4 ", StringComparison.Ordinal) || string.IsNullOrEmpty(export))
+                throw new InvalidOperationException("qualification.capture.isolation_required");
+            var output = new DirectoryInfo(Path.GetFullPath(export));
+            var stage = output.Parent; var campaign = stage?.Parent; var supervisor = campaign?.Parent;
+            if (output.Name != "fixture-inputs" || !output.Exists ||
+                !string.Equals(supervisor?.FullName, Path.GetFullPath(Path.Combine(Application.dataPath, "../TestResults/qualification-supervisor")), StringComparison.OrdinalIgnoreCase) ||
+                !Guid.TryParseExact(campaign?.Name, "N", out _))
+                throw new InvalidOperationException("qualification.capture.output_invalid");
+            foreach (var parent in new[] { supervisor, campaign, stage, output })
+                if (!parent.Exists || (parent.Attributes & FileAttributes.ReparsePoint) != 0)
+                    throw new InvalidOperationException("qualification.capture.output_redirected");
+            var owner = JsonUtility.FromJson<Ownership>(File.ReadAllText(Path.Combine(output.FullName, "ownership.json")));
+            var reservation = JsonUtility.FromJson<Reservation>(File.ReadAllText(Path.Combine(supervisor.Parent.FullName,
+                "qualification-supervisor-reservation", "active.json")));
+            if (owner?.owner != "H1-F4 qualification" || owner.retention != "preserve" ||
+                !string.Equals(owner.stage, stage.FullName, StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(reservation?.campaign, campaign.FullName, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("qualification.capture.owner_mismatch");
+            return output;
         }
     }
 }

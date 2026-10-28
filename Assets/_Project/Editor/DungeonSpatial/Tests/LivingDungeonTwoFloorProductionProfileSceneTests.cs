@@ -3,6 +3,9 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using SceneClock = DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.SceneClock;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -26,27 +29,39 @@ namespace DungeonBuilder.M0.Tests
                 yield return new EnterPlayMode();
             }
             Assert.That(Application.isPlaying, Is.True, "Load production gameplay only after EnterPlayMode");
-            new EditMode.LivingDungeonTwoFloorTests().ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming();
-            string directory = Path.GetFullPath("TestResults/living-dungeon-two-floor-20261020/inputs");
+            string directory = EditMode.LivingDungeonTwoFloorTests.ExportProductionTwoFloorInputs();
             string manifestPath = Directory.GetFiles(directory, "two-floor-*.manifest.json").OrderByDescending(File.GetLastWriteTimeUtc).First();
             var manifest = JsonUtility.FromJson<TwoFloorSeedManifest>(File.ReadAllText(manifestPath));
             if (GameRoot.Instance != null) { UnityEngine.Object.Destroy(GameRoot.Instance.gameObject); yield return null; }
             Assert.That(manifest.Product, Is.EqualTo(Application.productName));
-            string path = Path.Combine(Application.persistentDataPath, manifest.SaveFileName);
+            string fileName = "phase7a4-scene-" + Guid.NewGuid().ToString("N") + ".json";
+            string path = Path.Combine(Application.persistentDataPath, fileName);
+            var clock = SeedClock(manifest);
             Assert.That(File.Exists(path), Is.False); File.Copy(manifest.SeedPath, path, false);
-            var isolation = new WaitingSceneIsolation(manifest.SaveFileName);
+            var isolation = new WaitingSceneIsolation(fileName, clock);
             SceneManager.sceneLoaded += isolation.Loaded;
             try {
                 yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
-                for (int frame = 0; frame < 120 && GameRoot.Instance?.Save == null; frame++) yield return null;
+                yield return AwaitRecoveryReady();
                 var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null); root.enabled = false;
                 var report = new GameRoot.ForegroundSmokeReport();
-                var operation = root.QualifyTwoFloor("two-floor-wait", report, manifestPath);
+                var operation = root.QualifyTwoFloor("two-floor-wait", report, manifestPath, clock.Advance);
                 while (operation.MoveNext()) yield return operation.Current;
                 Assert.That(report.Passed, Is.True, report.Failure);
                 var controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
                 var ui = controller.GetComponent<UnityEngine.UIElements.UIDocument>().rootVisualElement;
                 var floors = root.Save.validatedCanonicalSpatialState.Floors;
+                long accepted = root.Save.livingDungeon.Scheduler.AcceptedThrough;
+                var checkpoints = root.Save.livingDungeon.Parties.Select(p => p.CheckpointIdentity).ToArray();
+                double balance = root.Save.structureRuntime.ManaReserve;
+                root.ApplyPauseState(false);
+                var update = typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.Instance | BindingFlags.NonPublic);
+                for (int pump = 0; pump < 20 && (root.TimeService.RecoveryClockActive || root.TimeService.HasDeferredRecovery); pump++)
+                    update.Invoke(root, null);
+                Assert.That(root.TimeService.RecoveryClockActive || root.TimeService.HasDeferredRecovery, Is.False);
+                Assert.That(root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(accepted));
+                CollectionAssert.AreEqual(checkpoints, root.Save.livingDungeon.Parties.Select(p => p.CheckpointIdentity));
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(balance));
                 var original = root.SaveService.CanonicalSession.GetCurrentBytes();
                 foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(720, 1280), new Vector2Int(360, 640) })
                     foreach (var textSize in new[] { DungeonTextSize.Small, DungeonTextSize.Default, DungeonTextSize.Large }) {
@@ -54,7 +69,7 @@ namespace DungeonBuilder.M0.Tests
                         foreach (var floor in floors) {
                             controller.SelectFloor(floor.FloorInstanceId);
                             for (int frame = 0; frame < 8; frame++) {
-                                root.TimeService.OnResume(); root.TimeService.SetForegroundFocus(true); yield return null;
+                                root.ApplyPauseState(false); yield return null;
                             }
                             Assert.That(Screen.width, Is.EqualTo(size.x)); Assert.That(Screen.height, Is.EqualTo(size.y));
                             var party = root.ForegroundActivity.ForFloor(floor.FloorInstanceId);
@@ -101,13 +116,44 @@ namespace DungeonBuilder.M0.Tests
             }
         }
 
+        [Serializable] private sealed class SeedEnvelope { public int schemaVersion; public SeedPrimary primary; }
+        [Serializable] private sealed class SeedPrimary { public long lastSavedUtcUnix; public SeedTime timeProvenance; }
+        [Serializable] private sealed class SeedTime { public int AccountedFraction100ns; }
+        private static SceneClock SeedClock(TwoFloorSeedManifest manifest)
+        {
+            byte[] bytes = File.ReadAllBytes(manifest.SeedPath);
+            Assert.That(Gameplay.RunSimulation.RunCheckpointCodec.Identity(bytes), Is.EqualTo(manifest.SeedSha256));
+            var seed = JsonUtility.FromJson<SeedEnvelope>(System.Text.Encoding.UTF8.GetString(bytes));
+            Assert.That(seed.schemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
+            Assert.That(seed.primary?.timeProvenance, Is.Not.Null);
+            Assert.That(seed.primary.lastSavedUtcUnix, Is.GreaterThan(0));
+            // Provider initialization only. SaveService independently proves the
+            // complete canonical save/context before it may capture recovery R.
+            return new SceneClock { Now = new UnixTimePoint(seed.primary.lastSavedUtcUnix, seed.primary.timeProvenance.AccountedFraction100ns) };
+        }
+        private static IEnumerator AwaitRecoveryReady()
+        {
+            for (int frame = 0; frame < 120; frame++) {
+                var root = GameRoot.Instance;
+                if (root?.Save != null) {
+                    typeof(GameRoot).GetMethod("OnApplicationFocus", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(root, new object[] { true });
+                    root.ApplyPauseState(false);
+                    if (root.GameplayServicesInitializedForTests && !root.TimeService.RecoveryClockActive && !root.TimeService.HasDeferredRecovery)
+                        yield break;
+                }
+                yield return null;
+            }
+            Assert.Fail("The isolated scene did not complete recovery: " + GameRoot.Instance?.BannerMessage);
+        }
+
         // Unlike a captured local function, this setup object is allocated only
         // after EnterPlayMode and is not lost when Unity reloads the iterator.
         private sealed class WaitingSceneIsolation
         {
             private readonly string fileName;
+            private readonly SceneClock clock;
             internal TextAsset Config;
-            internal WaitingSceneIsolation(string fileName) { this.fileName = fileName; }
+            internal WaitingSceneIsolation(string fileName, SceneClock clock) { this.fileName = fileName; this.clock = clock; }
             internal void Loaded(Scene scene, LoadSceneMode mode)
             {
                 var root = GameRoot.Instance; Assert.That(root, Is.Not.Null);
@@ -115,6 +161,7 @@ namespace DungeonBuilder.M0.Tests
                 var config = JsonUtility.FromJson<BuildConfig>(root.buildConfigJson.text);
                 config.save.fileName = fileName;
                 root.buildConfigJson = Config = new TextAsset(JsonUtility.ToJson(config));
+                root.InjectSceneRecoveryClockForTests(clock, clock.Monotonic);
             }
         }
 
@@ -129,14 +176,15 @@ namespace DungeonBuilder.M0.Tests
             }
             // Build fresh production-content inputs through the canonical test
             // writer. Their only difference is Floor 2's activation state.
-            new EditMode.LivingDungeonTwoFloorTests().ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming();
-            string directory = Path.GetFullPath("TestResults/living-dungeon-two-floor-20261020/inputs");
+            string directory = EditMode.LivingDungeonTwoFloorTests.ExportProductionTwoFloorInputs();
             foreach (string variant in new[] { selectedVariant }) {
                 string manifestPath = Directory.GetFiles(directory, variant + "-*.manifest.json")
                     .OrderByDescending(File.GetLastWriteTimeUtc).First();
                 var manifest = JsonUtility.FromJson<TwoFloorSeedManifest>(File.ReadAllText(manifestPath));
                 if (GameRoot.Instance != null) { UnityEngine.Object.Destroy(GameRoot.Instance.gameObject); yield return null; }
-                string savePath = Path.Combine(Application.persistentDataPath, manifest.SaveFileName);
+                string fileName = "phase7a4-scene-" + Guid.NewGuid().ToString("N") + ".json";
+                string savePath = Path.Combine(Application.persistentDataPath, fileName);
+                var clock = SeedClock(manifest);
                 Assert.That(manifest.Product, Is.EqualTo(Application.productName));
                 Assert.That(File.Exists(savePath), Is.False, "Preserve previous test saves");
                 File.Copy(manifest.SeedPath, savePath, false);
@@ -144,20 +192,21 @@ namespace DungeonBuilder.M0.Tests
                 void Isolate(Scene scene, LoadSceneMode mode) {
                     var root = GameRoot.Instance; Assert.That(root.SaveService, Is.Null);
                     var config = JsonUtility.FromJson<BuildConfig>(root.buildConfigJson.text);
-                    config.save.fileName = manifest.SaveFileName;
+                    config.save.fileName = fileName;
                     root.buildConfigJson = isolated = new TextAsset(JsonUtility.ToJson(config));
+                    root.InjectSceneRecoveryClockForTests(clock, clock.Monotonic);
                 }
                 SceneManager.sceneLoaded += Isolate;
                 var report = new GameRoot.ForegroundProfileReport();
                 try {
                     yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
-                    for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
+                    yield return AwaitRecoveryReady();
                     var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null);
                     root.enabled = false;
                     EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
                     UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>().SetTextSize(DungeonTextSize.Default);
                     for (int frame = 0; frame < 8; frame++) yield return null;
-                    var operation = root.ProfileForeground(report);
+                    var operation = root.ProfileForeground(report, clock.Advance);
                     while (true) {
                         bool more; object current = null;
                         try { more = operation.MoveNext(); if (more) current = operation.Current; }
@@ -167,7 +216,7 @@ namespace DungeonBuilder.M0.Tests
                     }
                 } finally {
                     SceneManager.sceneLoaded -= Isolate;
-                    string path = Path.GetFullPath("TestResults/living-dungeon-two-floor-20261020/editor-" + variant + "-" + Guid.NewGuid().ToString("N") + ".profile.json");
+                    string path = Path.Combine(directory, "editor-" + variant + ".profile.json");
                     using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write))
                     using (var writer = new StreamWriter(stream)) writer.Write(JsonUtility.ToJson(report, true));
                     TestContext.WriteLine(path);

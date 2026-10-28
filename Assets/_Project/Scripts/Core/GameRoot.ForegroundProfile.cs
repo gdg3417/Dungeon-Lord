@@ -34,14 +34,16 @@ namespace DungeonBuilder.M0
         }
         private IEnumerator PrepareForegroundQualification()
         {
-            if (foregroundFailure != null || foregroundRetryPending || SaveService.RequiresCanonicalRecovery)
+            if (foregroundFailure != null || foregroundRetryPending || SaveService.RequiresCanonicalRecovery || TimeService.HasForegroundPersistenceStall)
                 throw new InvalidOperationException("b3b2.smoke.recovery_required");
             // Validated observation-time return. The normal coordinator drains
             // and closes recovery; qualification never resets its time owner.
-            OnApplicationFocus(true); ApplyPauseState(false);
+            if (isActiveAndEnabled) OnApplicationFocus(true);
+            else TimeService.SetForegroundFocus(true); // Explicit observation for the isolated manual driver.
+            ApplyPauseState(false);
             for (int frame = 0; frame < 600 && (bootRecoveryPending || TimeService.RecoveryClockActive || TimeService.HasDeferredRecovery); frame++) {
                 UpdateForeground();
-                if (foregroundFailure != null || foregroundRetryPending || SaveService.RequiresCanonicalRecovery)
+                if (foregroundFailure != null || foregroundRetryPending || SaveService.RequiresCanonicalRecovery || TimeService.HasForegroundPersistenceStall)
                     throw new InvalidOperationException("b3b2.smoke.recovery_required");
                 yield return null;
             }

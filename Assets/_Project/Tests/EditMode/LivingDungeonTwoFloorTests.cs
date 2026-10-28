@@ -647,28 +647,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return f;
         }
         [Test] public void ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming()
+        { ExportProductionTwoFloorInputs(); }
+
+        internal static string ExportProductionTwoFloorInputs()
         {
             // This current-schema producer must not write into retained historical
             // inputs. The explicit supervisor stage owns this fresh output root.
-            string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
-            Assert.That(Application.isBatchMode, Is.True);
-            Assert.That(Application.productName, Does.StartWith("Dungeon Lord B3B2 Smoke H1F4 "));
-            Assert.That(export, Is.Not.Null.And.Not.Empty);
-            var output = new DirectoryInfo(Path.GetFullPath(export));
-            Assert.That(output.Name, Is.EqualTo("fixture-inputs"));
-            var stage = output.Parent; var campaign = stage?.Parent; var supervisor = campaign?.Parent;
-            Assert.That(supervisor?.FullName, Is.EqualTo(Path.GetFullPath(Path.Combine(Application.dataPath,
-                "../TestResults/qualification-supervisor"))).IgnoreCase);
-            Assert.That(Guid.TryParseExact(campaign?.Name, "N", out _), Is.True);
-            Assert.That(stage?.Name, Is.EqualTo("living-regressions").Or.EqualTo("full-edit").Or.EqualTo("full-play"));
-            foreach (var directoryInfo in new[] { supervisor, campaign, stage, output }) {
-                Assert.That(directoryInfo.Exists, Is.True);
-                Assert.That((directoryInfo.Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
-            }
-            string directory = Path.Combine(output.FullName, "two-floor");
+            var output = DungeonBuilder.M0.EditorTools.H1F4QualificationArtifacts.RequireOutputRoot();
+            Assert.That(output.Parent.Name, Is.EqualTo("living-regressions").Or.EqualTo("full-edit").Or.EqualTo("full-play").Or.EqualTo("waiting-scene"));
+            string parent = Path.Combine(output.FullName, "two-floor");
+            Directory.CreateDirectory(parent);
+            Assert.That((new DirectoryInfo(parent).Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
+            string directory = Path.Combine(parent, Guid.NewGuid().ToString("N").Substring(0, 8));
             Assert.That(Directory.Exists(directory), Is.False); Directory.CreateDirectory(directory);
             var utc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var f = ProductionDungeon(utc); string second = PhaseSixA4Tests.FloorTwo(f);
+            for (int index = 0; index < H1F4RecoveryContractTests.Paths.Length; index++) {
+                var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(H1F4RecoveryContractTests.Paths[index]);
+                Assert.That(asset, Is.Not.Null);
+                CollectionAssert.AreEqual(f.Context.RecoveryInputs.Identity.GetInput(index), asset.bytes,
+                    "The scene must consume the same exact validated input bytes: component " + index);
+            }
             f.Runtime.lastPausedUtcUnix = utc; // W was authored before the synthetic owner, not moved by this metadata write.
             f.Accept(PhaseSixA4Tests.Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
             WriteSeed(f, directory, "owner-inactive", null, 0);
@@ -701,6 +700,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, second));
             WriteSeed(f, directory, "v1", old.StartIdentity, old.NextOrdinal); old.Abandon();
             TestContext.WriteLine("Production input descents=" + descending + "/32 longest Floor2 units=" + longest);
+            return directory;
         }
         private static void WriteSeed(Fixture f, string directory, string variant, string historicalStart, long historicalOrdinal,
             int descents = 0, long longest = 0)

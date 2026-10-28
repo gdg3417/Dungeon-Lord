@@ -175,8 +175,8 @@ def prepare(attempt):
     print(json.dumps({"preparation": str(prep), "product": product, "save": str(save)}))
 
 
-def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=False, living=False, common_repro=False, configuration_repro=False, instrumentation=False, b3b1=False, scene_repro=False, scene_clock=False, scene_bootstrap=False, scene_lifecycle=False, scene_fixes=False, scene_play=False, shared_replay=False, monster_recovery=False, recovery_regressions=False, economy_regressions=False, economy_repro=False, floor_repro=False, consumed_repro=False, floor_regressions=False, floor_repairs=False, clock_owner=False):
-    if sum((discovery, full_edit, fixtures, research, living, common_repro, configuration_repro, instrumentation, b3b1, scene_repro, scene_clock, scene_bootstrap, scene_lifecycle, scene_fixes, scene_play, shared_replay, monster_recovery, recovery_regressions, economy_regressions, economy_repro, floor_repro, consumed_repro, floor_regressions, floor_repairs, clock_owner)) > 1:
+def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=False, living=False, common_repro=False, configuration_repro=False, instrumentation=False, b3b1=False, scene_repro=False, scene_clock=False, scene_bootstrap=False, scene_lifecycle=False, scene_fixes=False, scene_play=False, shared_replay=False, monster_recovery=False, recovery_regressions=False, economy_regressions=False, economy_repro=False, floor_repro=False, consumed_repro=False, floor_regressions=False, floor_repairs=False, clock_owner=False, waiting_scene=False):
+    if sum((discovery, full_edit, fixtures, research, living, common_repro, configuration_repro, instrumentation, b3b1, scene_repro, scene_clock, scene_bootstrap, scene_lifecycle, scene_fixes, scene_play, shared_replay, monster_recovery, recovery_regressions, economy_regressions, economy_repro, floor_repro, consumed_repro, floor_regressions, floor_repairs, clock_owner, waiting_scene)) > 1:
         raise ValueError("Choose one explicit workload")
     prep, product, save = identities(attempt)
     check_protected(prep, save)
@@ -193,9 +193,9 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     command = lambda mode: [sys.executable, "-B", str(helper), mode, "--attempt", attempt, "--stage", "{stage}"]
     restored = json.loads((prep / "original-inputs.json").read_text())
     restored_id = hashlib.sha256(json.dumps(restored, sort_keys=True).encode()).hexdigest()
-    name = "clock-owner" if clock_owner else "floor-repairs" if floor_repairs else "floor-regressions" if floor_regressions else "consumed-repro" if consumed_repro else "floor-repro" if floor_repro else "economy-nine" if economy_repro else "economy-regressions" if economy_regressions else "recovery-regressions" if recovery_regressions else "monster-recovery" if monster_recovery else "shared-replay" if shared_replay else "scene-play" if scene_play else "scene-fixes" if scene_fixes else "scene-lifecycle" if scene_lifecycle else "scene-bootstrap" if scene_bootstrap else "scene-clock" if scene_clock else "scene-repro" if scene_repro else "b3b1-regressions" if b3b1 else "instrumentation-regressions" if instrumentation else "configuration-repro" if configuration_repro else "common-repro" if common_repro else "inventory" if discovery else "full-edit" if full_edit else "living-regressions" if living else "research-regressions" if research else "fixture-regressions" if fixtures else "focused"
+    name = "waiting-scene" if waiting_scene else "clock-owner" if clock_owner else "floor-repairs" if floor_repairs else "floor-regressions" if floor_regressions else "consumed-repro" if consumed_repro else "floor-repro" if floor_repro else "economy-nine" if economy_repro else "economy-regressions" if economy_regressions else "recovery-regressions" if recovery_regressions else "monster-recovery" if monster_recovery else "shared-replay" if shared_replay else "scene-play" if scene_play else "scene-fixes" if scene_fixes else "scene-lifecycle" if scene_lifecycle else "scene-bootstrap" if scene_bootstrap else "scene-clock" if scene_clock else "scene-repro" if scene_repro else "b3b1-regressions" if b3b1 else "instrumentation-regressions" if instrumentation else "configuration-repro" if configuration_repro else "common-repro" if common_repro else "inventory" if discovery else "full-edit" if full_edit else "living-regressions" if living else "research-regressions" if research else "fixture-regressions" if fixtures else "focused"
     workload = {"id": name, "role": "report" if discovery else "test", "depends": [name + "-preflight"],
-                "command": command("run-clock-owner" if clock_owner else "run-floor-repairs" if floor_repairs else "run-floor-regressions" if floor_regressions else "run-consumed-repro" if consumed_repro else "run-floor-repro" if floor_repro else "run-economy-nine" if economy_repro else "run-economy-regressions" if economy_regressions else "run-recovery-regressions" if recovery_regressions else "run-monster-recovery" if monster_recovery else "run-shared-replay" if shared_replay else "run-scene-play" if scene_play else "run-scene-fixes" if scene_fixes else "run-scene-lifecycle" if scene_lifecycle else "run-scene-bootstrap" if scene_bootstrap else "run-scene-clock" if scene_clock else "run-scene-repro" if scene_repro else "run-b3b1" if b3b1 else "run-instrumentation" if instrumentation else "run-configuration-repro" if configuration_repro else "run-common-repro" if common_repro else "run-inventory" if discovery else "run-full-edit" if full_edit else "run-living" if living else "run-research" if research else "run-fixtures" if fixtures else "run-test"), "timeout_seconds": 3600 if full_edit else 960,
+                "command": command("run-waiting-scene" if waiting_scene else "run-clock-owner" if clock_owner else "run-floor-repairs" if floor_repairs else "run-floor-regressions" if floor_regressions else "run-consumed-repro" if consumed_repro else "run-floor-repro" if floor_repro else "run-economy-nine" if economy_repro else "run-economy-regressions" if economy_regressions else "run-recovery-regressions" if recovery_regressions else "run-monster-recovery" if monster_recovery else "run-shared-replay" if shared_replay else "run-scene-play" if scene_play else "run-scene-fixes" if scene_fixes else "run-scene-lifecycle" if scene_lifecycle else "run-scene-bootstrap" if scene_bootstrap else "run-scene-clock" if scene_clock else "run-scene-repro" if scene_repro else "run-b3b1" if b3b1 else "run-instrumentation" if instrumentation else "run-configuration-repro" if configuration_repro else "run-common-repro" if common_repro else "run-inventory" if discovery else "run-full-edit" if full_edit else "run-living" if living else "run-research" if research else "run-fixtures" if fixtures else "run-test"), "timeout_seconds": 3600 if full_edit else 960,
                 "artifacts": ["unity.log", "invocation.json", "editor-exit.json" if discovery else "cli-exit.json", "generated-inputs"]}
     if discovery:
         workload["artifacts"].append("inventory.json")
@@ -210,9 +210,9 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
         # Research adds its 18 durable-acknowledgement and three save cases.
         # Living adds its 51 one-floor and 37 two-floor leaves; no Editor
         # sustained production-profile scene or Windows workload is selected.
-        workload.update(xml="results.xml", expected_tests=1 if clock_owner else 12 if floor_repairs else 287 if floor_regressions else 2 if consumed_repro else 6 if floor_repro else 12 if economy_repro else 236 if economy_regressions else 234 if recovery_regressions else 63 if monster_recovery else 84 if shared_replay else 29 if scene_play else 3 if scene_fixes else 20 if scene_lifecycle else 1 if scene_bootstrap else 10 if scene_clock else 2 if scene_repro else 51 if b3b1 else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
+        workload.update(xml="results.xml", expected_tests=1 if waiting_scene else 1 if clock_owner else 12 if floor_repairs else 287 if floor_regressions else 2 if consumed_repro else 6 if floor_repro else 12 if economy_repro else 236 if economy_regressions else 234 if recovery_regressions else 63 if monster_recovery else 84 if shared_replay else 29 if scene_play else 3 if scene_fixes else 20 if scene_lifecycle else 1 if scene_bootstrap else 10 if scene_clock else 2 if scene_repro else 51 if b3b1 else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
             allowed_skips=["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"] if full_edit else [])
-    if scene_play or scene_fixes or scene_lifecycle or scene_repro or scene_clock or scene_bootstrap or b3b1 or living or full_edit: workload["artifacts"].append("fixture-inputs")
+    if waiting_scene or scene_play or scene_fixes or scene_lifecycle or scene_repro or scene_clock or scene_bootstrap or b3b1 or living or full_edit: workload["artifacts"].append("fixture-inputs")
     stages = [
         {"id": name + "-preflight", "role": "preflight", "depends": [], "command": command("preflight")[:-1] + ["{campaign}/" + name + "-preflight"], "timeout_seconds": 120, "artifacts": ["preservation.json"]},
         workload,
@@ -231,7 +231,7 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     if discovery:
         data["approved_substitutions"].append("Discovery only: pinned Editor directly, without -quit, for the asynchronous existing TestRunnerApi.RetrieveTestList callbacks; collector exits explicitly. No tests execute and no passing test gate is inferred.")
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 1 if clock_owner else 12 if floor_repairs else 287 if floor_regressions else 2 if consumed_repro else 6 if floor_repro else 12 if economy_repro else 236 if economy_regressions else 234 if recovery_regressions else 63 if monster_recovery else 84 if shared_replay else 29 if scene_play else 3 if scene_fixes else 20 if scene_lifecycle else 1 if scene_bootstrap else 10 if scene_clock else 2 if scene_repro else 51 if b3b1 else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 1 if waiting_scene else 1 if clock_owner else 12 if floor_repairs else 287 if floor_regressions else 2 if consumed_repro else 6 if floor_repro else 12 if economy_repro else 236 if economy_regressions else 234 if recovery_regressions else 63 if monster_recovery else 84 if shared_replay else 29 if scene_play else 3 if scene_fixes else 20 if scene_lifecycle else 1 if scene_bootstrap else 10 if scene_clock else 2 if scene_repro else 51 if b3b1 else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
                       "skips": None if discovery else 1 if full_edit else 0}))
 
 
@@ -317,6 +317,14 @@ def run_scene_bootstrap(attempt, stage):
                "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClockNativeFractionAndOwnerRemainBound",
                "--output", str(stage / "results.xml"), "--timeout", "900", "--no-color", "--", "-logFile", str(stage / "unity.log")]
     return run_child(attempt, stage, command, "scene-bootstrap", "cli-exit.json")
+
+
+def run_waiting_scene(attempt, stage):
+    stage = Path(stage).resolve()
+    selected = "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonTwoFloorWaitingSelectedFloorLayoutsPreserveCanonicalState"
+    command = [str(CLI), "test", str(ROOT), "--mode", "EditMode", "--filter", selected,
+               "--output", str(stage / "results.xml"), "--timeout", "900", "--no-color", "--", "-logFile", str(stage / "unity.log")]
+    return run_child(attempt, stage, command, "waiting-scene", "cli-exit.json")
 
 
 def run_clock_owner(attempt, stage):
@@ -485,7 +493,7 @@ def run_child(attempt, stage, command, expected_stage, exit_name):
     font = (ROOT / FONT).read_bytes()
     environment = os.environ.copy()
     override = {"UNITY_NO_AUTH_BROKER": "1"} if command[0] == str(CLI) else {}
-    if expected_stage in ("scene-play", "scene-fixes", "scene-lifecycle", "scene-repro", "scene-clock", "scene-bootstrap", "b3b1-regressions", "living-regressions", "full-edit"):
+    if expected_stage in ("waiting-scene", "scene-play", "scene-fixes", "scene-lifecycle", "scene-repro", "scene-clock", "scene-bootstrap", "b3b1-regressions", "living-regressions", "full-edit"):
         # Fresh sealed artifact directory; old fixed-path fixture exports must
         # never be reused or overwritten. Override is local to this child only.
         export = stage / "fixture-inputs"; export.mkdir(exist_ok=False)
@@ -531,7 +539,7 @@ def restore(attempt, stage):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "plan-full-edit", "plan-fixtures", "plan-research", "plan-living", "plan-common-repro", "plan-configuration-repro", "plan-instrumentation", "plan-b3b1", "plan-scene-repro", "plan-scene-clock", "plan-scene-bootstrap", "plan-scene-lifecycle", "plan-scene-fixes", "plan-scene-play", "plan-shared-replay", "plan-monster-recovery", "plan-recovery-regressions", "plan-economy-regressions", "plan-economy-nine", "plan-floor-repro", "plan-consumed-repro", "plan-floor-regressions", "plan-floor-repairs", "plan-clock-owner", "preflight", "run-test", "run-inventory", "run-full-edit", "run-fixtures", "run-research", "run-living", "run-common-repro", "run-configuration-repro", "run-instrumentation", "run-b3b1", "run-scene-repro", "run-scene-clock", "run-scene-bootstrap", "run-scene-lifecycle", "run-scene-fixes", "run-scene-play", "run-shared-replay", "run-monster-recovery", "run-recovery-regressions", "run-economy-regressions", "run-economy-nine", "run-floor-repro", "run-consumed-repro", "run-floor-regressions", "run-floor-repairs", "run-clock-owner", "restore", "finish"])
+    parser.add_argument("mode", choices=["prepare", "plan", "plan-inventory", "plan-full-edit", "plan-fixtures", "plan-research", "plan-living", "plan-common-repro", "plan-configuration-repro", "plan-instrumentation", "plan-b3b1", "plan-scene-repro", "plan-scene-clock", "plan-scene-bootstrap", "plan-scene-lifecycle", "plan-scene-fixes", "plan-scene-play", "plan-shared-replay", "plan-monster-recovery", "plan-recovery-regressions", "plan-economy-regressions", "plan-economy-nine", "plan-floor-repro", "plan-consumed-repro", "plan-floor-regressions", "plan-floor-repairs", "plan-clock-owner", "plan-waiting-scene", "preflight", "run-test", "run-inventory", "run-full-edit", "run-fixtures", "run-research", "run-living", "run-common-repro", "run-configuration-repro", "run-instrumentation", "run-b3b1", "run-scene-repro", "run-scene-clock", "run-scene-bootstrap", "run-scene-lifecycle", "run-scene-fixes", "run-scene-play", "run-shared-replay", "run-monster-recovery", "run-recovery-regressions", "run-economy-regressions", "run-economy-nine", "run-floor-repro", "run-consumed-repro", "run-floor-regressions", "run-floor-repairs", "run-clock-owner", "run-waiting-scene", "restore", "finish"])
     parser.add_argument("--attempt", required=True)
     parser.add_argument("--stage")
     args = parser.parse_args()
@@ -547,6 +555,7 @@ if __name__ == "__main__":
     elif args.mode == "plan-instrumentation": plan(args.attempt, instrumentation=True)
     elif args.mode == "plan-b3b1": plan(args.attempt, b3b1=True)
     elif args.mode == "plan-scene-repro": plan(args.attempt, scene_repro=True)
+    elif args.mode == "plan-waiting-scene": plan(args.attempt, waiting_scene=True)
     elif args.mode == "plan-clock-owner": plan(args.attempt, clock_owner=True)
     elif args.mode == "plan-floor-repairs": plan(args.attempt, floor_repairs=True)
     elif args.mode == "plan-floor-regressions": plan(args.attempt, floor_regressions=True)
@@ -573,6 +582,7 @@ if __name__ == "__main__":
     elif args.mode == "run-instrumentation": raise SystemExit(run_instrumentation(args.attempt, args.stage))
     elif args.mode == "run-b3b1": raise SystemExit(run_b3b1(args.attempt, args.stage))
     elif args.mode == "run-scene-repro": raise SystemExit(run_scene_repro(args.attempt, args.stage))
+    elif args.mode == "run-waiting-scene": raise SystemExit(run_waiting_scene(args.attempt, args.stage))
     elif args.mode == "run-clock-owner": raise SystemExit(run_clock_owner(args.attempt, args.stage))
     elif args.mode == "run-floor-repairs": raise SystemExit(run_floor_repairs(args.attempt, args.stage))
     elif args.mode == "run-floor-regressions": raise SystemExit(run_floor_regressions(args.attempt, args.stage))
