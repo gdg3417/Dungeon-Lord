@@ -405,13 +405,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private DetachedCanonicalWriteResult PrepareAndPersist(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
             DetachedCanonicalSaveSessionResult prepared, bool roomEffect, bool ordinarySpend = false, bool recover = false,
-            Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null)
+            Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null, double preparedRecoveryManaSpent = 0)
         {
             if (!recoveryBindingsValid) return Failure(RecoveryEpisode.ContextMismatch);
             if (prepared == null || !prepared.IsSuccess || prepared.Update == null)
                 return Failure(prepared?.Reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
             byte[] candidate = prepared.Update.GetBytes();
-            double recoveryManaSpent = 0;
+            double recoveryManaSpent = preparedRecoveryManaSpent;
             bool foregroundStage = prepared.ForegroundValidation?.CurrentTargetValidated == true && prepared.Session != null &&
                 prepared.ForegroundValidation.GetBytes().SequenceEqual(candidate) && prepared.Session.GetCurrentBytes().SequenceEqual(candidate);
             DetachedCompleteSaveValidationResult validated =
@@ -445,7 +445,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             proposed.structureRuntime.ManaReserve, occupied);
                         if (balance != proposed.structureRuntime.ManaReserve)
                         {
-                            recoveryManaSpent = proposed.structureRuntime.ManaReserve - balance;
+                            recoveryManaSpent += proposed.structureRuntime.ManaReserve - balance;
                             var intermediate = DetachedCanonicalSaveSession.Open(candidate, context, limits);
                             var capture = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(proposed, balance, limits);
                             var recovered = intermediate.Session.PrepareLiveReplacement(capture, validated.State, monsterContinuity: healed);

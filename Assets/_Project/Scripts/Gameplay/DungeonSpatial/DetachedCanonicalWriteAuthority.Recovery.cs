@@ -24,6 +24,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!CanonicalMvpRouteProjection.TryPublishValidated(owned, production, out var current, out _))
                     return Failure(RecoveryEpisode.Invalid);
                 double wallet = current.structureRuntime.ManaReserve;
+                double recoverySpent = 0;
+                MonsterContinuityState healed = null;
                 if (transition.Settles) {
                     if (!owned.LivingDungeon.IsClosed || owned.TimeProvenance.Episode == null || mana == null || !mana.MatchesRecoveryInputs(context.RecoveryInputs))
                         return Failure(RecoveryEpisode.Invalid);
@@ -34,10 +36,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         original && episode.OriginalMode == RecoveryEpisode.Legacy);
                     if (!grant.CalculationAccepted) return Failure(RecoveryEpisode.Invalid);
                     wallet = grant.WalletAfter;
+                    // Healing belongs to this same checked settlement, including
+                    // original -> residualPending. An ordinary metadata rewrite
+                    // of that intermediate open episode has no such capability.
+                    healed = owned.MonsterContinuity.Copy();
+                    double balance = MonsterContinuity.Recover(healed, owned.State, context.MonsterRecovery,
+                        wallet, OccupiedFloors(owned));
+                    recoverySpent = wallet - balance;
+                    wallet = balance;
                 }
                 var snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(current, wallet, limits);
-                var prepared = session.PrepareRecoveryReplacement(snapshot, owned, transition);
-                return PrepareAndPersist(path, fs, session, prepared, false, recover: transition.Settles, candidatePrepared: candidatePrepared);
+                var prepared = session.PrepareRecoveryReplacement(snapshot, owned, transition, healed);
+                return PrepareAndPersist(path, fs, session, prepared, false, candidatePrepared: candidatePrepared,
+                    preparedRecoveryManaSpent: recoverySpent);
             } catch { return Failure(RecoveryEpisode.Invalid); }
         }
     }

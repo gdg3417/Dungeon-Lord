@@ -500,12 +500,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         internal DetachedCanonicalSaveSessionResult PrepareRecoveryReplacement(
             DetachedRecognizedSaveStateSnapshotResult recognized, DetachedCompleteSaveValidationResult owned,
-            CanonicalTimeTransition time) => recognized?.IsSuccess == true && time != null
+            CanonicalTimeTransition time, MonsterContinuityState settledMonsters = null) =>
+            recognized?.IsSuccess == true && time != null && (settledMonsters == null || time.Settles)
                 // A classification/entry publication changes only the checked
                 // provenance owner and its W seconds. Copy the exact predecessor
                 // gameplay fields, including the accepted closed prefix, rather
                 // than normalizing them through a runtime projection.
-                ? PrepareReplacement(time.Settles ? recognized.Snapshot : null, owned.State, null, null, null, null, time: time)
+                ? PrepareReplacement(time.Settles ? recognized.Snapshot : null, owned.State, null, null, null, null,
+                    monsterContinuity: settledMonsters, time: time)
                 : Failure(RecoveryEpisode.Invalid);
 
         private static void WriteField(ContractJsonWriter writer, string key,

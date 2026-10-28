@@ -56,3 +56,30 @@ full PlayMode, interruption/repeated-crash/reopen, isolated Windows Player and
 matched main-versus-H1-F4 performance/memory remain pending. Cohort counts are
 not added together or subtracted from the old 805 failures to claim a new
 full-suite result. No current performance improvement or regression is claimed.
+
+## C2 runtime findings after the first corrected-fixture cohort
+
+Campaign 17b5d88a3734480f86fb66bee1b7cc24 at
+45bcff7443b6e54827e162d17d5f7d5511428f28 completed 38 passed / 2 failed /
+0 skipped. Inputs remained unchanged; the normal guarded post-failure
+finalization independently verified process/Job completion, restored original
+settings and preserved all 100 prior evidence directories and the FAILED result.
+
+Both residual failures exposed production omissions rather than obsolete
+expectations:
+
+* Original settlement prepared residualPending, then generic healing attempted
+  an ordinary rewrite of that open candidate. The existing closed-boundary guard
+  rejected it. Healing now derives from the same independently validated
+  predecessor and is included with wallet/provenance in the checked settlement
+  candidate before atomic persistence. The entry-only capability cannot supply
+  monster changes. Reported recovery expenditure remains the actual debit.
+* The raw scanner omitted schema 17 from its exact monster-record array
+  allowance and appended-owner handling. Explicit schema-17 dispatch retains
+  the existing 165 monster-record ceiling and ordinary 128-element limit.
+  Every schema 7–16 dispatch and limit remains unchanged.
+
+The expanded 63-case cohort adds original/residual funding and fault tests
+(write, partial write, replace, readback, uncertain rollback), exact reopen/no
+second grant checks, and scanner boundaries for schemas 15/16/17. Results are
+pending; no full-suite result or readiness claim follows from these changes.

@@ -209,7 +209,7 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
         # Research adds its 18 durable-acknowledgement and three save cases.
         # Living adds its 51 one-floor and 37 two-floor leaves; no Editor
         # sustained production-profile scene or Windows workload is selected.
-        workload.update(xml="results.xml", expected_tests=40 if monster_recovery else 84 if shared_replay else 28 if scene_play else 3 if scene_fixes else 20 if scene_lifecycle else 1 if scene_bootstrap else 9 if scene_clock else 2 if scene_repro else 51 if b3b1 else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
+        workload.update(xml="results.xml", expected_tests=63 if monster_recovery else 84 if shared_replay else 28 if scene_play else 3 if scene_fixes else 20 if scene_lifecycle else 1 if scene_bootstrap else 9 if scene_clock else 2 if scene_repro else 51 if b3b1 else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
             allowed_skips=["DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"] if full_edit else [])
     if scene_play or scene_fixes or scene_lifecycle or scene_repro or scene_clock or scene_bootstrap or b3b1 or living or full_edit: workload["artifacts"].append("fixture-inputs")
     stages = [
@@ -230,7 +230,7 @@ def plan(attempt, discovery=False, full_edit=False, fixtures=False, research=Fal
     if discovery:
         data["approved_substitutions"].append("Discovery only: pinned Editor directly, without -quit, for the asynchronous existing TestRunnerApi.RetrieveTestList callbacks; collector exits explicitly. No tests execute and no passing test gate is inferred.")
     write(prep / "plan.json", data)
-    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 40 if monster_recovery else 84 if shared_replay else 28 if scene_play else 3 if scene_fixes else 20 if scene_lifecycle else 1 if scene_bootstrap else 9 if scene_clock else 2 if scene_repro else 51 if b3b1 else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
+    print(json.dumps({"plan": str(prep / "plan.json"), "tests": None if discovery else 63 if monster_recovery else 84 if shared_replay else 28 if scene_play else 3 if scene_fixes else 20 if scene_lifecycle else 1 if scene_bootstrap else 9 if scene_clock else 2 if scene_repro else 51 if b3b1 else 28 if instrumentation else 5 if configuration_repro else 2 if common_repro else 2783 if full_edit else 358 if living else 268 if research else 247 if fixtures else 111,
                       "skips": None if discovery else 1 if full_edit else 0}))
 
 
