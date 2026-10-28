@@ -273,6 +273,8 @@ namespace DungeonBuilder.M0.Tests
                 .GetValue(root.SaveService), Is.SameAs(owner));
             Assert.That(owner.ForegroundThrough, Is.EqualTo(through + 125));
             Assert.That(root.Save.totalTicks, Is.EqualTo(ticks));
+            Assert.That(root.SaveService.Save(root.Save, SaveReason.StateChange), Is.True,
+                "The ordinary save must flush captured foreground through the canonical barrier");
             Assert.That(root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(through + 125));
             before = root.SaveService.CanonicalSession.GetCurrentBytes();
             advance(0); yield return null; yield return null;
