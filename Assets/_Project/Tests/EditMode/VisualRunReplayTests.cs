@@ -14,7 +14,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         internal static Fixture Completed()
         {
-            var f = Fixture.Create(null); f.Configuration = PhaseSixA4Tests.Config();
+            var f = Fixture.Create(null);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             foreach (var value in new[] { (MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 0),
                 (MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, 1),

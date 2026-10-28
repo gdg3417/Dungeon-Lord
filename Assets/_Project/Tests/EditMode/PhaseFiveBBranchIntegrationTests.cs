@@ -12,16 +12,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class PhaseFiveBBranchIntegrationTests
     {
-        internal static DetachedCanonicalWriteAuthorityTests.Fixture Fixture(bool content = true)
+        internal static DetachedCanonicalWriteAuthorityTests.Fixture Fixture(bool content = true, Action<RunSimulationConfig> author = null)
         {
-            var f = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
-            f.Configuration = PhaseFiveBTestConfig.Production();
-            f.Configuration.BaseSuccessChance = 1d; f.Configuration.SuccessThreshold = 0d;
-            f.Configuration.HeatPenaltyPerPoint = 0d; f.Configuration.ManaReserveBonusPerPoint = 0d;
-            // Mathematical forcing belongs only to fixtures, not production controls.
-            f.Configuration.PhaseFiveB.BranchDecision.SkipThreshold = -1d;
-            f.Configuration.PhaseFiveB.BranchDecision.EnterThreshold = -.9d;
-            foreach (var p in f.Configuration.PhaseFiveB.BranchDecision.ProfileMinimums) p.MinimumSurvivability = 0d;
+            var bytes = PhaseFourTestSupport.AuthoredInputs((config, _) => {
+                config.BaseSuccessChance = 1d; config.SuccessThreshold = 0d;
+                config.HeatPenaltyPerPoint = 0d; config.ManaReserveBonusPerPoint = 0d;
+                // Mathematical forcing belongs only to fresh synthetic inputs.
+                config.PhaseFiveB.BranchDecision.SkipThreshold = -1d;
+                config.PhaseFiveB.BranchDecision.EnterThreshold = -.9d;
+                foreach (var p in config.PhaseFiveB.BranchDecision.ProfileMinimums) p.MinimumSurvivability = 0d;
+                author?.Invoke(config);
+            });
+            var f = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null, recoveryInputBytes: bytes);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             f.Runtime.completedResearch = new CompletedResearchState { ProjectIds = new[] { BasicBranchingResearchAuthority.ResearchId } };
             var floor = f.State.Floors.Single(); var origin = floor.Layout.Nodes.Single(n => n.Kind == FloorRouteNodeKind.Room);
@@ -58,20 +60,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         internal static RunSimulationService Service(RunSimulationConfig c) => new RunSimulationService(c,
             JsonUtility.FromJson<LootConfig>(File.ReadAllText("Assets/_Project/Data/Bootstrap/loot_config.json")));
+        internal static RunSimulationService Service(DetachedCanonicalWriteAuthorityTests.Fixture f) =>
+            new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot);
         internal static DetachedCanonicalWriteResult Run(DetachedCanonicalWriteAuthorityTests.Fixture f) =>
-            f.Authority.CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime, Service(f.Configuration),
+            f.Authority.CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime, Service(f),
                 RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix));
 
         [Test]
         public void ProductionLikeUnknownBranchEntersOnEarlySequentialRun()
         {
-            var f = Fixture();
-            var production = PhaseFiveBTestConfig.Production().PhaseFiveB.BranchDecision;
-            var decision = f.Configuration.PhaseFiveB.BranchDecision;
-            decision.SkipThreshold = production.SkipThreshold;
-            decision.EnterThreshold = production.EnterThreshold;
-            foreach (var minimum in decision.ProfileMinimums)
-                minimum.MinimumSurvivability = production.ProfileMinimums.Single(p => p.ProfileId == minimum.ProfileId).MinimumSurvivability;
+            var f = Fixture(author: config => {
+                var production = PhaseFiveBTestConfig.Production().PhaseFiveB.BranchDecision;
+                var decision = config.PhaseFiveB.BranchDecision;
+                decision.SkipThreshold = production.SkipThreshold;
+                decision.EnterThreshold = production.EnterThreshold;
+                foreach (var minimum in decision.ProfileMinimums)
+                    minimum.MinimumSurvivability = production.ProfileMinimums.Single(p => p.ProfileId == minimum.ProfileId).MinimumSurvivability;
+            });
 
             f.Accept(Run(f));
             var first = f.Runtime.runHistory.LatestOutcome.BranchOutcomes.Single();
@@ -113,7 +118,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(knowledge.Confidence, Is.EqualTo(.75d)); Assert.That(knowledge.LastConfirmedRunId, Is.EqualTo(run.RunId));
             Assert.That(JsonUtility.ToJson(before.runHistory), Is.Not.EqualTo(JsonUtility.ToJson(f.Runtime.runHistory)));
             Assert.That(JsonUtility.ToJson(f.State), Is.EqualTo(topology)); Assert.That(JsonUtility.ToJson(f.Runtime.corridorContent), Is.EqualTo(corridor));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
             string aggregate = JsonUtility.ToJson(run); double heat = f.Runtime.structureRuntime.Heat;
             Assert.That(aggregate, Does.Not.Contain("BranchOutcomes").And.Not.Contain("EncounterEvents").And.Not.Contain("CurrentHealth"));
             f.Reopen(); Assert.That(f.Runtime.runHistory.LatestOutcome.BranchOutcomes, Is.Null);
@@ -142,8 +148,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void SkipConfirmsOnlyTopologyAndEmptyBranchCanBeVisited()
         {
-            var f = Fixture(); var d = f.Configuration.PhaseFiveB.BranchDecision;
-            d.SkipThreshold = .9d; d.EnterThreshold = 1d;
+            var f = Fixture(author: config => {
+                var d = config.PhaseFiveB.BranchDecision; d.SkipThreshold = .9d; d.EnterThreshold = 1d;
+            });
             f.Accept(Run(f)); var run = f.Runtime.runHistory.LatestOutcome;
             Assert.That(run.BranchOutcomes.Single().Reason, Is.EqualTo("branch.outcome.skipped"));
             Assert.That(run.EncounterEvents, Is.Empty); Assert.That(run.BranchOutcomes.Single().ReachedAssignments, Is.Empty);
@@ -177,7 +184,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void CorridorWorkloadOneOverRollsBackEvenAfterDamage()
         {
-            var f = Fixture(); f.Configuration.PhaseFiveB.BranchDecision.MaximumAssignmentsPerBranch = 1;
+            var f = Fixture(author: config => config.PhaseFiveB.BranchDecision.MaximumAssignmentsPerBranch = 1);
             var bytes = f.Session.GetCurrentBytes(); string live = JsonUtility.ToJson(f.Runtime);
             var result = Run(f);
             Assert.That(result.Reason, Is.EqualTo(BranchRunWorkload.WorkloadExceeded)); Assert.That(result.RuntimeProjection, Is.Null);

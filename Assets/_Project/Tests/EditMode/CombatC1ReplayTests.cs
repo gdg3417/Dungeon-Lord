@@ -25,10 +25,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TearDown] public void TearDown() => UnityEngine.Object.DestroyImmediate(policy);
         internal static Fixture Completed(bool two=false, bool wipe=false)
         {
-            var f=two ? PhaseSixA4Tests.Eligible() : PhaseFiveBBranchIntegrationTests.Fixture(false);
-            f.Configuration.CombatC0=CombatC0IntegrationTests.Config().CombatC0;
-            PhaseSixA4Tests.ForceDescent(f.Configuration,true);
-            if (wipe) { foreach(var m in f.Configuration.CombatC0.Monsters) { m.Damage=100; m.Initiative=100; m.MaxHealth=100; } }
+            void Author(RunSimulationConfig config) {
+                PhaseSixA4Tests.ForceDescent(config,true);
+                if (wipe) foreach(var m in config.CombatC0.Monsters) { m.Damage=100; m.Initiative=100; m.MaxHealth=100; }
+            }
+            var f=two ? PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs((config, _) => Author(config))) :
+                PhaseFiveBBranchIntegrationTests.Fixture(false, Author);
             PhaseSixA4Tests.AddContent(f,0,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.GoblinOptionId);
             if(!two) {
                 PhaseSixA4Tests.AddContent(f,0,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.SkeletonOptionId);
@@ -36,7 +38,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if(two) { PhaseSixA4Tests.AddContent(f,1,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.SkeletonOptionId);
                 f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath,f.FileSystem,f.Session,f.Runtime,FloorLifecycleAction.Activate,PhaseSixA4Tests.FloorTwo(f))); }
             f.Accept(PhaseSixA4Tests.Writer(f).CommitPhaseFiveBRun(f.ActivePath,f.FileSystem,f.Session,f.Runtime,
-                PhaseFiveBBranchIntegrationTests.Service(f.Configuration),RunPostureResolver.BalancedId,Math.Max(1,f.Runtime.lastSavedUtcUnix))); return f;
+                PhaseFiveBBranchIntegrationTests.Service(f),RunPostureResolver.BalancedId,Math.Max(1,f.Runtime.lastSavedUtcUnix))); return f;
         }
         private DungeonRunReplay Create(Fixture f)
         {
@@ -274,7 +276,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(RunStepKind.TrapTrigger)] [TestCase(RunStepKind.LootInteraction)]
         public void CorridorInteractionPositionMustMatchItsCapturedAssignment(RunStepKind kind)
         {
-            var f=PhaseFiveBBranchIntegrationTests.Fixture(); f.Configuration.CombatC0=CombatC0IntegrationTests.Config().CombatC0;
+            var f=PhaseFiveBBranchIntegrationTests.Fixture();
             f.Accept(PhaseFiveBBranchIntegrationTests.Run(f)); var r=f.Runtime.runHistory.LatestOutcome;
             Assert.That(Create(f),Is.Not.Null);
             int at=Array.FindIndex(r.PresentationSteps,s=>s.Kind==kind&&s.PositionSpace==RunPositionSpace.Floor);
