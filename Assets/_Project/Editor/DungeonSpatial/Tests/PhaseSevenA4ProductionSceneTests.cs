@@ -41,7 +41,7 @@ namespace DungeonBuilder.M0.Tests
             }
         }
         private bool TraceSceneRecovery => TestContext.CurrentContext.Test.Name.Contains("RoomContentMapReassignmentCapacity") ||
-            TestContext.CurrentContext.Test.Name.Contains("SceneClockHistoricalOrder") ||
+            TestContext.CurrentContext.Test.Name.Contains("SceneClock") ||
             TestContext.CurrentContext.Test.Name.Contains("LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish");
         // Read-only diagnosis: never sample/advance time, invoke a barrier, or
         // serialize a mutable runtime back into the canonical owner.
@@ -60,7 +60,10 @@ namespace DungeonBuilder.M0.Tests
                 " rootEnabled=" + root?.enabled + " focused=" + Application.isFocused + " observedFocus=" + Field(root, "foregroundApplicationFocused") +
                 " observedPause=" + Field(root, "foregroundApplicationPaused") + " paused=" + time?.IsPaused +
                 " time=" + Id(time) + " boundTime=" + Id(Field(service, "recoveryTime")) + " recovery=" + time?.RecoveryClockActive +
-                " deferred=" + time?.HasDeferredRecovery + " failure=" + Field(root, "foregroundFailure") +
+                " deferred=" + time?.HasDeferredRecovery + " deferredBackground=" + time?.HasDeferredBackground +
+                " observedForeground=" + time?.RecoveryForegroundObserved + " presentation=" + time?.ForegroundPresentationActive +
+                " rootPumping=" + Field(root, "foregroundPumping") + " bootPending=" + Field(root, "bootRecoveryPending") +
+                " failure=" + Field(root, "foregroundFailure") +
                 " retry=" + Field(root, "foregroundRetryPending") + " publication=" + service?.CanonicalPublicationPending +
                 " recoveryRequired=" + service?.RequiresCanonicalRecovery + " save=" + Id(save) + " session=" + Id(session) +
                 " bytes=" + (session == null ? "null" : SpatialContractSha256.Compute(session.GetCurrentBytes())) +
@@ -161,11 +164,13 @@ namespace DungeonBuilder.M0.Tests
         {
             var root = GameRoot.Instance;
             var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            TraceSceneState("drain.begin");
             for (int pump = 0; pump < 128; pump++) {
                 typeof(GameRoot).GetMethod("UpdateForeground", flags).Invoke(root, null);
                 Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root), Is.Null);
                 if (root.Save.livingDungeon.IsClosed && !root.TimeService.RecoveryClockActive && !root.TimeService.HasDeferredRecovery) return;
             }
+            TraceSceneState("drain.exhausted");
             Assert.Fail("Controlled scene failed to close its existing cut/recovery within the fixture bound");
         }
 
@@ -225,6 +230,25 @@ namespace DungeonBuilder.M0.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            bool failed = TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed;
+            if (failed && filename != null) {
+                string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+                Assert.That(export, Is.Not.Null.And.Not.Empty, "Preserve failed scene inputs before cleanup");
+                var output = new DirectoryInfo(Path.GetFullPath(export)); var stage = output.Parent; var campaign = stage?.Parent;
+                Assert.That(output.Name, Is.EqualTo("fixture-inputs"));
+                Assert.That(campaign?.Parent?.FullName, Is.EqualTo(Path.GetFullPath(Path.Combine(Application.dataPath,
+                    "../TestResults/qualification-supervisor"))).IgnoreCase);
+                Assert.That(Guid.TryParseExact(campaign?.Name, "N", out _), Is.True);
+                foreach (var directory in new[] { output, stage, campaign, campaign.Parent })
+                    Assert.That(directory.Exists && (directory.Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
+                string owned = Path.Combine(output.FullName, "failed-scene-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(owned);
+                foreach (string path in Directory.GetFiles(Application.persistentDataPath, filename + "*"))
+                    File.Copy(path, Path.Combine(owned, Path.GetFileName(path)), false);
+                if (GameRoot.Instance?.SaveService?.CanonicalSession != null)
+                    File.WriteAllBytes(Path.Combine(owned, "canonical-authority.json"), GameRoot.Instance.SaveService.CanonicalSession.GetCurrentBytes());
+                File.WriteAllText(Path.Combine(owned, "identity.txt"), TestContext.CurrentContext.Test.FullName + "\n" +
+                    Application.productName + "\n" + Path.Combine(Application.persistentDataPath, filename));
+            }
             Application.logMessageReceived -= RecordThemeWarning;
             if (simulatedTouch != null) InputSystem.RemoveDevice(simulatedTouch);
             simulatedTouch = null;
@@ -234,7 +258,7 @@ namespace DungeonBuilder.M0.Tests
             if (disposableConfig != null) UnityEngine.Object.Destroy(disposableConfig);
             yield return null;
             SceneManager.sceneLoaded -= Isolate;
-            if (filename != null)
+            if (filename != null && !failed)
                 foreach (string path in Directory.GetFiles(Application.persistentDataPath, filename + "*")) File.Delete(path);
         }
         [UnityTest]
