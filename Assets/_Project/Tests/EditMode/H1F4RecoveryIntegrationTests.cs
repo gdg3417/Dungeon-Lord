@@ -187,7 +187,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 var owned = new Harness();
                 if (phase > 0) { owned.Start(); owned.Accept(100); }
                 if (phase > 1) owned.Accept(102);
-                var inputs = owned.Inputs;
+                var serviceContext = (DetachedCurrentTargetValidationContext)typeof(SaveService)
+                    .GetField("_validationContext", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(owned.Service);
+                var inputs = serviceContext.RecoveryInputs;
                 void RejectMutation(Action change, Action restore)
                 {
                     byte[] before = owned.Service.CanonicalSession.GetCurrentBytes();
@@ -197,10 +199,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     // Construct first: late DTO mutation must also invalidate an
                     // existing writer, not only a newly constructed one.
                     var existing = new DetachedCanonicalWriteAuthority(owned.F.Production, owned.F.Compatibility,
-                        inputs.Configuration, owned.F.Context, owned.F.Profile, economy: inputs.Economy, runLoot: inputs.Loot);
+                        inputs.Configuration, serviceContext, owned.F.Profile, economy: inputs.Economy, runLoot: inputs.Loot);
                     try {
                         change();
-                        Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, owned.F.Context).IsValid, Is.False);
+                        Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, serviceContext).IsValid, Is.False);
                         Assert.That(existing.SaveRecognizedState(owned.Service.SavePath, owned.F.FileSystem,
                             owned.Service.CanonicalSession, owned.Current).IsSuccess, Is.False);
                         Assert.Throws<InvalidOperationException>(() => owned.Service.BeginCanonicalRecovery(owned.Current));
@@ -210,7 +212,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         CollectionAssert.AreEqual(before, owned.F.FileSystem.ReadAllBytes(owned.Service.SavePath));
                     }
                     finally { restore(); }
-                    Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, owned.F.Context).IsValid, Is.True);
+                    Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, serviceContext).IsValid, Is.True);
                 }
                 if (wrongLoot) {
                     int original = inputs.Loot.items[0].worldValue;
@@ -220,14 +222,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     int health = goblin.MaxHealth, tick = inputs.Bootstrap.tickSeconds;
                     double progress = inputs.Bootstrap.researchProgressScaffold.progressPerActiveSecond;
                     int occupancyVersion = inputs.Occupancy.Value.SchemaVersion;
-                    int contextVersion = owned.F.Context.RoomContentOccupancy.Value.SchemaVersion;
+                    int contextVersion = serviceContext.RoomContentOccupancy.Value.SchemaVersion;
                     RejectMutation(() => goblin.MaxHealth++, () => goblin.MaxHealth = health);
                     RejectMutation(() => inputs.Bootstrap.tickSeconds++, () => inputs.Bootstrap.tickSeconds = tick);
                     RejectMutation(() => inputs.Bootstrap.researchProgressScaffold.progressPerActiveSecond++,
                         () => inputs.Bootstrap.researchProgressScaffold.progressPerActiveSecond = progress);
                     RejectMutation(() => inputs.Occupancy.Value.SchemaVersion++, () => inputs.Occupancy.Value.SchemaVersion = occupancyVersion);
-                    RejectMutation(() => owned.F.Context.RoomContentOccupancy.Value.SchemaVersion++,
-                        () => owned.F.Context.RoomContentOccupancy.Value.SchemaVersion = contextVersion);
+                    RejectMutation(() => serviceContext.RoomContentOccupancy.Value.SchemaVersion++,
+                        () => serviceContext.RoomContentOccupancy.Value.SchemaVersion = contextVersion);
                 }
             }
         }
