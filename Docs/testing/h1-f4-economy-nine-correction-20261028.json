@@ -1,0 +1,79 @@
+{
+  "status": "correction_candidate_qualification_pending",
+  "source": "aad167348daf803c31bf589c379fcce05573ed54",
+  "campaign": "6a616fd9e7ef4067a3ea065600bed607",
+  "counts": {
+    "passed": 227,
+    "failed": 9,
+    "skipped": 0
+  },
+  "xml_sha256": "6d615455afbed9cbd66669218532d1e93105f8933fdc572afae13237e988fef1",
+  "failures": [
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourAcquisition.InactiveFloorAndReturnedCustodyDoNotAddDeployedReserveToAcquisitionQuote(False)",
+      "message": "System.ArgumentException : living.profile.invalid",
+      "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.LivingDungeonProfile..ctor (System.String id, System.Int32 active, System.Int32 retained, System.Int32 checkpointBytes, System.Int64 partyReplay, System.Int64 totalReplay, System.Int32 baseSaveBytes, System.Int32 ownerBytes, DungeonBuilder.M0.Gameplay.RunSimulation.RunLogicalTiming qualificationTiming, System.String qualificationPostureId, DungeonBuilder.M0.Gameplay.DungeonSpatial.SpatialSerializedInputLimits baseBudget, System.Int64 maximumCombatWork) [0x000d9] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\LivingDungeonContracts.cs:41 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.LivingDungeonForegroundConfig.CreateProfile (DungeonBuilder.M0.Gameplay.DungeonSpatial.SpatialSerializedInputLimits baseBudget) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\LivingDungeonForegroundConfig.cs:82 \n  at DungeonBuilder.M0.SaveService.ConfigureRecovery (DungeonBuilder.M0.Gameplay.DungeonSpatial.RecoveryRuntimeInputs inputs, DungeonBuilder.M0.TimeService observationOwner, DungeonBuilder.M0.Gameplay.DungeonSpatial.IHistoricalRecoveryEvidence historicalEvidence) [0x00041] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Services\\SaveService.Recovery.cs:154 \n  at DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture fixture, DungeonBuilder.M0.SaveData& loaded) [0x00163] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\ResearchDurableAcknowledgementTests.cs:60 \n  at DungeonBuilder.M0.Tests.EditMode.PhaseFiveBBranchIntegrationTests.CanonicalSaveService (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x0000b] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\PhaseFiveBBranchIntegrationTests.cs:50 \n  at DungeonBuilder.M0.Tests.EditMode.ContentAcquisitionEconomyTests.PresentationService (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\ContentAcquisitionEconomyTests.cs:30 \n  at DungeonBuilder.M0.Tests.EditMode.ContentAcquisitionEconomyTests.InactiveFloorAndReturnedCustodyDoNotAddDeployedReserveToAcquisitionQuote (System.Boolean returnedCustody) [0x00069] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\ContentAcquisitionEconomyTests.cs:100 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+    },
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourAcquisition.InactiveFloorAndReturnedCustodyDoNotAddDeployedReserveToAcquisitionQuote(True)",
+      "message": "System.ArgumentException : living.profile.invalid",
+      "stack": "  at DungeonBuilder.M0.Gameplay.DungeonSpatial.LivingDungeonProfile..ctor (System.String id, System.Int32 active, System.Int32 retained, System.Int32 checkpointBytes, System.Int64 partyReplay, System.Int64 totalReplay, System.Int32 baseSaveBytes, System.Int32 ownerBytes, DungeonBuilder.M0.Gameplay.RunSimulation.RunLogicalTiming qualificationTiming, System.String qualificationPostureId, DungeonBuilder.M0.Gameplay.DungeonSpatial.SpatialSerializedInputLimits baseBudget, System.Int64 maximumCombatWork) [0x000d9] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\LivingDungeonContracts.cs:41 \n  at DungeonBuilder.M0.Gameplay.DungeonSpatial.LivingDungeonForegroundConfig.CreateProfile (DungeonBuilder.M0.Gameplay.DungeonSpatial.SpatialSerializedInputLimits baseBudget) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Gameplay\\DungeonSpatial\\LivingDungeonForegroundConfig.cs:82 \n  at DungeonBuilder.M0.SaveService.ConfigureRecovery (DungeonBuilder.M0.Gameplay.DungeonSpatial.RecoveryRuntimeInputs inputs, DungeonBuilder.M0.TimeService observationOwner, DungeonBuilder.M0.Gameplay.DungeonSpatial.IHistoricalRecoveryEvidence historicalEvidence) [0x00041] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Scripts\\Services\\SaveService.Recovery.cs:154 \n  at DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture fixture, DungeonBuilder.M0.SaveData& loaded) [0x00163] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\ResearchDurableAcknowledgementTests.cs:60 \n  at DungeonBuilder.M0.Tests.EditMode.PhaseFiveBBranchIntegrationTests.CanonicalSaveService (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x0000b] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\PhaseFiveBBranchIntegrationTests.cs:50 \n  at DungeonBuilder.M0.Tests.EditMode.ContentAcquisitionEconomyTests.PresentationService (DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture f) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\ContentAcquisitionEconomyTests.cs:30 \n  at DungeonBuilder.M0.Tests.EditMode.ContentAcquisitionEconomyTests.InactiveFloorAndReturnedCustodyDoNotAddDeployedReserveToAcquisitionQuote (System.Boolean returnedCustody) [0x00069] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\ContentAcquisitionEconomyTests.cs:100 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <1eb9db207454431c84a47bcd81e79c37>:0 "
+    },
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourEconomy.PaidRenovationAndSessionUndoAreExact(False)",
+      "message": "  time.recovery.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.StructuralEconomyTests.PaidRenovationAndSessionUndoAreExact (System.Boolean replacement) [0x001a8] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\StructuralEconomyTests.cs:333\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourEconomy.PaidRenovationAndSessionUndoAreExact(True)",
+      "message": "  time.recovery.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.StructuralEconomyTests.PaidRenovationAndSessionUndoAreExact (System.Boolean replacement) [0x001a8] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\StructuralEconomyTests.cs:333\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourEconomy.QaWalletFillUsesInjectedValidatedCapacityAndPreservesOverCap(0,321)",
+      "message": "  gd66.write.first_write_validation_failed\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.StructuralEconomyTests.QaWalletFillUsesInjectedValidatedCapacityAndPreservesOverCap (System.Double initial, System.Double expected) [0x00079] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\StructuralEconomyTests.cs:703\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourEconomy.QaWalletFillUsesInjectedValidatedCapacityAndPreservesOverCap(17,321)",
+      "message": "  gd66.write.first_write_validation_failed\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.StructuralEconomyTests.QaWalletFillUsesInjectedValidatedCapacityAndPreservesOverCap (System.Double initial, System.Double expected) [0x00079] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\StructuralEconomyTests.cs:703\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourEconomy.QaWalletFillUsesInjectedValidatedCapacityAndPreservesOverCap(444,444)",
+      "message": "  gd66.write.first_write_validation_failed\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.StructuralEconomyTests.QaWalletFillUsesInjectedValidatedCapacityAndPreservesOverCap (System.Double initial, System.Double expected) [0x00079] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\StructuralEconomyTests.cs:703\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourEconomy.QaWalletUnavailableAuthorityFailsClosedWithoutPublication(\"economy\")",
+      "message": "  Expected: False\n  But was:  True\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.StructuralEconomyTests.QaWalletUnavailableAuthorityFailsClosedWithoutPublication (System.String missing) [0x0011c] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\StructuralEconomyTests.cs:809\n"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourEconomy.UndoFailureRetainsCapabilityAndInjectedWindowUsesElapsedTime",
+      "message": "  gd66.write.first_write_validation_failed\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.StructuralEconomyTests.UndoFailureRetainsCapabilityAndInjectedWindowUsesElapsedTime () [0x0007a] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\StructuralEconomyTests.cs:445\n"
+    }
+  ],
+  "normal_finalization": {
+    "campaign": "6a616fd9e7ef4067a3ea065600bed607",
+    "campaign_evidence_unchanged": true,
+    "finished_utc": "2026-10-28T16:06:04.629136+00:00",
+    "original_verdict": "FAILED",
+    "phase": "completed",
+    "postchecks_passed": true,
+    "prechecks_passed": true,
+    "prior_evidence_directories_verified": 110,
+    "reservation_changed": false,
+    "restored_settings": {
+      "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+    },
+    "source_sha": "aad167348daf803c31bf589c379fcce05573ed54",
+    "started_utc": "2026-10-28T16:05:31.706205+00:00",
+    "success": true
+  },
+  "receipt_sha256": "357bd5e547df1e657522b332c774adaff27186e689e2e496f6cc4bbd015ae92f",
+  "original_verdict_unchanged": true
+}

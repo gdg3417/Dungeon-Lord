@@ -361,7 +361,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             Fixture fixture = Fixture.Create(initialTime.HasValue ? "\"lastSavedUtcUnix\":" +
                 initialTime.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
-                recoveryInputBytes: recoveryInputBytes);
+                workloadProfile:PhaseFourTestSupport.ProductionProfile(),recoveryInputBytes: recoveryInputBytes);
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             fixture.Runtime.completedResearch = new CompletedResearchState
