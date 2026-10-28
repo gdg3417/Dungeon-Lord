@@ -92,12 +92,16 @@ namespace DungeonBuilder.M0
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 var qualificationClock = LivingDungeonForegroundDevelopmentSmoke.ReopenClock(
                     Environment.GetCommandLineArgs(), Application.productName, SaveService.SavePath);
+                qualificationClockControl = qualificationClock?.Target as PreboundForegroundQualificationClock;
                 TimeService = qualificationClock == null ? new TimeService(Logger, inputs.Bootstrap.tickSeconds, inputs.Bootstrap.timeRules.detectClockSkewSeconds) :
                     new TimeService(Logger, inputs.Bootstrap.tickSeconds, inputs.Bootstrap.timeRules.detectClockSkewSeconds, new SystemTimeSource(), qualificationClock);
 #else
                 TimeService = new TimeService(Logger, inputs.Bootstrap.tickSeconds, inputs.Bootstrap.timeRules.detectClockSkewSeconds);
 #endif
                 }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                qualificationObservationOwner = TimeService;
+#endif
                 TimeService.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);
                 TimeService.SetForegroundFocus(foregroundApplicationFocused && isActiveAndEnabled && Application.isFocused);
                 if (foregroundApplicationPaused) TimeService.OnPause();

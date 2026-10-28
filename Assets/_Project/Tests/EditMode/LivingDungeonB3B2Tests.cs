@@ -719,19 +719,36 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Func<double> Source(string phase, string identity = null, string filename = null) =>
                 LivingDungeonForegroundDevelopmentSmoke.ReopenClock(new[] { "-b3b2ForegroundSmoke", phase },
                     identity ?? product, filename ?? save);
-            Assert.That(Source("admit"), Is.Null, "Admission must retain its real monotonic source qualification");
+            var admission = Source("admit");
+            Assert.That(admission, Is.Not.Null);
+            Assert.That(((PreboundForegroundQualificationClock)admission.Target).IsRealTime, Is.True,
+                "Admission must retain its real monotonic source qualification before acceleration");
             Assert.That(Source("settle", "Dungeon Lord"), Is.Null);
             Assert.That(Source("settle", filename: "save_primary.json"), Is.Null);
             Assert.That(LivingDungeonForegroundDevelopmentSmoke.ReopenClock(Array.Empty<string>(), product, save), Is.Null);
             foreach (string phase in new[] { "settle", "finish" }) {
                 var clock = Source(phase); Assert.That(clock, Is.Not.Null);
+                var control = (PreboundForegroundQualificationClock)clock.Target;
                 var time = new TimeService(new SimpleLogger(false), 10, 300, new Utc(), clock);
                 time.AttachSave(new SaveData()); time.BeginForeground(1000, 91629);
                 for (int frame = 0; frame < 120; frame++) {
                     time.SetForegroundFocus(frame % 2 == 0);
                     Assert.That(time.SampleForeground(), Is.EqualTo(91629));
                 }
+                foreach (double invalid in new[] { -1d, double.NaN, double.PositiveInfinity }) {
+                    Assert.Throws<InvalidOperationException>(() => control.Advance(invalid));
+                    Assert.That(clock(), Is.Zero);
+                }
+                time.SetForegroundFocus(true); control.Advance(.25);
+                Assert.That(time.SampleForeground(), Is.EqualTo(91879));
+                control.Advance(0); Assert.That(time.SampleForeground(), Is.EqualTo(91879));
             }
+            double real = 4.125;
+            var retained = new PreboundForegroundQualificationClock(() => real);
+            Assert.That(retained.Read(), Is.EqualTo(4.125)); real = 5.25;
+            retained.Advance(.125); real = 1000;
+            Assert.That(retained.Read(), Is.EqualTo(5.375));
+            Assert.That(retained.IsRealTime, Is.False);
         }
 
         [Test] public void ForegroundClockIsIndependentOfFramePartitionAndRejectsOverflowWithoutElapsedCredit()

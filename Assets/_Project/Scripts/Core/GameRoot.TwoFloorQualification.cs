@@ -19,13 +19,21 @@ namespace DungeonBuilder.M0
     }
     public partial class GameRoot
     {
-        internal IEnumerator QualifyTwoFloor(string phase, ForegroundSmokeReport report, string previous)
+        internal IEnumerator QualifyTwoFloor(string phase, ForegroundSmokeReport report, string previous, Action<double> editorAdvance = null)
         {
-            if (!Application.productName.Contains("B3B2 Smoke Two Floor") ||
-                !Path.GetFileName(SaveService.SavePath).StartsWith("living-dungeon-b3b2-qualification-two-floor-", StringComparison.Ordinal) ||
+            bool isolated = Application.productName.Contains("B3B2 Smoke Two Floor") &&
+                Path.GetFileName(SaveService.SavePath).StartsWith("living-dungeon-b3b2-qualification-two-floor-", StringComparison.Ordinal);
+#if UNITY_EDITOR
+            isolated |= editorRecoveryClockInjected && IsIsolatedSceneClockContext(Application.productName,
+                Application.isBatchMode, Path.GetFileName(SaveService.SavePath));
+#endif
+            if (!isolated ||
                 SaveService.ForegroundConfiguration?.TwoFloor != true || foregroundFailure != null)
                 throw new InvalidOperationException("two_floor.smoke.isolation_required");
             report.Product = Application.productName; report.SavePath = SaveService.SavePath;
+            var advance = QualificationAdvance(editorAdvance);
+            var preparation = PrepareForegroundQualification();
+            while (preparation.MoveNext()) yield return preparation.Current;
             var prior = phase == "two-floor-wait" || phase == "v1-upgrade" ? null : JsonUtility.FromJson<ForegroundSmokeReport>(File.ReadAllText(previous));
             if (prior != null) {
                 if (!prior.Passed || Save.livingDungeon.Scheduler.AcceptedThrough != prior.Accepted ||
@@ -53,15 +61,10 @@ namespace DungeonBuilder.M0
                         throw new InvalidOperationException("two_floor.smoke.historical_contract_changed");
                 } finally { old.Abandon(); }
             }
-            double sample = 1000; // same opt-in injected monotonic source as the B3B2 qualification
-            TimeService = new TimeService(Logger, _configuredSimulationTickSeconds,
-                Content.Bootstrap.timeRules.detectClockSkewSeconds, new SystemTimeSource(), () => sample);
-            TimeService.AttachSave(Save); TimeService.SetForegroundFocus(true);
-            TimeService.BeginForeground(SaveService.ForegroundConfiguration.UnitsPerSecond, Save.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
             bool complete = false;
             for (int frame = 0; frame < 40000; frame++) {
                 foregroundApplicationFocused = true; foregroundApplicationPaused = false;
-                TimeService.SetForegroundFocus(true); TimeService.OnResume(); sample += .25;
+                TimeService.SetForegroundFocus(true); TimeService.OnResume(); advance(.25);
                 UpdateForeground();
                 if (foregroundFailure != null || foregroundRetryPending) throw new InvalidOperationException(foregroundFailure ?? "two_floor.smoke.retry_pending");
                 if (phase == "v1-upgrade") {

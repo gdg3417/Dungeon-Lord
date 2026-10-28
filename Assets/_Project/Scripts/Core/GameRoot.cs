@@ -335,6 +335,9 @@ namespace DungeonBuilder.M0
                 TimeService.AttachSave(null);
             }
             TimeService = null;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            qualificationObservationOwner = null; qualificationClockControl = null;
+#endif
             _structureSimulationPass = null;
             _runSimulationService = null;
             Save = null;
@@ -640,8 +643,10 @@ namespace DungeonBuilder.M0
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             var qualificationClock = LivingDungeonForegroundDevelopmentSmoke.ReopenClock(
                 Environment.GetCommandLineArgs(), Application.productName, SaveService.SavePath);
+            qualificationClockControl = qualificationClock?.Target as PreboundForegroundQualificationClock;
             TimeService = qualificationClock == null ? new TimeService(Logger, tickSeconds, skewSeconds) :
                 new TimeService(Logger, tickSeconds, skewSeconds, new SystemTimeSource(), qualificationClock);
+            qualificationObservationOwner = TimeService;
 #else
             TimeService = new TimeService(Logger, tickSeconds, skewSeconds);
 #endif
