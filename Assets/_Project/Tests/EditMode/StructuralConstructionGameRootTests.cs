@@ -189,22 +189,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         internal static GameRoot PurchaseRoot(GameObject go, DetachedCanonicalWriteAuthorityTests.Fixture fixture)
         {
-            var service = new SaveService(new SimpleLogger(false),
-                new SaveConfig { fileName = Path.GetFileName(fixture.ActivePath), useAtomicWrites = true },
-                Path.GetDirectoryName(fixture.ActivePath));
-            service.ConfigureCanonical(fixture.Profile, fixture.Production, fixture.Compatibility,
-                fixture.Configuration, Encoding.UTF8.GetBytes(JsonUtility.ToJson(fixture.Configuration)),
-                fixture.PositionProfiles, fixture.Occupancy);
-            service.ConfigureStructuralEconomy(fixture.Economy);
-            service.ConfigureContentAcquisitionEconomy(fixture.Acquisition);
-            service.ConfigureStructuralRemovalPolicy(fixture.RemovalPolicy);
-            SetProperty(service, "SavePath", fixture.ActivePath);
-            typeof(SaveService).GetField("_canonicalSession", BindingFlags.Instance | BindingFlags.NonPublic)
-                .SetValue(service, fixture.Session);
-            typeof(SaveService).GetField("_canonicalFileSystem", BindingFlags.Instance | BindingFlags.NonPublic)
-                .SetValue(service, fixture.FileSystem);
-            typeof(SaveService).GetField("_validationContext", BindingFlags.Instance | BindingFlags.NonPublic)
-                .SetValue(service, fixture.Context);
+            var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(fixture);
             var content = new ContentService();
             const string directory = "Assets/_Project/Data/Bootstrap/";
             var assets = new[] { "content_bootstrap", "build_config", "schema_versions", "content_manifest",

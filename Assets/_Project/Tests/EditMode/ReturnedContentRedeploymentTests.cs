@@ -18,7 +18,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         // Production placement/construction/deletion creates custody; no production inventory fixture path.
         internal static Fixture Owned()
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null, workloadProfile: PhaseFourTestSupport.ProductionProfile());
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             var preview = StructuralEditService.Preview(f.State, new StructuralConstructionRequest

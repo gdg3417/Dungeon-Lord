@@ -23,6 +23,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             floorConstructionResearch: PhaseSixA3FloorActivationEligibilityTests.Research(f), runLoot: f.Context.RecoveryInputs.Loot);
         internal static Fixture Eligible(byte[][] recoveryInputBytes = null, long? initialTime = null) =>
             PhaseSixA3FloorActivationEligibilityTests.Eligible(recoveryInputBytes, initialTime);
+        private static Fixture Authored(Action<RunSimulationConfig> author, long? initialTime = null) =>
+            Eligible(PhaseFourTestSupport.AuthoredInputs((config, _) => author(config)), initialTime);
         internal static string FloorTwo(Fixture f) => f.State.Floors.Single(x => x.FloorIndex == 1).FloorInstanceId;
 
         [Test]
@@ -230,7 +232,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static void ConfigureLifecycle(GameRoot root, Fixture f)
         {
-            root.SaveService.ConfigureRunLoot(Loot());
+            root.SaveService.ConfigureRunLoot(f.Context.RecoveryInputs.Loot);
             root.SaveService.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
                 PhaseSixA3FloorActivationEligibilityTests.Research(f));
         }
@@ -438,20 +440,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         internal static ActiveFloorRunSnapshot Snapshot(Fixture f, RunSimulationConfig config = null) =>
             ActiveFloorRunSnapshot.Create(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context),
-                f.Production, config ?? f.Configuration, f.Profile.Canonical, Loot(), executionInputs: f.Runtime);
+                f.Production, config ?? f.Configuration, f.Profile.Canonical, f.Context.RecoveryInputs.Loot, executionInputs: f.Runtime);
 
         [TestCase(false)] [TestCase(true)]
         public void RealTwoFloorRunUsesOnePartyAndPublishesOneSettlement(bool descend)
         {
-            var f = Eligible(); AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            var f = Authored(c => ForceDescent(c, descend)); AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
-            ForceDescent(f.Configuration, descend);
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, FloorTwo(f)));
             int sequence = Math.Max(1, f.Runtime.runHistory.NextRunSequence);
             int history = f.Runtime.runHistory.RecentOutcomes?.Length ?? 0;
             int replaces = f.FileSystem.Operations.Count(o => o.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace);
+            var simulation = new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot);
+            var snapshot = Snapshot(f);
+            // Read-only legacy executable evidence remains covered separately;
+            // current manual publication executes C2 and emits CombatEvents.
+            var legacy = simulation.SimulateSnapshot(sequence, snapshot);
+            var execution = simulation.StartManualSnapshot(sequence, snapshot);
+            int[] transferredHealth = null;
+            while (!execution.IsTerminal) {
+                var steps = execution.Advance(1, execution.NextOrdinal);
+                if (steps.Any(s => s.Kind == RunStepKind.FloorTransfer))
+                    transferredHealth = execution.Inspect().Members.Select(m => m.Health).ToArray();
+            }
+            var expected = execution.TakeOutcome();
             var result = Writer(f).CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
-                new RunSimulationService(f.Configuration, Loot()), RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix));
+                simulation, RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix));
             Assert.That(result.IsSuccess, Is.True, result.Reason); f.Accept(result);
             var run = f.Runtime.runHistory.LatestOutcome;
             Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(sequence + 1));
@@ -466,9 +480,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(run.LootSummary.TotalGeneratedWorldValue, Is.EqualTo(run.RoomResolutions.Sum(r => r.GeneratedLootValue)));
             if (descend)
             {
-                var next = run.EncounterEvents.First(e => e.FloorIndex == 1);
-                Assert.That(next.HealthBefore, Is.EqualTo(run.FloorTransitions[0].MemberHealth[next.MemberOrdinal]));
-                Assert.That(next.MemberOrdinal, Is.EqualTo(run.FloorTransitions[0].FormationOrdinals[0]));
+                var next = legacy.EncounterEvents.First(e => e.FloorIndex == 1);
+                Assert.That(next.HealthBefore, Is.EqualTo(legacy.FloorTransitions[0].MemberHealth[next.MemberOrdinal]));
+                Assert.That(next.MemberOrdinal, Is.EqualTo(legacy.FloorTransitions[0].FormationOrdinals[0]));
+                Assert.That(CombatC0Diagnostics.IsCombatC2(run), Is.True);
+                CollectionAssert.AreEqual(run.FloorTransitions[0].MemberHealth, transferredHealth);
+                CollectionAssert.AreEqual(expected.Party.Members.Select(m => m.CurrentHealth), run.Party.Members.Select(m => m.CurrentHealth));
+                Assert.That(run.CombatEvents.Any(e => e.FloorId == FloorTwo(f)), Is.True);
                 Assert.That(run.RoomResolutions[1].CarriedLootValueAfterRoom, Is.GreaterThanOrEqualTo(run.RoomResolutions[0].CarriedLootValueAfterRoom));
             }
             else
@@ -482,8 +500,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void HiddenContentCannotChangeUnknownTransitionAndSnapshotSurvivesSourceMutation()
         {
-            var f = Eligible(); AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
-            ForceDescent(f.Configuration, true);
+            var f = Authored(c => ForceDescent(c, true)); AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.Activate, FloorTwo(f)));
             var snapshot = Snapshot(f); var engine = new RunSimulationService(f.Configuration, Loot());
             var first = engine.SimulateSnapshot(1, snapshot);
