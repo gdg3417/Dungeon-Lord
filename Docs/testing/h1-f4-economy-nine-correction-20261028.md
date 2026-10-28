@@ -47,3 +47,25 @@ claim against fresh discovery before execution. Retain each failed campaign.
 Broader fixture corrections, full EditMode, applicable full PlayMode, repeated
 interruption/reopen, Windows Player execution/exit and matched performance remain
 pending. No merge, owner UAT, performance conclusion or readiness claim.
+
+## Refreshed discovery and focused selection
+
+Discovery campaign 5c8e707ff7f04621b95caff1c5e088ad at
+60636c99c0c9164031c0c793eab89922e608199a completed all five stages and independent
+verification: 2,812 EditMode leaves, 4,290 PlayMode leaves, exactly the same
+236 affected economy leaves, and all nine original failure names present.
+
+Focused campaign 4ac81c68b7a744989d69c8054f157813 ran eight passing cases,
+omitting the literal quoted economy parameter selection. It remains FAILED
+because the supervisor required nine. No passing nine-case gate is claimed.
+Its native/helper exits were zero, inputs unchanged and complete process/Job
+completion recorded. Normal guarded finalization restored exact settings,
+preserved all 114 prior evidence directories and did not mutate its already
+released reservation or FAILED verdict.
+
+The fresh focused selection uses the complete four-case missing-authority method,
+so it contains the original nine plus three adjacent negative cases: 12 total.
+Independent verification must require all nine original exact names, not merely
+a total of 12. Then execute and independently verify the unchanged 236-case
+cohort. The selector correction changes no Unity/test source or discovery
+identity. It does not relax the supervisor's expected counts.
