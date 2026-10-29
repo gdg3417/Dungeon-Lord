@@ -27,14 +27,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             acquisition: f.Acquisition, branchingResearch: f.BranchingResearch, runLoot: f.Context.RecoveryInputs.Loot);
         // Current writable tests use the supported executable and the exact
         // consumed inputs. Profile A below remains a historical reader/model.
-        private static Fixture Current()
+        private static Fixture Current(bool admissionContent = true)
         {
             var f = PhaseFiveBBranchIntegrationTests.Fixture();
             // Automatic demand requires a monster on the main floor and a
             // positive loot signal; optional-corridor content alone cannot
             // authorize an arrival. Place both through the canonical editor.
-            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
-            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+            if (admissionContent)
+            {
+                PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+                PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+            }
             f.ReopenWithSupportedForegroundProfiles(); return f;
         }
         private static void CurrentThrough(Fixture f, long through)
@@ -140,13 +143,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void DormantFixtureAllocatorDiagnostics()
         {
-            var f = Current();
+            var f = Current(admissionContent: false);
             Assert.That(LivingDungeonScheduling.AllocatorValid(f.Runtime.runHistory, Owner(f), true), Is.True,
                 UnityEngine.JsonUtility.ToJson(f.Runtime.runHistory));
             Assert.That(Owner(f).IsDormant, Is.True);
             CurrentThrough(f, 0);
             Assert.That(Owner(f).IsDormant, Is.False);
             Assert.That(Owner(f).Scheduler.ProfileId, Is.EqualTo(f.Context.RecoveryInputs.OneFloor.Id));
+            string history = HistoryBytes(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized);
+            long through = f.Context.RecoveryInputs.OneFloor.MinimumArrival;
+            CurrentThrough(f, through);
+            Assert.That(Owner(f).Scheduler.NextOpportunityTime, Is.Null);
+            Assert.That(Owner(f).Parties, Is.Empty);
+            Assert.That(HistoryBytes(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized), Is.EqualTo(history));
+
+            // A legal edit at the closed boundary may enable future demand.
+            // It cannot retroactively admit a party into the closed prefix.
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+            Assert.That(Owner(f).Parties, Is.Empty);
+            CurrentThrough(f, through);
+            Assert.That(Owner(f).Scheduler.NextOpportunityTime.HasValue, Is.True);
+            long arrival = Owner(f).Scheduler.NextOpportunityTime.Value;
+            Assert.That(arrival, Is.GreaterThan(through));
+            CurrentThrough(f, arrival);
+            Assert.That(Owner(f).Parties.Single().Sequence, Is.EqualTo(1));
+            Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(2));
         }
         [Test] public void C2FundingWaitsForProvenCanonicalVacancyAtClosedB2Boundary()
         {
