@@ -37,8 +37,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(Through, Is.LessThan(100000L * F.Context.RecoveryInputs.OneFloor.UnitsPerSecond));
                 CurrentThrough(F, Through - 1);
             }
-            internal DetachedCanonicalWriteResult Pump(string path = null, ISpatialMigrationFileSystem fs = null) =>
-                PhaseFourTestSupport.PumpForeground(F, F.Context.RecoveryInputs.OneFloor, Through, activePath: path, fileSystem: fs);
+            internal DetachedCanonicalWriteResult Pump(string path = null, ISpatialMigrationFileSystem fs = null,
+                Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null) =>
+                PhaseFourTestSupport.PumpForeground(F, F.Context.RecoveryInputs.OneFloor, Through, activePath: path,
+                    fileSystem: fs, candidatePrepared: candidatePrepared);
         }
         private static void CurrentThrough(Fixture f, long through)
         {
@@ -443,11 +445,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void PartialCandidateAndDurableReadbackFailuresDoNotRetireOrPublish(string mode)
         {
             var current = new CurrentTerminal(); var f = current.F; var before = f.Session.GetCurrentBytes();
+            var runtime = f.Runtime; var session = f.Session; string runtimeBefore = Json(runtime);
             f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem(); f.FileSystem.Seed(f.ActivePath, before);
-            if (mode == "partial") f.FileSystem.EnablePartialWriteFailure(10);
+            if (mode == "partial") f.FileSystem.EnablePartialWriteFailure(10, path => path.EndsWith(".candidate", StringComparison.Ordinal));
             else f.FileSystem.EnableTargetedFailure(Op.Read, paths => paths[0] == f.ActivePath &&
                 f.FileSystem.Operations.Any(o => o.Type == Op.Replace && o.Paths[1] == f.ActivePath), 1, false);
-            var result = current.Pump();
+            byte[] prepared = null; int preparations = 0;
+            var result = current.Pump(candidatePrepared: (candidate, _) => { preparations++; prepared = candidate.GetCurrentBytes(); });
+            Assert.That(preparations, Is.EqualTo(1)); Assert.That(prepared, Is.Not.Null);
+            Assert.That(prepared.Length, Is.GreaterThan(10));
+            string rollbackPath = null, candidatePath = null;
+            if (mode == "partial")
+            {
+                var writes = f.FileSystem.Operations.Where(o => o.Type == Op.Write).ToArray();
+                Assert.That(writes.Length, Is.EqualTo(2));
+                Assert.That(writes[0].Index, Is.EqualTo(1)); Assert.That(writes[1].Index, Is.EqualTo(2));
+                rollbackPath = writes[0].Paths.Single(); candidatePath = writes[1].Paths.Single();
+                Assert.That(rollbackPath, Does.EndWith(".rollback")); Assert.That(candidatePath, Does.EndWith(".candidate"));
+                Assert.That(writes.All(o => o.MutationCompleted), Is.True);
+                CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(rollbackPath));
+                CollectionAssert.AreEqual(prepared.Take(10).ToArray(), f.FileSystem.ReadAllBytes(candidatePath));
+                CollectionAssert.AreEquivalent(new[] { rollbackPath, candidatePath },
+                    ExactCompleteSaveAtomicPersistence.DiscoverOwnedEvidence(f.ActivePath, f.FileSystem, 64));
+                Assert.That(f.FileSystem.Operations.Any(o => o.Type == Op.Replace), Is.False);
+            }
             if (mode == "readback")
             {
                 Assert.That(f.FileSystem.FailedOperation.Type, Is.EqualTo(Op.Read));
@@ -455,8 +476,25 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(f.FileSystem.FailedTargetOccurrence, Is.EqualTo(1));
             }
             f.FileSystem.DisableFailure(); CurrentUnchanged(f, before, result);
+            Assert.That(f.Runtime, Is.SameAs(runtime)); Assert.That(f.Session, Is.SameAs(session));
+            Assert.That(Json(f.Runtime), Is.EqualTo(runtimeBefore));
+            int retryStart = f.FileSystem.Operations.Count(); f.Reopen();
             f.Accept(current.Pump()); Assert.That(f.Runtime.livingDungeon.Parties, Is.Empty);
+            CollectionAssert.AreEqual(prepared, f.Session.GetCurrentBytes());
+            if (mode == "partial")
+            {
+                var retry = f.FileSystem.Operations.Skip(retryStart).ToArray();
+                int firstWrite = Array.FindIndex(retry, o => o.Type == Op.Write);
+                Assert.That(firstWrite, Is.GreaterThan(0));
+                var recovery = retry.Take(firstWrite).ToArray();
+                Assert.That(recovery.Any(o => o.Type == Op.Read && o.Paths[0] == f.ActivePath), Is.True);
+                Assert.That(recovery.Any(o => o.Type == Op.Enumerate), Is.True);
+                CollectionAssert.AreEquivalent(new[] { rollbackPath, candidatePath },
+                    recovery.Where(o => o.Type == Op.Delete).Select(o => o.Paths.Single()));
+            }
+            var durable = f.Session.GetCurrentBytes();
             f.Reopen(); CurrentThrough(f, current.Through);
+            CollectionAssert.AreEqual(durable, f.Session.GetCurrentBytes());
             Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(r => r.RunId == "run-1"), Is.EqualTo(1));
         }
         [Test] public void SettlementDoesNotCompleteUnmetObjectivesOrResearchOrGrantMana()

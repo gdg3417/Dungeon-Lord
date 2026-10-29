@@ -2571,6 +2571,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             private FileOperation failedOperation;
             private int failedTargetOccurrence;
             private int partialWriteByteCount = -1;
+            private Predicate<string> partialWritePathPredicate;
             private readonly Dictionary<string, Queue<byte[]>> readSubstitutions =
                 new Dictionary<string, Queue<byte[]>>(PathComparer);
             internal DeterministicFileSystem(OperationType? failureType = null, int failureIndex = 0)
@@ -2590,8 +2591,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 failureType = type; failureIndex = index; failureAfterMutation = true;
                 secondFailureType = null; secondFailureIndex = 0; failurePathPredicate = null; targetedCounts.Clear();
             }
-            internal void EnablePartialWriteFailure(int byteCount)
-            { partialWriteByteCount = Math.Max(0, byteCount); }
+            internal void EnablePartialWriteFailure(int byteCount, Predicate<string> pathPredicate = null)
+            { partialWriteByteCount = Math.Max(0, byteCount); partialWritePathPredicate = pathPredicate; }
             internal void EnableTargetedFailure(OperationType type, Predicate<string[]> pathPredicate, int occurrence, bool afterMutation)
             {
                 failureType = type; failureIndex = occurrence; failureAfterMutation = afterMutation;
@@ -2635,7 +2636,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             public void WriteAllBytesDurable(string path, byte[] bytes)
             {
                 path = Normalize(path); Record(OperationType.Write, path);
-                if (partialWriteByteCount >= 0)
+                if (partialWriteByteCount >= 0 && (partialWritePathPredicate == null || partialWritePathPredicate(path)))
                 {
                     int count = Math.Min(partialWriteByteCount, bytes?.Length ?? 0);
                     files.Add(path, (bytes ?? Array.Empty<byte>()).Take(count).ToArray());
