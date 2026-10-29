@@ -56,3 +56,13 @@ Source **5488b6a7**, campaign **8d1b7f78674c4699b3031202f9003711**: **9 passed /
 The B2 retained-profile measurement and its PlayMode validation bridge now read the same private frozen model at four retained/two active parties. The ordinary transaction is measured separately on the supported current source session and must retain W. It is explicitly not a historical-retention atomic-write measurement or a matched performance result. The directly affected PlayMode wrapper still needs fresh qualification.
 
 Preparation hs01, selected nine-case plan/inventory/runner, campaign, independent receipt and compile-only diagnostic08 are H1-F4-owned retained evidence. Exact names, tool/source pins, recorded exit/Job completion, 1,494 original inputs/settings/TMP, actual released reservation and protected/prior evidence passed independent checks. Full B2/B3A and later completion gates remain pending.
+
+## Current bounded lifecycle and direct PlayMode follow-up
+
+Source **16ffbf04**, campaign **5ef838497731417eb1584c09b5c4f3ac**: EditMode **1/0/0**, then the exact two affected B2 PlayMode wrappers **2/0/0**. All seven selected stages and independent exact-name, tool/source, recorded native/host/Job completion, original input/settings/TMP restoration, reservation and protected/prior-tree checks passed.
+
+The fixture authors its one-boundary policy before canonical ownership, admits through the real current producer and durably accepts a horizon it cannot yet close. The lifecycle save loads through the existing prebound precise TimeService/SaveService path, invokes a real pause observation and preserves exact owner/checkpoint bytes, W and A>C. Gameplay mutation is blocked; the obsolete session is rejected. Frame delays and pause/quit/reopen do not consume the prefix. No service replacement, private-state mutation, invented background interval, old qualification profile or timestamp reset is used.
+
+The other PlayMode wrapper validates the historical four-retained/two-active model through the frozen reader and retains its GC-recorder assertions. These observations include Editor/test-harness work and are not a Windows benchmark.
+
+Preparations hl01, its original archive/maps, selected EditMode/PlayMode inventories, runner/plan, all stage receipts, independent receipt and compiler diagnostic09 are H1-F4-owned retained review evidence. The shared factory's default behavior is unchanged; its optional one-boundary preparation runs before input consumption. No production, schema, migration, tuning or localization change. Full suites and final Windows/performance gates remain pending.
