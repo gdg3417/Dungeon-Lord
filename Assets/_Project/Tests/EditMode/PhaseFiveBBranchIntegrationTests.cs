@@ -12,7 +12,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class PhaseFiveBBranchIntegrationTests
     {
-        internal static DetachedCanonicalWriteAuthorityTests.Fixture Fixture(bool content = true, Action<RunSimulationConfig> author = null)
+        internal static DetachedCanonicalWriteAuthorityTests.Fixture Fixture(bool content = true, Action<RunSimulationConfig> author = null,
+            bool oneBoundary = false)
         {
             var bytes = PhaseFourTestSupport.AuthoredInputs((config, _) => {
                 config.BaseSuccessChance = 1d; config.SuccessThreshold = 0d;
@@ -23,6 +24,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 foreach (var p in config.PhaseFiveB.BranchDecision.ProfileMinimums) p.MinimumSurvivability = 0d;
                 author?.Invoke(config);
             });
+            if (oneBoundary) PhaseFourTestSupport.OneBoundaryInputs(bytes);
             var f = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null, recoveryInputBytes: bytes);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             f.Runtime.completedResearch = new CompletedResearchState { ProjectIds = new[] { BasicBranchingResearchAuthority.ResearchId } };

@@ -27,9 +27,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             acquisition: f.Acquisition, branchingResearch: f.BranchingResearch, runLoot: f.Context.RecoveryInputs.Loot);
         // Current writable tests use the supported executable and the exact
         // consumed inputs. Profile A below remains a historical reader/model.
-        private static Fixture Current(bool admissionContent = true)
+        private static Fixture Current(bool admissionContent = true, bool oneBoundary = false)
         {
-            var f = PhaseFiveBBranchIntegrationTests.Fixture();
+            var f = PhaseFiveBBranchIntegrationTests.Fixture(oneBoundary: oneBoundary);
             // Automatic demand requires a monster on the main floor and a
             // positive loot signal; optional-corridor content alone cannot
             // authorize an arrival. Place both through the canonical editor.
@@ -184,9 +184,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         public static object CreateUnfinishedForPlayMode()
         {
-            var f = Controlled(); Activate(f); Admit(f, 0, 0);
-            f.Accept(Writer(f).AcceptLivingDungeonHorizon(f.ActivePath, f.FileSystem, f.Session, 10000));
-            f.Accept(Writer(f).AdvanceLivingDungeon(f.ActivePath, f.FileSystem, f.Session, 1));
+            var f = Current(oneBoundary: true); long arrival = CurrentAdmission(f);
+            f.Accept(PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, checked(arrival + 20000)));
+            Assert.That(Owner(f).IsClosed, Is.False);
+            Assert.That(Owner(f).Scheduler.AcceptedThrough, Is.GreaterThan(Owner(f).Scheduler.ClosedThrough));
             return f;
         }
         public static string PrefixForPlayMode(object value)
@@ -194,13 +195,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public static bool ClosedForPlayMode(object value) => Owner((Fixture)value).IsClosed;
         public static void SaveLifecycleForPlayMode(object value, bool quit)
         {
-            var f = (Fixture)value; var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
+            var f = (Fixture)value;
+            var wall = new LifecycleClock(f.Runtime.timeProvenance.AccountedBoundary);
+            var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(f,
+                out var loaded, wall, () => 0, out var time);
+            f.Runtime = loaded;
             service.CanonicalRuntimePublished += runtime => f.Runtime = runtime;
-            if (!quit) f.Runtime.lastPausedUtcUnix = 123;
+            if (!quit) time.OnPause();
             Assert.That(service.Save(f.Runtime, quit ? SaveReason.AppQuit : SaveReason.AppPause), Is.True);
-            f.Session = (DetachedCanonicalSaveSession)typeof(SaveService).GetField("_canonicalSession",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(service);
+            f.Session = service.CanonicalSession;
             f.Reopen();
+        }
+        private sealed class LifecycleClock : IPreciseTimeSource
+        {
+            private readonly UnixTimePoint now;
+            internal LifecycleClock(UnixTimePoint now) { this.now = now; }
+            public UnixTimePoint UtcNow() => now;
+            public long UtcNowUnixSeconds() => now.Seconds;
         }
         public static object CreateRetainedLimitForPlayMode()
         {
@@ -328,17 +339,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void UnfinishedLifecycleSavePreservesPrefixAndDefersGameplayMutation()
         {
-            var f = Controlled(); Activate(f); Admit(f, 0, 0);
-            f.Accept(Writer(f).AcceptLivingDungeonHorizon(f.ActivePath, f.FileSystem, f.Session, 10000));
-            f.Accept(Writer(f).AdvanceLivingDungeon(f.ActivePath, f.FileSystem, f.Session, 1));
+            var f = (Fixture)CreateUnfinishedForPlayMode();
             var prefix = Bytes(Owner(f), f.Profile.Canonical.Serialized); var session = f.Session;
-            f.Runtime.lastPausedUtcUnix = 123; f.Runtime.lastKnownAppState = "Paused";
-            f.Accept(Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
-            CollectionAssert.AreEqual(prefix, Bytes(Owner(f), f.Profile.Canonical.Serialized)); f.Reopen();
+            var boundary = f.Runtime.timeProvenance.AccountedBoundary;
+            SaveLifecycleForPlayMode(f, false);
+            CollectionAssert.AreEqual(prefix, Bytes(Owner(f), f.Profile.Canonical.Serialized));
+            Assert.That(f.Runtime.timeProvenance.AccountedBoundary.CompareTo(boundary), Is.Zero);
+            Assert.That(f.Runtime.lastPausedUtcUnix, Is.EqualTo(boundary.Seconds));
             Assert.That(Writer(f).InstallLivingDungeonOpportunity(f.ActivePath, f.FileSystem, f.Session, 1, 2).IsSuccess, Is.False);
             Assert.That(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)).IsSuccess, Is.False);
             Assert.That(Writer(f).AdvanceLivingDungeon(f.ActivePath, f.FileSystem, session, 1).Reason,
                 Is.EqualTo("living.scheduler.stale_session"));
+            var saved = f.Session.GetCurrentBytes(); f.Reopen();
+            CollectionAssert.AreEqual(saved, f.Session.GetCurrentBytes());
         }
         [TestCase(0)] [TestCase(-1)] [TestCase(int.MaxValue)]
         public void SharedAllocatorCannotActivateHistoricalAnomalyOrExhaustion(int next)
