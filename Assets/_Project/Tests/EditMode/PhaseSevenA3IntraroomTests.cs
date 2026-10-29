@@ -339,7 +339,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(f.Runtime.runHistory.LatestOutcome.SpatialEvents, Is.SameAs(evidence));
             Assert.That(JsonUtility.ToJson(run), Does.Not.Contain("SpatialEvents").And.Not.Contain("TraversableTiles"));
             f.Reopen(); Assert.That(f.Runtime.runHistory.LatestOutcome.SpatialEvents, Is.Null);
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
         }
 
         [Test]
