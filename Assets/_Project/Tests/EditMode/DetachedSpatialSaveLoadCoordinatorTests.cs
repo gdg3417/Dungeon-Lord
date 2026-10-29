@@ -299,6 +299,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
                 PhaseFourTestSupport.PositionProfiles(fixture.Limits),
                 PhaseFourTestSupport.Occupancy(fixture.Limits));
+            BindRecovery(service, fixture);
             string qualified = Path.Combine(canonicalDirectory, "save.json");
             fileSystem.Seed(qualified, fixture.Original);
             service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
@@ -983,6 +984,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.ConfigureStructuralEconomy(economy);
             service.ConfigureContentAcquisitionEconomy(
                 PhaseFourTestSupport.Acquisition(economy, fixture.Limits));
+            BindRecovery(service, fixture);
             service.SetPreflightEvaluatorForTests(path => Supported(fileSystem, path));
             return service;
         }
@@ -1058,12 +1060,39 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var profile = new SaveSpatialMigrationLimitsProfile(
                 Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                 fixture.Limits, fixture.WholeLimits);
-            return new DetachedSpatialSaveLoadCoordinator(profile, compatibility ?? fixture.Compatibility,
+            var coordinator = new DetachedSpatialSaveLoadCoordinator(profile, compatibility ?? fixture.Compatibility,
                 fixture.Production, fixture.LegacyBytes, new Dictionary<string, byte[]>(),
                 new RawSaveEnvelopeVersionContract(1, 6),
                 blankFloor ?? Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator,
                 PhaseFourTestSupport.PositionProfiles(fixture.Limits),
                 PhaseFourTestSupport.Occupancy(fixture.Limits));
+            var inputs = RecoveryInputs(fixture);
+            var time = RecoveryClock(inputs);
+            coordinator.ConfigureRecovery(inputs, time);
+            return coordinator;
+        }
+
+        // Newly authored dormant compatibility fixtures consume the complete
+        // validated inputs before load. This is not historical A>C producer proof.
+        private static RecoveryRuntimeInputs RecoveryInputs(Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture f) =>
+            PhaseFourTestSupport.CurrentContext(f.Compatibility, f.Production, f.LegacyBytes, f.Limits).RecoveryInputs;
+        private sealed class LoadClock : IPreciseTimeSource
+        {
+            public UnixTimePoint UtcNow() => new UnixTimePoint(1, 0);
+            public long UtcNowUnixSeconds() => 1;
+        }
+        private static TimeService RecoveryClock(RecoveryRuntimeInputs inputs)
+        {
+            var time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
+                inputs.Bootstrap.timeRules.detectClockSkewSeconds, new LoadClock(), () => 0);
+            time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);
+            return time;
+        }
+        private static void BindRecovery(SaveService service, Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture f)
+        {
+            var inputs = RecoveryInputs(f);
+            service.SetTimeSourceForTests(new LoadClock());
+            service.ConfigureRecovery(inputs, RecoveryClock(inputs));
         }
 
         private static SpatialMigrationActivationPreflight Supported(

@@ -248,7 +248,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] bytes = prepared.Result.Attempt.Candidate.GetBytes();
             Assert.That(PhaseFourTestSupport.Upgrade(bytes, profile.Canonical,
                 out bytes), Is.True);
-            var context = new DetachedCurrentTargetValidationContext(prepared.Compatibility,
+            var context = PhaseFourTestSupport.CurrentContext(prepared.Compatibility,
                 prepared.Production, prepared.LegacyBytes, profile.Canonical);
             DetachedCompleteSaveValidationResult validated =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, context);
@@ -290,7 +290,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             saveVersion = 7,
             contentVersion = "current-content",
             createdUtcUnix = 100,
-            lastSavedUtcUnix = saved,
+            // Ordinary detached metadata candidates retain the synthetic owner's
+            // W=1. The other lifecycle fields remain independently asserted.
+            lastSavedUtcUnix = 1,
             lastPausedUtcUnix = saved - 2,
             lastResumedUtcUnix = saved - 1,
             totalTicks = saved * 10,
@@ -327,7 +329,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string researchId, string objectiveId)
         {
             SaveData save = JsonUtility.FromJson<SaveRoot>(Encoding.UTF8.GetString(bytes)).primary;
-            Assert.That(save.lastSavedUtcUnix, Is.EqualTo(saved));
+            Assert.That(save.lastSavedUtcUnix, Is.EqualTo(1));
+            Assert.That(save.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(1, 0)));
+            Assert.That(save.lastPausedUtcUnix, Is.EqualTo(saved - 2));
+            Assert.That(save.lastResumedUtcUnix, Is.EqualTo(saved - 1));
+            Assert.That(save.totalTicks, Is.EqualTo(saved * 10));
             Assert.That(save.runHistory.NextRunSequence, Is.EqualTo(runSequence));
             Assert.That(save.structureRuntime.ManaReserve, Is.EqualTo(mana));
             Assert.That(save.completedResearch.LastCompletedProjectId, Is.EqualTo(researchId));
