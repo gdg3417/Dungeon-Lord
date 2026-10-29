@@ -234,12 +234,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void LaterCombatTechnicalFailureRollsBackEarlierDamageLootAndAllCanonicalState()
         {
             var f=Canonical(true, config => {
-                foreach(var p in config.CombatC0.Monsters) { p.Damage=0; p.MaxHealth=p.Id==MvpDungeonPlacementIds.GoblinOptionId?1:int.MaxValue; }
+                // Bound the intended late combat fault without exhausting the
+                // canonical recovery reserve before combat can start.
+                config.CombatC0.MaximumRounds=1;
+                int beyondOneRound=checked(config.CombatC0.Classes.Max(p=>p.Damage)*config.PhaseFiveB.MaxPartySize+1);
+                foreach(var p in config.CombatC0.Monsters) { p.Damage=0; p.MaxHealth=p.Id==MvpDungeonPlacementIds.GoblinOptionId?1:beyondOneRound; }
             });
             var snapshot=PhaseSixA4Tests.Snapshot(f); var staged=PhaseFiveBBranchIntegrationTests.Service(f.Configuration).StartHistoricalCombatC0Snapshot(1,snapshot);
             RunStep step; do { step=staged.AdvanceToNextEvent(staged.NextOrdinal); } while(step.Kind!=RunStepKind.RoomComplete);
             Assert.That(staged.Inspect().CarriedLootValue,Is.GreaterThan(0));
-            Assert.Throws<InvalidOperationException>(()=>staged.DrainToCompletion());
+            var fault=Assert.Throws<InvalidOperationException>(()=>staged.DrainToCompletion());
+            while(fault.InnerException is InvalidOperationException inner) fault=inner;
+            Assert.That(fault.Message,Is.EqualTo("combat.c0.round_limit"));
             byte[] before=f.FileSystem.ReadAllBytes(f.ActivePath); string live=B.Structured(f.Runtime); var session=f.Session;
             var result=PhaseFiveBBranchIntegrationTests.Run(f); Assert.That(result.IsSuccess,Is.False); Assert.That(result.RuntimeProjection,Is.Null);
             CollectionAssert.AreEqual(before,f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(f.Session,Is.SameAs(session)); Assert.That(B.Structured(f.Runtime),Is.EqualTo(live));
