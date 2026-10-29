@@ -433,7 +433,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("null")] [TestCase("default")] [TestCase("omitted")]
         public void DormantSchemaThirteenPreservesConflictingAliasAndActivationRejectsWithoutMutation(string scenario)
         {
-            var f = Controlled(); string history = AliasHistoryJson(scenario);
+            var f = Current(); string history = AliasHistoryJson(scenario);
             string json = Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace(
                 HistoryBytes(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized), history);
             byte[] source = PhaseFourTestSupport.FrozenThirteen(Encoding.UTF8.GetBytes(json));
@@ -445,12 +445,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(HistoryBytes(migrated, f.Profile.Canonical.Serialized), Is.EqualTo(history));
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(migrated,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out migrated),Is.True);
             Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(migrated, f.Context, out migrated), Is.True);
-            f.FileSystem.Seed(f.ActivePath, migrated); f.Reopen(); var session = f.Session;
-            var result = Writer(f).ConfigureLivingDungeon(f.ActivePath, f.FileSystem, session, ProfileA().Id, 1);
+            var historical = (byte[])migrated.Clone();
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(migrated, f.Profile.Canonical).IsValid, Is.True);
+            // Explicit new negative fixture, not production historical activation
+            // or evidence that the old save had this configuration/context.
+            var current = PhaseFourTestSupport.SyntheticCurrent(migrated, f.Profile.Canonical, f.Context.RecoveryInputs.Identity);
+            CollectionAssert.AreEqual(historical, migrated);
+            f.FileSystem.Seed(f.ActivePath, current); f.Reopen(); var session = f.Session;
+            var result = PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, 0);
             Assert.That(result.IsSuccess, Is.False); Assert.That(result.Reason, Is.EqualTo(LivingDungeonScheduling.Invalid));
             Assert.That(result.Session, Is.Null); Assert.That(result.RuntimeProjection, Is.Null);
-            CollectionAssert.AreEqual(migrated, session.GetCurrentBytes());
-            CollectionAssert.AreEqual(migrated, f.FileSystem.ReadAllBytes(f.ActivePath));
+            CollectionAssert.AreEqual(current, session.GetCurrentBytes());
+            CollectionAssert.AreEqual(current, f.FileSystem.ReadAllBytes(f.ActivePath));
             f.Reopen(); Assert.That(Owner(f).IsDormant, Is.True); Assert.That(Owner(f).Revision, Is.Zero);
         }
         [TestCase("absent")] [TestCase("earlier")] [TestCase("score")] [TestCase("tags")]
@@ -493,12 +499,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void SchedulerAndOrdinaryWritesPreserveHistoricalHistoryNullsAndExtensions()
         {
-            var f = Controlled(); var limits = f.Profile.Canonical.Serialized;
+            var f = Current(); var limits = f.Profile.Canonical.Serialized;
             const string old = "{\"NextRunSequence\":1,\"LatestOutcome\":null,\"RecentOutcomes\":null,\"legacyExtension\":{\"lexical\":1.00,\"explicitNull\":null}}";
             string json = Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace(HistoryBytes(f.Session.GetCurrentBytes(), limits), old);
-            f.FileSystem.Seed(f.ActivePath, Encoding.UTF8.GetBytes(json)); f.Reopen(); Activate(f);
+            f.FileSystem.Seed(f.ActivePath, Encoding.UTF8.GetBytes(json)); f.Reopen(); CurrentThrough(f, 0);
             Assert.That(HistoryBytes(f.Session.GetCurrentBytes(), limits), Is.EqualTo(old));
-            Admit(f, 0, 0); string reserved = old.Replace("\"NextRunSequence\":1", "\"NextRunSequence\":2");
+            CurrentAdmission(f); string reserved = old.Replace("\"NextRunSequence\":1", "\"NextRunSequence\":2");
             Assert.That(HistoryBytes(f.Session.GetCurrentBytes(), limits), Is.EqualTo(reserved));
             f.Runtime.structureRuntime.ManaReserve++;
             f.Accept(Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
