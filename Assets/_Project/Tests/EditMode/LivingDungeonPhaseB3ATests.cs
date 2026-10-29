@@ -131,7 +131,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = PhaseFiveBBranchIntegrationTests.Fixture();
             var before = f.Session.GetCurrentBytes();
-            int operations = f.FileSystem.Operations.Count;
+            int operations = f.FileSystem.Operations.Count();
             Assert.That(() => new Scope(f.Authority, f.Session), Throws.InvalidOperationException);
             var historicalProfile = Profile();
             Assert.That(LivingDungeonForegroundConfig.IsProduction(historicalProfile.Id), Is.False);
@@ -142,7 +142,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Throws.ArgumentException.With.Message.EqualTo(RecoveryEpisode.ContextMismatch));
             CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
-            Assert.That(f.FileSystem.Operations.Count, Is.EqualTo(operations + 1), "Only this explicit verification read may touch storage");
+            Assert.That(f.FileSystem.Operations.Count(), Is.EqualTo(operations + 1), "Only this explicit verification read may touch storage");
         }
         [Test] public void UnfinishedHorizonRejectsBeforeEligibility()
         {
