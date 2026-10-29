@@ -24,7 +24,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static readonly RunLogicalTiming Timing = new RunLogicalTiming(3, 0, 0, 0, 3);
         private static DetachedCanonicalWriteAuthority Writer(Fixture f) => new DetachedCanonicalWriteAuthority(
             f.Production, f.Compatibility, f.Configuration, f.Context, f.Profile, f.RemovalPolicy, f.Economy,
-            acquisition: f.Acquisition, branchingResearch: f.BranchingResearch, runLoot: PhaseSixA4Tests.Loot());
+            acquisition: f.Acquisition, branchingResearch: f.BranchingResearch, runLoot: f.Context.RecoveryInputs.Loot);
+        // Current writable tests use the supported executable and the exact
+        // consumed inputs. Profile A below remains a historical reader/model.
+        private static Fixture Current()
+        {
+            var f = PhaseFiveBBranchIntegrationTests.Fixture();
+            f.ReopenWithSupportedForegroundProfiles(); return f;
+        }
+        private static void CurrentThrough(Fixture f, long through)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                f.Accept(PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, through));
+                if (Owner(f).IsClosed && Owner(f).Scheduler.AcceptedThrough == through) return;
+            }
+            Assert.Fail("The bounded current foreground pump did not close its accepted horizon");
+        }
+        private static long CurrentAdmission(Fixture f)
+        {
+            CurrentThrough(f, 0);
+            long arrival = Owner(f).Scheduler.NextOpportunityTime.Value;
+            CurrentThrough(f, arrival); return arrival;
+        }
         private static byte[] Bytes(LivingDungeonState state, SpatialSerializedInputLimits limits)
         { var writer = new ContractJsonWriter(limits); LivingDungeonContracts.Write(writer, state); return writer.Finish(); }
         private static LivingDungeonState Reopen(LivingDungeonState state, LivingDungeonProfile profile)
@@ -113,12 +135,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void DormantFixtureAllocatorDiagnostics()
         {
-            var f = Controlled();
+            var f = Current();
             Assert.That(LivingDungeonScheduling.AllocatorValid(f.Runtime.runHistory, Owner(f), true), Is.True,
                 UnityEngine.JsonUtility.ToJson(f.Runtime.runHistory));
             Assert.That(Owner(f).IsDormant, Is.True);
-            var result = Writer(f).ConfigureLivingDungeon(f.ActivePath, f.FileSystem, f.Session, ProfileA().Id, 1);
-            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            CurrentThrough(f, 0);
+            Assert.That(Owner(f).IsDormant, Is.False);
+            Assert.That(Owner(f).Scheduler.ProfileId, Is.EqualTo(f.Context.RecoveryInputs.OneFloor.Id));
         }
         [Test] public void C2FundingWaitsForProvenCanonicalVacancyAtClosedB2Boundary()
         {
@@ -200,10 +223,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(0)] [TestCase(-1)] [TestCase(int.MaxValue)]
         public void SharedAllocatorCannotActivateHistoricalAnomalyOrExhaustion(int next)
         {
-            var f = Controlled(); f.Runtime.runHistory.NextRunSequence = next;
+            var f = Current(); f.Runtime.runHistory.NextRunSequence = next;
             f.Accept(Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
             var before = f.Session.GetCurrentBytes();
-            Assert.That(Writer(f).ConfigureLivingDungeon(f.ActivePath, f.FileSystem, f.Session, ProfileA().Id, 1).IsSuccess, Is.False);
+            Assert.That(PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, 0).IsSuccess, Is.False);
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(Owner(f).IsDormant, Is.True);
         }
         [Test]
@@ -267,10 +290,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var history = AliasHistory("valid");
             Assert.That(history.LatestOutcome, Is.Not.SameAs(history.RecentOutcomes.Last()));
             Assert.That(LivingDungeonScheduling.AllocatorValid(history, LivingDungeonState.Empty(), true), Is.True);
-            var f = Controlled(); string json = Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace(
+            var f = Current(); string json = Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace(
                 HistoryBytes(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized), UnityEngine.JsonUtility.ToJson(history));
-            f.FileSystem.Seed(f.ActivePath, Encoding.UTF8.GetBytes(json)); f.Reopen(); Activate(f); f.Reopen();
-            Admit(f, 0, 0);
+            f.FileSystem.Seed(f.ActivePath, Encoding.UTF8.GetBytes(json)); f.Reopen(); CurrentThrough(f, 0); f.Reopen();
+            CurrentAdmission(f);
             Assert.That(Owner(f).Parties.Single().Sequence, Is.EqualTo(3));
             Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(4));
         }
@@ -279,11 +302,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var history = new RunHistoryState { LatestOutcome = defaultRecord ? new RunOutcomeRecord() : null };
             Assert.That(LivingDungeonScheduling.AllocatorValid(history, LivingDungeonState.Empty(), true), Is.True);
-            var f = Controlled(); string historyJson = defaultRecord ? UnityEngine.JsonUtility.ToJson(history) :
+            var f = Current(); string historyJson = defaultRecord ? UnityEngine.JsonUtility.ToJson(history) :
                 "{\"NextRunSequence\":1,\"LatestOutcome\":null,\"RecentOutcomes\":[]}";
             string json = Encoding.UTF8.GetString(f.Session.GetCurrentBytes()).Replace(
                 HistoryBytes(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized), historyJson);
-            f.FileSystem.Seed(f.ActivePath, Encoding.UTF8.GetBytes(json)); f.Reopen(); Activate(f); f.Reopen();
+            f.FileSystem.Seed(f.ActivePath, Encoding.UTF8.GetBytes(json)); f.Reopen(); CurrentThrough(f, 0); f.Reopen();
             Assert.That(HistoryBytes(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized), Is.EqualTo(historyJson));
         }
         [TestCase("absent")] [TestCase("earlier")] [TestCase("score")] [TestCase("tags")]
@@ -314,7 +337,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("null")] [TestCase("default")] [TestCase("omitted")]
         public void ActivatedCanonicalSaveRejectsConflictingAliasWithoutRewritingSource(string scenario)
         {
-            var f = Controlled(); Activate(f); var committed = f.Session.GetCurrentBytes();
+            var f = Current(); CurrentThrough(f, 0); var committed = f.Session.GetCurrentBytes();
             string json = Encoding.UTF8.GetString(committed).Replace(
                 HistoryBytes(committed, f.Profile.Canonical.Serialized), AliasHistoryJson(scenario));
             byte[] candidate = Encoding.UTF8.GetBytes(json); var before = (byte[])candidate.Clone();
@@ -337,14 +360,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("1.0")] [TestCase("1e0")] [TestCase("omitted")]
         public void DormantNoncanonicalAllocatorCannotBeNormalizedByActivation(string value)
         {
-            var f = Controlled(); string json = Encoding.UTF8.GetString(f.Session.GetCurrentBytes());
+            var f = Current(); string json = Encoding.UTF8.GetString(f.Session.GetCurrentBytes());
             json = value == "omitted" ? json.Replace("\"NextRunSequence\":1,", "") :
                 json.Replace("\"NextRunSequence\":1", "\"NextRunSequence\":" + value);
             byte[] source = Encoding.UTF8.GetBytes(json); f.FileSystem.Seed(f.ActivePath, source);
             var opened = DetachedCanonicalSaveSession.Open(source, f.Context, f.Profile);
             Assert.That(opened.IsSuccess, Is.True, opened.Reason); f.Session = opened.Session;
             Assert.That(Owner(f).IsDormant, Is.True);
-            Assert.That(Writer(f).ConfigureLivingDungeon(f.ActivePath, f.FileSystem, f.Session, ProfileA().Id, 1).IsSuccess, Is.False);
+            Assert.That(PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, 0).IsSuccess, Is.False);
             CollectionAssert.AreEqual(source, f.FileSystem.ReadAllBytes(f.ActivePath));
         }
         [Test]
@@ -523,7 +546,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("branchKnowledge")] [TestCase("floorKnowledge")] [TestCase("recognizedManaResearch")]
         public void EveryCanonicalReplacementPathPreservesNonemptyPartyOwner(string path)
         {
-            var f = Controlled(); Activate(f); Admit(f, 0, 0);
+            var f = Current(); CurrentAdmission(f);
             var validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context);
             byte[] owner = Bytes(validated.LivingDungeon, f.Profile.Canonical.Serialized);
             if (path == "recognizedManaResearch") f.Runtime.structureRuntime.ManaReserve++;
