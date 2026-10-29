@@ -87,6 +87,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal readonly SaveData Candidate;
             internal readonly LivingDungeonProfile Profile = ProfileA();
             internal LivingDungeonState State = LivingDungeonState.Empty();
+            private readonly CanonicalSpatialSerializationLimits readerLimits = PhaseFourTestSupport.ProductionProfile().Canonical.ForSchema(14);
             private readonly byte[] sourceBytes;
             internal HistoricalModel(Fixture source = null)
             {
@@ -125,7 +126,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             internal byte[] FrozenReaderBytes()
             {
-                var limits = Source.Profile.Canonical.ForSchema(14).Serialized;
+                var limits = readerLimits.Serialized;
                 var issues = new SpatialIssueCollector(limits.MaximumDiagnostics);
                 Assert.That(ContractJson.TryParse(PhaseFourTestSupport.FrozenFourteen(Source.Session.GetCurrentBytes()),
                     limits, issues, out var root), Is.True);
@@ -156,13 +157,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 }
                 writer.Token("}"); var bytes = writer.Finish();
                 var read = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(bytes,
-                    Source.Profile.Canonical, new[] { Profile });
+                    readerLimits, new[] { Profile });
                 Assert.That(read.IsValid, Is.True, read.Reason);
                 Assert.That(read.CurrentTargetValidated, Is.False, "A frozen read does not confer current writable authority");
                 CollectionAssert.AreEqual(bytes, read.GetBytes()); return bytes;
             }
             internal void Reopen() => State = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(
-                FrozenReaderBytes(), Source.Profile.Canonical, new[] { Profile }).LivingDungeon;
+                FrozenReaderBytes(), readerLimits, new[] { Profile }).LivingDungeon;
             internal void AssertSourceUnchanged()
             {
                 CollectionAssert.AreEqual(sourceBytes, Source.Session.GetCurrentBytes());
@@ -851,11 +852,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
             model.AssertSourceUnchanged();
 
             // Retain the actual canonical no-op publication assertion through
-            // the supported current foreground/time authority.
+            // the supported current writer at its unchanged time boundary.
             var f = Current(); CurrentThrough(f, 0); bytes = f.Session.GetCurrentBytes();
-            var result = PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, 0);
-            Assert.That(result.IsSuccess && result.IsNoOp, Is.True, result.Reason);
-            CollectionAssert.AreEqual(bytes, result.GetPersistedBytes());
+            var write = Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write;
+            int writes = f.FileSystem.Operations.Count(o => o.Type == write);
+            var runtime = f.Runtime; var session = f.Session;
+            string room = f.State.Floors[0].Layout.Rooms[0].RoomInstanceId;
+            var result = f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId, room));
+            Assert.That(result.IsNoOp, Is.True);
+            Assert.That(result.IsSuccess, Is.False, "An unchanged canonical placement is rejected without publication");
+            Assert.That(result.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.NoOpReason));
+            Assert.That(result.RuntimeProjection, Is.Null); Assert.That(result.Session, Is.Null);
+            CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath));
+            Assert.That(f.FileSystem.Operations.Count(o => o.Type == write), Is.EqualTo(writes));
+            Assert.That(f.Runtime, Is.SameAs(runtime)); Assert.That(f.Session, Is.SameAs(session));
         }
         [Test]
         public void CanonicalEditAffectsOnlyLaterPartyAndCannotResetActivatedAllocator()
