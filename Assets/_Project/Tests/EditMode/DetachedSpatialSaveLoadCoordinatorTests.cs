@@ -259,7 +259,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var reopened = ConfiguredService(fixture, fileSystem, "service-eight.json");
             Assert.That(reopened.LoadOrCreate("phase-four", out string reason), Is.Not.Null, reason);
             CloseZeroDurationRecovery(reopened);
-            Assert.That(Encoding.UTF8.GetString(reopened.CanonicalSession.GetCurrentBytes()), Is.EqualTo(current));
+            // Recovery intentionally writes the canonical R-format wallet
+            // number even for a zero award (40.0 -> 40). No other native byte
+            // may change after the zero-duration episode closes.
+            Assert.That(Encoding.UTF8.GetString(reopened.CanonicalSession.GetCurrentBytes()),
+                Is.EqualTo(ZeroRecoveryWalletBytes(current)));
             var again = ConfiguredService(fixture, fileSystem, "service-eight.json");
             Assert.That(again.LoadOrCreate("phase-four", out _), Is.Not.Null);
             CollectionAssert.AreEqual(reopened.CanonicalSession.GetCurrentBytes(), again.CanonicalSession.GetCurrentBytes());
@@ -1130,7 +1134,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var inputs = RecoveryInputs(fixture);
             var limits = PhaseFourTestSupport.ProductionProfile().Canonical;
-            Assert.That(PhaseFourTestSupport.UpgradeFrozenSixteen(historical, limits, out var sixteen), Is.True);
+            // This source is schema ten, not the schema-seven starting point of
+            // UpgradeFrozenSixteen. Keep each frozen migration independently
+            // asserted rather than using a tolerant fixture conversion.
+            Assert.That(SchemaTenToElevenUpgrade.TryPrepare(historical, limits, out var eleven), Is.True);
+            Assert.That(SchemaElevenToTwelveUpgrade.TryPrepare(eleven, limits, out var twelve), Is.True);
+            Assert.That(SchemaTwelveToThirteenUpgrade.TryPrepare(twelve, limits,
+                PhaseFourTestSupport.PositionProfiles(limits), out var thirteen), Is.True);
+            Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out var fourteen), Is.True);
+            Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(fourteen, limits, inputs.Monsters, out var fifteen), Is.True);
+            Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepareStructure(fifteen, limits, null, out var sixteen), Is.True);
             var context = PhaseFourTestSupport.CurrentContext(inputs.Compatibility, fixture.Production,
                 fixture.LegacyBytes, limits);
             var frozen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(sixteen, context);
@@ -1140,6 +1153,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaSixteenRecoveryActivation.Prepare(historical, sixteen, context, entry,
                 entry.WallEndpoint, 0, out var expected), Is.Null);
             return expected;
+        }
+
+        private static string ZeroRecoveryWalletBytes(string native)
+        {
+            var limits = PhaseFourTestSupport.ProductionProfile().Canonical.Serialized;
+            Assert.That(ContractJson.TryParse(Encoding.UTF8.GetBytes(native), limits,
+                new SpatialIssueCollector(64), out var root), Is.True);
+            var wallet = root.Fields[2].Value.Fields.Single(p => p.Key == "structureRuntime").Value
+                .Fields.Single(p => p.Key == "ManaReserve").Value;
+            double amount = double.Parse(wallet.Text, System.Globalization.CultureInfo.InvariantCulture);
+            string token = "\"ManaReserve\":" + wallet.Text;
+            Assert.That(native.Split(new[] { token }, StringSplitOptions.None).Length, Is.EqualTo(2));
+            // CaptureWithMana's established writable-wallet number contract.
+            return native.Replace(token, "\"ManaReserve\":" + amount.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
         }
 
         private static void CloseZeroDurationRecovery(SaveService service)
