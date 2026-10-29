@@ -113,6 +113,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Source.Profile.Canonical, Source.Context.RecoveryInputs.Loot, executionInputs: Candidate);
                 return new RunSimulationService(Source.Configuration, Source.Context.RecoveryInputs.Loot).StartSnapshot(sequence, snapshot, Timing);
             });
+            internal void Manual()
+            {
+                var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(Source.Session.GetCurrentBytes(), Source.Context);
+                // Existing pure simulation mutates only the private candidate.
+                // It is not a historical writer or a publication capability.
+                new RunSimulationService(Source.Configuration, Source.Context.RecoveryInputs.Loot).CalculatePhaseFiveBRun(
+                    Candidate, owned, Source.Production, RunPostureResolver.BalancedId, Source.Profile.Canonical);
+            }
             internal void Complete(int budget = 1000, bool reopen = false, long through = 10000)
             {
                 LivingDungeonScheduling.Accept(State, through);
@@ -170,18 +178,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 CollectionAssert.AreEqual(sourceBytes, Source.FileSystem.ReadAllBytes(Source.ActivePath));
             }
         }
-        private static Fixture Controlled()
-        {
-            return Qualify(PhaseFiveBBranchIntegrationTests.Fixture());
-        }
-        private static Fixture Qualify(Fixture f)
-        {
-            f.Profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
-            f.Context = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
-                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile.Canonical,
-                f.Occupancy, livingDungeonProfiles: new[] { ProfileA() });
-            f.Reopen(); return f;
-        }
         public static object CreateUnfinishedForPlayMode()
         {
             var f = Current(oneBoundary: true); long arrival = CurrentAdmission(f);
@@ -225,24 +221,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         private static LivingDungeonState Owner(Fixture f) => DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
             f.Session.GetCurrentBytes(), f.Context).LivingDungeon;
-        private static void Activate(Fixture f) => f.Accept(Writer(f).ConfigureLivingDungeon(
-            f.ActivePath, f.FileSystem, f.Session, ProfileA().Id, 1));
-        private static void Admit(Fixture f, long ordinal, long time)
-        {
-            f.Accept(Writer(f).InstallLivingDungeonOpportunity(f.ActivePath, f.FileSystem, f.Session, ordinal, time));
-            f.Accept(Writer(f).AcceptLivingDungeonHorizon(f.ActivePath, f.FileSystem, f.Session, time));
-            f.Accept(Writer(f).AdvanceLivingDungeon(f.ActivePath, f.FileSystem, f.Session, 1000));
-        }
-        private static void Complete(Fixture f, int budget, bool restart)
-        {
-            f.Accept(Writer(f).AcceptLivingDungeonHorizon(f.ActivePath, f.FileSystem, f.Session, 10000));
-            int writes = 0;
-            while (!Owner(f).IsClosed)
-            {
-                f.Accept(Writer(f).AdvanceLivingDungeon(f.ActivePath, f.FileSystem, f.Session, budget));
-                if (restart) f.Reopen(); Assert.That(++writes, Is.LessThan(1000));
-            }
-        }
         [Test]
         public void DormantFixtureAllocatorDiagnostics()
         {
@@ -275,13 +253,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void C2FundingWaitsForProvenCanonicalVacancyAtClosedB2Boundary()
         {
-            var f=Controlled(); PhaseSixA4Tests.AddContent(f,0,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.GoblinOptionId);
-            Activate(f); CombatC2Tests.SetState(f,0,true,0); Admit(f,0,0);
+            // Prebind a passive period beyond the real terminal so a passive
+            // tick cannot independently fund this vacancy-recovery assertion.
+            var f=LivingDungeonB3B2Tests.Dungeon(tickSeconds:100000);
+            CurrentThrough(f,0); CombatC2Tests.SetState(f,0,true,0); CurrentAdmission(f);
             Assert.That(Owner(f).IsClosed,Is.True);
             f.Runtime.structureRuntime.ManaReserve=3.25;
             f.Accept(Writer(f).SaveRecognizedState(f.ActivePath,f.FileSystem,f.Session,f.Runtime));
             Assert.That(f.Runtime.monsterContinuity.Records.Single().Health,Is.Zero);
-            Complete(f,1000,false);
+            long terminal=LivingDungeonB3B2Tests.Finish(f);
+            Assert.That(terminal,Is.LessThan(100000L*f.Context.RecoveryInputs.OneFloor.UnitsPerSecond));
+            CurrentThrough(f,terminal);
             Assert.That(f.Runtime.monsterContinuity.Records.Single().Health,Is.EqualTo(3));
             Assert.That(f.Runtime.monsterContinuity.Records.Single().RevivalRequired,Is.True);
             Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(.25));
@@ -365,15 +347,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ManualAndAutomaticRunsUseOneSequenceAndManualMutationPreservesParty()
         {
-            var f = Controlled(); Activate(f); Admit(f, 0, 0);
-            var prefix = Bytes(Owner(f), f.Profile.Canonical.Serialized);
+            var model = new HistoricalModel(); model.Admit(0, 0);
+            var prefix = Bytes(model.State, PhaseFourTestSupport.ProductionProfile().Canonical.ForSchema(14).Serialized);
+            model.Manual(); model.Reopen();
+            Assert.That(model.Candidate.runHistory.LatestOutcome.RunId, Is.EqualTo("run-2"));
+            Assert.That(model.Candidate.runHistory.NextRunSequence, Is.EqualTo(3));
+            Assert.That(UnityEngine.JsonUtility.ToJson(model.Candidate.runHistory.LatestOutcome), Is.EqualTo(
+                UnityEngine.JsonUtility.ToJson(model.Candidate.runHistory.RecentOutcomes.Last())));
+            CollectionAssert.AreEqual(prefix, Bytes(model.State, PhaseFourTestSupport.ProductionProfile().Canonical.ForSchema(14).Serialized));
+            model.Admit(1, 1); CollectionAssert.AreEqual(new[] { 1, 3 }, model.State.Parties.Select(p => p.Sequence));
+            model.FrozenReaderBytes(); model.AssertSourceUnchanged();
+
+            // Also retain the actual current writer's manual transaction while
+            // a supported automatic party owns its immutable checkpoint.
+            var f = Current(); CurrentAdmission(f); prefix = Bytes(Owner(f), f.Profile.Canonical.Serialized);
             f.Accept(PhaseFiveBBranchIntegrationTests.Run(f)); f.Reopen();
             Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.EqualTo("run-2"));
             Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(3));
-            Assert.That(UnityEngine.JsonUtility.ToJson(f.Runtime.runHistory.LatestOutcome), Is.EqualTo(
-                UnityEngine.JsonUtility.ToJson(f.Runtime.runHistory.RecentOutcomes.Last())));
             CollectionAssert.AreEqual(prefix, Bytes(Owner(f), f.Profile.Canonical.Serialized));
-            Admit(f, 1, 1); CollectionAssert.AreEqual(new[] { 1, 3 }, Owner(f).Parties.Select(p => p.Sequence));
         }
         private static RunHistoryState AliasHistory(string scenario)
         {
@@ -743,7 +734,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void RealWindowsMigrationAndUnfinishedPrefixReopenUseOneAtomicAuthority()
         {
-            var f = Controlled(); var fs = new WindowsSpatialMigrationFileSystem();
+            var f = Current(oneBoundary: true); var fs = new WindowsSpatialMigrationFileSystem();
             string directory = Path.GetFullPath(Path.Combine("TestResults", "living-dungeon-b2-windows", Guid.NewGuid().ToString("N")));
             Directory.CreateDirectory(directory); string path = Path.Combine(directory, "disposable-schema14.json");
             byte[] source = PhaseFourTestSupport.FrozenThirteen(f.Session.GetCurrentBytes());
@@ -755,16 +746,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(migrated,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out var fifteen),Is.True);
             Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(fifteen, f.Context, out fifteen), Is.True);
             Assert.That(ExactCompleteSaveAtomicPersistence.Persist(path,fs,migrated,fifteen,64,
-                b=>DetachedCompleteSaveContract.ParseValidateAndRoundTrip(b,f.Context).IsValid),Is.Null);
-            f.FileSystem.Seed(f.ActivePath,fifteen); f.Reopen();
-            f.Accept(Writer(f).ConfigureLivingDungeon(path, fs, f.Session, ProfileA().Id, 1));
-            f.Accept(Writer(f).InstallLivingDungeonOpportunity(path, fs, f.Session, 0, 0));
-            f.Accept(Writer(f).AcceptLivingDungeonHorizon(path, fs, f.Session, 10000));
-            f.Accept(Writer(f).AdvanceLivingDungeon(path, fs, f.Session, 2));
-            var durable = fs.ReadAllBytes(path); var clock = Stopwatch.StartNew();
+                b=>DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(b,f.Context).IsValid),Is.Null);
+            // The exact historical migration stays read-only. Separately prove
+            // native publication/reopen of genuinely current accepted work;
+            // a synthetic predecessor is not historical activation evidence.
+            long arrival = CurrentAdmission(f); var before = f.Session.GetCurrentBytes();
+            string currentPath = Path.Combine(directory, "disposable-current17.json");
+            fs.WriteAllBytesDurable(currentPath, before);
+            f.Accept(PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, checked(arrival + 20000)));
+            Assert.That(ExactCompleteSaveAtomicPersistence.Persist(currentPath, fs, before, f.Session.GetCurrentBytes(), 64,
+                b => DetachedCompleteSaveContract.ParseValidateAndRoundTrip(b, f.Context).CurrentTargetValidated), Is.Null);
+            var durable = fs.ReadAllBytes(currentPath); var clock = Stopwatch.StartNew();
             var opened = DetachedCanonicalSaveSession.Open(durable, f.Context, f.Profile);
             Assert.That(opened.IsSuccess, Is.True); Assert.That(Owner(f).IsClosed, Is.False);
             CollectionAssert.AreEqual(durable, opened.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(fifteen, fs.ReadAllBytes(path));
+            File.WriteAllText(Path.Combine(directory, "ownership.json"), "{\"owner\":\"H1-F4 B2 fixture\",\"purpose\":\"frozen migration and separate current accepted-prefix native persistence\",\"retention\":\"preserve qualification evidence\"}");
             TestContext.WriteLine($"Windows migration/readback/unfinished-prefix reopen; durableBytes={durable.Length}; reopenMs={clock.Elapsed.TotalMilliseconds}; namespace={directory}; ownerFilesUsed=false");
         }
         [TestCase("pin")] [TestCase("ordinal")] [TestCase("format")] [TestCase("rules")] [TestCase("consumed")]
@@ -817,7 +814,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void NearLimitFrozenSchemaThirteenMigratesWithReservedHeadroom()
         {
-            var f = Controlled(); string original = Encoding.UTF8.GetString(PhaseFourTestSupport.FrozenThirteen(f.Session.GetCurrentBytes()));
+            var f = Current(); string original = Encoding.UTF8.GetString(PhaseFourTestSupport.FrozenThirteen(f.Session.GetCurrentBytes()));
             string ArrayValue(int characters)
             {
                 var values = new List<string>();
@@ -839,6 +836,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(candidate.Length, Is.EqualTo(source.Length + 79)); CollectionAssert.AreEqual(source, PhaseFourTestSupport.FrozenThirteen(candidate));
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(candidate,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out candidate),Is.True);
             Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(candidate, f.Context, out candidate), Is.True);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(candidate, f.Context).IsValid, Is.True);
+            var frozen = (byte[])candidate.Clone();
+            // Explicitly authored current parser fixture, not producer proof or
+            // a claim that this historical source can activate in production.
+            candidate = PhaseFourTestSupport.SyntheticCurrent(candidate, f.Profile.Canonical, f.Context.RecoveryInputs.Identity);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, f.Context).CurrentTargetValidated, Is.True);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(frozen, f.Context).IsValid, Is.True);
             // Independent complete-save parser/round-trip ceiling, using dormant synthetic extension padding.
             // This is not a claim that four active checkpoints can attain both ceilings simultaneously.
             int envelope = f.Profile.Whole.MaximumCandidateBytes;
@@ -918,13 +922,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void CanonicalEditAffectsOnlyLaterPartyAndCannotResetActivatedAllocator()
         {
-            var f = Controlled(); Activate(f); Admit(f, 0, 0); var before = Owner(f); byte[] checkpoint = before.Parties[0].Checkpoint;
-            string roomId = f.State.Floors[0].Layout.Rooms[0].RoomInstanceId;
-            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId,
-                roomId, null, new TileCoordinate(0, 0))));
+            var model = new HistoricalModel(); model.Admit(0, 0);
+            var checkpoint = model.State.Parties[0].Checkpoint; long revision = model.State.Revision;
+            PhaseSixA4Tests.AddContent(model.Source, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            var edited = model.Source.Session.GetCurrentBytes();
+            Assert.That(model.State.Revision, Is.EqualTo(revision)); CollectionAssert.AreEqual(checkpoint, model.State.Parties[0].Checkpoint);
+            model.Admit(1, 1); var after = model.State;
+            Assert.That(after.Parties[0].StartIdentity, Is.Not.EqualTo(after.Parties[1].StartIdentity));
+            CollectionAssert.AreEqual(checkpoint, after.Parties[0].Checkpoint); model.FrozenReaderBytes();
+            CollectionAssert.AreEqual(edited, model.Source.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(edited, model.Source.FileSystem.ReadAllBytes(model.Source.ActivePath));
+
+            // Actual schema-17 editing retains the durable active checkpoint;
+            // its allocated identity cannot be reset through metadata saving.
+            var f = Current(); CurrentAdmission(f); var before = Owner(f); checkpoint = before.Parties[0].Checkpoint;
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             Assert.That(Owner(f).Revision, Is.EqualTo(before.Revision)); CollectionAssert.AreEqual(checkpoint, Owner(f).Parties[0].Checkpoint);
-            Admit(f, 1, 1); var after = Owner(f); Assert.That(after.Parties[0].StartIdentity, Is.Not.EqualTo(after.Parties[1].StartIdentity));
-            CollectionAssert.AreEqual(checkpoint, after.Parties[0].Checkpoint);
             var oldBytes = f.Session.GetCurrentBytes(); f.Runtime.runHistory.NextRunSequence = 1;
             Assert.That(Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime).IsSuccess, Is.False);
             CollectionAssert.AreEqual(oldBytes, f.FileSystem.ReadAllBytes(f.ActivePath));

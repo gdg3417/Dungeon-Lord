@@ -77,7 +77,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             view.RecentInteraction = new RunStep(RunStepKind.LootInteraction, 0, "test.room", carriedLootValue: 17);
             Assert.That(Feedback(), Is.EqualTo("Loot reached · Carried value 17"));
         }
-        private static Fixture Dungeon(Action<RunSimulationConfig> author = null, bool oneBoundary = false, int? tickSeconds = null)
+        internal static Fixture Dungeon(Action<RunSimulationConfig> author = null, bool oneBoundary = false, int? tickSeconds = null)
         {
             var inputs = PhaseFourTestSupport.AuthoredInputs((config, bootstrap) => {
                 PhaseSixA4Tests.ForceDescent(config, true); author?.Invoke(config);
@@ -164,7 +164,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Through(f, 0); long arrival = f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value;
             Through(f, arrival); return arrival;
         }
-        private static long Finish(Fixture f)
+        internal static long Finish(Fixture f)
         {
             var p = f.Runtime.livingDungeon.Parties.Single();
             var e = LivingDungeonContracts.Restore(p, Policy.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized));
