@@ -29,13 +29,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal Scope Q;
             internal Harness(int retention = 10, bool wipe = false)
             {
-                F = PhaseFiveBBranchIntegrationTests.Fixture();
-                F.Configuration.MaxRunHistoryEntries = retention;
+                F = PhaseFiveBBranchIntegrationTests.Fixture(author: config => {
+                    config.MaxRunHistoryEntries = retention;
+                    if (wipe) {
+                        config.PhaseFiveB.MinPartySize = config.PhaseFiveB.MaxPartySize = 3;
+                        foreach (var c in config.PhaseFiveB.Classes) c.LevelOneMaxHealth = 1;
+                        foreach (var d in config.PhaseFiveB.DamageProfiles) { d.MinimumDamage = 100; d.MaximumDamage = 100; }
+                    }
+                });
                 if (wipe)
                 {
-                    F.Configuration.PhaseFiveB.MinPartySize = F.Configuration.PhaseFiveB.MaxPartySize = 3;
-                    foreach (var c in F.Configuration.PhaseFiveB.Classes) c.LevelOneMaxHealth = 1;
-                    foreach (var d in F.Configuration.PhaseFiveB.DamageProfiles) { d.MinimumDamage = 100; d.MaximumDamage = 100; }
                     PhaseSixA4Tests.AddContent(F, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
                     PhaseSixA4Tests.AddContent(F, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
                     PhaseSixA4Tests.AddContent(F, 0, MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId);
@@ -127,7 +130,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void ProductionDefaultContextCannotInstallQualification()
         {
             var f = PhaseFiveBBranchIntegrationTests.Fixture();
+            var before = f.Session.GetCurrentBytes();
+            int operations = f.FileSystem.Operations.Count;
             Assert.That(() => new Scope(f.Authority, f.Session), Throws.InvalidOperationException);
+            var historicalProfile = Profile();
+            Assert.That(LivingDungeonForegroundConfig.IsProduction(historicalProfile.Id), Is.False);
+            var unsupported = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
+                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile.Canonical,
+                f.Occupancy, livingDungeonProfiles: new[] { historicalProfile });
+            Assert.That(() => unsupported.BindRecoveryInputs(f.Context.RecoveryInputs),
+                Throws.ArgumentException.With.Message.EqualTo(RecoveryEpisode.ContextMismatch));
+            CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            Assert.That(f.FileSystem.Operations.Count, Is.EqualTo(operations + 1), "Only this explicit verification read may touch storage");
         }
         [Test] public void UnfinishedHorizonRejectsBeforeEligibility()
         {

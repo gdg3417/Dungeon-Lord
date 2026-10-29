@@ -150,7 +150,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void FrozenHistoricalOwnerCollisionIsPreservedAndMigrationFails(string name)
         {
             var f = Fixture.Create(null); var source = Encoding.UTF8.GetString(PhaseFourTestSupport.FrozenThirteen(f.Session.GetCurrentBytes()));
-            source = source.Replace("\"primary\":{", "\"primary\":{\"" + name + "\":null,");
+            // Unknown historical members follow recognized members. The new
+            // synthetic fixture authors time/Research before its frozen owners;
+            // prefix insertion would test bad ordering rather than collision.
+            source = source.Replace("\"canonicalSpatialAuthority\":", "\"" + name + "\":null,\"canonicalSpatialAuthority\":");
             var bytes = Encoding.UTF8.GetBytes(source); var copy = (byte[])bytes.Clone();
             Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(bytes, f.Profile.Canonical).IsValid, Is.True);
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(bytes, f.Profile.Canonical, out _), Is.False);
@@ -421,17 +424,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SpatialContractSha256.Compute(File.ReadAllBytes("Assets/_Project/Resources/save_spatial_migration_limits_schema13.json")),
                 Is.EqualTo("e3ba04771aea8955afec08f52f67b7b5f124aec46d2803802d66208435c750ea"));
             var profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
-            Assert.That(profile.Canonical.Serialized.MaximumInputBytes, Is.EqualTo(1376256));
+            Assert.That(profile.Canonical.ForSchema(16).Serialized.MaximumInputBytes, Is.EqualTo(1376256));
+            Assert.That(profile.Canonical.Serialized.MaximumInputBytes, Is.EqualTo(1376256 + 590));
             Assert.That(profile.Canonical.ForSchema(14).Serialized.MaximumInputBytes, Is.EqualTo(655360));
             Assert.That(profile.Canonical.ForSchema(13).Serialized.MaximumInputBytes, Is.EqualTo(262144));
             Assert.That(profile.Canonical.ForSchema(12).Serialized.MaximumParsedNodes, Is.EqualTo(8192));
-            var f = Controlled(); var old = PhaseFourTestSupport.FrozenThirteen(f.Session.GetCurrentBytes());
+            var f = Fixture.Create(null, workloadProfile: profile); var old = PhaseFourTestSupport.FrozenThirteen(f.Session.GetCurrentBytes());
             Assert.That(profile.Raw.ForPayload(old).MaximumInputBytes, Is.EqualTo(524288));
             Assert.That(profile.Raw.ForPayload(PhaseFourTestSupport.FrozenFourteen(f.Session.GetCurrentBytes())).MaximumInputBytes, Is.EqualTo(1310720));
-            Assert.That(profile.Raw.ForPayload(f.Session.GetCurrentBytes()).MaximumInputBytes, Is.EqualTo(2752512));
+            Assert.That(profile.Raw.ForPayload(f.FrozenSixteen).MaximumInputBytes, Is.EqualTo(2752512));
+            Assert.That(profile.Raw.ForPayload(f.Session.GetCurrentBytes()).MaximumInputBytes, Is.EqualTo(2752512 + 2 * 590));
             Assert.That(RawSavePayloadClassifier.Classify(old, profile.Raw, new RawSaveEnvelopeVersionContract(1, 14),
                 Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator).UnknownPrimaryMembers.Any(v => v.Name == "livingDungeon"), Is.False);
-            var classified = RawSavePayloadClassifier.Classify(f.Session.GetCurrentBytes(), profile.Raw, new RawSaveEnvelopeVersionContract(1, 15),
+            var classified = RawSavePayloadClassifier.Classify(f.Session.GetCurrentBytes(), profile.Raw, new RawSaveEnvelopeVersionContract(1, 17),
                 Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator);
             Assert.That(classified.Members.Single(m => m.Name == "livingDungeon").State, Is.EqualTo(RawSaveMemberState.NonNull));
         }
