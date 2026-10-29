@@ -23,66 +23,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
             File.ReadAllBytes("Assets/_Project/Data/Production/Save/living_dungeon_qualification_profile.json"),
             new SpatialSerializedInputLimits(8192, 128, 32, 2048, 8), Timing, RunPostureResolver.BalancedId,
             SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile.Canonical.ForSchema(13).Serialized);
-        private sealed class Harness
+        // Holds a real current producer immediately before its actual terminal.
+        // All transitions still come from the existing source-bound authority.
+        private sealed class CurrentTerminal
         {
-            internal Fixture F;
-            internal DetachedCanonicalWriteAuthority Writer;
-            internal Scope Q;
-            internal Harness(int retention = 10, bool wipe = false)
+            internal readonly Fixture F = LivingDungeonB3B2Tests.Dungeon(tickSeconds: 100000);
+            internal readonly long Through;
+            internal CurrentTerminal()
             {
-                F = PhaseFiveBBranchIntegrationTests.Fixture(author: config => {
-                    config.MaxRunHistoryEntries = retention;
-                    if (wipe) {
-                        config.PhaseFiveB.MinPartySize = config.PhaseFiveB.MaxPartySize = 3;
-                        foreach (var c in config.PhaseFiveB.Classes) c.LevelOneMaxHealth = 1;
-                        foreach (var d in config.PhaseFiveB.DamageProfiles) { d.MinimumDamage = 100; d.MaximumDamage = 100; }
-                    }
-                });
-                if (wipe)
-                {
-                    PhaseSixA4Tests.AddContent(F, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
-                    PhaseSixA4Tests.AddContent(F, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
-                    PhaseSixA4Tests.AddContent(F, 0, MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId);
-                }
-                F.Profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
-                F.Context = new DetachedCurrentTargetValidationContext(F.Compatibility, F.Production,
-                    LegacyGameplayConfigurationContract.SerializeCanonical(F.Configuration), F.Profile.Canonical,
-                    F.Occupancy, livingDungeonProfiles: new[] { Profile() });
-                F.Reopen();
-                Writer = new DetachedCanonicalWriteAuthority(F.Production, F.Compatibility, F.Configuration,
-                    F.Context, F.Profile, F.RemovalPolicy, F.Economy, acquisition: F.Acquisition,
-                    branchingResearch: F.BranchingResearch, runLoot: PhaseSixA4Tests.Loot());
-                Q = new Scope(Writer, F.Session);
-                F.Accept(Q.Configure(F.ActivePath, F.FileSystem, F.Session, Profile().Id, 1));
+                CurrentThrough(F, 0);
+                CurrentThrough(F, F.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value);
+                Through = LivingDungeonB3B2Tests.Finish(F);
+                Assert.That(Through, Is.LessThan(100000L * F.Context.RecoveryInputs.OneFloor.UnitsPerSecond));
+                CurrentThrough(F, Through - 1);
             }
-            internal LivingDungeonState Owner => DetachedCompleteSaveContract.ParseValidateAndRoundTrip(F.Session.GetCurrentBytes(), F.Context).LivingDungeon;
-            internal void Admit(long ordinal = 0, long time = 0)
-            {
-                F.Accept(Q.Install(F.ActivePath, F.FileSystem, F.Session, ordinal, time));
-                F.Accept(Q.Accept(F.ActivePath, F.FileSystem, F.Session, time));
-                F.Accept(Q.Advance(F.ActivePath, F.FileSystem, F.Session, 1000));
-            }
-            internal void Complete(int budget = 1000, bool reopen = false, long horizon = 10000)
-            {
-                F.Accept(Q.Accept(F.ActivePath, F.FileSystem, F.Session, horizon));
-                int calls = 0;
-                while (!Owner.IsClosed)
-                {
-                    F.Accept(Q.Advance(F.ActivePath, F.FileSystem, F.Session, budget));
-                    if (reopen) F.Reopen();
-                    Assert.That(++calls, Is.LessThan(1000));
-                }
-            }
-            internal DetachedCanonicalWriteResult Settle(Scope.Request request = null) =>
-                Q.Settle(F.ActivePath, F.FileSystem, F.Session, request ?? Q.Prepare(F.Session));
-            internal void Save() => F.Accept(Q.Save(F.ActivePath, F.FileSystem, F.Session, F.Runtime));
-            internal void Manual() => F.Accept(Q.Manual(F.ActivePath, F.FileSystem, F.Session, F.Runtime, RunPostureResolver.BalancedId, 1));
+            internal DetachedCanonicalWriteResult Pump(string path = null, ISpatialMigrationFileSystem fs = null) =>
+                PhaseFourTestSupport.PumpForeground(F, F.Context.RecoveryInputs.OneFloor, Through, activePath: path, fileSystem: fs);
         }
-        private static Harness Terminal(int parties = 1, int retention = 10)
+        private static void CurrentThrough(Fixture f, long through)
         {
-            var h = new Harness(retention);
-            for (int i = 0; i < parties; i++) h.Admit(i, i);
-            h.Complete(); return h;
+            for (int i = 0; i < 100; i++)
+            {
+                f.Accept(PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, through));
+                if (f.Runtime.livingDungeon.IsClosed && f.Runtime.livingDungeon.Scheduler.AcceptedThrough == through) return;
+            }
+            Assert.Fail("Current foreground fixture did not close its bounded horizon");
+        }
+        private static void CurrentUnchanged(Fixture f, byte[] bytes, DetachedCanonicalWriteResult result)
+        {
+            Assert.That(result.IsSuccess, Is.False, result.Reason);
+            Assert.That(result.Session, Is.Null); Assert.That(result.RuntimeProjection, Is.Null);
+            CollectionAssert.AreEqual(bytes, f.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath));
         }
         private static HistoricalModel HistoricalTerminal(int parties = 1, int retention = 10)
         {
@@ -121,47 +93,56 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var writer = new ContractJsonWriter(PhaseFourTestSupport.ProductionProfile().Canonical.ForSchema(14).Serialized);
             LivingDungeonContracts.Write(writer, model.State); return writer.Finish();
         }
-        private static byte[] OwnerBytes(Harness h, LivingDungeonState owner = null)
-        { var w = new ContractJsonWriter(h.F.Profile.Canonical.Serialized); LivingDungeonContracts.Write(w, owner ?? h.Owner); return w.Finish(); }
         private static string Json(object value) => JsonUtility.ToJson(value);
-        private static void Unchanged(Harness h, byte[] bytes, DetachedCanonicalWriteResult result)
-        {
-            Assert.That(result.IsSuccess, Is.False, result.Reason);
-            Assert.That(result.Session, Is.Null); Assert.That(result.RuntimeProjection, Is.Null);
-            CollectionAssert.AreEqual(bytes, h.F.Session.GetCurrentBytes());
-            CollectionAssert.AreEqual(bytes, h.F.FileSystem.ReadAllBytes(h.F.ActivePath));
-        }
 
         [Test] public void QualifiedTerminalPublishesExistingIdentityAndOneRevisionThenRetires()
         {
-            var h = Terminal(2); var f = h.F; var before = h.Owner;
+            var model = HistoricalTerminal(2); var before = model.State;
             var selected = LivingDungeonTerminalSettlement.Select(before, Profile());
-            var request = h.Q.Prepare(f.Session); int next = f.Runtime.runHistory.NextRunSequence;
+            int next = model.Candidate.runHistory.NextRunSequence; long revision = before.Revision;
             byte[] other = before.Parties.Single(p => p.Sequence != selected.Sequence).Checkpoint;
-            string scheduler = Encoding.UTF8.GetString(OwnerBytes(h)).Split(new[] { ",\"Parties\":" }, StringSplitOptions.None)[0].Split(new[] { "\"Scheduler\":" }, StringSplitOptions.None)[1];
-            f.Accept(h.Settle(request));
-            Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.EqualTo("run-" + selected.Sequence));
+            string scheduler = Encoding.UTF8.GetString(HistoricalOwnerBytes(model)).Split(new[] { ",\"Parties\":" }, StringSplitOptions.None)[0].Split(new[] { "\"Scheduler\":" }, StringSplitOptions.None)[1];
+            ApplyHistoricalConsequencesAndRetire(model);
+            Assert.That(model.Candidate.runHistory.LatestOutcome.RunId, Is.EqualTo("run-" + selected.Sequence));
+            Assert.That(model.Candidate.runHistory.NextRunSequence, Is.EqualTo(next));
+            Assert.That(model.State.Revision, Is.EqualTo(revision + 1));
+            Assert.That(model.State.Parties.Count, Is.EqualTo(1));
+            CollectionAssert.AreEqual(other, model.State.Parties.Single().Checkpoint);
+            Assert.That(Encoding.UTF8.GetString(HistoricalOwnerBytes(model)), Does.Contain("\"Scheduler\":" + scheduler));
+            model.Reopen(); model.AssertSourceUnchanged();
+
+            var current = new CurrentTerminal(); var f = current.F; var writer = f.Authority;
+            var scope = new Scope(writer, f.Session); var party = f.Runtime.livingDungeon.Parties.Single();
+            var stale = new Scope.Request(party.Sequence, party.CheckpointIdentity);
+            next = f.Runtime.runHistory.NextRunSequence; f.Accept(current.Pump());
+            Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.EqualTo("run-1"));
             Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(next));
-            Assert.That(h.Owner.Revision, Is.EqualTo(before.Revision + 1));
-            Assert.That(h.Owner.Parties.Count, Is.EqualTo(1));
-            CollectionAssert.AreEqual(other, h.Owner.Parties.Single().Checkpoint);
-            Assert.That(Encoding.UTF8.GetString(OwnerBytes(h)), Does.Contain("\"Scheduler\":" + scheduler));
+            Assert.That(f.Runtime.livingDungeon.Parties, Is.Empty);
             var persisted = f.Session.GetCurrentBytes();
-            Unchanged(h, persisted, h.Settle(request)); // cannot accidentally select the next terminal party
-            f.Reopen(); CollectionAssert.AreEqual(persisted, f.Session.GetCurrentBytes());
+            var rejected = scope.Settle(f.ActivePath, f.FileSystem, f.Session, stale);
+            CurrentUnchanged(f, persisted, rejected);
+            Assert.That(rejected.Reason, Is.EqualTo(LivingDungeonTerminalSettlement.Stale));
+            f.Reopen(); CurrentThrough(f, current.Through);
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(r => r.RunId == "run-1"), Is.EqualTo(1));
         }
         [Test] public void ReopenedB2TerminalCannotAcquireProvenanceAfterTheFact()
         {
-            var h = Terminal(); var before = h.F.Session.GetCurrentBytes(); h.F.Reopen();
-            var fresh = new Scope(h.Writer, h.F.Session);
-            Assert.That(() => fresh.Prepare(h.F.Session), Throws.InvalidOperationException.With.Message.EqualTo(LivingDungeonTerminalSettlement.Ineligible));
-            CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.F.ActivePath));
+            var historical = HistoricalTerminal(); var frozen = historical.FrozenReaderBytes(); historical.Reopen();
+            CollectionAssert.AreEqual(frozen, historical.FrozenReaderBytes());
+            Assert.That(DetachedCanonicalSaveSession.Open(frozen, historical.Source.Context, historical.Source.Profile).IsSuccess, Is.False);
+            historical.AssertSourceUnchanged();
+            var current = new CurrentTerminal(); var f = current.F; var before = f.Session.GetCurrentBytes(); f.Reopen();
+            var fresh = new Scope(f.Authority, f.Session);
+            Assert.That(() => fresh.Prepare(f.Session), Throws.InvalidOperationException.With.Message.EqualTo(LivingDungeonTerminalSettlement.Ineligible));
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
         }
         [Test] public void FakeRequestAndForegroundAppStateCannotAuthorizeAnything()
         {
-            var h = Terminal(); h.F.Runtime.lastKnownAppState = "Foreground"; h.Save();
-            var p = h.Owner.Parties.Single(); var before = h.F.Session.GetCurrentBytes();
-            Unchanged(h, before, h.Settle(new Scope.Request(p.Sequence, p.CheckpointIdentity)));
+            var current = new CurrentTerminal(); var f = current.F; f.Runtime.lastKnownAppState = "Foreground";
+            f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
+            var p = f.Runtime.livingDungeon.Parties.Single(); var before = f.Session.GetCurrentBytes();
+            var scope = new Scope(f.Authority, f.Session);
+            CurrentUnchanged(f, before, scope.Settle(f.ActivePath, f.FileSystem, f.Session, new Scope.Request(p.Sequence, p.CheckpointIdentity)));
             Assert.That(typeof(SaveService).GetMethods().Any(m => m.Name.Contains("Settlement") || m.Name.Contains("ForegroundQualification")), Is.False);
             Assert.That(typeof(GameRoot).GetMethods().Any(m => m.Name.Contains("ForegroundQualification")), Is.False);
         }
@@ -184,16 +165,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void UnfinishedHorizonRejectsBeforeEligibility()
         {
-            var h = new Harness(); h.Admit();
-            h.F.Accept(h.Q.Accept(h.F.ActivePath, h.F.FileSystem, h.F.Session, 10000));
-            Assert.That(() => h.Q.Prepare(h.F.Session), Throws.InvalidOperationException.With.Message.EqualTo(LivingDungeonScheduling.Boundary));
+            var f = (Fixture)LivingDungeonPhaseB2Tests.CreateUnfinishedForPlayMode();
+            var scope = new Scope(f.Authority, f.Session); var before = f.Session.GetCurrentBytes();
+            Assert.That(() => scope.Prepare(f.Session), Throws.InvalidOperationException.With.Message.EqualTo(LivingDungeonScheduling.Boundary));
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
         }
         [Test] public void EarliestUnqualifiedTerminalBlocksLaterQualifiedParty()
         {
-            var h = Terminal(); h.Q = new Scope(h.Writer, h.F.Session); // forget run-1 provenance
-            h.Admit(1, 10001); h.Complete(horizon: 20000);
-            Assert.That(h.Owner.RetainedCount, Is.EqualTo(2));
-            Assert.That(() => h.Q.Prepare(h.F.Session), Throws.InvalidOperationException.With.Message.EqualTo(LivingDungeonTerminalSettlement.Ineligible));
+            var historical = HistoricalTerminal(); historical.Admit(1, 10001); historical.Complete(through: 20000);
+            Assert.That(historical.State.RetainedCount, Is.EqualTo(2));
+            Assert.That(LivingDungeonTerminalSettlement.Select(historical.State, historical.Profile).Sequence, Is.EqualTo(1));
+            var frozen = historical.FrozenReaderBytes();
+            // Neither later nor earlier B1 parties may acquire current authority.
+            // The obsolete fixture's later-qualified current B1 state is unsupported.
+            Assert.That(DetachedCanonicalSaveSession.Open(frozen, historical.Source.Context, historical.Source.Profile).IsSuccess, Is.False);
+            var current = new CurrentTerminal(); var f = current.F; var scope = new Scope(f.Authority, f.Session);
+            var before = f.Session.GetCurrentBytes();
+            Assert.That(() => scope.Prepare(f.Session), Throws.InvalidOperationException.With.Message.EqualTo(LivingDungeonTerminalSettlement.Ineligible));
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath)); historical.AssertSourceUnchanged();
         }
         [TestCase(false)] [TestCase(true)]
         public void OrderingUsesAbsoluteCompletionAndNumericSequenceRegardlessOfEnumeration(bool equal)
@@ -333,32 +322,58 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(Op.Write, 1)] [TestCase(Op.Write, 2)] [TestCase(Op.Replace, 1)] [TestCase(Op.Flush, 1)]
         public void FailedAtomicSettlementPublishesNothingAndProvenRollbackCanRetry(Op operation, int occurrence)
         {
-            var h = Terminal(2); var f = h.F; var request = h.Q.Prepare(f.Session);
+            var current = new CurrentTerminal(); var f = current.F;
             var bytes = f.Session.GetCurrentBytes(); var runtime = f.Runtime; var session = f.Session;
             f.FileSystem.EnableFailure(operation, occurrence);
-            var result = h.Settle(request); f.FileSystem.DisableFailure();
-            Unchanged(h, bytes, result); Assert.That(f.Runtime, Is.SameAs(runtime)); Assert.That(f.Session, Is.SameAs(session));
-            f.Accept(h.Settle(request)); Assert.That(h.Owner.RetainedCount, Is.EqualTo(1));
+            var result = current.Pump();
+            Assert.That(f.FileSystem.FailedOperation.Type, Is.EqualTo(operation)); f.FileSystem.DisableFailure();
+            CurrentUnchanged(f, bytes, result); Assert.That(f.Runtime, Is.SameAs(runtime)); Assert.That(f.Session, Is.SameAs(session));
+            f.Accept(current.Pump()); Assert.That(f.Runtime.livingDungeon.Parties, Is.Empty);
+            f.Reopen(); CurrentThrough(f, current.Through);
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(r => r.RunId == "run-1"), Is.EqualTo(1));
         }
         [Test] public void UncertainRollbackBlocksTheQualificationScope()
         {
-            var h = Terminal(); var f = h.F; var request = h.Q.Prepare(f.Session);
+            var current = new CurrentTerminal(); var f = current.F;
             f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             f.FileSystem.Seed(f.ActivePath, f.Session.GetCurrentBytes());
+            var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
             f.FileSystem.EnableFailureSequence(Op.Flush, 1, Op.Replace, 2);
-            var result = h.Settle(request); f.FileSystem.DisableFailure();
+            var result = service.AdvanceForeground(f.Runtime, current.Through, f.Context.RecoveryInputs.Bootstrap.tickSeconds, (_, __) => { });
+            f.FileSystem.DisableFailure();
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Reason, Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
             Assert.That(result.RuntimeProjection, Is.Null);
-            Assert.That(h.Settle(request).Reason, Is.EqualTo(LivingDungeonTerminalSettlement.Recovery));
+            Assert.That(service.RequiresCanonicalRecovery, Is.True);
+            int operations = f.FileSystem.Operations.Count();
+            Assert.That(service.AdvanceForeground(f.Runtime, current.Through, f.Context.RecoveryInputs.Bootstrap.tickSeconds,
+                (_, __) => Assert.Fail("Uncertain authority cannot execute a tick")).Reason,
+                Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+            Assert.That(f.FileSystem.Operations.Count(), Is.EqualTo(operations));
         }
         [Test] public void UnobservedCanonicalWriteInvalidatesExactPrefixAuthorization()
         {
-            var h = Terminal(); var f = h.F; var request = h.Q.Prepare(f.Session); var old = f.Session;
-            f.Runtime.totalTicks++; f.Accept(h.Writer.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
-            Unchanged(h, f.Session.GetCurrentBytes(), h.Settle(request));
-            var result = h.Q.Settle(f.ActivePath, f.FileSystem, old, request);
+            var current = new CurrentTerminal(); var f = current.F; var writer = f.Authority;
+            var scope = new Scope(writer, f.Session); var old = f.Session;
+            var party = f.Runtime.livingDungeon.Parties.Single(); var request = new Scope.Request(party.Sequence, party.CheckpointIdentity);
+            var prior = f.Runtime.timeProvenance;
+            var observation = ForegroundObservation.ForDeterministicServiceTest(old.GetCurrentBytes(), current.Through,
+                f.Runtime.livingDungeon.Scheduler.AcceptedThrough, f.Runtime.livingDungeon.Scheduler.ClosedThrough,
+                prior.AccountedBoundary, ForegroundObservationContext.EligibleForeground);
+            var time = CanonicalTimeTransition.Foreground(old.GetCurrentBytes(), prior, observation, f.Runtime.livingDungeon);
+            f.Runtime.structureRuntime.ManaReserve++;
+            f.Accept(writer.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
+            var before = f.Session.GetCurrentBytes();
+            var stale = scope.Settle(f.ActivePath, f.FileSystem, f.Session, request);
+            CurrentUnchanged(f, before, stale); Assert.That(stale.Reason, Is.EqualTo(LivingDungeonTerminalSettlement.Stale));
+            Assert.That(time.Matches(before, f.Runtime.timeProvenance), Is.False);
+            var rejected = writer.AdvanceForeground(f.ActivePath, f.FileSystem, f.Session, f.Runtime, f.Context.RecoveryInputs.OneFloor,
+                current.Through, f.Context.RecoveryInputs.Bootstrap.tickSeconds, (_, __) => Assert.Fail(),
+                prior.AccountedBoundary.Seconds, time);
+            CurrentUnchanged(f, before, rejected);
+            var result = scope.Settle(f.ActivePath, f.FileSystem, old, request);
             Assert.That(result.IsSuccess, Is.False); Assert.That(result.RuntimeProjection, Is.Null);
+            Assert.That(result.Reason, Is.EqualTo(LivingDungeonTerminalSettlement.Stale));
         }
         [TestCase("ordinal")] [TestCase("checkpoint")] [TestCase("identity")]
         public void ContradictoryTerminalPinsAndOrdinalsAreRejectedByCompleteSave(string kind)
@@ -379,19 +394,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void GenericHistoryMutationStillCannotPublishAnAllocatedDurableIdentity()
         {
-            var h = Terminal(); var f = h.F; var bytes = f.Session.GetCurrentBytes();
-            var e = LivingDungeonContracts.Restore(h.Owner.Parties.Single(), Profile());
-            try { f.Runtime.runHistory.AppendOutcome(e.TakeOutcome(), 10); } finally { e.Abandon(); }
-            Unchanged(h, bytes, h.Writer.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
+            var current = new CurrentTerminal(); var f = current.F; var bytes = f.Session.GetCurrentBytes();
+            var e = LivingDungeonContracts.Restore(f.Runtime.livingDungeon.Parties.Single(),
+                f.Context.RecoveryInputs.OneFloor.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized));
+            try { f.Runtime.runHistory.AppendOutcome(e.DrainToCompletion(), f.Configuration.MaxRunHistoryEntries); }
+            finally { e.Abandon(); }
+            CurrentUnchanged(f, bytes, f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
         }
         [Test] public void UnknownHistoryAndRetainedOutcomeExtensionsSurviveAlongsideCompatibleNulls()
         {
-            var h = new Harness(); h.Manual(); var f = h.F;
+            var f = LivingDungeonB3B2Tests.Dungeon(tickSeconds: 100000);
+            f.Accept(PhaseFiveBBranchIntegrationTests.Run(f));
             string text = Encoding.UTF8.GetString(f.Session.GetCurrentBytes())
                 .Replace("\"runHistory\":{", "\"runHistory\":{\"HistoryExtra\":null,\"HistoryLexical\":1.00,")
                 .Replace("\"RunId\":\"run-1\"", "\"OutcomeExtra\":null,\"RunId\":\"run-1\"");
-            f.FileSystem.Seed(f.ActivePath, Encoding.UTF8.GetBytes(text)); f.Reopen(); h.Q = new Scope(h.Writer, f.Session);
-            h.Admit(); h.Complete(); f.Accept(h.Settle());
+            f.FileSystem.Seed(f.ActivePath, Encoding.UTF8.GetBytes(text)); f.Reopen();
+            CurrentThrough(f, 0); CurrentThrough(f, f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value);
+            CurrentThrough(f, LivingDungeonB3B2Tests.Finish(f));
             string after = Encoding.UTF8.GetString(f.Session.GetCurrentBytes());
             Assert.That(after, Does.Contain("\"HistoryExtra\":null"));
             Assert.That(after, Does.Contain("\"HistoryLexical\":1.00"));
@@ -423,12 +442,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("partial")] [TestCase("readback")]
         public void PartialCandidateAndDurableReadbackFailuresDoNotRetireOrPublish(string mode)
         {
-            var h = Terminal(); var f = h.F; var request = h.Q.Prepare(f.Session); var before = f.Session.GetCurrentBytes();
+            var current = new CurrentTerminal(); var f = current.F; var before = f.Session.GetCurrentBytes();
             f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem(); f.FileSystem.Seed(f.ActivePath, before);
             if (mode == "partial") f.FileSystem.EnablePartialWriteFailure(10);
-            else f.FileSystem.EnableTargetedFailure(Op.Read, paths => paths[0] == f.ActivePath, 4, false);
-            var result = h.Settle(request); f.FileSystem.DisableFailure(); Unchanged(h, before, result);
-            f.Accept(h.Settle(request)); Assert.That(h.Owner.RetainedCount, Is.Zero);
+            else f.FileSystem.EnableTargetedFailure(Op.Read, paths => paths[0] == f.ActivePath &&
+                f.FileSystem.Operations.Any(o => o.Type == Op.Replace && o.Paths[1] == f.ActivePath), 1, false);
+            var result = current.Pump();
+            if (mode == "readback")
+            {
+                Assert.That(f.FileSystem.FailedOperation.Type, Is.EqualTo(Op.Read));
+                Assert.That(f.FileSystem.FailedOperation.Paths[0], Is.EqualTo(f.ActivePath));
+                Assert.That(f.FileSystem.FailedTargetOccurrence, Is.EqualTo(1));
+            }
+            f.FileSystem.DisableFailure(); CurrentUnchanged(f, before, result);
+            f.Accept(current.Pump()); Assert.That(f.Runtime.livingDungeon.Parties, Is.Empty);
+            f.Reopen(); CurrentThrough(f, current.Through);
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(r => r.RunId == "run-1"), Is.EqualTo(1));
         }
         [Test] public void SettlementDoesNotCompleteUnmetObjectivesOrResearchOrGrantMana()
         {
@@ -500,37 +529,56 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void CurrentOccupiedFloorBlocksRecoveryDuringAnOlderPartySettlement()
         {
-            var h = new Harness(); var f = h.F;
-            f.Accept(h.Q.Edit(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
-                DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId)));
-            CombatC2Tests.SetState(f, 0, true, 0); h.Q = new Scope(h.Writer, f.Session);
-            h.Admit(); h.Complete(); h.Admit(1, 10001);
-            f.Runtime.structureRuntime.ManaReserve = 3.25; h.Save();
-            string monsters = Json(f.Runtime.monsterContinuity); long reserve = MonsterContinuity.RequiredReserve(f.State, f.Context.MonsterRecovery);
-            f.Accept(h.Settle());
-            Assert.That(h.Owner.RetainedCount, Is.EqualTo(1));
+            var source = PhaseFiveBBranchIntegrationTests.Fixture();
+            PhaseSixA4Tests.AddContent(source, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            CombatC2Tests.SetState(source, 0, true, 0);
+            var model = new HistoricalModel(source); model.Admit(0, 0); model.Complete(); model.Admit(1, 10001);
+            model.Candidate.structureRuntime.ManaReserve = 3.25;
+            string monsters = Json(model.Candidate.monsterContinuity);
+            long reserve = MonsterContinuity.RequiredReserve(source.State, source.Context.MonsterRecovery);
+            ApplyHistoricalConsequencesAndRetire(model);
+            Assert.That(model.State.RetainedCount, Is.EqualTo(1));
+            Assert.That(Json(model.Candidate.monsterContinuity), Is.EqualTo(monsters));
+            Assert.That(model.Candidate.structureRuntime.ManaReserve, Is.EqualTo(3.25));
+            Assert.That(MonsterContinuity.RequiredReserve(source.State, source.Context.MonsterRecovery), Is.EqualTo(reserve));
+            model.AssertSourceUnchanged();
+
+            // Actual current ordinary publication must also exclude the floor
+            // occupied by an independently pinned, unconsumed C2 executable.
+            var current = new CurrentTerminal(); var f = current.F;
+            CombatC2Tests.SetState(f, 0, true, 3.25); monsters = Json(f.Runtime.monsterContinuity);
+            reserve = MonsterContinuity.RequiredReserve(f.State, f.Context.MonsterRecovery);
+            var checkpoint = f.Runtime.livingDungeon.Parties.Single().Checkpoint;
+            f.Runtime.lastKnownAppState = "Foreground";
+            f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
             Assert.That(Json(f.Runtime.monsterContinuity), Is.EqualTo(monsters));
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(3.25));
             Assert.That(MonsterContinuity.RequiredReserve(f.State, f.Context.MonsterRecovery), Is.EqualTo(reserve));
+            CollectionAssert.AreEqual(checkpoint, f.Runtime.livingDungeon.Parties.Single().Checkpoint);
         }
         [Test] public void RealWindowsAtomicReplacementRollbackRetryAndReopenAreExactlyOnce()
         {
-            var h = Terminal(); var f = h.F; var request = h.Q.Prepare(f.Session);
+            var current = new CurrentTerminal(); var f = current.F;
+            var old = f.Session; var runtime = f.Runtime;
             var fs = new FailingWindowsFileSystem();
-            string directory = Path.GetFullPath(Path.Combine("TestResults", "living-dungeon-b3a-20261017", "windows", Guid.NewGuid().ToString("N")));
+            string directory = Path.GetFullPath(Path.Combine("TestResults", "living-dungeon-b3a-current-windows", Guid.NewGuid().ToString("N")));
             Directory.CreateDirectory(directory); string path = Path.Combine(directory, "qualified.json");
             var before = f.Session.GetCurrentBytes(); fs.WriteAllBytesDurable(path, before); fs.FailAfterReplacement = true;
-            var failed = h.Q.Settle(path, fs, f.Session, request);
+            var failed = current.Pump(path, fs);
             Assert.That(failed.IsSuccess, Is.False); Assert.That(failed.Session, Is.Null);
             Assert.That(failed.Reason, Is.EqualTo(DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
             CollectionAssert.AreEqual(before, fs.ReadAllBytes(path));
-            var success = h.Q.Settle(path, fs, f.Session, request); f.Accept(success);
+            var success = current.Pump(path, fs); f.Accept(success);
             var durable = fs.ReadAllBytes(path);
             var reopened = DetachedCanonicalSaveSession.Open(durable, f.Context, f.Profile);
             Assert.That(reopened.IsSuccess, Is.True);
             Assert.That(success.Validation.LivingDungeon.RetainedCount, Is.Zero);
-            Assert.That(h.Q.Settle(path, fs, reopened.Session, request).IsSuccess, Is.False);
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(r => r.RunId == "run-1"), Is.EqualTo(1));
+            var stale = f.Authority.AdvanceForeground(path, fs, old, runtime, f.Context.RecoveryInputs.OneFloor,
+                current.Through, f.Context.RecoveryInputs.Bootstrap.tickSeconds, (_, __) => Assert.Fail(), runtime.lastSavedUtcUnix);
+            Assert.That(stale.IsSuccess, Is.False); Assert.That(stale.Session, Is.Null);
             CollectionAssert.AreEqual(durable, fs.ReadAllBytes(path));
+            File.WriteAllText(Path.Combine(directory, "ownership.json"), "{\"owner\":\"H1-F4 current B3A fixture\",\"purpose\":\"native atomic replacement rollback retry and exact reopen\",\"retention\":\"preserve qualification evidence\"}");
             TestContext.WriteLine($"B3A Windows NTFS actual replacement+rollback+retry+reopen bytes={durable.Length}; path={path}");
         }
         private sealed class FailingWindowsFileSystem : ISpatialMigrationFileSystem
@@ -552,10 +600,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             public void DeleteFile(string path) => inner.DeleteFile(path);
         }
 
-        public static object CreateForPlayMode() => Terminal();
-        public static string FingerprintForPlayMode(object value) => SpatialContractSha256.Compute(((Harness)value).F.Session.GetCurrentBytes());
+        public static object CreateForPlayMode() => new CurrentTerminal();
+        public static string FingerprintForPlayMode(object value) => SpatialContractSha256.Compute(((CurrentTerminal)value).F.Session.GetCurrentBytes());
         public static void SettleForPlayMode(object value)
-        { var h = (Harness)value; var request = h.Q.Prepare(h.F.Session); h.F.Accept(h.Settle(request)); h.F.Reopen(); Unchanged(h, h.F.Session.GetCurrentBytes(), h.Settle(request)); }
+        {
+            var current = (CurrentTerminal)value; var f = current.F; var scope = new Scope(f.Authority, f.Session);
+            var party = f.Runtime.livingDungeon.Parties.Single(); var request = new Scope.Request(party.Sequence, party.CheckpointIdentity);
+            f.Accept(current.Pump()); f.Reopen();
+            CurrentUnchanged(f, f.Session.GetCurrentBytes(), scope.Settle(f.ActivePath, f.FileSystem, f.Session, request));
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(r => r.RunId == "run-1"), Is.EqualTo(1));
+        }
     }
 }
 #endif

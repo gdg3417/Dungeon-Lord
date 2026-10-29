@@ -46,7 +46,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         // This uses the same transition capability as SaveService, never a raw W
         // assignment or a production bypass. An old A>C drain retains its W.
         internal static DetachedCanonicalWriteResult PumpForeground(DetachedCanonicalWriteAuthorityTests.Fixture f,
-            LivingDungeonForegroundConfig policy, long through, long? wallSeconds = null)
+            LivingDungeonForegroundConfig policy, long through, long? wallSeconds = null,
+            string activePath = null, ISpatialMigrationFileSystem fileSystem = null)
         {
             var prior = f.Runtime.timeProvenance;
             long wall = wallSeconds ?? System.Math.Max(1000, prior.AccountedBoundary.Seconds);
@@ -56,7 +57,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 f.Runtime.livingDungeon.Scheduler?.ClosedThrough ?? -1, endpoint, ForegroundObservationContext.EligibleForeground);
             var transition = f.Runtime.livingDungeon.IsClosed
                 ? CanonicalTimeTransition.Foreground(f.Session.GetCurrentBytes(), prior, observation, f.Runtime.livingDungeon) : null;
-            return PhaseSixA4Tests.Writer(f).AdvanceForeground(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
+            return PhaseSixA4Tests.Writer(f).AdvanceForeground(activePath ?? f.ActivePath, fileSystem ?? f.FileSystem, f.Session, f.Runtime,
                 policy, through, f.Context.RecoveryInputs.Bootstrap.tickSeconds, (_, __) => { },
                 transition?.Successor.AccountedBoundary.Seconds ?? prior.AccountedBoundary.Seconds, transition);
         }
