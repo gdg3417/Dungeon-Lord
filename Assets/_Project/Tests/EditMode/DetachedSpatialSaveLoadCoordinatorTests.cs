@@ -6,6 +6,7 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using System.Text;
 using System;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Economy;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -257,6 +258,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             var reopened = ConfiguredService(fixture, fileSystem, "service-eight.json");
             Assert.That(reopened.LoadOrCreate("phase-four", out string reason), Is.Not.Null, reason);
+            CloseZeroDurationRecovery(reopened);
             Assert.That(Encoding.UTF8.GetString(reopened.CanonicalSession.GetCurrentBytes()), Is.EqualTo(current));
             var again = ConfiguredService(fixture, fileSystem, "service-eight.json");
             Assert.That(again.LoadOrCreate("phase-four", out _), Is.Not.Null);
@@ -293,9 +295,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string suppliedDirectory = canonicalDirectory.Replace(Path.DirectorySeparatorChar, alternate);
             var service = new SaveService(new SimpleLogger(false),
                 new SaveConfig { fileName = "save.json", useAtomicWrites = true }, suppliedDirectory);
-            service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
-                    Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
-                    fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
+            service.ConfigureCanonical(PhaseFourTestSupport.ProductionProfile(), fixture.Production, fixture.Compatibility,
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
                 PhaseFourTestSupport.PositionProfiles(fixture.Limits),
                 PhaseFourTestSupport.Occupancy(fixture.Limits));
@@ -500,6 +500,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"mvpDungeonPlacements\":{\"Entries\":[{\"CategoryId\":\"placement.category.room\"," +
                 "\"OptionId\":\"placement.option.room.narrow_hall\",\"Revision\":1}],\"NextRevision\":2}}," +
                 "\"unknownRoot\":[true,null]}");
+            original = AuthorAbsentResearch(original);
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
@@ -527,6 +528,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"primary\":{\"lastSavedUtcUnix\":1,\"mvpSelectedRoomSlotIndex\":1,\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
                 Assignment(0, "narrow_hall") + "," + Assignment(1, "narrow_hall") +
                 "],\"NextRevision\":3}}}");
+            original = AuthorAbsentResearch(original);
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
@@ -557,6 +559,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"primary\":{\"lastSavedUtcUnix\":1,\"mvpDungeonPlacements\":{\"Entries\":[{" +
                 "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\"," +
                 "\"Revision\":1}],\"NextRevision\":2}}}");
+            narrow = AuthorAbsentResearch(narrow);
             byte[] changed = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(narrow).Replace(
                 "placement.option.room.narrow_hall", "placement.option.room.basic"));
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
@@ -673,6 +676,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
                 "\"primary\":{\"lastSavedUtcUnix\":1,\"unknownPrimary\":[1,{\"n\":1.00}]}," +
                 "\"unknownRoot\":{\"nested\":[true,null]}}");
+            original = AuthorAbsentResearch(original);
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
@@ -945,6 +949,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 primary = new SaveData { saveVersion = 6, lastSavedUtcUnix = 1 } };
             byte[] pretty = Encoding.UTF8.GetBytes(JsonUtility.ToJson(root, true));
 
+            // JsonUtility expands null classes into default shells. Keep proof
+            // that the original historical producer output is readable, then
+            // explicitly author absent Research in this fresh positive fixture.
+            var historical = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, pretty);
+            Assert.That(historical.Result.IsSuccess, Is.True, historical.Result.Reason);
+            string authored = Encoding.UTF8.GetString(pretty);
+            foreach (string member in new[] { "researchPending", "researchProgress" }) {
+                string pattern = "(\"" + member + "\"\\s*:\\s*)\\{[^{}]*\\}";
+                Assert.That(System.Text.RegularExpressions.Regex.Matches(authored, pattern).Count, Is.EqualTo(1));
+                authored = System.Text.RegularExpressions.Regex.Replace(authored, pattern, "$1null");
+            }
+            pretty = Encoding.UTF8.GetBytes(authored);
+
             DetachedSpatialSaveLoadResult result = LoadOriginal(6, pretty, "json-utility-pretty");
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
@@ -958,6 +975,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string json = Encoding.UTF8.GetString(original);
             if (!json.Contains("\"lastSavedUtcUnix\"")) original = Encoding.UTF8.GetBytes(
                 System.Text.RegularExpressions.Regex.Replace(json, "(\"primary\"\\s*:\\s*\\{)", "$1\"lastSavedUtcUnix\":1,"));
+            original = AuthorAbsentResearch(original);
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(schema, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
@@ -974,9 +992,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "gd66-save-service-tests"));
             var service = new SaveService(errors == null ? new SimpleLogger(false) : CapturingLogger(errors),
                 new SaveConfig { fileName = filename, useAtomicWrites = true }, directory);
-            service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(
-                    Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
-                    fixture.Limits, fixture.WholeLimits), fixture.Production, fixture.Compatibility,
+            service.ConfigureCanonical(PhaseFourTestSupport.ProductionProfile(), fixture.Production, fixture.Compatibility,
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
                 PhaseFourTestSupport.PositionProfiles(fixture.Limits),
                 PhaseFourTestSupport.Occupancy(fixture.Limits));
@@ -1009,7 +1025,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             byte[] ten = Encoding.UTF8.GetBytes(PhaseFourTestSupport.FrozenTen(f.Session.GetCurrentBytes()));
-            byte[] expected = f.Session.GetCurrentBytes();
+            byte[] expected = ExpectedActivation(ten, source);
             var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             fs.Seed(f.ActivePath, ten);
             if (failure == "readback")
@@ -1049,17 +1065,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture TimedFixture(int schema, bool unwrapped = false) =>
             Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(schema, unwrapped,
-                Encoding.UTF8.GetBytes(unwrapped ? "{\"saveVersion\":1,\"lastSavedUtcUnix\":1}" :
-                    "{\"schema\":\"save_root\",\"schemaVersion\":" + schema + ",\"primary\":{\"lastSavedUtcUnix\":1}}"));
+                AuthorAbsentResearch(Encoding.UTF8.GetBytes(unwrapped ? "{\"saveVersion\":1,\"lastSavedUtcUnix\":1}" :
+                    "{\"schema\":\"save_root\",\"schemaVersion\":"  + schema + ",\"primary\":{\"lastSavedUtcUnix\":1}}"), unwrapped));
 
         private static DetachedSpatialSaveLoadCoordinator Coordinator(
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,
             RawLegacyBlankFloorContract blankFloor = null,
             SpatialLayoutCompatibilitySnapshot compatibility = null)
         {
-            var profile = new SaveSpatialMigrationLimitsProfile(
-                Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
-                fixture.Limits, fixture.WholeLimits);
+            var profile = PhaseFourTestSupport.ProductionProfile();
             var coordinator = new DetachedSpatialSaveLoadCoordinator(profile, compatibility ?? fixture.Compatibility,
                 fixture.Production, fixture.LegacyBytes, new Dictionary<string, byte[]>(),
                 new RawSaveEnvelopeVersionContract(1, 6),
@@ -1068,14 +1082,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 PhaseFourTestSupport.Occupancy(fixture.Limits));
             var inputs = RecoveryInputs(fixture);
             var time = RecoveryClock(inputs);
-            coordinator.ConfigureRecovery(inputs, time);
+            // Deliberately unbound malformed compatibility is a negative-only
+            // early-selection fixture. It must fail before any publication.
+            if (compatibility == null) coordinator.ConfigureRecovery(inputs, time);
             return coordinator;
         }
 
         // Newly authored dormant compatibility fixtures consume the complete
         // validated inputs before load. This is not historical A>C producer proof.
         private static RecoveryRuntimeInputs RecoveryInputs(Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture f) =>
-            PhaseFourTestSupport.CurrentContext(f.Compatibility, f.Production, f.LegacyBytes, f.Limits).RecoveryInputs;
+            PhaseFourTestSupport.CurrentContext(f.Compatibility, f.Production, f.LegacyBytes,
+                PhaseFourTestSupport.ProductionProfile().Canonical).RecoveryInputs;
         private sealed class LoadClock : IPreciseTimeSource
         {
             public UnixTimePoint UtcNow() => new UnixTimePoint(1, 0);
@@ -1093,6 +1110,63 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var inputs = RecoveryInputs(f);
             service.SetTimeSourceForTests(new LoadClock());
             service.ConfigureRecovery(inputs, RecoveryClock(inputs));
+        }
+
+        private static byte[] AuthorAbsentResearch(byte[] source, bool unwrapped = false)
+        {
+            // Only fresh in-memory synthetic sources call this before preparing
+            // their migration identity. Never repair a loaded historical save.
+            string json = Encoding.UTF8.GetString(source);
+            if (json.Contains("\"researchPending\"") || json.Contains("\"researchProgress\"")) return source;
+            const string absence = "\"researchPending\":null,\"researchProgress\":null,";
+            if (unwrapped) return Encoding.UTF8.GetBytes("{" + absence + json.Substring(1));
+            var pattern = new System.Text.RegularExpressions.Regex("(\"primary\"\\s*:\\s*\\{)");
+            Assert.That(pattern.Matches(json).Count, Is.EqualTo(1));
+            return Encoding.UTF8.GetBytes(pattern.Replace(json, "$1" + absence, 1));
+        }
+
+        private static byte[] ExpectedActivation(byte[] historical,
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture)
+        {
+            var inputs = RecoveryInputs(fixture);
+            var limits = PhaseFourTestSupport.ProductionProfile().Canonical;
+            Assert.That(PhaseFourTestSupport.UpgradeFrozenSixteen(historical, limits, out var sixteen), Is.True);
+            var context = PhaseFourTestSupport.CurrentContext(inputs.Compatibility, fixture.Production,
+                fixture.LegacyBytes, limits);
+            var frozen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(sixteen, context);
+            Assert.That(frozen.IsValid, Is.True, frozen.Reason);
+            var entry = RecoveryEntryObservation.FromCaptured(new UnixTimePoint(1, 0), frozen.TimeProvenance,
+                RecoveryEntryContext.UnknownPostCrash);
+            Assert.That(SchemaSixteenRecoveryActivation.Prepare(historical, sixteen, context, entry,
+                entry.WallEndpoint, 0, out var expected), Is.Null);
+            return expected;
+        }
+
+        private static void CloseZeroDurationRecovery(SaveService service)
+        {
+            var time = (TimeService)typeof(SaveService).GetField("recoveryTime",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(service);
+            var inputs = (RecoveryRuntimeInputs)typeof(SaveService).GetField("recoveryInputs",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(service);
+            var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(service.CanonicalSession.GetCurrentBytes(),
+                (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(service));
+            Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(owned, inputs == null ? null :
+                (ProductionSpatialContentSnapshot)typeof(SaveService).GetField("_production",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(service),
+                out var current, out var reason), Is.True, reason);
+            time.BindLoadedForegroundHorizon(current.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
+            time.AttachSave(current);
+            service.CanonicalRuntimePublished += value => { current = value; time.AttachSave(value); };
+            var mana = new CanonicalOfflinePassiveManaService(inputs.Passive,
+                new CanonicalPassiveManaService(inputs.Passive, inputs.Economy, new FormulaEngine(),
+                    PhaseFourTestSupport.ProductionProfile().Canonical.Spatial, inputs.Bootstrap.tickSeconds));
+            for (int i = 0; i < 2; i++) {
+                var step = service.AdvanceCanonicalRecovery(current, mana, (_, __) => Assert.Fail());
+                Assert.That(step.IsSuccess, Is.True, step.Reason);
+            }
+            Assert.That(current.timeProvenance.Episode, Is.Null);
+            Assert.That(time.RecoveryClockActive, Is.False);
         }
 
         private static SpatialMigrationActivationPreflight Supported(
