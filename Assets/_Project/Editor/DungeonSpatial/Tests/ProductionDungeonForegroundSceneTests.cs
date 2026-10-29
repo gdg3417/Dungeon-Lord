@@ -224,7 +224,7 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(root.SaveService.ExecuteCanonicalMutation(root.Save,
                     DetachedCanonicalMutationRequest.Unassign(assignment.AssignmentId)).IsSuccess, Is.True);
             var report = new GameRoot.ForegroundProfileReport();
-            var operation = root.ProfileForeground(report);
+            var operation = root.ProfileForeground(report, InstallForegroundBoundaryTestClock());
             try {
                 while (true) {
                     bool more; object next = null;

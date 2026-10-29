@@ -224,7 +224,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void FloorTransferKeepsExactPartyHpAndNoFutureFloorEncounter()
         {
-            var f = PhaseSixA4Tests.Eligible(); PhaseSixA4Tests.ForceDescent(f.Configuration, true);
+            var f = PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs(
+                (config, _) => PhaseSixA4Tests.ForceDescent(config, true)));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             PhaseSixA4Tests.AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
             f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath,f.FileSystem,f.Session,f.Runtime,

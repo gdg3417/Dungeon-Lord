@@ -101,11 +101,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 restored.Execution.DrainToCompletion();
             } finally { restored.Execution.Abandon(); }
         }
-        internal static Fixture Dungeon(bool descend = true, bool oneBoundary = false)
+        internal static Fixture Dungeon(bool descend = true, bool oneBoundary = false, Action<RunSimulationConfig> author = null)
         {
             var inputs = PhaseFourTestSupport.AuthoredInputs((config, _) => {
                 PhaseSixA4Tests.ForceDescent(config, descend);
                 foreach (var c in config.PhaseFiveB.Classes) c.LevelOneMaxHealth = 100; // isolated survival fixture
+                author?.Invoke(config);
             });
             if (oneBoundary) PhaseFourTestSupport.OneBoundaryInputs(inputs);
             var f = PhaseSixA4Tests.Eligible(inputs);

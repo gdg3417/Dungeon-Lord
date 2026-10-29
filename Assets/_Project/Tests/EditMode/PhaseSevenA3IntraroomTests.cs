@@ -295,7 +295,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static Fixture CanonicalRoom()
         {
-            var f = Fixture.Create(null); f.Configuration = Config();
+            var f = Fixture.Create(null, recoveryInputBytes: PhaseFourTestSupport.AuthoredInputs(
+                (config, _) => PhaseSixA4Tests.ForceDescent(config, true)));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             return f;
         }
@@ -484,7 +485,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void TwoFloorSpatialRunsReuseRunIdentityPartyHealthTransitionsAndKnowledge()
         {
-            var f = PhaseSixA4Tests.Eligible(); PhaseSixA4Tests.ForceDescent(f.Configuration, true);
+            var f = PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs(
+                (config, _) => PhaseSixA4Tests.ForceDescent(config, true)));
             foreach (int floor in new[] { 0, 1 }) PhaseSixA4Tests.AddContent(f, floor,
                 MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
             f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,

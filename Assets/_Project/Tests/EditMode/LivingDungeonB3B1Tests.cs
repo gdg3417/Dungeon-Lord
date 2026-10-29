@@ -19,9 +19,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static readonly RunLogicalTiming Timing = new RunLogicalTiming(3, 7, 5, 2, 11); // synthetic, injected
         private static RunCheckpointLimits Limits => new RunCheckpointLimits(65536, 2048, 1000000);
         private static RunSimulationService Service => new RunSimulationService(CombatC0IntegrationTests.Config(), PhaseSixA4Tests.Loot());
-        private static Fixture Dungeon(bool two = false, int hp = 8, bool revival = false)
+        private static Fixture Dungeon(bool two = false, int hp = 8, bool revival = false, Action<RunSimulationConfig> author = null)
         {
-            var inputs = PhaseFourTestSupport.AuthoredInputs((config, _) => PhaseSixA4Tests.ForceDescent(config, true));
+            var inputs = PhaseFourTestSupport.AuthoredInputs((config, _) => {
+                PhaseSixA4Tests.ForceDescent(config, true);
+                author?.Invoke(config);
+            });
             var f = two ? PhaseSixA4Tests.Eligible(inputs) : Fixture.Create(null, recoveryInputBytes: inputs);
             if (!two) f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
@@ -210,17 +213,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("wipe")] [TestCase("retreat")] [TestCase("multiple")] [TestCase("repeated")]
         public void CombatCasualtyRetreatAndStableMultipleMonsterReceiptsMatchManual(string mode)
         {
-            var f = Dungeon(true);
+            var f = Dungeon(true, author: config => {
+                if (mode == "wipe") {
+                    foreach (var p in config.PhaseFiveB.Classes) p.LevelOneMaxHealth = 1;
+                    foreach (var p in config.CombatC0.Monsters) p.Damage = 100;
+                }
+                if (mode == "retreat") { config.BaseSuccessChance = 0; config.SuccessThreshold = 1; }
+                if (mode == "repeated") {
+                    foreach (var p in config.CombatC0.Classes) { p.AttackType = CombatC0Config.Melee; p.Range = 1; p.Damage = 10; }
+                    foreach (var p in config.CombatC0.Monsters) { p.AttackType = CombatC0Config.Ranged; p.Range = 1; }
+                }
+            });
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
-            if (mode == "wipe") {
-                foreach (var p in f.Configuration.PhaseFiveB.Classes) p.LevelOneMaxHealth = 1;
-                foreach (var p in f.Configuration.CombatC0.Monsters) p.Damage = 100;
-            }
-            if (mode == "retreat") { f.Configuration.BaseSuccessChance = 0; f.Configuration.SuccessThreshold = 1; }
-            if (mode == "repeated") {
-                foreach (var p in f.Configuration.CombatC0.Classes) { p.AttackType = CombatC0Config.Melee; p.Range = 1; p.Damage = 10; }
-                foreach (var p in f.Configuration.CombatC0.Monsters) { p.AttackType = CombatC0Config.Ranged; p.Range = 1; }
-            }
             var s = PhaseSixA4Tests.Snapshot(f); var expected = Service.StartManualSnapshot(1, s).DrainToCompletion(); var e = Start(s);
             while (!e.IsTerminal) { e.Advance(1, e.NextOrdinal); e = Restore(e); }
             var outcome = e.TakeOutcome(); EqualOutcome(outcome, expected);
@@ -274,12 +278,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = Dungeon(); var first = Start(PhaseSixA4Tests.Snapshot(f)).ExportCheckpoint(Limits);
             int padding = Limits.MaximumBytes - first.GetBytes().Length;
             // Test-only unused rule-name padding qualifies bytes, not production content size.
-            f.Configuration.PhaseFiveB.EncounterRuleSourceId += new string('x', padding);
-            var exact = Start(PhaseSixA4Tests.Snapshot(f)).ExportCheckpoint(Limits);
+            var exactFixture = Dungeon(author: config => config.PhaseFiveB.EncounterRuleSourceId += new string('x', padding));
+            var exact = Start(PhaseSixA4Tests.Snapshot(exactFixture)).ExportCheckpoint(Limits);
             Assert.That(exact.GetBytes().Length, Is.EqualTo(65536));
             Assert.That(Service.RestoreCheckpoint(exact.GetBytes(), exact.Identity, exact.StartIdentity, 0, Limits).IsValid, Is.True);
-            f.Configuration.PhaseFiveB.EncounterRuleSourceId += "x";
-            Assert.Throws<InvalidOperationException>(() => Start(PhaseSixA4Tests.Snapshot(f)).ExportCheckpoint(Limits));
+            var excessive = Dungeon(author: config => config.PhaseFiveB.EncounterRuleSourceId += new string('x', padding + 1));
+            Assert.Throws<InvalidOperationException>(() => Start(PhaseSixA4Tests.Snapshot(excessive)).ExportCheckpoint(Limits));
         }
         [Test] public void ExportStandaloneTechnicalFixturesAndMeasurements()
         {
@@ -420,8 +424,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var reference = Start(s); for (int i = 0; i < encounter; i++) reference.Advance(1, reference.NextOrdinal);
             long committed = reference.CommittedCombatWork; reference.NextDueTime(); long work = reference.Combat.Kernel.WorkCount;
             Assert.That(work, Is.GreaterThan(committed));
-            f.Configuration.CombatC0.MaximumWork = work - 1;
-            var limited = PhaseSixA4Tests.Snapshot(f); var e = Start(limited);
+            var bounded = Dungeon(author: config => config.CombatC0.MaximumWork = work - 1);
+            var limited = PhaseSixA4Tests.Snapshot(bounded); var e = Start(limited);
             for (int i = 0; i < encounter; i++) e.Advance(1, e.NextOrdinal);
             var restored = Restore(e);
             string Failure(RunExecution run, bool probe) {
@@ -450,8 +454,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(pendingWork, Is.GreaterThan(committed)); Assert.That(encounterWork, Is.GreaterThan(pendingWork));
             foreach (var point in new[] { (Name: "pending", Work: pendingWork), (Name: "commit", Work: encounterWork), (Name: "terminal", Work: total) })
             foreach (int delta in new[] { -1, 0, 1 }) {
-                f.Configuration.CombatC0.MaximumWork = point.Work + delta;
-                var limited = PhaseSixA4Tests.Snapshot(f);
+                var bounded = Dungeon(twoFloors, author: config => config.CombatC0.MaximumWork = point.Work + delta);
+                var limited = PhaseSixA4Tests.Snapshot(bounded);
                 var direct = RunAtMeasuredCeiling(Start(limited, persistent), false);
                 var cycling = RunAtMeasuredCeiling(Start(limited, persistent), true);
                 Assert.That(cycling.Failure, Is.EqualTo(direct.Failure), point.Name + delta);
@@ -518,8 +522,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Dungeon(); var canonical = f.Session.GetCurrentBytes(); var runtime = B.Structured(f.Runtime);
             var full = Start(PhaseSixA4Tests.Snapshot(f), persistent); full.DrainToCompletion();
-            f.Configuration.CombatC0.MaximumWork = full.CommittedCombatWork - 1;
-            var limited = Start(PhaseSixA4Tests.Snapshot(f), persistent);
+            var bounded = Dungeon(author: config => config.CombatC0.MaximumWork = full.CommittedCombatWork - 1);
+            var limited = Start(PhaseSixA4Tests.Snapshot(bounded), persistent);
             // Independently accepted synthetic pins request the full ordinal under
             // the smaller captured budget; replay must fail before evidence comparison.
             full.StartInputs = limited.StartInputs;
@@ -561,8 +565,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var steps = Drain(Start(snapshot, persistent), 1); int boundary = steps.FindIndex(s => s.Kind == RunStepKind.MonsterEngagement);
             var measured = Start(snapshot, persistent);
             for (int i = 0; i < boundary; i++) measured.Advance(1, measured.NextOrdinal);
-            measured.NextDueTime(); f.Configuration.CombatC0.MaximumWork = measured.Combat.Kernel.WorkCount - 1;
-            var limited = Start(PhaseSixA4Tests.Snapshot(f), persistent);
+            measured.NextDueTime();
+            var bounded = Dungeon(author: config => config.CombatC0.MaximumWork = measured.Combat.Kernel.WorkCount - 1);
+            var limited = Start(PhaseSixA4Tests.Snapshot(bounded), persistent);
             for (int i = 0; i < boundary; i++) limited.Advance(1, limited.NextOrdinal);
             var c = limited.ExportCheckpoint(Limits);
             var profile = new LivingDungeonProfile("test.b3b1.work.v1", 2, 4, 65536, 2048, 8192, 262144, 357996,

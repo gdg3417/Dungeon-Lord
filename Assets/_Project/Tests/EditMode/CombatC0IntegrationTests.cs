@@ -178,8 +178,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         private static DetachedCanonicalWriteAuthorityTests.Fixture Canonical(bool two=false)
         {
-            var f=two ? PhaseSixA4Tests.Eligible() : PhaseFiveBBranchIntegrationTests.Fixture(false);
-            f.Configuration.CombatC0=Config().CombatC0; PhaseSixA4Tests.ForceDescent(f.Configuration,true);
+            void Author(RunSimulationConfig config) {
+                config.CombatC0=Config().CombatC0;
+                PhaseSixA4Tests.ForceDescent(config,true);
+            }
+            var f=two ? PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs((config, _) => Author(config)))
+                : PhaseFiveBBranchIntegrationTests.Fixture(false, Author);
             PhaseSixA4Tests.AddContent(f,0,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.GoblinOptionId);
             if(two) { PhaseSixA4Tests.AddContent(f,1,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.SkeletonOptionId);
                 f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath,f.FileSystem,f.Session,f.Runtime,FloorLifecycleAction.Activate,PhaseSixA4Tests.FloorTwo(f))); }
