@@ -30,3 +30,11 @@ The failed campaign had complete exit/Job records, unchanged qualified inputs an
 Frozen schema-14 resource SHA-256 remains `f535a0f7ba406916eb088dc499e58630e95eac340e88f18ce47227914bde642f`. [Exact cases, stacks, source/tool/input identities and receipts](h1-f4-historical-retention-qualification-20261029.json). H1-F4 owns preparations `TestResults/h1-f4-20261027-hm01` and `hm02`, their exact supervisor campaign directories, and compiler diagnostic outputs/scripts 03/04; all are retained for review. Generated default plans are preserved but only the source-pinned `plan-selected01.json` 13-case selections executed.
 
 This is not a new complete 123-case result or a full-suite failure count. Remaining B2/B3A current-writer, lifecycle, compatibility and settlement fixtures still require correction/qualification. Full EditMode, applicable PlayMode, interruption/reopen, Windows runtime/shutdown and matched performance remain pending. PR #259 stays draft; no merge or owner UAT.
+
+## Frozen history and current activation follow-up
+
+Source **76b8485309bf2703caa3fd19dbfad37c303c381a**, campaign **32f4ed9953ec4b97b8fa2a988d7d204b**: **8 passed / 0 failed / 0 skipped**, all five stages and independent completion verification passed.
+
+The seven dormant alias cases preserve exact schema-13/14/15/16 migration/reader assertions. A separately authored synthetic current negative fixture tests activation rejection with source-bound foreground time; it is not producer proof or production historical activation. The history-extension case uses actual current admission and consumed configuration, preserving nulls, lexical extensions, shared allocator and ordinary/manual mutation assertions.
+
+All 1,494 original inputs, settings and TMP were restored; ten tool pins, exact NUnit names, recorded process/Job completion, released reservation, protected evidence and prior trees were independently verified. An initial later PID query was denied; a subsequent CIM query found no process and the unchanged original verifier then passed. Historical completion continues to rest on the recorded exit/Job evidence, not later absence. Preparation hi01, its campaign, independent receipt and compile-only diagnostic05 are H1-F4-owned retained evidence. No production or frozen-contract change. This focused result does not replace complete B2/B3A or full-suite qualification.
