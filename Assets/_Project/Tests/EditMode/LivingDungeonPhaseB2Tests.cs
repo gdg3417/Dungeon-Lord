@@ -30,6 +30,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static Fixture Current()
         {
             var f = PhaseFiveBBranchIntegrationTests.Fixture();
+            // Automatic demand requires a monster on the main floor and a
+            // positive loot signal; optional-corridor content alone cannot
+            // authorize an arrival. Place both through the canonical editor.
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             f.ReopenWithSupportedForegroundProfiles(); return f;
         }
         private static void CurrentThrough(Fixture f, long through)
