@@ -66,3 +66,15 @@ The fixture authors its one-boundary policy before canonical ownership, admits t
 The other PlayMode wrapper validates the historical four-retained/two-active model through the frozen reader and retains its GC-recorder assertions. These observations include Editor/test-harness work and are not a Windows benchmark.
 
 Preparations hl01, its original archive/maps, selected EditMode/PlayMode inventories, runner/plan, all stage receipts, independent receipt and compiler diagnostic09 are H1-F4-owned retained review evidence. The shared factory's default behavior is unchanged; its optional one-boundary preparation runs before input consumption. No production, schema, migration, tuning or localization change. Full suites and final Windows/performance gates remain pending.
+
+## Remaining B2 methods and adjacent current-producer checks
+
+Source **41c2ea535433781bdbecabf1f93e6ebfb9743bd6**, campaign **c1d0dc822be24a94a4353c75e1d9ac74**: **9/0/0** (five corrected B2 methods and four adjacent current-producer leaves). All five stages and independent exact-name, source/tool, exit/Job, original input/settings/TMP, reservation and protected/prior-evidence checks passed.
+
+Obsolete Controlled/Qualify and B1 writable helpers are removed. Historical manual/allocation and snapshot/edit assertions stay in the private pure model with frozen-reader parity. Actual current manual and live-edit transactions independently retain exact durable active checkpoints and reject allocator reset. Manual execution uses the existing simulation component on the private candidate without a publication capability.
+
+Partial recovery uses an actual C2 party and verified terminal vacancy. Its test-only long passive period is authored before ownership and exceeds the terminal boundary: no passive tick funds the original 3-HP/.25-mana assertion. Existing current fixture/terminal helpers are only internally exposed for reuse, without behavior changes.
+
+Native Windows filesystem coverage preserves exact schema-13 through 16 migration/readback in one file and separately publishes/reopens current accepted-but-unclosed work in another. Neither is production historical activation proof. Both files and ownership receipt are retained under TestResults/living-dungeon-b2-windows/763ba4fcb43d47c9ae9c99c7fbe0e12c; hashes are in the machine report. This is filesystem integration, not Windows Player qualification. Frozen 262,144-byte predecessor/headroom assertions remain; an explicit synthetic current parser frame separately tests its ceiling, reopen and over-limit rejection.
+
+Preparation hn01, selected inventory/runner/plan, campaign/receipt, native disposable files and compile-only diagnostic10 are H1-F4-owned retained evidence. The machine result was committed at 44b1e133; this prose append follows a local encoding error before the append wrote data. Existing documentation/evidence was preserved. Complete B2 and remaining B3A qualification are next; these nine passes are not the complete 123-case or full-suite result.
