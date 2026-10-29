@@ -529,42 +529,65 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(1)] [TestCase(2)]
         public void FailedAdmissionPersistencePublishesNeitherSequenceNorCheckpoint(int write)
         {
-            var f = Controlled(); Activate(f);
-            f.Accept(Writer(f).InstallLivingDungeonOpportunity(f.ActivePath, f.FileSystem, f.Session, 0, 0));
-            f.Accept(Writer(f).AcceptLivingDungeonHorizon(f.ActivePath, f.FileSystem, f.Session, 0));
+            var f = Current(); CurrentThrough(f, 0);
+            long arrival = Owner(f).Scheduler.NextOpportunityTime.Value;
             var before = f.Session.GetCurrentBytes(); f.FileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, write);
-            var failed = Writer(f).AdvanceLivingDungeon(f.ActivePath, f.FileSystem, f.Session, 1);
+            var failed = PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, arrival);
             Assert.That(failed.IsSuccess, Is.False); Assert.That(failed.Session, Is.Null);
+            Assert.That(failed.RuntimeProjection, Is.Null);
+            Assert.That(f.FileSystem.Operations.Count(o => o.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write), Is.GreaterThanOrEqualTo(write));
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(1));
+            Assert.That(Owner(f).Parties, Is.Empty);
+            f.FileSystem.DisableFailure(); f.Reopen(); CurrentThrough(f, arrival);
+            Assert.That(Owner(f).Parties.Single().Sequence, Is.EqualTo(1));
+            Assert.That(f.Runtime.runHistory.NextRunSequence, Is.EqualTo(2));
         }
         [TestCase("readback")] [TestCase("replace")] [TestCase("partial")] [TestCase("rollback")]
         public void AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(string failure)
         {
-            var f = Controlled(); Activate(f); Admit(f, 0, 0);
-            f.Accept(Writer(f).AcceptLivingDungeonHorizon(f.ActivePath, f.FileSystem, f.Session, 10000));
+            var f = Current(); CurrentAdmission(f);
+            // Use the actual admitted executable's next boundary, not a B1
+            // qualification writer or an invented accepted horizon.
+            var party = Owner(f).Parties.Single();
+            var executable = LivingDungeonContracts.Restore(party,
+                f.Context.RecoveryInputs.OneFloor.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized));
+            long through;
+            try { through = checked(party.AdmittedAt + executable.NextDueTime().Value); }
+            finally { executable.Abandon(); }
             var before = f.Session.GetCurrentBytes();
+            // Reset only the disposable filesystem's operation counters so
+            // protocol-cut indices cannot include fixture construction writes.
+            f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            f.FileSystem.Seed(f.ActivePath, before);
             var read = Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read;
             var replace = Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace;
             var flush = Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush;
-            if (failure == "readback") f.FileSystem.EnableTargetedFailure(read, paths => paths[0] == f.ActivePath, 4, false);
+            if (failure == "readback") f.FileSystem.EnableTargetedFailure(read, paths => paths[0] == f.ActivePath &&
+                f.FileSystem.Operations.Any(o => o.Type == replace && o.Paths[1] == f.ActivePath), 1, false);
             if (failure == "replace") f.FileSystem.EnableTargetedFailure(replace, paths => paths[1] == f.ActivePath, 1, false);
             if (failure == "partial") f.FileSystem.EnablePartialWriteFailure(7);
             if (failure == "rollback") f.FileSystem.EnableFailureSequence(flush, 1, replace,
                 f.FileSystem.Operations.Count(o => o.Type == replace) + 2);
-            var result = Writer(f).AdvanceLivingDungeon(f.ActivePath, f.FileSystem, f.Session, 1);
+            var result = PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, through);
             Assert.That(result.IsSuccess, Is.False); Assert.That(result.Session, Is.Null); Assert.That(result.RuntimeProjection, Is.Null);
+            if (failure == "readback")
+            {
+                Assert.That(f.FileSystem.FailedOperation.Type, Is.EqualTo(read));
+                Assert.That(f.FileSystem.FailedOperation.Paths[0], Is.EqualTo(f.ActivePath));
+                Assert.That(f.FileSystem.FailedTargetOccurrence, Is.EqualTo(1));
+            }
             CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
             f.FileSystem.DisableFailure();
             if (failure == "rollback")
             {
                 Assert.That(result.Reason, Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
                 Assert.That(f.FileSystem.Paths.Any(path => path.Contains(".canonical-write-")), Is.True);
-                Assert.That(Writer(f).AdvanceLivingDungeon(f.ActivePath, f.FileSystem, f.Session, 1).IsSuccess, Is.False);
+                Assert.That(PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.OneFloor, through).IsSuccess, Is.False);
             }
             else
             {
                 CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath)); f.Reopen();
-                f.Accept(Writer(f).AdvanceLivingDungeon(f.ActivePath, f.FileSystem, f.Session, 1));
+                CurrentThrough(f, through);
             }
         }
         [Test]
