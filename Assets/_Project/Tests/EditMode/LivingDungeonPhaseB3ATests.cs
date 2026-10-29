@@ -12,6 +12,7 @@ using UnityEngine;
 using Fixture = DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests.Fixture;
 using Scope = DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteAuthority.SyntheticForegroundQualification;
 using Op = DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests.OperationType;
+using HistoricalModel = DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseB2Tests.HistoricalModel;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -82,6 +83,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var h = new Harness(retention);
             for (int i = 0; i < parties; i++) h.Admit(i, i);
             h.Complete(); return h;
+        }
+        private static HistoricalModel HistoricalTerminal(int parties = 1)
+        {
+            var model = new HistoricalModel();
+            for (int i = 0; i < parties; i++) model.Admit(i, i);
+            model.Complete(); model.FrozenReaderBytes(); model.AssertSourceUnchanged();
+            return model;
+        }
+        private static byte[] HistoricalOwnerBytes(HistoricalModel model)
+        {
+            var writer = new ContractJsonWriter(PhaseFourTestSupport.ProductionProfile().Canonical.ForSchema(14).Serialized);
+            LivingDungeonContracts.Write(writer, model.State); return writer.Finish();
         }
         private static byte[] OwnerBytes(Harness h, LivingDungeonState owner = null)
         { var w = new ContractJsonWriter(h.F.Profile.Canonical.Serialized); LivingDungeonContracts.Write(w, owner ?? h.Owner); return w.Finish(); }
@@ -160,7 +173,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(false)] [TestCase(true)]
         public void OrderingUsesAbsoluteCompletionAndNumericSequenceRegardlessOfEnumeration(bool equal)
         {
-            var h = Terminal(2); var owner = h.Owner;
+            var model = HistoricalTerminal(2); var owner = model.State;
             var p1 = owner.Parties[0]; var p2 = owner.Parties[1];
             long Time(LivingDungeonParty p)
             { var e = LivingDungeonContracts.Restore(p, Profile()); try { return e.Inspect().LogicalTime; } finally { e.Abandon(); } }
@@ -168,11 +181,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             p1.AdmittedAt = common - t1; p2.AdmittedAt = common - t2 - (equal ? 0 : 1);
             owner.Parties.Reverse();
             Assert.That(LivingDungeonTerminalSettlement.Select(owner, Profile()).Sequence, Is.EqualTo(equal ? 1 : 2));
+            model.AssertSourceUnchanged();
         }
         [Test] public void AbsoluteCompletionOverflowFailsClosed()
         {
-            var h = Terminal(); var owner = h.Owner; owner.Parties[0].AdmittedAt = long.MaxValue;
+            var model = HistoricalTerminal(); var owner = model.State; owner.Parties[0].AdmittedAt = long.MaxValue;
             Assert.That(() => LivingDungeonTerminalSettlement.Select(owner, Profile()), Throws.TypeOf<OverflowException>());
+            model.AssertSourceUnchanged();
         }
         [TestCase(1)] [TestCase(2)] [TestCase(7)]
         public void SplitBudgetAndReopenGroupingsProduceByteIdenticalSettlement(int budget)
@@ -319,14 +334,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("ordinal")] [TestCase("checkpoint")] [TestCase("identity")]
         public void ContradictoryTerminalPinsAndOrdinalsAreRejectedByCompleteSave(string kind)
         {
-            var h = Terminal(); var owner = h.Owner; var p = owner.Parties.Single();
+            var model = HistoricalTerminal();
+            string before = Encoding.UTF8.GetString(model.FrozenReaderBytes());
+            string old = Encoding.UTF8.GetString(HistoricalOwnerBytes(model));
+            var p = model.State.Parties.Single();
             if (kind == "ordinal") p.NextOrdinal--;
             if (kind == "identity") p.StartIdentity = new string('0', 64);
             if (kind == "checkpoint") p.Checkpoint[p.Checkpoint.Length - 1] ^= 1;
-            string before = Encoding.UTF8.GetString(h.F.Session.GetCurrentBytes());
-            string old = Encoding.UTF8.GetString(OwnerBytes(h)); string bad = Encoding.UTF8.GetString(OwnerBytes(h, owner));
+            string bad = Encoding.UTF8.GetString(HistoricalOwnerBytes(model));
             var bytes = Encoding.UTF8.GetBytes(before.Replace(old, bad));
-            Assert.That(DetachedCanonicalSaveSession.Open(bytes, h.F.Context, h.F.Profile).IsSuccess, Is.False);
+            Assert.That(bytes, Is.Not.EqualTo(Encoding.UTF8.GetBytes(before)), "The negative frame must contain the intended contradiction");
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(bytes,
+                PhaseFourTestSupport.ProductionProfile().Canonical.ForSchema(14), new[] { model.Profile }).IsValid, Is.False);
+            model.AssertSourceUnchanged();
         }
         [Test] public void GenericHistoryMutationStillCannotPublishAnAllocatedDurableIdentity()
         {
@@ -394,7 +414,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void ReplayAndParserLimitsRemainIndependentOfQualification()
         {
-            var h = Terminal(); var f = h.F; var p = h.Owner.Parties.Single();
+            var model = HistoricalTerminal(); var f = model.Source; var p = model.State.Parties.Single();
             var restored = new RunSimulationService(f.Configuration).RestoreCheckpoint(p.Checkpoint,
                 p.CheckpointIdentity, p.StartIdentity, p.NextOrdinal, new RunCheckpointLimits(p.Checkpoint.Length, p.NextOrdinal - 1));
             Assert.That(restored.IsValid, Is.False); Assert.That(restored.FailureReason, Is.EqualTo("run.checkpoint.replay_limit"));
@@ -403,6 +423,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(restored.IsValid, Is.False);
             var bytes = new byte[f.Profile.Canonical.Serialized.MaximumInputBytes + 1];
             Assert.That(DetachedCanonicalSaveSession.Open(bytes, f.Context, f.Profile).IsSuccess, Is.False);
+            model.AssertSourceUnchanged();
         }
         [Test] public void SettlementWorkAndReleasedStorageAreMeasuredWithinProfileBounds()
         {
@@ -417,9 +438,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         [Test] public void EqualCompletionOrdersRun2BeforeRun10UsingNumericIdentity()
         {
-            var h = Terminal(2); var owner = h.Owner;
+            var model = HistoricalTerminal(2); var owner = model.State;
             var original = LivingDungeonContracts.Restore(owner.Parties[0], Profile());
-            var ten = new RunSimulationService(h.F.Configuration, PhaseSixA4Tests.Loot()).StartSnapshot(10, original.Snapshot, Timing);
+            var ten = new RunSimulationService(model.Source.Configuration, model.Source.Context.RecoveryInputs.Loot).StartSnapshot(10, original.Snapshot, Timing);
             original.Abandon();
             try
             {
@@ -431,6 +452,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 p10.AdmittedAt = common - ten.Inspect().LogicalTime; p2.AdmittedAt = common - t2;
                 owner.Parties = new System.Collections.Generic.List<LivingDungeonParty> { p10, p2 };
                 Assert.That(LivingDungeonTerminalSettlement.Select(owner, Profile()).Sequence, Is.EqualTo(2));
+                model.AssertSourceUnchanged();
             }
             finally { ten.Abandon(); }
         }

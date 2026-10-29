@@ -204,13 +204,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         public static object CreateRetainedLimitForPlayMode()
         {
-            var f = Controlled(); Activate(f); Admit(f, 0, 0); Admit(f, 1, 1); Complete(f, 1000, false);
-            Admit(f, 2, 10001); Admit(f, 3, 10002); return f;
+            var model = new HistoricalModel(); model.Admit(0, 0); model.Admit(1, 1); model.Complete();
+            model.Admit(2, 10001); model.Admit(3, 10002); return model;
         }
         public static void ValidateForPlayMode(object value)
         {
-            var f = (Fixture)value;
-            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context).IsValid, Is.True);
+            var model = (HistoricalModel)value;
+            model.FrozenReaderBytes(); model.AssertSourceUnchanged();
         }
         private static LivingDungeonState Owner(Fixture f) => DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
             f.Session.GetCurrentBytes(), f.Context).LivingDungeon;
@@ -685,17 +685,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void CompleteSaveProfileRetainedLimitMeasurement()
         {
-            var f = Controlled(); Activate(f); Admit(f, 0, 0); Admit(f, 1, 1); Complete(f, 1000, false);
-            Admit(f, 2, 10001); Admit(f, 3, 10002);
-            var bytes = f.Session.GetCurrentBytes(); var owner = Owner(f);
+            var model = (HistoricalModel)CreateRetainedLimitForPlayMode();
+            var bytes = model.FrozenReaderBytes(); var owner = model.State;
             Assert.That(owner.RetainedCount, Is.EqualTo(ProfileA().MaximumRetained));
             long allocations = GC.GetAllocatedBytesForCurrentThread(); var clock = Stopwatch.StartNew();
-            for (int i = 0; i < 5; i++) Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, f.Context).IsValid, Is.True);
+            for (int i = 0; i < 5; i++) Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(bytes,
+                PhaseFourTestSupport.ProductionProfile().Canonical.ForSchema(14), new[] { model.Profile }).IsValid, Is.True);
             double validate = clock.Elapsed.TotalMilliseconds / 5; long validationAllocations = (GC.GetAllocatedBytesForCurrentThread() - allocations) / 5;
-            clock.Restart(); f.Reopen(); double reopen = clock.Elapsed.TotalMilliseconds;
-            f.Runtime.lastSavedUtcUnix++; allocations = GC.GetAllocatedBytesForCurrentThread(); clock.Restart();
+            clock.Restart(); model.Reopen(); double reopen = clock.Elapsed.TotalMilliseconds;
+            CollectionAssert.AreEqual(bytes, model.FrozenReaderBytes()); model.AssertSourceUnchanged();
+            // Historical retention cannot gain current write authority. Measure
+            // ordinary publication separately on its supported source session.
+            var f = model.Source; var boundary = f.Runtime.timeProvenance.AccountedBoundary;
+            f.Runtime.lastKnownAppState = "Paused"; allocations = GC.GetAllocatedBytesForCurrentThread(); clock.Restart();
             f.Accept(Writer(f).SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
-            TestContext.WriteLine($"Profile A completeBytes={bytes.Length}; retained={owner.RetainedCount}; active=2; checkpointBytes={owner.Parties.Sum(p => p.Checkpoint.Length)}; replayEvents={owner.Parties.Sum(p => p.NextOrdinal)}; validateMeanMs={validate}; validateAllocations={validationAllocations}; reopenMs={reopen}; completeTransactionMs={clock.Elapsed.TotalMilliseconds}; transactionAllocations={GC.GetAllocatedBytesForCurrentThread() - allocations}; byteCeiling=655360; replayCeiling=8192; byteReplayCeilingsAreBoundsNotAttainedWorkloads=true");
+            Assert.That(f.Runtime.timeProvenance.AccountedBoundary.CompareTo(boundary), Is.Zero);
+            TestContext.WriteLine($"Frozen Profile A completeBytes={bytes.Length}; retained={owner.RetainedCount}; active=2; checkpointBytes={owner.Parties.Sum(p => p.Checkpoint.Length)}; replayEvents={owner.Parties.Sum(p => p.NextOrdinal)}; validateMeanMs={validate}; validateAllocations={validationAllocations}; frozenReopenMs={reopen}; separateCurrentOrdinaryTransactionMs={clock.Elapsed.TotalMilliseconds}; separateCurrentTransactionAllocations={GC.GetAllocatedBytesForCurrentThread() - allocations}; byteCeiling=655360; replayCeiling=8192; byteReplayCeilingsAreBoundsNotAttainedWorkloads=true; historicalWritableAuthority=false");
         }
         [TestCase("spatial")] [TestCase("investment")] [TestCase("corridor")]
         [TestCase("branchKnowledge")] [TestCase("floorKnowledge")] [TestCase("recognizedManaResearch")]
