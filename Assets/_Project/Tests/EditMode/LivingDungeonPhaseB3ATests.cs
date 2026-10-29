@@ -84,12 +84,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
             for (int i = 0; i < parties; i++) h.Admit(i, i);
             h.Complete(); return h;
         }
-        private static HistoricalModel HistoricalTerminal(int parties = 1)
+        private static HistoricalModel HistoricalTerminal(int parties = 1, int retention = 10)
         {
-            var model = new HistoricalModel();
+            var model = new HistoricalModel(PhaseFiveBBranchIntegrationTests.Fixture(author: c => c.MaxRunHistoryEntries = retention));
             for (int i = 0; i < parties; i++) model.Admit(i, i);
             model.Complete(); model.FrozenReaderBytes(); model.AssertSourceUnchanged();
             return model;
+        }
+        // Pure historical composition only. This calls the existing selector and
+        // consequence component; it has no current session, publication result,
+        // request capability, persistence operation or historical producer proof.
+        private static void ApplyHistoricalConsequencesAndRetire(HistoricalModel model, RunSimulationConfig currentConfig = null)
+        {
+            var f = model.Source; var source = f.Session.GetCurrentBytes();
+            var owned = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(model.FrozenReaderBytes(),
+                PhaseFourTestSupport.ProductionProfile().Canonical.ForSchema(14), new[] { model.Profile });
+            var selected = LivingDungeonTerminalSettlement.Select(model.State, model.Profile);
+            Assert.That(selected, Is.Not.Null);
+            var execution = LivingDungeonContracts.Restore(selected, model.Profile);
+            try { LivingDungeonTerminalSettlement.Apply(model.Candidate, owned, execution, execution.TakeOutcome(),
+                currentConfig ?? f.Configuration, f.Production, f.Profile.Canonical); }
+            finally { execution.Abandon(); }
+            Assert.That(model.State.Parties.Remove(selected), Is.True);
+            LivingDungeonScheduling.Change(model.State);
+            CollectionAssert.AreEqual(source, f.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(source, f.FileSystem.ReadAllBytes(f.ActivePath));
+        }
+        private static RunSimulationConfig IndependentConfiguration(HistoricalModel model)
+        {
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                Encoding.UTF8.GetString(model.Source.Context.RecoveryInputs.Identity.GetInput(0)), out var copy), Is.True);
+            return copy;
         }
         private static byte[] HistoricalOwnerBytes(HistoricalModel model)
         {
@@ -192,114 +217,118 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(1)] [TestCase(2)] [TestCase(7)]
         public void SplitBudgetAndReopenGroupingsProduceByteIdenticalSettlement(int budget)
         {
-            var a = Terminal(2); a.F.Accept(a.Settle()); a.F.Accept(a.Settle());
-            var b = new Harness(); b.Admit(); b.Admit(1, 1); b.Complete(budget, true);
-            b.F.Reopen(); b.F.Accept(b.Settle()); b.F.Reopen(); b.F.Accept(b.Settle());
-            CollectionAssert.AreEqual(a.F.Session.GetCurrentBytes(), b.F.Session.GetCurrentBytes());
+            var a = HistoricalTerminal(2); ApplyHistoricalConsequencesAndRetire(a); ApplyHistoricalConsequencesAndRetire(a);
+            var b = new HistoricalModel(); b.Admit(0, 0); b.Admit(1, 1); b.Complete(budget, true);
+            b.Reopen(); ApplyHistoricalConsequencesAndRetire(b); b.Reopen(); ApplyHistoricalConsequencesAndRetire(b);
+            CollectionAssert.AreEqual(a.FrozenReaderBytes(), b.FrozenReaderBytes());
+            a.AssertSourceUnchanged(); b.AssertSourceUnchanged();
         }
         [Test] public void RetiredBytesAndReplayReleaseCapacityForLaterAdmission()
         {
-            var h = Terminal(2); h.Admit(2, 10001); h.Admit(3, 10002); h.Complete(horizon: 20000);
-            Assert.That(h.Owner.RetainedCount, Is.EqualTo(4));
-            int bytes = h.F.Session.GetCurrentBytes().Length; long replay = h.Owner.Parties.Sum(p => p.NextOrdinal);
-            h.F.Accept(h.Settle());
-            Assert.That(h.F.Session.GetCurrentBytes().Length, Is.LessThan(bytes));
-            Assert.That(h.Owner.Parties.Sum(p => p.NextOrdinal), Is.LessThan(replay));
-            h.Admit(4, 20001); Assert.That(h.Owner.RetainedCount, Is.EqualTo(4));
-            Assert.That(h.F.Runtime.runHistory.NextRunSequence, Is.EqualTo(6));
+            var model = HistoricalTerminal(2); model.Admit(2, 10001); model.Admit(3, 10002); model.Complete(through: 20000);
+            Assert.That(model.State.RetainedCount, Is.EqualTo(4));
+            int bytes = model.FrozenReaderBytes().Length; long replay = model.State.Parties.Sum(p => p.NextOrdinal);
+            ApplyHistoricalConsequencesAndRetire(model);
+            Assert.That(model.FrozenReaderBytes().Length, Is.LessThan(bytes));
+            Assert.That(model.State.Parties.Sum(p => p.NextOrdinal), Is.LessThan(replay));
+            model.Admit(4, 20001); Assert.That(model.State.RetainedCount, Is.EqualTo(4));
+            Assert.That(model.Candidate.runHistory.NextRunSequence, Is.EqualTo(6)); model.AssertSourceUnchanged();
         }
         [Test] public void InterleavedManualAndDurableHistoryRetainsAllocatorAndRolloverRules()
         {
-            var h = new Harness(2); h.Admit(); h.Manual(); h.Admit(1, 1); h.Complete();
-            Assert.That(h.Owner.Parties.Select(p => p.Sequence), Is.EqualTo(new[] { 1, 3 }));
-            h.Manual(); int next = h.F.Runtime.runHistory.NextRunSequence;
-            h.F.Accept(h.Settle()); h.F.Accept(h.Settle());
-            Assert.That(h.F.Runtime.runHistory.RecentOutcomes.Select(o => o.RunId), Is.EqualTo(new[] { "run-1", "run-3" }));
-            Assert.That(h.F.Runtime.runHistory.NextRunSequence, Is.EqualTo(next));
+            var model = new HistoricalModel(PhaseFiveBBranchIntegrationTests.Fixture(author: c => c.MaxRunHistoryEntries = 2));
+            model.Admit(0, 0); model.Manual(); model.Admit(1, 1); model.Complete();
+            Assert.That(model.State.Parties.Select(p => p.Sequence), Is.EqualTo(new[] { 1, 3 }));
+            model.Manual(); int next = model.Candidate.runHistory.NextRunSequence;
+            ApplyHistoricalConsequencesAndRetire(model); ApplyHistoricalConsequencesAndRetire(model);
+            Assert.That(model.Candidate.runHistory.RecentOutcomes.Select(o => o.RunId), Is.EqualTo(new[] { "run-1", "run-3" }));
+            Assert.That(model.Candidate.runHistory.NextRunSequence, Is.EqualTo(next));
             Assert.That(next, Is.EqualTo(5));
-            Assert.That(Json(h.F.Runtime.runHistory.LatestOutcome), Is.EqualTo(Json(h.F.Runtime.runHistory.RecentOutcomes.Last())));
+            Assert.That(Json(model.Candidate.runHistory.LatestOutcome), Is.EqualTo(Json(model.Candidate.runHistory.RecentOutcomes.Last())));
+            model.FrozenReaderBytes(); model.AssertSourceUnchanged();
         }
         [Test] public void CurrentHeatUsesResolvedDeltaThenIndependentCoolingWithoutStartOverwrite()
         {
-            var h = Terminal(); var p = h.Owner.Parties.Single(); var e = LivingDungeonContracts.Restore(p, Profile());
+            var model = HistoricalTerminal(); var p = model.State.Parties.Single(); var e = LivingDungeonContracts.Restore(p, Profile());
             RunOutcomeRecord historical; RunSimulationConfig config;
             try { config = e.Snapshot.Configuration; historical = e.TakeOutcome(); } finally { e.Abandon(); }
-            h.F.Runtime.structureRuntime.Heat = 47.375; h.Save();
+            model.Candidate.structureRuntime.Heat = 47.375;
             var expectedHeat = RunHeatStateApplyResolver.Resolve(config, 47.375, historical.RunHeatDeltaSummary);
             var expectedCooling = LootHeatCoolingResolver.Resolve(config, historical.LootExtractionSummary,
                 expectedHeat.HeatAfter, historical.LootExtractionSummary.DeterministicSeed);
-            h.F.Accept(h.Settle()); var outcome = h.F.Runtime.runHistory.LatestOutcome;
+            ApplyHistoricalConsequencesAndRetire(model); var outcome = model.Candidate.runHistory.LatestOutcome;
             Assert.That(outcome.RunHeatApplicationSummary.HeatBefore, Is.EqualTo(47.375));
             Assert.That(outcome.RunHeatApplicationSummary.HeatAfter, Is.EqualTo(expectedHeat.HeatAfter));
             Assert.That(outcome.LootHeatCoolingSummary.HeatBeforeCooling, Is.EqualTo(expectedHeat.HeatAfter));
-            Assert.That(h.F.Runtime.structureRuntime.Heat, Is.EqualTo(Math.Max(0, expectedHeat.HeatAfter + expectedCooling.AppliedHeatDelta)));
+            Assert.That(model.Candidate.structureRuntime.Heat, Is.EqualTo(Math.Max(0, expectedHeat.HeatAfter + expectedCooling.AppliedHeatDelta)));
             Assert.That(Json(outcome.LootExtractionSummary), Is.EqualTo(Json(historical.LootExtractionSummary)));
             Assert.That(outcome.RunHeatApplicationSummary.HeatBefore, Is.Not.EqualTo(historical.RunHeatApplicationSummary.HeatBefore));
+            model.FrozenReaderBytes(); model.AssertSourceUnchanged();
         }
         [Test] public void SettlementUsesCurrentHistoryRetentionRatherThanTheOlderStartBound()
         {
-            var h = Terminal(retention: 3); h.Manual();
-            h.F.Configuration.MaxRunHistoryEntries = 1;
-            int next = h.F.Runtime.runHistory.NextRunSequence;
-            h.F.Accept(h.Settle());
-            Assert.That(h.F.Runtime.runHistory.RecentOutcomes.Select(o => o.RunId), Is.EqualTo(new[] { "run-1" }));
-            Assert.That(h.F.Runtime.runHistory.NextRunSequence, Is.EqualTo(next));
+            var model = HistoricalTerminal(retention: 3); model.Manual();
+            var independent = IndependentConfiguration(model); independent.MaxRunHistoryEntries = 1;
+            int next = model.Candidate.runHistory.NextRunSequence;
+            ApplyHistoricalConsequencesAndRetire(model, independent);
+            Assert.That(model.Candidate.runHistory.RecentOutcomes.Select(o => o.RunId), Is.EqualTo(new[] { "run-1" }));
+            Assert.That(model.Candidate.runHistory.NextRunSequence, Is.EqualTo(next)); model.AssertSourceUnchanged();
         }
         [Test] public void OnlyTheIndividuallyVerifiedConfiguredFirstSessionObjectiveIsCompleted()
         {
-            var h = new Harness(); var f = h.F; var objective = f.Configuration.MvpFirstSessionObjective;
-            // Test-owned qualification thresholds; production configuration is unchanged.
-            objective.RequiredRunCount = 1; objective.RequiredRecoveredLootValue = 1;
-            objective.RequiredCompletePath = true; objective.RequireResearchAnalysisUnlocked = false;
-            objective.AllowedMaxHeatTierId = CurrentHeatTierResolver.ConcernTierId;
-            string room = f.State.Floors[0].Layout.Rooms[0].RoomInstanceId;
-            foreach (var item in new[] {
-                (MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId, new TileCoordinate(1,1)),
-                (MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, new TileCoordinate(1,2)),
-                (MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId, new TileCoordinate(0,0)) })
-                f.Accept(h.Q.Edit(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
-                    DetachedCanonicalMutationRequest.Place(item.Item1, item.Item2, room, null, item.Item3)));
-            f.Runtime.completedObjectives = new CompletedObjectiveState { ObjectiveIds = new[] { "test.b3a.unrelated" },
+            var f = PhaseFiveBBranchIntegrationTests.Fixture(author: config => {
+                var objective = config.MvpFirstSessionObjective;
+                objective.RequiredRunCount = 1; objective.RequiredRecoveredLootValue = 1;
+                objective.RequiredCompletePath = true; objective.RequireResearchAnalysisUnlocked = false;
+                objective.AllowedMaxHeatTierId = CurrentHeatTierResolver.ConcernTierId;
+            });
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+            var model = new HistoricalModel(f); var candidate = model.Candidate;
+            candidate.completedObjectives = new CompletedObjectiveState { ObjectiveIds = new[] { "test.b3a.unrelated" },
                 LastCompletedObjectiveId = "test.b3a.unrelated", LastCompletionRuleSourceId = "test.b3a.previous" };
-            h.Save(); string research = Json(f.Runtime.completedResearch);
-            h.Admit(); h.Complete(); double mana = f.Runtime.structureRuntime.ManaReserve;
-            f.Accept(h.Settle());
-            CollectionAssert.AreEquivalent(new[] { "test.b3a.unrelated", objective.ObjectiveId }, f.Runtime.completedObjectives.ObjectiveIds);
-            Assert.That(f.Runtime.completedObjectives.LastCompletionRuleSourceId,
+            string research = Json(candidate.completedResearch);
+            model.Admit(0, 0); model.Complete(); double mana = candidate.structureRuntime.ManaReserve;
+            ApplyHistoricalConsequencesAndRetire(model);
+            CollectionAssert.AreEquivalent(new[] { "test.b3a.unrelated", f.Configuration.MvpFirstSessionObjective.ObjectiveId }, candidate.completedObjectives.ObjectiveIds);
+            Assert.That(candidate.completedObjectives.LastCompletionRuleSourceId,
                 Is.EqualTo(CompletedObjectiveStateResolver.FirstSessionObjectiveCompletionRuleSourceId));
-            Assert.That(Json(f.Runtime.completedResearch), Is.EqualTo(research));
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            Assert.That(Json(candidate.completedResearch), Is.EqualTo(research));
+            Assert.That(candidate.structureRuntime.ManaReserve, Is.EqualTo(mana)); model.AssertSourceUnchanged();
         }
         [Test] public void CompatibleSurvivorLearningUsesCanonicalRecordsAndNoFabricatedC2State()
         {
-            var h = Terminal(); var f = h.F;
-            string monsters = Json(f.Runtime.monsterContinuity), research = Json(f.Runtime.completedResearch);
-            double mana = f.Runtime.structureRuntime.ManaReserve;
-            h.F.Accept(h.Settle());
-            Assert.That(f.Runtime.sharedBranchKnowledge.Records.Single().LastConfirmedRunId, Is.EqualTo("run-1"));
-            Assert.That(f.Runtime.sharedFloorKnowledge.Records.Single().LastConfirmedRunId, Is.EqualTo("run-1"));
-            Assert.That(Json(f.Runtime.monsterContinuity), Is.EqualTo(monsters));
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana));
-            Assert.That(Json(f.Runtime.completedResearch), Is.EqualTo(research));
-            Assert.That(CombatC0Diagnostics.IsCombatC2(f.Runtime.runHistory.LatestOutcome), Is.False);
+            var model = HistoricalTerminal(); var candidate = model.Candidate;
+            string monsters = Json(candidate.monsterContinuity), research = Json(candidate.completedResearch);
+            double mana = candidate.structureRuntime.ManaReserve;
+            ApplyHistoricalConsequencesAndRetire(model);
+            Assert.That(candidate.sharedBranchKnowledge.Records.Single().LastConfirmedRunId, Is.EqualTo("run-1"));
+            Assert.That(candidate.sharedFloorKnowledge.Records.Single().LastConfirmedRunId, Is.EqualTo("run-1"));
+            Assert.That(Json(candidate.monsterContinuity), Is.EqualTo(monsters));
+            Assert.That(candidate.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            Assert.That(Json(candidate.completedResearch), Is.EqualTo(research));
+            Assert.That(CombatC0Diagnostics.IsCombatC2(candidate.runHistory.LatestOutcome), Is.False); model.AssertSourceUnchanged();
         }
         [Test] public void ContentChangedBranchAndFloorCannotLearnFromMatchingTopology()
         {
-            var h = Terminal(); var f = h.F; var assignment = f.Runtime.corridorContent.Assignments.First();
-            f.Accept(h.Q.Edit(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
-                DetachedCanonicalMutationRequest.Unassign(assignment.AssignmentId)));
-            string branch = Json(f.Runtime.sharedBranchKnowledge), floor = Json(f.Runtime.sharedFloorKnowledge);
-            f.Accept(h.Settle());
-            Assert.That(Json(f.Runtime.sharedBranchKnowledge), Is.EqualTo(branch));
-            Assert.That(Json(f.Runtime.sharedFloorKnowledge), Is.EqualTo(floor));
+            var model = HistoricalTerminal(); var f = model.Source; var candidate = model.Candidate;
+            var assignment = f.Runtime.corridorContent.Assignments.First();
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Unassign(assignment.AssignmentId)));
+            var edited = f.Session.GetCurrentBytes();
+            string branch = Json(candidate.sharedBranchKnowledge), floor = Json(candidate.sharedFloorKnowledge);
+            ApplyHistoricalConsequencesAndRetire(model);
+            Assert.That(Json(candidate.sharedBranchKnowledge), Is.EqualTo(branch));
+            Assert.That(Json(candidate.sharedFloorKnowledge), Is.EqualTo(floor));
+            CollectionAssert.AreEqual(edited, f.Session.GetCurrentBytes());
         }
         [Test] public void LaterManualLearningIsPreservedAgainstOlderDurableSnapshot()
         {
-            var h = Terminal(); h.Manual();
-            string branch = Json(h.F.Runtime.sharedBranchKnowledge), floor = Json(h.F.Runtime.sharedFloorKnowledge);
-            h.F.Accept(h.Settle());
-            Assert.That(Json(h.F.Runtime.sharedBranchKnowledge), Is.EqualTo(branch));
-            Assert.That(Json(h.F.Runtime.sharedFloorKnowledge), Is.EqualTo(floor));
+            var model = HistoricalTerminal(); model.Manual();
+            string branch = Json(model.Candidate.sharedBranchKnowledge), floor = Json(model.Candidate.sharedFloorKnowledge);
+            ApplyHistoricalConsequencesAndRetire(model);
+            Assert.That(Json(model.Candidate.sharedBranchKnowledge), Is.EqualTo(branch));
+            Assert.That(Json(model.Candidate.sharedFloorKnowledge), Is.EqualTo(floor)); model.AssertSourceUnchanged();
         }
         [TestCase(Op.Write, 1)] [TestCase(Op.Write, 2)] [TestCase(Op.Replace, 1)] [TestCase(Op.Flush, 1)]
         public void FailedAtomicSettlementPublishesNothingAndProvenRollbackCanRetry(Op operation, int occurrence)
@@ -371,16 +400,25 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void PartyWipeRetainsHistoricalExtractionButPublishesNoSurvivorLearning()
         {
-            var h = new Harness(wipe: true); h.Admit(); h.Complete();
-            var e = LivingDungeonContracts.Restore(h.Owner.Parties.Single(), Profile());
+            var f = PhaseFiveBBranchIntegrationTests.Fixture(author: config => {
+                config.PhaseFiveB.MinPartySize = config.PhaseFiveB.MaxPartySize = 3;
+                foreach (var c in config.PhaseFiveB.Classes) c.LevelOneMaxHealth = 1;
+                foreach (var d in config.PhaseFiveB.DamageProfiles) { d.MinimumDamage = 100; d.MaximumDamage = 100; }
+            });
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId);
+            var model = new HistoricalModel(f); model.Admit(0, 0); model.Complete();
+            var e = LivingDungeonContracts.Restore(model.State.Parties.Single(), Profile());
             RunOutcomeRecord outcome;
             try { outcome = e.TakeOutcome(); } finally { e.Abandon(); }
             Assert.That(outcome.Party.ActiveCount, Is.Zero);
-            string branch = Json(h.F.Runtime.sharedBranchKnowledge), floor = Json(h.F.Runtime.sharedFloorKnowledge);
-            h.F.Accept(h.Settle());
-            Assert.That(Json(h.F.Runtime.sharedBranchKnowledge), Is.EqualTo(branch));
-            Assert.That(Json(h.F.Runtime.sharedFloorKnowledge), Is.EqualTo(floor));
-            Assert.That(Json(h.F.Runtime.runHistory.LatestOutcome.LootExtractionSummary), Is.EqualTo(Json(outcome.LootExtractionSummary)));
+            string branch = Json(model.Candidate.sharedBranchKnowledge), floor = Json(model.Candidate.sharedFloorKnowledge);
+            ApplyHistoricalConsequencesAndRetire(model);
+            Assert.That(Json(model.Candidate.sharedBranchKnowledge), Is.EqualTo(branch));
+            Assert.That(Json(model.Candidate.sharedFloorKnowledge), Is.EqualTo(floor));
+            Assert.That(Json(model.Candidate.runHistory.LatestOutcome.LootExtractionSummary), Is.EqualTo(Json(outcome.LootExtractionSummary)));
+            model.AssertSourceUnchanged();
         }
         [TestCase("partial")] [TestCase("readback")]
         public void PartialCandidateAndDurableReadbackFailuresDoNotRetireOrPublish(string mode)
@@ -394,23 +432,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void SettlementDoesNotCompleteUnmetObjectivesOrResearchOrGrantMana()
         {
-            var h = Terminal(); var f = h.F;
-            string completed = Json(f.Runtime.completedObjectives), pending = Json(f.Runtime.researchPending), progress = Json(f.Runtime.researchProgress);
-            double mana = f.Runtime.structureRuntime.ManaReserve;
-            f.Accept(h.Settle());
-            Assert.That(Json(f.Runtime.completedObjectives), Is.EqualTo(completed));
-            Assert.That(Json(f.Runtime.researchPending), Is.EqualTo(pending));
-            Assert.That(Json(f.Runtime.researchProgress), Is.EqualTo(progress));
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            var model = HistoricalTerminal(); var candidate = model.Candidate;
+            string completed = Json(candidate.completedObjectives), pending = Json(candidate.researchPending), progress = Json(candidate.researchProgress);
+            double mana = candidate.structureRuntime.ManaReserve;
+            ApplyHistoricalConsequencesAndRetire(model);
+            Assert.That(Json(candidate.completedObjectives), Is.EqualTo(completed));
+            Assert.That(Json(candidate.researchPending), Is.EqualTo(pending));
+            Assert.That(Json(candidate.researchProgress), Is.EqualTo(progress));
+            Assert.That(candidate.structureRuntime.ManaReserve, Is.EqualTo(mana)); model.AssertSourceUnchanged();
         }
         [Test] public void ChangedObjectiveConfigurationCannotAuthorizeOldObjectiveCompletion()
         {
-            var h = Terminal(); var f = h.F; string objectives = Json(f.Runtime.completedObjectives);
-            f.Configuration.MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig {
+            var model = HistoricalTerminal(); string objectives = Json(model.Candidate.completedObjectives);
+            var independent = IndependentConfiguration(model);
+            independent.MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig {
                 ObjectiveId = "test.b3a.changed_objective", RequiredRunCount = 1,
                 RequiredRecoveredLootValue = 1, RequiredCompletePath = false };
-            f.Accept(h.Settle());
-            Assert.That(Json(f.Runtime.completedObjectives), Is.EqualTo(objectives));
+            ApplyHistoricalConsequencesAndRetire(model, independent);
+            Assert.That(Json(model.Candidate.completedObjectives), Is.EqualTo(objectives)); model.AssertSourceUnchanged();
         }
         [Test] public void ReplayAndParserLimitsRemainIndependentOfQualification()
         {
@@ -427,13 +466,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void SettlementWorkAndReleasedStorageAreMeasuredWithinProfileBounds()
         {
-            var h = Terminal(2); var f = h.F; int before = f.Session.GetCurrentBytes().Length;
-            long replay = h.Owner.Parties.Sum(p => p.NextOrdinal);
-            var watch = Stopwatch.StartNew(); var request = h.Q.Prepare(f.Session); double selection = watch.Elapsed.TotalMilliseconds;
-            watch.Restart(); f.Accept(h.Settle(request)); double transaction = watch.Elapsed.TotalMilliseconds;
+            var model = HistoricalTerminal(2); int before = model.FrozenReaderBytes().Length;
+            long replay = model.State.Parties.Sum(p => p.NextOrdinal);
+            var watch = Stopwatch.StartNew(); var selected = LivingDungeonTerminalSettlement.Select(model.State, model.Profile);
+            Assert.That(selected, Is.Not.Null); double selection = watch.Elapsed.TotalMilliseconds;
+            watch.Restart(); ApplyHistoricalConsequencesAndRetire(model); double composition = watch.Elapsed.TotalMilliseconds;
             Assert.That(replay, Is.LessThanOrEqualTo(Profile().MaximumTotalReplay));
-            Assert.That(before, Is.LessThanOrEqualTo(f.Profile.Whole.MaximumCandidateBytes));
-            TestContext.WriteLine($"B3A retainedBefore=2 retainedAfter=1 replayEventsBefore={replay} bytesBefore={before} bytesAfter={f.Session.GetCurrentBytes().Length} selectionMs={selection:R} atomicSettlementMs={transaction:R}; includesFullValidationAndReplay=true");
+            Assert.That(before, Is.LessThanOrEqualTo(PhaseFourTestSupport.ProductionProfile().Canonical.ForSchema(14).Serialized.MaximumInputBytes));
+            Assert.That(model.State.RetainedCount, Is.EqualTo(1));
+            Assert.That(model.FrozenReaderBytes().Length, Is.LessThan(before)); model.AssertSourceUnchanged();
+            TestContext.WriteLine($"Historical B3A retainedBefore=2 retainedAfter=1 replayEventsBefore={replay} bytesBefore={before} bytesAfter={model.FrozenReaderBytes().Length} selectionMs={selection:R} pureCompositionMs={composition:R}; includesFrozenValidationAndReplay=true; atomicPublicationMeasured=false");
         }
 
         [Test] public void EqualCompletionOrdersRun2BeforeRun10UsingNumericIdentity()
