@@ -1413,6 +1413,613 @@
       "worktree_patch_sha256": "321efb5f7d69cf523fcf26ab779cab5c70f8124d1c3f41c3b757176ad5704d98"
     }
   },
+  "current_protocol_fault_followup": {
+    "campaign": "86f84bc8b1d54a819f1d3ab7d5e100eb",
+    "cases": [
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"readback\")",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"replace\")",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"partial\")",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"rollback\")",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.FailedAdmissionPersistencePublishesNeitherSequenceNorCheckpoint(1)",
+        "result": "Passed"
+      },
+      {
+        "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.FailedAdmissionPersistencePublishesNeitherSequenceNorCheckpoint(2)",
+        "result": "Passed"
+      }
+    ],
+    "counts": {
+      "failed": 0,
+      "passed": 6,
+      "skipped": 0
+    },
+    "independent": {
+      "all_checks_passed": true,
+      "all_stage_job_queries_absent_error2": true,
+      "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\86f84bc8b1d54a819f1d3ab7d5e100eb",
+      "font_sha256": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+      "historical_descendant_completion_reinterpreted": false,
+      "historical_full_xml_unchanged": true,
+      "input_count": 1494,
+      "later_process_absences": {
+        "legacy-scheduling-preflight/child_process": {
+          "current": null,
+          "recorded": {
+            "created": 134377580669476329,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 41360
+          }
+        },
+        "legacy-scheduling-preflight/process": {
+          "current": null,
+          "recorded": {
+            "created": 134377580668221560,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 30912
+          }
+        },
+        "legacy-scheduling/child_process": {
+          "current": null,
+          "recorded": {
+            "created": 134377580769083768,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 39956
+          }
+        },
+        "legacy-scheduling/process": {
+          "current": null,
+          "recorded": {
+            "created": 134377580767887979,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 29580
+          }
+        },
+        "preservation/child_process": {
+          "current": null,
+          "recorded": {
+            "created": 134377581364584560,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 41080
+          }
+        },
+        "preservation/process": {
+          "current": null,
+          "recorded": {
+            "created": 134377581363488937,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 43352
+          }
+        },
+        "restore-preflight/child_process": {
+          "current": null,
+          "recorded": {
+            "created": 134377581159487504,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 31572
+          }
+        },
+        "restore-preflight/process": {
+          "current": null,
+          "recorded": {
+            "created": 134377581158317864,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 23672
+          }
+        },
+        "restore/child_process": {
+          "current": null,
+          "recorded": {
+            "created": 134377581259449166,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 40832
+          }
+        },
+        "restore/process": {
+          "current": null,
+          "recorded": {
+            "created": 134377581258245588,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 27516
+          }
+        }
+      },
+      "original_inputs_restored": true,
+      "prior_evidence_directories_verified": 195,
+      "protected_evidence_unchanged": true,
+      "reservation": {
+        "campaign": null,
+        "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\86f84bc8b1d54a819f1d3ab7d5e100eb"
+      },
+      "stages": {
+        "legacy-scheduling": {
+          "campaign": "86f84bc8b1d54a819f1d3ab7d5e100eb",
+          "child_finished_utc": "2026-10-29T14:35:10.646203+00:00",
+          "child_process": {
+            "created": 134377580769083768,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 39956
+          },
+          "child_started_utc": "2026-10-29T14:34:36.915464+00:00",
+          "command": [
+            "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "-B",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-hf01\\run_selected01.py",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\86f84bc8b1d54a819f1d3ab7d5e100eb\\legacy-scheduling"
+          ],
+          "evidence": {
+            "child.json": "91575a169a5a1a68b726f8dc553a6d106b67ada231b4091151173ebda5d3e720",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "b203f3f8d3e4b844bb5044f34b85641395d286110c56d269fc77d40ea5a12aa5",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "54dbffc5e1bae1c338d9b4c9b97291f5b76ef90be1f559949324d29f1f2aee8e",
+            "results.xml": "786eeabdaa8e912946ce57f10bac84fe3c8c9bd9a7c14eb0bdcb4fa861a87e67",
+            "started.json": "269545442af82a0ca1f9712cbfb9db6a41aa36d3c0346746591c3f8aa85a79c2",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "c29c7cfa1b8c3f0f72a577517892664e0a3143126266103890d9b08245dcb947"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-29T14:35:10.655362+00:00",
+          "host_exit_code": 0,
+          "input_identity": "c1bfc0fa473233339ec410f4577f2fa8cf8fff5b5f72aaca1ef5dd633d42dce2",
+          "job": "Local\\DLQ-52805c99c5d0407a8a684a2db0b079d7",
+          "process": {
+            "created": 134377580767887979,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 29580
+          },
+          "source_sha": "292ca24cf9b92a32701dc2b7dcd707f43e851d6e",
+          "stage": "legacy-scheduling",
+          "started_utc": "2026-10-29T14:34:36.780355+00:00",
+          "status": "PASSED",
+          "tests": {
+            "discovered": 6,
+            "failed": 0,
+            "passed": 6,
+            "skipped": 0,
+            "skips": []
+          }
+        },
+        "legacy-scheduling-preflight": {
+          "campaign": "86f84bc8b1d54a819f1d3ab7d5e100eb",
+          "child_finished_utc": "2026-10-29T14:34:31.749678+00:00",
+          "child_process": {
+            "created": 134377580669476329,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 41360
+          },
+          "child_started_utc": "2026-10-29T14:34:26.953730+00:00",
+          "command": [
+            "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "-B",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+            "preflight",
+            "--attempt",
+            "hf01",
+            "--stage",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\86f84bc8b1d54a819f1d3ab7d5e100eb/legacy-scheduling-preflight"
+          ],
+          "evidence": {
+            "child.json": "e91cd47093a83efdf5ed05099a01d6730955d2e1eacae8da4492a7e2473700c7",
+            "exit.json": "e3158812569a1720d5486569f4f27a4b1eaed3f2c60a948cbc06cc24d1d51daa",
+            "preservation.json": "2b641046f1ddb8a8a98a6e48299e396e2e96f952b82f2a0476fd4b444854d972",
+            "started.json": "25b825da5a02127857f8403a121641c67e864db196e3902a60319a4000ca7310",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-29T14:34:31.758678+00:00",
+          "host_exit_code": 0,
+          "input_identity": "c1bfc0fa473233339ec410f4577f2fa8cf8fff5b5f72aaca1ef5dd633d42dce2",
+          "job": "Local\\DLQ-3bdb4f0be1184c5699ff04683b88b1aa",
+          "process": {
+            "created": 134377580668221560,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 30912
+          },
+          "source_sha": "292ca24cf9b92a32701dc2b7dcd707f43e851d6e",
+          "stage": "legacy-scheduling-preflight",
+          "started_utc": "2026-10-29T14:34:26.811336+00:00",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "preservation": {
+          "campaign": "86f84bc8b1d54a819f1d3ab7d5e100eb",
+          "child_finished_utc": "2026-10-29T14:35:40.821686+00:00",
+          "child_process": {
+            "created": 134377581364584560,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 41080
+          },
+          "child_started_utc": "2026-10-29T14:35:36.464029+00:00",
+          "command": [
+            "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "-B",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+            "finish",
+            "--attempt",
+            "hf01",
+            "--stage",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\86f84bc8b1d54a819f1d3ab7d5e100eb\\preservation"
+          ],
+          "evidence": {
+            "child.json": "c6c70953b933b066e8701c2b907dc725d4c803f6ff69f4f370fce4bac7bd4faa",
+            "exit.json": "80f98a620fc46900f3d3e2baac6e73b5ce6fea12a449ccfaf560af97714ceea0",
+            "preservation.json": "4c33645ab68ae751d8c28cfce62632fce3486944c764f25797a70a964e20df38",
+            "started.json": "9b7904ca46a0524440801c96d2d3d7341fb4afc747b446d297df35568f75c967",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-29T14:35:40.830686+00:00",
+          "host_exit_code": 0,
+          "input_identity": "9f14a93e5104782b5b61e74f342482491669d8689cb3b3074f5f4ad409605146",
+          "job": "Local\\DLQ-84bd654054584ebc9e163a8ca5b62415",
+          "process": {
+            "created": 134377581363488937,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 43352
+          },
+          "source_sha": "292ca24cf9b92a32701dc2b7dcd707f43e851d6e",
+          "stage": "preservation",
+          "started_utc": "2026-10-29T14:35:36.341033+00:00",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "restore": {
+          "campaign": "86f84bc8b1d54a819f1d3ab7d5e100eb",
+          "child_finished_utc": "2026-10-29T14:35:31.861110+00:00",
+          "child_process": {
+            "created": 134377581259449166,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 40832
+          },
+          "child_started_utc": "2026-10-29T14:35:25.950017+00:00",
+          "command": [
+            "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "-B",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+            "restore",
+            "--attempt",
+            "hf01",
+            "--stage",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\86f84bc8b1d54a819f1d3ab7d5e100eb\\restore"
+          ],
+          "evidence": {
+            "child.json": "44f7f8ddbba91220b79c4e8c8994412cb6ba609e90f8ebe74c5a25734971e1ab",
+            "exit.json": "d28bb6db0325bea23ef8b6629ff10ba070f93e04d81f8a370aac8c2fe3a183d6",
+            "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+            "started.json": "d67dde737903a6327e182c84e3cd54e28aae278e005a5a652edbf5be4076daab",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-29T14:35:31.871605+00:00",
+          "host_exit_code": 0,
+          "input_identity": "c1bfc0fa473233339ec410f4577f2fa8cf8fff5b5f72aaca1ef5dd633d42dce2",
+          "job": "Local\\DLQ-61975929fd0441eeb3dc88e5620366c9",
+          "process": {
+            "created": 134377581258245588,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 27516
+          },
+          "source_sha": "292ca24cf9b92a32701dc2b7dcd707f43e851d6e",
+          "stage": "restore",
+          "started_utc": "2026-10-29T14:35:25.817679+00:00",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "restore-preflight": {
+          "campaign": "86f84bc8b1d54a819f1d3ab7d5e100eb",
+          "child_finished_utc": "2026-10-29T14:35:20.747728+00:00",
+          "child_process": {
+            "created": 134377581159487504,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 31572
+          },
+          "child_started_utc": "2026-10-29T14:35:15.954471+00:00",
+          "command": [
+            "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "-B",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+            "preflight",
+            "--attempt",
+            "hf01",
+            "--stage",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\86f84bc8b1d54a819f1d3ab7d5e100eb/restore-preflight"
+          ],
+          "evidence": {
+            "child.json": "d4be9627225271780ef388d69ed6c290559b28ee480d5aac72e293ecd39829ac",
+            "exit.json": "6b43de81849f7fc6481885be0c11c16f99fc4f551b806c3c80f4ba73a723f1ac",
+            "preservation.json": "2b641046f1ddb8a8a98a6e48299e396e2e96f952b82f2a0476fd4b444854d972",
+            "started.json": "97eb87e2c7f7b5923dbf3930a24a5a945288d8dc8bad6a84fa9fe4c489b0b7bb",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-29T14:35:20.757235+00:00",
+          "host_exit_code": 0,
+          "input_identity": "c1bfc0fa473233339ec410f4577f2fa8cf8fff5b5f72aaca1ef5dd633d42dce2",
+          "job": "Local\\DLQ-eb06a32204ca495e8be055346a1dcdef",
+          "process": {
+            "created": 134377581158317864,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 23672
+          },
+          "source_sha": "292ca24cf9b92a32701dc2b7dcd707f43e851d6e",
+          "stage": "restore-preflight",
+          "started_utc": "2026-10-29T14:35:15.824888+00:00",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      },
+      "status": {
+        "campaign": "86f84bc8b1d54a819f1d3ab7d5e100eb",
+        "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\86f84bc8b1d54a819f1d3ab7d5e100eb",
+        "recorded_status": "PASSED",
+        "stages": {
+          "legacy-scheduling": "PASSED",
+          "legacy-scheduling-preflight": "PASSED",
+          "preservation": "PASSED",
+          "restore": "PASSED",
+          "restore-preflight": "PASSED"
+        },
+        "status": "PASSED"
+      },
+      "tests": [
+        {
+          "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"readback\")",
+          "result": "Passed"
+        },
+        {
+          "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"replace\")",
+          "result": "Passed"
+        },
+        {
+          "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"partial\")",
+          "result": "Passed"
+        },
+        {
+          "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"rollback\")",
+          "result": "Passed"
+        },
+        {
+          "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.FailedAdmissionPersistencePublishesNeitherSequenceNorCheckpoint(1)",
+          "result": "Passed"
+        },
+        {
+          "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseB2.FailedAdmissionPersistencePublishesNeitherSequenceNorCheckpoint(2)",
+          "result": "Passed"
+        }
+      ],
+      "tools_reverified": 10,
+      "verified_utc": "2026-10-29T14:36:17.114202+00:00",
+      "xml_sha256": "786eeabdaa8e912946ce57f10bac84fe3c8c9bd9a7c14eb0bdcb4fa861a87e67"
+    },
+    "input_archive_sha256": "89cdc2fa06c86bcd870f4cb8f8c7d4f39dbb488a0636b24f2fcff018cf9ae66d",
+    "plan": {
+      "approved_substitutions": [
+        "Temporary isolated productName; exact archived restoration. Only the measured original PlayerSettings bytes are prepared as LF with unchanged Android/Standalone identifier entries in measured order before sealing. The two other measured import-only LF settings rewrites are likewise presealed; all three original files are restored afterward.",
+        "UNITY_NO_AUTH_BROKER=1 in the CLI child only, as documented by installed CLI and approved supervisor runbook. No ownership/drain exemption.",
+        "Only the previously measured TMP fallback-font rewrite may be retained then restored after a zero-exit CLI; any other change fails closed."
+      ],
+      "isolation": {
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 hf01",
+        "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 hf01\\save_primary.json"
+      },
+      "purpose": "qualification",
+      "selections": {
+        "legacy-scheduling": [
+          "legacy-scheduling-preflight",
+          "legacy-scheduling",
+          "restore-preflight",
+          "restore",
+          "preservation"
+        ]
+      },
+      "source_sha": "292ca24cf9b92a32701dc2b7dcd707f43e851d6e",
+      "stages": [
+        {
+          "artifacts": [
+            "preservation.json"
+          ],
+          "command": [
+            "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "-B",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+            "preflight",
+            "--attempt",
+            "hf01",
+            "--stage",
+            "{campaign}/legacy-scheduling-preflight"
+          ],
+          "depends": [],
+          "id": "legacy-scheduling-preflight",
+          "role": "preflight",
+          "timeout_seconds": 120
+        },
+        {
+          "allowed_skips": [],
+          "artifacts": [
+            "unity.log",
+            "invocation.json",
+            "cli-exit.json",
+            "generated-inputs"
+          ],
+          "command": [
+            "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "-B",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-hf01\\run_selected01.py",
+            "{stage}"
+          ],
+          "depends": [
+            "legacy-scheduling-preflight"
+          ],
+          "expected_tests": 6,
+          "id": "legacy-scheduling",
+          "role": "test",
+          "timeout_seconds": 960,
+          "xml": "results.xml"
+        },
+        {
+          "artifacts": [
+            "preservation.json"
+          ],
+          "command": [
+            "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "-B",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+            "preflight",
+            "--attempt",
+            "hf01",
+            "--stage",
+            "{campaign}/restore-preflight"
+          ],
+          "depends": [
+            "legacy-scheduling"
+          ],
+          "id": "restore-preflight",
+          "role": "preflight",
+          "timeout_seconds": 120
+        },
+        {
+          "after_input_identity": "9f14a93e5104782b5b61e74f342482491669d8689cb3b3074f5f4ad409605146",
+          "artifacts": [
+            "restoration.json"
+          ],
+          "command": [
+            "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "-B",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+            "restore",
+            "--attempt",
+            "hf01",
+            "--stage",
+            "{stage}"
+          ],
+          "depends": [
+            "restore-preflight"
+          ],
+          "id": "restore",
+          "role": "report",
+          "timeout_seconds": 120
+        },
+        {
+          "artifacts": [
+            "preservation.json"
+          ],
+          "command": [
+            "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "-B",
+            "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+            "finish",
+            "--attempt",
+            "hf01",
+            "--stage",
+            "{stage}"
+          ],
+          "depends": [
+            "legacy-scheduling-preflight",
+            "legacy-scheduling",
+            "restore-preflight",
+            "restore"
+          ],
+          "id": "preservation",
+          "input_identity": "9f14a93e5104782b5b61e74f342482491669d8689cb3b3074f5f4ad409605146",
+          "role": "final",
+          "timeout_seconds": 120
+        }
+      ],
+      "tools": {
+        "C:\\Program Files\\Git\\cmd\\git.EXE": {
+          "sha256": "81ef35ae005ca9318018d18e3327578ce939fb99feaad6b2d7c8ab15f3de8db5",
+          "version": "git version 2.54.0.windows.1"
+        },
+        "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.2f1\\Editor\\Unity.exe": {
+          "sha256": "c2f3d552a9f9a4639b2e54e9d41f360614d512ba6a9816c8c934568ecc2ad93d",
+          "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+        },
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe": {
+          "sha256": "73dbf1f40507275d6fa636b49eb80b4753e313f649f52591abba86b31f1a1bce",
+          "version": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]"
+        },
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-hf01\\run_selected01.py": {
+          "sha256": "b72f8d088383b7056e8d4140b84ae90fee0591f395b3b296c162eab8383f4820",
+          "version": "exact six-case current admission and publication fault cohort"
+        },
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_inputs.py": {
+          "sha256": "34d3ff45cf7512e21f242bc0e4ede876e5c8b68eddba853ad9b1e69192270c92",
+          "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+        },
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_supervisor.py": {
+          "sha256": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a",
+          "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+        },
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_windows.py": {
+          "sha256": "234bce5f0ca8c7087bb999c603cfbb3d87f0eb4499501a1644dcbbabf3104db7",
+          "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+        },
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py": {
+          "sha256": "cafa31627594654b4bc0d34a88c5a4bc3ad4db813a7451e7aa25a4756f86fbc0",
+          "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+        },
+        "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe": {
+          "sha256": "78761a0547cd4a9bc212e27a217c66e6a621bf48c753ba440e4b2327ee7ff8ac",
+          "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+        },
+        "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE": {
+          "sha256": "d8f182560210d43baaf767d482ad1dc1207372522e91413b9d5e515a875e552d",
+          "version": "Windows PowerShell 5.1; process-inspection dependency"
+        }
+      }
+    },
+    "preparation_invocation_correction": {
+      "error": "TypeError: WindowsPath object is not subscriptable; create expects loaded plan dict",
+      "no_Unity_launched_by_failed_preparation": true,
+      "original_creation_failed_before_campaign": true,
+      "protected_and_prior_evidence_unchanged": true,
+      "qualified_inputs_reverified": true,
+      "source": "292ca24cf9b92a32701dc2b7dcd707f43e851d6e"
+    },
+    "source": "292ca24cf9b92a32701dc2b7dcd707f43e851d6e",
+    "xml_sha256": "786eeabdaa8e912946ce57f10bac84fe3c8c9bd9a7c14eb0bdcb4fa861a87e67"
+  },
   "frozen14_string_budget": 655360,
   "frozen_contracts_changed": false,
   "frozen_schema14_resource_sha256": "f535a0f7ba406916eb088dc499e58630e95eac340e88f18ce47227914bde642f",
