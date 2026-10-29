@@ -40,3 +40,18 @@ The first selected run, campaign `e48d180350ad40b6961fb26f1a9d8c64` at `7dd5a945
 This completes the recorded 23-case source qualification; it is not a current full-suite result or an inferred new 123-case failure count. The legacy B2/B3A reproduction remains independently recorded at 23/100/0. Historical B1 terminal retention must retain frozen-reader/pure-scheduler coverage, while current writable tests must use the supported C2 authority. Neither unsupported profiles nor historical checkpoints may be relabeled to bypass this distinction.
 
 Remaining work includes those fixtures, fresh full EditMode and applicable PlayMode, interruption/repeated-crash/reopen, isolated Windows Player startup/gameplay/shutdown, and matched main/H1-F4 performance and memory. No Windows/runtime benchmark result is claimed here. PR #259 remains draft; no merge or owner UAT.
+
+## Post-restart fresh qualification
+
+Source **`c3403ac8e8556ec0881a2c9e14f93b26a46d1041`** strengthens the existing allocator fixture case without adding/removing NUnit identities. A supported fixture without main-floor admission content progresses to a closed foreground horizon with no opportunity, no party and byte-identical history. Legal main-floor content placement then enables an opportunity strictly after that closed prefix, followed by the normal first admission. It changes no configuration after ownership and fabricates no arrival.
+
+Unity's existing Roslyn compiler and response file first compiled the changed Assembly-CSharp source with outputs redirected to an owned diagnostic directory. The first diagnostic's final check accidentally read the exclusively locked execution-lock byte range through another handle; it remains INCOMPLETE_DIAGNOSTIC with no durable compiler-exit claim. No reservation was claimed/released, no Unity ran, and inputs/protected evidence remained unchanged. The separately retained corrected probe verifies through the held handle and compares the path again after leaving Lease; it completed with compiler exit 0, unchanged inputs/protected evidence/reservation, and **no NUnit tests or Unity execution**. It is compilation evidence only.
+
+| Fresh campaign | Actual selected cases | Passed / failed / skipped |
+| --- | --- | --- |
+| `fed06f4f24cc42e08186470af02f3fe7` | Original seven failures plus strengthened no-arrival case | **8 / 0 / 0** |
+| `65c0c6ca826d40889d4febe9f3fa670b` | Complete exact allocator/replacement cohort | **23 / 0 / 0** |
+
+Both campaigns recorded PASSED and remain currently applicable at their qualified source/tool identities. Each completed all five stages and separate independent verification of exact NUnit names, source and ten tool hashes, recorded process/Job completion, actual released reservation, original inputs/settings/TMP, protected evidence and prior trees. The installed Windows PowerShell hash was pinned prospectively; no old manifest or verifier rule changed. The eight cases overlap the 23 and are not an additional distinct-case count. No full-suite remainder is inferred.
+
+The executable plans are separately identified `plan-selected01.json`; the retained generated default plans were not selected. Compiler probes are retained under `TestResults/h1-f4-compile-20261029-01` and `02`, their launcher `.py` files directly under TestResults; fresh preparations are `TestResults/h1-f4-20261027-lc03` and `lc04`. All are owned by H1-F4 qualification/diagnostics, retained for review with sources, outputs and receipts. Machine evidence above appends these records without replacing the original shutdown audit or historical results.
