@@ -61,6 +61,10 @@ namespace DungeonBuilder.Tests.EditMode
                 new SaveConfig { fileName = Path.GetFileName(fixture.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(fixture.ActivePath));
             result.ConfigureCanonical(fixture.Profile, fixture.Production, fixture.Compatibility, fixture.Configuration,
                 LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), fixture.PositionProfiles, fixture.Occupancy);
+            // Native creation after explicit deletion needs these before LoadOrCreate,
+            // just as the real GameRoot bootstrap supplies them before its first load.
+            result.ConfigureStructuralEconomy(inputs.Economy);
+            result.ConfigureContentAcquisitionEconomy(fixture.Acquisition);
             result.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, fixture.FileSystem, path));
             result.SetTimeSourceForTests(wall);
