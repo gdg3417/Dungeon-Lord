@@ -23,7 +23,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Application.productName, Does.StartWith("Dungeon Lord B3B2 Smoke H1F4 "));
             // Keep the existing 240-character native bound meaningful. Stage
             // paths are too long for the deliberately long journal leaf below.
-            ownedTemporaryRoot = Path.Combine(Application.persistentDataPath, "wf-" + Guid.NewGuid().ToString("N").Substring(0, 12));
+            ownedTemporaryRoot = Path.GetFullPath(Path.Combine(Application.persistentDataPath, "wf-" + Guid.NewGuid().ToString("N").Substring(0, 12)));
             Assert.That(Directory.Exists(ownedTemporaryRoot), Is.False);
             Directory.CreateDirectory(ownedTemporaryRoot);
         }
@@ -145,6 +145,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             try
             {
                 string active = Path.Combine(directory, "save.json");
+                Assert.That(active, Is.EqualTo(Path.GetFullPath(active)), "The transaction consumes a normalized absolute path");
                 SpatialMigrationActivationPreflight preflight = SpatialMigrationFileSystemSelector.Evaluate(active);
                 Assert.That(preflight.IsSupported, Is.True, preflight.Reason);
                 ISpatialMigrationFileSystem fileSystem = preflight.FileSystem;
@@ -672,6 +673,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             try
             {
                 string active = Path.Combine(directory, "save.json");
+                Assert.That(active, Is.EqualTo(Path.GetFullPath(active)), "Recovery consumes a normalized absolute path");
                 SpatialMigrationActivationPreflight preflight = SpatialMigrationFileSystemSelector.Evaluate(active);
                 Assert.That(preflight.IsSupported, Is.True, preflight.Reason);
                 File.WriteAllBytes(active, original);
