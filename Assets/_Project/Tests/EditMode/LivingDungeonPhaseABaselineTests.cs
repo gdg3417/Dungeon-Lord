@@ -142,6 +142,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             candidate.runHistory.AppendOutcome(outcome, snapshot.Configuration.MaxRunHistoryEntries);
             candidate.runHistory.NextRunSequence = checked(sequence + 1);
             MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(candidate, snapshot.Configuration, f.Production);
+            // The old canonical publication projected serialized history. Retain
+            // that read-only JSON normalization (not a new save or a golden edit).
+            candidate.runHistory = JsonUtility.FromJson<RunHistoryState>(JsonUtility.ToJson(candidate.runHistory));
             CollectionAssert.AreEqual(source, f.Session.GetCurrentBytes());
             CollectionAssert.AreEqual(source, f.FileSystem.ReadAllBytes(f.ActivePath));
             return candidate;

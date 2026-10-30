@@ -15,6 +15,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class Gd66WindowsSpatialMigrationFileSystemTests
     {
+        private string ownedTemporaryRoot;
+        [SetUp] public void OwnWindowsFixturePaths()
+        {
+            string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+            Assert.That(export, Is.Not.Null.And.Not.Empty, "Windows filesystem qualification requires the existing campaign-owned fixture export root");
+            Assert.That(Application.productName, Does.StartWith("Dungeon Lord B3B2 Smoke H1F4 "));
+            // Keep the existing 240-character native bound meaningful. Stage
+            // paths are too long for the deliberately long journal leaf below.
+            ownedTemporaryRoot = Path.Combine(Application.persistentDataPath, "wf-" + Guid.NewGuid().ToString("N").Substring(0, 12));
+            Assert.That(Directory.Exists(ownedTemporaryRoot), Is.False);
+            Directory.CreateDirectory(ownedTemporaryRoot);
+        }
+        [TearDown] public void ReleaseEmptyWindowsFixturePaths()
+        {
+            if (ownedTemporaryRoot == null || !Directory.Exists(ownedTemporaryRoot)) return;
+            // Unexpected leftovers remain owned, sealed evidence, never recursive
+            // speculative cleanup of an unknown or failed reproduction state.
+            Assert.That(Directory.GetFileSystemEntries(ownedTemporaryRoot), Is.Empty, "Retain unexpected Windows fixture evidence");
+            Directory.Delete(ownedTemporaryRoot);
+        }
         [Test]
         public void EvidenceProbeAndTransactionShareExtensionlessSaveStemGrammar()
         {
@@ -119,7 +139,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-qualification");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-qualification");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -290,8 +310,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.Ignore("gd66.test.windows_only");
             var fileSystem = new WindowsSpatialMigrationFileSystem();
             Assert.Throws<IOException>(() => fileSystem.MoveSameDirectoryAtomic(
-                Path.Combine(Path.GetTempPath(), "a", "source"),
-                Path.Combine(Path.GetTempPath(), "b", "destination")));
+                Path.Combine(ownedTemporaryRoot, "a", "source"),
+                Path.Combine(ownedTemporaryRoot, "b", "destination")));
         }
 
         [Test]
@@ -299,7 +319,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-collapse");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-collapse");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -325,7 +345,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-create-new");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-create-new");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -348,7 +368,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-lock");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-lock");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -372,7 +392,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-existing-destination");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-existing-destination");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -396,7 +416,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-destination-lock");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-destination-lock");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -421,7 +441,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-missing-source");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-missing-source");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -469,7 +489,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(nativeSize, Is.EqualTo(24));
             }
 
-            string destination = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-layout-Ω.json"));
+            string destination = Path.GetFullPath(Path.Combine(ownedTemporaryRoot, "gd66-layout-Ω.json"));
             byte[] expected = Encoding.Unicode.GetBytes(destination);
             MethodInfo allocate = fileSystemType.GetMethod("AllocateRenameInfo",
                 BindingFlags.Static | BindingFlags.NonPublic);
@@ -496,7 +516,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-long-journal");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-long-journal");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -523,7 +543,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-file-identity");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-file-identity");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -564,7 +584,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-path-bound");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-path-bound");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -588,7 +608,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string root = Path.Combine(Path.GetTempPath(), "gd66-winfs-reparse");
+            string root = Path.Combine(ownedTemporaryRoot, "gd66-winfs-reparse");
             string target = Path.Combine(root, "target");
             string ordinaryChild = Path.Combine(target, "ordinary-child");
             string junction = Path.Combine(root, "junction");
@@ -627,7 +647,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
-            string directory = Path.Combine(Path.GetTempPath(), populated
+            string directory = Path.Combine(ownedTemporaryRoot, populated
                 ? "gd66-winfs-transaction-populated" : "gd66-winfs-transaction-empty");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
@@ -665,7 +685,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
-            string directory = Path.Combine(Path.GetTempPath(), includeBackup
+            string directory = Path.Combine(ownedTemporaryRoot, includeBackup
                 ? "gd66-winfs-replaced-backup" : "gd66-winfs-replaced-no-backup");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
@@ -750,7 +770,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             service = WindowsService(fixture, filename, out var time, out var inputs);
             var current = service.LoadOrCreate("gd66-live", out banner);
-            Assert.That(current, Is.Not.Null, banner);
+            string diagnostic = banner;
+            if (current == null) {
+                var context = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                    BindingFlags.Instance | BindingFlags.NonPublic).GetValue(service);
+                if (PhaseFourTestSupport.UpgradeFrozenSixteen(fixture.Result.Attempt.Candidate.GetBytes(), fixture.Limits, out var bytes)) {
+                    var frozen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(bytes, context);
+                    diagnostic += "; frozen16=" + frozen.IsValid + "; reason=" + frozen.Reason +
+                        "; research=" + (frozen.IsValid && DetachedCompleteSaveContract.ResearchStateValid(frozen, inputs)) +
+                        "; W=" + frozen.TimeProvenance?.AccountedBoundary.Seconds + "; R=" + time.RetainedRecoveryEntry?.WallEndpoint.Seconds;
+                }
+            }
+            Assert.That(current, Is.Not.Null, diagnostic);
             time.BindLoadedForegroundHorizon(current.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
             time.AttachSave(current);
             service.CanonicalRuntimePublished += value => { current = value; time.AttachSave(value); };

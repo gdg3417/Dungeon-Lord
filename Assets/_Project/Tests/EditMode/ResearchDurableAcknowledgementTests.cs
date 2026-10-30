@@ -123,7 +123,8 @@ namespace DungeonBuilder.Tests.EditMode
                     ",\"researchProgress\":" + JsonOrNull(legacy.researchProgress) +
                     ",\"completedResearch\":" + JsonOrNull(legacy.completedResearch) +
                     ",\"completedObjectives\":" + JsonOrNull(legacy.completedObjectives) +
-                    ",\"runHistory\":" + JsonOrNull(legacy.runHistory), recoveryInputBytes: bytes);
+                    ",\"runHistory\":" + JsonOrNull(legacy.runHistory),
+                    workloadProfile: DungeonBuilder.M0.Tests.EditMode.PhaseFourTestSupport.ProductionProfile(), recoveryInputBytes: bytes);
                 if (starterDungeon)
                 {
                     foreach (var pair in new[] {
