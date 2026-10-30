@@ -25,6 +25,7 @@ namespace DungeonBuilder.M0.Tests
         private Touchscreen simulatedTouch;
         private bool missingThemeWarning;
         private SceneClock sceneClock;
+        private int tracedPublications;
         internal sealed class SceneClock : IPreciseTimeSource
         {
             internal UnixTimePoint Now = new UnixTimePoint(2000, 2500000);
@@ -41,6 +42,7 @@ namespace DungeonBuilder.M0.Tests
             }
         }
         private bool TraceSceneRecovery => TestContext.CurrentContext.Test.Name.Contains("RoomContentMapReassignmentCapacity") ||
+            TestContext.CurrentContext.Test.Name == "AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen" ||
             TestContext.CurrentContext.Test.Name.Contains("SceneClock") ||
             TestContext.CurrentContext.Test.Name.Contains("LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish");
         // Read-only diagnosis: never sample/advance time, invoke a barrier, or
@@ -77,6 +79,7 @@ namespace DungeonBuilder.M0.Tests
         [UnitySetUp]
         public IEnumerator SetUp()
         {
+            tracedPublications = 0;
             missingThemeWarning = false;
             Application.logMessageReceived += RecordThemeWarning;
             if (!Application.isPlaying)
@@ -108,7 +111,14 @@ namespace DungeonBuilder.M0.Tests
             for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
             Assert.That(controller.World, Is.Not.Null);
             if (TraceSceneRecovery) {
-                root.SaveService.CanonicalRuntimePublished += _ => TraceSceneState("canonical-publication");
+                root.SaveService.CanonicalRuntimePublished += _ => {
+                    if (tracedPublications++ >= 16) return;
+                    TraceSceneState("canonical-publication");
+                    if (TestContext.CurrentContext.Test.Name == "AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen")
+                        TestContext.WriteLine("H1F4_SCENE publication-caller " + string.Join(" <- ",
+                            new System.Diagnostics.StackTrace().GetFrames().Take(10).Select(frame =>
+                                frame.GetMethod().DeclaringType?.Name + "." + frame.GetMethod().Name)));
+                };
                 var ui = controller.GetComponent<UIDocument>().rootVisualElement;
                 foreach (string name in new[] { "save", "discard", "confirm", "cancel", "edit", "legacy" })
                     ui.Q<Button>(name).clicked += () => TraceSceneState("ui-click-" + name);

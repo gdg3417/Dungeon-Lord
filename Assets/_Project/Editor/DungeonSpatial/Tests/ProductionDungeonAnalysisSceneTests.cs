@@ -287,6 +287,7 @@ namespace DungeonBuilder.M0.Tests
             root.Save.structureRuntime.ManaReserve = 1000;
             Assert.That(root.SimulateRunOnce(), Is.True);
             var before = File.ReadAllBytes(root.SaveService.SavePath);
+            TraceSceneState("analysis.before-read-only-baseline");
             var history = JsonUtility.ToJson(root.Save.runHistory);
             string floor = controller.SelectedFloorInstanceId;
             controller.OpenAnalysis(); yield return null;
@@ -294,6 +295,20 @@ namespace DungeonBuilder.M0.Tests
             controller.EnterEdit(); Assert.That(controller.IsEditing, Is.False);
             controller.ReturnToDungeon(); yield return null;
             Assert.That(controller.SelectedFloorInstanceId, Is.EqualTo(floor));
+            TraceSceneState("analysis.before-byte-assertion");
+            // Read-only, bounded diagnosis of the first historical byte mismatch.
+            // This never normalizes either byte array or changes the assertion.
+            var observed = File.ReadAllBytes(root.SaveService.SavePath);
+            int first = 0;
+            while (first < before.Length && first < observed.Length && before[first] == observed[first]) first++;
+            bool decimalSuffixOnly = observed.Length == before.Length + 2 && first < before.Length &&
+                observed[first] == (byte)'.' && observed[first + 1] == (byte)'0' &&
+                before.Skip(first).SequenceEqual(observed.Skip(first + 2));
+            int start = System.Math.Max(0, first - 48);
+            TestContext.WriteLine("H1F4_SCENE byte-diff first=" + first + " beforeLength=" + before.Length +
+                " afterLength=" + observed.Length + " decimalSuffixOnly=" + decimalSuffixOnly +
+                " before=" + System.Text.Encoding.UTF8.GetString(before, start, System.Math.Min(96, before.Length - start)) +
+                " after=" + System.Text.Encoding.UTF8.GetString(observed, start, System.Math.Min(96, observed.Length - start)));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
             UnityEngine.Object.Destroy(controller.gameObject);
             UnityEngine.Object.Destroy(root.gameObject); yield return null;
