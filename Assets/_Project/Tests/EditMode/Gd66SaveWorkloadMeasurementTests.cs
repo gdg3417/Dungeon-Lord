@@ -277,6 +277,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new RawSaveEnvelopeVersionContract(1, SaveMigration.LatestSchemaVersion), BlankFloor()).IsSuccess, Is.True);
             var context = new DetachedCurrentTargetValidationContext(fixture.Compatibility, fixture.Production,
                 LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), profile.Canonical);
+            context.BindRecoveryInputs(fixture.Context.RecoveryInputs);
             var opened = DetachedCanonicalSaveSession.Open(bytes, context, profile);
             Assert.That(opened.IsSuccess, Is.True, opened.Reason);
             var repeated = opened.Session.PrepareSpatialOnlyReplacement(fixture.State);
@@ -429,12 +430,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             // Current canonical owners are not unknown preservation data, even though the
             // frozen legacy raw classifier describes them as unknown primary members.
             string[] owners = { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership",
-                "structuralInvestment", "corridorContent", "sharedBranchKnowledge", "sharedFloorKnowledge", "livingDungeon", "monsterContinuity" };
+                "structuralInvestment", "corridorContent", "sharedBranchKnowledge", "sharedFloorKnowledge", "livingDungeon", "monsterContinuity", TimeProvenance.Owner };
             var unknown = classification.UnknownRootMembers.Concat(classification.UnknownPrimaryMembers.Where(value =>
                 !owners.Contains(value.Name))).ToArray();
             int copied = classification.Members.Where(value => value.State != RawSaveMemberState.Absent &&
                 value.Name != "corridorContent" && value.Name != "sharedBranchKnowledge" &&
-                value.Name != "sharedFloorKnowledge" && value.Name != "livingDungeon" && value.Name != "monsterContinuity")
+                value.Name != "sharedFloorKnowledge" && value.Name != "livingDungeon" && value.Name != "monsterContinuity" && value.Name != TimeProvenance.Owner)
                 .Sum(value => value.ByteLength);
             Assert.That(MinimumWhole(fixture, 0), Is.EqualTo(bytes.Length));
             Assert.That(MinimumWhole(fixture, 1), Is.EqualTo(copied));

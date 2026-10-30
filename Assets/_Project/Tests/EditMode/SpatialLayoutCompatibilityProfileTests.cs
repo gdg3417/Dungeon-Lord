@@ -91,7 +91,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Value.SelectStarter(13,1).Success,Is.True);
             Assert.That(result.Value.SelectStarter(7,2).Code,Is.EqualTo("gd66.starter_profile.version_mismatch"));
             Assert.That(result.Value.SelectContract(6).Code,Is.EqualTo("gd66.layout_contract.selection_missing"));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
             Assert.That(SaveMigration.LegacyCompatibilitySchemaVersion,Is.EqualTo(6));
             Assert.That(CompatibilityReleasePolicy.IsAuthorized(data),Is.True);
             CollectionAssert.AreEqual(profiles.bytes,result.Value.CanonicalBytes);
