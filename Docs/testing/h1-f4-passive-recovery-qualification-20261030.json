@@ -1,0 +1,175 @@
+{
+  "branch": "codex/h1-f4-recovery",
+  "campaign": "812a0af79c65454a9887a4a81217747b",
+  "combined_original_84_qualified": 54,
+  "deferred_cases": [
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.ColdStartCommitBootSaveAndFreshReopenCannotReplayInterval",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.PauseResumeAppliesOnceAndRepeatedResumeDoesNotReplay",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.ResumePersistenceFailureKeepsSimulationPausedAndRetryDoesNotDuplicate"
+  ],
+  "evidence_sha256": {
+    "TestResults/h1-f4-20261027-rx07/post-failure-finalize01/receipt.json": "0daa61b14b67add769c5c1f95e976570b5d1b73b1ce4d77fe4a4267b03a8a620",
+    "TestResults/h1-f4-20261027-rx08/post-failure-finalize01/receipt.json": "21ec1572aa019ee043a1414f5891eaa879301a2ec32fd9c27b49cf7c6e72860f",
+    "TestResults/h1-f4-20261027-rx09/post-failure-finalize01/receipt.json": "61b2227d1a5454ffce75b86f6635fae0c65903b1160868bbc70c42f08f1fabb8",
+    "TestResults/h1-f4-20261027-rx10/deferred-lifecycle-reporting-identities.json": "f6fe016fff97200aaec542f7ed5a436e550d123524e5ccd7cef218b56b04af8b",
+    "TestResults/h1-f4-20261027-rx10/independent-completion01.json": "189479903b40bfef976da1cd396b2419e426a7492ffb0ddb218c8d90957f85fc",
+    "TestResults/h1-f4-20261027-rx10/plan-selected01.json": "d60660e92191295043e7103192a5b3fc15ff920db8351f08ce1d040dcd7183fe",
+    "TestResults/h1-f4-20261027-rx10/selected-inventory.json": "8c26174f41218acfc4bf4c5cabf48675d1fa822b5527f83c6830403b313edace",
+    "TestResults/qualification-supervisor/4d6726e6815448199d1dd010935dbb5a/living-regressions/results.xml": "d23433cf5d930b3181216ec4c2b0f1a512de55d140d0d644f559844ecac653a2",
+    "TestResults/qualification-supervisor/544e9c1243b64539b1445e3193ebef47/living-regressions/results.xml": "8c10723426bf8888617bec66775e521784e73b4381a746c83c9435138651ed48",
+    "TestResults/qualification-supervisor/812a0af79c65454a9887a4a81217747b/living-regressions/results.xml": "85a1a0e0d53bde45f545dcf17a2c6d8abb27a5a3c68bcd1d19a04a37b145118d",
+    "TestResults/qualification-supervisor/e8c49459f3a54a24b6bfdd44d17451ef/living-regressions/results.xml": "7516fe71d277f6fa5bd963d5c55b601795a59751ff9c01b1fddb3c637392e3e6"
+  },
+  "failed": 0,
+  "full_suite_failure_count_at_new_source": null,
+  "historical_verdicts_unchanged": true,
+  "original_84_remaining_unqualified": 30,
+  "original_ten_now_qualified": [
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.BackwardClockBootSavePreservesDurableBoundaryAcrossReopen",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.DetachedCommitPersistsWalletAndConsumedTimestampBeforePublication",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(Boot)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(Periodic)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(ManualDev)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(AppPause)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(AppQuit)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.PersistenceFailureLeavesWalletTimestampDiskAndSessionUnchangedThenRetrySucceeds",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.StaleDiskSessionReturnsStableReasonWithoutWrite",
+    "DungeonBuilder.M0.Tests.Editor.H1F3RecoveryEntryAndPreciseMana.CalculationAndObservationCannotPublishOrMutateCanonicalState"
+  ],
+  "passed": 64,
+  "preservation": {
+    "input_count": 1494,
+    "original_archive_members_verified": 1494,
+    "original_inputs_restored": true,
+    "prior_evidence_directories_verified": 273,
+    "protected_evidence_unchanged": true,
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\812a0af79c65454a9887a4a81217747b"
+    },
+    "tools_reverified": 10
+  },
+  "production_changed": false,
+  "remaining_by_class": {
+    "Gd66WindowsSpatialMigrationFileSystemTests": 1,
+    "LivingDungeonPhaseABaselineTests": 1,
+    "MvpCanonicalJourneyIntegrationTests": 1,
+    "OfflinePassiveManaTests": 3,
+    "PhaseSevenA4ProductionSceneTests": 19,
+    "PhaseSevenA5TransactionalRoomMovementTests": 4,
+    "ResearchCompletionEligibilityDiagnosticsTests": 1
+  },
+  "reporting_proposal_implemented": false,
+  "retained_failed_campaigns": [
+    {
+      "campaign": "544e9c1243b64539b1445e3193ebef47",
+      "counts": [
+        1,
+        1,
+        0
+      ],
+      "failures": [
+        {
+          "message": "  Successful canonical recovery must retain the existing offline-mana presentation evidence\n  Expected: not null\n  But was:  null\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.ColdStartCommitBootSaveAndFreshReopenCannotReplayInterval",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.ColdStartCommitBootSaveAndFreshReopenCannotReplayInterval () [0x0011f] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:326\n"
+        }
+      ],
+      "restoration_receipt": "TestResults/h1-f4-20261027-rx07/post-failure-finalize01/receipt.json",
+      "verdict": "FAILED"
+    },
+    {
+      "campaign": "e8c49459f3a54a24b6bfdd44d17451ef",
+      "counts": [
+        58,
+        6,
+        0
+      ],
+      "failures": [
+        {
+          "message": "  Expected: False\n  But was:  True\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.BackwardClockBootSavePreservesDurableBoundaryAcrossReopen",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.BackwardClockBootSavePreservesDurableBoundaryAcrossReopen () [0x00062] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:384\n"
+        },
+        {
+          "message": "  Every writer must reject a backward observation under H1-F4 D6\n  Expected: False\n  But was:  True\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(Boot)",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.EveryCanonicalSaveReasonPreservesFutureDurableBoundary (DungeonBuilder.M0.SaveReason reason) [0x0005d] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:429\n"
+        },
+        {
+          "message": "  Every writer must reject a backward observation under H1-F4 D6\n  Expected: False\n  But was:  True\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(Periodic)",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.EveryCanonicalSaveReasonPreservesFutureDurableBoundary (DungeonBuilder.M0.SaveReason reason) [0x0005d] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:429\n"
+        },
+        {
+          "message": "  Every writer must reject a backward observation under H1-F4 D6\n  Expected: False\n  But was:  True\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(ManualDev)",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.EveryCanonicalSaveReasonPreservesFutureDurableBoundary (DungeonBuilder.M0.SaveReason reason) [0x0005d] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:429\n"
+        },
+        {
+          "message": "  Every writer must reject a backward observation under H1-F4 D6\n  Expected: False\n  But was:  True\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(AppPause)",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.EveryCanonicalSaveReasonPreservesFutureDurableBoundary (DungeonBuilder.M0.SaveReason reason) [0x0005d] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:429\n"
+        },
+        {
+          "message": "  Every writer must reject a backward observation under H1-F4 D6\n  Expected: False\n  But was:  True\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(AppQuit)",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.EveryCanonicalSaveReasonPreservesFutureDurableBoundary (DungeonBuilder.M0.SaveReason reason) [0x0005d] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:429\n"
+        }
+      ],
+      "restoration_receipt": "TestResults/h1-f4-20261027-rx08/post-failure-finalize01/receipt.json",
+      "verdict": "FAILED"
+    },
+    {
+      "campaign": "4d6726e6815448199d1dd010935dbb5a",
+      "counts": [
+        58,
+        6,
+        0
+      ],
+      "failures": [
+        {
+          "message": "  gd66.transaction.candidate_invalid\n  Expected: True\n  But was:  False\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.BackwardClockBootSavePreservesDurableBoundaryAcrossReopen",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Reopen () [0x00024] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1585\nat DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.BackwardClockBootSavePreservesDurableBoundaryAcrossReopen () [0x00123] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:394\n"
+        },
+        {
+          "message": "  gd66.transaction.candidate_invalid\n  Expected: True\n  But was:  False\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(Boot)",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Reopen () [0x00024] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1585\nat DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.EveryCanonicalSaveReasonPreservesFutureDurableBoundary (DungeonBuilder.M0.SaveReason reason) [0x000e0] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:441\n"
+        },
+        {
+          "message": "  gd66.transaction.candidate_invalid\n  Expected: True\n  But was:  False\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(Periodic)",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Reopen () [0x00024] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1585\nat DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.EveryCanonicalSaveReasonPreservesFutureDurableBoundary (DungeonBuilder.M0.SaveReason reason) [0x000e0] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:441\n"
+        },
+        {
+          "message": "  gd66.transaction.candidate_invalid\n  Expected: True\n  But was:  False\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(ManualDev)",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Reopen () [0x00024] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1585\nat DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.EveryCanonicalSaveReasonPreservesFutureDurableBoundary (DungeonBuilder.M0.SaveReason reason) [0x000e0] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:441\n"
+        },
+        {
+          "message": "  gd66.transaction.candidate_invalid\n  Expected: True\n  But was:  False\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(AppPause)",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Reopen () [0x00024] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1585\nat DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.EveryCanonicalSaveReasonPreservesFutureDurableBoundary (DungeonBuilder.M0.SaveReason reason) [0x000e0] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:441\n"
+        },
+        {
+          "message": "  gd66.transaction.candidate_invalid\n  Expected: True\n  But was:  False\n",
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(AppQuit)",
+          "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Reopen () [0x00024] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1585\nat DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests.EveryCanonicalSaveReasonPreservesFutureDurableBoundary (DungeonBuilder.M0.SaveReason reason) [0x000e0] in <isolated-worktree>\\Assets\\_Project\\Tests\\EditMode\\OfflinePassiveManaTests.cs:441\n"
+        }
+      ],
+      "restoration_receipt": "TestResults/h1-f4-20261027-rx09/post-failure-finalize01/receipt.json",
+      "verdict": "FAILED"
+    }
+  ],
+  "skipped": 0,
+  "stages": {
+    "living-regressions": "PASSED",
+    "living-regressions-preflight": "PASSED",
+    "preservation": "PASSED",
+    "restore": "PASSED",
+    "restore-preflight": "PASSED"
+  },
+  "tested_source": "4401358047aeb8cf3127e1a7680c3f86e44fb695"
+}
