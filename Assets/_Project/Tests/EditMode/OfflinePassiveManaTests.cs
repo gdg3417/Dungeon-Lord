@@ -279,7 +279,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(retry.RuntimeProjection.structureRuntime.ManaReserve,
                 Is.EqualTo(calculated.WalletAfter));
             Assert.That(Step(fixture, service).IsSuccess, Is.True);
-            fixture.Reopen();
+            fixture.ReopenWithSupportedForegroundProfiles();
             Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(calculated.WalletAfter));
             Assert.That(fixture.Runtime.timeProvenance.Episode, Is.Null);
         }
@@ -334,7 +334,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(service.Save(root.Save, SaveReason.Boot), Is.True);
                 UnityEngine.Object.DestroyImmediate(go);
 
-                fixture.Reopen();
+                fixture.ReopenWithSupportedForegroundProfiles();
                 SaveData reopened = fixture.Runtime;
                 var reopenedService = Service(fixture, time);
                 GameObject reopenedGo = new GameObject("Offline cold-start reopened lifecycle");
@@ -391,7 +391,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 CollectionAssert.AreEqual(before, firstService.CanonicalSession.GetCurrentBytes());
             } finally { DisposeRoot(firstGo); }
 
-            fixture.Reopen();
+            fixture.ReopenWithSupportedForegroundProfiles();
             time.Now = durableBoundary;
             SaveService restoredService = Service(fixture, time);
             restoredService.BeginCanonicalRecovery(fixture.Runtime);
@@ -400,7 +400,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(12.5d));
             Assert.That(restoredService.Save(fixture.Runtime, SaveReason.Boot), Is.True);
 
-            fixture.Reopen();
+            fixture.ReopenWithSupportedForegroundProfiles();
             time.Now = durableBoundary + 1;
             SaveService forwardService = Service(fixture, time);
             forwardService.BeginCanonicalRecovery(fixture.Runtime);
@@ -409,7 +409,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Step(fixture, forwardService).IsSuccess, Is.True);
             Assert.That(Step(fixture, forwardService).IsSuccess, Is.True);
             Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(12.5075d).Within(1e-12));
-            fixture.Reopen();
+            fixture.ReopenWithSupportedForegroundProfiles();
             Assert.That(fixture.Runtime.timeProvenance.Episode, Is.Null);
             Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(12.5075d).Within(1e-12));
         }
@@ -438,7 +438,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 CollectionAssert.AreEqual(before, service.CanonicalSession.GetCurrentBytes());
                 CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
             } finally { DisposeRoot(host); }
-            fixture.Reopen();
+            fixture.ReopenWithSupportedForegroundProfiles();
 
             Assert.That(fixture.Runtime.lastSavedUtcUnix, Is.EqualTo(durableBoundary));
             Assert.That(Encoding.UTF8.GetString(fixture.Session.GetCurrentBytes()),
