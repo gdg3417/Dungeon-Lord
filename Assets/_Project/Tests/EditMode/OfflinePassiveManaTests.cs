@@ -375,17 +375,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Fixture fixture = OneFloor(durableBoundary, 12.5d);
             var time = new FakeTimeSource { Now = durableBoundary };
             SaveService firstService = Service(fixture, time);
-            Assert.That(firstService.Save(fixture.Runtime, SaveReason.Boot), Is.True);
-
-            time.Now = 1000;
-            byte[] before = firstService.CanonicalSession.GetCurrentBytes();
-            // H1-F4 D6: an invalid/backward observation fails closed, including
-            // ordinary boot metadata; it is not permission to advance W or grant.
-            Assert.That(firstService.Save(fixture.Runtime, SaveReason.Boot), Is.False);
-            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(12.5d));
-            Assert.That(fixture.Runtime.lastSavedUtcUnix, Is.EqualTo(durableBoundary));
-            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
-            CollectionAssert.AreEqual(before, firstService.CanonicalSession.GetCurrentBytes());
+            var firstGo = new GameObject("Canonical backward-clock boot barrier");
+            try {
+                var root = Root(firstGo, fixture, firstService, time);
+                Assert.That(firstService.Save(fixture.Runtime, SaveReason.Boot), Is.True);
+                time.Now = 1000;
+                byte[] before = firstService.CanonicalSession.GetCurrentBytes();
+                // The real root barrier owns clock observation. A standalone
+                // metadata no-op preserves W without sampling a new time.
+                Assert.That(firstService.Save(fixture.Runtime, SaveReason.Boot), Is.False);
+                Assert.That(root.ForegroundActivity.StateKey, Is.EqualTo("ui.living.blocked"));
+                Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(12.5d));
+                Assert.That(fixture.Runtime.lastSavedUtcUnix, Is.EqualTo(durableBoundary));
+                CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+                CollectionAssert.AreEqual(before, firstService.CanonicalSession.GetCurrentBytes());
+            } finally { DisposeRoot(firstGo); }
 
             fixture.Reopen();
             time.Now = durableBoundary;
@@ -422,14 +426,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Fixture fixture = OneFloor(durableBoundary);
             var time = new FakeTimeSource { Now = durableBoundary };
             SaveService service = Service(fixture, time);
-            Assert.That(service.Save(fixture.Runtime, SaveReason.Boot), Is.True);
-
-            time.Now = 1000;
-            byte[] before = service.CanonicalSession.GetCurrentBytes();
-            Assert.That(service.Save(fixture.Runtime, reason), Is.False,
-                "Every writer must reject a backward observation under H1-F4 D6");
-            CollectionAssert.AreEqual(before, service.CanonicalSession.GetCurrentBytes());
-            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            var host = new GameObject("Canonical save-reason observation barrier");
+            try {
+                var root = Root(host, fixture, service, time);
+                Assert.That(service.Save(fixture.Runtime, SaveReason.Boot), Is.True);
+                time.Now = 1000;
+                byte[] before = service.CanonicalSession.GetCurrentBytes();
+                Assert.That(service.Save(fixture.Runtime, reason), Is.False,
+                    "The root barrier rejects backward time before any save-reason writer can run");
+                Assert.That(root.ForegroundActivity.StateKey, Is.EqualTo("ui.living.blocked"));
+                CollectionAssert.AreEqual(before, service.CanonicalSession.GetCurrentBytes());
+                CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            } finally { DisposeRoot(host); }
             fixture.Reopen();
 
             Assert.That(fixture.Runtime.lastSavedUtcUnix, Is.EqualTo(durableBoundary));
@@ -680,6 +688,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             for (int i = 0; i < 8 && root.TimeService.RecoveryClockActive; i++) pulse.Invoke(root, null);
             Assert.That(root.TimeService.RecoveryClockActive, Is.False, "All required recovery phases must close durably");
             Assert.That(root.Save.timeProvenance.Episode, Is.Null);
+        }
+
+        private static void DisposeRoot(GameObject host)
+        {
+            var root = host.GetComponent<GameRoot>();
+            if (root.SaveService != null) {
+                root.SaveService.BeforeForegroundAction = null;
+                root.SaveService.ForegroundCurrent = null;
+            }
+            root.AttachSaveServiceForTests(null);
+            // Test-scope teardown, as in the qualified H1-F4 RootScope. Do not
+            // synthesize another lifecycle observation from an invalid test clock.
+            typeof(GameRoot).GetProperty("TimeService").SetValue(root, null);
+            UnityEngine.Object.DestroyImmediate(host);
         }
 
         private static ContentService ProductionLocalizedContent()
