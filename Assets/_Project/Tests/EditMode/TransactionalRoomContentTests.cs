@@ -46,7 +46,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var result = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d, Allowed);
             Assert.That(result.IsSuccess, Is.True, result.Reason); f.Accept(result); f.Reopen();
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Single().RoomLocalPosition, Is.EqualTo(new TileCoordinate(3, 3)));
-            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana - cost)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana - cost)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
         }
         [TestCase(-1,0)][TestCase(4,0)][TestCase(0,4)][TestCase(int.MaxValue,int.MinValue)]
         public void InvalidCoordinatesNeverAllocateOrJournal(int x, int y)

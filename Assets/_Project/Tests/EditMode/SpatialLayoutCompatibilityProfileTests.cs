@@ -34,8 +34,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(data.GeometryRecords,Has.Length.EqualTo(1));
             Assert.That(data.GeometryRecords[0].Layouts.Select(x=>x.ExpectedOccupiedTileTotal).ToArray(),Is.EqualTo(new[]{26,42}));
             Assert.That(data.MigrationProfiles,Has.Length.EqualTo(1));
-            Assert.That(data.StarterProfiles,Has.Length.EqualTo(10));
-            Assert.That(data.ContractSelections,Has.Length.EqualTo(10));
+            Assert.That(data.StarterProfiles,Has.Length.EqualTo(11));
+            Assert.That(data.ContractSelections,Has.Length.EqualTo(11));
             SpatialMigrationCompatibilityProfile migration=data.MigrationProfiles[0];
             CanonicalStarterLayoutProfile starter=data.StarterProfiles.Single(x=>x.TargetSchemaVersion==7);
             CanonicalLayoutContractSelection contract=data.ContractSelections.Single(x=>x.TargetSchemaVersion==7);
@@ -150,8 +150,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 .TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.LivingDungeonIntroduction));
             Assert.That(production.StarterProfiles.Single(value => value.TargetSchemaVersion == 15).TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.FrozenSchemaFifteen));
             Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 15).TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.FrozenSchemaFifteen));
-            Assert.That(production.StarterProfiles.Single(value => value.TargetSchemaVersion == 16).TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
-            Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 16).TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
+            Assert.That(production.StarterProfiles.Single(value => value.TargetSchemaVersion == 16).TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 16).TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(production.StarterProfiles.Single(value => value.TargetSchemaVersion == 17).TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
+            Assert.That(production.ContractSelections.Single(value => value.TargetSchemaVersion == 17).TargetSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
 
             SpatialLayoutCompatibilityProfilesData schemaEight =
                 JsonUtility.FromJson<SpatialLayoutCompatibilityProfilesData>(profiles.text);

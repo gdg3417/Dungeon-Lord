@@ -19,13 +19,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CurrentConstantsAndNativeEmptyCreationUseThirteen()
         {
             Fixture f = Fixture.Create(null);
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
             var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(f.ActivePath, fs,
-                f.Runtime, f.Compatibility, f.Production,
-                    LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile,
-                    f.Acquisition, f.Occupancy);
+            NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.CreatePrecise(f.ActivePath, fs,
+                f.Runtime, f.Production, f.Profile, f.Acquisition,
+                f.Context.RecoveryInputs, f.Runtime.timeProvenance.AccountedBoundary);
             Assert.That(created.IsSuccess, Is.True, created.Reason);
             Assert.That(created.Validation.State.Floors, Is.Empty);
             Assert.That(Encoding.UTF8.GetString(created.Session.GetCurrentBytes()),

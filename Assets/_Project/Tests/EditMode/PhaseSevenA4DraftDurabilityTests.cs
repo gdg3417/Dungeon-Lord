@@ -15,15 +15,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         private static SaveService DeleteService(Fixture f)
         {
-            byte[] legacy = (byte[])typeof(DetachedCurrentTargetValidationContext).GetField("legacyConfiguration",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(f.Context);
-            var service = new SaveService(new SimpleLogger(false, (level, message) => { }),
-                new SaveConfig { fileName = Path.GetFileName(f.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(f.ActivePath));
-            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration, legacy, f.PositionProfiles, f.Occupancy);
+            var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(f, out _);
             service.ConfigureStructuralEconomy(f.Economy); service.ConfigureContentAcquisitionEconomy(f.Acquisition);
-            service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
-                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, f.FileSystem, path));
-            Assert.That(service.LoadOrCreate("a4-explicit-delete", out string banner), Is.Not.Null, banner);
             return service;
         }
         private static SaveService CommittedDeleteDraft(Fixture f)
@@ -125,7 +118,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(recovered.CanSave, Is.True);
             f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, recovered));
             f.Reopen(); Assert.That(f.State.Floors[0].RoomContents.Assignments[0].RoomLocalPosition, Is.EqualTo(new TileCoordinate(2, 1)));
-            Assert.That(Store(f).Read(), Is.Null); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(Store(f).Read(), Is.Null); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
         }
 
         [TestCase("candidate-before", 0)]

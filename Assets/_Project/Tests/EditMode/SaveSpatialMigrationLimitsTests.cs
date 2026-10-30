@@ -21,20 +21,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     SaveSpatialMigrationLimitsLoader.ProductionPath));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
-            Assert.That(result.Profile.Raw.MaximumInputBytes, Is.EqualTo(2752696));
+            Assert.That(result.Profile.Raw.MaximumInputBytes, Is.EqualTo(2753692));
             Assert.That(result.Profile.Raw.MaximumNestingDepth, Is.EqualTo(32));
             Assert.That(result.Profile.Raw.MaximumObjectMembers, Is.EqualTo(64));
             Assert.That(result.Profile.Raw.MaximumArrayElements, Is.EqualTo(128));
             Assert.That(result.Profile.Raw.MaximumStringBytes, Is.EqualTo(4096));
-            Assert.That(result.Profile.Raw.MaximumScanWork, Is.EqualTo(5505392));
-            Assert.That(result.Profile.Canonical.Serialized.MaximumInputBytes, Is.EqualTo(1376348));
-            Assert.That(result.Profile.Canonical.Serialized.MaximumParsedNodes, Is.EqualTo(10244));
-            Assert.That(result.Profile.Canonical.Serialized.MaximumCollectionRecords, Is.EqualTo(5380));
-            Assert.That(result.Profile.Canonical.Serialized.MaximumStringCharacters, Is.EqualTo(1376327));
+            Assert.That(result.Profile.Raw.MaximumScanWork, Is.EqualTo(5507384));
+            Assert.That(result.Profile.Canonical.Serialized.MaximumInputBytes, Is.EqualTo(1376846));
+            Assert.That(result.Profile.Canonical.Serialized.MaximumParsedNodes, Is.EqualTo(10256));
+            Assert.That(result.Profile.Canonical.Serialized.MaximumCollectionRecords, Is.EqualTo(5392));
+            Assert.That(result.Profile.Canonical.Serialized.MaximumStringCharacters, Is.EqualTo(1376684));
             Assert.That(result.Profile.Canonical.Serialized.MaximumDiagnostics, Is.EqualTo(64));
             Assert.That(result.Profile.Canonical.Spatial.MaximumRecords, Is.EqualTo(165));
             Assert.That(result.Profile.Canonical.Spatial.MaximumMaterializedTiles, Is.EqualTo(64));
-            Assert.That(result.Profile.Whole.MaximumCandidateBytes, Is.EqualTo(1376348));
+            Assert.That(result.Profile.Whole.MaximumCandidateBytes, Is.EqualTo(1376846));
             Assert.That(result.Profile.Whole.MaximumCopiedValueBytes, Is.EqualTo(524288));
             Assert.That(result.Profile.Whole.MaximumUnknownMembers, Is.EqualTo(64));
             Assert.That(result.Profile.Whole.MaximumUnknownMemberBytes, Is.EqualTo(131072));

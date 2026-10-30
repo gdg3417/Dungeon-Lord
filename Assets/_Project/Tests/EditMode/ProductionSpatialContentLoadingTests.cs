@@ -528,7 +528,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(snapshot.Catalog.Rooms[0].ConnectionPoints[0].ConnectionPointId,
                 Is.Not.EqualTo("mutated"));
             Assert.That(snapshot.Languages[0].entries[0].key, Is.Not.EqualTo("mutated"));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
             Assert.That(typeof(SaveData).GetFields(BindingFlags.Instance | BindingFlags.Public)
                 .Any(field => field.FieldType == typeof(ProductionSpatialContentSnapshot)), Is.False);
 
@@ -553,6 +553,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void ProductionPublicationHasOnlyApprovedCanonicalRuntimeConsumers()
         {
             const string compositionPath = "Assets/_Project/Scripts/Core/GameRoot.cs";
+            const string recoveryCompositionPath = "Assets/_Project/Scripts/Core/GameRoot.Recovery.cs";
             const string overlayPath = "Assets/_Project/Scripts/UI/BootstrapOverlay.cs";
             const string productionUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonController.cs";
             const string constructionUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs";
@@ -563,7 +564,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 .ToArray();
             // Construction and replay are partials of the already approved production controller,
             // not another runtime publisher or composition root.
-            CollectionAssert.AreEquivalent(new[] { compositionPath, overlayPath, productionUiPath, constructionUiPath, replayUiPath }, consumers);
+            Assert.That(File.ReadAllText(recoveryCompositionPath), Does.Contain("partial class GameRoot"));
+            CollectionAssert.AreEquivalent(new[] { compositionPath, recoveryCompositionPath, overlayPath, productionUiPath, constructionUiPath, replayUiPath }, consumers);
             foreach (string path in new[] { productionUiPath, constructionUiPath, replayUiPath })
             {
                 string productionUi = File.ReadAllText(path);
