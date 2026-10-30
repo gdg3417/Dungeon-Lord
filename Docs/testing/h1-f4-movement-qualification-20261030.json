@@ -1,0 +1,53 @@
+{
+  "branch": "codex/h1-f4-recovery",
+  "campaign": "e0834cc7b44e4734a3ed341c79d817e5",
+  "combined_original_84_qualified": 58,
+  "evidence_sha256": {
+    "TestResults/h1-f4-20261027-rx11/independent-completion01.json": "d31a34fcaf8f29c0dd8432cd56aa31472545999204f3285c3b127bb758e96cb8",
+    "TestResults/h1-f4-20261027-rx11/plan-selected01.json": "99c7b8875a4e9c45511b59a0599335cdab67b6a9fe25cf98770071b7304a13f2",
+    "TestResults/h1-f4-20261027-rx11/selected-inventory.json": "9530a4cec7ad45018186291c0e2a09cab95e49ef8763fe2567facd1750d52ab3",
+    "TestResults/qualification-supervisor/e0834cc7b44e4734a3ed341c79d817e5/living-regressions/results.xml": "6247e993d2833456a7e1ea4ce7fa83d91514805e88c99fd84d6baedfac66e023"
+  },
+  "failed": 0,
+  "full_suite_failure_count_at_new_source": null,
+  "historical_verdicts_unchanged": true,
+  "original_84_remaining_unqualified": 26,
+  "original_four_now_qualified": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA5TransactionalRoomMovement.CurrentEconomicConfigurationAndCurrentWalletAreRecalculatedAfterDrafting",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA5TransactionalRoomMovement.ValidDraftUsesInjectedRoomPriceAndMovementFactorWithoutCanonicalMutation(\"spatial.room.basic\",300,0.25d,75)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA5TransactionalRoomMovement.ValidDraftUsesInjectedRoomPriceAndMovementFactorWithoutCanonicalMutation(\"spatial.room.rectangle\",320,0.25d,80)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA5TransactionalRoomMovement.ValidDraftUsesInjectedRoomPriceAndMovementFactorWithoutCanonicalMutation(\"spatial.room.large_chamber\",400,0.25d,100)"
+  ],
+  "passed": 52,
+  "preservation": {
+    "input_count": 1494,
+    "original_archive_members_verified": 1494,
+    "original_inputs_restored": true,
+    "prior_evidence_directories_verified": 276,
+    "protected_evidence_unchanged": true,
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\e0834cc7b44e4734a3ed341c79d817e5"
+    },
+    "tools_reverified": 10
+  },
+  "production_changed": false,
+  "remaining_by_class": {
+    "Gd66WindowsSpatialMigrationFileSystemTests": 1,
+    "LivingDungeonPhaseABaselineTests": 1,
+    "MvpCanonicalJourneyIntegrationTests": 1,
+    "OfflinePassiveManaTests": 3,
+    "PhaseSevenA4ProductionSceneTests": 19,
+    "ResearchCompletionEligibilityDiagnosticsTests": 1
+  },
+  "reporting_proposal_implemented": false,
+  "skipped": 0,
+  "stages": {
+    "living-regressions": "PASSED",
+    "living-regressions-preflight": "PASSED",
+    "preservation": "PASSED",
+    "restore": "PASSED",
+    "restore-preflight": "PASSED"
+  },
+  "tested_source": "1a8462d0494d0856708cf953cd02cf6d924bc3ed"
+}
