@@ -94,11 +94,36 @@ namespace DungeonBuilder.Tests.EditMode
             private readonly SaveData legacy;
             private readonly SaveService previousService;
             private readonly ProductionSpatialContentSnapshot previousProduction;
+            private readonly ContentBootstrap previousBootstrap;
+            private readonly object previousTick;
+            private readonly SaveService canonical;
             internal CanonicalRootScope(GameRoot root, bool starterDungeon = false)
             {
                 this.root = root; legacy = root.Save; previousService = root.SaveService;
                 previousProduction = root.Content.ProductionSpatialContent;
-                var fixture = Fixture.Create(null);
+                previousBootstrap = root.Content.Bootstrap;
+                previousTick = typeof(GameRoot).GetField("_configuredSimulationTickSeconds", Private).GetValue(root);
+                Assert.That(root.TimeService, Is.Null, "This legacy presentation sandbox must not replace an existing observation owner");
+                var run = (RunSimulationService)typeof(GameRoot).GetField("_runSimulationService", Private).GetValue(root);
+                var bytes = DungeonBuilder.M0.Tests.EditMode.PhaseFourTestSupport.AuthoredInputs((config, bootstrap) => {
+                    config.MvpFirstSessionObjective = JsonUtility.FromJson<MvpFirstSessionObjectiveConfig>(JsonUtility.ToJson(run.Config.MvpFirstSessionObjective));
+                    bootstrap.tickSeconds = previousBootstrap.tickSeconds;
+                    bootstrap.researchPendingScaffold = JsonUtility.FromJson<ResearchPendingScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchPendingScaffold));
+                    bootstrap.researchProgressScaffold = JsonUtility.FromJson<ResearchProgressScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchProgressScaffold));
+                    bootstrap.researchCompletionEligibilityScaffold = JsonUtility.FromJson<ResearchCompletionEligibilityScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchCompletionEligibilityScaffold));
+                    bootstrap.researchCompletionClaimScaffold = JsonUtility.FromJson<ResearchCompletionClaimScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchCompletionClaimScaffold));
+                    bootstrap.researchVerificationScaffold = JsonUtility.FromJson<ResearchVerificationScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchVerificationScaffold));
+                });
+                string JsonOrNull(object value) => value == null ? "null" : JsonUtility.ToJson(value);
+                // Explicit synthetic initial Research/history, before ownership.
+                // Do not clone the presentation sandbox's time/spatial authority
+                // or overwrite a bound owner's runtime with that legacy object.
+                var fixture = Fixture.Create("\"lastSavedUtcUnix\":" + Math.Max(1, legacy.lastSavedUtcUnix) +
+                    ",\"researchPending\":" + JsonOrNull(legacy.researchPending) +
+                    ",\"researchProgress\":" + JsonOrNull(legacy.researchProgress) +
+                    ",\"completedResearch\":" + JsonOrNull(legacy.completedResearch) +
+                    ",\"completedObjectives\":" + JsonOrNull(legacy.completedObjectives) +
+                    ",\"runHistory\":" + JsonOrNull(legacy.runHistory), recoveryInputBytes: bytes);
                 if (starterDungeon)
                 {
                     foreach (var pair in new[] {
@@ -108,17 +133,17 @@ namespace DungeonBuilder.Tests.EditMode
                         (MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId) })
                         fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(pair.Item1, pair.Item2)));
                 }
-                // The presentation sandbox has no persisted time. Use the explicit
-                // fake canonical fixture boundary while copying its research state.
-                long presentationTime = legacy.lastSavedUtcUnix;
-                try {
-                    legacy.lastSavedUtcUnix = Math.Max(legacy.lastSavedUtcUnix, fixture.Runtime.lastSavedUtcUnix);
-                    fixture.Accept(fixture.Authority.SaveRecognizedState(fixture.ActivePath, fixture.FileSystem, fixture.Session, legacy));
-                } finally { legacy.lastSavedUtcUnix = presentationTime; }
-                var canonical = OpenService(fixture, out var save);
+                var clock = new ResearchFixtureClock(fixture.Runtime.timeProvenance.AccountedBoundary);
+                canonical = OpenService(fixture, out var save, clock, () => 0, out var owner);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.SaveService)).SetValue(root, canonical);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.Save)).SetValue(root, save);
+                typeof(GameRoot).GetProperty(nameof(GameRoot.TimeService)).SetValue(root, owner);
+                typeof(GameRoot).GetField("_configuredSimulationTickSeconds", Private).SetValue(root, fixture.Context.RecoveryInputs.Bootstrap.tickSeconds);
+                root.Content.BindRecoveryBootstrap(fixture.Context.RecoveryInputs);
                 typeof(ContentService).GetProperty(nameof(ContentService.ProductionSpatialContent)).SetValue(root.Content, fixture.Production);
+                canonical.BeforeForegroundAction = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), root,
+                    typeof(GameRoot).GetMethod("FlushForeground", Private));
+                canonical.ForegroundCurrent = () => root.Save;
                 canonical.CanonicalRuntimePublished += (Action<SaveData>)Delegate.CreateDelegate(typeof(Action<SaveData>), root,
                     typeof(GameRoot).GetMethod("PublishCanonicalRuntime", Private));
                 root.RefreshOfflineSummaryLines();
@@ -127,6 +152,10 @@ namespace DungeonBuilder.Tests.EditMode
             {
                 legacy.researchPending = root.Save.researchPending; legacy.researchProgress = root.Save.researchProgress;
                 legacy.completedResearch = root.Save.completedResearch; legacy.completedObjectives = root.Save.completedObjectives;
+                canonical.BeforeForegroundAction = null; canonical.ForegroundCurrent = null;
+                typeof(GameRoot).GetProperty(nameof(GameRoot.TimeService)).SetValue(root, null);
+                typeof(GameRoot).GetField("_configuredSimulationTickSeconds", Private).SetValue(root, previousTick);
+                typeof(ContentService).GetProperty(nameof(ContentService.Bootstrap)).SetValue(root.Content, previousBootstrap);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.Save)).SetValue(root, legacy);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.SaveService)).SetValue(root, previousService);
                 typeof(ContentService).GetProperty(nameof(ContentService.ProductionSpatialContent)).SetValue(root.Content, previousProduction);

@@ -179,19 +179,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"RoomOptionId\":\"placement.option.room.basic\"," +
                 "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"]," +
                 "\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}],\"NextRevision\":3}}}");
+            var workload = PhaseFourTestSupport.ProductionProfile();
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original,
+                    workload.Raw, workload.Whole, workload.Canonical);
             string filename = "gd66-unity-save-service-" + Guid.NewGuid().ToString("N") + ".json";
             string unityShapedPath = Path.Combine(Application.persistentDataPath, filename);
             string schemaTwelveFilename = "gd66-unity-schema12-service-" +
                 Guid.NewGuid().ToString("N") + ".json";
             string schemaTwelvePath = Path.Combine(Application.persistentDataPath, schemaTwelveFilename);
-            SaveService migratedService = WindowsService(fixture, filename);
             try
             {
                 File.WriteAllBytes(unityShapedPath, original);
 
-                SaveData migrated = migratedService.LoadOrCreate("gd66-live", out string migrationBanner);
+                SaveData migrated = LoadWindowsService(fixture, filename, out var migratedService, out string migrationBanner);
 
                 Assert.That(migrated, Is.Not.Null, migrationBanner);
                 Assert.That(migrated.validatedCanonicalSpatialState, Is.Not.Null);
@@ -204,8 +205,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 migratedService.DeleteSave(out string originalDeleteBanner);
                 Assert.That(File.Exists(migratedService.SavePath), Is.False, originalDeleteBanner);
 
-                SaveService nativeService = WindowsService(fixture, filename);
-                SaveData created = nativeService.LoadOrCreate("gd66-live", out string nativeBanner);
+                SaveData created = LoadWindowsService(fixture, filename, out var nativeService, out string nativeBanner);
                 Assert.That(created, Is.Not.Null, nativeBanner);
                 Assert.That(created.validatedCanonicalSpatialState, Is.Not.Null);
                 Assert.That(nativeService.CanonicalSession, Is.Not.Null);
@@ -227,11 +227,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 byte[] frozenSchemaTwelve = PhaseFourTestSupport.FrozenTwelve(firstCurrentBytes);
                 Assert.That(Encoding.UTF8.GetString(frozenSchemaTwelve),
                     Does.Contain("\"schemaVersion\":12").And.Not.Contain("RoomLocalPosition"));
+                var readerContext = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                    BindingFlags.Instance | BindingFlags.NonPublic).GetValue(nativeService);
+                var historical = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(frozenSchemaTwelve, readerContext);
+                Assert.That(historical.IsValid, Is.True, historical.Reason);
+                Assert.That(historical.CurrentTargetValidated, Is.False, "Frozen reader proof is not current write authority");
                 File.WriteAllBytes(schemaTwelvePath, frozenSchemaTwelve);
 
-                SaveService schemaTwelveService = WindowsService(fixture, schemaTwelveFilename);
-                SaveData schemaTwelveMigrated = schemaTwelveService.LoadOrCreate(
-                    "gd66-live", out string schemaTwelveBanner);
+                SaveData schemaTwelveMigrated = LoadWindowsService(fixture, schemaTwelveFilename,
+                    out var schemaTwelveService, out string schemaTwelveBanner);
                 Assert.That(schemaTwelveMigrated, Is.Not.Null, schemaTwelveBanner);
                 RoomContentAssignment remigratedAssignment = schemaTwelveMigrated
                     .validatedCanonicalSpatialState.Floors.Single().RoomContents.Assignments.Single();
@@ -244,14 +248,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Is.EqualTo(firstAssignment.RoomLocalPosition.X));
                 Assert.That(remigratedAssignment.RoomLocalPosition.Y,
                     Is.EqualTo(firstAssignment.RoomLocalPosition.Y));
-                CollectionAssert.AreEqual(firstCurrentBytes, File.ReadAllBytes(schemaTwelveService.SavePath));
+                byte[] migratedBytes = File.ReadAllBytes(schemaTwelveService.SavePath);
+                // Frozen migration/activation is not native creation: its legacy
+                // interval contract is preserved, not stamped with native proof.
+                CollectionAssert.AreEqual(frozenSchemaTwelve, PhaseFourTestSupport.FrozenTwelve(migratedBytes));
+                Assert.That(schemaTwelveMigrated.timeProvenance.Mode, Is.EqualTo(TimeProvenance.PreciseMode));
+                Assert.That(schemaTwelveMigrated.timeProvenance.AccountedBoundary.Seconds, Is.EqualTo(1000));
+                Assert.That(schemaTwelveMigrated.timeProvenance.RecoveryContextSha256,
+                    Is.EqualTo(created.timeProvenance.RecoveryContextSha256));
 
-                SaveService reopenedService = WindowsService(fixture, schemaTwelveFilename);
-                SaveData reopened = reopenedService.LoadOrCreate("gd66-live", out string reopenBanner);
+                SaveData reopened = LoadWindowsService(fixture, schemaTwelveFilename, out var reopenedService, out string reopenBanner);
                 Assert.That(reopened, Is.Not.Null, reopenBanner);
                 Assert.That(reopened.validatedCanonicalSpatialState, Is.Not.Null);
                 Assert.That(reopenedService.CanonicalSession, Is.Not.Null);
-                CollectionAssert.AreEqual(firstCurrentBytes, File.ReadAllBytes(reopenedService.SavePath));
+                CollectionAssert.AreEqual(migratedBytes, File.ReadAllBytes(reopenedService.SavePath));
 
                 reopenedService.DeleteSave(out string deleteBanner);
                 Assert.That(File.Exists(reopenedService.SavePath), Is.False, deleteBanner);
@@ -729,8 +739,39 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Reason, Is.EqualTo(SpatialMigrationCapabilityReason.NativeProbeFailed));
         }
 
+        private sealed class WindowsFixtureClock : IPreciseTimeSource
+        {
+            public UnixTimePoint UtcNow() => new UnixTimePoint(1000, 0);
+            public long UtcNowUnixSeconds() => 1000;
+        }
+
+        private static SaveData LoadWindowsService(Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,
+            string filename, out SaveService service, out string banner)
+        {
+            service = WindowsService(fixture, filename, out var time, out var inputs);
+            var current = service.LoadOrCreate("gd66-live", out banner);
+            Assert.That(current, Is.Not.Null, banner);
+            time.BindLoadedForegroundHorizon(current.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
+            time.AttachSave(current);
+            service.CanonicalRuntimePublished += value => { current = value; time.AttachSave(value); };
+            if (time.RecoveryClockActive || current.timeProvenance.Episode != null) {
+                service.BeginCanonicalRecovery(current);
+                var online = new DungeonBuilder.M0.Economy.CanonicalPassiveManaService(inputs.Passive, inputs.Economy,
+                    new DungeonBuilder.M0.Economy.FormulaEngine(), fixture.Limits.Spatial, inputs.Bootstrap.tickSeconds);
+                var mana = new DungeonBuilder.M0.Economy.CanonicalOfflinePassiveManaService(inputs.Passive, online);
+                for (int i = 0; i < 8 && time.RecoveryClockActive; i++) {
+                    var result = service.AdvanceCanonicalRecovery(current, mana, (_, __) => Assert.Fail("Historical A=C owns no accepted ticks"));
+                    Assert.That(result.IsSuccess, Is.True, result.Reason);
+                }
+                Assert.That(time.RecoveryClockActive, Is.False);
+            }
+            Assert.That(current.timeProvenance.Episode, Is.Null);
+            return current;
+        }
+
         private static SaveService WindowsService(
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture, string filename)
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture, string filename,
+            out TimeService time, out RecoveryRuntimeInputs inputs)
         {
             var service = new SaveService(new SimpleLogger(false),
                 new SaveConfig { fileName = filename, useAtomicWrites = true },
@@ -741,10 +782,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
                 PhaseFourTestSupport.PositionProfiles(fixture.Limits),
                 PhaseFourTestSupport.Occupancy(fixture.Limits));
-            var economy = PhaseFourTestSupport.Economy(fixture.Production, fixture.Limits);
+            var contentLimits = ProductionSpatialContentWorkloadLimitParser.Parse(UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(
+                "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json")).Limits;
+            inputs = new RecoveryRuntimeInputs(H1F4RecoveryContractTests.Inputs(), fixture.Production, contentLimits, fixture.Limits);
+            var economy = inputs.Economy;
             service.ConfigureStructuralEconomy(economy);
             service.ConfigureContentAcquisitionEconomy(
                 PhaseFourTestSupport.Acquisition(economy, fixture.Limits));
+            var clock = new WindowsFixtureClock();
+            time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
+                inputs.Bootstrap.timeRules.detectClockSkewSeconds, clock, () => 0);
+            time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);
+            service.SetTimeSourceForTests(clock);
+            service.ConfigureRecovery(inputs, time);
             return service;
         }
 
