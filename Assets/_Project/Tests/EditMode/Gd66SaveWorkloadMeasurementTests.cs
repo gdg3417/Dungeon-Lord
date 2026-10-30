@@ -276,7 +276,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(RawSavePayloadClassifier.Classify(bytes, profile.Raw,
                 new RawSaveEnvelopeVersionContract(1, SaveMigration.LatestSchemaVersion), BlankFloor()).IsSuccess, Is.True);
             var context = new DetachedCurrentTargetValidationContext(fixture.Compatibility, fixture.Production,
-                LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), profile.Canonical);
+                LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), profile.Canonical,
+                fixture.Context.RecoveryInputs.Occupancy, allowEditorTestOccupancyFallback: false,
+                monsterRecovery: fixture.Context.RecoveryInputs.Monsters);
             context.BindRecoveryInputs(fixture.Context.RecoveryInputs);
             var opened = DetachedCanonicalSaveSession.Open(bytes, context, profile);
             Assert.That(opened.IsSuccess, Is.True, opened.Reason);

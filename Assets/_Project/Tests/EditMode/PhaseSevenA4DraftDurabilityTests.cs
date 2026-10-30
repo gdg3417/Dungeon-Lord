@@ -47,8 +47,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             int firstCanonical = Array.FindIndex(deletes, o => o.Paths[0] == ordinary || o.Paths[0] == migration || o.Paths[0] == f.ActivePath);
             Assert.That(firstCanonical, Is.GreaterThan(0));
             Assert.That(deletes.Skip(firstCanonical).Any(o => o.Paths[0].StartsWith(f.ActivePath + ".editor-draft", StringComparison.Ordinal)), Is.False);
-            Assert.That(service.LoadOrCreate("a4-explicit-delete", out string freshBanner), Is.Not.Null, freshBanner);
-            Assert.That(service.CreateDungeonDraftStore().Read(), Is.Null);
+            // A fresh boot creates its own observation owner. The deleted root
+            // is quiesced in production; its attached TimeService is not reused.
+            var freshService = DeleteService(f); // Loads/creates through the real prebound service path.
+            Assert.That(freshService.CanonicalSession, Is.Not.Null);
+            Assert.That(freshService.CreateDungeonDraftStore().Read(), Is.Null);
         }
         [TestCase(false)] [TestCase(true)]
         public void ExplicitDeleteDraftFailureBeforeOrAfterMutationPreservesCanonical(bool afterMutation)
