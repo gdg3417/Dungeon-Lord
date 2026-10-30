@@ -534,9 +534,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(root.Save.totalTicks, Is.Zero);
 
                 fixture.FileSystem.DisableFailure();
-                // Explicit action retries the existing barrier; repeated resume
-                // callbacks cannot manufacture another lifecycle transition.
-                service.Save(root.Save, SaveReason.StateChange);
+                // A root action retries the existing barrier. SaveService alone
+                // correctly refuses an open episode before entering its writer.
+                // The request must remain rejected until recovery closes.
+                Assert.That(root.SimulateRunOnce(), Is.False);
                 DrainRecovery(root);
                 Assert.That(root.TimeService.IsPaused, Is.False);
                 Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(27d).Within(1e-9));
