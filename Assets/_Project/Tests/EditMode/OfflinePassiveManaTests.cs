@@ -18,9 +18,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
     [Category("PhaseFourOfflinePassiveMana")]
     public class OfflinePassiveManaTests
     {
-        private sealed class FakeTimeSource : ITimeSource
+        private sealed class FakeTimeSource : IPreciseTimeSource
         {
             public long Now;
+            public double Monotonic;
+            public UnixTimePoint UtcNow() => new UnixTimePoint(Now, 0);
             public long UtcNowUnixSeconds() => Now;
         }
 
@@ -302,10 +304,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ColdStartCommitBootSaveAndFreshReopenCannotReplayInterval()
         {
-            Fixture fixture = OneFloor();
-            fixture.Runtime.lastSavedUtcUnix = 1000;
-            fixture.Runtime.structureRuntime.ManaReserve = 12.5d;
-            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
+            Fixture fixture = OneFloor(1000, 12.5d);
             var time = new FakeTimeSource { Now = 1001 };
             SaveService service = Service(fixture, time);
             GameObject go = new GameObject("Offline cold-start lifecycle");
@@ -319,10 +318,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 byte[] spatial = CanonicalSpatialSaveSerializer.Serialize(
                     fixture.State, fixture.Profile.Canonical).Value;
 
-                Assert.That(root.TryApplyOfflinePassiveManaForTests(), Is.True);
+                service.BeginCanonicalRecovery(root.Save);
+                DrainRecovery(root);
                 Assert.That(root.Save.structureRuntime.ManaReserve,
                     Is.EqualTo(12.5075d).Within(1e-12));
                 Assert.That(root.Save.lastSavedUtcUnix, Is.EqualTo(1001));
+                Assert.That(root.LatestOfflinePassiveManaResultForTests, Is.Not.Null,
+                    "Successful canonical recovery must retain the existing offline-mana presentation evidence");
                 Assert.That(root.LatestOfflinePassiveManaResultForTests.Persisted, Is.True);
                 Assert.That(service.Save(root.Save, SaveReason.Boot), Is.True);
                 UnityEngine.Object.DestroyImmediate(go);
@@ -334,7 +336,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 try
                 {
                     GameRoot reopenedRoot = Root(reopenedGo, fixture, reopenedService, time);
-                    Assert.That(reopenedRoot.TryApplyOfflinePassiveManaForTests(), Is.True);
+                    reopenedService.BeginCanonicalRecovery(reopenedRoot.Save);
+                    DrainRecovery(reopenedRoot);
                     Assert.That(reopenedRoot.LatestOfflinePassiveManaResultForTests.Reason,
                         Is.EqualTo(OfflinePassiveManaReason.ZeroElapsedInterval));
                     Assert.That(reopenedRoot.Save.structureRuntime.ManaReserve,
@@ -349,7 +352,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Assert.That(Encoding.UTF8.GetString(
                         reopenedService.CanonicalSession.GetCurrentBytes()),
                         Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget));
-                    Assert.That(reopened, Is.SameAs(reopenedRoot.Save));
+                    // Even a zero-duration reopen closes a real recovery episode;
+                    // its durable publications replace the runtime projection.
+                    Assert.That(reopenedRoot.Save.timeProvenance.Episode, Is.Null);
+                    CollectionAssert.AreEqual(reopenedService.CanonicalSession.GetCurrentBytes(),
+                        fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
                 }
                 finally { UnityEngine.Object.DestroyImmediate(reopenedGo); }
             }
@@ -444,7 +451,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             GameObject go = new GameObject("Offline pause-resume lifecycle");
             try
             {
-                GameRoot root = Root(go, fixture, service, time, attachClock: true);
+                GameRoot root = Root(go, fixture, service, time);
                 double heat = root.Save.structureRuntime.Heat;
                 long ticks = root.Save.totalTicks;
 
@@ -483,7 +490,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             GameObject go = new GameObject("Offline resume failure");
             try
             {
-                GameRoot root = Root(go, fixture, service, time, attachClock: true);
+                GameRoot root = Root(go, fixture, service, time);
                 root.ApplyPauseState(true);
                 long boundary = root.Save.lastSavedUtcUnix;
                 byte[] before = service.CanonicalSession.GetCurrentBytes();
@@ -589,12 +596,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.IsSubsetOf(required, keys);
         }
 
-        private static Fixture OneFloor()
+        private static Fixture OneFloor(long durableSeconds = 1, double? wallet = null)
         {
-            Fixture fixture = Fixture.Create(null);
+            Fixture fixture = Fixture.Create("\"lastSavedUtcUnix\":" + durableSeconds.ToString(CultureInfo.InvariantCulture),
+                workloadProfile: PhaseFourTestSupport.ProductionProfile());
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
+            if (wallet.HasValue) {
+                fixture.Runtime.structureRuntime.ManaReserve = wallet.Value;
+                fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
+                fixture.Accept(fixture.Authority.SaveRecognizedState(fixture.ActivePath, fixture.FileSystem,
+                    fixture.Session, fixture.Runtime));
+            }
             return fixture;
         }
 
@@ -614,43 +628,50 @@ namespace DungeonBuilder.M0.Tests.EditMode
             tierId == CurrentHeatTierResolver.NoticeTierId ? config.HeatNoticeMinimum :
             config.HeatConcernMinimum;
 
-        private static SaveService Service(Fixture fixture, ITimeSource timeSource = null)
+        private static SaveService Service(Fixture fixture, FakeTimeSource timeSource)
         {
-            var service = new SaveService(new SimpleLogger(false, (level, message) => { }), null,
-                Path.GetDirectoryName(fixture.ActivePath));
-            service.ConfigureCanonical(fixture.Profile, fixture.Production,
-                fixture.Compatibility, fixture.Configuration,
-                LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration),
-                fixture.PositionProfiles, fixture.Occupancy);
-            service.ConfigureStructuralEconomy(fixture.Economy);
+            var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(
+                fixture, out var loaded, timeSource, () => timeSource.Monotonic, out _);
+            fixture.Runtime = loaded;
             service.ConfigureStructuralRemovalPolicy(fixture.RemovalPolicy);
-            service.ConfigureContentAcquisitionEconomy(fixture.Acquisition);
-            typeof(SaveService).GetProperty("SavePath").SetValue(service, fixture.ActivePath);
-            SetField(service, "_canonicalSession", fixture.Session);
-            SetField(service, "_canonicalFileSystem", fixture.FileSystem);
-            SetField(service, "_validationContext", fixture.Context);
-            if (timeSource != null) service.SetTimeSourceForTests(timeSource);
             return service;
         }
 
         private static GameRoot Root(GameObject go, Fixture fixture, SaveService service,
-            FakeTimeSource time, bool attachClock = false)
+            FakeTimeSource time)
         {
             GameRoot root = go.AddComponent<GameRoot>();
+            typeof(GameRoot).GetProperty("Logger").SetValue(root, new SimpleLogger(false, (_, __) => { }));
             typeof(GameRoot).GetProperty("Save").SetValue(root, fixture.Runtime);
-            SetField(root, "<Content>k__BackingField", ProductionLocalizedContent());
+            var content = ProductionLocalizedContent();
+            var inputs = fixture.Context.RecoveryInputs;
+            content.BindRecoveryBootstrap(inputs);
+            typeof(ContentService).GetProperty("ProductionSpatialContent").SetValue(content, fixture.Production);
+            SetField(root, "<Content>k__BackingField", content);
+            var owner = (TimeService)typeof(SaveService).GetField("recoveryTime",
+                BindingFlags.Instance | BindingFlags.NonPublic).GetValue(service);
+            Assert.That(owner, Is.Not.Null);
+            Assert.That(root.TimeService, Is.Null, "Install the already-bound owner once; never replace it");
+            typeof(GameRoot).GetProperty("TimeService").SetValue(root, owner);
+            SetField(root, "recoveryRuntimeInputs", inputs);
             root.AttachSaveServiceForTests(service);
-            Assert.That(root.ConfigureCanonicalPassiveManaForTests(Configuration(fixture),
-                fixture.Economy, fixture.Profile.Canonical.Spatial, 10, 30), Is.True);
+            Assert.That(root.ConfigureCanonicalPassiveManaForTests(inputs.Passive,
+                fixture.Economy, fixture.Profile.Canonical.Spatial, inputs.Bootstrap.tickSeconds,
+                inputs.Bootstrap.timeRules.activeSaveIntervalSeconds), Is.True);
             root.SetOfflineHeatConfigurationForTests(fixture.Configuration);
             root.SetOfflineTimeSourceForTests(time);
-            if (attachClock)
-            {
-                var clock = new TimeService(new SimpleLogger(false), 10, 300, time);
-                clock.AttachSave(root.Save);
-                typeof(GameRoot).GetProperty("TimeService").SetValue(root, clock);
-            }
+            service.BeforeForegroundAction = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), root,
+                typeof(GameRoot).GetMethod("FlushForeground", BindingFlags.Instance | BindingFlags.NonPublic));
+            service.ForegroundCurrent = () => root.Save;
             return root;
+        }
+
+        private static void DrainRecovery(GameRoot root)
+        {
+            var pulse = typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.Instance | BindingFlags.NonPublic);
+            for (int i = 0; i < 8 && root.TimeService.RecoveryClockActive; i++) pulse.Invoke(root, null);
+            Assert.That(root.TimeService.RecoveryClockActive, Is.False, "All required recovery phases must close durably");
+            Assert.That(root.Save.timeProvenance.Episode, Is.Null);
         }
 
         private static ContentService ProductionLocalizedContent()
