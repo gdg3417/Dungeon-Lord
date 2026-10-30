@@ -300,6 +300,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     if (profile.OptionId == MvpDungeonPlacementIds.SkeletonOptionId ||
                         profile.OptionId == MvpDungeonPlacementIds.SpikeTrapOptionId)
                         profile.MinimumDamage = profile.MaximumDamage = 100;
+                // The pure historical snapshot and current manual writer dispatch
+                // different executables. Author both, as in the existing C1 wipe fixture.
+                foreach (var monster in config.CombatC0.Monsters)
+                    { monster.Damage = 100; monster.Initiative = 100; monster.MaxHealth = 100; }
             });
             for (int index = 0; index < 2; index++)
                 PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId,
