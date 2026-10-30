@@ -199,6 +199,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"RoomOptionId\":\"placement.option.room.basic\"," +
                 "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"]," +
                 "\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}],\"NextRevision\":3}}}");
+            byte[] omittedResearchSource = original;
+            // This inline synthetic migration fixture intends no Research state.
+            // Preserve that explicitly; an omitted nullable object is not proof
+            // that JsonUtility's historical projection represents no project.
+            original = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(original).Replace(
+                "\"lastSavedUtcUnix\":1,", "\"lastSavedUtcUnix\":1,\"researchPending\":null,\"researchProgress\":null,"));
             var workload = PhaseFourTestSupport.ProductionProfile();
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original,
@@ -221,6 +227,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(File.ReadAllText(migratedService.SavePath), Does.Contain("\"RoomLocalPosition\""));
                 Assert.That(migrated.validatedCanonicalSpatialState.Floors.Single().RoomContents.Assignments,
                     Has.Length.EqualTo(1));
+                var actualContext = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                    BindingFlags.Instance | BindingFlags.NonPublic).GetValue(migratedService);
+                var omitted = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, omittedResearchSource,
+                    workload.Raw, workload.Whole, workload.Canonical);
+                Assert.That(PhaseFourTestSupport.UpgradeFrozenSixteen(omitted.Result.Attempt.Candidate.GetBytes(),
+                    fixture.Limits, out var omittedSixteen), Is.True);
+                var historicalOmitted = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(omittedSixteen, actualContext);
+                Assert.That(historicalOmitted.IsValid, Is.True, historicalOmitted.Reason);
+                Assert.That(DetachedCompleteSaveContract.ResearchStateValid(historicalOmitted, actualContext.RecoveryInputs), Is.False,
+                    "The old ambiguous Research fixture must not acquire current activation authority");
 
                 migratedService.DeleteSave(out string originalDeleteBanner);
                 Assert.That(File.Exists(migratedService.SavePath), Is.False, originalDeleteBanner);

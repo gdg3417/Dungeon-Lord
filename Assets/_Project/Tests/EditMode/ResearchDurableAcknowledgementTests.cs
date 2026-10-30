@@ -113,6 +113,7 @@ namespace DungeonBuilder.Tests.EditMode
                     bootstrap.researchCompletionEligibilityScaffold = JsonUtility.FromJson<ResearchCompletionEligibilityScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchCompletionEligibilityScaffold));
                     bootstrap.researchCompletionClaimScaffold = JsonUtility.FromJson<ResearchCompletionClaimScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchCompletionClaimScaffold));
                     bootstrap.researchVerificationScaffold = JsonUtility.FromJson<ResearchVerificationScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchVerificationScaffold));
+                    bootstrap.researchUnlockBridge = JsonUtility.FromJson<ResearchUnlockBridgeConfig>(JsonUtility.ToJson(previousBootstrap.researchUnlockBridge));
                 });
                 string JsonOrNull(object value) => value == null ? "null" : JsonUtility.ToJson(value);
                 // Explicit synthetic initial Research/history, before ownership.
