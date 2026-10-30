@@ -1,0 +1,59 @@
+{
+  "branch": "codex/h1-f4-recovery",
+  "campaign": "bc2cff7692f0493c86f74876373eb8ab",
+  "combined_original_84_with_qualified_evidence": 44,
+  "evidence_sha256": {
+    "TestResults/h1-f4-20261027-rx05/post-failure-finalize01/receipt.json": "9c2ab4db8f192cebbac7f2c2f12542d30d61275f9a87e0df9718159852a16f78",
+    "TestResults/h1-f4-20261027-rx06/independent-completion01.json": "36820f8836362827ac4a90c72a414efdcd748b04b847834b02bb778374b87437",
+    "TestResults/h1-f4-20261027-rx06/plan-selected01.json": "68bfa984dac906fa184bcfe8717a4618dd82fe9c2d21d6d1f81d6f683fb97fc9",
+    "TestResults/h1-f4-20261027-rx06/selected-inventory.json": "de9a60f2eca289e305d9587a2f8c61650fcc8f256f84c2370a8f81da21fca60c",
+    "TestResults/qualification-supervisor/bc2cff7692f0493c86f74876373eb8ab/living-regressions/results.xml": "d6ae652dbf6969f1fa2bdcce58ce68f4b637bbb6f3f5c07bd73c6d01f705342c"
+  },
+  "failed": 0,
+  "full_suite_failure_count_at_new_source": null,
+  "historical_campaign_verdicts_unchanged": true,
+  "original_84_remaining_unqualified": 40,
+  "original_eight": [
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.ChangedObservedContentStartsNewConfidenceAndSnapshotCopiesKnowledge",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.DescendedTwoFloorRunPublishesApplicableKnowledgeForBothCompletedFloors",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.ExitBeforeFloorTwoDoesNotLearnItsHiddenSnapshot",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.FinalWipeDoesNotCreatePreciseFloorKnowledge",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.FinalWipeDoesNotUpdateExistingApplicableFloorKnowledge",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.SurvivorLearningReconfirmsClampsAndOnlyPublishesAfterCompleteRun",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5B.DurableKnowledgeSurvivesOneActiveFloorLimitAndReopen",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5B.LaterRunUsesApplicablePreRunKnowledgeAndCurrentRunCannotLearnRetroactively"
+  ],
+  "passed": 31,
+  "preservation": {
+    "input_count": 1494,
+    "original_archive_members_verified": 1494,
+    "original_inputs_restored": true,
+    "prior_evidence_directories_verified": 261,
+    "protected_evidence_unchanged": true,
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\bc2cff7692f0493c86f74876373eb8ab"
+    },
+    "tools_reverified": 10
+  },
+  "production_changed": false,
+  "remaining_by_class": {
+    "Gd66WindowsSpatialMigrationFileSystemTests": 1,
+    "LivingDungeonPhaseABaselineTests": 1,
+    "MvpCanonicalJourneyIntegrationTests": 1,
+    "OfflinePassiveManaTests": 12,
+    "PhaseSevenA4ProductionSceneTests": 19,
+    "PhaseSevenA5TransactionalRoomMovementTests": 4,
+    "RecoveryEntryAndPrecisePassiveManaTests": 1,
+    "ResearchCompletionEligibilityDiagnosticsTests": 1
+  },
+  "skipped": 0,
+  "stages": {
+    "living-regressions": "PASSED",
+    "living-regressions-preflight": "PASSED",
+    "preservation": "PASSED",
+    "restore": "PASSED",
+    "restore-preflight": "PASSED"
+  },
+  "tested_source": "510fcb6c9f6646c5bba444e9abca07defcedc4b3"
+}
