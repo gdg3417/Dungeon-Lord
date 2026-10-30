@@ -265,9 +265,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Does.Contain("\"schemaVersion\":12").And.Not.Contain("RoomLocalPosition"));
                 var readerContext = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
                     BindingFlags.Instance | BindingFlags.NonPublic).GetValue(nativeService);
-                var historical = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(frozenSchemaTwelve, readerContext);
+                var historical = DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(frozenSchemaTwelve, fixture.Limits);
                 Assert.That(historical.IsValid, Is.True, historical.Reason);
                 Assert.That(historical.CurrentTargetValidated, Is.False, "Frozen reader proof is not current write authority");
+                Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(frozenSchemaTwelve, readerContext).IsValid,
+                    Is.False, "The current reader must continue rejecting a frozen source as current write authority");
                 File.WriteAllBytes(schemaTwelvePath, frozenSchemaTwelve);
 
                 SaveData schemaTwelveMigrated = LoadWindowsService(fixture, schemaTwelveFilename,

@@ -148,7 +148,13 @@ namespace DungeonBuilder.Tests.EditMode
                 canonical.ForegroundCurrent = () => root.Save;
                 canonical.CanonicalRuntimePublished += (Action<SaveData>)Delegate.CreateDelegate(typeof(Action<SaveData>), root,
                     typeof(GameRoot).GetMethod("PublishCanonicalRuntime", Private));
+                var consumed = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext", Private).GetValue(canonical);
+                Assert.That(consumed.RecoveryInputs, Is.SameAs(fixture.Context.RecoveryInputs));
+                Assert.That(root.Content.Bootstrap, Is.SameAs(consumed.RecoveryInputs.Bootstrap));
+                Assert.That(root.TimeService, Is.SameAs(owner));
                 root.RefreshOfflineSummaryLines();
+                CollectionAssert.AreEqual(fixture.Session.GetCurrentBytes(), canonical.CanonicalSession.GetCurrentBytes(),
+                    "Binding presentation to consumed authority must not publish a time or gameplay change");
             }
             public void Dispose()
             {
