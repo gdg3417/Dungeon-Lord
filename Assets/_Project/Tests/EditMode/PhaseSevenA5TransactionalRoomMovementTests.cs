@@ -127,9 +127,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.ValidAnchors, Is.Empty); Assert.That(result.ExaminedAnchorCount, Is.Zero); Assert.That(result.Reason, Is.Not.Null);
         }
 
-        internal static Fixture Room(string definition = "spatial.room.basic")
+        internal static Fixture Room(string definition = "spatial.room.basic", byte[][] recoveryInputBytes = null)
         {
-            var f = PhaseSevenA4TransactionalEditorTests.Content();
+            var f = PhaseSevenA4TransactionalEditorTests.Content(recoveryInputBytes: recoveryInputBytes);
             if (definition != "spatial.room.basic")
             {
                 if (definition == "spatial.room.large_chamber")
@@ -350,9 +350,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("spatial.room.large_chamber", 400, 0.25, 100)]
         public void ValidDraftUsesInjectedRoomPriceAndMovementFactorWithoutCanonicalMutation(string definition, double price, double factor, double expected)
         {
-            var f = Room(definition); var config = JsonUtility.FromJson<StructuralEconomyConfiguration>(File.ReadAllText("Assets/_Project/Resources/structural_economy.json"));
+            var inputs = H1F4RecoveryContractTests.Inputs();
+            var config = JsonUtility.FromJson<StructuralEconomyConfiguration>(Encoding.UTF8.GetString(inputs[2]));
             config.Rooms.Single(r => r.DefinitionId == definition).Mana = price; config.MovementFactor = factor;
-            Assert.That(StructuralEconomySnapshot.TryCreate(config, f.Production.Catalog, out f.Economy), Is.True);
+            inputs[2] = Encoding.UTF8.GetBytes(JsonUtility.ToJson(config));
+            var f = Room(definition, inputs);
+            Assert.That(f.Economy, Is.SameAs(f.Context.RecoveryInputs.Economy));
             var store = new Store(); var d = TransactionalDungeonDraft.Create(f.State, Context(f), store); byte[] before = f.Session.GetCurrentBytes();
             var target = f.State.Floors[0].Layout.Rooms.Single(r => r.RoomDefinitionId == definition);
             var anchor = definition == "spatial.room.large_chamber" ? new TileCoordinate(target.Anchor.X + 1, target.Anchor.Y) : new TileCoordinate(target.Anchor.X, target.Anchor.Y + 1);
@@ -467,8 +470,33 @@ namespace DungeonBuilder.M0.Tests.EditMode
             long reserve = MonsterContinuity.RequiredReserve(f.State, MonsterRecoveryRules.EditorFallback());
             f.Runtime.structureRuntime.ManaReserve = 167 + reserve;
             Assert.That(Price(d, f).Cost, Is.EqualTo(167));
+            // Current saves cannot adopt changed configuration, even while closed.
+            // Preserve the read-only repricing assertion but reject this foreign
+            // economy before publication; do not rebind the persisted context.
+            byte[] before = f.Session.GetCurrentBytes(); string runtimeBefore = JsonUtility.ToJson(f.Runtime);
+            var rejected = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d);
+            Assert.That(rejected.IsSuccess, Is.False);
+            Assert.That(rejected.Reason, Is.EqualTo(TransactionalDungeonDraft.StaleReason));
+            Assert.That(rejected.RuntimeProjection, Is.Null);
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
+            Assert.That(JsonUtility.ToJson(f.Runtime), Is.EqualTo(runtimeBefore));
+            Assert.That(Ledger(f).Sum(r => r.RenovationMana), Is.Zero);
+
+            // A separately authored current fixture proves the original positive
+            // 167-mana cost and late-wallet check under its own immutable inputs.
+            var inputs = H1F4RecoveryContractTests.Inputs();
+            inputs[2] = Encoding.UTF8.GetBytes(JsonUtility.ToJson(config));
+            f = Room(recoveryInputBytes: inputs);
+            d = TransactionalDungeonDraft.Create(f.State, Context(f), new Store()); Move(d, f, 0, 3); Flush(d);
+            reserve = MonsterContinuity.RequiredReserve(f.State, f.Context.RecoveryInputs.Monsters);
+            f.Runtime.structureRuntime.ManaReserve = 167 + reserve;
+            Assert.That(Price(d, f).Cost, Is.EqualTo(167));
             f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, d));
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(reserve)); Assert.That(Ledger(f).Sum(r => r.RenovationMana), Is.EqualTo(167));
+            f.Reopen();
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(reserve));
+            Assert.That(Ledger(f).Sum(r => r.RenovationMana), Is.EqualTo(167));
         }
 
         [Test]
