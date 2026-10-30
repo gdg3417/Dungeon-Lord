@@ -219,18 +219,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void DetachedCommitPersistsWalletAndConsumedTimestampBeforePublication()
         {
-            Fixture fixture = OneFloor();
-            fixture.Runtime.lastSavedUtcUnix = 1000;
-            fixture.Runtime.structureRuntime.ManaReserve = 10d;
-            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
+            Fixture fixture = OneFloor(1000, 10d);
             OfflinePassiveManaResult calculated = Offline(fixture).Resolve(
                 fixture.Runtime, fixture.Configuration, 4600);
             SaveData liveBefore = fixture.Runtime;
 
-            DetachedCanonicalWriteResult write = fixture.Authority.SaveOfflinePassiveMana(
-                fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime,
-                calculated.WalletAfter, calculated.SourceSavedUtcUnix,
-                calculated.ObservedCurrentUtcUnix);
+            var service = Service(fixture, new FakeTimeSource { Now = 4600 });
+            service.BeginCanonicalRecovery(fixture.Runtime);
+            Assert.That(Step(fixture, service).IsSuccess, Is.True); // durable originalPending
+            var original = Step(fixture, service);
+            Assert.That(original.IsSuccess, Is.True, original.Reason);
+            Assert.That(original.Validation.TimeProvenance.Episode.Phase, Is.EqualTo(RecoveryEpisode.ResidualPending));
+            DetachedCanonicalWriteResult write = Step(fixture, service); // grouped residual and closure
 
             Assert.That(write.IsSuccess, Is.True, write.Reason);
             Assert.That(liveBefore.structureRuntime.ManaReserve, Is.EqualTo(10d));
@@ -247,58 +247,63 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void PersistenceFailureLeavesWalletTimestampDiskAndSessionUnchangedThenRetrySucceeds()
         {
-            Fixture fixture = OneFloor();
-            fixture.Runtime.lastSavedUtcUnix = 1000;
-            fixture.Runtime.structureRuntime.ManaReserve = 10d;
-            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
+            Fixture fixture = OneFloor(1000, 10d);
             OfflinePassiveManaResult calculated = Offline(fixture).Resolve(
                 fixture.Runtime, fixture.Configuration, 4600);
+            var service = Service(fixture, new FakeTimeSource { Now = 4600 });
+            service.BeginCanonicalRecovery(fixture.Runtime);
+            Assert.That(Step(fixture, service).IsSuccess, Is.True);
             byte[] before = fixture.FileSystem.ReadAllBytes(fixture.ActivePath);
+            var sessionBefore = service.CanonicalSession;
+            var episodeBefore = fixture.Runtime.timeProvenance.Episode;
             fixture.FileSystem.EnableFailure(
                 Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 2);
 
-            DetachedCanonicalWriteResult failed = fixture.Authority.SaveOfflinePassiveMana(
-                fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime,
-                calculated.WalletAfter, calculated.SourceSavedUtcUnix,
-                calculated.ObservedCurrentUtcUnix);
+            DetachedCanonicalWriteResult failed = Step(fixture, service);
 
             Assert.That(failed.IsSuccess, Is.False);
             Assert.That(failed.RuntimeProjection, Is.Null);
             Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(10d));
-            Assert.That(fixture.Runtime.lastSavedUtcUnix, Is.EqualTo(1000));
+            // Entry already accounts through R, but originalPending still owes D0.
+            Assert.That(fixture.Runtime.lastSavedUtcUnix, Is.EqualTo(4600));
+            Assert.That(fixture.Runtime.timeProvenance.Episode, Is.SameAs(episodeBefore));
+            Assert.That(episodeBefore.Phase, Is.EqualTo(RecoveryEpisode.OriginalPending));
+            Assert.That(episodeBefore.OriginalEligible100ns, Is.EqualTo(3600L * UnixTimePoint.UnitsPerSecond));
             CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
-            CollectionAssert.AreEqual(before, fixture.Session.GetCurrentBytes());
+            Assert.That(service.CanonicalSession, Is.SameAs(sessionBefore));
+            CollectionAssert.AreEqual(before, service.CanonicalSession.GetCurrentBytes());
 
             fixture.FileSystem.DisableFailure();
-            DetachedCanonicalWriteResult retry = fixture.Authority.SaveOfflinePassiveMana(
-                fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime,
-                calculated.WalletAfter, calculated.SourceSavedUtcUnix,
-                calculated.ObservedCurrentUtcUnix);
+            DetachedCanonicalWriteResult retry = Step(fixture, service);
             Assert.That(retry.IsSuccess, Is.True, retry.Reason);
             Assert.That(retry.RuntimeProjection.structureRuntime.ManaReserve,
                 Is.EqualTo(calculated.WalletAfter));
+            Assert.That(Step(fixture, service).IsSuccess, Is.True);
+            fixture.Reopen();
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(calculated.WalletAfter));
+            Assert.That(fixture.Runtime.timeProvenance.Episode, Is.Null);
         }
 
         [Test]
         public void StaleDiskSessionReturnsStableReasonWithoutWrite()
         {
-            Fixture fixture = OneFloor();
-            fixture.Runtime.lastSavedUtcUnix = 1000;
-            fixture.Runtime.structureRuntime.ManaReserve = 0d;
-            OfflinePassiveManaResult calculated = Offline(fixture).Resolve(
-                fixture.Runtime, fixture.Configuration, 4600);
+            Fixture fixture = OneFloor(1000, 0d);
+            var service = Service(fixture, new FakeTimeSource { Now = 4600 });
+            service.BeginCanonicalRecovery(fixture.Runtime);
+            Assert.That(Step(fixture, service).IsSuccess, Is.True);
+            byte[] source = service.CanonicalSession.GetCurrentBytes();
+            int writes = fixture.FileSystem.Operations.Count(o => o.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write);
             byte[] stale = Encoding.UTF8.GetBytes("{\"changed\":true}");
             fixture.FileSystem.Seed(fixture.ActivePath, stale);
 
-            DetachedCanonicalWriteResult result = fixture.Authority.SaveOfflinePassiveMana(
-                fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime,
-                calculated.WalletAfter, calculated.SourceSavedUtcUnix,
-                calculated.ObservedCurrentUtcUnix);
+            DetachedCanonicalWriteResult result = Step(fixture, service);
 
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Reason,
                 Is.EqualTo(DetachedCanonicalWriteAuthority.OfflineStaleSessionReason));
             CollectionAssert.AreEqual(stale, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            CollectionAssert.AreEqual(source, service.CanonicalSession.GetCurrentBytes());
+            Assert.That(fixture.FileSystem.Operations.Count(o => o.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write), Is.EqualTo(writes));
         }
 
         [Test]
@@ -367,53 +372,42 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void BackwardClockBootSavePreservesDurableBoundaryAcrossReopen()
         {
             const long durableBoundary = 2000;
-            Fixture fixture = OneFloor();
-            fixture.Runtime.lastSavedUtcUnix = durableBoundary;
-            fixture.Runtime.structureRuntime.ManaReserve = 12.5d;
-            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
+            Fixture fixture = OneFloor(durableBoundary, 12.5d);
             var time = new FakeTimeSource { Now = durableBoundary };
             SaveService firstService = Service(fixture, time);
             Assert.That(firstService.Save(fixture.Runtime, SaveReason.Boot), Is.True);
 
             time.Now = 1000;
-            GameObject firstGo = new GameObject("Offline backward-clock boot");
-            GameRoot firstRoot = Root(firstGo, fixture, firstService, time);
-            Assert.That(firstRoot.TryApplyOfflinePassiveManaForTests(), Is.True);
-            Assert.That(firstRoot.LatestOfflinePassiveManaResultForTests.Reason,
-                Is.EqualTo(OfflinePassiveManaReason.BackwardClockMovement));
-            Assert.That(firstRoot.Save.structureRuntime.ManaReserve, Is.EqualTo(12.5d));
-            Assert.That(firstService.Save(firstRoot.Save, SaveReason.Boot), Is.True);
-            Assert.That(firstRoot.Save.lastSavedUtcUnix, Is.EqualTo(durableBoundary));
-            UnityEngine.Object.DestroyImmediate(firstGo);
+            byte[] before = firstService.CanonicalSession.GetCurrentBytes();
+            // H1-F4 D6: an invalid/backward observation fails closed, including
+            // ordinary boot metadata; it is not permission to advance W or grant.
+            Assert.That(firstService.Save(fixture.Runtime, SaveReason.Boot), Is.False);
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(12.5d));
+            Assert.That(fixture.Runtime.lastSavedUtcUnix, Is.EqualTo(durableBoundary));
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            CollectionAssert.AreEqual(before, firstService.CanonicalSession.GetCurrentBytes());
 
             fixture.Reopen();
             time.Now = durableBoundary;
             SaveService restoredService = Service(fixture, time);
-            GameObject restoredGo = new GameObject("Offline restored-clock reopen");
-            GameRoot restoredRoot = Root(restoredGo, fixture, restoredService, time);
-            Assert.That(restoredRoot.TryApplyOfflinePassiveManaForTests(), Is.True);
-            Assert.That(restoredRoot.LatestOfflinePassiveManaResultForTests.Reason,
-                Is.EqualTo(OfflinePassiveManaReason.ZeroElapsedInterval));
-            Assert.That(restoredRoot.Save.structureRuntime.ManaReserve, Is.EqualTo(12.5d));
-            Assert.That(restoredService.Save(restoredRoot.Save, SaveReason.Boot), Is.True);
-            UnityEngine.Object.DestroyImmediate(restoredGo);
+            restoredService.BeginCanonicalRecovery(fixture.Runtime);
+            for (int i = 0; i < 3; i++) Assert.That(Step(fixture, restoredService).IsSuccess, Is.True);
+            Assert.That(fixture.Runtime.timeProvenance.Episode, Is.Null);
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(12.5d));
+            Assert.That(restoredService.Save(fixture.Runtime, SaveReason.Boot), Is.True);
 
             fixture.Reopen();
             time.Now = durableBoundary + 1;
             SaveService forwardService = Service(fixture, time);
-            GameObject forwardGo = new GameObject("Offline genuine-forward reopen");
-            try
-            {
-                GameRoot forwardRoot = Root(forwardGo, fixture, forwardService, time);
-                Assert.That(forwardRoot.TryApplyOfflinePassiveManaForTests(), Is.True);
-                Assert.That(forwardRoot.LatestOfflinePassiveManaResultForTests.Reason,
-                    Is.EqualTo(OfflinePassiveManaReason.Applied));
-                Assert.That(forwardRoot.LatestOfflinePassiveManaResultForTests.ObservedElapsedSeconds,
-                    Is.EqualTo(1));
-                Assert.That(forwardRoot.Save.structureRuntime.ManaReserve,
-                    Is.EqualTo(12.5075d).Within(1e-12));
-            }
-            finally { UnityEngine.Object.DestroyImmediate(forwardGo); }
+            forwardService.BeginCanonicalRecovery(fixture.Runtime);
+            Assert.That(Step(fixture, forwardService).IsSuccess, Is.True);
+            Assert.That(fixture.Runtime.timeProvenance.Episode.OriginalEligible100ns, Is.EqualTo(UnixTimePoint.UnitsPerSecond));
+            Assert.That(Step(fixture, forwardService).IsSuccess, Is.True);
+            Assert.That(Step(fixture, forwardService).IsSuccess, Is.True);
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(12.5075d).Within(1e-12));
+            fixture.Reopen();
+            Assert.That(fixture.Runtime.timeProvenance.Episode, Is.Null);
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(12.5075d).Within(1e-12));
         }
 
         [TestCase(SaveReason.Boot)]
@@ -425,14 +419,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveReason reason)
         {
             const long durableBoundary = 2000;
-            Fixture fixture = OneFloor();
-            fixture.Runtime.lastSavedUtcUnix = durableBoundary;
+            Fixture fixture = OneFloor(durableBoundary);
             var time = new FakeTimeSource { Now = durableBoundary };
             SaveService service = Service(fixture, time);
             Assert.That(service.Save(fixture.Runtime, SaveReason.Boot), Is.True);
 
             time.Now = 1000;
-            Assert.That(service.Save(fixture.Runtime, reason), Is.True);
+            byte[] before = service.CanonicalSession.GetCurrentBytes();
+            Assert.That(service.Save(fixture.Runtime, reason), Is.False,
+                "Every writer must reject a backward observation under H1-F4 D6");
+            CollectionAssert.AreEqual(before, service.CanonicalSession.GetCurrentBytes());
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
             fixture.Reopen();
 
             Assert.That(fixture.Runtime.lastSavedUtcUnix, Is.EqualTo(durableBoundary));
@@ -633,8 +630,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(
                 fixture, out var loaded, timeSource, () => timeSource.Monotonic, out _);
             fixture.Runtime = loaded;
+            service.CanonicalRuntimePublished += value => fixture.Runtime = value;
             service.ConfigureStructuralRemovalPolicy(fixture.RemovalPolicy);
             return service;
+        }
+
+        private static DetachedCanonicalWriteResult Step(Fixture fixture, SaveService service)
+        {
+            var inputs = fixture.Context.RecoveryInputs;
+            var online = new CanonicalPassiveManaService(inputs.Passive, inputs.Economy, new FormulaEngine(),
+                fixture.Profile.Canonical.Spatial, inputs.Bootstrap.tickSeconds);
+            return service.AdvanceCanonicalRecovery(fixture.Runtime,
+                new CanonicalOfflinePassiveManaService(inputs.Passive, online),
+                (_, __) => Assert.Fail("Absence cannot create an adventurer tick"));
         }
 
         private static GameRoot Root(GameObject go, Fixture fixture, SaveService service,
