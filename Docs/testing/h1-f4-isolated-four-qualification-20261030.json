@@ -1,0 +1,491 @@
+{
+  "EditMode_discovered": 2819,
+  "PlayMode_discovered": 4297,
+  "allowed_skips": [
+    "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.CurrentNonWindowsRuntimeFailsClosed"
+  ],
+  "applicability": {
+    "SIT": "Actual Windows Editor persistentDataPath/NTFS migration, atomic operations, recovery closure, reopen/delete/native creation; canonical Research publication through GameRoot barrier passed",
+    "UAT": "Required later; not started or authorized by this gate",
+    "Unit": "Historical deterministic reference, Research handler/diagnostics and negative contracts passed",
+    "Windows_Player": "pending",
+    "full_EditMode": "pending",
+    "full_PlayMode": "pending",
+    "performance_memory": "pending"
+  },
+  "artifact_inventory": [
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-20261027-is01",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-20261027-is02",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-20261027-is03",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-20261027-is04",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-20261027-is05",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-20261027-is06",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-20261027-di04",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-33",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-34",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-35",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-36",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-37",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-38",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-33.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-34.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-35.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-36.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-37.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-compile-20261030-38.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-prepare-is01.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-prepare-is02.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-prepare-is03.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-prepare-is04.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-prepare-is05.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-prepare-is06.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-prepare-di04.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/h1-f4-verify-is06.py",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/qualification-supervisor/62a5d10fc29d4767ac17b6205f2d4e44",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/qualification-supervisor/4186ffa49dd04d2690d5f338579bdcb5",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/qualification-supervisor/18e80c85bd6243549ae5bf8f9db251c4",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/qualification-supervisor/6ed7f50d96234a919bc55b7cf9486bf3",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/qualification-supervisor/a6fb0bab540843c9a6ea63655bc60a2f",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/qualification-supervisor/5e79d819b0184e238806a4990585afd2",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    },
+    {
+      "owner": "H1-F4 four isolated regressions",
+      "path": "TestResults/qualification-supervisor/48239be508534354b0d07f80d651643b",
+      "purpose": "source-pinned qualification, guarded preservation or retained diagnostic evidence",
+      "retention": "preserve for independent review"
+    }
+  ],
+  "base_main": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaign": "5e79d819b0184e238806a4990585afd2",
+  "changed_source_files": [
+    "Assets/_Project/Tests/EditMode/Gd66WindowsSpatialMigrationFileSystemTests.cs",
+    "Assets/_Project/Tests/EditMode/LivingDungeonPhaseABaselineTests.cs",
+    "Assets/_Project/Tests/EditMode/ResearchDurableAcknowledgementTests.cs"
+  ],
+  "class_counts": {
+    "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests": {
+      "Passed": 31,
+      "Skipped": 1
+    },
+    "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseABaselineTests": {
+      "Passed": 1
+    },
+    "DungeonBuilder.Tests.EditMode.MvpCanonicalJourneyIntegrationTests": {
+      "Passed": 1
+    },
+    "DungeonBuilder.Tests.EditMode.PlayerResearchActionHandlerTests": {
+      "Passed": 31
+    },
+    "DungeonBuilder.Tests.EditMode.ResearchCompletionEligibilityDiagnosticsTests": {
+      "Passed": 11
+    },
+    "DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests": {
+      "Passed": 18
+    }
+  },
+  "current_full_suite_failure_count": null,
+  "discovery": "7eeb8e1713be21663dbf875f3f35306d6b0c51ab",
+  "discovery_campaign": "48239be508534354b0d07f80d651643b",
+  "evidence_sha256": {
+    "TestResults/h1-f4-20261027-di04/independent-completion01.json": "601fd4f18fddf4b7f83122d19519403025fbe969c734b4f34e9962d830e163a2",
+    "TestResults/h1-f4-20261027-is06/independent-completion01.json": "f0fbc0f971f3348c5588bd9632f6f1187a9c01b4c95ff3dd2eed576b889997c6",
+    "TestResults/h1-f4-20261027-is06/plan-selected01.json": "e5f06951456d5dea972dbd1aec370f47e4cfd2ea83ec272c94f0afe604e2cfc0",
+    "TestResults/h1-f4-20261027-is06/selected-inventory.json": "65670f50df6e4169ba97207c691c0ead6f2b8918a86d5607f5e1bfae733dcc4f",
+    "TestResults/qualification-supervisor/5e79d819b0184e238806a4990585afd2/living-regressions/results.xml": "bdcb99f175e601606482ecd710a1b3eba5ab7eb12948c9ddc72ad899a1593ee6"
+  },
+  "failed": 0,
+  "failed_attempts": [
+    {
+      "attempt": "is01",
+      "campaign": "62a5d10fc29d4767ac17b6205f2d4e44",
+      "failed": 4,
+      "guarded_normal_restoration": true,
+      "passed": 0,
+      "qualification_claimed": false,
+      "receipt_sha256": "f70c98a931da8d6e3830d97f3fa993e313a1ca8a0d39145a41a05f901ef9e22b",
+      "skipped": 0,
+      "source": "48da4e16160e9515c9936c5debfa8ca393dc257e",
+      "verdict": "FAILED"
+    },
+    {
+      "attempt": "is02",
+      "campaign": "4186ffa49dd04d2690d5f338579bdcb5",
+      "failed": 4,
+      "guarded_normal_restoration": true,
+      "passed": 0,
+      "qualification_claimed": false,
+      "receipt_sha256": "9d57e1fdd76079afe98d87640caae461ed1f1295130b1a43020fd2231dfdcc36",
+      "skipped": 0,
+      "source": "60e49dcc1cc5b7964b01e04e7a1bf8d0df3d2a8c",
+      "verdict": "FAILED"
+    },
+    {
+      "attempt": "is03",
+      "campaign": "18e80c85bd6243549ae5bf8f9db251c4",
+      "failed": 3,
+      "guarded_normal_restoration": true,
+      "passed": 1,
+      "qualification_claimed": false,
+      "receipt_sha256": "9bbbc70fbc3a437c35197d0ced01cdc2d0989d2bbdd561b7301c410653c4cb8e",
+      "skipped": 0,
+      "source": "8840d413fc10154c5ea9842a3743c5d4b10b6ae1",
+      "verdict": "FAILED"
+    },
+    {
+      "attempt": "is04",
+      "campaign": "6ed7f50d96234a919bc55b7cf9486bf3",
+      "failed": 1,
+      "guarded_normal_restoration": true,
+      "passed": 3,
+      "qualification_claimed": false,
+      "receipt_sha256": "bf9aa9d80522cda6b71dd239ac5ace40c9e0fe1df9fa562f9e325689457d96d1",
+      "skipped": 0,
+      "source": "fa5fa8f550777993f6840e6413091124ae0fc43d",
+      "verdict": "FAILED"
+    },
+    {
+      "attempt": "is05",
+      "campaign": "a6fb0bab540843c9a6ea63655bc60a2f",
+      "failed": 4,
+      "guarded_normal_restoration": true,
+      "passed": 89,
+      "qualification_claimed": false,
+      "receipt_sha256": "c7fca108f194524e24886e91fff839300572113a725831a712c4e49db6118a73",
+      "skipped": 1,
+      "source": "7eeb8e1713be21663dbf875f3f35306d6b0c51ab",
+      "verdict": "FAILED"
+    }
+  ],
+  "golden_git_blob_unchanged": true,
+  "golden_sha256": "53045ad58ab1dbebf8ea07f83480db02604eb79ae3b243f1169df2ae2e950198",
+  "historical_full_counts": {
+    "failed": 84,
+    "passed": 2728,
+    "skipped": 1
+  },
+  "historical_full_verdict": "INCOMPLETE / UNCERTAIN",
+  "is03_export_label_discrepancy": "Pinned test/source/input identities were current, but the diagnostic runner read is02 inventory for its export ownership label. Retained unchanged; not counted as qualified evidence. Final runner ownership source is independently verified.",
+  "original_84_newly_qualified": 4,
+  "original_84_qualified_before": 61,
+  "original_84_qualified_now": 65,
+  "original_84_remaining_unqualified": 19,
+  "original_four": [
+    {
+      "classname": "DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests",
+      "corrected_result": "Passed",
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsUnityPersistentDataPathRunsLegacyMigrationReopenDeleteAndNativeCreate",
+      "message": "  ui.time.recovery.context_mismatch\n  Expected: not null\n  But was:  null\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.Gd66WindowsSpatialMigrationFileSystemTests.WindowsUnityPersistentDataPathRunsLegacyMigrationReopenDeleteAndNativeCreate () [0x000c8] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\Gd66WindowsSpatialMigrationFileSystemTests.cs:196\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseABaselineTests",
+      "corrected_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseABaseline.QualifiedPreRefactorStructuredFixturesRemainEquivalent",
+      "message": "  time.recovery.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.LivingDungeonPhaseABaselineTests.QualifiedPreRefactorStructuredFixturesRemainEquivalent () [0x002c7] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\LivingDungeonPhaseABaselineTests.cs:97\n"
+    },
+    {
+      "classname": "DungeonBuilder.Tests.EditMode.ResearchCompletionEligibilityDiagnosticsTests",
+      "corrected_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDiagnostics.ClaimConfiguredPlayerResearch_ReadyStateRefreshesDiagnosticsWithoutStaleActiveProject",
+      "message": "  gd66.transaction.candidate_invalid\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests+CanonicalRootScope..ctor (DungeonBuilder.M0.GameRoot root, System.Boolean starterDungeon) [0x00117] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\ResearchDurableAcknowledgementTests.cs:112\nat DungeonBuilder.Tests.EditMode.ResearchCompletionEligibilityDiagnosticsTests.ClaimConfiguredPlayerResearch_ReadyStateRefreshesDiagnosticsWithoutStaleActiveProject () [0x00019] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\ResearchCompletionEligibilityDiagnosticsTests.cs:227\n"
+    },
+    {
+      "classname": "DungeonBuilder.Tests.EditMode.MvpCanonicalJourneyIntegrationTests",
+      "corrected_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchJourney.CleanSaveMvpJourney_RemainsRepeatableAcrossBuildRunResearchGreedRiskAdjustmentSaveLoadAndReset",
+      "message": "  time.recovery.invalid_state\n  Expected: True\n  But was:  False\n",
+      "stack": "at DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests+Fixture.Accept (DungeonBuilder.M0.Gameplay.DungeonSpatial.DetachedCanonicalWriteResult result) [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\DetachedCanonicalWriteAuthorityTests.cs:1576\nat DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests+CanonicalRootScope..ctor (DungeonBuilder.M0.GameRoot root, System.Boolean starterDungeon) [0x00117] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\ResearchDurableAcknowledgementTests.cs:112\nat DungeonBuilder.Tests.EditMode.MvpCanonicalJourneyIntegrationTests.CompleteResearchThroughRootBoundary () [0x00000] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\MvpCanonicalJourneyIntegrationTests.cs:208\nat DungeonBuilder.Tests.EditMode.MvpCanonicalJourneyIntegrationTests.CleanSaveMvpJourney_RemainsRepeatableAcrossBuildRunResearchGreedRiskAdjustmentSaveLoadAndReset () [0x00349] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Tests\\EditMode\\MvpCanonicalJourneyIntegrationTests.cs:91\n"
+    }
+  ],
+  "passed": 93,
+  "preservation": {
+    "all_checks_passed": true,
+    "fixture_export_ownership_matches_source": true,
+    "input_count": 1494,
+    "later_jobs_absent_error2": true,
+    "original_archive_members_verified": 1494,
+    "original_inputs_restored": true,
+    "prior_evidence_directories_verified": 306,
+    "protected_evidence_unchanged": true,
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\5e79d819b0184e238806a4990585afd2"
+    },
+    "tools_reverified": 10
+  },
+  "production_changes": false,
+  "remaining_exact_original_identities": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneNavigationSafeAreaAndCoveredInput",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneOpeningDuringReplayClosesPresentationOnly",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.FloorHudStatesAndInputCapture",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewMeaningfulInvalidations",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentCompactAcquisitionOwnedReassignAndOverflow",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentExplicitReassignmentWithConstructionAndInspectionReuse",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentProductionMouseTouchRecovery",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentProductionPreviewCustodySaveDiscardAndLayouts",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatBrowserIdentityAndDirectTargetSwitch",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatPlacementGeometryAndLocalizedFeedback",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RuntimeThemeAndLocalizedTextRenderInActualScene",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls"
+  ],
+  "skipped": 1,
+  "stages": {
+    "living-regressions": {
+      "child_process": {
+        "created": 134378745881382428,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 38120
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-f8f1041928a44d04af6bdeb1ea2d74d3",
+      "process": {
+        "created": 134378745880129902,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 8344
+      },
+      "status": "PASSED"
+    },
+    "living-regressions-preflight": {
+      "child_process": {
+        "created": 134378745777612508,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 40320
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-74a22b5d6b20483694ecd96bc92e334e",
+      "process": {
+        "created": 134378745776141490,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 26224
+      },
+      "status": "PASSED"
+    },
+    "preservation": {
+      "child_process": {
+        "created": 134378746547832371,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 38808
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-97584d3f43544e8d912eaf63487c0598",
+      "process": {
+        "created": 134378746546678687,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 17552
+      },
+      "status": "PASSED"
+    },
+    "restore": {
+      "child_process": {
+        "created": 134378746441272121,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 4348
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-c05635f26e3040a7a958f15ce7ed79b7",
+      "process": {
+        "created": 134378746440151541,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 40712
+      },
+      "status": "PASSED"
+    },
+    "restore-preflight": {
+      "child_process": {
+        "created": 134378746336949825,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 3448
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-c7561f6f08a344d5bac9febeee6959d6",
+      "process": {
+        "created": 134378746334902718,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 42336
+      },
+      "status": "PASSED"
+    }
+  },
+  "starting_source": "48da4e16160e9515c9936c5debfa8ca393dc257e",
+  "tested_source": "b5418525fd6d70882ebbf7229c73a002309ad137",
+  "total": 94
+}
