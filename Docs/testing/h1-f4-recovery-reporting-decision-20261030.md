@@ -1,6 +1,6 @@
-# H1-F4 recovery summary: narrow decision for independent review
+# H1-F4 recovery summary: accepted R1 presentation contract
 
-Status: **proposal only; no production/UI/localization implementation**. Core recovery/time/settlement policies remain approved. This decision concerns truthful presentation of committed effects, not eligibility, amounts, save authority or durable encoding.
+Status: **independently accepted and explicitly authorized by the owner on 2026-10-30**. Implementation/qualification is in progress from `cfa609cfebb0ce86cc6e817a1dd7c2b62115f50f`. Core recovery/time/settlement policies remain unchanged. This decision concerns truthful presentation of committed effects, not eligibility, amounts, save authority or durable encoding.
 
 ## Demonstrated gap
 
@@ -28,16 +28,25 @@ Illustrative information-loss counterexample, derived from the existing capacity
 
 The existing unavailable fallback is unsafe for this situation: `ui.offline_mana.no_award_format` says **"No offline mana was awarded: {0}."** That claim may be false when effects committed but reporting evidence was lost. The existing applied text also says "Away for ... seconds"; eligible recovery processing is not proof of exact physical background duration under L1.
 
-## Proposed R1: complete-proof-only, transient summary
+## Accepted R1: complete-proof-only, transient summary
 
 1. Preserve the existing summary for an episode only when independently proven original and residual publication evidence is available. Use the existing exact transition durations, computed/clamped awards, healing costs and canonical final wallet; do not infer these from wallet differences or UTC spans.
 2. Keep at most one fixed-size process-local aggregate and the already bounded pending-publication evidence. It is derived presentation data with no grant/spend/time capability, no file, no new save field, no timestamp cursor, no journal and no new durable identity.
 3. Original plus residual evidence is combined only for the same existing episode identity and exact proven candidate(s). Duplicate callbacks/retries do not accumulate again. Proven rollback contributes nothing; uncertain publication contributes nothing until exact canonical proof succeeds.
-4. When an earlier receipt cannot be proven after reopening or process loss, suppress the historical breakdown and retain the normal canonical wallet display. Do not display zero/no-award, infer a pre-grant wallet, claim a complete episode total or block otherwise completed recovery for missing display evidence.
+4. When an earlier receipt cannot be proven after reopening or process loss, suppress the historical breakdown. If this process proves episode closure, show a neutral localized completion status and the current authoritative wallet. If it merely loads a closed save with no current-process history, retain only the normal wallet display. Do not display zero/no-award, infer a pre-grant wallet, claim a complete episode total or block otherwise completed recovery for missing display evidence.
 5. Distinguish an actual fully observed zero-duration episode from missing evidence. Preserve the existing zero-elapsed/no-generation/capacity distinctions when their facts are known.
 6. In the applicable localized summary, describe **eligible recovery time**, rather than claiming exact physical time away. Retain stable localization ownership and existing quantity formatting; no broader UI redesign or tuning.
 
-R1 needs independent acceptance because it defines the interruption/reopen fallback and changes player-facing summary semantics. The time, wallet, monster and save policies themselves do not change. No implementation should add storage or reconstruct hidden observations to satisfy the old summary assertion.
+The independent acceptance includes these proof boundaries:
+
+- A reporting receipt is bound to exact predecessor/candidate bytes, validated settlement phase, existing episode identity, context and exact classified eligible duration. Calculated and actual awards, capacity limitation and actual healing spending are copied at preparation; provisional receipts are not committed.
+- The one SaveService-owned process-local aggregate accepts original/residual evidence only after successful durable publication or independent proof of the exact retained candidate. A proven predecessor rollback discards attempted evidence. Duplicate acknowledgements do not add awards twice.
+- Uncertain-publication reconstruction does not reconstruct spending. Its default spending value is not a receipt. Missing original or pending spending evidence prevents a full breakdown even if durable settlement succeeds.
+- The fixed aggregate contains at most two receipts and a predecessor hash for continuity, with no persistence, time, retry, wallet or scheduler capability. New episodes, incompatible identity or lost continuity clear stale evidence. Ordinary refreshes preserve completed evidence and render the current canonical wallet.
+- Original/residual rates remain separately available. Equal rates may share a label; unequal rates use distinct localized labels. Duration is the exact sum of classified 100 ns counters, never a UTC span or the sum of truncated whole seconds. Proven zero remains distinct from unavailable evidence.
+- The legacy result/presenter remains unchanged. Current recovery uses a separate presentation path with stable localization keys, not a fabricated legacy result. No save fields, migrations, schema or atomic persistence behavior are added.
+
+The time, wallet, monster and save policies themselves do not change. No storage or hidden observations may be reconstructed to satisfy the old summary assertion.
 
 ## Qualification after acceptance
 

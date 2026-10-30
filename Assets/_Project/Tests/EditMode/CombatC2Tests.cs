@@ -324,6 +324,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             Assert.That(Monster(f).Health,Is.EqualTo(3)); Assert.That(Monster(f).RevivalRequired,Is.True);
             Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(.75)); Assert.That(f.Runtime.lastSavedUtcUnix,Is.EqualTo(1500));
+            Assert.That(service.RecoveryReport.Complete,Is.True);
+            Assert.That(service.RecoveryReport.Spent,Is.EqualTo(3),"Retained candidate receipt preserves healing cost even when reconstructed proof defaults to zero");
+            Assert.That(service.RecoveryReport.ClosingWallet,Is.EqualTo(.75));
             f.Reopen(); var bytes=f.Session.GetCurrentBytes();
             var duplicate=f.Authority.SaveOfflinePassiveMana(f.ActivePath,f.FileSystem,old,f.Runtime,3.75,1000,1500);
             Assert.That(duplicate.IsSuccess,Is.False); CollectionAssert.AreEqual(bytes,f.FileSystem.ReadAllBytes(f.ActivePath));

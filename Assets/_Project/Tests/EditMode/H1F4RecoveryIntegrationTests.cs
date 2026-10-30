@@ -19,7 +19,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         sealed class Clock : IPreciseTimeSource
         {
             internal long Seconds = 100;
-            public UnixTimePoint UtcNow() => new UnixTimePoint(Seconds, 0);
+            internal int Fraction;
+            public UnixTimePoint UtcNow() => new UnixTimePoint(Seconds, Fraction);
             public long UtcNowUnixSeconds() => Seconds;
         }
         sealed class Harness
@@ -37,7 +38,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 F = Fixture.Create("\"researchPending\":null,\"researchProgress\":null", workloadProfile: profile);
                 Inputs = Bundle(F);
                 Time = new TimeService(new SimpleLogger(false), Inputs.Bootstrap.tickSeconds, Inputs.Bootstrap.timeRules.detectClockSkewSeconds,
-                    Wall, () => Wall.Seconds - 100d);
+                    Wall, () => Wall.Seconds - 100d + Wall.Fraction / 10000000d);
                 Time.BeginRecoveryForeground(Inputs.TwoFloor.UnitsPerSecond);
                 Service = CreateService(F, Inputs, Time);
                 Current = Service.LoadOrCreate("h1f4-owned-test", out var banner);
@@ -71,6 +72,111 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.ConfigureRecovery(inputs, time); return service;
         }
         static void Expected(Harness h, double wallet) => Assert.That(h.Current.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+
+        [Test] public void ReportingCombinesOnlyProvenFractionalSettlementsWithoutWritingDisplayState()
+        {
+            var h = new Harness(); h.Wall.Fraction = 1; h.Start(); h.Accept(100);
+            Assert.That(h.Service.RecoveryReport.Closed, Is.False);
+            h.Wall.Fraction = 3333334; var original = h.Step(101);
+            Assert.That(original.IsSuccess, Is.True, original.Reason);
+            Assert.That(original.RecoveryReceipt, Is.Not.Null);
+            Assert.That(h.Service.RecoveryReport.Complete, Is.False);
+            h.Wall.Fraction = 6666667; var residual = h.Step(102);
+            Assert.That(residual.IsSuccess, Is.True, residual.Reason);
+            var report = h.Service.RecoveryReport;
+            Assert.That(report.Complete, Is.True);
+            Assert.That(report.Eligible100ns, Is.EqualTo(original.RecoveryReceipt.Eligible100ns + residual.RecoveryReceipt.Eligible100ns));
+            Assert.That(report.Awarded, Is.EqualTo(original.RecoveryReceipt.Awarded + residual.RecoveryReceipt.Awarded));
+            Assert.That(report.Spent, Is.EqualTo(original.RecoveryManaSpent + residual.RecoveryManaSpent));
+            Assert.That(report.ClosingWallet, Is.EqualTo(h.Current.structureRuntime.ManaReserve));
+            byte[] before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            int operations = h.F.FileSystem.Operations.Count();
+            string Localize(string key) => key == "ui.recovery.summary_format" ? "Eligible {0}; {1}; award {2}; wallet {3}/{4}" :
+                key == "ui.recovery.rate_format" ? "Rate {0}" : key;
+            string text = OfflinePassiveManaPresenter.BuildRecovery(report, report.ClosingWallet, report.Capacity,
+                System.Globalization.CultureInfo.InvariantCulture, Localize);
+            Assert.That(text, Does.Contain("101.6666667"));
+            report.Observe(original.GetPersistedBytes(), residual, residual.RecoveryReceipt);
+            Assert.That(report.Awarded, Is.EqualTo(original.RecoveryReceipt.Awarded + residual.RecoveryReceipt.Awarded), "Duplicate proof cannot add awards");
+            Assert.That(OfflinePassiveManaPresenter.BuildRecovery(report, report.ClosingWallet, report.Capacity, null, key => key), Is.Empty);
+            Assert.That(h.F.FileSystem.Operations.Count(), Is.EqualTo(operations));
+            CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+        }
+
+        [Test] public void UncertainPredecessorProofDiscardsAttemptedReceiptAndRetryReportsOnce()
+        {
+            var h = new Harness(); var fs = new ObservedFileSystem(h.F.FileSystem);
+            var service = CreateService(h.F, h.Inputs, h.Time, fs);
+            var current = service.LoadOrCreate("report-predecessor", out _);
+            service.CanonicalRuntimePublished += value => current = value;
+            service.BeginCanonicalRecovery(current);
+            Assert.That(service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail()).IsSuccess, Is.True);
+            var predecessor = service.CanonicalSession.GetCurrentBytes();
+            fs.InterruptReplacement = true;
+            Assert.That(service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail()).IsSuccess, Is.False);
+            Assert.That(service.RecoveryReport.Complete, Is.False);
+            h.F.FileSystem.Seed(service.SavePath, predecessor); fs.InterruptReplacement = false;
+            Assert.That(service.ResolveUncertainRecoveryPublication().IsSuccess, Is.True);
+            Assert.That(service.RecoveryReport.Complete, Is.False);
+            var original = service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail());
+            var residual = service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail());
+            Assert.That(original.IsSuccess && residual.IsSuccess, Is.True);
+            Assert.That(service.RecoveryReport.Complete, Is.True);
+            Assert.That(service.RecoveryReport.Awarded, Is.EqualTo(original.RecoveryReceipt.Awarded + residual.RecoveryReceipt.Awarded));
+            Assert.That(service.ResolveUncertainRecoveryPublication().IsSuccess, Is.False);
+        }
+
+        [Test] public void LostPendingSpendingEvidenceCannotBecomeAZeroSpendingReceipt()
+        {
+            var h = new Harness(); var fs = new ObservedFileSystem(h.F.FileSystem);
+            var service = CreateService(h.F, h.Inputs, h.Time, fs);
+            var current = service.LoadOrCreate("report-missing-receipt", out _);
+            service.CanonicalRuntimePublished += value => current = value;
+            service.BeginCanonicalRecovery(current);
+            Assert.That(service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail()).IsSuccess, Is.True);
+            Assert.That(service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail()).IsSuccess, Is.True);
+            fs.InterruptReplacement = true;
+            Assert.That(service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail()).IsSuccess, Is.False);
+            // Explicitly model loss of display-only evidence, not save/time state.
+            typeof(SaveService).GetField("pendingRecoveryReceipt", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(service, null);
+            fs.InterruptReplacement = false;
+            var proof = service.ResolveUncertainRecoveryPublication();
+            Assert.That(proof.IsSuccess, Is.True, proof.Reason);
+            Assert.That(proof.RecoveryManaSpent, Is.Zero, "Reconstructed proof's default is not historical spending evidence");
+            Assert.That(service.RecoveryReport.Closed, Is.True);
+            Assert.That(service.RecoveryReport.Complete, Is.False);
+        }
+
+        [Test] public void SyntheticPresentationKeepsDistinctRatesCapacityAndSpendingWithoutWalletInference()
+        {
+            // Pure presentation unit inputs. These synthetic receipts never enter
+            // SaveService and do not claim a gameplay settlement occurred.
+            var h = new Harness(); h.Start(); h.Accept(100);
+            var predecessor = h.Service.CanonicalSession.GetCurrentBytes();
+            var firstEpisode = h.Current.timeProvenance.Episode;
+            var first = h.Step(102); Assert.That(first.IsSuccess, Is.True);
+            var secondEpisode = h.Current.timeProvenance.Episode;
+            var second = h.Step(105); Assert.That(second.IsSuccess, Is.True);
+            var original = new RecoveryGrantReceipt(predecessor, first.GetPersistedBytes(), h.Inputs.Identity.Digest,
+                firstEpisode, 1, new OfflinePassiveManaResult { EffectiveOfflineManaPerHour = 18, CalculatedPreCapacityAward = 20,
+                    ActualAwardedMana = 10, CapacityLimited = true, Capacity = 1000 }, 3, first.RuntimeProjection.structureRuntime.ManaReserve);
+            var residual = new RecoveryGrantReceipt(first.GetPersistedBytes(), second.GetPersistedBytes(), h.Inputs.Identity.Digest,
+                secondEpisode, 2, new OfflinePassiveManaResult { EffectiveOfflineManaPerHour = 27, CalculatedPreCapacityAward = 7,
+                    ActualAwardedMana = 7, Capacity = 1000 }, 2, second.RuntimeProjection.structureRuntime.ManaReserve);
+            var report = new RecoveryEpisodeReport(predecessor, firstEpisode);
+            report.Observe(predecessor, first, original); report.Observe(first.GetPersistedBytes(), second, residual);
+            Assert.That(report.Complete, Is.True);
+            Assert.That(report.Calculated, Is.EqualTo(27)); Assert.That(report.Awarded, Is.EqualTo(17));
+            Assert.That(report.Spent, Is.EqualTo(5)); Assert.That(report.CapacityLimited, Is.True);
+            string Localize(string key) => key == "ui.recovery.summary_format" ? "Eligible {0}; {1}; earned {2}; current {3}/{4}" :
+                key == "ui.recovery.rates_format" ? "Original {0}; residual {1}" :
+                key == OfflinePassiveManaPresenter.CapacityLimitedKey ? "Capacity limited" :
+                key == "combat.c2.recovery_spent" ? "Healing cost {0}" : key;
+            string text = OfflinePassiveManaPresenter.BuildRecovery(report, 23, 1000, System.Globalization.CultureInfo.InvariantCulture, Localize);
+            Assert.That(text, Does.Contain("0.0000003")); Assert.That(text, Does.Contain("Original 18; residual 27"));
+            Assert.That(text, Does.Contain("earned 17; current 23/1000"));
+            Assert.That(text, Does.Contain("Capacity limited")); Assert.That(text, Does.Contain("Healing cost 5"));
+        }
 
         sealed class ObservedFileSystem : ISpatialMigrationFileSystem
         {
@@ -305,6 +411,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             h.Wall.Seconds = residual ? 104 : 102; fs.InterruptReplacement = true;
             var failed = service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail());
             Assert.That(failed.Reason, Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+            Assert.That(service.RecoveryReport.Complete, Is.False, "Provisional receipts are not committed");
             var committed = h.F.FileSystem.ReadAllBytes(service.SavePath);
             var committedState = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(committed, h.F.Context);
             Assert.That(committedState.CurrentTargetValidated, Is.True);
@@ -332,6 +439,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(service.ResolveUncertainRecoveryPublication().IsSuccess, Is.False);
             CollectionAssert.AreEqual(once, h.F.FileSystem.ReadAllBytes(service.SavePath));
             Assert.That(time.ForegroundThrough, Is.Zero);
+            if (!residual)
+                Assert.That(service.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail()).IsSuccess, Is.True);
+            Assert.That(service.RecoveryReport.Complete, Is.True, "Retained receipt survives exact candidate-authority proof");
         }
         [TestCase(false)] [TestCase(true)]
         public void ReopenedPendingPhaseRetainsOriginalEntryAndOnlyAddsUnknownSuffix(bool originalComplete)
@@ -348,6 +458,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(time.RecoveryEligible100nsForClockTest, Is.EqualTo((110 - persisted) * 10000000));
             var result = reopened.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail()); Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.RuntimeProjection.timeProvenance.Episode?.Entry, Is.EqualTo(originalComplete ? null : r));
+            if (!originalComplete) {
+                current = result.RuntimeProjection;
+                result = reopened.AdvanceCanonicalRecovery(current, h.Mana, (_, __) => Assert.Fail());
+                Assert.That(result.IsSuccess, Is.True, result.Reason);
+            }
+            Assert.That(reopened.RecoveryReport.Closed, Is.True);
+            Assert.That(reopened.RecoveryReport.Complete, Is.EqualTo(!originalComplete));
+            if (originalComplete) {
+                string neutral = OfflinePassiveManaPresenter.BuildRecovery(reopened.RecoveryReport,
+                    result.RuntimeProjection.structureRuntime.ManaReserve, h.Mana.ResolveRecoveryDuration(result.RuntimeProjection, h.Inputs.Configuration, 0, false).Capacity,
+                    null, key => key == "ui.recovery.completed_format" ? "Recovery complete. Current mana: {0}/{1}" : key);
+                Assert.That(neutral, Does.Contain("Recovery complete. Current mana:"));
+                Assert.That(neutral, Does.Not.Contain("No offline mana"));
+            }
         }
         [Test] public void DigestAloneCannotGrantCurrentWriterAuthorityWithoutValidatedInputs()
         {
@@ -583,6 +707,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(residual));
             Assert.That(scope.Root.Save.timeProvenance.Episode, Is.Null);
             Assert.That(scope.Root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.Zero);
+            Assert.That(h.Service.RecoveryReport.Complete, Is.True);
+            Assert.That(h.Service.RecoveryReport.Eligible100ns, Is.EqualTo(120000000), "The five known stalled seconds are excluded");
             var clock = new Clock { Seconds = 130 };
             var time = new TimeService(new SimpleLogger(false), h.Inputs.Bootstrap.tickSeconds,
                 h.Inputs.Bootstrap.timeRules.detectClockSkewSeconds, clock, () => 0);
@@ -731,6 +857,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(h.Current.timeProvenance.Episode.Entry.Seconds, Is.EqualTo(100));
             double residual = h.Mana.ResolveRecoveryDuration(h.Current, h.Inputs.Configuration, 40000000, false).WalletAfter;
             h.Accept(112); Expected(h, residual); Assert.That(h.Current.timeProvenance.Episode, Is.Null);
+            Assert.That(h.Service.RecoveryReport.Complete, Is.True);
+            Assert.That(h.Service.RecoveryReport.Eligible100ns, Is.EqualTo(1030000000));
         }
         [TestCase(Faults.OperationType.Write, 2)]
         [TestCase(Faults.OperationType.Replace, 1)]

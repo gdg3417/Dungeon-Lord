@@ -13,6 +13,8 @@ namespace DungeonBuilder.M0
         private DetachedCanonicalSaveSession pendingPredecessor, pendingCandidate;
         private TimeService.RecoveryPublicationObservation pendingRecoveryObservation;
         private bool recoveryPublicationUncertain;
+        private RecoveryGrantReceipt pendingRecoveryReceipt;
+        internal RecoveryEpisodeReport RecoveryReport { get; private set; }
         private static bool UsesAtomicRecovery => CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
         internal bool LastLoadCreatedNative { get; private set; }
 
@@ -28,6 +30,8 @@ namespace DungeonBuilder.M0
             if (pendingRecoveryObservation != null) return; // The recovery coordinator owns this disposition.
             try {
                 if (result.IsSuccess) {
+                    if (RecoveryReport != null && !RecoveryReport.Closed && pendingPredecessor != null)
+                        RecoveryReport.Observe(pendingPredecessor.GetCurrentBytes(), result, null);
                     if (result.Validation.TimeProvenance?.Mode == TimeProvenance.PreciseMode)
                         recoveryTime.OrdinaryPublicationSucceeded(result);
                     pendingPredecessor = null; pendingCandidate = null;
@@ -47,12 +51,15 @@ namespace DungeonBuilder.M0
         {
             if (recoveryInputs == null || !recoveryInputs.ConsumedValuesStillBound(_validationContext?.RoomContentOccupancy) ||
                 recoveryTime == null || proven?.timeProvenance?.Mode != TimeProvenance.PreciseMode ||
-                _canonicalSession == null || recoveryPublicationUncertain)
+                _canonicalSession == null || recoveryPublicationUncertain) {
+                RecoveryReport = null;
                 throw new InvalidOperationException(RecoveryEpisode.Invalid);
+            }
             recoveryTime.AttachSave(proven);
             if (!recoveryTime.RecoveryClockActive) {
                 if (observedBackground) recoveryTime.BeginObservedRecovery(proven);
                 else recoveryTime.BeginRecoveryClock(proven.timeProvenance);
+                RecoveryReport = new RecoveryEpisodeReport(_canonicalSession.GetCurrentBytes(), proven.timeProvenance.Episode);
             }
         }
 
@@ -87,12 +94,14 @@ namespace DungeonBuilder.M0
                     : writer.PublishRecovery(SavePath, _canonicalFileSystem, _canonicalSession, transition, mana);
                 if (result.IsSuccess) {
                     recoveryTime.RecoveryPublicationSucceeded(cut, result);
-                    AdoptRecoveryPublication(result);
+                    AdoptRecoveryPublication(result, result.RecoveryReceipt);
                 } else if (result.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason && pendingCandidate != null) {
+                    pendingRecoveryReceipt = result.RecoveryReceipt;
                     recoveryTime.RecoveryPublicationUncertain(cut); recoveryPublicationUncertain = true; foregroundRecoveryRequired = true;
                 } else {
                     recoveryTime.RecoveryPublicationFailed(cut);
                     pendingRecoveryObservation = null; pendingPredecessor = null; pendingCandidate = null;
+                    pendingRecoveryReceipt = null;
                 }
                 return result;
             } catch {
@@ -103,11 +112,14 @@ namespace DungeonBuilder.M0
             } finally { ForegroundWriting = false; }
         }
 
-        private void AdoptRecoveryPublication(DetachedCanonicalWriteResult proof)
+        private void AdoptRecoveryPublication(DetachedCanonicalWriteResult proof, RecoveryGrantReceipt receipt = null, bool rollback = false)
         {
+            if (!rollback && pendingRecoveryObservation != null && pendingPredecessor != null)
+                RecoveryReport?.Observe(pendingPredecessor.GetCurrentBytes(), proof, receipt);
             _canonicalSession = proof.Session; _undo = null;
             pendingPredecessor = null; pendingCandidate = null; pendingRecoveryObservation = null;
             recoveryPublicationUncertain = false; foregroundRecoveryRequired = false;
+            pendingRecoveryReceipt = null;
             recoveryTime.AttachSave(proof.RuntimeProjection);
             CanonicalRuntimePublished?.Invoke(proof.RuntimeProjection);
         }
@@ -139,7 +151,9 @@ namespace DungeonBuilder.M0
                     if (committed) recoveryTime.RecoveryPublicationSucceeded(pendingRecoveryObservation, proof);
                     else recoveryTime.RecoveryPublicationFailed(pendingRecoveryObservation);
                 } else recoveryTime.OrdinaryPublicationSucceeded(proof);
-                AdoptRecoveryPublication(proof); return proof;
+                // Reconstructed proof has no historical spending information.
+                // Only the exact retained candidate receipt may supply it.
+                AdoptRecoveryPublication(proof, committed ? pendingRecoveryReceipt : null, rollback: !committed); return proof;
             } catch { return RecoveryFailure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason); }
         }
 

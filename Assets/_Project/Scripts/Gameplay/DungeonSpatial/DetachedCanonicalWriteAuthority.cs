@@ -28,6 +28,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DetachedCompleteSaveValidationResult Validation { get; }
         public SaveData RuntimeProjection { get; }
         public double RecoveryManaSpent { get; }
+        internal RecoveryGrantReceipt RecoveryReceipt { get; set; }
         public string ForegroundAdmissionReason { get; internal set; }
         public byte[] GetPersistedBytes() => persistedBytes == null ? null : (byte[])persistedBytes.Clone();
     }
@@ -405,7 +406,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private DetachedCanonicalWriteResult PrepareAndPersist(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
             DetachedCanonicalSaveSessionResult prepared, bool roomEffect, bool ordinarySpend = false, bool recover = false,
-            Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null, double preparedRecoveryManaSpent = 0)
+            Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null, double preparedRecoveryManaSpent = 0,
+            Action<byte[], TimeProvenance, double, double> reportingPrepared = null)
         {
             if (!recoveryBindingsValid) return Failure(RecoveryEpisode.ContextMismatch);
             if (prepared == null || !prepared.IsSuccess || prepared.Update == null)
@@ -476,6 +478,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             // Retain the exact final candidate (including healing) before any IO.
             // The observer receives an immutable session, never writable bytes.
+            reportingPrepared?.Invoke((byte[])candidate.Clone(), validated.TimeProvenance, recoveryManaSpent, runtime.structureRuntime.ManaReserve);
             candidatePrepared?.Invoke(reopened.Session, validated.TimeProvenance);
             CandidatePrepared?.Invoke(session, reopened.Session, validated.TimeProvenance);
             string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,

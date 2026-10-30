@@ -474,6 +474,22 @@
       "text": "Away for {0:N0} seconds. Offline rate: {1} mana/hour. Earned: {2} mana. Current mana: {3} / {4}."
     },
     {
+      "key": "ui.recovery.completed_format",
+      "text": "Recovery complete. Current mana: {0} / {1}."
+    },
+    {
+      "key": "ui.recovery.summary_format",
+      "text": "Eligible recovery time: {0} seconds. {1} Earned: {2} mana. Current mana: {3} / {4}."
+    },
+    {
+      "key": "ui.recovery.rate_format",
+      "text": "Offline rate: {0} mana/hour."
+    },
+    {
+      "key": "ui.recovery.rates_format",
+      "text": "Original offline rate: {0} mana/hour; residual offline rate: {1} mana/hour."
+    },
+    {
       "key": "ui.offline_mana.capacity_limited",
       "text": "Mana storage capacity limited this award."
     },

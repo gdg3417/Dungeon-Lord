@@ -328,11 +328,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(root.Save.structureRuntime.ManaReserve,
                     Is.EqualTo(12.5075d).Within(1e-12));
                 Assert.That(root.Save.lastSavedUtcUnix, Is.EqualTo(1001));
-                Assert.That(root.LatestOfflinePassiveManaResultForTests, Is.Not.Null,
-                    "Successful canonical recovery must retain the existing offline-mana presentation evidence");
-                Assert.That(root.LatestOfflinePassiveManaResultForTests.Persisted, Is.True);
+                Assert.That(service.RecoveryReport.Complete, Is.True);
+                Assert.That(service.RecoveryReport.Eligible100ns, Is.EqualTo(10000000));
+                Assert.That(root.OfflinePassiveManaLine, Does.Contain("Eligible recovery time: 1 seconds"));
                 Assert.That(service.Save(root.Save, SaveReason.Boot), Is.True);
-                UnityEngine.Object.DestroyImmediate(go);
+                Assert.That(service.RecoveryReport.Complete, Is.True, "Ordinary saves retain accepted reporting evidence");
+                DisposeRoot(go);
 
                 fixture.ReopenWithSupportedForegroundProfiles();
                 SaveData reopened = fixture.Runtime;
@@ -341,10 +342,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 try
                 {
                     GameRoot reopenedRoot = Root(reopenedGo, fixture, reopenedService, time);
+                    Assert.That(reopenedService.RecoveryReport, Is.Null, "Closed bytes alone prove no historical breakdown");
                     reopenedService.BeginCanonicalRecovery(reopenedRoot.Save);
                     DrainRecovery(reopenedRoot);
-                    Assert.That(reopenedRoot.LatestOfflinePassiveManaResultForTests.Reason,
-                        Is.EqualTo(OfflinePassiveManaReason.ZeroElapsedInterval));
+                    Assert.That(reopenedService.RecoveryReport.Complete, Is.True);
+                    Assert.That(reopenedService.RecoveryReport.Eligible100ns, Is.Zero);
+                    Assert.That(reopenedService.RecoveryReport.Awarded, Is.Zero);
                     Assert.That(reopenedRoot.Save.structureRuntime.ManaReserve,
                         Is.EqualTo(12.5075d).Within(1e-12));
                     Assert.That(reopenedRoot.Save.structureRuntime.Heat, Is.EqualTo(heat));
@@ -363,9 +366,25 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     CollectionAssert.AreEqual(reopenedService.CanonicalSession.GetCurrentBytes(),
                         fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
                 }
-                finally { UnityEngine.Object.DestroyImmediate(reopenedGo); }
+                finally { DisposeRoot(reopenedGo); }
             }
-            finally { if (go != null) UnityEngine.Object.DestroyImmediate(go); }
+            finally { if (go != null) DisposeRoot(go); }
+        }
+
+        [TestCase(990d, 10d)]
+        [TestCase(1000d, 0d)]
+        public void CanonicalEpisodeReportsActualCapacityClampedGrant(double startingWallet, double actual)
+        {
+            var fixture = OneFloor(1000, startingWallet);
+            var time = new FakeTimeSource { Now = 4600 };
+            var service = Service(fixture, time);
+            service.BeginCanonicalRecovery(fixture.Runtime);
+            for (int i = 0; i < 3; i++) Assert.That(Step(fixture, service).IsSuccess, Is.True);
+            Assert.That(service.RecoveryReport.Complete, Is.True);
+            Assert.That(service.RecoveryReport.Calculated, Is.EqualTo(27));
+            Assert.That(service.RecoveryReport.Awarded, Is.EqualTo(actual));
+            Assert.That(service.RecoveryReport.CapacityLimited, Is.True);
+            Assert.That(service.RecoveryReport.ClosingWallet, Is.EqualTo(1000));
         }
 
         [Test]
@@ -448,15 +467,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void PauseResumeAppliesOnceAndRepeatedResumeDoesNotReplay()
         {
-            Fixture fixture = OneFloor();
-            fixture.Runtime.structureRuntime.ManaReserve = 0d;
-            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
-            var time = new FakeTimeSource { Now = TimeUtil.UtcNowUnixSeconds() };
+            Fixture fixture = OneFloor(1000, 0d);
+            var time = new FakeTimeSource { Now = 1000 };
             SaveService service = Service(fixture, time);
             GameObject go = new GameObject("Offline pause-resume lifecycle");
             try
             {
                 GameRoot root = Root(go, fixture, service, time);
+                service.BeginCanonicalRecovery(root.Save);
+                DrainRecovery(root);
                 double heat = root.Save.structureRuntime.Heat;
                 long ticks = root.Save.totalTicks;
 
@@ -465,11 +484,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 const long elapsed = 90000;
                 time.Now = boundary + elapsed;
                 root.ApplyPauseState(false);
+                DrainRecovery(root);
                 double once = root.Save.structureRuntime.ManaReserve;
 
                 Assert.That(once, Is.EqualTo(675d).Within(1e-9));
-                Assert.That(root.LatestOfflinePassiveManaResultForTests.ObservedElapsedSeconds,
-                    Is.EqualTo(elapsed));
+                Assert.That(service.RecoveryReport.Complete, Is.True);
+                Assert.That(service.RecoveryReport.Eligible100ns, Is.EqualTo(elapsed * 10000000));
                 Assert.That(root.Save.structureRuntime.Heat, Is.EqualTo(heat));
                 Assert.That(root.Save.totalTicks, Is.EqualTo(ticks));
                 Assert.That(root.TimeService.IsPaused, Is.False);
@@ -481,21 +501,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 root.ApplyPauseState(false);
                 Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(once));
             }
-            finally { UnityEngine.Object.DestroyImmediate(go); }
+            finally { DisposeRoot(go); }
         }
 
         [Test]
         public void ResumePersistenceFailureKeepsSimulationPausedAndRetryDoesNotDuplicate()
         {
-            Fixture fixture = OneFloor();
-            fixture.Runtime.structureRuntime.ManaReserve = 0d;
-            fixture.Runtime.structureRuntime.Heat = fixture.Configuration.HeatPeaceMinimum;
-            var time = new FakeTimeSource { Now = TimeUtil.UtcNowUnixSeconds() };
+            Fixture fixture = OneFloor(1000, 0d);
+            var time = new FakeTimeSource { Now = 1000 };
             SaveService service = Service(fixture, time);
             GameObject go = new GameObject("Offline resume failure");
             try
             {
                 GameRoot root = Root(go, fixture, service, time);
+                service.BeginCanonicalRecovery(root.Save);
+                DrainRecovery(root);
                 root.ApplyPauseState(true);
                 long boundary = root.Save.lastSavedUtcUnix;
                 byte[] before = service.CanonicalSession.GetCurrentBytes();
@@ -505,19 +525,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
                 root.ApplyPauseState(false);
 
-                Assert.That(root.TimeService.IsPaused, Is.True);
+                Assert.That(root.TimeService.IsPaused, Is.False, "L1 records the real return; the recovery barrier pauses simulation");
+                var update = typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.Instance | BindingFlags.NonPublic);
+                update.Invoke(root, null); // No automatic per-frame persistence retry.
                 Assert.That(root.Save.structureRuntime.ManaReserve, Is.Zero);
                 Assert.That(root.Save.lastSavedUtcUnix, Is.EqualTo(boundary));
                 CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
-                Assert.That(root.LatestOfflinePassiveManaResultForTests.Reason,
-                    Is.EqualTo(OfflinePassiveManaReason.PersistenceFailure));
+                Assert.That(root.Save.totalTicks, Is.Zero);
 
                 fixture.FileSystem.DisableFailure();
-                root.ApplyPauseState(false);
+                // Explicit action retries the existing barrier; repeated resume
+                // callbacks cannot manufacture another lifecycle transition.
+                service.Save(root.Save, SaveReason.StateChange);
+                DrainRecovery(root);
                 Assert.That(root.TimeService.IsPaused, Is.False);
                 Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(27d).Within(1e-9));
+                Assert.That(service.RecoveryReport.Complete, Is.True);
+                double once = root.Save.structureRuntime.ManaReserve;
+                root.ApplyPauseState(false);
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(once));
             }
-            finally { UnityEngine.Object.DestroyImmediate(go); }
+            finally { DisposeRoot(go); }
         }
 
         [Test]

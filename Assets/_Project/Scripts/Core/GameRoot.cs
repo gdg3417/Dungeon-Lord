@@ -2660,6 +2660,13 @@ namespace DungeonBuilder.M0
             Func<string, string> localize = key => Content != null
                 ? Content.GetString(key, key)
                 : key;
+            if (Save?.timeProvenance?.Mode == TimeProvenance.PreciseMode) {
+                OfflinePassiveManaLine = OfflinePassiveManaPresenter.BuildRecovery(
+                    SaveService?.RecoveryReport, Save.structureRuntime.ManaReserve,
+                    _passiveManaService != null ? _passiveManaService.ManaCapacity : double.NaN,
+                    PassiveManaPresenter.ResolveFormatProvider(Content?.Strings?.language), localize);
+                return;
+            }
             OfflinePassiveManaLine = OfflinePassiveManaPresenter.Build(
                 _latestOfflinePassiveManaResult,
                 PassiveManaPresenter.ResolveFormatProvider(Content?.Strings?.language),
