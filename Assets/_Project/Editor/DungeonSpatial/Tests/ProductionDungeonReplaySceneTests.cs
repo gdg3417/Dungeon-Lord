@@ -161,15 +161,31 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.SimulateRunOnce(), Is.True);
             Assert.That(CombatC0Diagnostics.IsCombatC0(root.Save.runHistory.LatestOutcome), Is.True);
             // The manual run invalidates the next foreground opportunity. The
-            // real save barrier must reconcile that scheduler state before the
+            // real Update coordinator must reconcile that scheduler state before the
             // stricter UI-only baseline (which never accepts substantive writes).
             var beforeTime = root.Save.timeProvenance;
             long beforeA = root.Save.livingDungeon.Scheduler.AcceptedThrough, beforeC = root.Save.livingDungeon.Scheduler.ClosedThrough;
             long beforeTicks = root.Save.totalTicks, beforeRevision = root.Save.livingDungeon.Revision;
             double beforeMana = root.Save.structureRuntime.ManaReserve;
             string beforeHistory = JsonUtility.ToJson(root.Save.runHistory), beforeMonsters = JsonUtility.ToJson(root.Save.monsterContinuity);
+            string beforeRuntime = JsonUtility.ToJson(root.Save);
+            var timeOwner = root.TimeService; var beforeUtc = sceneClock.Now; long beforeMonotonic = sceneClock.Elapsed100ns;
             bool initializeOpportunity = !root.Save.livingDungeon.Scheduler.NextOpportunityTime.HasValue;
-            Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.True);
+            var rootFlags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            object RootField(string name) => typeof(GameRoot).GetField(name, rootFlags).GetValue(root);
+            bool PendingRunPublication() => (bool)RootField("foregroundDirty") || (bool)RootField("foregroundPumping");
+            for (int frame = 0; frame < 8 && PendingRunPublication(); frame++) {
+                yield return null;
+                Assert.That(root.isActiveAndEnabled, Is.True);
+                Assert.That(RootField("foregroundFailure"), Is.Null);
+                Assert.That(RootField("foregroundRetryPending"), Is.EqualTo(false));
+                Assert.That(root.TimeService.RecoveryClockActive || root.TimeService.HasDeferredRecovery ||
+                    root.TimeService.HasForegroundPersistenceStall || root.SaveService.RequiresCanonicalRecovery, Is.False);
+            }
+            Assert.That(PendingRunPublication(), Is.False, "Normal Update must finish the manual run's pending reconciliation within the fixture bound");
+            Assert.That(root.TimeService, Is.SameAs(timeOwner));
+            Assert.That(sceneClock.Now, Is.EqualTo(beforeUtc)); Assert.That(sceneClock.Elapsed100ns, Is.EqualTo(beforeMonotonic));
+            Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(beforeRuntime));
             Assert.That(root.Save.timeProvenance.SameAs(beforeTime), Is.True);
             Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(beforeMana));
             Assert.That(root.Save.totalTicks, Is.EqualTo(beforeTicks));
