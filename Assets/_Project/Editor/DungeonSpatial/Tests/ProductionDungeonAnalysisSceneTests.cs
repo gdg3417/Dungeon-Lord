@@ -213,50 +213,80 @@ namespace DungeonBuilder.M0.Tests
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             var strings = AnalysisPhoneStrings; string invalidText = strings["ui.analysis.leave_invalid"];
             string staleText = strings[TransactionalDungeonDraft.StaleReason];
+            var stringOwner = GameRoot.Instance.Content;
+            var rootOwner = GameRoot.Instance;
+            int phoneTraceCount = 0;
+            void TracePhone(string phase)
+            {
+                if (phoneTraceCount++ >= 128) return;
+                int Id(object value) => value == null ? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(value);
+                var currentRoot = GameRoot.Instance;
+                TestContext.WriteLine("H1F4_ANALYSIS_PHONE " + phase + " root=" + Id(currentRoot) +
+                    " owner=" + Id(rootOwner) + " content=" + Id(currentRoot?.Content) + " contentOwner=" + Id(stringOwner) +
+                    " strings=" + Id(strings) + " document=" + Id(ui) + " attached=" + (ui?.panel != null) +
+                    " controller=" + Id(controller) + " draft=" + Id(controller?.Draft) +
+                    " recovery=" + currentRoot?.TimeService?.RecoveryClockActive + " episode=" + currentRoot?.Save?.timeProvenance?.Episode?.Phase);
+                if (phase != "before-restore") return;
+                object result = TestContext.CurrentContext.Result;
+                var assertions = result.GetType().GetProperty("Assertions")?.GetValue(result) as System.Collections.IEnumerable;
+                if (assertions == null) return;
+                int count = 0;
+                foreach (object assertion in assertions) {
+                    if (count++ == 3) break;
+                    TestContext.WriteLine("H1F4_ANALYSIS_PHONE recorded-assertion " +
+                        assertion.GetType().GetProperty("Message")?.GetValue(assertion) + " " +
+                        assertion.GetType().GetProperty("StackTrace")?.GetValue(assertion));
+                }
+            }
+            TracePhone("entry");
             try
             {
                 strings["ui.analysis.leave_invalid"] = invalidText + " " + string.Join(" ",Enumerable.Repeat("Test-only expanded invalid draft guidance.",24));
                 strings[TransactionalDungeonDraft.StaleReason] = staleText + " " + string.Join(" ",Enumerable.Repeat("Test-only expanded stale draft guidance.",24));
                 foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
                 {
-                    yield return AnalysisPhoneConfigure(size); controller.EnterEdit();
+                    TracePhone("before-1:AnalysisPhoneConfigure"); yield return AnalysisPhoneConfigure(size); TracePhone("after-1:AnalysisPhoneConfigure"); controller.EnterEdit();
                     var root = GameRoot.Instance; var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var room = floor.Layout.Rooms[0];
                     controller.TapWorld(new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+2)); controller.BeginMove();
-                    controller.TapWorld(new TileCoordinate(-1,-1)); yield return null;
+                    controller.TapWorld(new TileCoordinate(-1,-1)); TracePhone("before-2:null"); yield return null; TracePhone("after-2:null");
                     var draft = controller.Draft; Assert.That(draft.IsStructurallyValid, Is.False);
-                    yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath);
-                    yield return AnalysisPhoneOpenFromEdit();
+                    TracePhone("before-3:StabilizeReadOnlySceneBaseline"); yield return StabilizeReadOnlySceneBaseline(); TracePhone("after-3:StabilizeReadOnlySceneBaseline"); var before = File.ReadAllBytes(root.SaveService.SavePath);
+                    TracePhone("before-4:AnalysisPhoneOpenFromEdit"); yield return AnalysisPhoneOpenFromEdit(); TracePhone("after-4:AnalysisPhoneOpenFromEdit");
                     Assert.That(ui.Q<Button>("confirm").text, Is.EqualTo(strings["ui.analysis.discard_changes"]));
                     Assert.That(ui.Q<Button>("navigationDiscard").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
-                    yield return AnalysisPhoneDialog(draft.StructuralReason,"confirm","cancel");
-                    yield return AnalysisPhoneTap(ui.Q<Button>("cancel")); Assert.That(controller.Draft, Is.SameAs(draft));
-                    yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay"));
-                    yield return AnalysisPhoneOpenFromEdit(); yield return AnalysisPhoneTap(ui.Q<Button>("confirm"));
+                    TracePhone("before-5:AnalysisPhoneDialog"); yield return AnalysisPhoneDialog(draft.StructuralReason,"confirm","cancel"); TracePhone("after-5:AnalysisPhoneDialog");
+                    TracePhone("before-6:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("cancel")); TracePhone("after-6:AnalysisPhoneTap"); Assert.That(controller.Draft, Is.SameAs(draft));
+                    TracePhone("before-7:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay")); TracePhone("after-7:AnalysisPhoneTap");
+                    TracePhone("before-8:AnalysisPhoneOpenFromEdit"); yield return AnalysisPhoneOpenFromEdit(); TracePhone("after-8:AnalysisPhoneOpenFromEdit"); TracePhone("before-9:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("confirm")); TracePhone("after-9:AnalysisPhoneTap");
                     Assert.That(controller.IsAnalysis, Is.True); CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath));
-                    yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon"));
+                    TracePhone("before-10:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon")); TracePhone("after-10:AnalysisPhoneTap");
 
                     controller.EnterEdit(); draft = controller.Draft; var assignment = floor.RoomContents.Assignments.First();
                     Assert.That(draft.Move(floor.FloorInstanceId,assignment.RoomInstanceId,assignment.AssignmentId,new TileCoordinate(1,0)), Is.True);
-                    yield return null; yield return null;
+                    TracePhone("before-11:null"); yield return null; TracePhone("after-11:null"); TracePhone("before-12:null"); yield return null; TracePhone("after-12:null");
                     var otherStore = new FileDungeonDraftStore(root.SaveService.SavePath+".phone-stale",
                         SpatialMigrationFileSystemSelector.Evaluate(root.SaveService.SavePath).FileSystem,root.SaveSpatialMigrationLimits);
                     var other = TransactionalDungeonDraft.Create(root.Save.validatedCanonicalSpatialState,root.SaveService.DungeonDraftContext,otherStore);
                     var competingTarget = assignment.RoomLocalPosition.Equals(new TileCoordinate(2,1)) ? new TileCoordinate(0,0) : new TileCoordinate(2,1);
                     Assert.That(other.Move(floor.FloorInstanceId,assignment.RoomInstanceId,assignment.AssignmentId,competingTarget), Is.True);
                     Assert.That(other.FlushNext(), Is.True); Assert.That(root.SaveService.CommitDungeonDraft(root.Save,other).IsSuccess, Is.True);
-                    yield return StabilizeReadOnlySceneBaseline(); before = File.ReadAllBytes(root.SaveService.SavePath);
-                    yield return AnalysisPhoneOpenFromEdit(); Assert.That(ui.Q<Button>("confirm").enabledInHierarchy, Is.False);
-                    yield return AnalysisPhoneDialog(TransactionalDungeonDraft.StaleReason,"confirm","navigationDiscard","cancel");
-                    yield return AnalysisPhoneTap(ui.Q<Button>("confirm"),false);
+                    TracePhone("before-13:StabilizeReadOnlySceneBaseline"); yield return StabilizeReadOnlySceneBaseline(); TracePhone("after-13:StabilizeReadOnlySceneBaseline"); before = File.ReadAllBytes(root.SaveService.SavePath);
+                    TracePhone("before-14:AnalysisPhoneOpenFromEdit"); yield return AnalysisPhoneOpenFromEdit(); TracePhone("after-14:AnalysisPhoneOpenFromEdit"); Assert.That(ui.Q<Button>("confirm").enabledInHierarchy, Is.False);
+                    TracePhone("before-15:AnalysisPhoneDialog"); yield return AnalysisPhoneDialog(TransactionalDungeonDraft.StaleReason,"confirm","navigationDiscard","cancel"); TracePhone("after-15:AnalysisPhoneDialog");
+                    TracePhone("before-16:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("confirm"),false); TracePhone("after-16:AnalysisPhoneTap");
                     Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex)); Assert.That(controller.Draft, Is.SameAs(draft));
-                    yield return AnalysisPhoneTap(ui.Q<Button>("cancel")); Assert.That(controller.Draft, Is.SameAs(draft));
-                    yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay"));
-                    yield return AnalysisPhoneOpenFromEdit(); yield return AnalysisPhoneTap(ui.Q<Button>("navigationDiscard"));
+                    TracePhone("before-17:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("cancel")); TracePhone("after-17:AnalysisPhoneTap"); Assert.That(controller.Draft, Is.SameAs(draft));
+                    TracePhone("before-18:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay")); TracePhone("after-18:AnalysisPhoneTap");
+                    TracePhone("before-19:AnalysisPhoneOpenFromEdit"); yield return AnalysisPhoneOpenFromEdit(); TracePhone("after-19:AnalysisPhoneOpenFromEdit"); TracePhone("before-20:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("navigationDiscard")); TracePhone("after-20:AnalysisPhoneTap");
                     Assert.That(controller.IsAnalysis, Is.True); CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath));
-                    yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon"));
+                    TracePhone("before-21:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon")); TracePhone("after-21:AnalysisPhoneTap");
                 }
             }
-            finally { strings["ui.analysis.leave_invalid"]=invalidText; strings[TransactionalDungeonDraft.StaleReason]=staleText; }
+            finally {
+                TracePhone("before-restore");
+                strings["ui.analysis.leave_invalid"]=invalidText; strings[TransactionalDungeonDraft.StaleReason]=staleText;
+                TracePhone("restored");
+            }
         }
 
         [UnityTest] public IEnumerator AnalysisPhoneOpeningDuringReplayClosesPresentationOnly()
