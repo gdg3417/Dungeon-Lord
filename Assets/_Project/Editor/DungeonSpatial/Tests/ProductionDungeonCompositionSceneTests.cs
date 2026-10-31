@@ -576,6 +576,18 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.SaveService.CommitFloorConstruction(root.Save,quote).IsSuccess,Is.True);
             var state=root.Save.validatedCanonicalSpatialState;
             var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            // Read-only diagnosis of the first publication after floor construction.
+            // Keep the original byte assertion; do not settle or suppress the write here.
+            string baselineGameplay=JsonUtility.ToJson(root.Save);
+            var baselineTime=root.TimeService;
+            int observedPublications=0;
+            Action<SaveData> observePublication = _ => {
+                if (observedPublications++ >= 4) return;
+                TraceReadOnlyBaselineDifference(before,File.ReadAllBytes(root.SaveService.SavePath),"play-floor-publication");
+                TestContext.WriteLine("H1F4_PLAY_BASELINE publisher="+string.Join("/",new System.Diagnostics.StackTrace().GetFrames().Take(12).Select(f=>f.GetMethod().Name)));
+            };
+            root.SaveService.CanonicalRuntimePublished += observePublication;
+            TestContext.WriteLine("H1F4_PLAY_BASELINE capture dirty="+typeof(GameRoot).GetField("foregroundDirty",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(root));
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
             for(int i=0;i<12;i++) yield return null;
             var floors=ui.Q("floors").Children().Cast<Button>().ToArray();
@@ -593,6 +605,12 @@ namespace DungeonBuilder.M0.Tests
             for(int i=0;i<8;i++) yield return null;
             Assert.That(controller.FloorRailCollapsed,Is.False);
             Assert.That(controller.Viewport.Center,Is.EqualTo(railCamera));
+            root.SaveService.CanonicalRuntimePublished -= observePublication;
+            TraceReadOnlyBaselineDifference(before,File.ReadAllBytes(root.SaveService.SavePath),"play-floor-before-assert");
+            Assert.That(JsonUtility.ToJson(root.Save),Is.EqualTo(baselineGameplay),"Read-only floor controls cannot change canonical gameplay, W, A/C or rewards");
+            Assert.That(root.TimeService,Is.SameAs(baselineTime));
+            CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(),File.ReadAllBytes(root.SaveService.SavePath));
+            TestContext.WriteLine("H1F4_PLAY_BASELINE publications="+observedPublications+" gameplayUnchanged=True timeOwnerUnchanged=True");
             AssertCanonicalUnchanged(before,mana);
             yield return CompositionTap(CompositionButtonScreen(floors[1]));
             Assert.That(controller.SelectedFloorInstanceId,Is.EqualTo(state.Floors[1].FloorInstanceId));
