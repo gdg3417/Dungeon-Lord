@@ -131,7 +131,7 @@ namespace DungeonBuilder.M0.Tests
             var root = GameRoot.Instance; root.Save.structureRuntime.ManaReserve = 1000;
             Assert.That(root.SimulateRunOnce(), Is.True);
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
-            var before = File.ReadAllBytes(root.SaveService.SavePath); string live = JsonUtility.ToJson(root.Save);
+            yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath); string live = JsonUtility.ToJson(root.Save);
             foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
             {
                 yield return AnalysisPhoneConfigure(size);
@@ -224,7 +224,7 @@ namespace DungeonBuilder.M0.Tests
                     controller.TapWorld(new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+2)); controller.BeginMove();
                     controller.TapWorld(new TileCoordinate(-1,-1)); yield return null;
                     var draft = controller.Draft; Assert.That(draft.IsStructurallyValid, Is.False);
-                    var before = File.ReadAllBytes(root.SaveService.SavePath);
+                    yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath);
                     yield return AnalysisPhoneOpenFromEdit();
                     Assert.That(ui.Q<Button>("confirm").text, Is.EqualTo(strings["ui.analysis.discard_changes"]));
                     Assert.That(ui.Q<Button>("navigationDiscard").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
@@ -244,7 +244,7 @@ namespace DungeonBuilder.M0.Tests
                     var competingTarget = assignment.RoomLocalPosition.Equals(new TileCoordinate(2,1)) ? new TileCoordinate(0,0) : new TileCoordinate(2,1);
                     Assert.That(other.Move(floor.FloorInstanceId,assignment.RoomInstanceId,assignment.AssignmentId,competingTarget), Is.True);
                     Assert.That(other.FlushNext(), Is.True); Assert.That(root.SaveService.CommitDungeonDraft(root.Save,other).IsSuccess, Is.True);
-                    before = File.ReadAllBytes(root.SaveService.SavePath);
+                    yield return StabilizeReadOnlySceneBaseline(); before = File.ReadAllBytes(root.SaveService.SavePath);
                     yield return AnalysisPhoneOpenFromEdit(); Assert.That(ui.Q<Button>("confirm").enabledInHierarchy, Is.False);
                     yield return AnalysisPhoneDialog(TransactionalDungeonDraft.StaleReason,"confirm","navigationDiscard","cancel");
                     yield return AnalysisPhoneTap(ui.Q<Button>("confirm"),false);
@@ -263,7 +263,7 @@ namespace DungeonBuilder.M0.Tests
         {
             var root = GameRoot.Instance; root.Save.structureRuntime.ManaReserve = 1000;
             Assert.That(root.SimulateRunOnce(), Is.True); var ui = controller.GetComponent<UIDocument>().rootVisualElement;
-            var before = File.ReadAllBytes(root.SaveService.SavePath); string live = JsonUtility.ToJson(root.Save);
+            yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath); string live = JsonUtility.ToJson(root.Save);
             foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
             {
                 yield return AnalysisPhoneConfigure(size);
@@ -286,8 +286,7 @@ namespace DungeonBuilder.M0.Tests
             var root = GameRoot.Instance;
             root.Save.structureRuntime.ManaReserve = 1000;
             Assert.That(root.SimulateRunOnce(), Is.True);
-            var before = File.ReadAllBytes(root.SaveService.SavePath);
-            TraceSceneState("analysis.before-read-only-baseline");
+            yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath);
             var history = JsonUtility.ToJson(root.Save.runHistory);
             string floor = controller.SelectedFloorInstanceId;
             controller.OpenAnalysis(); yield return null;
@@ -295,30 +294,16 @@ namespace DungeonBuilder.M0.Tests
             controller.EnterEdit(); Assert.That(controller.IsEditing, Is.False);
             controller.ReturnToDungeon(); yield return null;
             Assert.That(controller.SelectedFloorInstanceId, Is.EqualTo(floor));
-            TraceSceneState("analysis.before-byte-assertion");
-            // Read-only, bounded diagnosis of the first historical byte mismatch.
-            // This never normalizes either byte array or changes the assertion.
-            var observed = File.ReadAllBytes(root.SaveService.SavePath);
-            int first = 0;
-            while (first < before.Length && first < observed.Length && before[first] == observed[first]) first++;
-            bool decimalSuffixOnly = observed.Length == before.Length + 2 && first < before.Length &&
-                observed[first] == (byte)'.' && observed[first + 1] == (byte)'0' &&
-                before.Skip(first).SequenceEqual(observed.Skip(first + 2));
-            int start = System.Math.Max(0, first - 48);
-            TestContext.WriteLine("H1F4_SCENE byte-diff first=" + first + " beforeLength=" + before.Length +
-                " afterLength=" + observed.Length + " decimalSuffixOnly=" + decimalSuffixOnly +
-                " before=" + System.Text.Encoding.UTF8.GetString(before, start, System.Math.Min(96, before.Length - start)) +
-                " after=" + System.Text.Encoding.UTF8.GetString(observed, start, System.Math.Min(96, observed.Length - start)));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
             UnityEngine.Object.Destroy(controller.gameObject);
             UnityEngine.Object.Destroy(root.gameObject); yield return null;
             yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
             for (int i=0;i<120 && GameRoot.Instance?.Save==null;i++) yield return null;
-            root = GameRoot.Instance; root.enabled = false;
+            root = GameRoot.Instance;
             controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
             for (int i=0;i<30 && controller.World==null;i++) yield return null;
             // Boot owns its clock/save metadata; Analysis must preserve the reopened bytes.
-            before = File.ReadAllBytes(root.SaveService.SavePath);
+            yield return StabilizeReadOnlySceneBaseline(); before = File.ReadAllBytes(root.SaveService.SavePath);
             controller.OpenAnalysis(); yield return null;
             Assert.That(JsonUtility.ToJson(root.Save.runHistory), Is.EqualTo(history));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));

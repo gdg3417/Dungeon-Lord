@@ -26,6 +26,8 @@ namespace DungeonBuilder.M0.Tests
         private bool missingThemeWarning;
         private SceneClock sceneClock;
         private int tracedPublications;
+        private byte[] readOnlyBaselineProbe;
+        private int readOnlyBaselineOrdinal;
         internal sealed class SceneClock : IPreciseTimeSource
         {
             internal UnixTimePoint Now = new UnixTimePoint(2000, 2500000);
@@ -42,7 +44,6 @@ namespace DungeonBuilder.M0.Tests
             }
         }
         private bool TraceSceneRecovery => TestContext.CurrentContext.Test.Name.Contains("RoomContentMapReassignmentCapacity") ||
-            TestContext.CurrentContext.Test.Name == "AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen" ||
             TestContext.CurrentContext.Test.Name.Contains("SceneClock") ||
             TestContext.CurrentContext.Test.Name.Contains("LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish");
         // Read-only diagnosis: never sample/advance time, invoke a barrier, or
@@ -80,6 +81,7 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator SetUp()
         {
             tracedPublications = 0;
+            readOnlyBaselineProbe = null; readOnlyBaselineOrdinal = 0;
             missingThemeWarning = false;
             Application.logMessageReceived += RecordThemeWarning;
             if (!Application.isPlaying)
@@ -114,10 +116,6 @@ namespace DungeonBuilder.M0.Tests
                 root.SaveService.CanonicalRuntimePublished += _ => {
                     if (tracedPublications++ >= 16) return;
                     TraceSceneState("canonical-publication");
-                    if (TestContext.CurrentContext.Test.Name == "AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen")
-                        TestContext.WriteLine("H1F4_SCENE publication-caller " + string.Join(" <- ",
-                            new System.Diagnostics.StackTrace().GetFrames().Take(10).Select(frame =>
-                                frame.GetMethod().DeclaringType?.Name + "." + frame.GetMethod().Name)));
                 };
                 var ui = controller.GetComponent<UIDocument>().rootVisualElement;
                 foreach (string name in new[] { "save", "discard", "confirm", "cancel", "edit", "legacy" })
@@ -168,6 +166,32 @@ namespace DungeonBuilder.M0.Tests
         private void ObserveSceneFocus(bool focused) => typeof(GameRoot).GetMethod("OnApplicationFocus",
             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
             .Invoke(GameRoot.Instance, new object[] { focused });
+
+        // First prove the exact first-failure byte signature for every P1 case.
+        // The probe is read-only; no time sampling, pumping or byte rewriting.
+        private IEnumerator StabilizeReadOnlySceneBaseline()
+        {
+            readOnlyBaselineOrdinal++;
+            readOnlyBaselineProbe = File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath);
+            yield break;
+        }
+
+        private void TraceReadOnlyBaselineDifference(byte[] before, byte[] after, string phase)
+        {
+            int first = 0;
+            while (first < before.Length && first < after.Length && before[first] == after[first]) first++;
+            string original = System.Text.Encoding.UTF8.GetString(before);
+            int key = original.LastIndexOf("\"ManaReserve\":", System.Math.Min(first, original.Length - 1), StringComparison.Ordinal);
+            bool walletNumber = key >= 0 && original.Substring(key + "\"ManaReserve\":".Length,
+                first - key - "\"ManaReserve\":".Length).All(c => c == '-' || c >= '0' && c <= '9');
+            bool decimalSuffixOnly = after.Length == before.Length + 2 && first < before.Length &&
+                before[first] == (byte)',' && after[first] == (byte)'.' && after[first + 1] == (byte)'0' &&
+                before.Skip(first).SequenceEqual(after.Skip(first + 2)) && walletNumber;
+            TestContext.WriteLine("H1F4_BASELINE " + phase + " ordinal=" + readOnlyBaselineOrdinal +
+                " identical=" + before.SequenceEqual(after) + " walletDecimalSuffixOnly=" + decimalSuffixOnly +
+                " beforeLength=" + before.Length + " afterLength=" + after.Length + " first=" + first +
+                " beforeSha=" + SpatialContractSha256.Compute(before) + " afterSha=" + SpatialContractSha256.Compute(after));
+        }
 
         private void PumpSceneToClosed(bool establishForeground = false)
         {
@@ -240,6 +264,8 @@ namespace DungeonBuilder.M0.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            if (readOnlyBaselineProbe != null && GameRoot.Instance?.SaveService != null)
+                TraceReadOnlyBaselineDifference(readOnlyBaselineProbe, File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath), "probe-after-test");
             bool failed = TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed;
             if (failed && filename != null) {
                 string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
@@ -624,7 +650,14 @@ namespace DungeonBuilder.M0.Tests
             }
             Assert.That(missingThemeWarning, Is.False);
             Click(document.rootVisualElement.Q<Button>("closeDisplay"));
-            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("phase7a4-theme-normal-1080x1920.png");
+            const string captureName = "phase7a4-theme-normal-1080x1920.png";
+            string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+            Assert.That(export, Is.Not.Null.And.Not.Empty, "Expected capture must belong to the qualification campaign");
+            string captureDirectory = Path.Combine(Path.GetFullPath(export), "screenshots") + Path.DirectorySeparatorChar;
+            LogAssert.Expect(LogType.Log, new System.Text.RegularExpressions.Regex("^Qualification capture: " +
+                System.Text.RegularExpressions.Regex.Escape(captureDirectory) + "[0-9a-f]{8}-" +
+                System.Text.RegularExpressions.Regex.Escape(captureName) + "$"));
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(captureName);
             yield return null;
             LogAssert.NoUnexpectedReceived();
         }
@@ -1163,7 +1196,7 @@ namespace DungeonBuilder.M0.Tests
                         filename + ".editor-draft.draft-*.commit").OrderBy(p => p, StringComparer.Ordinal).Last();
                     File.WriteAllText(commit, "malformed test commit evidence");
                 }
-                byte[] canonical = File.ReadAllBytes(root.SaveService.SavePath);
+                yield return StabilizeReadOnlySceneBaseline(); byte[] canonical = File.ReadAllBytes(root.SaveService.SavePath);
                 double mana = root.Save.structureRuntime.ManaReserve;
                 yield return RestartShell();
                 var ui = controller.GetComponent<UIDocument>().rootVisualElement;

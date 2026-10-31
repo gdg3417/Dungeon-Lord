@@ -23,7 +23,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.SimulateRunOnce(),Is.True); var outcome=root.Save.runHistory.LatestOutcome;
             var selected=root.Save.runHistory.RecentOutcomes.Last();
             Assert.That(CombatC0Diagnostics.Events(selected),Is.EqualTo(CombatC0Diagnostics.Events(outcome)));
-            var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
+            yield return StabilizeReadOnlySceneBaseline(); var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
             var sprites=controller.World.GetComponentsInChildren<SpriteRenderer>(true).Where(v=>v.name=="Content").ToDictionary(v=>v,v=>v.sprite);
             int pooled=-1,pooledLabels=-1;
             foreach(var size in new[]{new Vector2Int(1920,1080),new Vector2Int(1280,720),new Vector2Int(720,1280)})
@@ -254,7 +254,7 @@ namespace DungeonBuilder.M0.Tests
                     foreach(var c in service.Config.CombatC0.Classes) c.Damage=0;
                     foreach(var c in service.Config.PhaseFiveB.Classes) c.LevelOneMaxHealth=1;
                 }
-                Assert.That(root.SimulateRunOnce(),Is.True); var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
+                Assert.That(root.SimulateRunOnce(),Is.True); yield return StabilizeReadOnlySceneBaseline(); var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
                 Assert.That(controller.StartReplay(),Is.True); controller.ToggleReplayPause();
                 for(int i=0;i<3;i++) yield return null;
                 AssertCombatDeathVisibility(ui); Assert.That(controller.World.ReplayCasualtyCount,Is.Zero);

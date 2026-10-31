@@ -461,14 +461,14 @@ namespace DungeonBuilder.M0.Tests
         {
             var root=GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
             var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var room=floor.Layout.Rooms[0]; var identity=floor.RoomContents.Assignments.Single();
-            var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            yield return StabilizeReadOnlySceneBaseline(); var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
             controller.EnterEdit(); controller.SelectConstructionRoom("spatial.room.basic");
             controller.TapWorld(controller.World.MoveGuidanceAnchors.First()); Assert.That(controller.ConfirmConstructionPlacement(),Is.True);
             var destination=controller.Draft.ReadModel.Floors[0].Layout.Rooms.Single(r=>r.RoomInstanceId!=room.RoomInstanceId);
             yield return SettleContentPanel();
             Assert.That(controller.Commit(),Is.True,"Isolated second-room fixture: "+ui.Q<Label>("status").text);
-            before=File.ReadAllBytes(root.SaveService.SavePath); mana=root.Save.structureRuntime.ManaReserve;
+            yield return StabilizeReadOnlySceneBaseline(); before=File.ReadAllBytes(root.SaveService.SavePath); mana=root.Save.structureRuntime.ManaReserve;
             controller.EnterEdit(); Assert.That(controller.Draft.CommandCount,Is.Zero);
             var strings=(System.Collections.Generic.Dictionary<string,string>)typeof(ContentService).GetField("_stringMap",
                 System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(root.Content);
@@ -536,7 +536,7 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator RoomContentUatBrowserIdentityAndDirectTargetSwitch()
         {
             var root = GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess, Is.True);
-            var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
+            yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
             var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var source = floor.Layout.Rooms[0];
             var original = floor.RoomContents.Assignments.Single();
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
@@ -709,7 +709,7 @@ namespace DungeonBuilder.M0.Tests
         {
             var root = GameRoot.Instance; var room = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];
             Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess, Is.True);
-            var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
+            yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             controller.EnterEdit(); controller.TapWorld(ContentCell(room,1,1));
             foreach(var size in new[] {new Vector2Int(720,1280),new Vector2Int(1920,1080),new Vector2Int(1024,600)})
@@ -752,7 +752,7 @@ namespace DungeonBuilder.M0.Tests
             {
                 Assert.That(RoomLocalCoordinateTransform.TryToFloor(new TileCoordinate(x,y),definition.GrossFootprint,room.Anchor,room.Orientation,out var value),Is.True); return value;
             }
-            var before = File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             controller.EnterEdit();
             Assert.That(controller.OpenContentCategory("placement.category.monster"),Is.False);
             Assert.That(ui.Q<Button>("monstersCategory").enabledSelf,Is.False);
@@ -818,7 +818,7 @@ namespace DungeonBuilder.M0.Tests
             controller.TapWorld(Cell(2,2)); DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720,1280);
             yield return null; yield return null;
             yield return RoomContentCapture("room-content-normal-room.png");
-            before=File.ReadAllBytes(root.SaveService.SavePath); mana=root.Save.structureRuntime.ManaReserve;
+            yield return StabilizeReadOnlySceneBaseline(); before=File.ReadAllBytes(root.SaveService.SavePath); mana=root.Save.structureRuntime.ManaReserve;
             controller.EnterEdit(); controller.TapWorld(Cell(1,1)); controller.UnassignSelectedContent(); yield return null; yield return null;
             Assert.That(controller.Discard(),Is.True); AssertCanonicalUnchanged(before,mana);
             Assert.That(root.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.Any(a=>a.AssignmentId==id),Is.True);
@@ -833,7 +833,7 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator RoomContentExplicitReassignmentWithConstructionAndInspectionReuse()
         {
             var root=GameRoot.Instance; Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
-            var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            yield return StabilizeReadOnlySceneBaseline(); var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var original=floor.RoomContents.Assignments.Single();
             controller.EnterEdit(); Assert.That(controller.SelectConstructionRoom("spatial.room.basic"),Is.True);
             controller.TapWorld(controller.World.MoveGuidanceAnchors.First()); Assert.That(controller.ConstructionPreview.IsValid,Is.True);
