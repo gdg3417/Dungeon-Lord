@@ -26,9 +26,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             public bool Delete(byte[] expected) { if (FailDelete) return false; Bytes = null; return true; }
         }
         internal static Fixture Content(string category = CanonicalSpatialSaveContracts.MonsterCategoryId,
-            string option = "placement.option.monster.skeleton")
+            string option = "placement.option.monster.skeleton", SaveSpatialMigrationLimitsProfile profile = null,
+            byte[][] recoveryInputBytes = null)
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null, workloadProfile: profile, recoveryInputBytes: recoveryInputBytes);
             var room = f.Prepare(DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic", null, null, null));
             Assert.That(room.IsSuccess, Is.True, room.Reason);
             f = f.Rebase(room.State);
@@ -64,7 +65,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(final.AssignmentId, Is.EqualTo(original.AssignmentId)); Assert.That(final.CategoryId, Is.EqualTo(original.CategoryId));
             Assert.That(final.OptionId, Is.EqualTo(original.OptionId)); Assert.That(final.Sequence, Is.EqualTo(original.Sequence));
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(mana));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction)); Assert.That(store.Bytes, Is.Null);
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction)); Assert.That(store.Bytes, Is.Null);
         }
 
         [Test]

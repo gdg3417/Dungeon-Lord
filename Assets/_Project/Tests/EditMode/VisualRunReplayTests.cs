@@ -14,7 +14,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         internal static Fixture Completed()
         {
-            var f = Fixture.Create(null); f.Configuration = PhaseSixA4Tests.Config();
+            var f = Fixture.Create(null);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             foreach (var value in new[] { (MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId, 0),
                 (MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId, 1),
@@ -35,6 +35,30 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 f.Runtime.corridorContent, f.Profile.Canonical, out var fingerprint), Is.True);
             return fingerprint;
         }
+        private static RunOutcomeRecord LegacyPresentation(Fixture f)
+        {
+            // Supported legacy executable, transient read-only evidence only.
+            // Never a schema-17 write or historical producer/activation proof.
+            var before = f.Session.GetCurrentBytes();
+            var run = PhaseFiveBBranchIntegrationTests.Service(f).StartSnapshot(1, PhaseSixA4Tests.Snapshot(f)).DrainToCompletion(true);
+            Assert.That(CombatC0Diagnostics.IsCombatC0(run), Is.False);
+            run.PresentationLayoutFingerprint = new DungeonDraftContext(f.Production, f.Configuration, f.Occupancy, f.Profile).Fingerprint(f.State);
+            Assert.That(RunTransientEvidence.TryCorridorFingerprint(run, f.Runtime.corridorContent, f.Profile.Canonical, out var corridor), Is.True);
+            run.PresentationCorridorFingerprint = corridor;
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            return run;
+        }
+        private static void AssertOriginalStepStream(RunOutcomeRecord run, DungeonRunReplay replay)
+        {
+            // C1 projects multiple recorded combat events for one run ordinal.
+            // Preserve every original step in order and verify every repeated
+            // frame still references that exact authoritative step.
+            Assert.That(replay.Frames.Select(frame => frame.Step.Ordinal), Is.Ordered);
+            CollectionAssert.AreEqual(run.PresentationSteps.Select(step => step.Ordinal),
+                replay.Frames.Select(frame => frame.Step.Ordinal).Distinct());
+            var source = run.PresentationSteps.ToDictionary(step => step.Ordinal);
+            foreach (var frame in replay.Frames) Assert.That(frame.Step, Is.EqualTo(source[frame.Step.Ordinal]));
+        }
         [TestCase("tile")]
         [TestCase("option")]
         [TestCase("removed")]
@@ -47,6 +71,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             try
             {
                 var original = Create(f, policy); var run = f.Runtime.runHistory.LatestOutcome;
+                var legacy = LegacyPresentation(f);
+                Assert.That(DungeonRunReplay.TryCreate(legacy, f.State, f.Production.Catalog, legacy.PresentationLayoutFingerprint,
+                    legacy.PresentationCorridorFingerprint, policy, out _, out var legacyReason), Is.True, legacyReason);
                 Assert.That(run.BranchOutcomes.Single().Traversed, Is.True);
                 var current = PhaseFiveSaveContracts.Canonicalize(f.Runtime.corridorContent);
                 string canonical = run.PresentationLayoutFingerprint;
@@ -62,7 +89,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(RunTransientEvidence.TryCorridorFingerprint(run, current, f.Profile.Canonical, out var changed), Is.True);
                 Assert.That(DungeonRunReplay.TryCreate(run, f.State, f.Production.Catalog, canonical, changed, policy,
                     out _, out var reason), Is.False);
-                Assert.That(reason, Is.EqualTo(DungeonRunReplay.Historical));
+                Assert.That(reason, Is.EqualTo(DungeonRunReplay.Layout));
+                Assert.That(DungeonRunReplay.TryCreate(legacy, f.State, f.Production.Catalog, canonical, changed, policy,
+                    out _, out legacyReason), Is.False);
+                Assert.That(legacyReason, Is.EqualTo(DungeonRunReplay.Historical));
                 Assert.That(new DungeonDraftContext(f.Production, f.Configuration, f.Occupancy, f.Profile).Fingerprint(f.State), Is.EqualTo(canonical));
             }
             finally { UnityEngine.Object.DestroyImmediate(policy); }
@@ -203,7 +233,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 TestContext.WriteLine("Pure playback: " + replay.FrameCount + " recorded steps / " + displayFrames +
                     " display updates / " + timer.Elapsed.TotalMilliseconds.ToString("F4", System.Globalization.CultureInfo.InvariantCulture) +
                     " ms (Windows Editor; excludes view/UI and projection construction).");
-                CollectionAssert.AreEqual(run.PresentationSteps.Select(s => s.Kind), replay.Frames.Select(f => f.Step.Kind));
+                AssertOriginalStepStream(run, replay);
                 Assert.That(run.PresentationSteps.Any(s => s.PositionSpace == RunPositionSpace.Floor), Is.True, "Recorded connections included");
                 foreach (var kind in new[] { RunStepKind.RoomEntry, RunStepKind.Movement, RunStepKind.MonsterEngagement,
                     RunStepKind.TrapTrigger, RunStepKind.LootInteraction, RunStepKind.RoomEgress, RunStepKind.Terminal })
@@ -261,12 +291,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
             try
             {
                 var bytes = f.Session.GetCurrentBytes(); var outcome = f.Runtime.runHistory.LatestOutcome;
+                var legacy = edited ? LegacyPresentation(f) : null;
                 if (edited) outcome.PresentationLayoutFingerprint = "historical.test";
                 else { f.Reopen(); outcome = f.Runtime.runHistory.LatestOutcome; Assert.That(outcome.PresentationSteps, Is.Null); }
                 var context = new DungeonDraftContext(f.Production, f.Configuration, f.Occupancy, f.Profile);
                 Assert.That(DungeonRunReplay.TryCreate(outcome, f.State, f.Production.Catalog, context.Fingerprint(f.State), CorridorFingerprint(f), policy,
                     out var replay, out var reason), Is.False); Assert.That(replay, Is.Null);
-                Assert.That(reason, Is.EqualTo(edited ? DungeonRunReplay.Historical : DungeonRunReplay.Missing));
+                Assert.That(reason, Is.EqualTo(edited ? DungeonRunReplay.Layout : DungeonRunReplay.Missing));
+                if (edited) {
+                    Assert.That(DungeonRunReplay.TryCreate(legacy, f.State, f.Production.Catalog, context.Fingerprint(f.State),
+                        legacy.PresentationCorridorFingerprint, policy, out _, out var validReason), Is.True, validReason);
+                    legacy.PresentationLayoutFingerprint = "historical.test";
+                    Assert.That(DungeonRunReplay.TryCreate(legacy, f.State, f.Production.Catalog, context.Fingerprint(f.State),
+                        legacy.PresentationCorridorFingerprint, policy, out _, out var legacyReason), Is.False);
+                    Assert.That(legacyReason, Is.EqualTo(DungeonRunReplay.Historical));
+                }
                 CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath));
             }
             finally { UnityEngine.Object.DestroyImmediate(policy); }
@@ -288,10 +327,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void TwoFloorConnectionsAndBranchReturnsFollowOriginalOrdinalStream(bool multiFloor)
         {
             {
-                var f = multiFloor ? PhaseSixA4Tests.Eligible() : PhaseFiveBBranchIntegrationTests.Fixture();
+                var f = multiFloor ? PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs((config, _) =>
+                    PhaseSixA4Tests.ForceDescent(config, true))) : PhaseFiveBBranchIntegrationTests.Fixture();
                 if (multiFloor)
                 {
-                    PhaseSixA4Tests.ForceDescent(f.Configuration, true);
                     foreach (int floor in new[] { 0, 1 }) PhaseSixA4Tests.AddContent(f, floor, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
                     var activation = PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime, FloorLifecycleAction.ActivateAllEligible, null);
                     f.Accept(activation);
@@ -300,7 +339,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 // Use the established full writer with injected loot, not the single-floor
                 // branch helper whose authority intentionally omits that dependency.
                 f.Accept(multiFloor ? PhaseSixA4Tests.Writer(f).CommitPhaseFiveBRun(f.ActivePath,
-                    f.FileSystem, f.Session, f.Runtime, PhaseFiveBBranchIntegrationTests.Service(f.Configuration),
+                    f.FileSystem, f.Session, f.Runtime, PhaseFiveBBranchIntegrationTests.Service(f),
                     RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix)) : PhaseFiveBBranchIntegrationTests.Run(f));
                 var policy = ScriptableObject.CreateInstance<DungeonPresentationPolicy>();
                 try
@@ -309,7 +348,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Assert.That(replay.Frames.Any(f => f.Step.Kind == (multiFloor ? RunStepKind.FloorTransfer : RunStepKind.BranchReturn)), Is.True);
                     Assert.That(replay.Frames.Where(f => f.HasPosition).Select(f => f.FloorId).Distinct().Count(), Is.EqualTo(multiFloor ? 2 : 1));
                     if (!multiFloor) Assert.That(replay.CorridorContents.Count, Is.EqualTo(f.Runtime.corridorContent.Assignments.Length));
-                    CollectionAssert.AreEqual(Enumerable.Range(0, replay.FrameCount).Select(i => (long)i), replay.Frames.Select(f => f.Step.Ordinal));
+                    AssertOriginalStepStream(f.Runtime.runHistory.LatestOutcome, replay);
+                    CollectionAssert.AreEqual(Enumerable.Range(0, f.Runtime.runHistory.LatestOutcome.PresentationSteps.Length).Select(i => (long)i),
+                        replay.Frames.Select(frame => frame.Step.Ordinal).Distinct());
                 }
                 finally { UnityEngine.Object.DestroyImmediate(policy); }
             }

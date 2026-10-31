@@ -1,0 +1,234 @@
+{
+  "archive_errors": [],
+  "branch": "codex/h1-f4-recovery",
+  "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\61c2a2cd452e4a5c837496834f680e55",
+  "campaign_file_hashes": {
+    "campaign.json": "981a29b90ceceac1360c659c085f3b9556516e72d2a7f3fefd3a832d4df70f22",
+    "full-edit-preflight\\child.json": "6b19484e918227278a9dede706d8995b8369dbc2d2c1d27c736039cb43be7b02",
+    "full-edit-preflight\\exit.json": "8ac1ac82106d361a4222f5e4ff350c6a1add81ec5cb5356b2c4a2d1ad75cf05d",
+    "full-edit-preflight\\preservation.json": "c8e6406cbe5309ccba5efcc32e2b0519f65a6c1246b46899291e25fd2f500627",
+    "full-edit-preflight\\result.json": "d21a22f3994a6fb741cb76c16f60d5b2d548ce47c0d1741bbad847c81e9ba46c",
+    "full-edit-preflight\\started.json": "39fda0ef61b823d05feb92f7760b685e477059d4d90bf13ffc549f9aaca5dd27",
+    "full-edit-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "full-edit\\child.json": "68bd2417b5d553658d7c5a931c874ce33c616980319cfe770c16fce09ff4ab27",
+    "full-edit\\exit.json": "4593b6cb11aaf20a11d81cc66ea2c985bf9c721cae9686c0409f1019b5910868",
+    "full-edit\\generated-inputs\\manifest.json": "a29f4908c8df48cce97fd6a430c615ac3cf2ec13c62ccec15a797087edf359a9",
+    "full-edit\\invocation.json": "4639c9f5010d49ca6f11abddc99b6f7f65f141e9c9b819fb9db6aa571705ee7d",
+    "full-edit\\result.json": "73b99d871623a16e6100be3b02fec09f1ae9714905ca1e7480f3bfe01a164334",
+    "full-edit\\results.xml": "aac1bab11bf2ba8b942c5c9828250f02cec636f29456b70921c87a2abc0a1f53",
+    "full-edit\\started.json": "1dbd8549b92b399fbed5a6aba5484c63d4acf7ed964fe66370df3e28366d3a55",
+    "full-edit\\stdout.log": "88be10d94cf68b0cbd29de3267b299db82cffea5232317de1ca671f6a65b83d3",
+    "full-edit\\unity.log": "421c8011bcf4bfddc639ea025113cdfc08ce52376b79a89fd2e1aa4e11c5d76c",
+    "launch.claim": "4f9c88e0a55b992fc6f1105ab2ec641a9154b131a698ba6eded35b75e5e57931",
+    "launch.json": "4650ddaeff66cc6b53737258cb7ca3749dbd44515fd3c036f0eab92b6b743b06",
+    "launch.log": "30154906234207a6167d455ec16a6aaf088b0b6557c5df18af5a354b38c23cc9"
+  },
+  "campaign_source_sha": "16955152fcdd5a5f8af006dc38887a75f1f83266",
+  "changed_qualified_inputs": {
+    "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": {
+      "current": "f53586850a70c4f308e7e71b99b63881a49f38de4bd40f4edb7fe7ae6ecf8a52",
+      "qualified": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d"
+    }
+  },
+  "check_only_receipt": {
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\61c2a2cd452e4a5c837496834f680e55",
+    "diagnostic_sha256": "374f0c03f72c1d5ef9f5d7f19ca80ffe79390ffb27857a2e5e7b98dfb7a98134",
+    "execute_requested": false,
+    "final_reservation": {
+      "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\61c2a2cd452e4a5c837496834f680e55"
+    },
+    "final_target_hashes": {
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "f53586850a70c4f308e7e71b99b63881a49f38de4bd40f4edb7fe7ae6ecf8a52",
+      "ProjectSettings/EditorBuildSettings.asset": "f72e8fd550133184822260c85b62c371189f88e1d390fb95839292e9247ee7cf",
+      "ProjectSettings/ProjectSettings.asset": "0f13de06da5c719873aa0ca6b0801f56402538f81ad07b33ebe35d5aa1a1d9ae",
+      "ProjectSettings/ShaderGraphSettings.asset": "5c432c9c73fdf73fee91c8823ea02ab98e3b7a8edf341b5ae6901d699cce52a7"
+    },
+    "modification_attempts": [],
+    "prechecks_passed": true,
+    "proposal_script_sha256": "52d72bc462b4f2b6ae7c47200e074471416e6e645c04fd4d512f94e513708dd6",
+    "released": false,
+    "restored": [],
+    "success": true,
+    "utc": "2026-10-27T18:52:26.286706+00:00"
+  },
+  "current_input_identity": "afbbd9bbc1f67c6156a2b40b1378be134ac3fb706408bfa88950fb7601790185",
+  "failure_details_sha256": "ab2e4d0dafa65cdb645dd5232864d58cc5f32ed60a028965f46cbc0247c9ede6",
+  "failure_message_groups": {
+    "Expected string length 29 but was 31. Strings differ at index 16.": 1,
+    "Expected string length 34 but was 27. Strings differ at index 0.": 1,
+    "Expected string length 34 but was 29. Strings differ at index 6.": 1,
+    "Expected string length 36 but was 22. Strings differ at index 0.": 1,
+    "Expected string length 36 but was 29. Strings differ at index 16.": 1,
+    "Expected: \"structural.economy.invalid\"": 1,
+    "Expected: 1": 1,
+    "Expected: 1376256": 1,
+    "Expected: 16": 12,
+    "Expected: 17": 1,
+    "Expected: 2752696": 1,
+    "Expected: 500": 1,
+    "Expected: 675.0d +/- 1.0000000000000001E-09d": 1,
+    "Expected: 7500001": 1,
+    "Expected: 92": 1,
+    "Expected: False": 4,
+    "Expected: String containing \"Not enough mana for this structural edit.\"": 1,
+    "Expected: True": 112,
+    "Expected: equivalent to < \"Assets/_Project/Scripts/Core/GameRoot.cs\", \"Assets/_Project/Scripts/UI/BootstrapOverlay.cs\", \"Assets/_Project/Scripts/UI/ProductionDungeonController.cs\", \"Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs\", \"Assets/_Project/Scripts/UI/ProductionDungeonReplay.cs\" >": 1,
+    "Expected: not null": 6,
+    "Expected: property Length equal to 10": 1,
+    "Expected: same as <DungeonBuilder.M0.SaveData>": 1,
+    "No extra research write after foreground barrier": 1,
+    "One bounded pause flush cannot close three ticks": 1,
+    "SetUp :   save.migration.spatial.gd66.authority.contradictory_state": 21,
+    "System.InvalidOperationException : living.foreground.clock_invalid": 1,
+    "System.NullReferenceException : Object reference not set to an instance of an object": 4,
+    "branch.run.invalid_state": 1,
+    "floor.lifecycle.invalid_state": 21,
+    "gd66.authority.contradictory_state": 2,
+    "gd66.payload.workload_exceeded": 1,
+    "gd66.transaction.candidate_invalid": 14,
+    "gd66.write.first_write_validation_failed": 487,
+    "living.foreground.boundary_pending": 3,
+    "researchPending": 8,
+    "save.migration.spatial.gd66.authority.contradictory_state": 21,
+    "structural.edit.invalid_context": 7,
+    "time.recovery.context_mismatch": 25,
+    "time.recovery.invalid_state": 25,
+    "ui.dungeon.draft.stale": 4,
+    "ui.time.recovery.context_mismatch": 6
+  },
+  "isolated_save_directory": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 fulledit01",
+  "job_query": {
+    "name": "Local\\DLQ-5efc1e89f6274ccbb3021ef461147897",
+    "opened_for_query": false,
+    "windows_error": 2
+  },
+  "missing_cli_exit_receipt": true,
+  "observed_utc": "2026-10-27T18:49:50.556339+00:00",
+  "old_campaign_file_count": 19,
+  "old_incomplete_evidence_unchanged": true,
+  "original_archive_sha256": "a7472a408ae05497d37de8983dee0f2b09b15cce8f1a6e30f3d95c71f247a070",
+  "original_input_identity": "6d44c97c7a1481866746adeff148b67c90ffa334092154702b3e7c53a262de6c",
+  "original_input_map_sha256": "0baeae84928ebda7eea2ac8fb0588155c96de9db3e7d07f9bf91c9c13fd3f899",
+  "preservation_note": "Diagnostic collection made no repairs, releases, terminations, verdict edits or new launches.",
+  "process_evidence_limit": "Later absence is not descendant completion. Recorded host exit 0 and runner exit 1 are retained. INCOMPLETE/UNCERTAIN is unchanged.",
+  "processes": {
+    "host": {
+      "current": null,
+      "matches": false,
+      "recorded": {
+        "created": 134375993822635613,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 44588
+      }
+    },
+    "runner": {
+      "current": null,
+      "matches": false,
+      "recorded": {
+        "created": 134375993823730434,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 25920
+      }
+    },
+    "supervisor": {
+      "current": null,
+      "matches": false,
+      "recorded": {
+        "created": 134375993693524398,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 46620
+      }
+    }
+  },
+  "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 fulledit01",
+  "proposal_script": {
+    "executed": false,
+    "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-fulledit01\\incomplete-investigation\\proposed_recovery.py",
+    "sha256": "52d72bc462b4f2b6ae7c47200e074471416e6e645c04fd4d512f94e513708dd6"
+  },
+  "proposed_restoration_inputs": {
+    "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": {
+      "current": "f53586850a70c4f308e7e71b99b63881a49f38de4bd40f4edb7fe7ae6ecf8a52",
+      "original": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+      "qualified": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d"
+    },
+    "ProjectSettings/EditorBuildSettings.asset": {
+      "current": "f72e8fd550133184822260c85b62c371189f88e1d390fb95839292e9247ee7cf",
+      "original": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "qualified": "f72e8fd550133184822260c85b62c371189f88e1d390fb95839292e9247ee7cf"
+    },
+    "ProjectSettings/ProjectSettings.asset": {
+      "current": "0f13de06da5c719873aa0ca6b0801f56402538f81ad07b33ebe35d5aa1a1d9ae",
+      "original": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "qualified": "0f13de06da5c719873aa0ca6b0801f56402538f81ad07b33ebe35d5aa1a1d9ae"
+    },
+    "ProjectSettings/ShaderGraphSettings.asset": {
+      "current": "5c432c9c73fdf73fee91c8823ea02ab98e3b7a8edf341b5ae6901d699cce52a7",
+      "original": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72",
+      "qualified": "5c432c9c73fdf73fee91c8823ea02ab98e3b7a8edf341b5ae6901d699cce52a7"
+    }
+  },
+  "protected": {
+    "map_sha256": "153198c74d40d2676ec2dff34f605c14fcb4370146e8f597d23ef288fd9cd747",
+    "passed": true
+  },
+  "qualified_input_identity": "854afc8c8c8743678a54563fe38de67011c9b3c598ec9d8765bebf0ff031b011",
+  "qualified_input_map_sha256": "1aa136372a047e1c7b68796409d1c84e227aebabee5f850a1710c88e85268b4b",
+  "recorded_host_exit_code": 0,
+  "recorded_runner_exit_code": 1,
+  "recorded_status": "INCOMPLETE",
+  "reservation": {
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\61c2a2cd452e4a5c837496834f680e55"
+  },
+  "reservation_sha256": "d4b76086a03df9339aa4741f67faf5304ed48870bcec48321c3389c9a2dad962",
+  "source_sha": "16955152fcdd5a5f8af006dc38887a75f1f83266",
+  "stage_detail": "Inputs no longer applicable",
+  "stage_failure": "UNCERTAIN",
+  "test_case_count": 2772,
+  "tests_raw_only": {
+    "Failed": 805,
+    "Passed": 1966,
+    "Skipped": 1
+  },
+  "tool_checks": {
+    "C:\\Program Files\\Git\\cmd\\git.EXE": {
+      "current": "81ef35ae005ca9318018d18e3327578ce939fb99feaad6b2d7c8ab15f3de8db5",
+      "expected": "81ef35ae005ca9318018d18e3327578ce939fb99feaad6b2d7c8ab15f3de8db5"
+    },
+    "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.2f1\\Editor\\Unity.exe": {
+      "current": "c2f3d552a9f9a4639b2e54e9d41f360614d512ba6a9816c8c934568ecc2ad93d",
+      "expected": "c2f3d552a9f9a4639b2e54e9d41f360614d512ba6a9816c8c934568ecc2ad93d"
+    },
+    "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe": {
+      "current": "73dbf1f40507275d6fa636b49eb80b4753e313f649f52591abba86b31f1a1bce",
+      "expected": "73dbf1f40507275d6fa636b49eb80b4753e313f649f52591abba86b31f1a1bce"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_inputs.py": {
+      "current": "34d3ff45cf7512e21f242bc0e4ede876e5c8b68eddba853ad9b1e69192270c92",
+      "expected": "34d3ff45cf7512e21f242bc0e4ede876e5c8b68eddba853ad9b1e69192270c92"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_supervisor.py": {
+      "current": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a",
+      "expected": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_windows.py": {
+      "current": "234bce5f0ca8c7087bb999c603cfbb3d87f0eb4499501a1644dcbbabf3104db7",
+      "expected": "234bce5f0ca8c7087bb999c603cfbb3d87f0eb4499501a1644dcbbabf3104db7"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py": {
+      "current": "bc3d899272fc0c9ac88779304dbbfdaa187b40414ac3faf726e2ac5122d69c9b",
+      "expected": "bc3d899272fc0c9ac88779304dbbfdaa187b40414ac3faf726e2ac5122d69c9b"
+    },
+    "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe": {
+      "current": "78761a0547cd4a9bc212e27a217c66e6a621bf48c753ba440e4b2327ee7ff8ac",
+      "expected": "78761a0547cd4a9bc212e27a217c66e6a621bf48c753ba440e4b2327ee7ff8ac"
+    },
+    "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE": {
+      "current": "60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f",
+      "expected": "60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f"
+    }
+  },
+  "unity_guard": {
+    "passed": true
+  }
+}

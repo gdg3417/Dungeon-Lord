@@ -1,0 +1,774 @@
+{
+  "purpose": "Compatibility review fixture matrix; expected decisions are not executed runtime results",
+  "source_sha": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "generator_sha256": "b68d0a73508370d1e4557a0f8d9388d899f1011671ad0c4fd5984117e61c9b24",
+  "input_order": [
+    "Assets/_Project/Data/Bootstrap/run_simulation_config.json",
+    "Assets/_Project/Resources/passive_online_mana.json",
+    "Assets/_Project/Resources/structural_economy.json",
+    "Assets/_Project/Resources/monster_recovery.json",
+    "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json",
+    "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json",
+    "Assets/_Project/Resources/living_dungeon_foreground.json",
+    "Assets/_Project/Resources/living_dungeon_foreground_v2.json",
+    "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json",
+    "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json",
+    "Assets/_Project/Data/Bootstrap/content_bootstrap.json",
+    "Assets/_Project/Data/Bootstrap/loot_config.json"
+  ],
+  "exact_checkout_input_hashes": {
+    "Assets/_Project/Data/Bootstrap/run_simulation_config.json": "f07657572530df1955ae904c66a76feeb71ca7ae8a6e8382c25bb8b7a1cf4e16",
+    "Assets/_Project/Resources/passive_online_mana.json": "2848ccfa6ffde744ade883edb0171bfbe993bbee5c32758a70d8ee4b690e6639",
+    "Assets/_Project/Resources/structural_economy.json": "f33799b480d27bd65356c182dee67a8473cfed0db061bba9e8de55eb6c0addaf",
+    "Assets/_Project/Resources/monster_recovery.json": "1a5e199c55cc28678099dc56bf0ea5a4796038090d6f2f3e7f8e67494ad4595d",
+    "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227",
+    "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b",
+    "Assets/_Project/Resources/living_dungeon_foreground.json": "840001642c9b3d2d53ef7ebfcac7170459f012589a6206d8bb58a9727cfc2331",
+    "Assets/_Project/Resources/living_dungeon_foreground_v2.json": "2183efa3f7540442c861bd2fe7ab7912007ad725b33ab21546795803c0d331a1",
+    "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600",
+    "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json": "6caa36bb2b6cd7cf40227e762197a798e262b84ad7e40980584902b14524e8c9",
+    "Assets/_Project/Data/Bootstrap/content_bootstrap.json": "8a90c78da4e0941f4da7e02292de7df0e8cd53bc84ac3ab2c78d3014d9500b8f",
+    "Assets/_Project/Data/Bootstrap/loot_config.json": "f0efb530aa6673c7cd12d2b2d5cbf87b4b93a49f77af6fd2af30e761d6ba327a"
+  },
+  "context_v3_asset_byte_fixture_hash": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+  "asset_hash_limit": "No Unity import/validation run; manifest/catalog raw assets stand for their canonical loaded bytes in this fixture",
+  "changed_config_variants": [
+    {
+      "change": "tickSeconds",
+      "component": 11,
+      "modified_input_sha256": "d5af6ac9980ae8d86f39e2837fdfc49309c340d568c93b1f825b5af2205caa6d",
+      "context_sha256": "dc1110e6d54d7095dc0a2148b75b7afe06e6f051dbf8e385c65531ec423f4bc3",
+      "fixture_scope": "In-memory asset variant; no production asset edited"
+    },
+    {
+      "change": "researchProgression",
+      "component": 11,
+      "modified_input_sha256": "4660a7da7271e5422406ae9d38756413d066e170b257de04e80898c7bb409da2",
+      "context_sha256": "fc09dd9f71fe2cbec4a5dfad51216764bd1730d07ed29f33c4574613d8f4d13a",
+      "fixture_scope": "In-memory asset variant; no production asset edited"
+    },
+    {
+      "change": "lootWorldValues",
+      "component": 12,
+      "modified_input_sha256": "319a1a5747bf90dfa60d2c3249b584cbd9f1734f7955360838a30e95577952a2",
+      "context_sha256": "d19d677c3aecabb857d9ac2b197544cf62e7bee5230808c23ebed5c999f1d045",
+      "fixture_scope": "In-memory asset variant; no production asset edited"
+    },
+    {
+      "change": "combatMaximumHp",
+      "component": 1,
+      "modified_input_sha256": "741678d7c6fdb9881ef6d4a329a3f128aadf7876b60731ae8e776a45f59b61db",
+      "context_sha256": "6ad058adb7a160d18a0a95aa815c37c8eff11d0e1aae767050625a4e93ffcaaa",
+      "fixture_scope": "In-memory asset variant; no production asset edited"
+    }
+  ],
+  "modern_semantic_cases": [
+    {
+      "id": "originalPending.sameContext",
+      "state": {
+        "id": "originalPending",
+        "phase": "originalPending",
+        "C": 0,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "expected": "identity_noop_only_then_existing_recovery_barriers",
+      "automatic_rebind": false,
+      "note": "Matching context does not bypass other state/authority/clock validation"
+    },
+    {
+      "id": "originalPending.changed.tickSeconds",
+      "state": {
+        "id": "originalPending",
+        "phase": "originalPending",
+        "C": 0,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "dc1110e6d54d7095dc0a2148b75b7afe06e6f051dbf8e385c65531ec423f4bc3",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "originalPending.changed.researchProgression",
+      "state": {
+        "id": "originalPending",
+        "phase": "originalPending",
+        "C": 0,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "fc09dd9f71fe2cbec4a5dfad51216764bd1730d07ed29f33c4574613d8f4d13a",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "originalPending.changed.lootWorldValues",
+      "state": {
+        "id": "originalPending",
+        "phase": "originalPending",
+        "C": 0,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "d19d677c3aecabb857d9ac2b197544cf62e7bee5230808c23ebed5c999f1d045",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "originalPending.changed.combatMaximumHp",
+      "state": {
+        "id": "originalPending",
+        "phase": "originalPending",
+        "C": 0,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "6ad058adb7a160d18a0a95aa815c37c8eff11d0e1aae767050625a4e93ffcaaa",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "residualPending.sameContext",
+      "state": {
+        "id": "residualPending",
+        "phase": "residualPending",
+        "C": 10000,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "expected": "identity_noop_only_then_existing_recovery_barriers",
+      "automatic_rebind": false,
+      "note": "Matching context does not bypass other state/authority/clock validation"
+    },
+    {
+      "id": "residualPending.changed.tickSeconds",
+      "state": {
+        "id": "residualPending",
+        "phase": "residualPending",
+        "C": 10000,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "dc1110e6d54d7095dc0a2148b75b7afe06e6f051dbf8e385c65531ec423f4bc3",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "residualPending.changed.researchProgression",
+      "state": {
+        "id": "residualPending",
+        "phase": "residualPending",
+        "C": 10000,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "fc09dd9f71fe2cbec4a5dfad51216764bd1730d07ed29f33c4574613d8f4d13a",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "residualPending.changed.lootWorldValues",
+      "state": {
+        "id": "residualPending",
+        "phase": "residualPending",
+        "C": 10000,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "d19d677c3aecabb857d9ac2b197544cf62e7bee5230808c23ebed5c999f1d045",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "residualPending.changed.combatMaximumHp",
+      "state": {
+        "id": "residualPending",
+        "phase": "residualPending",
+        "C": 10000,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "6ad058adb7a160d18a0a95aa815c37c8eff11d0e1aae767050625a4e93ffcaaa",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedAcceptedDebt.sameContext",
+      "state": {
+        "id": "closedAcceptedDebt",
+        "phase": null,
+        "C": 0,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "expected": "identity_noop_only_then_existing_recovery_barriers",
+      "automatic_rebind": false,
+      "note": "Matching context does not bypass other state/authority/clock validation"
+    },
+    {
+      "id": "closedAcceptedDebt.changed.tickSeconds",
+      "state": {
+        "id": "closedAcceptedDebt",
+        "phase": null,
+        "C": 0,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "dc1110e6d54d7095dc0a2148b75b7afe06e6f051dbf8e385c65531ec423f4bc3",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedAcceptedDebt.changed.researchProgression",
+      "state": {
+        "id": "closedAcceptedDebt",
+        "phase": null,
+        "C": 0,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "fc09dd9f71fe2cbec4a5dfad51216764bd1730d07ed29f33c4574613d8f4d13a",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedAcceptedDebt.changed.lootWorldValues",
+      "state": {
+        "id": "closedAcceptedDebt",
+        "phase": null,
+        "C": 0,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "d19d677c3aecabb857d9ac2b197544cf62e7bee5230808c23ebed5c999f1d045",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedAcceptedDebt.changed.combatMaximumHp",
+      "state": {
+        "id": "closedAcceptedDebt",
+        "phase": null,
+        "C": 0,
+        "A": 10000
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "6ad058adb7a160d18a0a95aa815c37c8eff11d0e1aae767050625a4e93ffcaaa",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedOfflineGap.sameContext",
+      "state": {
+        "id": "closedOfflineGap",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "W": 100,
+        "R": 120
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "expected": "identity_noop_only_then_existing_recovery_barriers",
+      "automatic_rebind": false,
+      "note": "Matching context does not bypass other state/authority/clock validation"
+    },
+    {
+      "id": "closedOfflineGap.changed.tickSeconds",
+      "state": {
+        "id": "closedOfflineGap",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "W": 100,
+        "R": 120
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "dc1110e6d54d7095dc0a2148b75b7afe06e6f051dbf8e385c65531ec423f4bc3",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedOfflineGap.changed.researchProgression",
+      "state": {
+        "id": "closedOfflineGap",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "W": 100,
+        "R": 120
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "fc09dd9f71fe2cbec4a5dfad51216764bd1730d07ed29f33c4574613d8f4d13a",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedOfflineGap.changed.lootWorldValues",
+      "state": {
+        "id": "closedOfflineGap",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "W": 100,
+        "R": 120
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "d19d677c3aecabb857d9ac2b197544cf62e7bee5230808c23ebed5c999f1d045",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedOfflineGap.changed.combatMaximumHp",
+      "state": {
+        "id": "closedOfflineGap",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "W": 100,
+        "R": 120
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "6ad058adb7a160d18a0a95aa815c37c8eff11d0e1aae767050625a4e93ffcaaa",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "settledNoGap.sameContext",
+      "state": {
+        "id": "settledNoGap",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "W": 100,
+        "R": 100
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "expected": "identity_noop_only_then_existing_recovery_barriers",
+      "automatic_rebind": false,
+      "note": "Matching context does not bypass other state/authority/clock validation"
+    },
+    {
+      "id": "settledNoGap.changed.tickSeconds",
+      "state": {
+        "id": "settledNoGap",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "W": 100,
+        "R": 100
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "dc1110e6d54d7095dc0a2148b75b7afe06e6f051dbf8e385c65531ec423f4bc3",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "settledNoGap.changed.researchProgression",
+      "state": {
+        "id": "settledNoGap",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "W": 100,
+        "R": 100
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "fc09dd9f71fe2cbec4a5dfad51216764bd1730d07ed29f33c4574613d8f4d13a",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "settledNoGap.changed.lootWorldValues",
+      "state": {
+        "id": "settledNoGap",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "W": 100,
+        "R": 100
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "d19d677c3aecabb857d9ac2b197544cf62e7bee5230808c23ebed5c999f1d045",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "settledNoGap.changed.combatMaximumHp",
+      "state": {
+        "id": "settledNoGap",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "W": 100,
+        "R": 100
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "6ad058adb7a160d18a0a95aa815c37c8eff11d0e1aae767050625a4e93ffcaaa",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedActiveSnapshot.sameContext",
+      "state": {
+        "id": "closedActiveSnapshot",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "retained_parties": 1
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "expected": "identity_noop_only_then_existing_recovery_barriers",
+      "automatic_rebind": false,
+      "note": "Matching context does not bypass other state/authority/clock validation"
+    },
+    {
+      "id": "closedActiveSnapshot.changed.tickSeconds",
+      "state": {
+        "id": "closedActiveSnapshot",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "retained_parties": 1
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "dc1110e6d54d7095dc0a2148b75b7afe06e6f051dbf8e385c65531ec423f4bc3",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedActiveSnapshot.changed.researchProgression",
+      "state": {
+        "id": "closedActiveSnapshot",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "retained_parties": 1
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "fc09dd9f71fe2cbec4a5dfad51216764bd1730d07ed29f33c4574613d8f4d13a",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedActiveSnapshot.changed.lootWorldValues",
+      "state": {
+        "id": "closedActiveSnapshot",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "retained_parties": 1
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "d19d677c3aecabb857d9ac2b197544cf62e7bee5230808c23ebed5c999f1d045",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedActiveSnapshot.changed.combatMaximumHp",
+      "state": {
+        "id": "closedActiveSnapshot",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "retained_parties": 1
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "6ad058adb7a160d18a0a95aa815c37c8eff11d0e1aae767050625a4e93ffcaaa",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedResearchInProgress.sameContext",
+      "state": {
+        "id": "closedResearchInProgress",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "research_progress": 0.4
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "expected": "identity_noop_only_then_existing_recovery_barriers",
+      "automatic_rebind": false,
+      "note": "Matching context does not bypass other state/authority/clock validation"
+    },
+    {
+      "id": "closedResearchInProgress.changed.tickSeconds",
+      "state": {
+        "id": "closedResearchInProgress",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "research_progress": 0.4
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "dc1110e6d54d7095dc0a2148b75b7afe06e6f051dbf8e385c65531ec423f4bc3",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedResearchInProgress.changed.researchProgression",
+      "state": {
+        "id": "closedResearchInProgress",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "research_progress": 0.4
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "fc09dd9f71fe2cbec4a5dfad51216764bd1730d07ed29f33c4574613d8f4d13a",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedResearchInProgress.changed.lootWorldValues",
+      "state": {
+        "id": "closedResearchInProgress",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "research_progress": 0.4
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "d19d677c3aecabb857d9ac2b197544cf62e7bee5230808c23ebed5c999f1d045",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedResearchInProgress.changed.combatMaximumHp",
+      "state": {
+        "id": "closedResearchInProgress",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "research_progress": 0.4
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "6ad058adb7a160d18a0a95aa815c37c8eff11d0e1aae767050625a4e93ffcaaa",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedMonsterDeficit.sameContext",
+      "state": {
+        "id": "closedMonsterDeficit",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "goblin_health": 1
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "expected": "identity_noop_only_then_existing_recovery_barriers",
+      "automatic_rebind": false,
+      "note": "Matching context does not bypass other state/authority/clock validation"
+    },
+    {
+      "id": "closedMonsterDeficit.changed.tickSeconds",
+      "state": {
+        "id": "closedMonsterDeficit",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "goblin_health": 1
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "dc1110e6d54d7095dc0a2148b75b7afe06e6f051dbf8e385c65531ec423f4bc3",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedMonsterDeficit.changed.researchProgression",
+      "state": {
+        "id": "closedMonsterDeficit",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "goblin_health": 1
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "fc09dd9f71fe2cbec4a5dfad51216764bd1730d07ed29f33c4574613d8f4d13a",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedMonsterDeficit.changed.lootWorldValues",
+      "state": {
+        "id": "closedMonsterDeficit",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "goblin_health": 1
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "d19d677c3aecabb857d9ac2b197544cf62e7bee5230808c23ebed5c999f1d045",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    },
+    {
+      "id": "closedMonsterDeficit.changed.combatMaximumHp",
+      "state": {
+        "id": "closedMonsterDeficit",
+        "phase": null,
+        "C": 10000,
+        "A": 10000,
+        "goblin_health": 1
+      },
+      "saved_context": "54bb6ca7531f2623680961580d3437ec0e86158c4f639c0ede1061e3a9f84157",
+      "loaded_context": "6ad058adb7a160d18a0a95aa815c37c8eff11d0e1aae767050625a4e93ffcaaa",
+      "expected": "incompatible_no_automatic_rebind",
+      "repeated_reopen_attempts": 3,
+      "expected_each_attempt": "same_predecessor_hash_W_phase_and_effects; no grant, healing, drain or context write"
+    }
+  ],
+  "historical_cases": [
+    {
+      "id": "active-v1.derivedSchema15",
+      "fixture": "Docs\\testing\\evidence\\h1-f4\\final-compatibility\\active-v1.test-only-schema15.json",
+      "sha256": "d1f17bd5506206bed67ac5a78fa0366da01d3e9a2f7fc1cbc5f6d4f6e77045a1",
+      "historical_producer_capture": false,
+      "expected_activation": "reject_unproven_original_global_context",
+      "reason": "Explicit fake timestamp/new provenance do not attest old tick, Research or future-admission loot inputs"
+    },
+    {
+      "id": "active-v1.derivedSchema16",
+      "fixture": "Docs\\testing\\evidence\\h1-f4\\final-compatibility\\active-v1.test-only-schema16.json",
+      "sha256": "33b223fd721b9e0cb0a63e4c5e8e247e484078543bf3113a5b51ee869bcfde4c",
+      "historical_producer_capture": false,
+      "expected_activation": "reject_unproven_original_global_context",
+      "reason": "Explicit fake timestamp/new provenance do not attest old tick, Research or future-admission loot inputs"
+    },
+    {
+      "id": "active-v1.original",
+      "source": "Tools\\Presentation\\Fixtures\\schema15-09a46810\\active-v1.json",
+      "sha256": "09994fb9821b7a0f2f240b34deb40beed7487009eeeb28dee880c532c65e6ddc",
+      "checkpoint_format": 2,
+      "C": -1,
+      "A": 100,
+      "retained_historical_reader_verdict": "positive_with_registered_profile",
+      "expected_activation": "reject_missing_boundary_and_unproven_global_context"
+    },
+    {
+      "id": "active-v2.derivedSchema15",
+      "fixture": "Docs\\testing\\evidence\\h1-f4\\final-compatibility\\active-v2.test-only-schema15.json",
+      "sha256": "5bac950925ceabf9c01507adc9f9aa6f6ab737b7dd5c28fa01a7a53b4808bf8d",
+      "historical_producer_capture": false,
+      "expected_activation": "reject_unproven_original_global_context",
+      "reason": "Explicit fake timestamp/new provenance do not attest old tick, Research or future-admission loot inputs"
+    },
+    {
+      "id": "active-v2.derivedSchema16",
+      "fixture": "Docs\\testing\\evidence\\h1-f4\\final-compatibility\\active-v2.test-only-schema16.json",
+      "sha256": "2a148cdb75a48a327241b11391e9f100558bdde32cc6294a68a6076294840bc2",
+      "historical_producer_capture": false,
+      "expected_activation": "reject_unproven_original_global_context",
+      "reason": "Explicit fake timestamp/new provenance do not attest old tick, Research or future-admission loot inputs"
+    },
+    {
+      "id": "active-v2.original",
+      "source": "Tools\\Presentation\\Fixtures\\schema15-09a46810\\active-v2.json",
+      "sha256": "4c237b65d4b297a92a71fceaeac3e0e3ae94958ef65b13858744933bda940bc4",
+      "checkpoint_format": 3,
+      "C": -1,
+      "A": 100,
+      "retained_historical_reader_verdict": "positive_with_registered_profile",
+      "expected_activation": "reject_missing_boundary_and_unproven_global_context"
+    }
+  ],
+  "historical_corpus_files_hash_verified": 46,
+  "historical_archive": {
+    "path": "Docs\\testing\\evidence\\h1-f2\\qualification-reports.zip",
+    "sha256": "98e4acae19aaf893aa28fc2fe072bfe9e0365db32e693adc4f3805742f002f55",
+    "build_source_record": {
+      "vcs": "git",
+      "revision": "591b2c3cb27b6d71057cb648ae692609ab4346ab",
+      "dirty": true
+    },
+    "matching_project_input_hashes": 12,
+    "save_snapshots": [
+      {
+        "member": "windows-create-save.json",
+        "sha256": "97c6ec6ab42229b19c5e46a2e78b331d59f61ff0e0d3b521509eddc973c55cc6",
+        "schema": 16,
+        "C": 604,
+        "A": 604,
+        "last_saved": 1792977497
+      },
+      {
+        "member": "windows-future-save.json",
+        "sha256": "250497bc5e3052b1c4c4ee0a02bb96c699b223a0d8650e539c38904cd4aa305d",
+        "schema": 17,
+        "C": 2418,
+        "A": 2418,
+        "last_saved": 1792977513
+      },
+      {
+        "member": "windows-migrate15-save.json",
+        "sha256": "9dbbb7c829d30a6c87907463e705c8e8553fb382248025f907d32cfa5ee8e4b3",
+        "schema": 16,
+        "C": 1809,
+        "A": 1809,
+        "last_saved": 1792977508
+      },
+      {
+        "member": "windows-reopen-save.json",
+        "sha256": "65522af86cbd896530c4850705125b89e103fb08c02ac0eab2aff0f0fff07525",
+        "schema": 16,
+        "C": 1202,
+        "A": 1202,
+        "last_saved": 1792977502
+      },
+      {
+        "member": "windows-reopen16-save.json",
+        "sha256": "bf8680d6ef866c5b54bc23e5d4781d70b0969fe6e8895b6cab3bafccdca556de",
+        "schema": 16,
+        "C": 2418,
+        "A": 2418,
+        "last_saved": 1792977513
+      }
+    ],
+    "positive_evidence": "Recorded producer source, project inputs and closed save artifacts; not a generic runtime historical-context authority",
+    "has_archived_A_gt_C_save": false
+  },
+  "runtime_tests_executed": false,
+  "unity_tests_executed": false,
+  "no_production_legacy_proof_provider_invented": true
+}

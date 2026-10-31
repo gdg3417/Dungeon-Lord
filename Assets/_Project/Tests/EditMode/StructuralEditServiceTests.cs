@@ -268,8 +268,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), PhaseFourTestSupport.CurrentContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
+            Assert.That(parsed.IsValid, Is.True, parsed.Reason);
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
                 DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic"),
@@ -306,8 +307,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), PhaseFourTestSupport.CurrentContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
+            Assert.That(parsed.IsValid, Is.True, parsed.Reason);
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
                 DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic"),
@@ -386,8 +388,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), PhaseFourTestSupport.CurrentContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
+            Assert.That(parsed.IsValid, Is.True, parsed.Reason);
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
                 DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic"),
@@ -414,8 +417,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), PhaseFourTestSupport.CurrentContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
+            Assert.That(parsed.IsValid, Is.True, parsed.Reason);
             Assert.That(parsed.IsValid, Is.True);
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
@@ -486,8 +490,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                CurrentBytes(fixture), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(fixture), PhaseFourTestSupport.CurrentContext(
                     fixture.Compatibility, fixture.Production, fixture.LegacyBytes, fixture.Limits));
+            Assert.That(parsed.IsValid, Is.True, parsed.Reason);
             CompatibilityLayoutGeometryRecord geometry = fixture.Compatibility.Value.GeometryRecords.Single();
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
@@ -1516,8 +1521,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var source = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             DetachedCompleteSaveValidationResult parsed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
-                CurrentBytes(source), new DetachedCurrentTargetValidationContext(
+                CurrentBytes(source), PhaseFourTestSupport.CurrentContext(
                     source.Compatibility, source.Production, source.LegacyBytes, source.Limits));
+            Assert.That(parsed.IsValid, Is.True, parsed.Reason);
             RunSimulationConfig configuration = LegacyGameplayConfigurationContract.Parse(source.LegacyBytes);
             DetachedCanonicalMutationResult r1 = DetachedCanonicalSpatialMutation.Prepare(parsed.State,
                 DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic"),

@@ -7,6 +7,7 @@ using System.Text;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
+using DungeonBuilder.M0.Economy;
 using NUnit.Framework;
 using Fixture = DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests.Fixture;
 
@@ -15,9 +16,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public class CombatC2Tests
     {
         private static MonsterRecoveryRules Rules => MonsterRecoveryRules.EditorFallback();
-        private static Fixture Deployed()
+        private static Fixture Deployed(Action<RunSimulationConfig> author = null, long initialTime = 1000)
         {
-            var f = Fixture.Create(null); f.Configuration = CombatC0IntegrationTests.Config();
+            var bytes = PhaseFourTestSupport.AuthoredInputs((config, _) => {
+                PhaseSixA4Tests.ForceDescent(config, true); author?.Invoke(config);
+            });
+            var profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            var f = Fixture.Create("\"lastSavedUtcUnix\":" + initialTime, workloadProfile: profile, recoveryInputBytes: bytes);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId,
                 null, null, new TileCoordinate(2, 2))));
@@ -47,9 +52,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         private static DetachedCanonicalWriteResult Fund(Fixture f, double mana)
         {
-            var current = UnityEngine.JsonUtility.FromJson<SaveData>(UnityEngine.JsonUtility.ToJson(f.Runtime));
-            current.structureRuntime.ManaReserve = mana;
-            return f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, current);
+            // Stage only the test-funded wallet. JsonUtility materializes null
+            // optional owners, so it cannot clone a recognized save faithfully.
+            double before = f.Runtime.structureRuntime.ManaReserve;
+            try {
+                f.Runtime.structureRuntime.ManaReserve = mana;
+                return f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime);
+            } finally { f.Runtime.structureRuntime.ManaReserve = before; }
         }
         [TestCase(MvpDungeonPlacementIds.GoblinOptionId, 8, 6)]
         [TestCase(MvpDungeonPlacementIds.SkeletonOptionId, 10, 7)]
@@ -195,10 +204,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void ASubthresholdSurvivorNeverAcquiresRevivalStateWithoutDefeat()
         {
-            var f=Deployed(); SetState(f,2,false,0);
             // Explicit synthetic combat setup: a surviving defender and bounded party wipe.
-            foreach(var c in f.Configuration.CombatC0.Classes) c.Damage=0;
-            foreach(var m in f.Configuration.CombatC0.Monsters) { m.Damage=100; m.Initiative=100; }
+            var f=Deployed(config => {
+                foreach(var c in config.CombatC0.Classes) c.Damage=0;
+                foreach(var m in config.CombatC0.Monsters) { m.Damage=100; m.Initiative=100; }
+            }); SetState(f,2,false,0);
             for(int run=0;run<2;run++)
             {
                 f.Accept(PhaseFiveBBranchIntegrationTests.Run(f)); Assert.That(Monster(f).Health,Is.EqualTo(2));
@@ -238,15 +248,116 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static DetachedCanonicalWriteResult FundWithOldSession(Fixture f, DetachedCanonicalSaveSession old) =>
             f.Authority.SaveRecognizedState(f.ActivePath,f.FileSystem,old,f.Runtime);
         [Test] public void OfflineFundingConsumesTimestampAndRecoveryTogetherWithoutASecondGrant()
+            => ExerciseOfflineFunding(false);
+        [Test] public void ResidualFundingHealsInTheSameClosureAndReopensWithoutASecondGrant()
+            => ExerciseOfflineFunding(true);
+        [TestCase(false,"write")] [TestCase(true,"write")]
+        [TestCase(false,"partial")] [TestCase(true,"partial")]
+        [TestCase(false,"replace")] [TestCase(true,"replace")]
+        [TestCase(false,"readback")] [TestCase(true,"readback")]
+        [TestCase(false,"rollback")] [TestCase(true,"rollback")]
+        public void OriginalAndResidualHealingInterruptionsRemainAtomic(bool residual,string failure)
+            => ExerciseOfflineFunding(residual,failure);
+        private static void ExerciseOfflineFunding(bool residual,string failure=null)
         {
-            var f=Deployed(); SetState(f,0,true,0); f.Runtime.lastSavedUtcUnix=1000;
-            f.Accept(f.Authority.SaveRecognizedState(f.ActivePath,f.FileSystem,f.Session,f.Runtime));
-            var old=f.Session; f.Accept(f.Authority.SaveOfflinePassiveMana(f.ActivePath,f.FileSystem,f.Session,f.Runtime,3.75,1000,4600));
+            var f=Deployed(); SetState(f,0,true,0); var old=f.Session;
+            var inputs=f.Context.RecoveryInputs; var clock=new RecoveryClock { Seconds=residual ? 1000 : 1500 };
+            long origin=clock.Seconds;
+            var service=LivingDungeonB3B2Tests.Service(f,clock,out var time,()=>clock.Seconds-origin);
+            service.CanonicalRuntimePublished += current => f.Runtime=current;
+            var online=new CanonicalPassiveManaService(inputs.Passive,inputs.Economy,new FormulaEngine(),f.Profile.Canonical.Spatial,inputs.Bootstrap.tickSeconds);
+            var mana=new CanonicalOfflinePassiveManaService(inputs.Passive,online);
+            var calculation=mana.Resolve(f.Runtime,f.Configuration,1500);
+            Assert.That(calculation.EffectiveOfflineManaPerHour,Is.EqualTo(27));
+            Assert.That(calculation.ActualAwardedMana,Is.EqualTo(3.75));
+            service.BeginCanonicalRecovery(f.Runtime);
+            for(int phase=0;phase<3;phase++) {
+                if(residual && phase==2) clock.Seconds=1500;
+                bool interrupted=failure!=null && phase==(residual ? 2 : 1);
+                byte[] before=service.CanonicalSession.GetCurrentBytes();
+                int replacementsBefore=f.FileSystem.Operations.Count(o=>o.Type==Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace);
+                if(interrupted) {
+                    if(failure=="partial") f.FileSystem.EnablePartialWriteFailure(10);
+                    else if(failure=="rollback") f.FileSystem.EnableFailureSequence(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Flush,1,
+                        Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace,replacementsBefore+2);
+                    // Active reads: stale proof, protocol predecessor, evidence
+                    // settlement recheck, then committed-candidate readback.
+                    else if(failure=="readback") f.FileSystem.EnableTargetedFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read,p=>p[0]==f.ActivePath,4,false);
+                    else f.FileSystem.EnableTargetedFailure(failure=="replace" ? Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace :
+                        Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write,p=>true,1,false);
+                }
+                var result=service.AdvanceCanonicalRecovery(f.Runtime,mana,(_,__)=>Assert.Fail("Dormant save has no accepted ticks"));
+                if(interrupted) {
+                    Assert.That(result.IsSuccess,Is.False); Assert.That(Monster(f).Health,Is.Zero);
+                    Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.Zero);
+                    CollectionAssert.AreEqual(before,service.CanonicalSession.GetCurrentBytes());
+                    var failedOperation=f.FileSystem.FailedOperation;
+                    if(failure=="readback") {
+                        Assert.That(failedOperation.Type,Is.EqualTo(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read));
+                        Assert.That(f.FileSystem.FailedTargetOccurrence,Is.EqualTo(4));
+                        Assert.That(failedOperation.Paths[0],Is.EqualTo(f.ActivePath));
+                    }
+                    if(failure=="rollback") {
+                        Assert.That(failedOperation.Type,Is.EqualTo(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace));
+                        Assert.That(failedOperation.Index,Is.EqualTo(replacementsBefore+2));
+                    }
+                    f.FileSystem.DisableFailure();
+                    if(failure=="rollback") {
+                        Assert.That(result.Reason,Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+                        var durable=f.FileSystem.ReadAllBytes(f.ActivePath);
+                        var committed=DetachedCompleteSaveContract.ParseValidateAndRoundTrip(durable,f.Context);
+                        Assert.That(committed.CurrentTargetValidated,Is.True);
+                        Assert.That(committed.MonsterContinuity.Records.Single().Health,Is.EqualTo(3));
+                        int writes=f.FileSystem.Operations.Count(o=>o.Type==Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write);
+                        result=service.ResolveUncertainRecoveryPublication();
+                        CollectionAssert.AreEqual(durable,f.FileSystem.ReadAllBytes(f.ActivePath));
+                        Assert.That(f.FileSystem.Operations.Count(o=>o.Type==Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write),Is.EqualTo(writes));
+                    } else {
+                        Assert.That(result.Reason,Is.EqualTo(DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
+                        CollectionAssert.AreEqual(before,f.FileSystem.ReadAllBytes(f.ActivePath));
+                        result=service.AdvanceCanonicalRecovery(f.Runtime,mana,(_,__)=>Assert.Fail());
+                    }
+                }
+                Assert.That(result.IsSuccess,Is.True,result.Reason);
+                Assert.That(result.RecoveryManaSpent,Is.EqualTo(phase==(residual ? 2 : 1) && failure!="rollback" ? 3 : 0));
+                Assert.That(f.Runtime.timeProvenance.Episode?.Phase,Is.EqualTo(phase==0 ? RecoveryEpisode.OriginalPending : phase==1 ? RecoveryEpisode.ResidualPending : null));
+            }
             Assert.That(Monster(f).Health,Is.EqualTo(3)); Assert.That(Monster(f).RevivalRequired,Is.True);
-            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(.75)); Assert.That(f.Runtime.lastSavedUtcUnix,Is.EqualTo(4600));
-            var bytes=f.Session.GetCurrentBytes(); f.Reopen();
-            var duplicate=f.Authority.SaveOfflinePassiveMana(f.ActivePath,f.FileSystem,old,f.Runtime,3.75,1000,4600);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(.75)); Assert.That(f.Runtime.lastSavedUtcUnix,Is.EqualTo(1500));
+            Assert.That(service.RecoveryReport.Complete,Is.True);
+            Assert.That(service.RecoveryReport.Spent,Is.EqualTo(3),"Retained candidate receipt preserves healing cost even when reconstructed proof defaults to zero");
+            Assert.That(service.RecoveryReport.ClosingWallet,Is.EqualTo(.75));
+            f.Reopen(); var bytes=f.Session.GetCurrentBytes();
+            var duplicate=f.Authority.SaveOfflinePassiveMana(f.ActivePath,f.FileSystem,old,f.Runtime,3.75,1000,1500);
             Assert.That(duplicate.IsSuccess,Is.False); CollectionAssert.AreEqual(bytes,f.FileSystem.ReadAllBytes(f.ActivePath));
+            service=LivingDungeonB3B2Tests.Service(f,clock,out time);
+            service.CanonicalRuntimePublished += current => f.Runtime=current;
+            service.BeginCanonicalRecovery(f.Runtime);
+            for(int phase=0;phase<3;phase++) Assert.That(service.AdvanceCanonicalRecovery(f.Runtime,mana,(_,__)=>Assert.Fail()).IsSuccess,Is.True);
+            Assert.That(Monster(f).Health,Is.EqualTo(3)); Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(.75));
+            f.Reopen(); Assert.That(f.Runtime.timeProvenance.AccountedBoundary.Seconds,Is.EqualTo(1500));
+        }
+        private sealed class RecoveryClock : IPreciseTimeSource
+        {
+            internal long Seconds;
+            public UnixTimePoint UtcNow() => new UnixTimePoint(Seconds,0);
+            public long UtcNowUnixSeconds() => Seconds;
+        }
+        [TestCase(15,165,true)] [TestCase(15,166,false)]
+        [TestCase(16,165,true)] [TestCase(16,166,false)]
+        [TestCase(17,165,true)] [TestCase(17,166,false)]
+        [TestCase(15,128,true)] [TestCase(15,129,false)]
+        [TestCase(16,128,true)] [TestCase(16,129,false)]
+        [TestCase(17,128,true)] [TestCase(17,129,false)]
+        public void RawMonsterAllowanceIsBoundedAndDoesNotExpandOrdinaryArrays(int schema,int count,bool expected)
+        {
+            var profile=SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            // Scanner-budget proof only; these scalar records intentionally do
+            // not claim semantic monster validation or historical provenance.
+            string array="["+string.Join(",",Enumerable.Repeat("0",count))+"]";
+            string body=count>=165 ? "\"monsterContinuity\":{\"Records\":"+array+"}" : "\"ordinary\":"+array;
+            var bytes=Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":"+schema+",\"primary\":{"+body+"}}");
+            Assert.That(RawSavePayloadClassifier.TryValidateWorkload(bytes,profile.Raw,out _),Is.EqualTo(expected));
         }
         [Test] public void SchemaFifteenBudgetIsExplicitAndEarlierParserBudgetsStayFrozen()
         {
@@ -263,9 +374,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void OnlyContinuityArrayCanExceedTheUnchangedOrdinaryArrayBoundary()
         {
-            var f=Deployed(); f.Profile=SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
-            f.Context=new DetachedCurrentTargetValidationContext(f.Compatibility,f.Production,LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration),f.Profile.Canonical,f.Occupancy);
-            f.Reopen();
+            var f=Deployed();
             var spatial=UnityEngine.JsonUtility.FromJson<DetachedCanonicalSpatialSaveState>(UnityEngine.JsonUtility.ToJson(f.State));
             spatial.LifecycleAndOwnership.ReturnedContents=Enumerable.Range(0,128).Select(i=>new ReturnedStructuralContent {
                 AssignmentId="test.custody."+i.ToString("D3"),CategoryId=MvpDungeonPlacementIds.MonsterCategoryId,
@@ -273,11 +382,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var update=f.Session.PrepareSpatialOnlyReplacement(spatial);
             Assert.That(update.IsSuccess,Is.True,update.Reason); var bytes=update.Update.GetBytes();
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes,f.Context).MonsterContinuity.Records.Length,Is.EqualTo(129));
-            var raw=RawSavePayloadClassifier.Classify(bytes,f.Profile.Raw,new RawSaveEnvelopeVersionContract(1,15),Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator);
+            var raw=RawSavePayloadClassifier.Classify(bytes,f.Profile.Raw,new RawSaveEnvelopeVersionContract(1,CanonicalSaveSchemaVersions.CurrentWritableTarget),Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator);
             Assert.That(raw.IsSuccess,Is.True,raw.FailureReason);
             var text=Encoding.UTF8.GetString(bytes);
             text=text.Substring(0,text.Length-1)+",\"extra\":["+string.Join(",",Enumerable.Repeat("0",129))+"]}";
-            Assert.That(RawSavePayloadClassifier.Classify(Encoding.UTF8.GetBytes(text),f.Profile.Raw,new RawSaveEnvelopeVersionContract(1,15),
+            Assert.That(RawSavePayloadClassifier.Classify(Encoding.UTF8.GetBytes(text),f.Profile.Raw,new RawSaveEnvelopeVersionContract(1,CanonicalSaveSchemaVersions.CurrentWritableTarget),
                 Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator).IsSuccess,Is.False);
         }
         [TestCase(2,false)] [TestCase(0,true)] [TestCase(2,true)]
@@ -308,12 +417,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var coordinator=new DetachedSpatialSaveLoadCoordinator(f.Profile,f.Compatibility,f.Production,legacy,
                 new Dictionary<string,byte[]>(),new RawSaveEnvelopeVersionContract(1,6),Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator,
                 f.PositionProfiles,f.Occupancy,monsterRecovery:Rules);
+            var clock=new RecoveryClock { Seconds=1000 }; var inputs=f.Context.RecoveryInputs;
+            var time=new TimeService(new SimpleLogger(false),inputs.Bootstrap.tickSeconds,inputs.Bootstrap.timeRules.detectClockSkewSeconds,clock,()=>0);
+            coordinator.ConfigureRecovery(inputs,time);
             var migrated=coordinator.Load(path,preflight); Assert.That(migrated.IsSuccess,Is.True,migrated.Reason);
             Assert.That(migrated.RuntimeProjection.monsterContinuity.Records.Single().Health,Is.EqualTo(8));
             var bytes=File.ReadAllBytes(path); CollectionAssert.AreEqual(source,PhaseFourTestSupport.FrozenFourteen(bytes));
             var reopened=coordinator.Load(path,preflight); Assert.That(reopened.IsSuccess,Is.True,reopened.Reason); CollectionAssert.AreEqual(bytes,File.ReadAllBytes(path));
             var nativePath=Path.Combine(directory,"native.json"); var nativeFs=SpatialMigrationFileSystemSelector.Evaluate(nativePath);
-            var native=NativeCanonicalSaveCreator.Create(nativePath,nativeFs.FileSystem,new SaveData(),f.Compatibility,f.Production,legacy,f.Profile,f.Acquisition,f.Occupancy,Rules);
+            // Retain the historical fixture identity, but exercise the current
+            // writer explicitly. Frozen 14->15 bytes are checked independently.
+            Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(source,f.Profile.Canonical,Rules,out var fifteen),Is.True);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(fifteen,f.Context).IsValid,Is.True);
+            var native=NativeCanonicalSaveCreator.CreatePrecise(nativePath,nativeFs.FileSystem,new SaveData(),f.Production,f.Profile,f.Acquisition,inputs,new UnixTimePoint(1000,0));
             Assert.That(native.IsSuccess,Is.True,native.Reason); Assert.That(native.RuntimeProjection.monsterContinuity.Records,Is.Empty);
             Assert.That(DetachedCanonicalSaveSession.Open(File.ReadAllBytes(nativePath),f.Context,f.Profile).IsSuccess,Is.True);
             TestContext.WriteLine("Isolated Windows evidence: "+directory+"; migratedBytes="+bytes.Length);

@@ -18,7 +18,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         // Production placement/construction/deletion creates custody; no production inventory fixture path.
         internal static Fixture Owned()
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null, workloadProfile: PhaseFourTestSupport.ProductionProfile());
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             var preview = StructuralEditService.Preview(f.State, new StructuralConstructionRequest
@@ -244,7 +244,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             CollectionAssert.AreEqual(result.GetPersistedBytes(), f.FileSystem.ReadAllBytes(f.ActivePath));
             f.Accept(result); f.Reopen();
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(f.FrozenSixteen,
+                f.Context).IsValid, Is.True, "Frozen schema-16 reading remains supported independently of the current writer");
             Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget));
             Assert.That(f.State.Floors[0].RoomContents.Assignments.Single().AssignmentId, Is.EqualTo(owned.AssignmentId));
             Assert.That(f.State.LifecycleAndOwnership.ReturnedContents.Any(i => i.AssignmentId == owned.AssignmentId), Is.False);

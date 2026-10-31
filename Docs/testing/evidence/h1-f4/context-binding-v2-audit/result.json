@@ -1,0 +1,85 @@
+{
+  "source_sha": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "probe_sha256": "1737c43da6dd8289222d8e678a0b65751e402a9c57a9ecae6d7915c276390d09",
+  "files_sha256": {
+    "Assets/_Project/Data/Bootstrap/run_simulation_config.json": "f07657572530df1955ae904c66a76feeb71ca7ae8a6e8382c25bb8b7a1cf4e16",
+    "Assets/_Project/Resources/passive_online_mana.json": "2848ccfa6ffde744ade883edb0171bfbe993bbee5c32758a70d8ee4b690e6639",
+    "Assets/_Project/Resources/structural_economy.json": "f33799b480d27bd65356c182dee67a8473cfed0db061bba9e8de55eb6c0addaf",
+    "Assets/_Project/Resources/monster_recovery.json": "1a5e199c55cc28678099dc56bf0ea5a4796038090d6f2f3e7f8e67494ad4595d",
+    "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227",
+    "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b",
+    "Assets/_Project/Resources/living_dungeon_foreground.json": "840001642c9b3d2d53ef7ebfcac7170459f012589a6206d8bb58a9727cfc2331",
+    "Assets/_Project/Resources/living_dungeon_foreground_v2.json": "2183efa3f7540442c861bd2fe7ab7912007ad725b33ab21546795803c0d331a1",
+    "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600",
+    "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json": "6caa36bb2b6cd7cf40227e762197a798e262b84ad7e40980584902b14524e8c9",
+    "Assets/_Project/Data/Bootstrap/content_bootstrap.json": "8a90c78da4e0941f4da7e02292de7df0e8cd53bc84ac3ab2c78d3014d9500b8f",
+    "Assets/_Project/Data/Bootstrap/loot_config.json": "f0efb530aa6673c7cd12d2b2d5cbf87b4b93a49f77af6fd2af30e761d6ba327a",
+    "Assets/_Project/Scripts/Core/GameRoot.cs": "df0d2e68a2b0d8917d346767736fd5ca16b490deea66ef9dc0339eb8338289b9",
+    "Assets/_Project/Scripts/Core/GameRoot.Foreground.cs": "0935d4208f660d4c4ac9aa82b42b4fb3b3212327609a4156e032dff7d9a239bc",
+    "Assets/_Project/Scripts/Services/PlayerResearchActionHandler.cs": "9ace421fac8d648602ac5d1e1eea27374cb0cdda7871298d6c6a6b3dcaf317d1",
+    "Assets/_Project/Scripts/Services/ResearchProgressApplyResolver.cs": "9c80a1bf3bc7831afa005c7a610b7f648fbb0b34c3c7edd7f8a685f4c763cf77",
+    "Assets/_Project/Scripts/Services/ResearchProgressResolver.cs": "cde7beb18ec43957e4ea263771af6f6c48a76fd0992706a6debdadbadb45fd39",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/LivingDungeonForeground.cs": "cbde3630f54e2f55c914b368db27e6205ab4ee4e55712e3f311ead2d0af8c416",
+    "Assets/_Project/Scripts/Gameplay/RunSimulation/ActiveFloorRunSnapshot.cs": "16b52c3b0c5539e8a54268803f41361e8b9f72a11776c28e4a8b7361888496d8",
+    "Assets/_Project/Scripts/Services/LootRollResolver.cs": "867966f14ca2d230eaae9989dfe7bf77f932a40f3b5ec856bba751418dddbc9a",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/ProductionSpatialGeneratedSet.cs": "a23d128d038e003e03f0e5e5f691d46d34cb5ffb9ba76c9df694be107bff5845",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/MonsterContinuity.cs": "aa0878b24b9976f24db0fa7be015c732b06815ff6998ebe13326320179148ea0",
+    "Assets/_Project/Scripts/Util/Models.cs": "84a92977f6940d8b0cc093f7d1a07d993042ecdead363652a6e79c546903869f",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialMigrationPreparation.cs": "8faacc2d4a1c9bbae28a092ec7b5323475fc2159127e5b970e99a077db963ac9"
+  },
+  "source_checks": {
+    "tick_duration_from_other_bootstrap": true,
+    "accepted_drain_tick_uses_external_duration": true,
+    "research_config_from_other_bootstrap": true,
+    "research_tick_applies_rate": true,
+    "accepted_opportunity_captures_live_loot": true,
+    "new_start_serializes_live_loot": true,
+    "legacy_omits_combat": true,
+    "legacy_serializer_unchanged_shape": true
+  },
+  "digest_fixture": {
+    "domain_hex": "444c2d483146342d636f6e746578742d76320a",
+    "ten_asset_byte_digest": "ae563001d11fdb73727ddb07eb8e49892b74d8b90fcb60f75071b3dc3594d120",
+    "goblin_maximum_only_variant_digest": "f2adec6939c5b6f5231158f7f43f84b317ecfc1fa3e310241c0836231b50378e",
+    "unchanged_input_digest_identical": true,
+    "readiness_before_after": [
+      6,
+      7
+    ],
+    "limitation": "Direct asset-byte composition: manifest/catalog assets stand for their canonical loaded bytes. No Unity validation/JsonUtility serialization was run; this is not a qualified runtime digest or historical-serializer regression verdict."
+  },
+  "further_omissions": [
+    {
+      "asset": "Assets/_Project/Data/Bootstrap/content_bootstrap.json",
+      "change": "tickSeconds 10 -> 20",
+      "closed_units": 0,
+      "accepted_units": 10000,
+      "units_per_second": 1000,
+      "ticks_before_after": [
+        1,
+        0
+      ],
+      "all_ten_context_components_unchanged": true
+    },
+    {
+      "asset": "Assets/_Project/Data/Bootstrap/content_bootstrap.json",
+      "change": "researchProgressScaffold.progressPerActiveSecond doubled",
+      "active_seconds": 10,
+      "progress_delta_before_after": [
+        0.1,
+        0.2
+      ],
+      "all_ten_context_components_unchanged": true
+    },
+    {
+      "asset": "Assets/_Project/Data/Bootstrap/loot_config.json",
+      "change": "Increase every item.worldValue by 1; preserve IDs/pools/weights",
+      "fixed_roll_count": 2,
+      "generated_world_value_delta": 2,
+      "reason": "Same selection and roll count; each selected item contributes one additional world value",
+      "all_ten_context_components_unchanged": true
+    }
+  ],
+  "unity_or_episode_protocol_tests_executed": false,
+  "qualification_counts": null
+}

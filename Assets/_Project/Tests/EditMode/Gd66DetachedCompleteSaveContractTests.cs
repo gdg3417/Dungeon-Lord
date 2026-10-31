@@ -207,8 +207,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(schemaEight, fixture.Limits, out schemaEight), Is.True);
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(schemaEight,fixture.Limits,MonsterRecoveryRules.EditorFallback(),out schemaEight),Is.True);
             Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(schemaEight, fixture.CurrentContext, out schemaEight), Is.True);
+            byte[] frozenSixteen = (byte[])schemaEight.Clone();
+            var historical = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(
+                frozenSixteen, fixture.CurrentContext);
+            Assert.That(historical.IsValid, Is.True, historical.Reason);
+            Assert.That(historical.CurrentTargetValidated, Is.False);
+            CollectionAssert.AreEqual(frozenSixteen, historical.GetBytes());
+            // Separate explicit synthetic authorship, not a production migration
+            // or historical producer proof granting current write authority.
+            byte[] syntheticCurrent = PhaseFourTestSupport.SyntheticCurrent(frozenSixteen,
+                fixture.Limits, fixture.CurrentContext.RecoveryInputs.Identity);
             DetachedCompleteSaveValidationResult contextual =
-                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(schemaEight, fixture.CurrentContext);
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(syntheticCurrent, fixture.CurrentContext);
             Assert.That(contextual.IsValid, Is.True, contextual.Reason);
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
                 fixture.Compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
@@ -216,13 +226,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var profile = new SaveSpatialMigrationLimitsProfile(
                 Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                 fixture.Limits, fixture.WholeLimits);
-            DetachedCanonicalSaveSessionResult opened = DetachedCanonicalSaveSession.Open(schemaEight,
+            Assert.That(DetachedCanonicalSaveSession.Open(frozenSixteen, fixture.CurrentContext, profile).IsSuccess, Is.False);
+            DetachedCanonicalSaveSessionResult opened = DetachedCanonicalSaveSession.Open(syntheticCurrent,
                 fixture.CurrentContext, profile);
             Assert.That(opened.IsSuccess, Is.True, opened.Reason);
             Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(contextual, fixture.Production,
                 out SaveData published, out string reason), Is.True, reason);
             Assert.That(published.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Any(value =>
                 value.RoomInstanceId == nativeRoom), Is.True);
+            CollectionAssert.AreEqual(frozenSixteen, schemaEight);
         }
 
         private static CanonicalSpatialSerializationLimits Limits() =>

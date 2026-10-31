@@ -20,26 +20,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             JsonUtility.FromJson<ContentAcquisitionEconomyConfiguration>(File.ReadAllText(ConfigPath));
         private static Fixture Room()
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null,workloadProfile:PhaseFourTestSupport.ProductionProfile());
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             return f;
         }
         private static string Target(Fixture f) => f.State.Floors[0].Layout.Rooms.Single().RoomInstanceId;
         private static SaveService PresentationService(Fixture f)
-        {
-            byte[] legacy = (byte[])typeof(DetachedCurrentTargetValidationContext).GetField("legacyConfiguration",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(f.Context);
-            var service = new SaveService(new SimpleLogger(false, (level, message) => { }),
-                new SaveConfig { fileName = Path.GetFileName(f.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(f.ActivePath));
-            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration, legacy, f.PositionProfiles, f.Occupancy);
-            service.ConfigureStructuralEconomy(f.Economy); service.ConfigureContentAcquisitionEconomy(f.Acquisition);
-            service.ConfigureStructuralRemovalPolicy(f.RemovalPolicy);
-            service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
-                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, f.FileSystem, path));
-            Assert.That(service.LoadOrCreate("reserve-ui-test", out string banner), Is.Not.Null, banner);
-            return service;
-        }
+            => PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
 
         [TestCase(MvpDungeonPlacementIds.GoblinOptionId, 24, false, false)]
         [TestCase(MvpDungeonPlacementIds.GoblinOptionId, 26, false, true)]
@@ -445,13 +433,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static Fixture Native()
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null,workloadProfile:PhaseFourTestSupport.ProductionProfile());
             f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             var recognized = new SaveData { contentVersion = "test", createdUtcUnix = 1, lastSavedUtcUnix = 1,
                 structureRuntime = new StructureRuntimeState { ManaReserve = 123 } };
-            var result = NativeCanonicalSaveCreator.Create(f.ActivePath, f.FileSystem, recognized,
-                f.Compatibility, f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration),
-                f.Profile, f.Acquisition, f.Occupancy);
+            var result = NativeCanonicalSaveCreator.CreatePrecise(f.ActivePath,f.FileSystem,recognized,
+                f.Production,f.Profile,f.Acquisition,f.Context.RecoveryInputs,new UnixTimePoint(1,0));
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(recognized.structureRuntime.ManaReserve, Is.EqualTo(123));
             f.Session = result.Session; f.State = result.Validation.State; f.Runtime = result.RuntimeProjection;
@@ -463,8 +450,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Native();
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(40));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
             Assert.That(Encoding.UTF8.GetString(f.Session.GetCurrentBytes()), Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId)));
             Unchanged(f, DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.LootNodeCategoryId,
@@ -485,9 +472,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(legacyRuntime.structureRuntime.ManaReserve, Is.Zero); // Empty schema-6 fixture; no acquisition charge or starting grant.
             f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             var injected = PhaseFourTestSupport.Acquisition(f.Economy, f.Profile.Canonical, 17); // Test-owned starting tuning.
-            var fresh = NativeCanonicalSaveCreator.Create(f.ActivePath, f.FileSystem, legacyRuntime, f.Compatibility,
-                f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile,
-                injected, f.Occupancy);
+            var fresh = NativeCanonicalSaveCreator.CreatePrecise(f.ActivePath,f.FileSystem,legacyRuntime,
+                f.Production,f.Profile,injected,f.Context.RecoveryInputs,new UnixTimePoint(1,0));
             Assert.That(fresh.IsSuccess, Is.True, fresh.Reason);
             Assert.That(fresh.RuntimeProjection.structureRuntime.ManaReserve, Is.EqualTo(17));
             Assert.That(legacyRuntime.structureRuntime.ManaReserve, Is.Zero);
@@ -499,14 +485,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = Native(); f.Runtime.structureRuntime.ManaReserve = balance;
             var result = f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime);
             f.Accept(result); byte[] before = f.Session.GetCurrentBytes();
-            var service = new SaveService(new SimpleLogger(false), null, Path.GetDirectoryName(f.ActivePath));
-            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
-                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration),
-                f.PositionProfiles, f.Occupancy);
-            service.ConfigureStructuralEconomy(f.Economy); service.ConfigureContentAcquisitionEconomy(f.Acquisition);
-            typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);
-            service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
-                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, f.FileSystem, path));
+            var service=PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
             var loaded = service.LoadOrCreate("test", out string banner);
             Assert.That(loaded, Is.Not.Null, banner); Assert.That(loaded.structureRuntime.ManaReserve, Is.EqualTo(balance));
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));

@@ -1,0 +1,1271 @@
+{
+  "actual_counts": {
+    "failed": 0,
+    "inconclusive": 0,
+    "passed": 358,
+    "planned": 358,
+    "skipped": 0,
+    "unique_nunit_ids": 358
+  },
+  "artifact_retention": {
+    "no_cleanup_authorized": true,
+    "owner": "H1-F4",
+    "paths": [
+      "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b09a3fc9877b4b1ea6ca8fb435512052",
+      "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-r2-living01",
+      "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\018acc3079bf4e7d89b79789e99b4433",
+      "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-r2-repro01"
+    ],
+    "purpose": "Source-pinned reproduction, qualification and preservation evidence",
+    "status": "preserve"
+  },
+  "base_sha": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b09a3fc9877b4b1ea6ca8fb435512052",
+  "campaign_file_hashes": {
+    "campaign.json": "e7d94476c5fb6a1f2a54f5ec038bcbfb15364b8d2cd4e6a499d39bfd34d1fdb4",
+    "launch.claim": "0be7f94b3c5cf877240a5dd2e19cd3b383a06bf76e3ec55ae535968155aa75a9",
+    "launch.json": "2b080bc940de19eb8d3c75d3141551ac816c40047eeb96d7c24a6b7c51cfad27",
+    "launch.log": "bdba040850f1c42c26790924f41c82fd7beeae0bc55623ac32fba94071a1e3ef",
+    "living-regressions-preflight\\child.json": "076c5a1f8882a7673a4b9cee5e1d353e8bcbd069ac11a0b4dfd435267d3c5ea2",
+    "living-regressions-preflight\\exit.json": "199b266378cbccf8c3f6d6fa2bde479a9356117717a7cc30253753b7e9fdee87",
+    "living-regressions-preflight\\preservation.json": "a16d0d722f2efd82f56a0445ddb02113eca2ed9860d3117988b63bea402b95b4",
+    "living-regressions-preflight\\result.json": "280c0f0786c87713251e8895ef918632701ab177bcb09d942ca747723e2f02bf",
+    "living-regressions-preflight\\started.json": "e3cbcc260d58ae23646ee112dad0704c2d7b3401587ad7563ce34dc4f01c040a",
+    "living-regressions-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "living-regressions\\child.json": "16600f7e1b847aabbd35934bc1178e9cbf7d9607f3c5b4f85022441314454354",
+    "living-regressions\\cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+    "living-regressions\\exit.json": "a51278ee2d8a66128b9c87fac40b68c6a3b4ae646ce9112da4a6b341afcffce2",
+    "living-regressions\\fixture-inputs\\two-floor\\owner-inactive-7d84b231cdb545dab7ea3d61d677adc5.manifest.json": "d58f9a476bc8e610e48423e0db04df3c6e39e58cf21bcc99c5c8db0e327ab443",
+    "living-regressions\\fixture-inputs\\two-floor\\owner-inactive-7d84b231cdb545dab7ea3d61d677adc5.save.json": "542d73b823be35325a24cc9139f71b1801a5e33117415676b456fb0d09416677",
+    "living-regressions\\fixture-inputs\\two-floor\\two-floor-b73506f26c40406f9d047e58d8a778c8.manifest.json": "97fceff6443bda420fc20c6f624553f2aab6e5f97bd711509812fa0da7050d4f",
+    "living-regressions\\fixture-inputs\\two-floor\\two-floor-b73506f26c40406f9d047e58d8a778c8.save.json": "cdef976fbe58c0e67a0ff895619831764d110b77d7b139c7568964aa0beec975",
+    "living-regressions\\fixture-inputs\\two-floor\\v1-8fa7b9e803b34d4ebda179649c61da58.manifest.json": "deb30434b2064fb178787605c843e851499ac81ac86e7349d3f617a6a2974af9",
+    "living-regressions\\fixture-inputs\\two-floor\\v1-8fa7b9e803b34d4ebda179649c61da58.save.json": "8d39df881b0a0bbb720b00f38852c1687c1c2633b22b6eb3d53fdda622e6f8b5",
+    "living-regressions\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+    "living-regressions\\invocation.json": "c2245f03c0ace409e356ede3ecd6046e15a823e0ca63cb787f6b0efea73496ad",
+    "living-regressions\\result.json": "fd6e9fe8b3082a444eb67dc6a6f0c7ebacb4e508cd20fb18cd998d0672fa00a3",
+    "living-regressions\\results.xml": "06948eff61b0e8a2c4899ba6510f5374e9a83fc8285cb329bcf8b95984a755ff",
+    "living-regressions\\started.json": "a55060e8109daf1577f16716bcd11853249fa8e811f1e2ce0e3f994be5a56edb",
+    "living-regressions\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "living-regressions\\unity.log": "9cb03f5858a67144713fa29b2fd50e25235282d56cd00764ff226b93329950bc",
+    "preservation\\child.json": "973239e9f4b954a6cd456f6828ce0dced9ee55d20f299f4e96a9b26f6ef4955b",
+    "preservation\\exit.json": "40af7349e680af709d13b59266dc81b6f6ae4c1c3980b22ca432abef447fd67d",
+    "preservation\\preservation.json": "30c3b2f4f53339d8e6409b0113b7a9b258bf3af7b30f92389a9145462b2fad4c",
+    "preservation\\result.json": "9573d587db00db1935a4436491335875a362d6b3efdfe3bcb460ff3ca4ed69a4",
+    "preservation\\started.json": "90520dc391351a974c5018a8bf4359a6bf5708ac6a0e1ceb54f844c8f01b4dd1",
+    "preservation\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "restore-preflight\\child.json": "a81c10b0a10e44be7b19f93e75ca4018300b2f70ba62bcda1783e632e6e14312",
+    "restore-preflight\\exit.json": "41e88772a6a793f4c88d5511b74f3cb42999e649dcdd7a487b90a643b60323de",
+    "restore-preflight\\preservation.json": "a16d0d722f2efd82f56a0445ddb02113eca2ed9860d3117988b63bea402b95b4",
+    "restore-preflight\\result.json": "c4d173a22453d54d67d739b7e2d41d054aeb302a199271686df2f223259fcf0c",
+    "restore-preflight\\started.json": "fedefaebbbd451cc6fbc50d46efb990adaed933142241e951e1b07f85275b1c9",
+    "restore-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "restore\\child.json": "ba026f6cc992b7ff3bbed2f85ea36cc3ced94919387040591eedc485fb0cd881",
+    "restore\\exit.json": "d5bb2e75ac008d83e805daa1e4a7e0bef6b13dc1cd13ad76f6db2d09b69b3e2e",
+    "restore\\restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "restore\\result.json": "9497f9e0b27d51dfe51f86885e5d64122dae99845ab9e25516647580e2f3c858",
+    "restore\\started.json": "de383909bdf59f39211b115703a05e7c965dbf5463b9324bad3a6b611bbf7421",
+    "restore\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "changed_files": [
+    "Assets/_Project/Tests/EditMode/LivingDungeonB3B2Tests.cs",
+    "Assets/_Project/Tests/EditMode/LivingDungeonTwoFloorTests.cs",
+    "Assets/_Project/Tests/EditMode/PhaseFourTestSupport.cs",
+    "Tools/Presentation/qualify_h1_f4.py",
+    "Tools/Presentation/test_qualify_h1_f4.py"
+  ],
+  "cohorts": {
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourSpatial": {
+      "Passed": 77
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites": {
+      "Passed": 59
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2": {
+      "Passed": 53
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor": {
+      "Passed": 37
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability": {
+      "Passed": 18
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchSaveIntegration": {
+      "Passed": 3
+    },
+    "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract": {
+      "Passed": 111
+    }
+  },
+  "commits": [
+    {
+      "purpose": "Two source-bound provenance reproductions and explicit isolated selection",
+      "sha": "6dbfc4a108c32cd0e14193187a0d0b4238633f1b"
+    },
+    {
+      "purpose": "Test-scoped canonical time cuts, pre-owned immutable inputs, precise clock binding and nullable-owner preservation",
+      "sha": "3b63ff49a12496b97d7ed2e6e5ecba6bac11350e"
+    }
+  ],
+  "final_preservation": {
+    "inputs": 1494,
+    "original_inputs_restored": true,
+    "passed": true,
+    "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 r2-living01",
+    "protected_evidence_unchanged": true,
+    "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 r2-living01"
+  },
+  "frozen_schemas_7_16_changed": false,
+  "independent_final_verification": {
+    "all_checks_passed": true,
+    "all_stage_job_queries_absent_error2": true,
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b09a3fc9877b4b1ea6ca8fb435512052",
+    "font_sha256": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+    "historical_descendant_completion_reinterpreted": false,
+    "later_process_absences": {
+      "living-regressions-preflight/child_process": {
+        "current": null,
+        "recorded": {
+          "created": 134376195608432232,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 24908
+        }
+      },
+      "living-regressions-preflight/process": {
+        "current": null,
+        "recorded": {
+          "created": 134376195607310845,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 50572
+        }
+      },
+      "living-regressions/child_process": {
+        "current": null,
+        "recorded": {
+          "created": 134376195708756120,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 53348
+        }
+      },
+      "living-regressions/process": {
+        "current": null,
+        "recorded": {
+          "created": 134376195707567866,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 54400
+        }
+      },
+      "preservation/child_process": {
+        "current": null,
+        "recorded": {
+          "created": 134376199916553924,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 52844
+        }
+      },
+      "preservation/process": {
+        "current": null,
+        "recorded": {
+          "created": 134376199915514850,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 40780
+        }
+      },
+      "restore-preflight/child_process": {
+        "current": null,
+        "recorded": {
+          "created": 134376199718778932,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 50860
+        }
+      },
+      "restore-preflight/process": {
+        "current": null,
+        "recorded": {
+          "created": 134376199717607465,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 48432
+        }
+      },
+      "restore/child_process": {
+        "current": null,
+        "recorded": {
+          "created": 134376199817222062,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 35128
+        }
+      },
+      "restore/process": {
+        "current": null,
+        "recorded": {
+          "created": 134376199816141810,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 44752
+        }
+      }
+    },
+    "original_campaign_verdicts_preserved": true,
+    "original_input_count": 1494,
+    "original_input_identity": "dcf129f2e907b48cf4f18d11f8d4631506b66e128660183c18f92ab0255af419",
+    "original_inputs_and_settings_restored": true,
+    "prior_incomplete_failed_campaign_manifests_unchanged": true,
+    "prior_recovery_receipts_unchanged": true,
+    "protected_owner_saves_builds_history_unchanged": true,
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b09a3fc9877b4b1ea6ca8fb435512052"
+    },
+    "reservation_sha256": "0b3ed990a8f85c5431798666b943eefa56189af5e3e3b033703cc25f861b926e",
+    "settings_hashes": {
+      "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+    },
+    "source_sha": "3b63ff49a12496b97d7ed2e6e5ecba6bac11350e",
+    "tools_verified": 9,
+    "utc": "2026-10-28T02:13:47.739521+00:00",
+    "verified_recorded_process_exit": true
+  },
+  "isolation": {
+    "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 r2-living01",
+    "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+    "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 r2-living01\\save_primary.json"
+  },
+  "model_recommendation": "GPT-6.1 Sol High, Complex; GPT-6 Sol High availability fallback; no model escalation or subagents used.",
+  "new_provenance_cases": [
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.SchemaSeventeenDirectPumpRequiresSourceBoundTimeCut(False)",
+      "id": "2789",
+      "output": "schema17 direct pump: first Stage rejects unproved W; source-bound time cut prepares and publishes; twoFloor=False\n",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.SchemaSeventeenDirectPumpRequiresSourceBoundTimeCut(True)",
+      "id": "2790",
+      "output": "schema17 direct pump: first Stage rejects unproved W; source-bound time cut prepares and publishes; twoFloor=True\n",
+      "result": "Passed"
+    }
+  ],
+  "nunit_root": {
+    "asserts": "0",
+    "clr-version": "4.0.30319.42000",
+    "duration": "364.3215267",
+    "end-time": "2026-10-28 00:12:39Z",
+    "engine-version": "3.5.0.0",
+    "failed": "0",
+    "id": "2",
+    "inconclusive": "0",
+    "passed": "358",
+    "result": "Passed",
+    "skipped": "0",
+    "start-time": "2026-10-28 00:06:35Z",
+    "testcasecount": "358",
+    "total": "358"
+  },
+  "pinned_tools": {
+    "C:\\Program Files\\Git\\cmd\\git.EXE": {
+      "sha256": "81ef35ae005ca9318018d18e3327578ce939fb99feaad6b2d7c8ab15f3de8db5",
+      "version": "git version 2.54.0.windows.1"
+    },
+    "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.2f1\\Editor\\Unity.exe": {
+      "sha256": "c2f3d552a9f9a4639b2e54e9d41f360614d512ba6a9816c8c934568ecc2ad93d",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe": {
+      "sha256": "73dbf1f40507275d6fa636b49eb80b4753e313f649f52591abba86b31f1a1bce",
+      "version": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_inputs.py": {
+      "sha256": "34d3ff45cf7512e21f242bc0e4ede876e5c8b68eddba853ad9b1e69192270c92",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_supervisor.py": {
+      "sha256": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_windows.py": {
+      "sha256": "234bce5f0ca8c7087bb999c603cfbb3d87f0eb4499501a1644dcbbabf3104db7",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py": {
+      "sha256": "515de110cf161f1c871bea347d7bbf417a89316a39732852a515e42d93160407",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe": {
+      "sha256": "78761a0547cd4a9bc212e27a217c66e6a621bf48c753ba440e4b2327ee7ff8ac",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE": {
+      "sha256": "60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f",
+      "version": "Windows PowerShell 5.1; process-inspection dependency"
+    }
+  },
+  "preparation": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-r2-living01",
+  "preparation_file_hashes": {
+    "independent-final-verification01.json": "2998a3140c4aea5d764399e4c0b3af593ef4918bc70a5d4e4ca4c3aeaddaef7d",
+    "original-inputs.json": "fc27216a9282712f73fe57fb8cc4a32420189b95370100251bae51679c854f10",
+    "original-inputs.zip": "4d89a0e98ba805561da86203512ea6bd311d58fcd5e851dd4a8cfc2f1ca1bca6",
+    "plan.json": "5671b25bdac2f40830159b08229848871acdd3d971af403843f3741690a99f72",
+    "protected.json": "8d86ab2c2d14a1e30460c8db7e0c8136e7808673f52c444e4f0c094e29576f70",
+    "qualified-inputs.json": "28d9eaea26b4e048a6edbc3485deb051d59b87fa060b08949129fb0af8eeda0f"
+  },
+  "previous_46_failures": [
+    {
+      "current_nunit_id": "2795",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.AcceptedButUnclosedHorizonReopensWithoutDroppingTimeOrDuplicatingHistory",
+      "previous_message": "  time.recovery.context_mismatch\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Bounded policy bytes authored into input components 6/7 before creating the owner; consumed instances retained. Deferred pre-pause cut captured and rebound by the actual single TimeService."
+    },
+    {
+      "current_nunit_id": "2839",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ActualActiveRunAllowsSameFloorDraftCommitAndUsesSnapshotUntilSettlement",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2822",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ActualAdmissionRetainsAnUnfinishedTimedC2PrefixThenSettlesAndRetiresExactlyOnce",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2832",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ActualTerminalReconcilesCustodyOrRedeploymentAndRecoversOnlyAssignedVacantIdentity(False)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2833",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ActualTerminalReconcilesCustodyOrRedeploymentAndRecoversOnlyAssignedVacantIdentity(True)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2793",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.AutomaticSettlementRetainsSessionReplayWithoutChangingHistoricalSaveContract",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2801",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.CurrentRecoveryBeforeSettlementIsChargedOnceAndDamageIsThenAppliedToRecoveredIdentity",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2818",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.DeferredPrePauseSampleDoesNotConsumeLaterOfflineInterval",
+      "previous_message": "  time.recovery.context_mismatch\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Bounded policy bytes authored into input components 6/7 before creating the owner; consumed instances retained. Deferred pre-pause cut captured and rebound by the actual single TimeService."
+    },
+    {
+      "current_nunit_id": "2817",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.DirtyClosedActionBarrierRetainsSessionAndDisabledPauseDoesNotPublish",
+      "previous_message": "System.InvalidOperationException : living.foreground.clock_invalid",
+      "previous_result": "Failed",
+      "resolution": "Precise UTC source injected before ConfigureRecovery/load; lifecycle root uses the same bound TimeService rather than replacing it after attachment."
+    },
+    {
+      "current_nunit_id": "2796",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Flush,1)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2797",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Replace,1)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2798",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Write,2)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2823",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FirstOpportunityAndAllOutcomesAreIndependentOfForegroundPartitionAndReopen",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2812",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FreshNativeSessionBindsProductionProfilesBeforeDormantActivation",
+      "previous_message": "System.InvalidOperationException : living.foreground.clock_invalid",
+      "previous_result": "Failed",
+      "resolution": "Precise UTC source injected before ConfigureRecovery/load; lifecycle root uses the same bound TimeService rather than replacing it after attachment."
+    },
+    {
+      "current_nunit_id": "2813",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.IndependentlyInjectedHistoricalLimitsDoNotAcquireProductionScheduling",
+      "previous_message": "System.ArgumentException : living.profile.invalid",
+      "previous_result": "Failed",
+      "resolution": "Generic historical-reader budget is explicitly refused before configuring production recovery; dormant canonical predecessor bytes remain unchanged. No unsupported production profile is installed."
+    },
+    {
+      "current_nunit_id": "2840",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ManualC2CanFinishBeforeAnOlderAutomaticReservationWithoutDiscardingEitherResult",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2835",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.MoveToAnotherFloorPreservesIdentityAndOrdersCurrentVacantRecoveryBeforeHistoricalDamage(False)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2836",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.MoveToAnotherFloorPreservesIdentityAndOrdersCurrentVacantRecoveryBeforeHistoricalDamage(True)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2792",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.PresentationObserverCannotChangeCheckpointBytesWorkReceiptsOrOutcome",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2815",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.QualificationCannotConfigureProductionProfileAndTwoValidActivePrefixesCannotBypassCapacity",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2821",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.QualifiedProductionLifetimeMeasuresCheckpointReplayAndBoundaryWork",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2786",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.RecoveryConditionChangesAreStagedBeforeAdmissionWhenDoubleWalletDebitRoundsAway",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2816",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ReinspectionAndPausedHorizonDrainRetainOfflineBoundary",
+      "previous_message": "  Expected: 2000\n  But was:  9000\n",
+      "previous_result": "Failed",
+      "resolution": "Reinspection uses the read-only InspectForeground API and proves bytes/W unchanged; new eligible progression still advances W to the observed 9000. Expected values retained."
+    },
+    {
+      "current_nunit_id": "2819",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.ServiceLatchesRecoveryRequiredAndBlocksAllLaterForegroundPublication",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2794",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.TerminalSettlementPreservesTheCurrentSavedBoundary",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2800",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.UnprovenRollbackRequiresRecoveryAndDoesNotPublishTerminalEffects",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "2814",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.UnsupportedCombatWorkConsumesOpportunityWithoutRunAllocationOrGameplayDamage",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3135",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.AutomaticProductionPartyCanChooseASurvivingFloorOneExitWithTwoCapturedFloors",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3106",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.AutomaticTwoFloorAdmissionCompletesAndRetiresExactlyOnce",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3115",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.CurrentDeactivationDoesNotFabricateVacancyOrRewriteCapturedRoute",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3134",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EmptyUnclosedV1DrainConsumesDueOpportunityWithoutReplacementAndRetainsTheFutureIdentity",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3129",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EqualTimeOrdinaryTransferAndBlockedReleaseRespectSequenceAndRecoveryPhases(True)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3130",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.EqualTimeOrdinaryTransferAndBlockedReleaseRespectSequenceAndRecoveryPhases(False)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3116",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Write,2)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3117",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Replace,1)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3118",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Flush,1)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3110",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalV1DrainsOnceAndUpgradesWithoutEligibility(False)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3111",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.HistoricalV1DrainsOnceAndUpgradesWithoutEligibility(True)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3133",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OneBoundaryPumpsAndReopenMatchTheSameAcceptedTwoPartyHorizon",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3122",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements(False)",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3123",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.OverlappingSnapshotsPreservePriorDamageAndPartialRecoveryAtBothSettlements(True)",
+      "previous_message": "  gd66.transaction.candidate_invalid\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Test-only funding snapshots the original nullable owners, avoiding JsonUtility null-class clone defaults; only staged synthetic wallet funding changes."
+    },
+    {
+      "current_nunit_id": "3121",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.ReopenOneUnitBeforeVacancyAndImmediatelyAfterReleasePreservesExactPrefixes",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3132",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.UnprovenWaitingReleaseRollbackRequiresRecoveryWithoutPublishingEitherParty",
+      "previous_message": "  Expected string length 32 but was 31. Strings differ at index 0.\n  Expected: \"gd66.transaction.recovery_failed\"\n  But was:  \"living.foreground.invalid_state\"\n  -----------^\n",
+      "previous_result": "Failed",
+      "resolution": "Valid time transition lets the waiting-release fixture reach its original injected Flush/rollback cut; original recovery-required/no-publication assertions retained and pass."
+    },
+    {
+      "current_nunit_id": "3114",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.WaitingProtectsBothFloorsFromRecoveryAndThrottlesAdmissionAfterReopen",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3120",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.WaitingReleaseIsEquivalentAcrossForegroundPartitionsAndReopen",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    },
+    {
+      "current_nunit_id": "3107",
+      "current_result": "Passed",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.WaitingReopensAndRealRetirementReleasesItWithAuthenticatedCause",
+      "previous_message": "  living.foreground.invalid_state\n  Expected: True\n  But was:  False\n",
+      "previous_result": "Failed",
+      "resolution": "Shared direct-writer path now carries source-bound CanonicalTimeTransition; the exact timestamp rejection is independently reproduced for both profiles. Original gameplay/atomic assertions pass."
+    }
+  ],
+  "prior_full_suite_counts_unchanged": {
+    "failed": 805,
+    "passed": 1966,
+    "skipped": 1,
+    "source_sha": "16955152fcdd5a5f8af006dc38887a75f1f83266",
+    "status": "INCOMPLETE / UNCERTAIN retained; no new full-suite failure total inferred"
+  },
+  "production_files_changed": false,
+  "recorded_status": "PASSED",
+  "remaining_qualification": [
+    "Other full-suite fixture/configuration/current-schema assertions are not requalified by this selected cohort.",
+    "Fourth production-scene null-reference case, broad scene/lifecycle integration and historical schema activation remain for their affected gates.",
+    "Complete protocol-cut/repeated-crash coverage, PlayMode and isolated Windows Development Player ordinary/abrupt reopen qualification remain pending.",
+    "Historical/current-main/final-H1-F4 performance comparison remains pending.",
+    "Owner UAT and merge are prohibited; independent review precedes another expensive full EditMode campaign."
+  ],
+  "representative_reproduction": {
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\018acc3079bf4e7d89b79789e99b4433",
+    "campaign_file_hashes": {
+      "campaign.json": "7bd5a6a06308ff37039c8787bf9347a988f194552ae957e115b692aa4396b32c",
+      "common-repro-preflight\\child.json": "6ce9098dab23acec6e749cc0e97717d08dd4aab1aed0a31dfa61b031aea2eda0",
+      "common-repro-preflight\\exit.json": "ad44c46f33be2c57b4b36552bda1d5f7f3a78e744fb18935f415cb65440ccf23",
+      "common-repro-preflight\\preservation.json": "ee47cedcbc4ee260932b33e7daca2b02d697b37062cbac975aa8c6c31bee1320",
+      "common-repro-preflight\\result.json": "84ba4edddc988f8e9b3e846a6cd00c9783fe3f599aab0b363df58ec86096a460",
+      "common-repro-preflight\\started.json": "e4d352b3f08add6c011aeaef18f7704d057a1b36461bd507cf217eb7f9380d1d",
+      "common-repro-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "common-repro\\child.json": "b730458f45671b7af0e597c603caaaa39a2749fce6ea42f23030668ec84f3cbc",
+      "common-repro\\cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+      "common-repro\\exit.json": "00a0419695fd3bff04c00cc8f19a76a2ee4854eb24cbc2ba91fc38d688720f9e",
+      "common-repro\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+      "common-repro\\invocation.json": "c6f9001c6ae4fd3efc501fb7c568d9c3f53582f38282b3538c2489f54b2e1a52",
+      "common-repro\\result.json": "8a15d16a1bcc924d7a5b5253deb59cc9910ee5c959d427767c503c778524c78e",
+      "common-repro\\results.xml": "c3e40ee6675b0398523c5486641f00c61abf70592c6b250221c05ba3a0df3250",
+      "common-repro\\started.json": "59199870c9b186dc1220e4b4995a68c12d7a25055c38e554ca031d9d19882336",
+      "common-repro\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "common-repro\\unity.log": "8943d546d198f676c776a349bd52645f92b7354c9463c5fefd2d719ecf1d34d5",
+      "launch.claim": "099b2d9e03cf2531ae617572d690a1966c070fdffb84d6b1ff8b2e01f4983e2a",
+      "launch.json": "b695a3e830ff137ce9cfe021285cb1e24b98cb53b879dd70120868dea60e7bd2",
+      "launch.log": "ac0389eea78f09c6de8019b02da0a5df75c9b513d3d7103fa0c9dd4c3eb44ada",
+      "preservation\\child.json": "ecd2e7c732ed7d09183f5154e748a62f40c390567aee94c3a0b87de73b9eda40",
+      "preservation\\exit.json": "dc6697de3a9ee40198d650e65450559403adc179d921be21a40fb76da0201867",
+      "preservation\\preservation.json": "cd759921a74183f5e463b98c49832cf1d8b13a5f77ba336bd28bb0a2cc88735d",
+      "preservation\\result.json": "cdc7dcdfc1e7c4873a9c60fa4a44970c4955ee8b7613a929442ac141a136659c",
+      "preservation\\started.json": "690d80799f114448c662bfe9f76007b3da3809f256ac6661393f907195055063",
+      "preservation\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "restore-preflight\\child.json": "07d4ff98d004174678be4630bbb93b39ac0eaa427dc16a367550f49053b2716e",
+      "restore-preflight\\exit.json": "19fcc25acc227f7dfd8e6f893040bab33d0243489168813f0e6d6f2bf0ad1e72",
+      "restore-preflight\\preservation.json": "ee47cedcbc4ee260932b33e7daca2b02d697b37062cbac975aa8c6c31bee1320",
+      "restore-preflight\\result.json": "26d3b2cac72028525cd130d5d0038a1e7c1588bc83aeb0dc27a4da56b33c6388",
+      "restore-preflight\\started.json": "5dc41b92d387827d58d369edf7d0c50f1a6878dc92fca6d0092bfda9b4b634ba",
+      "restore-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "restore\\child.json": "7685174fe7c7d422d608b42075d70a69f7d1759b95983065313622ba53f3345f",
+      "restore\\exit.json": "4ba21c9e678fbd529f733770d66b1c72e526b43f0028029872a05d681ec62c26",
+      "restore\\restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+      "restore\\result.json": "19fc60dbe4f5e0552d1267366c2c608bcd984b11b0a209bce2f1be8aef328533",
+      "restore\\started.json": "8e8a27e0391721add0c1ec861728d482ca474dddb22b7cd2ed05a5255eeda550",
+      "restore\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "counts": {
+      "failed": 0,
+      "inconclusive": 0,
+      "passed": 2,
+      "skipped": 0,
+      "total": 2
+    },
+    "first_failed_condition": "DetachedCanonicalSaveSession.PrepareReplacement rejects supplied lastSavedUtcUnix=1000 when prior and unchanged successor W differ; no time transition was supplied. Negative Stage yields time.recovery.invalid_state, mapped by outer writer to living.foreground.invalid_state.",
+    "positive_control": "Same source and recognized snapshot prepare/publish successfully with CanonicalTimeTransition.Foreground. No production hook, bypass or reason-code change.",
+    "source_sha": "6dbfc4a108c32cd0e14193187a0d0b4238633f1b",
+    "stage_records": {
+      "common-repro": {
+        "campaign": "018acc3079bf4e7d89b79789e99b4433",
+        "child_finished_utc": "2026-10-27T23:58:15.347400+00:00",
+        "child_process": {
+          "created": 134376190692758371,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 23336
+        },
+        "child_started_utc": "2026-10-27T23:57:49.279532+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+          "run-common-repro",
+          "--attempt",
+          "r2-repro01",
+          "--stage",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\018acc3079bf4e7d89b79789e99b4433\\common-repro"
+        ],
+        "evidence": {
+          "child.json": "b730458f45671b7af0e597c603caaaa39a2749fce6ea42f23030668ec84f3cbc",
+          "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+          "exit.json": "00a0419695fd3bff04c00cc8f19a76a2ee4854eb24cbc2ba91fc38d688720f9e",
+          "generated-inputs": {
+            "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+          },
+          "invocation.json": "c6f9001c6ae4fd3efc501fb7c568d9c3f53582f38282b3538c2489f54b2e1a52",
+          "results.xml": "c3e40ee6675b0398523c5486641f00c61abf70592c6b250221c05ba3a0df3250",
+          "started.json": "59199870c9b186dc1220e4b4995a68c12d7a25055c38e554ca031d9d19882336",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "unity.log": "8943d546d198f676c776a349bd52645f92b7354c9463c5fefd2d719ecf1d34d5"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-27T23:58:15.356911+00:00",
+        "host_exit_code": 0,
+        "input_identity": "07c30a161b2d5a74c292255995b4844aa0a89da513bdc67a792be1e55e6c90c8",
+        "job": "Local\\DLQ-5d65e2fbca074cd3983ef579ec5708c2",
+        "process": {
+          "created": 134376190691553237,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 10100
+        },
+        "source_sha": "6dbfc4a108c32cd0e14193187a0d0b4238633f1b",
+        "stage": "common-repro",
+        "started_utc": "2026-10-27T23:57:49.139758+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": 2,
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0,
+          "skips": []
+        }
+      },
+      "common-repro-preflight": {
+        "campaign": "018acc3079bf4e7d89b79789e99b4433",
+        "child_finished_utc": "2026-10-27T23:57:44.257297+00:00",
+        "child_process": {
+          "created": 134376190598289448,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 53848
+        },
+        "child_started_utc": "2026-10-27T23:57:39.832862+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+          "preflight",
+          "--attempt",
+          "r2-repro01",
+          "--stage",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\018acc3079bf4e7d89b79789e99b4433/common-repro-preflight"
+        ],
+        "evidence": {
+          "child.json": "6ce9098dab23acec6e749cc0e97717d08dd4aab1aed0a31dfa61b031aea2eda0",
+          "exit.json": "ad44c46f33be2c57b4b36552bda1d5f7f3a78e744fb18935f415cb65440ccf23",
+          "preservation.json": "ee47cedcbc4ee260932b33e7daca2b02d697b37062cbac975aa8c6c31bee1320",
+          "started.json": "e4d352b3f08add6c011aeaef18f7704d057a1b36461bd507cf217eb7f9380d1d",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-27T23:57:44.268382+00:00",
+        "host_exit_code": 0,
+        "input_identity": "07c30a161b2d5a74c292255995b4844aa0a89da513bdc67a792be1e55e6c90c8",
+        "job": "Local\\DLQ-0fffb7675e754a329eef16337e54e720",
+        "process": {
+          "created": 134376190597138694,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 8256
+        },
+        "source_sha": "6dbfc4a108c32cd0e14193187a0d0b4238633f1b",
+        "stage": "common-repro-preflight",
+        "started_utc": "2026-10-27T23:57:39.706825+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "preservation": {
+        "campaign": "018acc3079bf4e7d89b79789e99b4433",
+        "child_finished_utc": "2026-10-27T23:58:44.805281+00:00",
+        "child_process": {
+          "created": 134376191206316653,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 37868
+        },
+        "child_started_utc": "2026-10-27T23:58:40.636287+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+          "finish",
+          "--attempt",
+          "r2-repro01",
+          "--stage",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\018acc3079bf4e7d89b79789e99b4433\\preservation"
+        ],
+        "evidence": {
+          "child.json": "ecd2e7c732ed7d09183f5154e748a62f40c390567aee94c3a0b87de73b9eda40",
+          "exit.json": "dc6697de3a9ee40198d650e65450559403adc179d921be21a40fb76da0201867",
+          "preservation.json": "cd759921a74183f5e463b98c49832cf1d8b13a5f77ba336bd28bb0a2cc88735d",
+          "started.json": "690d80799f114448c662bfe9f76007b3da3809f256ac6661393f907195055063",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-27T23:58:44.814349+00:00",
+        "host_exit_code": 0,
+        "input_identity": "300cc4afb31fbcc6f13ff4edf2fd0a93c21d6bc83135265ced98bee343d835fc",
+        "job": "Local\\DLQ-e41863e8b7794947b3a7c62aa71981bb",
+        "process": {
+          "created": 134376191205260681,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 45180
+        },
+        "source_sha": "6dbfc4a108c32cd0e14193187a0d0b4238633f1b",
+        "stage": "preservation",
+        "started_utc": "2026-10-27T23:58:40.517826+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "restore": {
+        "campaign": "018acc3079bf4e7d89b79789e99b4433",
+        "child_finished_utc": "2026-10-27T23:58:35.660492+00:00",
+        "child_process": {
+          "created": 134376191103287410,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 5972
+        },
+        "child_started_utc": "2026-10-27T23:58:30.332439+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+          "restore",
+          "--attempt",
+          "r2-repro01",
+          "--stage",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\018acc3079bf4e7d89b79789e99b4433\\restore"
+        ],
+        "evidence": {
+          "child.json": "7685174fe7c7d422d608b42075d70a69f7d1759b95983065313622ba53f3345f",
+          "exit.json": "4ba21c9e678fbd529f733770d66b1c72e526b43f0028029872a05d681ec62c26",
+          "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+          "started.json": "8e8a27e0391721add0c1ec861728d482ca474dddb22b7cd2ed05a5255eeda550",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-27T23:58:35.669491+00:00",
+        "host_exit_code": 0,
+        "input_identity": "07c30a161b2d5a74c292255995b4844aa0a89da513bdc67a792be1e55e6c90c8",
+        "job": "Local\\DLQ-83777db49fb3496492dd44c6c0ea0687",
+        "process": {
+          "created": 134376191102165824,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 35108
+        },
+        "source_sha": "6dbfc4a108c32cd0e14193187a0d0b4238633f1b",
+        "stage": "restore",
+        "started_utc": "2026-10-27T23:58:30.209424+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      },
+      "restore-preflight": {
+        "campaign": "018acc3079bf4e7d89b79789e99b4433",
+        "child_finished_utc": "2026-10-27T23:58:24.859408+00:00",
+        "child_process": {
+          "created": 134376191004252543,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 50560
+        },
+        "child_started_utc": "2026-10-27T23:58:20.428678+00:00",
+        "command": [
+          "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "-B",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+          "preflight",
+          "--attempt",
+          "r2-repro01",
+          "--stage",
+          "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\018acc3079bf4e7d89b79789e99b4433/restore-preflight"
+        ],
+        "evidence": {
+          "child.json": "07d4ff98d004174678be4630bbb93b39ac0eaa427dc16a367550f49053b2716e",
+          "exit.json": "19fcc25acc227f7dfd8e6f893040bab33d0243489168813f0e6d6f2bf0ad1e72",
+          "preservation.json": "ee47cedcbc4ee260932b33e7daca2b02d697b37062cbac975aa8c6c31bee1320",
+          "started.json": "5dc41b92d387827d58d369edf7d0c50f1a6878dc92fca6d0092bfda9b4b634ba",
+          "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "exit_code": 0,
+        "failure": null,
+        "finished_utc": "2026-10-27T23:58:24.870420+00:00",
+        "host_exit_code": 0,
+        "input_identity": "07c30a161b2d5a74c292255995b4844aa0a89da513bdc67a792be1e55e6c90c8",
+        "job": "Local\\DLQ-9adcd840a6584623888f16b81437ce82",
+        "process": {
+          "created": 134376191002859545,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 46728
+        },
+        "source_sha": "6dbfc4a108c32cd0e14193187a0d0b4238633f1b",
+        "stage": "restore-preflight",
+        "started_utc": "2026-10-27T23:58:20.277693+00:00",
+        "status": "PASSED",
+        "tests": {
+          "discovered": null,
+          "failed": null,
+          "passed": null,
+          "skipped": null
+        }
+      }
+    },
+    "status": "PASSED"
+  },
+  "restoration": {
+    "passed": true,
+    "restored": [
+      "ProjectSettings/ProjectSettings.asset",
+      "ProjectSettings/EditorBuildSettings.asset",
+      "ProjectSettings/ShaderGraphSettings.asset"
+    ]
+  },
+  "reviewed_head": "28343548bf7f32dfd0ba1e94754e2031afe12391",
+  "schema17_validation_weakened": false,
+  "scope": "PR259 Review2 affected-suite milestone; independent review required before next expensive full EditMode campaign",
+  "stage_records": {
+    "living-regressions": {
+      "campaign": "b09a3fc9877b4b1ea6ca8fb435512052",
+      "child_finished_utc": "2026-10-28T00:12:46.499624+00:00",
+      "child_process": {
+        "created": 134376195708756120,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 53348
+      },
+      "child_started_utc": "2026-10-28T00:06:10.879559+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "run-living",
+        "--attempt",
+        "r2-living01",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b09a3fc9877b4b1ea6ca8fb435512052\\living-regressions"
+      ],
+      "evidence": {
+        "child.json": "16600f7e1b847aabbd35934bc1178e9cbf7d9607f3c5b4f85022441314454354",
+        "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "exit.json": "a51278ee2d8a66128b9c87fac40b68c6a3b4ae646ce9112da4a6b341afcffce2",
+        "fixture-inputs": {
+          "two-floor/owner-inactive-7d84b231cdb545dab7ea3d61d677adc5.manifest.json": "d58f9a476bc8e610e48423e0db04df3c6e39e58cf21bcc99c5c8db0e327ab443",
+          "two-floor/owner-inactive-7d84b231cdb545dab7ea3d61d677adc5.save.json": "542d73b823be35325a24cc9139f71b1801a5e33117415676b456fb0d09416677",
+          "two-floor/two-floor-b73506f26c40406f9d047e58d8a778c8.manifest.json": "97fceff6443bda420fc20c6f624553f2aab6e5f97bd711509812fa0da7050d4f",
+          "two-floor/two-floor-b73506f26c40406f9d047e58d8a778c8.save.json": "cdef976fbe58c0e67a0ff895619831764d110b77d7b139c7568964aa0beec975",
+          "two-floor/v1-8fa7b9e803b34d4ebda179649c61da58.manifest.json": "deb30434b2064fb178787605c843e851499ac81ac86e7349d3f617a6a2974af9",
+          "two-floor/v1-8fa7b9e803b34d4ebda179649c61da58.save.json": "8d39df881b0a0bbb720b00f38852c1687c1c2633b22b6eb3d53fdda622e6f8b5"
+        },
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "c2245f03c0ace409e356ede3ecd6046e15a823e0ca63cb787f6b0efea73496ad",
+        "results.xml": "06948eff61b0e8a2c4899ba6510f5374e9a83fc8285cb329bcf8b95984a755ff",
+        "started.json": "a55060e8109daf1577f16716bcd11853249fa8e811f1e2ce0e3f994be5a56edb",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unity.log": "9cb03f5858a67144713fa29b2fd50e25235282d56cd00764ff226b93329950bc"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-28T00:12:46.510605+00:00",
+      "host_exit_code": 0,
+      "input_identity": "778dadf4c803997df3723a4ef18b466ad2896999fe8fee79e4c605da0b3170b1",
+      "job": "Local\\DLQ-7a76ec829cde431f86917f632b4aa630",
+      "process": {
+        "created": 134376195707567866,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 54400
+      },
+      "source_sha": "3b63ff49a12496b97d7ed2e6e5ecba6bac11350e",
+      "stage": "living-regressions",
+      "started_utc": "2026-10-28T00:06:10.747365+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": 358,
+        "failed": 0,
+        "passed": 358,
+        "skipped": 0,
+        "skips": []
+      }
+    },
+    "living-regressions-preflight": {
+      "campaign": "b09a3fc9877b4b1ea6ca8fb435512052",
+      "child_finished_utc": "2026-10-28T00:06:05.362339+00:00",
+      "child_process": {
+        "created": 134376195608432232,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 24908
+      },
+      "child_started_utc": "2026-10-28T00:06:00.846941+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "preflight",
+        "--attempt",
+        "r2-living01",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b09a3fc9877b4b1ea6ca8fb435512052/living-regressions-preflight"
+      ],
+      "evidence": {
+        "child.json": "076c5a1f8882a7673a4b9cee5e1d353e8bcbd069ac11a0b4dfd435267d3c5ea2",
+        "exit.json": "199b266378cbccf8c3f6d6fa2bde479a9356117717a7cc30253753b7e9fdee87",
+        "preservation.json": "a16d0d722f2efd82f56a0445ddb02113eca2ed9860d3117988b63bea402b95b4",
+        "started.json": "e3cbcc260d58ae23646ee112dad0704c2d7b3401587ad7563ce34dc4f01c040a",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-28T00:06:05.371345+00:00",
+      "host_exit_code": 0,
+      "input_identity": "778dadf4c803997df3723a4ef18b466ad2896999fe8fee79e4c605da0b3170b1",
+      "job": "Local\\DLQ-41f74415d20341b88ce70129ac415be0",
+      "process": {
+        "created": 134376195607310845,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 50572
+      },
+      "source_sha": "3b63ff49a12496b97d7ed2e6e5ecba6bac11350e",
+      "stage": "living-regressions-preflight",
+      "started_utc": "2026-10-28T00:06:00.723659+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    },
+    "preservation": {
+      "campaign": "b09a3fc9877b4b1ea6ca8fb435512052",
+      "child_finished_utc": "2026-10-28T00:13:15.760647+00:00",
+      "child_process": {
+        "created": 134376199916553924,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 52844
+      },
+      "child_started_utc": "2026-10-28T00:13:11.659111+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "finish",
+        "--attempt",
+        "r2-living01",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b09a3fc9877b4b1ea6ca8fb435512052\\preservation"
+      ],
+      "evidence": {
+        "child.json": "973239e9f4b954a6cd456f6828ce0dced9ee55d20f299f4e96a9b26f6ef4955b",
+        "exit.json": "40af7349e680af709d13b59266dc81b6f6ae4c1c3980b22ca432abef447fd67d",
+        "preservation.json": "30c3b2f4f53339d8e6409b0113b7a9b258bf3af7b30f92389a9145462b2fad4c",
+        "started.json": "90520dc391351a974c5018a8bf4359a6bf5708ac6a0e1ceb54f844c8f01b4dd1",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-28T00:13:15.769647+00:00",
+      "host_exit_code": 0,
+      "input_identity": "dcf129f2e907b48cf4f18d11f8d4631506b66e128660183c18f92ab0255af419",
+      "job": "Local\\DLQ-61af741cee534122b19deb04d2b4b205",
+      "process": {
+        "created": 134376199915514850,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 40780
+      },
+      "source_sha": "3b63ff49a12496b97d7ed2e6e5ecba6bac11350e",
+      "stage": "preservation",
+      "started_utc": "2026-10-28T00:13:11.544243+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    },
+    "restore": {
+      "campaign": "b09a3fc9877b4b1ea6ca8fb435512052",
+      "child_finished_utc": "2026-10-28T00:13:06.952618+00:00",
+      "child_process": {
+        "created": 134376199817222062,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 35128
+      },
+      "child_started_utc": "2026-10-28T00:13:01.725473+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "restore",
+        "--attempt",
+        "r2-living01",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b09a3fc9877b4b1ea6ca8fb435512052\\restore"
+      ],
+      "evidence": {
+        "child.json": "ba026f6cc992b7ff3bbed2f85ea36cc3ced94919387040591eedc485fb0cd881",
+        "exit.json": "d5bb2e75ac008d83e805daa1e4a7e0bef6b13dc1cd13ad76f6db2d09b69b3e2e",
+        "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+        "started.json": "de383909bdf59f39211b115703a05e7c965dbf5463b9324bad3a6b611bbf7421",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-28T00:13:06.962618+00:00",
+      "host_exit_code": 0,
+      "input_identity": "778dadf4c803997df3723a4ef18b466ad2896999fe8fee79e4c605da0b3170b1",
+      "job": "Local\\DLQ-6624bb097ddc4c5b8a3957a37d6ecbd9",
+      "process": {
+        "created": 134376199816141810,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 44752
+      },
+      "source_sha": "3b63ff49a12496b97d7ed2e6e5ecba6bac11350e",
+      "stage": "restore",
+      "started_utc": "2026-10-28T00:13:01.605358+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    },
+    "restore-preflight": {
+      "campaign": "b09a3fc9877b4b1ea6ca8fb435512052",
+      "child_finished_utc": "2026-10-28T00:12:56.577135+00:00",
+      "child_process": {
+        "created": 134376199718778932,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 50860
+      },
+      "child_started_utc": "2026-10-28T00:12:51.881350+00:00",
+      "command": [
+        "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-B",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py",
+        "preflight",
+        "--attempt",
+        "r2-living01",
+        "--stage",
+        "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b09a3fc9877b4b1ea6ca8fb435512052/restore-preflight"
+      ],
+      "evidence": {
+        "child.json": "a81c10b0a10e44be7b19f93e75ca4018300b2f70ba62bcda1783e632e6e14312",
+        "exit.json": "41e88772a6a793f4c88d5511b74f3cb42999e649dcdd7a487b90a643b60323de",
+        "preservation.json": "a16d0d722f2efd82f56a0445ddb02113eca2ed9860d3117988b63bea402b95b4",
+        "started.json": "fedefaebbbd451cc6fbc50d46efb990adaed933142241e951e1b07f85275b1c9",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "finished_utc": "2026-10-28T00:12:56.586666+00:00",
+      "host_exit_code": 0,
+      "input_identity": "778dadf4c803997df3723a4ef18b466ad2896999fe8fee79e4c605da0b3170b1",
+      "job": "Local\\DLQ-6408b31f8d4e4e1b81f3656d48e2788a",
+      "process": {
+        "created": 134376199717607465,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 48432
+      },
+      "source_sha": "3b63ff49a12496b97d7ed2e6e5ecba6bac11350e",
+      "stage": "restore-preflight",
+      "started_utc": "2026-10-28T00:12:51.750079+00:00",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    }
+  },
+  "tested_source_sha": "3b63ff49a12496b97d7ed2e6e5ecba6bac11350e"
+}

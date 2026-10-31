@@ -96,6 +96,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(deployed.IsSuccess, Is.True, deployed.Reason);
             var lifecycle = (FloorLifecyclePreview)FloorReviewField("floorLifecycle");
             Assert.That(lifecycle.RequiredReserveAfter, Is.GreaterThan(lifecycle.RequiredReserveBefore));
+            double publishedMana = root.Save.structureRuntime.ManaReserve;
             root.Save.structureRuntime.ManaReserve = lifecycle.RequiredReserveAfter - 1; update.Invoke(controller, null);
             Assert.That(ui.Q<Button>("activateFloor").enabledSelf, Is.False);
             root.Save.structureRuntime.ManaReserve = lifecycle.RequiredReserveAfter; update.Invoke(controller, null);
@@ -105,9 +106,27 @@ namespace DungeonBuilder.M0.Tests
             monster.Health--; update.Invoke(controller, null);
             Assert.That(FloorReviewField("floorLifecycle"), Is.SameAs(funded), "HP is not the reserve obligation");
             monster.Health = health;
+            // Affordability/HP probes are presentation-only. Restore their source
+            // values before allowing the legitimate pending foreground write.
+            root.Save.structureRuntime.ManaReserve = publishedMana;
+            yield return StabilizeReadOnlySceneBaseline();
+            update.Invoke(controller, null); funded = FloorReviewField("floorLifecycle");
+            var originalLoot = typeof(SaveService).GetField("_runLoot", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root.SaveService);
+            var originalSession = root.SaveService.CanonicalSession;
+            byte[] incompatibleBefore = File.ReadAllBytes(root.SaveService.SavePath);
+            string incompatibleLive = JsonUtility.ToJson(root.Save);
             root.SaveService.ConfigureRunLoot(DungeonBuilder.M0.Tests.EditMode.PhaseSixA4Tests.Loot());
             update.Invoke(controller, null);
             Assert.That(FloorReviewField("floorLifecycle"), Is.Not.SameAs(funded), "Configuration invalidates without publication");
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex(
+                "GD66 save failed: gd66.write.first_write_validation_failed$"));
+            Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.False,
+                "A foreign loot object cannot acquire the consumed canonical context");
+            CollectionAssert.AreEqual(incompatibleBefore, File.ReadAllBytes(root.SaveService.SavePath));
+            Assert.That(root.SaveService.CanonicalSession, Is.SameAs(originalSession));
+            Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(incompatibleLive));
+            // Restore the identical consumed object, not reloaded/rebound inputs.
+            root.SaveService.ConfigureRunLoot((LootConfig)originalLoot); update.Invoke(controller, null);
             var beforePublish = FloorReviewField("floorLifecycle");
             Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.True);
             Assert.That(FloorReviewField("floorLifecycle"), Is.Not.SameAs(beforePublish));
@@ -130,6 +149,9 @@ namespace DungeonBuilder.M0.Tests
             controller.TapWorld(new TileCoordinate(1, 2)); Assert.That(controller.ConfirmConstructionPlacement(), Is.True);
             yield return null; yield return null; Assert.That(controller.Commit(), Is.True);
             Assert.That(controller.ChangeFloorLifecycle(FloorLifecycleAction.Activate), Is.True);
+            // Close the authorized activation's foreground publication before
+            // opening a modal whose deliberate live mutation must stay unsaved.
+            yield return StabilizeReadOnlySceneBaseline();
             foreach (bool research in new[] { false, true })
             {
                 var preview = root.SaveService.PreviewFloorLifecycle(root.Save, FloorLifecycleAction.Deactivate, second);

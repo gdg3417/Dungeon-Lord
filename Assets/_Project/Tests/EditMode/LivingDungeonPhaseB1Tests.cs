@@ -74,9 +74,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static ActiveFloorRunSnapshot Canonical(bool twoFloors, out Action unchanged)
         {
-            var f = twoFloors ? PhaseSixA4Tests.Eligible() : PhaseFiveBBranchIntegrationTests.Fixture();
+            var f = twoFloors ? PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs(
+                (config, _) => PhaseSixA4Tests.ForceDescent(config, true))) : PhaseFiveBBranchIntegrationTests.Fixture();
             if (twoFloors) {
-                PhaseSixA4Tests.ForceDescent(f.Configuration, true);
                 PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
                 PhaseSixA4Tests.AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
                 f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,

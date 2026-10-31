@@ -1,0 +1,1016 @@
+{
+  "PR": 259,
+  "applicability": {
+    "SIT": "Real Editor scene and actual PlayMode wrappers, canonical publication, drafts, input, historical replay presentation and current C2 lifecycle.",
+    "UAT": "Not begun or authorized.",
+    "Unit": "Clock ownership, exact closed horizons, rejection, immutable configuration and no-write controls."
+  },
+  "base": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaigns": [
+    {
+      "all_five_stages": "PASSED",
+      "bounded_scene_evidence": [
+        "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=11376 afterLength=11378 first=361 beforeSha=5bda1ef21ad60647ad18458741da1b5ef8ca0092cdfee0424c235341dcbd8cc8 afterSha=87b4d3afb44d7f1162c3fdc4be9044593cc6635e5ab1972fe6989ebf3176956d",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=False beforeLength=11378 afterLength=11378 first=360 beforeSha=87b4d3afb44d7f1162c3fdc4be9044593cc6635e5ab1972fe6989ebf3176956d afterSha=7d37b27d3e73a8b87b68ed71e819db17b905eef0da863863c84014d717e297c2",
+        "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=10990 afterLength=10990 first=10990 beforeSha=4ea159d68cf80626594398806e7dcd2ad45bd9bf5ba71338f1707fe03205b7d6 afterSha=4ea159d68cf80626594398806e7dcd2ad45bd9bf5ba71338f1707fe03205b7d6",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=10990 afterLength=10990 first=10990 beforeSha=4ea159d68cf80626594398806e7dcd2ad45bd9bf5ba71338f1707fe03205b7d6 afterSha=4ea159d68cf80626594398806e7dcd2ad45bd9bf5ba71338f1707fe03205b7d6",
+        "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=8550 afterLength=8550 first=8550 beforeSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76 afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+        "H1F4_REPLAY_SETUP opportunityInitialized=True walletPreserved=True WPreserved=True ACPreserved=True ticksPreserved=True historyPreserved=True monstersPreserved=True",
+        "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=23597 afterLength=23597 first=23597 beforeSha=a1049079a4bccb1dfb6f08201bdfafb6de05667693ddf236f55007b9ba1cc8b4 afterSha=a1049079a4bccb1dfb6f08201bdfafb6de05667693ddf236f55007b9ba1cc8b4",
+        "H1F4_BASELINE publication-count=0 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=23597 afterLength=23597 first=23597 beforeSha=a1049079a4bccb1dfb6f08201bdfafb6de05667693ddf236f55007b9ba1cc8b4 afterSha=a1049079a4bccb1dfb6f08201bdfafb6de05667693ddf236f55007b9ba1cc8b4"
+      ],
+      "campaign": "3d35ed78a25d489eb700a5e280a11cbf",
+      "counts": {
+        "failed": 0,
+        "passed": 14,
+        "skipped": 0
+      },
+      "independent_receipt": "TestResults/h1-f4-20261027-fc04/independent-completion01.json",
+      "independent_receipt_sha256": "b52591f708108943b7c8c8d8ce2195f8f86893e8c8eca37f5cf59675a729d7f5",
+      "leaf_names": [
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewMeaningfulInvalidations",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewTickProbe",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorsConfirmationCancellationAndChangedSelectionAreSafe",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorsConstructionRequirementsBlockersRefreshAndReopen",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorsControlsRemainReachableAtSupportedSizes",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorsLifecycleUsesProductionSelectionAndRefreshesInPlace",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentCapacityMoveOwnedAndDiscard",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentCategoriesInvalidRetryAndSave",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentProductionMouseTouchRecovery",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClockNativeFractionAndOwnerRemainBound",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunFeedbackCasualtyAndMitigatedDamageAreRecordedAndReadOnly",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls"
+      ],
+      "mode": "EditMode",
+      "original_inputs_verified": 1494,
+      "prior_evidence_directories_verified": 351,
+      "process_and_job_evidence": {
+        "living-regressions": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-4f5beba5521d48e1975552984dc19fcc",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379422321179312,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 33504
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379422319969572,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 29876
+              }
+            }
+          },
+          "result_sha256": "9dad3b267d878e1562483f78ce7a22a36662062811d19de0e6dcf9979ad13319",
+          "status": "PASSED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-8673f1592e0c41cd9b22618da72a6bee",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379422210428471,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 38964
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379422209228047,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 28216
+              }
+            }
+          },
+          "result_sha256": "ac70a64e1c2bce1a92da4273f0925b620bf70cc553a8727c12b9ac951afb8aa9",
+          "status": "PASSED"
+        },
+        "preservation": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-d44be424ae9a47c5b820d32c5519e6bb",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379423993297156,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 35028
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379423992233076,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 23760
+              }
+            }
+          },
+          "result_sha256": "4c76da9fdc4bfa7ff8af9e633a8f4c00fbc81d75f851ebca47613858ae8b1ccc",
+          "status": "PASSED"
+        },
+        "restore": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-93a461e9d49d4b41bb35b903bfc22173",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379423881616661,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 18628
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379423880412575,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 3504
+              }
+            }
+          },
+          "result_sha256": "268c9876c4a104c9f1689c0b800edb7bd6c6219150ca6ccabeb2adbfde6e4c9d",
+          "status": "PASSED"
+        },
+        "restore-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-35498e7e5e594e9fb0559c78f7a4ebac",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379423778754535,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 43736
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379423777560286,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 30352
+              }
+            }
+          },
+          "result_sha256": "ebe7c17550d68da195e63c8d16918f5e4fe2a0137a2fb1f56a4d9c7827671fc2",
+          "status": "PASSED"
+        }
+      },
+      "source": "ed5af6f3473b95eabacfa2993a15ac49257d43b1",
+      "tool_pins_verified": 10,
+      "xml_sha256": "4f2b2fd84c8e6b3f145390a526d6055c271aa734e27c35d95bface33eead23df"
+    },
+    {
+      "all_five_stages": "PASSED",
+      "bounded_scene_evidence": [
+        "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=11376 afterLength=11378 first=361 beforeSha=5bda1ef21ad60647ad18458741da1b5ef8ca0092cdfee0424c235341dcbd8cc8 afterSha=87b4d3afb44d7f1162c3fdc4be9044593cc6635e5ab1972fe6989ebf3176956d",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=False beforeLength=11378 afterLength=11378 first=360 beforeSha=87b4d3afb44d7f1162c3fdc4be9044593cc6635e5ab1972fe6989ebf3176956d afterSha=7d37b27d3e73a8b87b68ed71e819db17b905eef0da863863c84014d717e297c2",
+        "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=10990 afterLength=10990 first=10990 beforeSha=4ea159d68cf80626594398806e7dcd2ad45bd9bf5ba71338f1707fe03205b7d6 afterSha=4ea159d68cf80626594398806e7dcd2ad45bd9bf5ba71338f1707fe03205b7d6",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=10990 afterLength=10990 first=10990 beforeSha=4ea159d68cf80626594398806e7dcd2ad45bd9bf5ba71338f1707fe03205b7d6 afterSha=4ea159d68cf80626594398806e7dcd2ad45bd9bf5ba71338f1707fe03205b7d6",
+        "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=8550 afterLength=8550 first=8550 beforeSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76 afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+        "H1F4_REPLAY_SETUP opportunityInitialized=True walletPreserved=True WPreserved=True ACPreserved=True ticksPreserved=True historyPreserved=True monstersPreserved=True",
+        "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=23597 afterLength=23597 first=23597 beforeSha=a1049079a4bccb1dfb6f08201bdfafb6de05667693ddf236f55007b9ba1cc8b4 afterSha=a1049079a4bccb1dfb6f08201bdfafb6de05667693ddf236f55007b9ba1cc8b4",
+        "H1F4_BASELINE publication-count=0 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=23597 afterLength=23597 first=23597 beforeSha=a1049079a4bccb1dfb6f08201bdfafb6de05667693ddf236f55007b9ba1cc8b4 afterSha=a1049079a4bccb1dfb6f08201bdfafb6de05667693ddf236f55007b9ba1cc8b4"
+      ],
+      "campaign": "1286fbafcdd8471190dca29f854e8fe1",
+      "counts": {
+        "failed": 0,
+        "passed": 14,
+        "skipped": 0
+      },
+      "independent_receipt": "TestResults/h1-f4-20261027-fc05/independent-completion01.json",
+      "independent_receipt_sha256": "7ce9be5ef40b45b706697fbb1de108497a981a8dbda6832cd8df5489ce76f66d",
+      "leaf_names": [
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.GraphicalFloorReviewMeaningfulInvalidations",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.GraphicalFloorReviewTickProbe",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.GraphicalFloorsConfirmationCancellationAndChangedSelectionAreSafe",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.GraphicalFloorsConstructionRequirementsBlockersRefreshAndReopen",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.GraphicalFloorsControlsRemainReachableAtSupportedSizes",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.GraphicalFloorsLifecycleUsesProductionSelectionAndRefreshesInPlace",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentCapacity",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentCategories",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.RoomContentMapReassignmentInput",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.SceneClockNativeFractionAndOwnerRemainBound",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.VisualRunFeedbackCasualtyAndMitigatedDamageAreRecordedAndReadOnly",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.VisualRunReplayProductionLifecycleAndResponsiveControls"
+      ],
+      "mode": "PlayMode",
+      "original_inputs_verified": 1494,
+      "prior_evidence_directories_verified": 353,
+      "process_and_job_evidence": {
+        "living-regressions": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-796c5d10c128412385299ba617cbaa4a",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379425554238382,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 22276
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379425553085517,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 22112
+              }
+            }
+          },
+          "result_sha256": "89e5a7a8a16fdeee359f2c3de7cabed2c6cb270a91e68eec57188885208640fb",
+          "status": "PASSED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-8ee3902714b945f583ddb7e5f295bef8",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379425442716409,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 42856
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379425441523681,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 41408
+              }
+            }
+          },
+          "result_sha256": "4c9b4acdbb5f9bef4cf120f88f5aceb72f085edca66e2d3065dbf2df7a91bdac",
+          "status": "PASSED"
+        },
+        "preservation": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-d940980849fb445aa683157638eefe1f",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379426650062500,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 17596
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379426648809451,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 23480
+              }
+            }
+          },
+          "result_sha256": "8bfc8e0680818651b2e0bb55ab69bb7d9bf91ad98d4cf43407bcd5b1b3d2d570",
+          "status": "PASSED"
+        },
+        "restore": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-640d9dcbc0ae410a8f1b647f0ac84699",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379426540061546,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 4824
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379426538893565,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 26612
+              }
+            }
+          },
+          "result_sha256": "2a7d3ad79a265d2dc99150f572e9df256e4821afb372190a2d9d5c35a41ea90b",
+          "status": "PASSED"
+        },
+        "restore-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-8903f0ee0b1745cbbdfdda61c75fc36e",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379426433082994,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 17024
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379426431281509,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 29172
+              }
+            }
+          },
+          "result_sha256": "03d6863ebff4c716db83be48d0e7878363e29a1d243cc30262e0f859b07a8931",
+          "status": "PASSED"
+        }
+      },
+      "source": "ed5af6f3473b95eabacfa2993a15ac49257d43b1",
+      "tool_pins_verified": 10,
+      "xml_sha256": "8074b4317173c88dc156cf6ac521844aa7851338252a5cb94d39f5e581d872f9"
+    }
+  ],
+  "changed_source_files": [
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonFloorSceneTests.cs",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonRoomContentSceneTests.cs",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonReplaySceneTests.cs"
+  ],
+  "newly_qualified_original_identities": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewMeaningfulInvalidations",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentProductionMouseTouchRecovery",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls"
+  ],
+  "original_84_exact_name_reconciliation": {
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourCompatibility.ProductionConfiguration_IsCanonicalAuthorizedReleaseAndRecomputesEveryHash": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourCompatibility.ProductionReleasePolicyPreservesFrozenSevenEightAndCurrentNineBoundaries": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourCompleteSave.FrozenSchemaSevenUpgrade_PreservesIssuedNativeRoomIdentityAndAdvancesHighWater": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourContent.EveryPublishedGraphIsDetachedAndDoesNotBecomeSavePersistenceAuthority": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourContent.ProductionPublicationHasOnlyApprovedCanonicalRuntimeConsumers": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.BackwardClockBootSavePreservesDurableBoundaryAcrossReopen": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.ColdStartCommitBootSaveAndFreshReopenCannotReplayInterval": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.DetachedCommitPersistsWalletAndConsumedTimestampBeforePublication": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(AppPause)": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(AppQuit)": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(Boot)": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(ManualDev)": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.EveryCanonicalSaveReasonPreservesFutureDurableBoundary(Periodic)": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.PauseResumeAppliesOnceAndRepeatedResumeDoesNotReplay": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.PersistenceFailureLeavesWalletTimestampDiskAndSessionUnchangedThenRetrySucceeds": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.ResumePersistenceFailureKeepsSimulationPausedAndRetryDoesNotDuplicate": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.StaleDiskSessionReturnsStableReasonWithoutWrite": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.Historical64RecordLifecycleBoundaryPreservesCustodyAndRejectsNextRecordAtomically": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(0)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(1)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(2)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(3)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(4)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(5)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeLifecycle_EmitExactCompleteSaveMeasurements": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.ProductionCustodyArrayBoundaryRedeploysWithoutInflatingRecords": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.ProductionLifecycle_CustodyArrayBoundaryRejectsNextReturnBeforePersistence": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2PositionalCanonicalState.CurrentSchemaRecoveryUsesExplicitOccupancyAndFailsClosedWhenItIsMissing": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2WindowsSpatialMigration.WindowsUnityPersistentDataPathRunsLegacyMigrationReopenDeleteAndNativeCreate": {
+      "campaign": "5e79d819b0184e238806a4990585afd2",
+      "source": "b5418525fd6d70882ebbf7229c73a002309ad137",
+      "stage": "living-regressions",
+      "xml_sha256": "bdcb99f175e601606482ecd710a1b3eba5ab7eb12948c9ddc72ad899a1593ee6"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.ChangedObservedContentStartsNewConfidenceAndSnapshotCopiesKnowledge": {
+      "campaign": "bc2cff7692f0493c86f74876373eb8ab",
+      "source": "510fcb6c9f6646c5bba444e9abca07defcedc4b3",
+      "stage": "living-regressions",
+      "xml_sha256": "d6ae652dbf6969f1fa2bdcce58ce68f4b637bbb6f3f5c07bd73c6d01f705342c"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.DescendedTwoFloorRunPublishesApplicableKnowledgeForBothCompletedFloors": {
+      "campaign": "bc2cff7692f0493c86f74876373eb8ab",
+      "source": "510fcb6c9f6646c5bba444e9abca07defcedc4b3",
+      "stage": "living-regressions",
+      "xml_sha256": "d6ae652dbf6969f1fa2bdcce58ce68f4b637bbb6f3f5c07bd73c6d01f705342c"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.ExitBeforeFloorTwoDoesNotLearnItsHiddenSnapshot": {
+      "campaign": "bc2cff7692f0493c86f74876373eb8ab",
+      "source": "510fcb6c9f6646c5bba444e9abca07defcedc4b3",
+      "stage": "living-regressions",
+      "xml_sha256": "d6ae652dbf6969f1fa2bdcce58ce68f4b637bbb6f3f5c07bd73c6d01f705342c"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.FinalWipeDoesNotCreatePreciseFloorKnowledge": {
+      "campaign": "bc2cff7692f0493c86f74876373eb8ab",
+      "source": "510fcb6c9f6646c5bba444e9abca07defcedc4b3",
+      "stage": "living-regressions",
+      "xml_sha256": "d6ae652dbf6969f1fa2bdcce58ce68f4b637bbb6f3f5c07bd73c6d01f705342c"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.FinalWipeDoesNotUpdateExistingApplicableFloorKnowledge": {
+      "campaign": "bc2cff7692f0493c86f74876373eb8ab",
+      "source": "510fcb6c9f6646c5bba444e9abca07defcedc4b3",
+      "stage": "living-regressions",
+      "xml_sha256": "d6ae652dbf6969f1fa2bdcce58ce68f4b637bbb6f3f5c07bd73c6d01f705342c"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5A.SurvivorLearningReconfirmsClampsAndOnlyPublishesAfterCompleteRun": {
+      "campaign": "bc2cff7692f0493c86f74876373eb8ab",
+      "source": "510fcb6c9f6646c5bba444e9abca07defcedc4b3",
+      "stage": "living-regressions",
+      "xml_sha256": "d6ae652dbf6969f1fa2bdcce58ce68f4b637bbb6f3f5c07bd73c6d01f705342c"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5B.DurableKnowledgeSurvivesOneActiveFloorLimitAndReopen": {
+      "campaign": "bc2cff7692f0493c86f74876373eb8ab",
+      "source": "510fcb6c9f6646c5bba444e9abca07defcedc4b3",
+      "stage": "living-regressions",
+      "xml_sha256": "d6ae652dbf6969f1fa2bdcce58ce68f4b637bbb6f3f5c07bd73c6d01f705342c"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixA5B.LaterRunUsesApplicablePreRunKnowledgeAndCurrentRunCannotLearnRetroactively": {
+      "campaign": "bc2cff7692f0493c86f74876373eb8ab",
+      "source": "510fcb6c9f6646c5bba444e9abca07defcedc4b3",
+      "stage": "living-regressions",
+      "xml_sha256": "d6ae652dbf6969f1fa2bdcce58ce68f4b637bbb6f3f5c07bd73c6d01f705342c"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixAActivation.CurrentConstantsAndNativeEmptyCreationUseThirteen": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixAActivation.FrozenChainContinuesThroughEachHistoricalStepToThirteen(10)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixAActivation.FrozenChainContinuesThroughEachHistoricalStepToThirteen(7)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixAActivation.FrozenChainContinuesThroughEachHistoricalStepToThirteen(8)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixAActivation.FrozenChainContinuesThroughEachHistoricalStepToThirteen(9)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonPhaseABaseline.QualifiedPreRefactorStructuredFixturesRemainEquivalent": {
+      "campaign": "5e79d819b0184e238806a4990585afd2",
+      "source": "b5418525fd6d70882ebbf7229c73a002309ad137",
+      "stage": "living-regressions",
+      "xml_sha256": "bdcb99f175e601606482ecd710a1b3eba5ab7eb12948c9ddc72ad899a1593ee6"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.DurabilityMatrix_SuccessHasIndependentCommitChainAndCanonicalCommitAfterRecovery": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftContainmentFailureDeletesNothing": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftFailureBeforeOrAfterMutationPreservesCanonical(False)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftFailureBeforeOrAfterMutationPreservesCanonical(True)": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftFlushFailureCannotClaimTotalDeletion": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteOversizedDraftEvidenceFailsClosedBeforeCanonicalDeletion": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteRemovesDraftLegacyAndCanonicalEvidenceBeforeFreshBoot": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen": {
+      "campaign": "8a8dc6e0e4ca448dab9a193940d40792",
+      "source": "596837f29377d4c3a9312384b7b8be975b306b2a",
+      "stage": "living-regressions",
+      "xml_sha256": "bba5295ad9a1873ee81ce0233d9069b34df136c7f5a0866adcf3b51a38390bb2"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible": {
+      "campaign": "8a8dc6e0e4ca448dab9a193940d40792",
+      "source": "596837f29377d4c3a9312384b7b8be975b306b2a",
+      "stage": "living-regressions",
+      "xml_sha256": "bba5295ad9a1873ee81ce0233d9069b34df136c7f5a0866adcf3b51a38390bb2"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneNavigationSafeAreaAndCoveredInput": {
+      "campaign": "8a8dc6e0e4ca448dab9a193940d40792",
+      "source": "596837f29377d4c3a9312384b7b8be975b306b2a",
+      "stage": "living-regressions",
+      "xml_sha256": "bba5295ad9a1873ee81ce0233d9069b34df136c7f5a0866adcf3b51a38390bb2"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneOpeningDuringReplayClosesPresentationOnly": {
+      "campaign": "8a8dc6e0e4ca448dab9a193940d40792",
+      "source": "596837f29377d4c3a9312384b7b8be975b306b2a",
+      "stage": "living-regressions",
+      "xml_sha256": "bba5295ad9a1873ee81ce0233d9069b34df136c7f5a0866adcf3b51a38390bb2"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence": {
+      "campaign": "e77e46ba480d4ff6add230f5c1e52f87",
+      "source": "654c02119acc43c4846f4474d231d5a36c03004a",
+      "stage": "living-regressions",
+      "xml_sha256": "1f5bf28fdad7738b1ea6fe82198bf5a66fd362d3ec5680b4ab8aaaf1d27b3a9a"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1PartyFollowsRoomsCorridorsAndFloors": {
+      "campaign": "e77e46ba480d4ff6add230f5c1e52f87",
+      "source": "654c02119acc43c4846f4474d231d5a36c03004a",
+      "stage": "living-regressions",
+      "xml_sha256": "1f5bf28fdad7738b1ea6fe82198bf5a66fd362d3ec5680b4ab8aaaf1d27b3a9a"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats": {
+      "campaign": "e77e46ba480d4ff6add230f5c1e52f87",
+      "source": "654c02119acc43c4846f4474d231d5a36c03004a",
+      "stage": "living-regressions",
+      "xml_sha256": "1f5bf28fdad7738b1ea6fe82198bf5a66fd362d3ec5680b4ab8aaaf1d27b3a9a"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.FloorHudStatesAndInputCapture": {
+      "campaign": "2617beb9783a41568358c9f47baee809",
+      "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+      "stage": "living-regressions",
+      "xml_sha256": "194a66f56bc94b68266180e3d79c96276c9a01549c5ccd09f78ca8184372f797"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewMeaningfulInvalidations": {
+      "campaign": "3d35ed78a25d489eb700a5e280a11cbf",
+      "source": "ed5af6f3473b95eabacfa2993a15ac49257d43b1",
+      "stage": "living-regressions",
+      "xml_sha256": "4f2b2fd84c8e6b3f145390a526d6055c271aa734e27c35d95bface33eead23df"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges": {
+      "campaign": "3d35ed78a25d489eb700a5e280a11cbf",
+      "source": "ed5af6f3473b95eabacfa2993a15ac49257d43b1",
+      "stage": "living-regressions",
+      "xml_sha256": "4f2b2fd84c8e6b3f145390a526d6055c271aa734e27c35d95bface33eead23df"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentCompactAcquisitionOwnedReassignAndOverflow": {
+      "campaign": "2617beb9783a41568358c9f47baee809",
+      "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+      "stage": "living-regressions",
+      "xml_sha256": "194a66f56bc94b68266180e3d79c96276c9a01549c5ccd09f78ca8184372f797"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentExplicitReassignmentWithConstructionAndInspectionReuse": {
+      "campaign": "2617beb9783a41568358c9f47baee809",
+      "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+      "stage": "living-regressions",
+      "xml_sha256": "194a66f56bc94b68266180e3d79c96276c9a01549c5ccd09f78ca8184372f797"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentProductionMouseTouchRecovery": {
+      "campaign": "3d35ed78a25d489eb700a5e280a11cbf",
+      "source": "ed5af6f3473b95eabacfa2993a15ac49257d43b1",
+      "stage": "living-regressions",
+      "xml_sha256": "4f2b2fd84c8e6b3f145390a526d6055c271aa734e27c35d95bface33eead23df"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentProductionPreviewCustodySaveDiscardAndLayouts": {
+      "campaign": "2617beb9783a41568358c9f47baee809",
+      "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+      "stage": "living-regressions",
+      "xml_sha256": "194a66f56bc94b68266180e3d79c96276c9a01549c5ccd09f78ca8184372f797"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatBrowserIdentityAndDirectTargetSwitch": {
+      "campaign": "2617beb9783a41568358c9f47baee809",
+      "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+      "stage": "living-regressions",
+      "xml_sha256": "194a66f56bc94b68266180e3d79c96276c9a01549c5ccd09f78ca8184372f797"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatPlacementGeometryAndLocalizedFeedback": {
+      "campaign": "2617beb9783a41568358c9f47baee809",
+      "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+      "stage": "living-regressions",
+      "xml_sha256": "194a66f56bc94b68266180e3d79c96276c9a01549c5ccd09f78ca8184372f797"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RuntimeThemeAndLocalizedTextRenderInActualScene": {
+      "campaign": "2617beb9783a41568358c9f47baee809",
+      "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+      "stage": "living-regressions",
+      "xml_sha256": "194a66f56bc94b68266180e3d79c96276c9a01549c5ccd09f78ca8184372f797"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry": {
+      "campaign": "8a8dc6e0e4ca448dab9a193940d40792",
+      "source": "596837f29377d4c3a9312384b7b8be975b306b2a",
+      "stage": "living-regressions",
+      "xml_sha256": "bba5295ad9a1873ee81ce0233d9069b34df136c7f5a0866adcf3b51a38390bb2"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls": {
+      "campaign": "3d35ed78a25d489eb700a5e280a11cbf",
+      "source": "ed5af6f3473b95eabacfa2993a15ac49257d43b1",
+      "stage": "living-regressions",
+      "xml_sha256": "4f2b2fd84c8e6b3f145390a526d6055c271aa734e27c35d95bface33eead23df"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4TransactionalEditor.RepositionPreservesIdentityWalletCanonicalBytesAndReopensExactPosition(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4TransactionalEditor.RepositionPreservesIdentityWalletCanonicalBytesAndReopensExactPosition(\"placement.category.monster\",\"placement.option.monster.skeleton\")": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4TransactionalEditor.RepositionPreservesIdentityWalletCanonicalBytesAndReopensExactPosition(\"placement.category.trap\",\"placement.option.trap.spike\")": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA5TransactionalRoomMovement.CurrentEconomicConfigurationAndCurrentWalletAreRecalculatedAfterDrafting": {
+      "campaign": "e0834cc7b44e4734a3ed341c79d817e5",
+      "source": "1a8462d0494d0856708cf953cd02cf6d924bc3ed",
+      "stage": "living-regressions",
+      "xml_sha256": "6247e993d2833456a7e1ea4ce7fa83d91514805e88c99fd84d6baedfac66e023"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA5TransactionalRoomMovement.ValidDraftUsesInjectedRoomPriceAndMovementFactorWithoutCanonicalMutation(\"spatial.room.basic\",300,0.25d,75)": {
+      "campaign": "e0834cc7b44e4734a3ed341c79d817e5",
+      "source": "1a8462d0494d0856708cf953cd02cf6d924bc3ed",
+      "stage": "living-regressions",
+      "xml_sha256": "6247e993d2833456a7e1ea4ce7fa83d91514805e88c99fd84d6baedfac66e023"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA5TransactionalRoomMovement.ValidDraftUsesInjectedRoomPriceAndMovementFactorWithoutCanonicalMutation(\"spatial.room.large_chamber\",400,0.25d,100)": {
+      "campaign": "e0834cc7b44e4734a3ed341c79d817e5",
+      "source": "1a8462d0494d0856708cf953cd02cf6d924bc3ed",
+      "stage": "living-regressions",
+      "xml_sha256": "6247e993d2833456a7e1ea4ce7fa83d91514805e88c99fd84d6baedfac66e023"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA5TransactionalRoomMovement.ValidDraftUsesInjectedRoomPriceAndMovementFactorWithoutCanonicalMutation(\"spatial.room.rectangle\",320,0.25d,80)": {
+      "campaign": "e0834cc7b44e4734a3ed341c79d817e5",
+      "source": "1a8462d0494d0856708cf953cd02cf6d924bc3ed",
+      "stage": "living-regressions",
+      "xml_sha256": "6247e993d2833456a7e1ea4ce7fa83d91514805e88c99fd84d6baedfac66e023"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDiagnostics.ClaimConfiguredPlayerResearch_ReadyStateRefreshesDiagnosticsWithoutStaleActiveProject": {
+      "campaign": "5e79d819b0184e238806a4990585afd2",
+      "source": "b5418525fd6d70882ebbf7229c73a002309ad137",
+      "stage": "living-regressions",
+      "xml_sha256": "bdcb99f175e601606482ecd710a1b3eba5ab7eb12948c9ddc72ad899a1593ee6"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchJourney.CleanSaveMvpJourney_RemainsRepeatableAcrossBuildRunResearchGreedRiskAdjustmentSaveLoadAndReset": {
+      "campaign": "5e79d819b0184e238806a4990585afd2",
+      "source": "b5418525fd6d70882ebbf7229c73a002309ad137",
+      "stage": "living-regressions",
+      "xml_sha256": "bdcb99f175e601606482ecd710a1b3eba5ab7eb12948c9ddc72ad899a1593ee6"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.monster\",\"placement.option.monster.skeleton\")": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.trap\",\"placement.option.trap.spike\")": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.EstablishedHistoricalLimitLoaderAssertions": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Tests.EditMode.RoomContentPositionMigrationProfileTests.SchemaTwelveContractRemainsFrozenWhileSchemaThirteenActivatesPosition": {
+      "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+      "source": "65c40334aed92a8143c0ac353f81d1557eecb3e3",
+      "stage": "living-regressions",
+      "xml_sha256": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+    },
+    "DungeonBuilder.M0.Tests.Editor.H1F3RecoveryEntryAndPreciseMana.CalculationAndObservationCannotPublishOrMutateCanonicalState": {
+      "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "source": "2c90eca04cc8510672086dd9fe05130423bfc3d8",
+      "stage": "living-regressions",
+      "xml_sha256": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+    }
+  },
+  "original_84_qualified_before": 80,
+  "original_84_qualified_now": 84,
+  "original_84_remaining_unqualified": 0,
+  "original_84_source_xml_sha256": "7e97bff348cf2db65bbdc8671ee7a8354a85f0c565ed5f0986ed60dc54ad897a",
+  "original_campaign_verdict": "INCOMPLETE / UNCERTAIN unchanged",
+  "production_changes": false,
+  "remaining_exact_original_identities": [],
+  "replay_private_byte_diagnostic": {
+    "after_length": 23600,
+    "after_sha256": "424352d265c0d4b4d9abda1bf8aea53efcd840bc654619b47afc52f8005c7801",
+    "before_length": 23597,
+    "before_sha256": "d3c164fc10f9be37832bce10c2f6272c099550c345495c7ac509164cbb3e0a10",
+    "campaign": "823d7defbaf24247971d30df4dce6763",
+    "canonical_state_modified": false,
+    "lexical_edits": [
+      {
+        "after_length": 2,
+        "after_numeric": ".0",
+        "after_offset": 361,
+        "before_length": 0,
+        "before_numeric": "",
+        "before_offset": 361,
+        "kind": "insert",
+        "numeric_characters_only": true
+      },
+      {
+        "after_length": 1,
+        "after_numeric": "4",
+        "after_offset": 22887,
+        "before_length": 1,
+        "before_numeric": "3",
+        "before_offset": 22885,
+        "kind": "replace",
+        "numeric_characters_only": true
+      },
+      {
+        "after_length": 5,
+        "after_numeric": null,
+        "after_offset": 23066,
+        "before_length": 4,
+        "before_numeric": null,
+        "before_offset": 23064,
+        "kind": "replace",
+        "numeric_characters_only": false
+      }
+    ],
+    "private_copy_directory": "TestResults/qualification-supervisor/823d7defbaf24247971d30df4dce6763/living-regressions/fixture-inputs/replay-baseline-48609c61f4304992ac11096bc1a2e036",
+    "semantic_differences": [
+      {
+        "after_type": "int",
+        "before_type": "int",
+        "kind": "value-change",
+        "path": "/primary/livingDungeon/Revision"
+      },
+      {
+        "after_type": "int",
+        "before_type": "NoneType",
+        "kind": "value-change",
+        "path": "/primary/livingDungeon/Scheduler/NextOpportunityTime"
+      }
+    ],
+    "source": "cbd13525d93f535d1105e00cb39d1c9504700abd"
+  },
+  "retained_failed_attempts": [
+    {
+      "campaign": "2c0132bedfb24e4e84037abe8ca4b944",
+      "counts": {
+        "failed": 1,
+        "passed": 13,
+        "skipped": 0
+      },
+      "first_failures": [
+        {
+          "message": "  Only unchanged bytes or the independently demonstrated mana decimal suffix is eligible\n  Expected: True\n  But was:  False\n",
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls",
+          "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<StabilizeReadOnlySceneBaseline>d__33.MoveNext () [0x00300] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:225\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        }
+      ],
+      "independent_finalization_receipt_sha256": "94e5756b7e7a9dbebbc84e87bed0206d8dd45ca33a565a8405949da9bbbc647c",
+      "normal_finalization_receipt_sha256": "9dadc82e0e8889f166ad5a16054781da9bf27977093a516fecc2dc8d94687203",
+      "source": "16051641314b5ffcfea7113687b4683a8933aa1f",
+      "verdict": "FAILED",
+      "xml_sha256": "060724fd9ceb291b4b697bba358ec5deeaa7997a8e12a2c45c7557b2819f5566"
+    },
+    {
+      "campaign": "823d7defbaf24247971d30df4dce6763",
+      "counts": {
+        "failed": 1,
+        "passed": 1,
+        "skipped": 0
+      },
+      "first_failures": [
+        {
+          "message": "  Only unchanged bytes or the independently demonstrated mana decimal suffix is eligible\n  Expected: True\n  But was:  False\n",
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls",
+          "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<StabilizeReadOnlySceneBaseline>d__33.MoveNext () [0x00300] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:225\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        }
+      ],
+      "independent_finalization_receipt_sha256": "3504fc320e92692aa2812d87eadebf6816e75fee76565c57efe932c26004fa2b",
+      "normal_finalization_receipt_sha256": "a5777534a2a504513c17c99de80c8b450043547a4dd81afd9865a53157382aab",
+      "source": "cbd13525d93f535d1105e00cb39d1c9504700abd",
+      "verdict": "FAILED",
+      "xml_sha256": "1573ab444e67d76374d2ff9dc2b838e8a707b1f539b34a45d03e11d7f6c9f1a1"
+    },
+    {
+      "campaign": "7e6aa849cea14c2a95621c579e36c3d7",
+      "counts": {
+        "failed": 1,
+        "passed": 13,
+        "skipped": 0
+      },
+      "first_failures": [
+        {
+          "message": "  Expected: True\n  But was:  False\n",
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls",
+          "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<VisualRunReplayProductionLifecycleAndResponsiveControls>d__167.MoveNext () [0x0096d] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonReplaySceneTests.cs:181\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        }
+      ],
+      "independent_finalization_receipt_sha256": "9fb93ed7bee79691394b282e8ca5ae0685c20543c6fcb8a0496a91c2e382bd21",
+      "normal_finalization_receipt_sha256": "6a95382590419d33eb59af1f67ab045ce7e93e0a14dd7b0e122ef4d10d02b204",
+      "source": "e28a05235eaca7456beb6273e8030ae688640ec5",
+      "verdict": "FAILED",
+      "xml_sha256": "245f29ba47a8fe1c0d751fcccb830ae2365d0bfc2c555c8772375068cdc4dd3f"
+    }
+  ],
+  "scope": "Qualified selected scene packets and adjacent controls only; no full-suite, Player, benchmark or owner-UAT pass inferred.",
+  "tested_source": "ed5af6f3473b95eabacfa2993a15ac49257d43b1"
+}

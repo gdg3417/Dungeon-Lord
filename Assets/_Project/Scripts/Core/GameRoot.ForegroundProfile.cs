@@ -14,6 +14,42 @@ namespace DungeonBuilder.M0
 {
     public partial class GameRoot
     {
+        private PreboundForegroundQualificationClock qualificationClockControl;
+        private TimeService qualificationObservationOwner;
+        private Action<double> QualificationAdvance(Action<double> editorAdvance = null)
+        {
+            if (TimeService == null || !ReferenceEquals(TimeService, qualificationObservationOwner))
+                throw new InvalidOperationException("living.foreground.clock_invalid");
+#if UNITY_EDITOR
+            if (editorAdvance != null) {
+                if (!editorRecoveryClockInjected || editorAdvance.Target == null ||
+                    !ReferenceEquals(editorAdvance.Target, editorRecoveryMonotonic.Target))
+                    throw new InvalidOperationException("living.foreground.clock_invalid");
+                return editorAdvance;
+            }
+#endif
+            if (editorAdvance != null || qualificationClockControl == null)
+                throw new InvalidOperationException("living.foreground.clock_invalid");
+            return qualificationClockControl.Advance;
+        }
+        private IEnumerator PrepareForegroundQualification()
+        {
+            if (foregroundFailure != null || foregroundRetryPending || SaveService.RequiresCanonicalRecovery || TimeService.HasForegroundPersistenceStall)
+                throw new InvalidOperationException("b3b2.smoke.recovery_required");
+            // Validated observation-time return. The normal coordinator drains
+            // and closes recovery; qualification never resets its time owner.
+            if (isActiveAndEnabled) OnApplicationFocus(true);
+            else TimeService.SetForegroundFocus(true); // Explicit observation for the isolated manual driver.
+            ApplyPauseState(false);
+            for (int frame = 0; frame < 600 && (bootRecoveryPending || TimeService.RecoveryClockActive || TimeService.HasDeferredRecovery); frame++) {
+                UpdateForeground();
+                if (foregroundFailure != null || foregroundRetryPending || SaveService.RequiresCanonicalRecovery || TimeService.HasForegroundPersistenceStall)
+                    throw new InvalidOperationException("b3b2.smoke.recovery_required");
+                yield return null;
+            }
+            if (bootRecoveryPending || TimeService.RecoveryClockActive || TimeService.HasDeferredRecovery || _runSimulationService == null)
+                throw new InvalidOperationException("b3b2.smoke.boot_failed");
+        }
         [Serializable] internal sealed class ForegroundProfileFrame
         {
             public int Frame, Sequence, Collections, PartyCount, CheckpointBytes;
@@ -33,7 +69,7 @@ namespace DungeonBuilder.M0
             public string[] Areas;
             public List<ForegroundProfileFrame> Frames = new List<ForegroundProfileFrame>();
         }
-        internal IEnumerator ProfileForeground(ForegroundProfileReport report)
+        internal IEnumerator ProfileForeground(ForegroundProfileReport report, Action<double> editorAdvance = null)
         {
             if (!Application.productName.Contains("B3B2 Smoke") ||
                 !(System.IO.Path.GetFileName(SaveService.SavePath).StartsWith("living-dungeon-b3b2-qualification-", StringComparison.Ordinal) ||
@@ -44,11 +80,9 @@ namespace DungeonBuilder.M0
             report.TextSize = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>()?.TextSize.ToString();
             report.StopwatchFrequency = Stopwatch.Frequency;
             report.Areas = Enum.GetNames(typeof(ForegroundQualificationMetrics.Area));
-            double sample = 1000;
-            TimeService = new TimeService(Logger, _configuredSimulationTickSeconds,
-                Content.Bootstrap.timeRules.detectClockSkewSeconds, new SystemTimeSource(), () => sample);
-            TimeService.AttachSave(Save); TimeService.SetForegroundFocus(true);
-            TimeService.BeginForeground(SaveService.ForegroundConfiguration.UnitsPerSecond, Save.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
+            var advance = QualificationAdvance(editorAdvance);
+            var preparation = PrepareForegroundQualification();
+            while (preparation.MoveNext()) yield return preparation.Current;
             foregroundApplicationFocused = true; foregroundApplicationPaused = false; foregroundDirty = true;
             using var mainThread = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "Main Thread", 1);
             using var frameAllocations = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Allocated In Frame", 1);
@@ -77,7 +111,7 @@ namespace DungeonBuilder.M0
                     }
                     foregroundApplicationFocused = true; foregroundApplicationPaused = false;
                     TimeService.SetForegroundFocus(true); TimeService.OnResume();
-                    if (frame >= 120) sample += .25; // explicit qualification clock acceleration; configuration unchanged
+                    if (frame >= 120) advance(.25); // advance the original prebound provider; configuration unchanged
                     int sequence = Save.runHistory.NextRunSequence;
                     long ordinal = Save.livingDungeon.Parties.Sum(p => p.NextOrdinal);
                     string latest = Save.runHistory.LatestOutcome?.RunId;

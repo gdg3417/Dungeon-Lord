@@ -26,12 +26,15 @@ namespace DungeonBuilder.Tests.EditMode
 
         [SetUp] public void SetUp()
         {
-            f = Fixture.Create("\"unrelatedResearchEvidence\":{\"n\":1.00}", "\"unrelatedRoot\":[true,null]");
+            f = Fixture.Create("\"unrelatedResearchEvidence\":{\"n\":1.00}", "\"unrelatedRoot\":[true,null]",
+                workloadProfile: SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile,
+                recoveryInputBytes: AuthoredResearchInputs());
             service = OpenService(f, out current);
             current.researchPending = null; current.researchProgress = null;
             current.completedResearch = new CompletedResearchState(); current.completedObjectives = new CompletedObjectiveState();
             current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1",
                 LootExtractionSummary = new RunLootExtractionSummary { TotalExtractedWorldValue = 1 } }, 5);
+            current.runHistory.NextRunSequence = 2; // This synthetic confirmed run already owns run-1.
             service.CanonicalRuntimePublished += save => { current = save; publications++; };
             Assert.That(service.Save(current, SaveReason.StateChange), Is.True);
             publications = 0;
@@ -39,15 +42,47 @@ namespace DungeonBuilder.Tests.EditMode
 
         internal static SaveService OpenService(Fixture fixture, out SaveData loaded)
         {
+            // This is a synthetic current-schema Research fixture, not historical
+            // activation evidence. Use its already-bound consumed inputs and a
+            // fixed test clock; metadata writes cannot move the fixture's W.
+            var inputs = fixture.Context.RecoveryInputs;
+            var wall = new ResearchFixtureClock(fixture.Runtime.timeProvenance.AccountedBoundary);
+            return OpenService(fixture, out loaded, wall, () => 0, out _);
+        }
+
+        internal static SaveService OpenService(Fixture fixture, out SaveData loaded,
+            IPreciseTimeSource wall, Func<double> monotonic, out TimeService time)
+        {
+            var inputs = fixture.Context.RecoveryInputs;
+            time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
+                inputs.Bootstrap.timeRules.detectClockSkewSeconds, wall, monotonic);
+            time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);
             var result = new SaveService(new SimpleLogger(false, (level, message) => { }),
                 new SaveConfig { fileName = Path.GetFileName(fixture.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(fixture.ActivePath));
             result.ConfigureCanonical(fixture.Profile, fixture.Production, fixture.Compatibility, fixture.Configuration,
                 LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), fixture.PositionProfiles, fixture.Occupancy);
+            // Native creation after explicit deletion needs these before LoadOrCreate,
+            // just as the real GameRoot bootstrap supplies them before its first load.
+            result.ConfigureStructuralEconomy(inputs.Economy);
+            result.ConfigureContentAcquisitionEconomy(fixture.Acquisition);
             result.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, fixture.FileSystem, path));
+            result.SetTimeSourceForTests(wall);
+            result.ConfigureRecovery(inputs, time);
             loaded = result.LoadOrCreate("r0-test", out string banner);
             Assert.That(loaded, Is.Not.Null, banner);
+            time.BindLoadedForegroundHorizon(loaded.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
+            time.AttachSave(loaded);
+            result.CanonicalRuntimePublished += time.AttachSave;
             return result;
+        }
+
+        private sealed class ResearchFixtureClock : IPreciseTimeSource
+        {
+            private readonly UnixTimePoint now;
+            internal ResearchFixtureClock(UnixTimePoint value) { now = value; }
+            public UnixTimePoint UtcNow() => now;
+            public long UtcNowUnixSeconds() => now.Seconds;
         }
 
         // Historical presentation fixtures use the schema-6 placement sandbox. Run
@@ -59,11 +94,38 @@ namespace DungeonBuilder.Tests.EditMode
             private readonly SaveData legacy;
             private readonly SaveService previousService;
             private readonly ProductionSpatialContentSnapshot previousProduction;
+            private readonly ContentBootstrap previousBootstrap;
+            private readonly object previousTick;
+            private readonly SaveService canonical;
             internal CanonicalRootScope(GameRoot root, bool starterDungeon = false)
             {
                 this.root = root; legacy = root.Save; previousService = root.SaveService;
                 previousProduction = root.Content.ProductionSpatialContent;
-                var fixture = Fixture.Create(null);
+                previousBootstrap = root.Content.Bootstrap;
+                previousTick = typeof(GameRoot).GetField("_configuredSimulationTickSeconds", Private).GetValue(root);
+                Assert.That(root.TimeService, Is.Null, "This legacy presentation sandbox must not replace an existing observation owner");
+                var run = (RunSimulationService)typeof(GameRoot).GetField("_runSimulationService", Private).GetValue(root);
+                var bytes = DungeonBuilder.M0.Tests.EditMode.PhaseFourTestSupport.AuthoredInputs((config, bootstrap) => {
+                    config.MvpFirstSessionObjective = JsonUtility.FromJson<MvpFirstSessionObjectiveConfig>(JsonUtility.ToJson(run.Config.MvpFirstSessionObjective));
+                    bootstrap.tickSeconds = previousBootstrap.tickSeconds;
+                    bootstrap.researchPendingScaffold = JsonUtility.FromJson<ResearchPendingScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchPendingScaffold));
+                    bootstrap.researchProgressScaffold = JsonUtility.FromJson<ResearchProgressScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchProgressScaffold));
+                    bootstrap.researchCompletionEligibilityScaffold = JsonUtility.FromJson<ResearchCompletionEligibilityScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchCompletionEligibilityScaffold));
+                    bootstrap.researchCompletionClaimScaffold = JsonUtility.FromJson<ResearchCompletionClaimScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchCompletionClaimScaffold));
+                    bootstrap.researchVerificationScaffold = JsonUtility.FromJson<ResearchVerificationScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchVerificationScaffold));
+                    bootstrap.researchUnlockBridge = JsonUtility.FromJson<ResearchUnlockBridgeConfig>(JsonUtility.ToJson(previousBootstrap.researchUnlockBridge));
+                });
+                string JsonOrNull(object value) => value == null ? "null" : JsonUtility.ToJson(value);
+                // Explicit synthetic initial Research/history, before ownership.
+                // Do not clone the presentation sandbox's time/spatial authority
+                // or overwrite a bound owner's runtime with that legacy object.
+                var fixture = Fixture.Create("\"lastSavedUtcUnix\":" + Math.Max(1, legacy.lastSavedUtcUnix) +
+                    ",\"researchPending\":" + JsonOrNull(legacy.researchPending) +
+                    ",\"researchProgress\":" + JsonOrNull(legacy.researchProgress) +
+                    ",\"completedResearch\":" + JsonOrNull(legacy.completedResearch) +
+                    ",\"completedObjectives\":" + JsonOrNull(legacy.completedObjectives) +
+                    ",\"runHistory\":" + JsonOrNull(legacy.runHistory),
+                    workloadProfile: DungeonBuilder.M0.Tests.EditMode.PhaseFourTestSupport.ProductionProfile(), recoveryInputBytes: bytes);
                 if (starterDungeon)
                 {
                     foreach (var pair in new[] {
@@ -73,25 +135,35 @@ namespace DungeonBuilder.Tests.EditMode
                         (MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.BasicLootNodeOptionId) })
                         fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(pair.Item1, pair.Item2)));
                 }
-                // The presentation sandbox has no persisted time. Use the explicit
-                // fake canonical fixture boundary while copying its research state.
-                long presentationTime = legacy.lastSavedUtcUnix;
-                try {
-                    legacy.lastSavedUtcUnix = Math.Max(legacy.lastSavedUtcUnix, fixture.Runtime.lastSavedUtcUnix);
-                    fixture.Accept(fixture.Authority.SaveRecognizedState(fixture.ActivePath, fixture.FileSystem, fixture.Session, legacy));
-                } finally { legacy.lastSavedUtcUnix = presentationTime; }
-                var canonical = OpenService(fixture, out var save);
+                var clock = new ResearchFixtureClock(fixture.Runtime.timeProvenance.AccountedBoundary);
+                canonical = OpenService(fixture, out var save, clock, () => 0, out var owner);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.SaveService)).SetValue(root, canonical);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.Save)).SetValue(root, save);
+                typeof(GameRoot).GetProperty(nameof(GameRoot.TimeService)).SetValue(root, owner);
+                typeof(GameRoot).GetField("_configuredSimulationTickSeconds", Private).SetValue(root, fixture.Context.RecoveryInputs.Bootstrap.tickSeconds);
+                root.Content.BindRecoveryBootstrap(fixture.Context.RecoveryInputs);
                 typeof(ContentService).GetProperty(nameof(ContentService.ProductionSpatialContent)).SetValue(root.Content, fixture.Production);
+                canonical.BeforeForegroundAction = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), root,
+                    typeof(GameRoot).GetMethod("FlushForeground", Private));
+                canonical.ForegroundCurrent = () => root.Save;
                 canonical.CanonicalRuntimePublished += (Action<SaveData>)Delegate.CreateDelegate(typeof(Action<SaveData>), root,
                     typeof(GameRoot).GetMethod("PublishCanonicalRuntime", Private));
+                var consumed = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext", Private).GetValue(canonical);
+                Assert.That(consumed.RecoveryInputs, Is.SameAs(fixture.Context.RecoveryInputs));
+                Assert.That(root.Content.Bootstrap, Is.SameAs(consumed.RecoveryInputs.Bootstrap));
+                Assert.That(root.TimeService, Is.SameAs(owner));
                 root.RefreshOfflineSummaryLines();
+                CollectionAssert.AreEqual(fixture.Session.GetCurrentBytes(), canonical.CanonicalSession.GetCurrentBytes(),
+                    "Binding presentation to consumed authority must not publish a time or gameplay change");
             }
             public void Dispose()
             {
                 legacy.researchPending = root.Save.researchPending; legacy.researchProgress = root.Save.researchProgress;
                 legacy.completedResearch = root.Save.completedResearch; legacy.completedObjectives = root.Save.completedObjectives;
+                canonical.BeforeForegroundAction = null; canonical.ForegroundCurrent = null;
+                typeof(GameRoot).GetProperty(nameof(GameRoot.TimeService)).SetValue(root, null);
+                typeof(GameRoot).GetField("_configuredSimulationTickSeconds", Private).SetValue(root, previousTick);
+                typeof(ContentService).GetProperty(nameof(ContentService.Bootstrap)).SetValue(root.Content, previousBootstrap);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.Save)).SetValue(root, legacy);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.SaveService)).SetValue(root, previousService);
                 typeof(ContentService).GetProperty(nameof(ContentService.ProductionSpatialContent)).SetValue(root.Content, previousProduction);
@@ -124,6 +196,26 @@ namespace DungeonBuilder.Tests.EditMode
             MvpFirstSessionObjective = new MvpFirstSessionObjectiveConfig { ObjectiveId = "test.objective", RequiredRecoveredLootValue = 1,
                 RequireResearchAnalysisUnlocked = true, AnalysisResearchProjectId = Project }
         };
+
+        internal static byte[][] AuthoredResearchInputs()
+        {
+            // The existing test coefficients/project are authored before the
+            // current owner exists. Do not alter production assets or historical
+            // serialization, and never hash JsonUtility's incomplete run config.
+            return DungeonBuilder.M0.Tests.EditMode.PhaseFourTestSupport.AuthoredInputs((config, bootstrap) => {
+            config.MvpFirstSessionObjective = ObjectiveConfig().MvpFirstSessionObjective;
+            bootstrap.researchPendingScaffold = new ResearchPendingScaffoldConfig {
+                enabled = true, slotId = "slot", projectId = Project, ruleSourceId = "test.pending" };
+            bootstrap.researchProgressScaffold = new ResearchProgressScaffoldConfig {
+                enabled = true, progressPerActiveSecond = .1, maxActiveSessionElapsedSeconds = 100, ruleSourceId = "test.progress" };
+            bootstrap.researchCompletionEligibilityScaffold = new ResearchCompletionEligibilityScaffoldConfig {
+                enabled = true, projectId = Project, requiredProgressUnits = 1, ruleSourceId = "test.eligibility" };
+            bootstrap.researchCompletionClaimScaffold = new ResearchCompletionClaimScaffoldConfig {
+                enabled = true, ruleSourceId = "test.claim", claimAuthorityMode = PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode };
+            bootstrap.researchVerificationScaffold = new ResearchVerificationScaffoldConfig {
+                enabled = true, ruleSourceId = "test.verification", verificationMode = ResearchVerificationBoundaryResolver.UnavailableVerificationMode };
+            });
+        }
 
         private int Writes => f.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Write);
         private byte[] Bytes => f.FileSystem.ReadAllBytes(service.SavePath);
@@ -173,7 +265,7 @@ namespace DungeonBuilder.Tests.EditMode
             string durable = Encoding.UTF8.GetString(Bytes);
             Assert.That(durable, Does.Contain("\"unrelatedResearchEvidence\":{\"n\":1.00}"));
             Assert.That(durable, Does.Contain("\"unrelatedRoot\":[true,null]"));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
         }
 
         [TestCase(false, Faults.OperationType.Write, 1)]

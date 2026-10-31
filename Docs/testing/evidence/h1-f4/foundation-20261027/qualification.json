@@ -1,0 +1,135 @@
+{
+  "artifact_owner": "H1-F4 task",
+  "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\234d81c04b3648d3965c479ab98fd966",
+  "preservation": {
+    "inputs": 1472,
+    "original_inputs_restored": true,
+    "passed": true,
+    "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 foundation02",
+    "protected_evidence_unchanged": true,
+    "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 foundation02"
+  },
+  "prior_failure": {
+    "campaign": "48aa42ce86cd4df89ab6d6ed0445e731",
+    "failed": 1,
+    "finding": "Assertion queried the generic fixture limit of 100000 nodes instead of the frozen production resource limit of 10244. Corrected the test to query the loaded frozen resource. No production limit changed.",
+    "passed": 29,
+    "restoration": "TestResults/h1-f4-20261027-foundation01/post-failure-reviewed-restoration",
+    "retention": "Entire failed campaign and original XML/logs preserved; not relabeled as passing.",
+    "skipped": 0,
+    "source_sha": "2bdacd4b36732d135adf6bf2e8030a2c6991025c",
+    "test": "FrozenSixteenRemainsReadOnlyAndExact"
+  },
+  "retention": "Preserve source-pinned compact evidence and complete local campaign trees; no owner UAT",
+  "scope": "Frozen schema-16 readers, immutable v3 identity and format-2 representation foundation only; schema 17 and recovery remain inactive",
+  "source_sha": "831b1acb159c11e885fe5039b5b26a6ea04c3b1d",
+  "stages": {
+    "focused": {
+      "evidence": {
+        "child.json": "320c509763de498943f40708c1865989c4583485a15fcfea62b16d89976ba069",
+        "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "exit.json": "07a978dd32d90d018493c893defa7d1b995a80aaf62a5d1d814e9370334536e8",
+        "generated-inputs": {
+          "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+        },
+        "invocation.json": "5de0d842c660570259ab214a864fb6eefe173fb2ca9e166833480ec70c3f567d",
+        "results.xml": "62b79c3bf38d3e78726405973345b668d6f750a839939188cf85a527061c32f9",
+        "started.json": "ad5a8fbff9dfd157acadc21709e1adaeeb8ea058f1e7e7e2336acf01a7783c3a",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "unity.log": "656aa73c31720e14790df214fa2b503ed8c2e59c662162ece777152fb6417309"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "source_sha": "831b1acb159c11e885fe5039b5b26a6ea04c3b1d",
+      "stage": "focused",
+      "status": "PASSED",
+      "tests": {
+        "discovered": 30,
+        "failed": 0,
+        "passed": 30,
+        "skipped": 0,
+        "skips": []
+      }
+    },
+    "focused-preflight": {
+      "evidence": {
+        "child.json": "71575dacb3422e79dc4b840508635370defedbce729630b6835a67f39846114d",
+        "exit.json": "7b0c7375528a37d3c7837c735d25ddf96ba76b0dc488719c8eb1487adae72f60",
+        "preservation.json": "7ac7b49811436e50dc6b498d1208a559e47eb32a15f6c644e8ad94952934cf40",
+        "started.json": "63d4b59da8170bc4e0a75a5350b64a3d9ea34eae4251aad93d48d65cbaa0de2f",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "source_sha": "831b1acb159c11e885fe5039b5b26a6ea04c3b1d",
+      "stage": "focused-preflight",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    },
+    "preservation": {
+      "evidence": {
+        "child.json": "464707d1a89231f71b0a69648e363059835c0bc8f814171fc4f9705ab4a66230",
+        "exit.json": "900b729f49e34748c00326788b026a9f112b5c7552081f2b7289b39c8247bd5a",
+        "preservation.json": "e3cb237fe35d723863757df997372a4de56da1aaaa08c873d5f80229568d9556",
+        "started.json": "441ec129f1e10542416b80e116cc995d67398d6b11ca46a7e962f59bb3223335",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "source_sha": "831b1acb159c11e885fe5039b5b26a6ea04c3b1d",
+      "stage": "preservation",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    },
+    "restore": {
+      "evidence": {
+        "child.json": "bcdfe237a0d7df3010a59a546163aa9beafe5fc1059c60f14a2143cb72940f5a",
+        "exit.json": "61f0377ac5640371c62a8536fb54b787a9e5ec0a6c1042e4d06f91026d1d5d7b",
+        "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+        "started.json": "33828ead6723f989e56b81b18cb453badde82bccbe357f208e8cbff9a2b9542b",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "source_sha": "831b1acb159c11e885fe5039b5b26a6ea04c3b1d",
+      "stage": "restore",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    },
+    "restore-preflight": {
+      "evidence": {
+        "child.json": "2eb7c42a65ffeac00993086e87c39b8b678a3d057d6b2f6b9da113c4672cdc1e",
+        "exit.json": "1d8d09e69c7fba46e5386498280188352af779634a4ee5c0ad2adb4b1aab22d2",
+        "preservation.json": "7ac7b49811436e50dc6b498d1208a559e47eb32a15f6c644e8ad94952934cf40",
+        "started.json": "4b0bcc9a0660a9c0a0e1f0b7f10a94b6479c61e7aed78b009afd605f7550867f",
+        "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "source_sha": "831b1acb159c11e885fe5039b5b26a6ea04c3b1d",
+      "stage": "restore-preflight",
+      "status": "PASSED",
+      "tests": {
+        "discovered": null,
+        "failed": null,
+        "passed": null,
+        "skipped": null
+      }
+    }
+  }
+}

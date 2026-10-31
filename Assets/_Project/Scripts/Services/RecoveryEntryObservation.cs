@@ -32,6 +32,14 @@ namespace DungeonBuilder.M0
             // Require one complete observation. A seconds-only source cannot
             // manufacture a precise sample, nor may callers interpolate one.
             UnixTimePoint wall = clock.UtcNow();
+            return FromCaptured(wall, provenance, context);
+        }
+
+        internal static RecoveryEntryObservation FromCaptured(UnixTimePoint wall,
+            TimeProvenance provenance, RecoveryEntryContext context)
+        {
+            if (provenance == null || context != RecoveryEntryContext.KnownBackground && context != RecoveryEntryContext.UnknownPostCrash)
+                throw new ArgumentException("time.recovery.observation_invalid");
             if (wall == null || wall.Seconds <= 0 || wall.CompareTo(provenance.AccountedBoundary) < 0)
                 throw new ArgumentException("time.recovery.observation_invalid");
             return new RecoveryEntryObservation(wall, context);

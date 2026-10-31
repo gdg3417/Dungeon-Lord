@@ -35,7 +35,8 @@ namespace DungeonBuilder.M0
             if (Save.livingDungeon?.Scheduler != null && !LivingDungeonForegroundConfig.IsProduction(Save.livingDungeon.Scheduler.ProfileId)) return;
             foregroundApplicationFocused = Application.isFocused;
             TimeService.SetForegroundFocus(foregroundApplicationFocused && isActiveAndEnabled);
-            TimeService.BeginForeground(SaveService.ForegroundConfiguration.UnitsPerSecond, Save.livingDungeon?.Scheduler?.AcceptedThrough ?? -1);
+            if (!TimeService.HasForegroundClock)
+                TimeService.BeginForeground(SaveService.ForegroundConfiguration.UnitsPerSecond, Save.livingDungeon?.Scheduler?.AcceptedThrough ?? -1);
             SaveService.BeforeForegroundAction = FlushForeground;
             SaveService.ForegroundCurrent = () => Save;
             SaveService.CanonicalRuntimePublished += ForegroundPublished;
@@ -57,8 +58,23 @@ namespace DungeonBuilder.M0
 
         private void UpdateForeground()
         {
-            if (_explicitSaveDeleteQuiesced || foregroundFailure != null || foregroundRetryPending || foregroundPumping || Save == null) return;
+            if (_explicitSaveDeleteQuiesced || foregroundFailure != null || foregroundRetryPending || foregroundPumping ||
+                SaveService?.CanonicalPublicationPending == true || Save == null) return;
             try {
+                if (TimeService.RecoveryClockActive) { PumpCanonicalRecovery(); return; }
+                // A known foreground failure is held for an explicit action or
+                // lifecycle retry, never retried by the frame loop as absence.
+                if (TimeService.HasForegroundPersistenceStall) return;
+                if (TimeService.HasDeferredRecovery) {
+                    if (!TimeService.RecoveryForegroundObserved) return; // Retain grouped absence until an observed return.
+                    TimeService.BeginDeferredRecoveryPreparation();
+                    if (!FlushForeground()) return;
+                    if (TimeService.HasDeferredRecovery) {
+                        if (TimeService.HasDeferredBackground) SaveService.BeginCanonicalRecovery(Save, observedBackground: true);
+                        return;
+                    }
+                }
+                if (bootRecoveryPending) { FinishRecoveryBoot(); return; }
                 long now = TimeService.SampleForeground();
                 if (foregroundDirty || ForegroundActivity == null || now >= ForegroundActivity.NextBoundary || Save.livingDungeon?.IsClosed == false)
                     PumpForeground(TimeService.CaptureForegroundObservation(SaveService.CanonicalSession));
@@ -118,20 +134,34 @@ namespace DungeonBuilder.M0
         private bool FlushForeground()
         {
             if (TimeService?.HasForegroundClock != true || foregroundPumping) return true;
+            if (SaveService?.CanonicalPublicationPending == true) return false;
             if (foregroundFailure != null || _explicitSaveDeleteQuiesced) return false;
+            if (TimeService.RecoveryClockActive) { PumpCanonicalRecovery(); return false; }
             try {
                 var observation = TimeService.CaptureForegroundObservation(SaveService.CanonicalSession);
                 long target = observation.CapturedThrough;
+                var wallTarget = Save.timeProvenance?.Mode == TimeProvenance.PreciseMode &&
+                    observation.Context == ForegroundObservationContext.EligibleForeground ? observation.WallEndpoint : null;
                 int pumps = SaveService.ForegroundConfiguration.MaximumBoundaries;
-                while (pumps-- > 0 && (foregroundRetryPending || Save.livingDungeon.IsDormant ||
-                    !Save.livingDungeon.IsClosed || target > Save.livingDungeon.Scheduler.AcceptedThrough))
+                while (pumps-- > 0 && (foregroundRetryPending || TimeService.HasForegroundPersistenceStall || Save.livingDungeon.IsDormant ||
+                    !Save.livingDungeon.IsClosed || target > Save.livingDungeon.Scheduler.AcceptedThrough ||
+                    wallTarget != null && Save.timeProvenance.AccountedBoundary.CompareTo(wallTarget) < 0))
                 {
                     if (!PumpForeground(observation)) return false;
                     // Rebind a new captured full observation after publication. Elapsed
                     // storage time is retained for subsequent processing, never interpolated.
                     observation = TimeService.CaptureForegroundObservation(SaveService.CanonicalSession);
                 }
-                return Save.livingDungeon.IsClosed && target <= Save.livingDungeon.Scheduler.AcceptedThrough;
+                bool complete = Save.livingDungeon.IsClosed && target <= Save.livingDungeon.Scheduler.AcceptedThrough &&
+                    (wallTarget == null || Save.timeProvenance.AccountedBoundary.CompareTo(wallTarget) >= 0);
+                if (complete && TimeService.HasDeferredRecovery) {
+                    if (TimeService.HasDeferredBackground && TimeService.RecoveryForegroundObserved) {
+                        TimeService.BeginDeferredRecoveryPreparation();
+                        SaveService.BeginCanonicalRecovery(Save, observedBackground: true);
+                    }
+                    return false; // An action cannot bypass the unresolved absence.
+                }
+                return complete;
             } catch { ForegroundFault("living.foreground.clock_invalid"); return false; }
         }
 

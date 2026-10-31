@@ -83,6 +83,8 @@ namespace DungeonBuilder.M0.Economy
         private const double SecondsPerHour = 3600d;
         private readonly PassiveOnlineManaConfigurationSnapshot configuration;
         private readonly CanonicalPassiveManaService canonicalOnline;
+        internal bool MatchesRecoveryInputs(DungeonBuilder.M0.Gameplay.DungeonSpatial.RecoveryRuntimeInputs inputs) =>
+            inputs != null && ReferenceEquals(configuration, inputs.Passive) && canonicalOnline.MatchesRecoveryInputs(inputs);
 
         public CanonicalOfflinePassiveManaService(
             PassiveOnlineManaConfigurationSnapshot configuration,
@@ -199,6 +201,29 @@ namespace DungeonBuilder.M0.Economy
                     ? OfflinePassiveManaReason.AlreadyAtCapacity
                     : OfflinePassiveManaReason.NoManaGenerated;
             return result;
+        }
+
+        // Publication callers must prove the episode phase/duration independently.
+        // A zero-duration obligation still closes durably and performs the one
+        // applicable recovery pass. Grouped durations have no fabricated UTC end.
+        internal OfflinePassiveManaResult ResolveRecoveryDuration(SaveData save,
+            RunSimulationConfig heatConfiguration, long eligible100ns, bool legacyWholeSeconds)
+        {
+            double wallet = save?.structureRuntime?.ManaReserve ?? double.NaN;
+            var result = new OfflinePassiveManaResult {
+                Reason = OfflinePassiveManaReason.CanonicalStateOrConfigurationInvalid,
+                SourceSavedUtcUnix = save?.lastSavedUtcUnix ?? 0,
+                ObservedElapsedSeconds = eligible100ns / UnixTimePoint.UnitsPerSecond,
+                WalletBefore = wallet, WalletAfter = wallet, Capacity = canonicalOnline.ManaCapacity,
+                ConfiguredBaseOfflineEfficiency = configuration.BaseOfflineEfficiency,
+                EffectiveOfflineEfficiency = configuration.BaseOfflineEfficiency };
+            if (eligible100ns < 0 || eligible100ns >
+                new UnixTimePoint(UnixTimePoint.MaximumSeconds, 9999999).Elapsed100nsSince(new UnixTimePoint(1, 0)) ||
+                legacyWholeSeconds && eligible100ns % UnixTimePoint.UnitsPerSecond != 0 ||
+                !FiniteNonnegative(wallet) || wallet > result.Capacity) return result;
+            double elapsed = eligible100ns / UnixTimePoint.UnitsPerSecond;
+            if (!legacyWholeSeconds) elapsed += (double)(eligible100ns % UnixTimePoint.UnitsPerSecond) / UnixTimePoint.UnitsPerSecond;
+            return Calculate(result, canonicalOnline.ResolveRate(save, heatConfiguration), elapsed);
         }
 
         public HistoricalOfflineManaInterval CaptureHistoricalInterval(SaveData intervalStart,

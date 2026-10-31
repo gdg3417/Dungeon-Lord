@@ -1,0 +1,1166 @@
+{
+  "P1_decimal_signatures_proven": 13,
+  "P1_qualified": 10,
+  "P1_unqualified": 3,
+  "P6_qualified": true,
+  "PR": 259,
+  "applicability": {
+    "SIT": "Actual production UI scene and canonical filesystem publications through normal Unity Update; selected Windows Editor EditMode UnityTests",
+    "UAT": "Not started; remains required later after independent authorization",
+    "Unit": "Fixture guards plus six existing clock/publication negatives qualified; no new production arithmetic"
+  },
+  "artifact_inventory": [
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "TestResults/h1-f4-20261027-pb01",
+      "purpose": "Inputs/archive, exact selection, runner, results verification and guarded failure receipt where applicable",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "TestResults/h1-f4-20261027-pb02",
+      "purpose": "Inputs/archive, exact selection, runner, results verification and guarded failure receipt where applicable",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "TestResults/h1-f4-20261027-pb03",
+      "purpose": "Inputs/archive, exact selection, runner, results verification and guarded failure receipt where applicable",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "TestResults/h1-f4-20261027-pb04",
+      "purpose": "Inputs/archive, exact selection, runner, results verification and guarded failure receipt where applicable",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "TestResults/qualification-supervisor/b77e00e12dad4b46a3a3d3a62c156eca",
+      "purpose": "Immutable supervisor outcome, XML, process/Job, screenshot and failed-scene evidence",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "TestResults/qualification-supervisor/71e128c853854884a88356edd024df99",
+      "purpose": "Immutable supervisor outcome, XML, process/Job, screenshot and failed-scene evidence",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "TestResults/qualification-supervisor/7c4c9237cb4e49e89f2ad55a5f870352",
+      "purpose": "Immutable supervisor outcome, XML, process/Job, screenshot and failed-scene evidence",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "TestResults/qualification-supervisor/2617beb9783a41568358c9f47baee809",
+      "purpose": "Immutable supervisor outcome, XML, process/Job, screenshot and failed-scene evidence",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "TestResults/h1-f4-scene-compile-20261030-02",
+      "purpose": "Compile-only probe checkpoint",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "TestResults/h1-f4-scene-compile-20261030-03",
+      "purpose": "Compile-only final helper checkpoint",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 pb01",
+      "purpose": "Isolated save namespace; failed states retained",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 pb02",
+      "purpose": "Isolated save namespace; failed states retained",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 pb03",
+      "purpose": "Isolated save namespace; failed states retained",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 P1/P6 packet",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 pb04",
+      "purpose": "Isolated save namespace; failed states retained",
+      "retention": "Preserve for independent review and failure reproduction"
+    }
+  ],
+  "base": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaigns": [
+    {
+      "archive_members_verified": 1494,
+      "archive_sha256": "20c98f05ce35f4db004af25cd1f9bef262f88b10fcbb3f26869af9544b313488",
+      "attempt": "pb01",
+      "campaign": "b77e00e12dad4b46a3a3d3a62c156eca",
+      "counts": {
+        "failed": 13,
+        "passed": 1,
+        "skipped": 0,
+        "total": 14
+      },
+      "normal_failed_finalizer_sha256": "de1bb648ec25bcdf9053468e8a696cf753df7b8bc0f7dfb407d383123f40b938",
+      "source": "ff6d7170edfe5c4c434ae50a72217354b115b375",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 8,
+          "host_exit": 0,
+          "job": "Local\\DLQ-2040b9703f1d4ea1a3a2fd8030ae2325",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134378831341886575,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 35692
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134378831340605745,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 38964
+              }
+            }
+          },
+          "result_sha256": "ceef423e979a9577fda762ff25cfdb7dde35441eaea64c8cbdc4e62eee91f268",
+          "status": "FAILED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-0560031a5487407da7b44c4c9ea14771",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134378831239511732,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 28604
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134378831238352389,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 37648
+              }
+            }
+          },
+          "result_sha256": "9456cb93510cb0865df9325d0897d3ee32eb06f83052355db6e7c1922741801b",
+          "status": "PASSED"
+        }
+      },
+      "tool_pins_verified": 10,
+      "verdict": "FAILED",
+      "xml_sha256": "2e1e99e2956393b78ee9460640c07e9e597289bcb00e72882c76dcd30f54fd9e"
+    },
+    {
+      "archive_members_verified": 1494,
+      "archive_sha256": "333c745fcbcecd3301972a38f8482a22307f2fe6186e9a15acd4eaa99ad226dc",
+      "attempt": "pb02",
+      "campaign": "71e128c853854884a88356edd024df99",
+      "counts": {
+        "failed": 2,
+        "passed": 3,
+        "skipped": 0,
+        "total": 5
+      },
+      "normal_failed_finalizer_sha256": "3a8ac625a554b39250be339c9b3e2ed4841d40e0b08a586621c8ac2e966b7c2c",
+      "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 8,
+          "host_exit": 0,
+          "job": "Local\\DLQ-08813d33d8bc452e984f39bc3a67202c",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134378837156183143,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 27628
+              }
+            },
+            "process": {
+              "current": {
+                "created": 134379280453515165,
+                "executable": "c:\\flaresolverr\\_internal\\chrome\\chrome.exe",
+                "pid": 28196
+              },
+              "recorded": {
+                "created": 134378837154360324,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 28196
+              }
+            }
+          },
+          "result_sha256": "ce4b70e3ad6f8114d3f8b440b6b8c670f495f95ed2e62703d73d62bd5ba9bd82",
+          "status": "FAILED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-d92898cd2b734abeae10611b8d5db371",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134378837049154406,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 26548
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134378837046459684,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 27876
+              }
+            }
+          },
+          "result_sha256": "eb610b7c9e602216f3d549e8e4bafaf17566aa73bd6b3d2d227101ddb5e9197f",
+          "status": "PASSED"
+        }
+      },
+      "tool_pins_verified": 10,
+      "verdict": "FAILED",
+      "xml_sha256": "172fa5effba576010d89a0af1e70b786f183fb1eeee23540174b65378a94e5bc"
+    },
+    {
+      "archive_members_verified": 1494,
+      "archive_sha256": "e03a27e7a90570477329323a46cab0579d73a6698a2ac48bde0311fba8b0c1e6",
+      "attempt": "pb03",
+      "campaign": "7c4c9237cb4e49e89f2ad55a5f870352",
+      "counts": {
+        "failed": 3,
+        "passed": 17,
+        "skipped": 0,
+        "total": 20
+      },
+      "normal_failed_finalizer_sha256": "d141cd866cde10651a4b2e90ba8ef8cb42069ede00f61b82bcf50c7cda6de7f2",
+      "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 8,
+          "host_exit": 0,
+          "job": "Local\\DLQ-11935ca50c464eba9ca99dfc7147cff6",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134378881556410825,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 13024
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134378881555241789,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 18320
+              }
+            }
+          },
+          "result_sha256": "a180aafe3ec02b5d595ffdc3b757ef16f657e1b2a4b7348ebd6f2a1283b371da",
+          "status": "FAILED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-3ca586b2184c46b4a7d8980efa3fcf59",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134378881451440118,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 17372
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134378881449072215,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 19284
+              }
+            }
+          },
+          "result_sha256": "3d68c95acfec0c47da60cbd07a79290a325dc637796eb76cc052130155ef2025",
+          "status": "PASSED"
+        }
+      },
+      "tool_pins_verified": 10,
+      "verdict": "FAILED",
+      "xml_sha256": "dca8925fbacab04794252f713e37c9a8c09713fe345d1398a3079487c83bbdf4"
+    },
+    {
+      "archive_members_verified": 1494,
+      "archive_sha256": "fb8affcc79d2473d5a9295761de09b9a583408014d5549f1a2e29882435254f8",
+      "attempt": "pb04",
+      "campaign": "2617beb9783a41568358c9f47baee809",
+      "counts": {
+        "failed": 0,
+        "passed": 17,
+        "skipped": 0,
+        "total": 17
+      },
+      "normal_failed_finalizer_sha256": null,
+      "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-0a55b80a5d434610808b4dabe5edb854",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379208773518054,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 39576
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379208771229603,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 36092
+              }
+            }
+          },
+          "result_sha256": "9427cf235771fea452c5e6d70c3523d57fd6a392ffd75a58d03a9dd3284f218b",
+          "status": "PASSED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-b71d6f8aa89f4673b2b7479e44b4de74",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379208664887506,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 42096
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379208663641914,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 33536
+              }
+            }
+          },
+          "result_sha256": "31fc29bfa43be8e225479f50dc45e22c6cceda0cd8f878004382cc420eb60439",
+          "status": "PASSED"
+        },
+        "preservation": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-13bc0129fde344aa9c17bb47094c4042",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379211052802173,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 3688
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379211051738734,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 39820
+              }
+            }
+          },
+          "result_sha256": "f3694f3baeb1216ac92e2660ef6c6847f02fae6f383b79a90aaabfecd54c0519",
+          "status": "PASSED"
+        },
+        "restore": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-69c87b2efe62447e9683bcf58f12078f",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379210944154159,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 42952
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379210942897501,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 25912
+              }
+            }
+          },
+          "result_sha256": "51f5289d1f62b9a00c43088e632faf090e79ff0c9bef25c1fa5f1907a8b2fbb5",
+          "status": "PASSED"
+        },
+        "restore-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-99bd1390e6244b43aa7e55a9ab5d364d",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379210840277686,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 11300
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379210838088680,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 13044
+              }
+            }
+          },
+          "result_sha256": "094ec28119f9aa508b470c1a4f2bbfe5cf34f51799a9f9b5f12a596b2916c64a",
+          "status": "PASSED"
+        }
+      },
+      "tool_pins_verified": 10,
+      "verdict": "PASSED",
+      "xml_sha256": "194a66f56bc94b68266180e3d79c96276c9a01549c5ccd09f78ca8184372f797"
+    }
+  ],
+  "diagnostic_source": "ff6d7170edfe5c4c434ae50a72217354b115b375",
+  "independent_receipt": {
+    "TMP": {
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d"
+    },
+    "all_checks_passed": true,
+    "path": "TestResults/h1-f4-20261027-pb04/independent-completion01.json",
+    "prior_evidence_directories_verified": 321,
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\2617beb9783a41568358c9f47baee809"
+    },
+    "screenshot": {
+      "height": 1920,
+      "path": "TestResults\\qualification-supervisor\\2617beb9783a41568358c9f47baee809\\living-regressions\\fixture-inputs\\screenshots\\b409ff32-phase7a4-theme-normal-1080x1920.png",
+      "sha256": "427b2e62d45c956b29b236991965e88ea79f77b9f2772415766dc25e6948136c",
+      "width": 1080
+    },
+    "settings": {
+      "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+    },
+    "sha256": "4fd872ce603b494c419c8ee5d996fbd4db1d9f383a9d286d25813f70826581b0"
+  },
+  "model": {
+    "classification": "Standard, bounded fixture corrections",
+    "fallback": "GPT-6 Sol Medium",
+    "production_authority_modified": false,
+    "recommended": "GPT-6.1 Sol Medium"
+  },
+  "original_84_remaining_unqualified": 8,
+  "qualified_original_84_before": 65,
+  "qualified_original_84_now": 76,
+  "qualified_tool_pins": {
+    "C:\\Program Files\\Git\\cmd\\git.EXE": {
+      "sha256": "81ef35ae005ca9318018d18e3327578ce939fb99feaad6b2d7c8ab15f3de8db5",
+      "version": "git version 2.54.0.windows.1"
+    },
+    "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.2f1\\Editor\\Unity.exe": {
+      "sha256": "c2f3d552a9f9a4639b2e54e9d41f360614d512ba6a9816c8c934568ecc2ad93d",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe": {
+      "sha256": "73dbf1f40507275d6fa636b49eb80b4753e313f649f52591abba86b31f1a1bce",
+      "version": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-pb04\\run_selected01.py": {
+      "sha256": "8669f867ca8d8cc75787af5689569fdefc8da8eb1ae3d1197b80987494239cfb",
+      "version": "Exact P1/P6 diagnostic selection; no sustained profile or other correction packet"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_inputs.py": {
+      "sha256": "34d3ff45cf7512e21f242bc0e4ede876e5c8b68eddba853ad9b1e69192270c92",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_supervisor.py": {
+      "sha256": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_windows.py": {
+      "sha256": "234bce5f0ca8c7087bb999c603cfbb3d87f0eb4499501a1644dcbbabf3104db7",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py": {
+      "sha256": "cafa31627594654b4bc0d34a88c5a4bc3ad4db813a7451e7aa25a4756f86fbc0",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe": {
+      "sha256": "78761a0547cd4a9bc212e27a217c66e6a621bf48c753ba440e4b2327ee7ff8ac",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE": {
+      "sha256": "d8f182560210d43baaf767d482ad1dc1207372522e91413b9d5e515a875e552d",
+      "version": "Windows PowerShell 5.1; process-inspection dependency"
+    }
+  },
+  "remaining_exact_original_identities": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewMeaningfulInvalidations",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentProductionMouseTouchRecovery",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls"
+  ],
+  "scope": {
+    "P2_P3_P4_P5_P7_modified": false,
+    "Player_or_benchmarks": false,
+    "R1_reopened": false,
+    "full_EditMode": false,
+    "full_PlayMode": false,
+    "owner_UAT": false,
+    "production_changes": false,
+    "schemas_migrations_tuning_or_localization_changed": false
+  },
+  "sealed_identity_files": {
+    "pb01": {
+      "original-inputs.json": "f9831ea9ac8dce1af15264aff79a14890cdca32ac5654c03c8e17a81ce0961e6",
+      "plan-selected01.json": "2b317a438b1b4bb7957f60b15eadeefbcfbde7e83050c7afafe32bb70438427f",
+      "qualified-inputs.json": "75a7fbb1122473182e44aa0745a67ffedc456478ea1ff1a0fc35beeb788aab3f",
+      "selected-inventory.json": "1a9f3051b65b3b520f77293725ab4d85c013bd13cf60bc0a80dc89c69580f4fa"
+    },
+    "pb02": {
+      "original-inputs.json": "9211da5cc4359c9bfc7e8bd54be1fb41fc889a33b91e09524dd2914027f39127",
+      "plan-selected01.json": "4182d2d0a7a1660ea60166d0224b75d1c7fd8b6314e1e60b7af3bb93088a9b21",
+      "qualified-inputs.json": "186847e0d0b53fb77407bcaef139c5256c9385b2ac01be6016b7a0c746d077d1",
+      "selected-inventory.json": "817b777ca7a2b38abc6e4e985fefe5026af87c7d91b56548ce703a2996a39921"
+    },
+    "pb03": {
+      "original-inputs.json": "9211da5cc4359c9bfc7e8bd54be1fb41fc889a33b91e09524dd2914027f39127",
+      "plan-selected01.json": "eb0e489cdc6476dc68b8a0629571585997008b23a0a465f22afee60056af79f6",
+      "qualified-inputs.json": "504f70e751341d88164dbc0aa2d7e495e63b6ab5963146afe3f865738bfacca3",
+      "selected-inventory.json": "547aed363993dd72c6eb85ea1e90600938918a3825ffa0ad785fc439d425a5e1"
+    },
+    "pb04": {
+      "original-inputs.json": "9211da5cc4359c9bfc7e8bd54be1fb41fc889a33b91e09524dd2914027f39127",
+      "plan-selected01.json": "8fdf8be9db59313434a9d0725f09d0270d7c3c4a3ca58b4f9ef1e64fe9670526",
+      "qualified-inputs.json": "a2287379f92b5e49c6d2868d93cfad58f9533b77d7c9d82ff3f53786a4d3deff",
+      "selected-inventory.json": "6d4c8daa9058442e7d6048ea757b884373719dc2086b7d7788e7ad576bd6b3ec"
+    }
+  },
+  "source": "3b60809b97076abd1335e01bc84a96fd57daf215",
+  "stability_limitations": [
+    "Focused multi-defender replay produced a missing-label NullReferenceException; the same source subsequently passed in both wider and partial cohorts. Cause remains unproven.",
+    "Geometry funding failed before its first probe in pb01 and passed in pb02/pb03/pb04 without a funding behavior change. No claim of a proven ordering fix."
+  ],
+  "starting_source": "b50e18ee2ba6ccaa63e38cb37aec6f5a2cb5205b",
+  "status": "Partial qualification only; full 14-case packet remains incomplete",
+  "targets": [
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18093 afterLength=18095 first=361 beforeSha=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253"
+          ],
+          "failure": "  Expected is <System.Byte[18093]>, actual is <System.Byte[18095]>\n  Values differ at index [361]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen>d__91.MoveNext () [0x0017a] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:297\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb02": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18093 afterLength=18095 first=361 beforeSha=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=False beforeLength=18095 afterLength=18421 first=18088 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=ddb172daf4951a35c4d8eccc6474c8e83aea2858d2d7c7ffd09fc2f569eb2c4c"
+          ],
+          "failure": "  Resolve lifecycle/recovery obligations before a read-only baseline\n  Expected: False\n  But was:  True\n",
+          "result": "Failed",
+          "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<>c__DisplayClass30_0.<StabilizeReadOnlySceneBaseline>g__Healthy|2 () [0x0004f] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:184\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<StabilizeReadOnlySceneBaseline>d__30.MoveNext () [0x00084] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:191\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18093 afterLength=18095 first=361 beforeSha=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=False beforeLength=18095 afterLength=18421 first=18088 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=ddb172daf4951a35c4d8eccc6474c8e83aea2858d2d7c7ffd09fc2f569eb2c4c"
+          ],
+          "failure": "  Resolve lifecycle/recovery obligations before a read-only baseline\n  Expected: False\n  But was:  True\n",
+          "result": "Failed",
+          "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<>c__DisplayClass30_0.<StabilizeReadOnlySceneBaseline>g__Healthy|2 () [0x0004f] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:184\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<StabilizeReadOnlySceneBaseline>d__30.MoveNext () [0x00084] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:191\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18093 afterLength=18095 first=361 beforeSha=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253"
+      },
+      "original_failure": "  Expected is <System.Byte[18093]>, actual is <System.Byte[18095]>\n  Values differ at index [361]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": false
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=2 identical=False walletDecimalSuffixOnly=True beforeLength=8549 afterLength=8551 first=360 beforeSha=07b6b609d8555e57e8e8551ac9fa9b8a9724b58f81306743ff59de680a37aa92 afterSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8"
+          ],
+          "failure": "  Expected is <System.Byte[8549]>, actual is <System.Byte[8551]>\n  Values differ at index [360]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneInvalidAndStaleDialogsRemainAccessible>d__89.MoveNext () [0x0089a] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:255\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb03": {
+          "baseline_evidence": [],
+          "failure": "System.NullReferenceException : Object reference not set to an instance of an object",
+          "result": "Failed",
+          "stack": "  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneInvalidAndStaleDialogsRemainAccessible>d__89.<>m__Finally1 () [0x00007] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:259 \n  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneInvalidAndStaleDialogsRemainAccessible>d__89.System.IDisposable.Dispose () [0x00016] in <367e8cdb597f4a8a81fcba88b31cbaa7>:0 \n  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneInvalidAndStaleDialogsRemainAccessible>d__89.MoveNext () [0x00941] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:260 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 "
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=2 identical=False walletDecimalSuffixOnly=True beforeLength=8549 afterLength=8551 first=360 beforeSha=07b6b609d8555e57e8e8551ac9fa9b8a9724b58f81306743ff59de680a37aa92 afterSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8"
+      },
+      "original_failure": "  Expected is <System.Byte[8549]>, actual is <System.Byte[8551]>\n  Values differ at index [360]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": false
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5"
+          ],
+          "failure": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneNavigationSafeAreaAndCoveredInput>d__87.MoveNext () [0x00672] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:167\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18093 afterLength=18095 first=361 beforeSha=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=18095 afterLength=18095 first=18095 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18093 afterLength=18095 first=361 beforeSha=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=18095 afterLength=18095 first=18095 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneNavigationSafeAreaAndCoveredInput",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5"
+      },
+      "original_failure": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": true
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5"
+          ],
+          "failure": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneOpeningDuringReplayClosesPresentationOnly>d__90.MoveNext () [0x002d0] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:280\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=18092 afterLength=18092 first=18092 beforeSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5 afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=18092 afterLength=18092 first=18092 beforeSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5 afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneOpeningDuringReplayClosesPresentationOnly",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5"
+      },
+      "original_failure": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": true
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=19379 afterLength=19381 first=358 beforeSha=b881c7a2483db50a1604148f1a3e1f4a0eef219d9e42822e159fa0b7f7bcc27c afterSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd"
+          ],
+          "failure": "  Expected is <System.Byte[19379]>, actual is <System.Byte[19381]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence>d__1.MoveNext () [0x00d1c] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:82\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb02": {
+          "baseline_evidence": [],
+          "failure": "System.NullReferenceException : Object reference not set to an instance of an object",
+          "result": "Failed",
+          "stack": "  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence>d__1.MoveNext () [0x008d0] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:59 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 "
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=19379 afterLength=19381 first=358 beforeSha=b881c7a2483db50a1604148f1a3e1f4a0eef219d9e42822e159fa0b7f7bcc27c afterSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=19381 afterLength=19381 first=19381 beforeSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd afterSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=19379 afterLength=19381 first=358 beforeSha=b881c7a2483db50a1604148f1a3e1f4a0eef219d9e42822e159fa0b7f7bcc27c afterSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=19381 afterLength=19381 first=19381 beforeSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd afterSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=19379 afterLength=19381 first=358 beforeSha=b881c7a2483db50a1604148f1a3e1f4a0eef219d9e42822e159fa0b7f7bcc27c afterSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd"
+      },
+      "original_failure": "  Expected is <System.Byte[19379]>, actual is <System.Byte[19381]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": true
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5"
+          ],
+          "failure": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1TargetFeedbackTracksRecordedHitsAndDefeats>d__7.MoveNext () [0x00b67] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:316\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=18092 afterLength=18092 first=18092 beforeSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5 afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5"
+          ],
+          "failure": "  Expected: True\n  But was:  False\n",
+          "result": "Failed",
+          "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1TargetFeedbackTracksRecordedHitsAndDefeats>d__7.MoveNext () [0x001cd] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:257\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5"
+      },
+      "original_failure": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": false
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=9657 afterLength=9659 first=357 beforeSha=a43cbd9a8557b19063be3ee2d903f0ca55a18f9535ebbc79663319febb065903 afterSha=df41519a42a666354f6aa536412d8ffb17da7d3bb506c1fdaf95bfc860a6e41f"
+          ],
+          "failure": "  Expected is <System.Byte[9657]>, actual is <System.Byte[9659]>\n  Values differ at index [357]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1520\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<FloorHudStatesAndInputCapture>d__157.MoveNext () [0x00a6a] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonOverlaySceneTests.cs:81\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=9657 afterLength=9659 first=357 beforeSha=a43cbd9a8557b19063be3ee2d903f0ca55a18f9535ebbc79663319febb065903 afterSha=df41519a42a666354f6aa536412d8ffb17da7d3bb506c1fdaf95bfc860a6e41f",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=9659 afterLength=9659 first=9659 beforeSha=df41519a42a666354f6aa536412d8ffb17da7d3bb506c1fdaf95bfc860a6e41f afterSha=df41519a42a666354f6aa536412d8ffb17da7d3bb506c1fdaf95bfc860a6e41f"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=9657 afterLength=9659 first=357 beforeSha=a43cbd9a8557b19063be3ee2d903f0ca55a18f9535ebbc79663319febb065903 afterSha=df41519a42a666354f6aa536412d8ffb17da7d3bb506c1fdaf95bfc860a6e41f",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=9659 afterLength=9659 first=9659 beforeSha=df41519a42a666354f6aa536412d8ffb17da7d3bb506c1fdaf95bfc860a6e41f afterSha=df41519a42a666354f6aa536412d8ffb17da7d3bb506c1fdaf95bfc860a6e41f"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.FloorHudStatesAndInputCapture",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=9657 afterLength=9659 first=357 beforeSha=a43cbd9a8557b19063be3ee2d903f0ca55a18f9535ebbc79663319febb065903 afterSha=df41519a42a666354f6aa536412d8ffb17da7d3bb506c1fdaf95bfc860a6e41f"
+      },
+      "original_failure": "  Expected is <System.Byte[9657]>, actual is <System.Byte[9659]>\n  Values differ at index [357]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": true
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=2 identical=False walletDecimalSuffixOnly=True beforeLength=9417 afterLength=9419 first=358 beforeSha=b5148cfec7187ce31c62be56eefcd0a5ed9d5b0b2e2cd880132301ea3f583c0b afterSha=c207640b9df181ecf8a84d238d8f57508e42728a5697d4f5166514505ab05d5c"
+          ],
+          "failure": "  Expected is <System.Byte[9417]>, actual is <System.Byte[9419]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1520\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentCompactAcquisitionOwnedReassignAndOverflow>d__185.MoveNext () [0x00b5c] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:523\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE stabilized ordinal=2 identical=False walletDecimalSuffixOnly=True beforeLength=9417 afterLength=9419 first=358 beforeSha=b5148cfec7187ce31c62be56eefcd0a5ed9d5b0b2e2cd880132301ea3f583c0b afterSha=c207640b9df181ecf8a84d238d8f57508e42728a5697d4f5166514505ab05d5c",
+            "H1F4_BASELINE publication-count=1 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=9419 afterLength=9419 first=9419 beforeSha=c207640b9df181ecf8a84d238d8f57508e42728a5697d4f5166514505ab05d5c afterSha=c207640b9df181ecf8a84d238d8f57508e42728a5697d4f5166514505ab05d5c"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE stabilized ordinal=2 identical=False walletDecimalSuffixOnly=True beforeLength=9417 afterLength=9419 first=358 beforeSha=b5148cfec7187ce31c62be56eefcd0a5ed9d5b0b2e2cd880132301ea3f583c0b afterSha=c207640b9df181ecf8a84d238d8f57508e42728a5697d4f5166514505ab05d5c",
+            "H1F4_BASELINE publication-count=1 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=9419 afterLength=9419 first=9419 beforeSha=c207640b9df181ecf8a84d238d8f57508e42728a5697d4f5166514505ab05d5c afterSha=c207640b9df181ecf8a84d238d8f57508e42728a5697d4f5166514505ab05d5c"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentCompactAcquisitionOwnedReassignAndOverflow",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=2 identical=False walletDecimalSuffixOnly=True beforeLength=9417 afterLength=9419 first=358 beforeSha=b5148cfec7187ce31c62be56eefcd0a5ed9d5b0b2e2cd880132301ea3f583c0b afterSha=c207640b9df181ecf8a84d238d8f57508e42728a5697d4f5166514505ab05d5c"
+      },
+      "original_failure": "  Expected is <System.Byte[9417]>, actual is <System.Byte[9419]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": true
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+          ],
+          "failure": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1520\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentExplicitReassignmentWithConstructionAndInspectionReuse>d__191.MoveNext () [0x005d0] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:861\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=False beforeLength=8550 afterLength=9421 first=355 beforeSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76 afterSha=d9a0d19352dbf74b6c47da56a332c6f86aae507f57799ccec2048bec6fb0bd16"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=False beforeLength=8550 afterLength=9421 first=355 beforeSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76 afterSha=d9a0d19352dbf74b6c47da56a332c6f86aae507f57799ccec2048bec6fb0bd16"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentExplicitReassignmentWithConstructionAndInspectionReuse",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+      },
+      "original_failure": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": true
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+          ],
+          "failure": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1520\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentProductionPreviewCustodySaveDiscardAndLayouts>d__189.MoveNext () [0x00434] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:773\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb02": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8551 afterLength=8553 first=362 beforeSha=a667533206fe357179d578f65cf9570f74ebb0f1ec432cc65c99230e4be56431 afterSha=fbb218747ce53f4278557e9ea12e147fd804f2a61c0a468bd292c9a188058127",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE stabilized ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=9424 afterLength=9424 first=9424 beforeSha=312258e6ad84de6bde7a11fb3c2f5c54bc615d2eccf8af20ce4b7798bf1a1963 afterSha=312258e6ad84de6bde7a11fb3c2f5c54bc615d2eccf8af20ce4b7798bf1a1963",
+            "H1F4_BASELINE publication-count=0 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=9424 afterLength=9424 first=9424 beforeSha=312258e6ad84de6bde7a11fb3c2f5c54bc615d2eccf8af20ce4b7798bf1a1963 afterSha=312258e6ad84de6bde7a11fb3c2f5c54bc615d2eccf8af20ce4b7798bf1a1963"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE stabilized ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=9421 afterLength=9421 first=9421 beforeSha=78d8dbbc6f4218bfd9fd9f55b82a7834bbf1dbdabb8839fd76e6d1dcfb54bc34 afterSha=78d8dbbc6f4218bfd9fd9f55b82a7834bbf1dbdabb8839fd76e6d1dcfb54bc34",
+            "H1F4_BASELINE publication-count=0 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=9421 afterLength=9421 first=9421 beforeSha=78d8dbbc6f4218bfd9fd9f55b82a7834bbf1dbdabb8839fd76e6d1dcfb54bc34 afterSha=78d8dbbc6f4218bfd9fd9f55b82a7834bbf1dbdabb8839fd76e6d1dcfb54bc34"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE stabilized ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=9421 afterLength=9421 first=9421 beforeSha=78d8dbbc6f4218bfd9fd9f55b82a7834bbf1dbdabb8839fd76e6d1dcfb54bc34 afterSha=78d8dbbc6f4218bfd9fd9f55b82a7834bbf1dbdabb8839fd76e6d1dcfb54bc34",
+            "H1F4_BASELINE publication-count=0 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=9421 afterLength=9421 first=9421 beforeSha=78d8dbbc6f4218bfd9fd9f55b82a7834bbf1dbdabb8839fd76e6d1dcfb54bc34 afterSha=78d8dbbc6f4218bfd9fd9f55b82a7834bbf1dbdabb8839fd76e6d1dcfb54bc34"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentProductionPreviewCustodySaveDiscardAndLayouts",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+      },
+      "original_failure": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": true
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+          ],
+          "failure": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1520\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentUatBrowserIdentityAndDirectTargetSwitch>d__186.MoveNext () [0x008af] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:585\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=8550 afterLength=8550 first=8550 beforeSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76 afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=8550 afterLength=8550 first=8550 beforeSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76 afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatBrowserIdentityAndDirectTargetSwitch",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+      },
+      "original_failure": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": true
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [],
+          "failure": "  Expected: True\n  But was:  False\n",
+          "result": "Failed",
+          "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentUatPlacementGeometryAndLocalizedFeedback>d__188.MoveNext () [0x00061] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:711\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb02": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=8550 afterLength=8550 first=8550 beforeSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76 afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=8550 afterLength=8550 first=8550 beforeSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76 afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=8550 afterLength=8550 first=8550 beforeSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76 afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatPlacementGeometryAndLocalizedFeedback",
+      "original_decimal_signature_proof": {
+        "attempt": "pb02",
+        "line": "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8548 afterLength=8550 first=359 beforeSha=454a6145c33d85f8363ba6aea69b89dab0409742dd1e4e35e76dc6a69bf0429a afterSha=9477cbd8bc7225052f068b2a34f8710a2893614159b22e6096d68d36af7b2c76"
+      },
+      "original_failure": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": true
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb02": {
+          "baseline_evidence": [],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb03": {
+          "baseline_evidence": [],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RuntimeThemeAndLocalizedTextRenderInActualScene",
+      "original_decimal_signature_proof": null,
+      "original_failure": "Unhandled log message: '[Log] Qualification capture: <worktree>\\TestResults\\qualification-supervisor\\75bee8ad47764696bf3404388fe8f757\\full-edit\\fixture-inputs\\screenshots\\3b820171-phase7a4-theme-normal-1080x1920.png'. Use UnityEngine.TestTools.LogAssert.Expect",
+      "packet": "P6",
+      "qualified": true
+    },
+    {
+      "attempts": {
+        "pb01": {
+          "baseline_evidence": [
+            "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8549 afterLength=8551 first=360 beforeSha=07b6b609d8555e57e8e8551ac9fa9b8a9724b58f81306743ff59de680a37aa92 afterSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8"
+          ],
+          "failure": "  Expected is <System.Byte[8549]>, actual is <System.Byte[8551]>\n  Values differ at index [360]\n  Expected: 44\n  But was:  46\n",
+          "result": "Failed",
+          "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1520\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry>d__63.MoveNext () [0x0045e] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1218\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+        },
+        "pb03": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8546 afterLength=8548 first=357 beforeSha=f5024c665cf4cc032ec4d3ca58070dd32e0a8cd547466033ffe5a19f25545aa7 afterSha=6022f7963bd138c87e68bc22691daa8c4b7e139daf009387a437abe7b38c8a58",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE stabilized ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=8548 afterLength=8548 first=8548 beforeSha=6022f7963bd138c87e68bc22691daa8c4b7e139daf009387a437abe7b38c8a58 afterSha=6022f7963bd138c87e68bc22691daa8c4b7e139daf009387a437abe7b38c8a58",
+            "H1F4_BASELINE publication-count=0 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=8548 afterLength=8548 first=8548 beforeSha=6022f7963bd138c87e68bc22691daa8c4b7e139daf009387a437abe7b38c8a58 afterSha=6022f7963bd138c87e68bc22691daa8c4b7e139daf009387a437abe7b38c8a58"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        },
+        "pb04": {
+          "baseline_evidence": [
+            "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8546 afterLength=8548 first=357 beforeSha=f5024c665cf4cc032ec4d3ca58070dd32e0a8cd547466033ffe5a19f25545aa7 afterSha=6022f7963bd138c87e68bc22691daa8c4b7e139daf009387a437abe7b38c8a58",
+            "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE stabilized ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=8548 afterLength=8548 first=8548 beforeSha=6022f7963bd138c87e68bc22691daa8c4b7e139daf009387a437abe7b38c8a58 afterSha=6022f7963bd138c87e68bc22691daa8c4b7e139daf009387a437abe7b38c8a58",
+            "H1F4_BASELINE publication-count=0 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+            "H1F4_BASELINE probe-after-test ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=8548 afterLength=8548 first=8548 beforeSha=6022f7963bd138c87e68bc22691daa8c4b7e139daf009387a437abe7b38c8a58 afterSha=6022f7963bd138c87e68bc22691daa8c4b7e139daf009387a437abe7b38c8a58"
+          ],
+          "failure": "",
+          "result": "Passed",
+          "stack": ""
+        }
+      },
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry",
+      "original_decimal_signature_proof": {
+        "attempt": "pb01",
+        "line": "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=8549 afterLength=8551 first=360 beforeSha=07b6b609d8555e57e8e8551ac9fa9b8a9724b58f81306743ff59de680a37aa92 afterSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8"
+      },
+      "original_failure": "  Expected is <System.Byte[8546]>, actual is <System.Byte[8548]>\n  Values differ at index [357]\n  Expected: 44\n  But was:  46\n",
+      "packet": "P1",
+      "qualified": true
+    }
+  ]
+}

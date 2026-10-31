@@ -481,7 +481,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void CanonicalAdventureActionDoesNotApplyLegacyOrPassiveTick()
         {
-            Fixture fixture = Fixture.Create(null);
+            Fixture fixture = Fixture.Create(null,workloadProfile:PhaseFourTestSupport.ProductionProfile());
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             fixture.Runtime.dungeonLayout = DungeonLayoutState.CreateEmpty(1, 1);
@@ -498,7 +498,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SetField(root, "<Save>k__BackingField", fixture.Runtime);
                 saveService = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(fixture);
                 root.AttachSaveServiceForTests(saveService);
-                SetField(root, "_runSimulationService", PhaseFiveBBranchIntegrationTests.Service(fixture.Configuration));
+                SetField(root, "_runSimulationService", PhaseFiveBBranchIntegrationTests.Service(fixture));
                 SetField(root, "_structureSimulationPass",
                     new StructureSimulationPass(new HeatSystem(), LegacyStructureConfig()));
                 var content = new ContentService();

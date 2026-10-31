@@ -131,7 +131,7 @@ namespace DungeonBuilder.M0.Tests
             var root = GameRoot.Instance; root.Save.structureRuntime.ManaReserve = 1000;
             Assert.That(root.SimulateRunOnce(), Is.True);
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
-            var before = File.ReadAllBytes(root.SaveService.SavePath); string live = JsonUtility.ToJson(root.Save);
+            yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath); string live = JsonUtility.ToJson(root.Save);
             foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
             {
                 yield return AnalysisPhoneConfigure(size);
@@ -213,57 +213,93 @@ namespace DungeonBuilder.M0.Tests
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             var strings = AnalysisPhoneStrings; string invalidText = strings["ui.analysis.leave_invalid"];
             string staleText = strings[TransactionalDungeonDraft.StaleReason];
+            var stringOwner = GameRoot.Instance.Content;
+            var rootOwner = GameRoot.Instance;
+            int phoneTraceCount = 0;
+            void TracePhone(string phase)
+            {
+                if (phoneTraceCount++ >= 128) return;
+                int Id(object value) => value == null ? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(value);
+                var currentRoot = GameRoot.Instance;
+                TestContext.WriteLine("H1F4_ANALYSIS_PHONE " + phase + " root=" + Id(currentRoot) +
+                    " owner=" + Id(rootOwner) + " content=" + Id(currentRoot?.Content) + " contentOwner=" + Id(stringOwner) +
+                    " strings=" + Id(strings) + " document=" + Id(ui) + " attached=" + (ui?.panel != null) +
+                    " controller=" + Id(controller) + " draft=" + Id(controller?.Draft) +
+                    " recovery=" + currentRoot?.TimeService?.RecoveryClockActive + " episode=" + currentRoot?.Save?.timeProvenance?.Episode?.Phase);
+                if (phase != "before-restore") return;
+                object result = TestContext.CurrentContext.Result;
+                var assertions = result.GetType().GetProperty("Assertions")?.GetValue(result) as System.Collections.IEnumerable;
+                if (assertions == null) return;
+                int count = 0;
+                foreach (object assertion in assertions) {
+                    if (count++ == 3) break;
+                    TestContext.WriteLine("H1F4_ANALYSIS_PHONE recorded-assertion " +
+                        assertion.GetType().GetProperty("Message")?.GetValue(assertion) + " " +
+                        assertion.GetType().GetProperty("StackTrace")?.GetValue(assertion));
+                }
+            }
+            TracePhone("entry");
             try
             {
                 strings["ui.analysis.leave_invalid"] = invalidText + " " + string.Join(" ",Enumerable.Repeat("Test-only expanded invalid draft guidance.",24));
                 strings[TransactionalDungeonDraft.StaleReason] = staleText + " " + string.Join(" ",Enumerable.Repeat("Test-only expanded stale draft guidance.",24));
                 foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
                 {
-                    yield return AnalysisPhoneConfigure(size); controller.EnterEdit();
+                    TracePhone("before-1:AnalysisPhoneConfigure"); yield return AnalysisPhoneConfigure(size); TracePhone("after-1:AnalysisPhoneConfigure"); controller.EnterEdit();
                     var root = GameRoot.Instance; var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var room = floor.Layout.Rooms[0];
                     controller.TapWorld(new TileCoordinate(room.Anchor.X+2,room.Anchor.Y+2)); controller.BeginMove();
-                    controller.TapWorld(new TileCoordinate(-1,-1)); yield return null;
+                    controller.TapWorld(new TileCoordinate(-1,-1)); TracePhone("before-2:null"); yield return null; TracePhone("after-2:null");
                     var draft = controller.Draft; Assert.That(draft.IsStructurallyValid, Is.False);
-                    var before = File.ReadAllBytes(root.SaveService.SavePath);
-                    yield return AnalysisPhoneOpenFromEdit();
+                    TracePhone("before-3:StabilizeReadOnlySceneBaseline"); yield return StabilizeReadOnlySceneBaseline(); TracePhone("after-3:StabilizeReadOnlySceneBaseline"); var before = File.ReadAllBytes(root.SaveService.SavePath);
+                    TracePhone("before-4:AnalysisPhoneOpenFromEdit"); yield return AnalysisPhoneOpenFromEdit(); TracePhone("after-4:AnalysisPhoneOpenFromEdit");
                     Assert.That(ui.Q<Button>("confirm").text, Is.EqualTo(strings["ui.analysis.discard_changes"]));
                     Assert.That(ui.Q<Button>("navigationDiscard").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
-                    yield return AnalysisPhoneDialog(draft.StructuralReason,"confirm","cancel");
-                    yield return AnalysisPhoneTap(ui.Q<Button>("cancel")); Assert.That(controller.Draft, Is.SameAs(draft));
-                    yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay"));
-                    yield return AnalysisPhoneOpenFromEdit(); yield return AnalysisPhoneTap(ui.Q<Button>("confirm"));
+                    TracePhone("before-5:AnalysisPhoneDialog"); yield return AnalysisPhoneDialog(draft.StructuralReason,"confirm","cancel"); TracePhone("after-5:AnalysisPhoneDialog");
+                    TracePhone("before-6:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("cancel")); TracePhone("after-6:AnalysisPhoneTap"); Assert.That(controller.Draft, Is.SameAs(draft));
+                    TracePhone("before-7:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay")); TracePhone("after-7:AnalysisPhoneTap");
+                    TracePhone("before-8:AnalysisPhoneOpenFromEdit"); yield return AnalysisPhoneOpenFromEdit(); TracePhone("after-8:AnalysisPhoneOpenFromEdit"); TracePhone("before-9:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("confirm")); TracePhone("after-9:AnalysisPhoneTap");
                     Assert.That(controller.IsAnalysis, Is.True); CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath));
-                    yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon"));
+                    TracePhone("before-10:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon")); TracePhone("after-10:AnalysisPhoneTap");
 
                     controller.EnterEdit(); draft = controller.Draft; var assignment = floor.RoomContents.Assignments.First();
                     Assert.That(draft.Move(floor.FloorInstanceId,assignment.RoomInstanceId,assignment.AssignmentId,new TileCoordinate(1,0)), Is.True);
-                    yield return null; yield return null;
+                    TracePhone("before-11:null"); yield return null; TracePhone("after-11:null"); TracePhone("before-12:null"); yield return null; TracePhone("after-12:null");
                     var otherStore = new FileDungeonDraftStore(root.SaveService.SavePath+".phone-stale",
                         SpatialMigrationFileSystemSelector.Evaluate(root.SaveService.SavePath).FileSystem,root.SaveSpatialMigrationLimits);
                     var other = TransactionalDungeonDraft.Create(root.Save.validatedCanonicalSpatialState,root.SaveService.DungeonDraftContext,otherStore);
                     var competingTarget = assignment.RoomLocalPosition.Equals(new TileCoordinate(2,1)) ? new TileCoordinate(0,0) : new TileCoordinate(2,1);
                     Assert.That(other.Move(floor.FloorInstanceId,assignment.RoomInstanceId,assignment.AssignmentId,competingTarget), Is.True);
                     Assert.That(other.FlushNext(), Is.True); Assert.That(root.SaveService.CommitDungeonDraft(root.Save,other).IsSuccess, Is.True);
-                    before = File.ReadAllBytes(root.SaveService.SavePath);
-                    yield return AnalysisPhoneOpenFromEdit(); Assert.That(ui.Q<Button>("confirm").enabledInHierarchy, Is.False);
-                    yield return AnalysisPhoneDialog(TransactionalDungeonDraft.StaleReason,"confirm","navigationDiscard","cancel");
-                    yield return AnalysisPhoneTap(ui.Q<Button>("confirm"),false);
+                    TracePhone("before-13:StabilizeReadOnlySceneBaseline"); yield return StabilizeReadOnlySceneBaseline(); TracePhone("after-13:StabilizeReadOnlySceneBaseline"); before = File.ReadAllBytes(root.SaveService.SavePath);
+                    TracePhone("before-14:AnalysisPhoneOpenFromEdit"); yield return AnalysisPhoneOpenFromEdit(); TracePhone("after-14:AnalysisPhoneOpenFromEdit"); Assert.That(ui.Q<Button>("confirm").enabledInHierarchy, Is.False);
+                    TracePhone("before-15:AnalysisPhoneDialog"); yield return AnalysisPhoneDialog(TransactionalDungeonDraft.StaleReason,"confirm","navigationDiscard","cancel"); TracePhone("after-15:AnalysisPhoneDialog");
+                    TracePhone("before-16:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("confirm"),false); TracePhone("after-16:AnalysisPhoneTap");
                     Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex)); Assert.That(controller.Draft, Is.SameAs(draft));
-                    yield return AnalysisPhoneTap(ui.Q<Button>("cancel")); Assert.That(controller.Draft, Is.SameAs(draft));
-                    yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay"));
-                    yield return AnalysisPhoneOpenFromEdit(); yield return AnalysisPhoneTap(ui.Q<Button>("navigationDiscard"));
+                    TracePhone("before-17:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("cancel")); TracePhone("after-17:AnalysisPhoneTap"); Assert.That(controller.Draft, Is.SameAs(draft));
+                    TracePhone("before-18:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("closeDisplay")); TracePhone("after-18:AnalysisPhoneTap");
+                    TracePhone("before-19:AnalysisPhoneOpenFromEdit"); yield return AnalysisPhoneOpenFromEdit(); TracePhone("after-19:AnalysisPhoneOpenFromEdit"); TracePhone("before-20:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("navigationDiscard")); TracePhone("after-20:AnalysisPhoneTap");
                     Assert.That(controller.IsAnalysis, Is.True); CollectionAssert.AreEqual(before,File.ReadAllBytes(root.SaveService.SavePath));
-                    yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon"));
+                    TracePhone("before-21:AnalysisPhoneTap"); yield return AnalysisPhoneTap(ui.Q<Button>("analysisDungeon")); TracePhone("after-21:AnalysisPhoneTap");
                 }
             }
-            finally { strings["ui.analysis.leave_invalid"]=invalidText; strings[TransactionalDungeonDraft.StaleReason]=staleText; }
+            finally {
+                TracePhone("before-restore");
+                strings["ui.analysis.leave_invalid"]=invalidText; strings[TransactionalDungeonDraft.StaleReason]=staleText;
+                Assert.That(GameRoot.Instance, Is.SameAs(rootOwner));
+                Assert.That(GameRoot.Instance.Content, Is.SameAs(stringOwner));
+                Assert.That(AnalysisPhoneStrings, Is.SameAs(strings));
+                Assert.That(controller.GetComponent<UIDocument>().rootVisualElement, Is.SameAs(ui));
+                Assert.That(strings["ui.analysis.leave_invalid"], Is.EqualTo(invalidText));
+                Assert.That(strings[TransactionalDungeonDraft.StaleReason], Is.EqualTo(staleText));
+                TracePhone("restored");
+            }
         }
 
         [UnityTest] public IEnumerator AnalysisPhoneOpeningDuringReplayClosesPresentationOnly()
         {
             var root = GameRoot.Instance; root.Save.structureRuntime.ManaReserve = 1000;
             Assert.That(root.SimulateRunOnce(), Is.True); var ui = controller.GetComponent<UIDocument>().rootVisualElement;
-            var before = File.ReadAllBytes(root.SaveService.SavePath); string live = JsonUtility.ToJson(root.Save);
+            yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath); string live = JsonUtility.ToJson(root.Save);
             foreach (var size in new[] {DungeonTextSize.Default,DungeonTextSize.Large})
             {
                 yield return AnalysisPhoneConfigure(size);
@@ -281,12 +317,68 @@ namespace DungeonBuilder.M0.Tests
             }
         }
 
+        // A loaded Save is not a completed recovery boot. Only real lifecycle
+        // observations and Update may satisfy the coordinator's existing barrier.
+        private IEnumerator AwaitAnalysisBootstrap(SaveData source, MonsterRecoveryRules rules, byte[] sourceBytes)
+        {
+            var root = GameRoot.Instance; var time = root.TimeService; var service = root.SaveService;
+            object Field(string name) => typeof(GameRoot).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root);
+            Assert.That(source.timeProvenance.Episode, Is.Null);
+            Assert.That(source.livingDungeon.IsClosed, Is.True); Assert.That(source.livingDungeon.Parties, Is.Empty);
+            Assert.That(source.timeProvenance.AccountedBoundary.CompareTo(sceneClock.Now), Is.Zero,
+                "This reopen has no elapsed eligible time; healing remains a separate canonical obligation");
+            var expectedMonsters = source.monsterContinuity.Copy();
+            double expectedWallet = MonsterContinuity.Recover(expectedMonsters, source.validatedCanonicalSpatialState,
+                rules, source.structureRuntime.ManaReserve, new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal));
+            Assert.That(MonsterContinuity.Recover(expectedMonsters, source.validatedCanonicalSpatialState, rules,
+                expectedWallet, new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal)), Is.EqualTo(expectedWallet),
+                "A second zero-duration settlement cannot repeat a completed readiness debit");
+            string history = JsonUtility.ToJson(source.runHistory);
+            long accepted = source.livingDungeon.Scheduler.AcceptedThrough, closed = source.livingDungeon.Scheduler.ClosedThrough;
+            var utc = sceneClock.Now; long monotonic = sceneClock.Elapsed100ns; int observations = 0;
+            bool Complete() => !(bool)Field("bootRecoveryPending") && !(bool)Field("foregroundPumping") &&
+                !(bool)Field("foregroundDirty") && !service.CanonicalPublicationPending &&
+                !time.RecoveryClockActive && !time.HasDeferredRecovery && root.Save.timeProvenance.Episode == null &&
+                root.Save.livingDungeon.IsClosed && time.RecoveryForegroundObserved;
+            const int maximumBootstrapFrames = 64; // Test orchestration bound; not a recovery/gameplay limit.
+            for (int frame = 0; frame < maximumBootstrapFrames && !Complete(); frame++) {
+                Assert.That(root.isActiveAndEnabled, Is.True); Assert.That(root.TimeService, Is.SameAs(time));
+                Assert.That(typeof(SaveService).GetField("recoveryTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(service), Is.SameAs(time));
+                Assert.That(Field("foregroundFailure"), Is.Null); Assert.That(Field("foregroundRetryPending"), Is.EqualTo(false));
+                Assert.That(service.RequiresCanonicalRecovery || time.HasForegroundPersistenceStall, Is.False);
+                if (!time.RecoveryForegroundObserved) {
+                    // Establish the isolated scene's current foreground observation
+                    // at the validated controlled cut; never backdate a callback.
+                    typeof(GameRoot).GetMethod("OnApplicationPause", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(root, new object[] { false });
+                    ObserveSceneFocus(true); observations++;
+                }
+                yield return null;
+            }
+            Assert.That(Complete(), Is.True, "Loaded root did not complete its real recovery boot within the fixture bound");
+            Assert.That(Field("foregroundFailure"), Is.Null); Assert.That(Field("foregroundRetryPending"), Is.EqualTo(false));
+            Assert.That(service.RequiresCanonicalRecovery || time.HasForegroundPersistenceStall, Is.False);
+            Assert.That(sceneClock.Now, Is.EqualTo(utc)); Assert.That(sceneClock.Elapsed100ns, Is.EqualTo(monotonic));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(source.timeProvenance.AccountedBoundary));
+            Assert.That(root.Save.timeProvenance.RecoveryContextSha256, Is.EqualTo(source.timeProvenance.RecoveryContextSha256));
+            Assert.That(root.Save.totalTicks, Is.EqualTo(source.totalTicks));
+            Assert.That(root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(accepted));
+            Assert.That(root.Save.livingDungeon.Scheduler.ClosedThrough, Is.EqualTo(closed));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(expectedWallet), "Only the configured canonical readiness spending is permitted");
+            Assert.That(JsonUtility.ToJson(root.Save.monsterContinuity), Is.EqualTo(JsonUtility.ToJson(expectedMonsters)));
+            Assert.That(JsonUtility.ToJson(root.Save.runHistory), Is.EqualTo(history), "Boot cannot replay or lose a confirmed run/reward");
+            var bytes = File.ReadAllBytes(service.SavePath);
+            CollectionAssert.AreEqual(service.CanonicalSession.GetCurrentBytes(), bytes);
+            TestContext.WriteLine("H1F4_ANALYSIS_BOOT complete=True foregroundObservations=" + observations +
+                " beforeSha=" + SpatialContractSha256.Compute(sourceBytes) + " afterSha=" + SpatialContractSha256.Compute(bytes) +
+                " walletMatchesConfiguredRecovery=True WPreserved=True ACPreserved=True historyPreserved=True");
+        }
+
         [UnityTest] public IEnumerator AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen()
         {
             var root = GameRoot.Instance;
             root.Save.structureRuntime.ManaReserve = 1000;
             Assert.That(root.SimulateRunOnce(), Is.True);
-            var before = File.ReadAllBytes(root.SaveService.SavePath);
+            yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath);
             var history = JsonUtility.ToJson(root.Save.runHistory);
             string floor = controller.SelectedFloorInstanceId;
             controller.OpenAnalysis(); yield return null;
@@ -295,15 +387,19 @@ namespace DungeonBuilder.M0.Tests
             controller.ReturnToDungeon(); yield return null;
             Assert.That(controller.SelectedFloorInstanceId, Is.EqualTo(floor));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
+            var recoverySource = root.Save;
+            var recoveryRules = ((DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root.SaveService)).MonsterRecovery;
             UnityEngine.Object.Destroy(controller.gameObject);
             UnityEngine.Object.Destroy(root.gameObject); yield return null;
             yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
             for (int i=0;i<120 && GameRoot.Instance?.Save==null;i++) yield return null;
-            root = GameRoot.Instance; root.enabled = false;
+            root = GameRoot.Instance;
             controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
             for (int i=0;i<30 && controller.World==null;i++) yield return null;
+            yield return AwaitAnalysisBootstrap(recoverySource, recoveryRules, before);
             // Boot owns its clock/save metadata; Analysis must preserve the reopened bytes.
-            before = File.ReadAllBytes(root.SaveService.SavePath);
+            yield return StabilizeReadOnlySceneBaseline(); before = File.ReadAllBytes(root.SaveService.SavePath);
             controller.OpenAnalysis(); yield return null;
             Assert.That(JsonUtility.ToJson(root.Save.runHistory), Is.EqualTo(history));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));

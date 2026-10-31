@@ -217,7 +217,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SharedFloorKnowledgeAuthority floorKnowledge,
             LivingDungeonState livingDungeon = null, bool manualRun = false,
             MonsterContinuityState monsterContinuity = null, DurableSettlementHistory settlement = null, bool foregroundStage = false,
-            LivingDungeonForegroundLineage.ReleasePermit releases = null)
+            LivingDungeonForegroundLineage.ReleasePermit releases = null, CanonicalTimeTransition time = null)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -230,13 +230,28 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out ContractJsonNode root))
                     return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 ContractJsonNode primary = root.Fields[2].Value;
+                if (!ContractJson.Int(root.Fields[1].Value, out int schema) ||
+                    !TimeProvenance.TryRead(primary, schema, out var priorTime) ||
+                    time != null && !time.Matches(currentBytes, priorTime)) return Failure(RecoveryEpisode.Invalid);
+                var nextTime = time?.Successor ?? priorTime;
                 if (settlement != null && !settlement.Matches(currentBytes, livingDungeon, limits.Canonical.Serialized))
                     return Failure("living.settlement.history_invalid");
                 var retainedOwner = primary.Fields[primary.Fields.Count - 3].Value;
                 bool activated = retainedOwner.Fields[2].Value.Kind != ContractJsonKind.Null;
                 bool unfinished = activated && retainedOwner.Fields[2].Value.Fields[2].Value.Text !=
                     retainedOwner.Fields[2].Value.Fields[3].Value.Text;
-                if (unfinished && livingDungeon == null)
+                bool pendingRecovery = priorTime.Episode != null;
+                if (time?.ForegroundThrough.HasValue == true &&
+                    livingDungeon?.Scheduler?.AcceptedThrough != time.ForegroundThrough.Value)
+                    return Failure(RecoveryEpisode.Invalid);
+                if (pendingRecovery && livingDungeon != null) {
+                    long accepted = -1;
+                    if (activated && !ContractJson.Long(retainedOwner.Fields[2].Value.Fields[2].Value, out accepted))
+                        return Failure(RecoveryEpisode.Invalid);
+                    if ((livingDungeon.Scheduler?.AcceptedThrough ?? -1) != accepted)
+                        return Failure(LivingDungeonScheduling.Boundary);
+                }
+                if ((unfinished || pendingRecovery && time?.Settles != true) && livingDungeon == null)
                 {
                     int start = primary.Fields.Count - 10;
                     if (!SerializeNode(primary.Fields[start].Value).AsSpan().SequenceEqual(spatial.Value.Authority) ||
@@ -268,6 +283,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         valueBytes = SerializeNode(retained);
                     }
                     else if (!recognizedState.TryGet(name, out valueBytes)) continue;
+                    if (schema == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction && name == "lastSavedUtcUnix")
+                    {
+                        var timestampIssues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
+                        if (!ContractJson.TryParse(valueBytes, limits.Canonical.Serialized, timestampIssues, out var timestamp) ||
+                            !TimeProvenance.TrySeconds(timestamp, out long supplied) ||
+                            supplied != priorTime.AccountedBoundary.Seconds && supplied != nextTime.AccountedBoundary.Seconds)
+                            return Failure(RecoveryEpisode.Invalid);
+                        valueBytes = Encoding.UTF8.GetBytes(nextTime.AccountedBoundary.Seconds.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    }
                     if (settlement != null && name != "runHistory")
                     {
                         if (TryFind(primary, name, out var settlementPrior))
@@ -300,7 +324,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         valueBytes = settlement != null ? settlement.Merge(priorHistory, nextHistory, limits.Canonical.Serialized)
                             : MergeHistory(priorHistory, nextHistory, manualRun);
                     }
-                    if (unfinished && livingDungeon == null && !LifecycleMember(name) &&
+                    if ((unfinished || pendingRecovery && time?.Settles != true) && livingDungeon == null && !LifecycleMember(name) &&
                         (!TryFind(primary, name, out var priorValue) || !SerializeNode(priorValue).AsSpan().SequenceEqual(valueBytes)))
                         return Failure(LivingDungeonScheduling.Boundary);
                     copiedBytes = Add(copiedBytes, valueBytes.Length,
@@ -347,16 +371,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 MonsterContinuity.Write(writer, continuity);
                 // Every writer shares this seam. In legacy mode changing the seconds
                 // advances the same boundary with an exact zero fraction; no resolver activates.
-                if (!TimeProvenance.TryRead(primary, out var priorTime))
-                    return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
-                if (recognizedState != null && recognizedState.TryGet("lastSavedUtcUnix", out var savedBytes))
+                if (schema == CanonicalSaveSchemaVersions.FrozenSchemaSixteen && recognizedState != null && recognizedState.TryGet("lastSavedUtcUnix", out var savedBytes))
                 {
                     var timeIssues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
                     if (!ContractJson.TryParse(savedBytes, limits.Canonical.Serialized, timeIssues, out var savedNode) ||
                         !TimeProvenance.TrySeconds(savedNode, out long savedSeconds) || savedSeconds < priorTime.AccountedBoundary.Seconds)
                         return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
                 }
-                writer.Token(","); writer.String(TimeProvenance.Owner); writer.Token(":"); TimeProvenance.WriteLegacy(writer);
+                writer.Token(","); writer.String(TimeProvenance.Owner); writer.Token(":"); nextTime.Write(writer);
                 writer.Token("}");
 
                 for (int index = 3; index < root.Fields.Count; index++)
@@ -470,10 +492,23 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedRecognizedSaveStateSnapshotResult recognized, DetachedCompleteSaveValidationResult owned,
             LivingDungeonState livingDungeon, MonsterContinuityState monsters,
             SharedBranchKnowledgeAuthority branch = null, SharedFloorKnowledgeAuthority floor = null,
-            DurableSettlementHistory settlement = null, LivingDungeonForegroundLineage.ReleasePermit releases = null) => recognized?.IsSuccess == true
+            DurableSettlementHistory settlement = null, LivingDungeonForegroundLineage.ReleasePermit releases = null,
+            CanonicalTimeTransition time = null) => recognized?.IsSuccess == true
                 ? PrepareReplacement(recognized.Snapshot, owned.State, null, null, branch, floor,
-                    livingDungeon, monsterContinuity: monsters, settlement: settlement, foregroundStage: true, releases: releases)
+                    livingDungeon, monsterContinuity: monsters, settlement: settlement, foregroundStage: true, releases: releases, time: time)
                 : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+
+        internal DetachedCanonicalSaveSessionResult PrepareRecoveryReplacement(
+            DetachedRecognizedSaveStateSnapshotResult recognized, DetachedCompleteSaveValidationResult owned,
+            CanonicalTimeTransition time, MonsterContinuityState settledMonsters = null) =>
+            recognized?.IsSuccess == true && time != null && (settledMonsters == null || time.Settles)
+                // A classification/entry publication changes only the checked
+                // provenance owner and its W seconds. Copy the exact predecessor
+                // gameplay fields, including the accepted closed prefix, rather
+                // than normalizing them through a runtime projection.
+                ? PrepareReplacement(time.Settles ? recognized.Snapshot : null, owned.State, null, null, null, null,
+                    monsterContinuity: settledMonsters, time: time)
+                : Failure(RecoveryEpisode.Invalid);
 
         private static void WriteField(ContractJsonWriter writer, string key,
             ContractJsonNode value, bool first)

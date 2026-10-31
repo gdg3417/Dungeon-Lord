@@ -1,0 +1,85 @@
+{
+  "purpose": "H1-F4 approved context binding: excluded recovery dependency counterexample",
+  "source_sha": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "probe_sha256": "17bda4e3329fa0e4199327f0117c9c113ade06773a99f62e3eafb84d2b47ab9a",
+  "source_files_sha256": {
+    "Assets/_Project/Scripts/Util/Models.cs": "84a92977f6940d8b0cc093f7d1a07d993042ecdead363652a6e79c546903869f",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedSpatialMigrationPreparation.cs": "8faacc2d4a1c9bbae28a092ec7b5323475fc2159127e5b970e99a077db963ac9",
+    "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0Config.cs": "e62be2ac49546959752733c3c43f3e110b00306b5a53c6b84f88f2ade7a8fbb7",
+    "Assets/_Project/Scripts/Gameplay/RunSimulation/CombatC0QualificationConfig.cs": "068346710a8a7367200624bf92975a18a54c1a07bfc2ac08e044fd2e3488ee2f",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/MonsterContinuity.cs": "aa0878b24b9976f24db0fa7be015c732b06815ff6998ebe13326320179148ea0",
+    "Assets/_Project/Scripts/Services/BootstrapConfigValidationService.cs": "ed591d4b67c0db5a0adff4bd80c66ed3e2a210a32d3c8f1a0c9fa7ec76464610",
+    "Assets/_Project/Scripts/Services/SaveService.cs": "fe676b18e113d74c919345ccdeb381c60250f9c23f13c7ef4d4d486a3d802675",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCompleteSaveContract.cs": "45acc910cd8bfe4162b0e58d954439c1fd7be688d853b25a8d180c878c9b4a45",
+    "Assets/_Project/Data/Bootstrap/run_simulation_config.json": "f07657572530df1955ae904c66a76feeb71ca7ae8a6e8382c25bb8b7a1cf4e16",
+    "Assets/_Project/Resources/monster_recovery.json": "1a5e199c55cc28678099dc56bf0ea5a4796038090d6f2f3e7f8e67494ad4595d",
+    "Docs/planning/h1-f4-recovery-design-gate.md": "eb11094727cfde1450a56c60f47949a5df179f8dad7280b670ee90bf65fa29ef"
+  },
+  "source_assertions": {
+    "combat_explicitly_nonserialized": true,
+    "legacy_serializer_uses_jsonutility": true,
+    "recovery_health_from_combat": true,
+    "record_accepts_health_below_current_max": true
+  },
+  "fixture_change": "Only CombatC0.Monsters[goblin].MaxHealth 8 -> 10, in memory",
+  "outside_combat_projection_equal": true,
+  "projection_sha256_before": "d500d3b3bcba1e3384b3a21615cdcdd09dbd629e7329ee37f0c0ee8a9a367a55",
+  "projection_sha256_after": "d500d3b3bcba1e3384b3a21615cdcdd09dbd629e7329ee37f0c0ee8a9a367a55",
+  "projection_hash_is_production_jsonutility_hash": false,
+  "context_digest_analysis": "Input 1 excludes the only changed field by NonSerialized; inputs 2-10 unchanged. Approved production digest must remain equal. Not computed with Unity here.",
+  "counterexamples": [
+    {
+      "phase": "originalPending",
+      "initial_health": 1,
+      "initial_wallet": 100,
+      "vacant_active_floor": true,
+      "revival_required": false,
+      "outcomes": [
+        {
+          "maximum_health": 8,
+          "readiness": 6,
+          "valid_living_health_record": true,
+          "health_after_recovery": 6,
+          "mana_spent": 5,
+          "wallet_after_recovery": 95
+        },
+        {
+          "maximum_health": 10,
+          "readiness": 7,
+          "valid_living_health_record": true,
+          "health_after_recovery": 7,
+          "mana_spent": 6,
+          "wallet_after_recovery": 94
+        }
+      ]
+    },
+    {
+      "phase": "residualPending",
+      "initial_health": 6,
+      "initial_wallet": 100,
+      "vacant_active_floor": true,
+      "revival_required": false,
+      "outcomes": [
+        {
+          "maximum_health": 8,
+          "readiness": 6,
+          "valid_living_health_record": true,
+          "health_after_recovery": 6,
+          "mana_spent": 0,
+          "wallet_after_recovery": 100
+        },
+        {
+          "maximum_health": 10,
+          "readiness": 7,
+          "valid_living_health_record": true,
+          "health_after_recovery": 7,
+          "mana_spent": 1,
+          "wallet_after_recovery": 99
+        }
+      ]
+    }
+  ],
+  "unity_or_canonical_save_validation_executed": false,
+  "qualification_counts": null,
+  "limitations": "Structural source assertions and integer arithmetic only; no real save load/reopen, Unity test, migration, executable gate or protocol fault qualification is claimed."
+}

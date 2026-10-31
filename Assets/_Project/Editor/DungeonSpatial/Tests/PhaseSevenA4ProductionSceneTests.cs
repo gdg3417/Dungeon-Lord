@@ -20,15 +20,70 @@ namespace DungeonBuilder.M0.Tests
     {
         private string filename;
         private TextAsset disposableConfig;
+        private TextAsset disposableRunScenarioConfig;
+        private int combatFeedbackScenario;
         private int isolationCallbacks;
         private ProductionDungeonController controller;
         private Touchscreen simulatedTouch;
         private bool missingThemeWarning;
+        private SceneClock sceneClock;
+        private int tracedPublications;
+        private byte[] readOnlyBaselineProbe;
+        private int readOnlyBaselineOrdinal;
+        internal sealed class SceneClock : IPreciseTimeSource
+        {
+            internal UnixTimePoint Now = new UnixTimePoint(2000, 2500000);
+            internal long Elapsed100ns;
+            internal bool InvalidUtc, InvalidMonotonic;
+            public UnixTimePoint UtcNow() => InvalidUtc ? new UnixTimePoint(0, 0) : Now;
+            public long UtcNowUnixSeconds() => UtcNow().Seconds;
+            internal double Monotonic() => InvalidMonotonic ? double.NaN : Elapsed100ns / (double)UnixTimePoint.UnitsPerSecond;
+            internal void Advance(double seconds)
+            {
+                Assert.That(double.IsNaN(seconds) || double.IsInfinity(seconds) || seconds < 0, Is.False);
+                long ticks = checked((long)Math.Round(seconds * UnixTimePoint.UnitsPerSecond));
+                Now = Now.Add100ns(ticks); Elapsed100ns = checked(Elapsed100ns + ticks);
+            }
+        }
+        private bool TraceSceneRecovery => TestContext.CurrentContext.Test.Name.Contains("RoomContentMapReassignmentCapacity") ||
+            TestContext.CurrentContext.Test.Name.Contains("SceneClock") ||
+            TestContext.CurrentContext.Test.Name.Contains("LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish");
+        // Read-only diagnosis: never sample/advance time, invoke a barrier, or
+        // serialize a mutable runtime back into the canonical owner.
+        private void TraceSceneState(string phase)
+        {
+            if (!TraceSceneRecovery) return;
+            object Field(object value, string name) => value?.GetType().GetField(name,
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?.GetValue(value);
+            int Id(object value) => value == null ? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(value);
+            var root = GameRoot.Instance; var service = root?.SaveService; var save = root?.Save;
+            var time = root?.TimeService; var session = service?.CanonicalSession; var draft = controller?.Draft;
+            TestContext.WriteLine("H1F4_SCENE " + phase + " frame=" + Time.frameCount +
+                " controller=" + Id(controller) + " initialized=" + Field(controller, "initialized") + " quiesced=" + controller?.IsQuiesced +
+                " draft=" + Id(draft) + " editing=" + controller?.IsEditing + " durability=" + draft?.Durability +
+                " commands=" + draft?.CommandCount + " draftReason=" + draft?.Reason + " feedback=" + Field(controller, "feedback") +
+                " rootEnabled=" + root?.enabled + " focused=" + Application.isFocused + " observedFocus=" + Field(root, "foregroundApplicationFocused") +
+                " observedPause=" + Field(root, "foregroundApplicationPaused") + " paused=" + time?.IsPaused +
+                " time=" + Id(time) + " boundTime=" + Id(Field(service, "recoveryTime")) + " recovery=" + time?.RecoveryClockActive +
+                " deferred=" + time?.HasDeferredRecovery + " deferredBackground=" + time?.HasDeferredBackground +
+                " observedForeground=" + time?.RecoveryForegroundObserved + " presentation=" + time?.ForegroundPresentationActive +
+                " rootPumping=" + Field(root, "foregroundPumping") + " bootPending=" + Field(root, "bootRecoveryPending") +
+                " failure=" + Field(root, "foregroundFailure") +
+                " retry=" + Field(root, "foregroundRetryPending") + " publication=" + service?.CanonicalPublicationPending +
+                " recoveryRequired=" + service?.RequiresCanonicalRecovery + " save=" + Id(save) + " session=" + Id(session) +
+                " bytes=" + (session == null ? "null" : SpatialContractSha256.Compute(session.GetCurrentBytes())) +
+                " W=" + save?.timeProvenance?.AccountedBoundary?.Seconds + "." + save?.timeProvenance?.AccountedBoundary?.Fraction100ns +
+                " A=" + save?.livingDungeon?.Scheduler?.AcceptedThrough + " C=" + save?.livingDungeon?.Scheduler?.ClosedThrough +
+                " banner=" + root?.BannerMessage + " pauseLine=" + root?.PauseLine +
+                " mouseUp=" + Mouse.current?.leftButton.wasReleasedThisFrame + " escape=" + Keyboard.current?.escapeKey.wasPressedThisFrame);
+        }
         private void RecordThemeWarning(string message, string stack, LogType type)
         { if (message.Contains("No Theme Style Sheet set to PanelSettings")) missingThemeWarning = true; }
         [UnitySetUp]
         public IEnumerator SetUp()
         {
+            tracedPublications = 0;
+            readOnlyBaselineProbe = null; readOnlyBaselineOrdinal = 0;
             missingThemeWarning = false;
             Application.logMessageReceived += RecordThemeWarning;
             if (!Application.isPlaying)
@@ -40,12 +95,18 @@ namespace DungeonBuilder.M0.Tests
                 yield return new EnterPlayMode();
             }
             if (GameRoot.Instance != null) { UnityEngine.Object.Destroy(GameRoot.Instance.gameObject); yield return null; }
+            sceneClock = new SceneClock();
             filename = "phase7a4-scene-" + Guid.NewGuid().ToString("N") + ".json";
             SceneManager.sceneLoaded += Isolate;
             yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
-            for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
+            // A successive isolated boot can still expose the departing root's
+            // loaded save before the new scene's Start. Wait for this boot's
+            // owned save, rather than treating any loaded Save as readiness.
+            for (int i = 0; i < 120 && (GameRoot.Instance?.Save == null ||
+                Path.GetFileName(GameRoot.Instance.SaveService?.SavePath) != filename); i++) yield return null;
             var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null);
             Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename), "Disposable scene save isolation");
+            PumpSceneToClosed(establishForeground: true);
             var placed = root.SaveService.ExecuteCanonicalMutation(root.Save,
                 DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic", null, null, null));
             Assert.That(placed.IsSuccess, Is.True, placed.Reason);
@@ -57,8 +118,20 @@ namespace DungeonBuilder.M0.Tests
             controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
             for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
             Assert.That(controller.World, Is.Not.Null);
-            root.enabled = false; // Stable test HUD/economy; runtime presentation remains active.
+            if (TraceSceneRecovery) {
+                root.SaveService.CanonicalRuntimePublished += _ => {
+                    if (tracedPublications++ >= 16) return;
+                    TraceSceneState("canonical-publication");
+                };
+                var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+                foreach (string name in new[] { "save", "discard", "confirm", "cancel", "edit", "legacy" })
+                    ui.Q<Button>(name).clicked += () => TraceSceneState("ui-click-" + name);
+            }
+            // The controlled provider is stationary until an explicit Advance.
+            // Keep the real root enabled instead of fabricating a suspension.
+            TraceSceneState("setup.prebound-clock-ready");
             yield return null;
+            TraceSceneState("setup.after-yield");
         }
         private void Isolate(Scene scene, LoadSceneMode mode)
         {
@@ -69,12 +142,203 @@ namespace DungeonBuilder.M0.Tests
             isolationCallbacks++;
             var config = JsonUtility.FromJson<BuildConfig>(root.buildConfigJson.text);
             config.save.fileName = filename;
+            if (disposableConfig != null) UnityEngine.Object.DestroyImmediate(disposableConfig);
             disposableConfig = new TextAsset(JsonUtility.ToJson(config)); root.buildConfigJson = disposableConfig;
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(null, sceneClock.Monotonic));
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(sceneClock, null));
+            // Exercise the non-isolated save refusal before any provider is owned.
+            var validConfig = disposableConfig;
+            config.save.fileName = "save_primary.json";
+            var invalid = new TextAsset(JsonUtility.ToJson(config)); root.buildConfigJson = invalid;
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(sceneClock, sceneClock.Monotonic));
+            root.buildConfigJson = validConfig; UnityEngine.Object.DestroyImmediate(invalid);
+            config.save.fileName = filename;
+            byte[] one = null, two = null;
+            string test = TestContext.CurrentContext.Test.Name;
+            AuthorCombatSceneConfiguration(root, test);
+            if (test.Contains("ResumeCompletesSeveralBoundedPasses") || test.Contains("SuspendedDrainRecognizes") ||
+                test.Contains("ProvenRollbackRetriesThroughRealSaveBarrier") || test.Contains("UncertainRollbackKeepsRealRootRecoveryLatch")) {
+                byte[] Bounded(string name) {
+                    string original = File.ReadAllText("Assets/_Project/Resources/" + name + ".json");
+                    string bounded = original.Replace("\"MaximumBoundariesPerPump\": 64", "\"MaximumBoundariesPerPump\": 1");
+                    Assert.That(bounded, Is.Not.EqualTo(original)); return System.Text.Encoding.UTF8.GetBytes(bounded);
+                }
+                one = Bounded("living_dungeon_foreground"); two = Bounded("living_dungeon_foreground_v2");
+            }
+            root.InjectSceneRecoveryClockForTests(sceneClock, sceneClock.Monotonic, one, two);
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(sceneClock, sceneClock.Monotonic));
+            Assert.That(root.TimeService, Is.Null, "Injection supplies providers, never an early/replacement owner");
             TestContext.WriteLine("Isolated scene boot " + isolationCallbacks + ": " + config.save.fileName);
+        }
+        private void ObserveSceneFocus(bool focused) => typeof(GameRoot).GetMethod("OnApplicationFocus",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            .Invoke(GameRoot.Instance, new object[] { focused });
+
+        // Finish only the legitimate pending foreground publication through the
+        // normal Update lifecycle. Never pump private methods or change time.
+        private IEnumerator StabilizeReadOnlySceneBaseline()
+        {
+            var root = GameRoot.Instance; var service = root.SaveService; var time = root.TimeService;
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            object RootField(string name) => typeof(GameRoot).GetField(name, flags).GetValue(root);
+            bool Pending() => (bool)RootField("foregroundDirty") || (bool)RootField("foregroundPumping") ||
+                (bool)RootField("bootRecoveryPending") || service.CanonicalPublicationPending;
+            void Healthy()
+            {
+                Assert.That(root.isActiveAndEnabled, Is.True, "Baseline keeps the real root running");
+                Assert.That(RootField("foregroundFailure"), Is.Null);
+                Assert.That(RootField("foregroundRetryPending"), Is.EqualTo(false));
+                Assert.That(time.RecoveryClockActive || time.HasDeferredRecovery || time.HasForegroundPersistenceStall ||
+                    service.RequiresCanonicalRecovery, Is.False, "Resolve lifecycle/recovery obligations before a read-only baseline");
+                Assert.That(root.Save.timeProvenance.Episode, Is.Null);
+                Assert.That(root.Save.livingDungeon.IsClosed, Is.True);
+                Assert.That(root.TimeService, Is.SameAs(time));
+                Assert.That(typeof(SaveService).GetField("recoveryTime", flags).GetValue(service), Is.SameAs(time));
+            }
+            Healthy();
+            readOnlyBaselineOrdinal++;
+            var before = File.ReadAllBytes(service.SavePath);
+            CollectionAssert.AreEqual(service.CanonicalSession.GetCurrentBytes(), before);
+            string gameplay = JsonUtility.ToJson(root.Save);
+            var utc = sceneClock.Now; long monotonic = sceneClock.Elapsed100ns, through = time.ForegroundThrough;
+            bool wasPending = Pending(); int publications = 0;
+            Action<SaveData> published = _ => publications++;
+            service.CanonicalRuntimePublished += published;
+            try
+            {
+                const int maximumPublicationFrames = 8; // Test orchestration bound, never gameplay tuning.
+                for (int frame = 0; frame < maximumPublicationFrames && Pending(); frame++) {
+                    yield return null;
+                    Healthy();
+                }
+                Assert.That(Pending(), Is.False, "Pending foreground publication did not complete within the fixture bound");
+            }
+            finally { service.CanonicalRuntimePublished -= published; }
+            Healthy();
+            Assert.That(publications, Is.EqualTo(wasPending ? 1 : 0), "Exactly one pending publication; no frame retry loop");
+            Assert.That(sceneClock.Now, Is.EqualTo(utc)); Assert.That(sceneClock.Elapsed100ns, Is.EqualTo(monotonic));
+            Assert.That(time.ForegroundThrough, Is.EqualTo(through));
+            Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(gameplay),
+                "Stabilization cannot change wallet, ticks, W, accepted/closed work, rewards or recovery state");
+            var after = File.ReadAllBytes(service.SavePath);
+            CollectionAssert.AreEqual(service.CanonicalSession.GetCurrentBytes(), after, "Authoritative session and disk agree");
+            Assert.That(TraceReadOnlyBaselineDifference(before, after, "stabilized"), Is.True,
+                "Only unchanged bytes or the independently demonstrated mana decimal suffix is eligible");
+            TestContext.WriteLine("H1F4_BASELINE publication-count=" + publications + " ordinal=" + readOnlyBaselineOrdinal +
+                " gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True");
+            readOnlyBaselineProbe = after;
+        }
+
+        private bool TraceReadOnlyBaselineDifference(byte[] before, byte[] after, string phase)
+        {
+            int first = 0;
+            while (first < before.Length && first < after.Length && before[first] == after[first]) first++;
+            string original = System.Text.Encoding.UTF8.GetString(before);
+            int key = original.LastIndexOf("\"ManaReserve\":", System.Math.Min(first, original.Length - 1), StringComparison.Ordinal);
+            bool walletNumber = key >= 0 && first >= key + "\"ManaReserve\":".Length && original.Substring(key + "\"ManaReserve\":".Length,
+                first - key - "\"ManaReserve\":".Length).All(c => c == '-' || c >= '0' && c <= '9');
+            bool decimalSuffixOnly = after.Length == before.Length + 2 && first < before.Length &&
+                before[first] == (byte)',' && after[first] == (byte)'.' && after[first + 1] == (byte)'0' &&
+                before.Skip(first).SequenceEqual(after.Skip(first + 2)) && walletNumber;
+            TestContext.WriteLine("H1F4_BASELINE " + phase + " ordinal=" + readOnlyBaselineOrdinal +
+                " identical=" + before.SequenceEqual(after) + " walletDecimalSuffixOnly=" + decimalSuffixOnly +
+                " beforeLength=" + before.Length + " afterLength=" + after.Length + " first=" + first +
+                " beforeSha=" + SpatialContractSha256.Compute(before) + " afterSha=" + SpatialContractSha256.Compute(after));
+            return before.SequenceEqual(after) || decimalSuffixOnly;
+        }
+
+        private void PumpSceneToClosed(bool establishForeground = false)
+        {
+            var root = GameRoot.Instance;
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            TraceSceneState("drain.begin");
+            for (int pump = 0; pump < 128; pump++) {
+                // Completing boot samples the platform's actual focus again.
+                // Establish this fixture's foreground observation after that
+                // initialization too, using callbacks at the same valid cut.
+                if (establishForeground && !root.TimeService.RecoveryForegroundObserved) {
+                    typeof(GameRoot).GetMethod("OnApplicationPause", flags).Invoke(root, new object[] { false });
+                    typeof(GameRoot).GetMethod("OnApplicationFocus", flags).Invoke(root, new object[] { true });
+                }
+                typeof(GameRoot).GetMethod("UpdateForeground", flags).Invoke(root, null);
+                Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root), Is.Null);
+                if (root.Save.livingDungeon.IsClosed && !root.TimeService.RecoveryClockActive && !root.TimeService.HasDeferredRecovery) return;
+            }
+            TraceSceneState("drain.exhausted");
+            Assert.Fail("Controlled scene failed to close its existing cut/recovery within the fixture bound");
+        }
+
+        [UnityTest] public IEnumerator SceneClockNativeFractionAndOwnerRemainBound()
+        {
+            var root = GameRoot.Instance; var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            Assert.That(root.TimeService, Is.SameAs(typeof(SaveService).GetField("recoveryTime", flags).GetValue(root.SaveService)));
+            Assert.That(typeof(SaveService).GetField("_timeSource", flags).GetValue(root.SaveService), Is.SameAs(sceneClock));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(sceneClock.Now));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary.Fraction100ns, Is.EqualTo(2500000));
+            var bytes = root.SaveService.CanonicalSession.GetCurrentBytes();
+            Assert.Throws<ArgumentException>(() => root.InjectSceneRecoveryClockForTests(sceneClock, sceneClock.Monotonic));
+            CollectionAssert.AreEqual(bytes, root.SaveService.CanonicalSession.GetCurrentBytes());
+            yield return null;
+        }
+        [UnityTest] public IEnumerator SceneClockEligibilityRejectsOwnerProductAndNonBatchContext()
+        {
+            var method = typeof(GameRoot).GetMethod("IsIsolatedSceneClockContext", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            Assert.That(method.Invoke(null, new object[] { "Dungeon Lord", true, filename }), Is.False);
+            Assert.That(method.Invoke(null, new object[] { Application.productName, false, filename }), Is.False);
+            Assert.That(method.Invoke(null, new object[] { Application.productName, true, "../" + filename }), Is.False);
+            Assert.That(method.Invoke(null, new object[] { Application.productName, true, filename }), Is.True);
+            yield return null;
+        }
+        [UnityTest] public IEnumerator SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit()
+        {
+            var root = GameRoot.Instance; double mana = root.Save.structureRuntime.ManaReserve; long ticks = root.Save.totalTicks;
+            var bound = root.TimeService; sceneClock.Advance(.0000001);
+            Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.True);
+            Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(2000, 2500001)));
+            for (int i = 0; i < 3; i++) Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.True);
+            Assert.That(root.TimeService, Is.SameAs(bound)); Assert.That(root.Save.totalTicks, Is.EqualTo(ticks));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(sceneClock.Now));
+            yield return null;
+        }
+        [UnityTest] public IEnumerator SceneClockInvalidUtcFailsClosed() { yield return SceneClockInvalidObservationsFailClosed(true); }
+        [UnityTest] public IEnumerator SceneClockInvalidMonotonicFailsClosed() { yield return SceneClockInvalidObservationsFailClosed(false); }
+        private IEnumerator SceneClockInvalidObservationsFailClosed(bool utc)
+        {
+            var root = GameRoot.Instance; var before = root.SaveService.CanonicalSession.GetCurrentBytes();
+            var wall = root.Save.timeProvenance.AccountedBoundary;
+            try {
+                sceneClock.InvalidUtc = utc; sceneClock.InvalidMonotonic = !utc;
+                Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.False);
+                CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
+                Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(wall));
+            } finally { sceneClock.InvalidUtc = sceneClock.InvalidMonotonic = false; }
+            yield return null;
         }
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            if (readOnlyBaselineProbe != null && GameRoot.Instance?.SaveService != null)
+                TraceReadOnlyBaselineDifference(readOnlyBaselineProbe, File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath), "probe-after-test");
+            bool failed = TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed;
+            if (failed && filename != null) {
+                string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+                Assert.That(export, Is.Not.Null.And.Not.Empty, "Preserve failed scene inputs before cleanup");
+                var output = new DirectoryInfo(Path.GetFullPath(export)); var stage = output.Parent; var campaign = stage?.Parent;
+                Assert.That(output.Name, Is.EqualTo("fixture-inputs"));
+                Assert.That(campaign?.Parent?.FullName, Is.EqualTo(Path.GetFullPath(Path.Combine(Application.dataPath,
+                    "../TestResults/qualification-supervisor"))).IgnoreCase);
+                Assert.That(Guid.TryParseExact(campaign?.Name, "N", out _), Is.True);
+                foreach (var directory in new[] { output, stage, campaign, campaign.Parent })
+                    Assert.That(directory.Exists && (directory.Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
+                string owned = Path.Combine(output.FullName, "failed-scene-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(owned);
+                foreach (string path in Directory.GetFiles(Application.persistentDataPath, filename + "*"))
+                    File.Copy(path, Path.Combine(owned, Path.GetFileName(path)), false);
+                if (GameRoot.Instance?.SaveService?.CanonicalSession != null)
+                    File.WriteAllBytes(Path.Combine(owned, "canonical-authority.json"), GameRoot.Instance.SaveService.CanonicalSession.GetCurrentBytes());
+                File.WriteAllText(Path.Combine(owned, "identity.txt"), TestContext.CurrentContext.Test.FullName + "\n" +
+                    Application.productName + "\n" + Path.Combine(Application.persistentDataPath, filename));
+            }
             Application.logMessageReceived -= RecordThemeWarning;
             if (simulatedTouch != null) InputSystem.RemoveDevice(simulatedTouch);
             simulatedTouch = null;
@@ -82,9 +346,11 @@ namespace DungeonBuilder.M0.Tests
             if (!Application.isPlaying) yield return new EnterPlayMode();
             if (GameRoot.Instance != null) UnityEngine.Object.Destroy(GameRoot.Instance.gameObject);
             if (disposableConfig != null) UnityEngine.Object.Destroy(disposableConfig);
+            if (disposableRunScenarioConfig != null) UnityEngine.Object.Destroy(disposableRunScenarioConfig);
             yield return null;
+            combatFeedbackScenario = 0;
             SceneManager.sceneLoaded -= Isolate;
-            if (filename != null)
+            if (filename != null && !failed)
                 foreach (string path in Directory.GetFiles(Application.persistentDataPath, filename + "*")) File.Delete(path);
         }
         [UnityTest]
@@ -440,7 +706,14 @@ namespace DungeonBuilder.M0.Tests
             }
             Assert.That(missingThemeWarning, Is.False);
             Click(document.rootVisualElement.Q<Button>("closeDisplay"));
-            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("phase7a4-theme-normal-1080x1920.png");
+            const string captureName = "phase7a4-theme-normal-1080x1920.png";
+            string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+            Assert.That(export, Is.Not.Null.And.Not.Empty, "Expected capture must belong to the qualification campaign");
+            string captureDirectory = Path.Combine(Path.GetFullPath(export), "screenshots") + Path.DirectorySeparatorChar;
+            LogAssert.Expect(LogType.Log, new System.Text.RegularExpressions.Regex("^Qualification capture: " +
+                System.Text.RegularExpressions.Regex.Escape(captureDirectory) + "[0-9a-f]{8}-" +
+                System.Text.RegularExpressions.Regex.Escape(captureName) + "$"));
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(captureName);
             yield return null;
             LogAssert.NoUnexpectedReceived();
         }
@@ -979,7 +1252,7 @@ namespace DungeonBuilder.M0.Tests
                         filename + ".editor-draft.draft-*.commit").OrderBy(p => p, StringComparer.Ordinal).Last();
                     File.WriteAllText(commit, "malformed test commit evidence");
                 }
-                byte[] canonical = File.ReadAllBytes(root.SaveService.SavePath);
+                yield return StabilizeReadOnlySceneBaseline(); byte[] canonical = File.ReadAllBytes(root.SaveService.SavePath);
                 double mana = root.Save.structureRuntime.ManaReserve;
                 yield return RestartShell();
                 var ui = controller.GetComponent<UIDocument>().rootVisualElement;

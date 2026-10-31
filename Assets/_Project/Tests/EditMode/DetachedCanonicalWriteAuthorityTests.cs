@@ -313,7 +313,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             AssertCandidateSuccess(fixture, result);
             DetachedCompleteSaveValidationResult durable = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 fixture.FileSystem.ReadAllBytes(fixture.ActivePath), fixture.Context);
-            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(durable.IsValid, Is.True); Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
             Assert.That(durable.State.Floors[0].RoomContents.Assignments.Any(value =>
                 assigned.Select(item => item.AssignmentId).Contains(value.AssignmentId)), Is.False);
             foreach (RoomContentAssignment expected in assigned)
@@ -756,8 +756,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     "writer-live-target-" + selectedRoom, 6, members);
             Assert.That(PhaseFourTestSupport.Upgrade(run.Attempt.Candidate.GetBytes(), run.Limits,
                 out byte[] current), Is.True);
-            var state = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current,
-                new DetachedCurrentTargetValidationContext(run.Compatibility, run.Production, run.LegacyBytes, run.Limits)).State;
+            var validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current,
+                PhaseFourTestSupport.CurrentContext(run.Compatibility, run.Production, run.LegacyBytes, run.Limits));
+            Assert.That(validated.IsValid, Is.True, validated.Reason);
+            var state = validated.State;
             var save = new SaveData { mvpSelectedRoomSlotIndex = selectedRoom,
                 canonicalSpatialAuthority = state.Authority, spatialFloors = state.Floors,
                 validatedCanonicalSpatialState = state };
@@ -915,7 +917,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void SuccessfulWritePersistsExactCompleteBytesThenPublishesRuntime()
         {
             Fixture fixture = CreateWithUnknownEvidence();
-            fixture.Runtime.lastSavedUtcUnix = 777;
+            long boundary = fixture.Runtime.lastSavedUtcUnix;
+            fixture.Runtime.lastPausedUtcUnix = 777;
             fixture.Runtime.structureRuntime.ManaReserve = 123d;
             fixture.Runtime.mvpDungeonPlacements.Entries[0].OptionId =
                 MvpDungeonPlacementIds.NarrowHallOptionId;
@@ -935,7 +938,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"CategoryId\":\"placement.category.room\"," +
                 "\"OptionId\":\"placement.option.room.basic\""));
             Assert.That(json, Does.Not.Contain("\"OptionId\":\"placement.option.room.narrow_hall\""));
-            Assert.That(result.RuntimeProjection.lastSavedUtcUnix, Is.EqualTo(777));
+            Assert.That(result.RuntimeProjection.lastSavedUtcUnix, Is.EqualTo(boundary));
+            Assert.That(result.RuntimeProjection.lastPausedUtcUnix, Is.EqualTo(777));
             Assert.That(result.RuntimeProjection.structureRuntime.ManaReserve, Is.EqualTo(123d));
             Assert.That(result.RuntimeProjection.validatedCanonicalSpatialState, Is.Not.Null);
             CanonicalMvpRouteProjectionResult route =
@@ -949,7 +953,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void NativeCreationPersistsContextuallyValidatedEmptySchema8WithLifecycleOwnership()
+        public void NativeCreationPersistsContextuallyValidatedCurrentSchemaWithLifecycleOwnership()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture source =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false);
@@ -962,10 +966,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var recognized = new SaveData { contentVersion = "test", createdUtcUnix = 1,
                 lastSavedUtcUnix = 1 };
 
-            NativeCanonicalSaveResult result = NativeCanonicalSaveCreator.Create(path, fileSystem,
-                recognized, source.Compatibility, source.Production, source.LegacyBytes, profile,
+            var inputs = PhaseFourTestSupport.CurrentContext(source.Compatibility, source.Production,
+                source.LegacyBytes, source.Limits).RecoveryInputs;
+            NativeCanonicalSaveResult result = NativeCanonicalSaveCreator.CreatePrecise(path, fileSystem,
+                recognized, source.Production, profile,
                 PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits),
-                PhaseFourTestSupport.Occupancy(source.Limits));
+                inputs, new UnixTimePoint(1, 0));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             Assert.That(result.Validation.State.Authority.CreationKind,
@@ -1037,7 +1043,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void RecognizedStateOnlySaveKeepsCanonicalAndUnknownEvidence()
         {
             Fixture fixture = CreateWithUnknownEvidence();
-            fixture.Runtime.lastSavedUtcUnix = 991;
+            long boundary = fixture.Runtime.lastSavedUtcUnix;
+            fixture.Runtime.lastPausedUtcUnix = 991;
             byte[] canonicalBefore = CanonicalSpatialSaveSerializer.Serialize(fixture.State,
                 fixture.Profile.Canonical).Value;
 
@@ -1045,7 +1052,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime);
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
-            Assert.That(result.RuntimeProjection.lastSavedUtcUnix, Is.EqualTo(991));
+            Assert.That(result.RuntimeProjection.lastSavedUtcUnix, Is.EqualTo(boundary));
+            Assert.That(result.RuntimeProjection.lastPausedUtcUnix, Is.EqualTo(991));
             Assert.That(CanonicalSpatialSaveSerializer.Serialize(result.Validation.State,
                 fixture.Profile.Canonical).Value, Is.EqualTo(canonicalBefore));
             string json = Encoding.UTF8.GetString(result.GetPersistedBytes());
@@ -1057,24 +1065,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void RecognizedStateSavePersistsExplicitNullableClearsAndReopensThemAsNull()
         {
             Fixture fixture = Create();
+            var pending = fixture.Context.RecoveryInputs.Bootstrap.researchPendingScaffold;
+            var progress = fixture.Context.RecoveryInputs.Bootstrap.researchProgressScaffold;
             fixture.Runtime.researchPending = new ResearchPendingState
-                { SlotId = "slot.old", ProjectId = "research.old" };
+                { SlotId = pending.slotId, ProjectId = pending.projectId };
             fixture.Runtime.researchProgress = new ResearchProgressState
             {
-                SlotId = "slot.old", ProjectId = "research.old", ProgressUnits = 1d,
-                RuleSourceIdUsed = "rule.old"
+                SlotId = pending.slotId, ProjectId = pending.projectId, ProgressUnits = 1d,
+                RuleSourceIdUsed = progress.ruleSourceId
             };
             fixture.Runtime.lastOfflineSummary = new OfflineSummary
                 { RuleResolved = true, RuleSourceIdUsed = "rule.old" };
             DetachedCanonicalWriteResult populated = fixture.Authority.SaveRecognizedState(
                 fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime);
             fixture.Accept(populated);
-            Assert.That(fixture.Runtime.researchPending.SlotId, Is.EqualTo("slot.old"));
-            Assert.That(fixture.Runtime.researchPending.ProjectId, Is.EqualTo("research.old"));
-            Assert.That(fixture.Runtime.researchProgress.SlotId, Is.EqualTo("slot.old"));
-            Assert.That(fixture.Runtime.researchProgress.ProjectId, Is.EqualTo("research.old"));
+            Assert.That(fixture.Runtime.researchPending.SlotId, Is.EqualTo(pending.slotId));
+            Assert.That(fixture.Runtime.researchPending.ProjectId, Is.EqualTo(pending.projectId));
+            Assert.That(fixture.Runtime.researchProgress.SlotId, Is.EqualTo(pending.slotId));
+            Assert.That(fixture.Runtime.researchProgress.ProjectId, Is.EqualTo(pending.projectId));
             Assert.That(fixture.Runtime.researchProgress.ProgressUnits, Is.EqualTo(1d));
-            Assert.That(fixture.Runtime.researchProgress.RuleSourceIdUsed, Is.EqualTo("rule.old"));
+            Assert.That(fixture.Runtime.researchProgress.RuleSourceIdUsed, Is.EqualTo(progress.ruleSourceId));
             Assert.That(fixture.Runtime.lastOfflineSummary.RuleResolved, Is.True);
             Assert.That(fixture.Runtime.lastOfflineSummary.RuleSourceIdUsed, Is.EqualTo("rule.old"));
             fixture.Runtime.researchPending = null;
@@ -1216,7 +1226,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             fixture.FileSystem.DisableFailure();
             fixture.Accept(first);
-            fixture.Runtime.lastSavedUtcUnix++;
+            fixture.Runtime.lastPausedUtcUnix++;
             DetachedCanonicalWriteResult second = fixture.Authority.SaveRecognizedState(
                 fixture.ActivePath, fixture.FileSystem, fixture.Session, fixture.Runtime);
 
@@ -1475,12 +1485,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal SaveData Runtime;
             internal Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem FileSystem;
             internal string ActivePath;
+            internal byte[] FrozenSixteen;
             internal DetachedCanonicalWriteAuthority Authority => new DetachedCanonicalWriteAuthority(
                 Production, Compatibility, Configuration, Context, Profile, RemovalPolicy, Economy,
                 acquisition: Acquisition, branchingResearch: BranchingResearch);
 
             internal static Fixture Create(string primaryUnknown, string rootUnknown = null,
-                SaveSpatialMigrationLimitsProfile workloadProfile = null)
+                SaveSpatialMigrationLimitsProfile workloadProfile = null, byte[][] recoveryInputBytes = null)
             {
                 string primary = primaryUnknown == null ? string.Empty : primaryUnknown;
                 string root = rootUnknown == null ? string.Empty : "," + rootUnknown;
@@ -1491,20 +1502,31 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         workloadProfile?.Raw, workloadProfile?.Whole, workloadProfile?.Canonical);
                 Assert.That(source.Result.IsSuccess, Is.True, source.Result.Reason);
                 byte[] candidate = source.Result.Attempt.Candidate.GetBytes();
-                Assert.That(PhaseFourTestSupport.Upgrade(candidate, source.Limits,
-                    out candidate), Is.True);
-                RoomContentSpatialOccupancySnapshot occupancy = PhaseFourTestSupport.Occupancy(source.Limits);
+                Assert.That(PhaseFourTestSupport.UpgradeFrozenSixteen(candidate, source.Limits,
+                    out var frozenSixteen), Is.True);
+                // Explicit fresh test authorship, never production migration or
+                // rebinding of an admitted run. Immutable consumed bytes precede
+                // creation of the synthetic current-schema owner.
+                var inputs = new RecoveryRuntimeInputs(recoveryInputBytes ?? H1F4RecoveryContractTests.Inputs(), source.Production,
+                    ProductionSpatialContentWorkloadLimitParser.Parse(AssetDatabase.LoadAssetAtPath<TextAsset>(
+                        "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json")).Limits, source.Limits);
+                candidate = PhaseFourTestSupport.SyntheticCurrent(frozenSixteen, source.Limits, inputs.Identity);
+                RoomContentSpatialOccupancySnapshot occupancy = inputs.Occupancy;
                 RoomContentPositionMigrationProfilesSnapshot positionProfiles =
                     PhaseFourTestSupport.PositionProfiles(source.Limits);
-                var context = new DetachedCurrentTargetValidationContext(source.Compatibility,
-                    source.Production, source.LegacyBytes, source.Limits, occupancy);
+                var context = new DetachedCurrentTargetValidationContext(inputs.Compatibility,
+                    source.Production, LegacyGameplayConfigurationContract.SerializeCanonical(inputs.Configuration),
+                    source.Limits, occupancy, monsterRecovery: inputs.Monsters);
+                context.BindRecoveryInputs(inputs);
                 var profile = workloadProfile ?? new SaveSpatialMigrationLimitsProfile(
                     Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
                     source.Limits, source.WholeLimits);
                 DetachedCompleteSaveValidationResult validation =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
+                Assert.That(validation.IsValid, Is.True, validation.Reason);
                 DetachedCanonicalSaveSessionResult opened =
                     DetachedCanonicalSaveSession.Open(candidate, context, profile);
+                Assert.That(opened.IsSuccess, Is.True, opened.Reason);
                 if (primaryUnknown != null && primaryUnknown.Contains("mvpDungeonPlacements"))
                 {
                     var empty = new DetachedCanonicalSpatialSaveState
@@ -1532,14 +1554,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     AssetDatabase.LoadAssetAtPath<TextAsset>(
                         "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json"),
                     out var branchingResearch), Is.True);
-                return new Fixture { Production = source.Production, Compatibility = source.Compatibility,
-                    Configuration = LegacyGameplayConfigurationContract.Parse(source.LegacyBytes),
+                return new Fixture { Production = source.Production, Compatibility = inputs.Compatibility,
+                    Configuration = context.RecoveryInputs.Configuration,
                     Profile = profile, Context = context, Session = opened.Session, State = validation.State,
                     Runtime = runtime, FileSystem = fs, ActivePath = path, RemovalPolicy = removalPolicy,
-                    Economy = PhaseFourTestSupport.Economy(source.Production, source.Limits),
+                    Economy = context.RecoveryInputs.Economy,
                     Acquisition = PhaseFourTestSupport.Acquisition(PhaseFourTestSupport.Economy(source.Production, source.Limits), source.Limits),
                     BranchingResearch = branchingResearch, Occupancy = occupancy,
-                    PositionProfiles = positionProfiles };
+                    PositionProfiles = positionProfiles, FrozenSixteen = frozenSixteen };
             }
 
             internal DetachedCanonicalMutationResult Prepare(DetachedCanonicalMutationRequest request) =>
@@ -1567,6 +1589,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     out SaveData runtime, out string reason), Is.True, reason);
                 Session = opened.Session; State = validated.State; Runtime = runtime;
                 CollectionAssert.AreEqual(bytes, Session.GetCurrentBytes());
+            }
+
+            internal void ReopenWithSupportedForegroundProfiles()
+            {
+                var inputs = Context.RecoveryInputs;
+                Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                    Encoding.UTF8.GetString(inputs.Identity.GetInput(0)), out var original), Is.True);
+                Assert.That(JsonUtility.ToJson(Configuration), Is.EqualTo(JsonUtility.ToJson(original)),
+                    "Author test configuration before creating its owner; do not change consumed inputs afterward");
+                Assert.That(JsonUtility.ToJson(Configuration.CombatC0), Is.EqualTo(JsonUtility.ToJson(original.CombatC0)));
+                Profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+                Context = new DetachedCurrentTargetValidationContext(inputs.Compatibility, Production,
+                    LegacyGameplayConfigurationContract.SerializeCanonical(inputs.Configuration), Profile.Canonical, inputs.Occupancy,
+                    livingDungeonProfiles: new[] { inputs.OneFloor.CreateProfile(Profile.Canonical.ForSchema(13).Serialized),
+                        inputs.TwoFloor.CreateProfile(Profile.Canonical.ForSchema(13).Serialized) }, monsterRecovery: inputs.Monsters);
+                Context.BindRecoveryInputs(inputs);
+                Reopen();
             }
 
             internal Fixture Rebase(DetachedCanonicalSpatialSaveState state)

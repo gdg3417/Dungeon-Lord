@@ -1,0 +1,38 @@
+# H1-F4 remaining scene packets — 2026-10-31
+
+PR #259 remains draft. Tested source **`ed5af6f3473b95eabacfa2993a15ac49257d43b1`**; base main `3eb6ccf93558b8145d64e9e63cbefcbd73484602`. Changes are confined to test fixtures. No production save/recovery, clock, tuning, schema/migration, localization, validator or historical golden changed.
+
+## Qualified acceptance scope
+
+The complete selected 14-case cohort passed **14/0/0 EditMode**, campaign `3d35ed78a25d489eb700a5e280a11cbf`, and **14/0/0 actual PlayMode counterparts**, campaign `1286fbafcdd8471190dca29f854e8fe1`. Both completed all five stages and independent verification. Counts overlap between modes and are not summed as unique tests. The cohort includes all seven floor-review methods, all three map-reassignment methods, both visual-feedback/replay methods and two clock-owner controls. Exact leaf names and wrapper mappings are in the [JSON evidence](h1-f4-scene-packets-qualification-20261031.json).
+
+All four remaining original identities passed:
+
+| Original method under `DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.` | Confirmed fixture cause and correction |
+| --- | --- |
+| `GraphicalFloorReviewMeaningfulInvalidations` | A foreign post-binding loot object fails the writer's consumed-input identity guard before candidate preparation (`gd66.write.first_write_validation_failed`). Restore presentation-only affordability/HP probes, settle legitimate pending publication, verify foreign-input refusal with exact disk/session/runtime nonmutation, then restore the identical original loot object for the successful publication/cache-invalidation assertions. No rebinding or guard relaxation. |
+| `GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges` | The activation publication left a legitimate dirty foreground update pending. Settle it through the existing strict baseline helper **before** opening the modal. Preserve deliberate mana/Research mutations and the stale action's exact no-write/live-state assertions. The unauthorized modal action still cannot publish those mutations. |
+| `RoomContentMapReassignmentProductionMouseTouchRecovery` | The fixture directly paused TimeService before funding, bypassing root coordination. The already prebound stationary provider controls time; retain normal foreground ownership and settle the legitimate funding publication before taking bytes. Actual mouse/touch events, stable draft identity, custody, pending/acknowledged durability, save/discard/shell reopen and raw-byte assertions remain. |
+| `VisualRunReplayProductionLifecycleAndResponsiveControls` | Disabling CombatC0 after ownership invalidated subsequent canonical writes. Produce B1 output through the existing pure snapshot executor without changing inputs or publishing it. Independently run the real current C2 manual writer. Install B1 evidence only for the synchronous existing replay-presentation call, restoring the current outcome before any yield; assert unchanged runtime, session and disk after each call. Retain historical art, controls, pooling, layouts, floor selection, encounters and exact no-write assertions. |
+
+## Replay baseline investigation
+
+The first affected cohort at `16051641` completed **13/1/0**, campaign `2c0132bedfb24e4e84037abe8ca4b944`, permanently FAILED. Replay reached current execution but the strict baseline rejected more than a decimal suffix. An unchanged-assertion diagnostic at `cbd13525` completed **1/1/0**, campaign `823d7defbaf24247971d30df4dce6763`, retaining bounded private before/after bytes.
+
+The exact diff was the wallet's `.0` lexical suffix **plus** living-dungeon `Revision` 3→4 and `Scheduler.NextOpportunityTime` null→a future boundary. All other parsed fields agreed. This is a real scheduler publication, not the P1 decimal-only case. `LivingDungeonForeground` initializes a missing opportunity from the committed closed horizon and increments revision; `GameRoot.UpdateForeground` runs that reconciliation when dirty. The ordinary save barrier closes accepted work but does not itself service this dirty-only case. A subsequent **13/1/0** attempt at `e28a0523`, campaign `7e6aa849cea14c2a95621c579e36c3d7`, correctly rejected the still-missing opportunity after an ordinary Save. Those failures remain unchanged.
+
+The final fixture waits at most eight normal Unity frames for that observable pending reconciliation. It keeps the real root and clock owner, rejects recovery/stall/failure/retry, and verifies unchanged UTC/monotonic providers, wallet, full serialized runtime, W/context/episode, A/C, ticks, history and monster continuity. Only the independently established scheduler initialization is accepted, with the exact revision increment, a future opportunity and session/disk agreement. The separate strict P1 helper then requires unchanged bytes or its original wallet-suffix exception. All subsequent replay/UI comparisons use untouched exact byte arrays. The P1 helper was not broadened. Temporary byte-copy diagnostics were removed after their evidence was retained.
+
+## Preservation and historical reconciliation
+
+Independent verification covered each original 1,494-member archive/input map, exact selected root/leaf inventories, pinned tools, complete host/child exits and Job accounting, settings/TMP, protected owner saves and historical evidence. EditMode verified **351** prior evidence directories; PlayMode verified **353**. Reservation is released with previous campaign `1286fbafcdd8471190dca29f854e8fe1`.
+
+The three failed attempts had completed process ownership and unchanged qualified inputs. Each received existing guarded normal-FAILED restoration and a separate independent check. Their FAILED verdicts and raw evidence remain. No exceptional recovery, force unlock, termination, owner-save operation or evidence deletion occurred.
+
+The exact 84 failing names from original campaign `75bee8ad47764696bf3404388fe8f757` were matched against passed leaves in ten retained, fully passed source-pinned cohorts. **84/84 have qualified passing exact-name evidence; zero remain unqualified in that historical inventory.** The JSON records every name's source/campaign/XML hash. The original raw 2,728/84/1 and **INCOMPLETE / UNCERTAIN** verdict are unchanged. This is a historical coverage reconciliation, not a new full-suite count or result.
+
+Unit controls and selected scene SIT passed. Owner UAT has not begun. Full ordered scene coverage (including separately scheduled sustained workload), fresh complete EditMode/PlayMode discovery and suites, final interruption/reopen, isolated Windows build/runtime/native exit, and matched main/final performance/memory remain required. Historical missing-label and missing-Draft causes remain unproven; these passes do not manufacture their root causes.
+
+Private retained artifacts are owned by the closeout supervisor: `TestResults/h1-f4-20261027-fc01` through `fc05`, their exact supervisor campaign directories above, their isolated product/save namespaces, original archives, selected runners and independent receipts. Root `h1-f4-prepare-fc*.py`, normal-finalization/verification adapters, compile diagnostics 05–08, private replay-byte analysis and this report generator are closeout-owned and retained for review. Raw logs and save bytes remain private; sanitized hashes/deltas are published. No cleanup of protected or unresolved artifacts is authorized.
+
+Model recommendation remains GPT-6.1 Sol Medium, Standard bounded fixture corrections; GPT-6 Sol Medium fallback. No deliberate model change or Astra escalation; exact selected app SKU/effort is not independently exposed by execution tools.

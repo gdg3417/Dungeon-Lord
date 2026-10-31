@@ -15,6 +15,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
     public class PhaseSixA5ATests
     {
         private static Fixture Eligible() => PhaseSixA4Tests.Eligible();
+        private static Fixture Authored(Action<RunSimulationConfig> author) => PhaseSixA4Tests.Eligible(
+            PhaseFourTestSupport.AuthoredInputs((config, _) => author(config)));
         private static DetachedCanonicalWriteAuthority Writer(Fixture f) => PhaseSixA4Tests.Writer(f);
         private static string FloorTwo(Fixture f) => PhaseSixA4Tests.FloorTwo(f);
         private static ActiveFloorRunSnapshot Snapshot(Fixture f) => PhaseSixA4Tests.Snapshot(f);
@@ -167,10 +169,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void SurvivorLearningReconfirmsClampsAndOnlyPublishesAfterCompleteRun()
         {
-            var f = Eligible();
+            var f = Authored(config => PhaseSixA4Tests.ForceDescent(config, false));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId,
                 MvpDungeonPlacementIds.HiddenCacheOptionId);
-            PhaseSixA4Tests.ForceDescent(f.Configuration, false);
             var writer = Writer(f);
             var initial = Snapshot(f);
             Assert.That(initial.FloorKnowledge.Records, Is.Empty);
@@ -200,12 +201,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void DescendedTwoFloorRunPublishesApplicableKnowledgeForBothCompletedFloors()
         {
-            var f = Eligible();
+            var f = Authored(config => PhaseSixA4Tests.ForceDescent(config, true));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId,
                 MvpDungeonPlacementIds.HiddenCacheOptionId);
             PhaseSixA4Tests.AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId,
                 MvpDungeonPlacementIds.SkeletonOptionId);
-            PhaseSixA4Tests.ForceDescent(f.Configuration, true);
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                 FloorLifecycleAction.Activate, FloorTwo(f)));
             var before = Snapshot(f);
@@ -252,7 +252,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ExitBeforeFloorTwoDoesNotLearnItsHiddenSnapshot()
         {
-            var f = Eligible(); PhaseSixA4Tests.ForceDescent(f.Configuration, false);
+            var f = Authored(config => PhaseSixA4Tests.ForceDescent(config, false));
             f.Accept(Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                 FloorLifecycleAction.Activate, FloorTwo(f)));
             var simulation = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot());
@@ -265,7 +265,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ChangedObservedContentStartsNewConfidenceAndSnapshotCopiesKnowledge()
         {
-            var f = Eligible(); PhaseSixA4Tests.ForceDescent(f.Configuration, false);
+            var f = Authored(config => PhaseSixA4Tests.ForceDescent(config, false));
             var simulation = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot());
             f.Accept(Writer(f).CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                 simulation, RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix)));
@@ -291,20 +291,40 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.Not.EqualTo(oldFingerprint));
         }
 
-        [Test]
-        public void FinalWipeDoesNotCreatePreciseFloorKnowledge()
+        private static Fixture LethalFixture()
         {
-            var f = Eligible();
+            var f = Authored(config => {
+                PhaseSixA4Tests.ForceDescent(config, false);
+                config.PhaseFiveB.MinPartySize = config.PhaseFiveB.MaxPartySize = 3;
+                foreach (var profile in config.PhaseFiveB.DamageProfiles)
+                    if (profile.OptionId == MvpDungeonPlacementIds.SkeletonOptionId ||
+                        profile.OptionId == MvpDungeonPlacementIds.SpikeTrapOptionId)
+                        profile.MinimumDamage = profile.MaximumDamage = 100;
+                // The pure historical snapshot and current manual writer dispatch
+                // different executables. Author both, as in the existing C1 wipe fixture.
+                foreach (var monster in config.CombatC0.Monsters)
+                    { monster.Damage = 100; monster.Initiative = 100; monster.MaxHealth = 100; }
+            });
             for (int index = 0; index < 2; index++)
                 PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId,
                     MvpDungeonPlacementIds.SkeletonOptionId);
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.TrapCategoryId,
                 MvpDungeonPlacementIds.SpikeTrapOptionId);
-            f.Configuration.PhaseFiveB.MinPartySize = f.Configuration.PhaseFiveB.MaxPartySize = 3;
-            foreach (var profile in f.Configuration.PhaseFiveB.DamageProfiles)
-                if (profile.OptionId == MvpDungeonPlacementIds.SkeletonOptionId ||
-                    profile.OptionId == MvpDungeonPlacementIds.SpikeTrapOptionId)
-                    profile.MinimumDamage = profile.MaximumDamage = 100;
+            // Match the existing A4 wipe fixture: an off-path trap cannot prove a
+            // reached lethal encounter under the current intraroom executable.
+            var room = Snapshot(f).Floors.Single().MaterializePlan().RequiredRooms.Single().Room;
+            var floor = f.State.Floors.Single(value => value.FloorIndex == 0);
+            var monsterStarts = floor.RoomContents.Assignments.Where(a =>
+                a.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId).Select(a => a.RoomLocalPosition).ToArray();
+            floor.RoomContents.Assignments.Single(a => a.CategoryId == MvpDungeonPlacementIds.TrapCategoryId)
+                .RoomLocalPosition = IntraroomTraversal.Plan(room).Path.First(tile => !monsterStarts.Contains(tile));
+            return f.Rebase(f.State);
+        }
+
+        [Test]
+        public void FinalWipeDoesNotCreatePreciseFloorKnowledge()
+        {
+            var f = LethalFixture();
             var simulation = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot());
             Assert.That(simulation.SimulateSnapshot(1, Snapshot(f)).Party.IsWiped, Is.True);
             f.Accept(Writer(f).CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
@@ -315,33 +335,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void FinalWipeDoesNotUpdateExistingApplicableFloorKnowledge()
         {
-            var f = Eligible();
-            for (int index = 0; index < 2; index++)
-                PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId,
-                    MvpDungeonPlacementIds.SkeletonOptionId);
-            PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.TrapCategoryId,
-                MvpDungeonPlacementIds.SpikeTrapOptionId);
-            PhaseSixA4Tests.ForceDescent(f.Configuration, false);
-            f.Configuration.PhaseFiveB.MinPartySize = f.Configuration.PhaseFiveB.MaxPartySize = 3;
-            foreach (var profile in f.Configuration.PhaseFiveB.DamageProfiles)
-                if (profile.OptionId == MvpDungeonPlacementIds.SkeletonOptionId ||
-                    profile.OptionId == MvpDungeonPlacementIds.SpikeTrapOptionId)
-                    profile.MinimumDamage = profile.MaximumDamage = 0;
+            var f = LethalFixture();
+            // Explicit synthetic initial gameplay state, using the existing checked
+            // fixture writer. This does not rebind a committed run to changed rules.
+            // Actual survivor learning/reconfirmation is asserted by the separate
+            // SurvivorLearningReconfirmsClampsAndOnlyPublishesAfterCompleteRun case.
+            byte[] seeded = WithKnowledge(f, Record(f, 0));
+            f.FileSystem.Seed(f.ActivePath, seeded); f.Reopen();
             var writer = Writer(f);
             var simulation = new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot());
-            f.Accept(writer.CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
-                simulation, RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix)));
-            Assert.That(f.Runtime.runHistory.LatestOutcome.Party.ActiveCount, Is.GreaterThan(0));
             FloorKnowledgeRecord existing = f.Runtime.sharedFloorKnowledge.Records.Single();
             Assert.That(FloorKnowledgeApplicability.IsApplicable(existing, f.State,
                 f.Runtime.corridorContent, f.Profile.Canonical), Is.True);
             string original = JsonUtility.ToJson(PhaseSixFloorKnowledge.Copy(existing));
             string confirmingRunId = existing.LastConfirmedRunId;
 
-            foreach (var profile in f.Configuration.PhaseFiveB.DamageProfiles)
-                if (profile.OptionId == MvpDungeonPlacementIds.SkeletonOptionId ||
-                    profile.OptionId == MvpDungeonPlacementIds.SpikeTrapOptionId)
-                    profile.MinimumDamage = profile.MaximumDamage = 100;
             Assert.That(FloorKnowledgeApplicability.IsApplicable(existing, f.State,
                 f.Runtime.corridorContent, f.Profile.Canonical), Is.True);
             int sequence = f.Runtime.runHistory.NextRunSequence;
@@ -349,6 +357,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.Accept(writer.CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                 simulation, RunPostureResolver.BalancedId, Math.Max(1, f.Runtime.lastSavedUtcUnix)));
             Assert.That(f.Runtime.runHistory.LatestOutcome.Party.IsWiped, Is.True);
+            Assert.That(f.Runtime.runHistory.LatestOutcome.RunId, Is.Not.EqualTo(confirmingRunId));
             Assert.That(f.Runtime.sharedFloorKnowledge.Records.Single().LastConfirmedRunId,
                 Is.EqualTo(confirmingRunId));
             Assert.That(JsonUtility.ToJson(f.Runtime.sharedFloorKnowledge.Records.Single()), Is.EqualTo(original));

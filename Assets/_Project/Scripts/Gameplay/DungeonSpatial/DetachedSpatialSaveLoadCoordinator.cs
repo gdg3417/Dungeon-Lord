@@ -61,6 +61,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly RoomContentSpatialOccupancySnapshot roomContentOccupancy;
         private readonly IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles;
         private readonly MonsterRecoveryRules monsterRecovery;
+        private RecoveryRuntimeInputs recoveryInputs;
+        private IHistoricalRecoveryEvidence historicalRecoveryEvidence;
+        private TimeService recoveryTime;
+        private static bool UsesAtomicRecovery => CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
+
+        internal void ConfigureRecovery(RecoveryRuntimeInputs inputs, TimeService observationOwner,
+            IHistoricalRecoveryEvidence evidence = null)
+        {
+            if (recoveryInputs != null || inputs == null || observationOwner == null)
+                throw new ArgumentException(RecoveryEpisode.Invalid);
+            observationOwner.BindRecoveryContext(inputs.Identity.Digest);
+            recoveryInputs = inputs; recoveryTime = observationOwner; historicalRecoveryEvidence = evidence;
+        }
 
         public DetachedSpatialSaveLoadCoordinator(SaveSpatialMigrationLimitsProfile limits,
             SpatialLayoutCompatibilitySnapshot compatibility,
@@ -133,6 +146,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     blankFloor, limits.Whole, roomContentOccupancy, livingDungeonProfiles, monsterRecovery);
                 currentContext = new DetachedCurrentTargetValidationContext(compatibility, production,
                     legacyConfiguration, limits.Canonical, roomContentOccupancy, livingDungeonProfiles: livingDungeonProfiles, monsterRecovery: monsterRecovery);
+                if (recoveryInputs != null) {
+                    currentContext.BindRecoveryInputs(recoveryInputs, historicalRecoveryEvidence);
+                    recoveryContext.BindRecoveryInputs(recoveryInputs);
+                }
             }
             catch { return Failure("gd66.profile.invalid"); }
 
@@ -146,6 +163,38 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             try { trusted = preflight.FileSystem.ReadAllBytes(activePath); }
             catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                 recovered.TrustedPayload, recovered); }
+
+            // Same-process entry acknowledgement can be lost without losing the
+            // retained cut/classifications. Resolve its exact candidate before
+            // attempting another activation; a crash instead has no local cut.
+            var pending = recoveryTime?.PendingRecoveryPublication;
+            if (pending != null && pending.CandidateSha256 != null &&
+                SpatialContractSha256.Compute(trusted) == pending.CandidateSha256) {
+                var proofValidation = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(trusted, currentContext);
+                if (!proofValidation.CurrentTargetValidated) return Failure(RecoveryEpisode.Invalid, recovery: recovered);
+                try { preflight.FileSystem.FlushDirectory(System.IO.Path.GetDirectoryName(activePath)); }
+                catch { return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason, recovery: recovered); }
+                string resolved = ExactCompleteSaveAtomicPersistence.Persist(activePath, preflight.FileSystem, trusted, trusted,
+                    limits.Canonical.Serialized.MaximumCollectionRecords, payload =>
+                        DetachedCompleteSaveContract.ParseValidateAndRoundTrip(payload, currentContext).CurrentTargetValidated);
+                if (resolved != null) return Failure(resolved, recovery: recovered);
+                var proven = PublishValidated(trusted, currentContext, DetachedSpatialSaveLoadDisposition.AlreadyCommitted, recovered, null);
+                if (!proven.IsSuccess) return proven;
+                try { recoveryTime.RecoveryPublicationSucceeded(pending, new DetachedCanonicalWriteResult(true, null, false, false,
+                    trusted, proven.Session, proven.Validation, proven.RuntimeProjection)); }
+                catch { return Failure(RecoveryEpisode.Invalid, recovery: recovered); }
+                return proven;
+            }
+            if (pending != null && pending.CandidateSha256 != null &&
+                SpatialContractSha256.Compute(trusted) != pending.PredecessorSha256)
+                return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason, recovery: recovered);
+
+            if (UsesAtomicRecovery) {
+                var frozen16 = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(trusted, currentContext);
+                if (frozen16.IsValid)
+                    return UpgradeSchemaSeven(activePath, preflight.FileSystem, trusted, frozen16,
+                        currentContext, DetachedSpatialSaveLoadDisposition.Migrated, recovered, null);
+            }
 
             var schemaFifteen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(trusted, currentContext);
             if (schemaFifteen.IsValid)
@@ -283,7 +332,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedSpatialSaveLoadDisposition disposition, DetachedSpatialMigrationOutcome recovery,
             DetachedSpatialMigrationOutcome transaction)
         {
-            int frozenSchema = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(source, currentContext).IsValid ? 15 :
+            int frozenSchema = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(source, currentContext).IsValid ? 16 :
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(source, currentContext).IsValid ? 15 :
                 DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(source, limits.Canonical, livingDungeonProfiles).IsValid ? 14 : DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(
                 source, limits.Canonical).IsValid ? 13 : DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(
                 source, limits.Canonical).IsValid ? 12 :
@@ -295,40 +345,98 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !DetachedCanonicalProductionSemanticValidation.Validate(frozenValidation.State, production,
                     currentContext.Configuration, limits.Canonical.Spatial,
                     frozenSchema >= 13 ? currentContext.RoomContentOccupancy : null, frozenSchema >= 13).IsValid ||
-                !TryUpgradeToCurrent(source, limits.Canonical, currentContext, out byte[] candidate))
+                !TryUpgradeToSixteen(source, limits.Canonical, currentContext, out byte[] candidate))
                 return Failure(SchemaSevenToEightUpgrade.InvalidReason,
                     transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
                     recovery, transaction);
+            TimeService.RecoveryPublicationObservation observation = null;
+            if (UsesAtomicRecovery) {
+                if (recoveryInputs == null || recoveryTime == null) return Failure(RecoveryEpisode.ContextMismatch,
+                    transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None, recovery, transaction);
+                string sourceReason = SchemaSixteenRecoveryActivation.ValidateSource(source, candidate, currentContext, out var frozen);
+                if (sourceReason != null) return Failure(sourceReason, recovery: recovery, transaction: transaction);
+                try {
+                    var unresolved = recoveryTime.PendingRecoveryPublication;
+                    if (unresolved != null) {
+                        if (SpatialContractSha256.Compute(source) != unresolved.PredecessorSha256)
+                            return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason, recovery: recovery, transaction: transaction);
+                        fileSystem.FlushDirectory(System.IO.Path.GetDirectoryName(activePath));
+                        string rollbackProof = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, source, source,
+                            limits.Canonical.Serialized.MaximumCollectionRecords, payload => payload.AsSpan().SequenceEqual(source));
+                        if (rollbackProof != null) return Failure(rollbackProof, recovery: recovery, transaction: transaction);
+                        recoveryTime.RecoveryPublicationFailed(unresolved);
+                    }
+                    var entry = recoveryTime.RecoveryClockActive ? recoveryTime.RetainedRecoveryEntry : recoveryTime.BeginRecoveryClock(frozen.TimeProvenance);
+                    if (entry == null) return Failure(RecoveryEpisode.Invalid, recovery: recovery, transaction: transaction);
+                    observation = recoveryTime.CaptureRecoveryPublication(source, frozen.TimeProvenance);
+                    string activation = SchemaSixteenRecoveryActivation.Prepare(source, candidate, currentContext,
+                        entry, observation.Through, observation.Eligible100ns, out var activated);
+                    if (activation != null) {
+                        recoveryTime.RecoveryPublicationFailed(observation);
+                        return Failure(activation, recovery: recovery, transaction: transaction);
+                    }
+                    candidate = activated;
+                } catch { return Failure(RecoveryEpisode.Invalid, recovery: recovery, transaction: transaction); }
+            }
             DetachedCompleteSaveValidationResult candidateValidation =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, currentContext);
             DetachedCanonicalSaveSessionResult candidateSession = candidateValidation.IsValid &&
                 candidateValidation.CurrentTargetValidated
                 ? DetachedCanonicalSaveSession.Open(candidate, currentContext, limits) : null;
             if (candidateSession == null || !candidateSession.IsSuccess)
+            {
+                if (observation != null) recoveryTime.RecoveryPublicationFailed(observation);
                 return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason,
                     transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
                     recovery, transaction);
+            }
+            observation?.Bind(candidate, candidateValidation.TimeProvenance);
+            Func<byte[], bool> validateReadback = null;
+            if (observation != null) validateReadback = payload =>
+                DetachedCompleteSaveContract.ParseValidateAndRoundTrip(payload, currentContext).CurrentTargetValidated;
             string persistence = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem,
-                source, candidate, limits.Canonical.Serialized.MaximumCollectionRecords);
+                source, candidate, limits.Canonical.Serialized.MaximumCollectionRecords,
+                validateReadback);
+            if (persistence != null && observation != null) {
+                if (persistence == DetachedCanonicalWriteAuthority.AtomicSaveFailedReason)
+                    recoveryTime.RecoveryPublicationFailed(observation);
+                else recoveryTime.RecoveryPublicationUncertain(observation);
+            }
             if (persistence != null) return Failure(persistence,
                 transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
                 recovery, transaction);
             byte[] durable;
             try { durable = fileSystem.ReadAllBytes(activePath); }
-            catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
+            catch {
+                if (observation != null) recoveryTime.RecoveryPublicationUncertain(observation);
+                return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
                 transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
                 recovery, transaction); }
             if (!ExactCompleteSaveAtomicPersistence.Same(durable, candidate))
+            {
+                if (observation != null) recoveryTime.RecoveryPublicationUncertain(observation);
                 return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason,
                     transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
                     recovery, transaction);
-            return PublishValidated(durable, currentContext, disposition, recovery, transaction);
+            }
+            var published = PublishValidated(durable, currentContext, disposition, recovery, transaction);
+            if (observation != null) {
+                if (!published.IsSuccess) recoveryTime.RecoveryPublicationUncertain(observation);
+                else {
+                    try { recoveryTime.RecoveryPublicationSucceeded(observation, new DetachedCanonicalWriteResult(true, null, false, false,
+                        durable, published.Session, published.Validation, published.RuntimeProjection)); }
+                    catch { return Failure(RecoveryEpisode.Invalid, recovery: recovery, transaction: transaction); }
+                }
+            }
+            return published;
         }
 
-        private bool TryUpgradeToCurrent(byte[] source, CanonicalSpatialSerializationLimits limits,
+        private bool TryUpgradeToSixteen(byte[] source, CanonicalSpatialSerializationLimits limits,
             DetachedCurrentTargetValidationContext currentContext, out byte[] candidate)
         {
             candidate = null;
+            if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(source, currentContext).IsValid)
+            { candidate = (byte[])source.Clone(); return true; }
             if (DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(source, currentContext).IsValid)
                 return SchemaFifteenToSixteenUpgrade.TryPrepare(source, currentContext, out candidate);
             return TryUpgradeToFifteen(source, limits, out var fifteen) &&

@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using NUnit.Framework;
 using Fixture = DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests.Fixture;
@@ -32,8 +33,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var background = time.CaptureForegroundObservation(f.Session);
             Assert.That(background.CapturedThrough, Is.EqualTo(250));
             Assert.That(background.WallEndpoint.Seconds, Is.EqualTo(foreground.WallEndpoint.Seconds));
-            Assert.That(background.WallEndpoint.Fraction100ns, Is.EqualTo(7500001));
-            Assert.That(background.Context, Is.EqualTo(ForegroundObservationContext.Suspended));
+            // The foreground cut remains F. Observed background belongs to the
+            // deferred recovery summary, never to a new foreground endpoint.
+            Assert.That(background.WallEndpoint, Is.EqualTo(foreground.WallEndpoint));
+            Assert.That(background.Context, Is.EqualTo(ForegroundObservationContext.EligibleForeground));
+            Assert.That(time.HasDeferredBackground, Is.True);
+            Assert.That(time.RecoveryDeferredEligible100nsForClockTest, Is.EqualTo(5000000));
+            Assert.That(time.CaptureForegroundObservation(f.Session).WallEndpoint, Is.EqualTo(foreground.WallEndpoint));
+            Assert.That(time.RecoveryDeferredEligible100nsForClockTest, Is.EqualTo(5000000));
         }
         [Test] public void IndependentUtcAndMonotonicMovementNeverGivesUtcExecutionAuthority()
         {
@@ -92,26 +99,43 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void PauseResumeReanchorsWithoutBackgroundLogicalCredit()
         {
-            var f = Fixture.Create(null); var wall = new PreciseClock(); double mono = 0;
-            var time = Service(f, wall, () => mono); mono = .25; time.OnPause();
+            var f = LivingDungeonTwoFloorTests.Dungeon(false); var wall = new PreciseClock(); double mono = 0;
+            var save = LivingDungeonB3B2Tests.Service(f, wall, out var time, () => mono);
+            mono = .25; time.OnPause();
             mono = .75; wall.Now = new UnixTimePoint(1000, 7500000);
             Assert.That(time.CaptureForegroundObservation(f.Session).CapturedThrough, Is.EqualTo(250));
-            time.OnResume(); mono = 1;
+            time.OnResume();
+            Assert.That(time.CaptureForegroundObservation(save.CanonicalSession).CapturedThrough, Is.EqualTo(250),
+                "Returning alone cannot bypass the observed-background recovery barrier");
+            f.Accept(save.AdvanceForeground(f.Runtime, time.CaptureForegroundObservation(save.CanonicalSession),
+                f.Context.RecoveryInputs.Bootstrap.tickSeconds, (_, __) => Assert.Fail()));
+            save.BeginCanonicalRecovery(f.Runtime, observedBackground: true);
+            var inputs = f.Context.RecoveryInputs;
+            var mana = new CanonicalOfflinePassiveManaService(inputs.Passive,
+                new CanonicalPassiveManaService(inputs.Passive, inputs.Economy, new FormulaEngine(),
+                    f.Profile.Canonical.Spatial, inputs.Bootstrap.tickSeconds));
+            for (int i = 0; i < 3; i++) f.Accept(save.AdvanceCanonicalRecovery(f.Runtime, mana, (_, __) => Assert.Fail()));
+            Assert.That(f.Runtime.timeProvenance.Episode, Is.Null);
+            Assert.That(time.RecoveryClockActive || time.HasDeferredRecovery, Is.False);
+            mono = 1;
             Assert.That(time.CaptureForegroundObservation(f.Session).CapturedThrough, Is.EqualTo(500));
         }
         [Test] public void PredecessorPublicationInvalidatesOldObservation()
         {
             var f = Fixture.Create(null); var wall = new PreciseClock(); var time = Service(f, wall, () => 0);
             var old = time.CaptureForegroundObservation(f.Session);
-            f.Runtime.lastSavedUtcUnix = 2;
+            // Metadata publication changes predecessor bytes while retaining W;
+            // an independent timestamp assignment is intentionally forbidden.
+            var boundary = f.Runtime.timeProvenance.AccountedBoundary;
+            f.Runtime.lastKnownAppState = "Paused";
             f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
+            Assert.That(f.Runtime.timeProvenance.AccountedBoundary, Is.EqualTo(boundary));
             Assert.That(old.Matches(f.Session, f.Runtime), Is.False);
         }
         [Test] public void ActualForegroundWriterConsumesCapturedEndpointAndRetainsLaterStorageTime()
         {
             var f = LivingDungeonTwoFloorTests.Dungeon(false); var wall = new PreciseClock(); double mono = 0;
-            var save = LivingDungeonB3B2Tests.Service(f, wall);
-            var time = Service(f, wall, () => mono); mono = .25;
+            var save = LivingDungeonB3B2Tests.Service(f, wall, out var time, () => mono); mono = .25;
             var cut = time.CaptureForegroundObservation(save.CanonicalSession);
             var before = save.CanonicalSession.GetCurrentBytes();
             Assert.That(cut.Authorizes(save.CanonicalSession, f.Runtime, 125), Is.False);
@@ -120,7 +144,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             mono = .75; wall.Now = new UnixTimePoint(2000, 7500000);
             f.Accept(save.AdvanceForeground(f.Runtime, cut, 10, (candidate, tick) => { }));
             Assert.That(f.Runtime.lastSavedUtcUnix, Is.EqualTo(1000));
-            Assert.That(f.Runtime.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(1000, 0)));
+            Assert.That(f.Runtime.timeProvenance.AccountedBoundary, Is.EqualTo(cut.WallEndpoint));
             Assert.That(f.Runtime.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(250));
             before = f.Session.GetCurrentBytes();
             Assert.That(save.AdvanceForeground(f.Runtime, cut, 10, (candidate, tick) => { }).IsSuccess, Is.False);

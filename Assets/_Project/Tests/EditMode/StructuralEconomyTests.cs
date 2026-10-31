@@ -19,9 +19,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         private static StructuralEconomyConfiguration Config() => JsonUtility.FromJson<StructuralEconomyConfiguration>(
             File.ReadAllText("Assets/_Project/Resources/structural_economy.json"));
-        private static Fixture R1()
+        private static byte[][] EconomicInputs(Action<StructuralEconomyConfiguration> author)
         {
-            var f = Fixture.Create(null);
+            var bytes=H1F4RecoveryContractTests.Inputs();
+            if(author!=null) {
+                var config=JsonUtility.FromJson<StructuralEconomyConfiguration>(Encoding.UTF8.GetString(bytes[2]));
+                author(config);bytes[2]=Encoding.UTF8.GetBytes(JsonUtility.ToJson(config));
+            }
+            return bytes;
+        }
+        private static Fixture R1(Action<StructuralEconomyConfiguration> author = null,long? initialTime = null)
+        {
+            var f = Fixture.Create(initialTime.HasValue ? "\"lastSavedUtcUnix\":"+initialTime.Value : null,
+                workloadProfile:PhaseFourTestSupport.ProductionProfile(),recoveryInputBytes:EconomicInputs(author));
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             return f;
@@ -143,7 +153,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void MissingConfigAndInvalidGeometryNeverSpend()
         {
             var f = R1(); var valid = Build(f); byte[] before = f.Session.GetCurrentBytes(); f.Economy = null;
-            Assert.That(f.Execute(DetachedCanonicalMutationRequest.Construct(valid)).Reason, Is.EqualTo(StructuralEconomyService.InvalidReason));
+            Assert.That(StructuralEconomyService.Preview(valid,f.State,Ledger(f),1000,null).Reason,Is.EqualTo(StructuralEconomyService.InvalidReason));
+            // Omitting an optional writer argument cannot erase its bound
+            // economy. An actually unproved context must reject publication.
+            var unbound=new DetachedCanonicalWriteAuthority(f.Production,f.Compatibility,f.Configuration,null,f.Profile);
+            Assert.That(unbound.Execute(f.ActivePath,f.FileSystem,f.Session,f.State,f.Runtime,
+                DetachedCanonicalMutationRequest.Construct(valid)).IsSuccess,Is.False);
             Assert.That(f.Execute(DetachedCanonicalMutationRequest.Construct(Build(f, x: -10))).IsSuccess, Is.False);
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(1000));
@@ -159,13 +174,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(StructuralEconomySnapshot.TryCreate(c, f.Production.Catalog, out f.Economy), Is.True);
             var deletion = Delete(f); var p = Price(f, deletion);
             Assert.That(p.RefundBasis, Is.EqualTo(100)); Assert.That(p.Refund, Is.EqualTo(75));
+            byte[] before=f.Session.GetCurrentBytes();
+            Assert.That(f.Execute(DetachedCanonicalMutationRequest.Delete(deletion)).IsSuccess,Is.False,"A different price snapshot cannot rebind persisted context");
+            CollectionAssert.AreEqual(before,f.FileSystem.ReadAllBytes(f.ActivePath));
+            f.Economy=f.Context.RecoveryInputs.Economy;
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Delete(deletion))); f.Reopen();
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(970));
             Assert.That(Ledger(f).Sum(r => r.ConstructionMana), Is.EqualTo(5));
             FloorRouteEdge retained = f.State.Floors[0].Layout.Edges.Single(e =>
                 Ledger(f).Single(r => r.ConstructionMana == 5).StructureId == e.EdgeId);
             Assert.That(retained.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.PhysicalCorridor));
-            f.Economy = PhaseFourTestSupport.Economy(f.Production, f.Profile.Canonical);
+            f.Economy = f.Context.RecoveryInputs.Economy;
             StructuralEconomyPreview rebuild = Price(f, Build(f, x: 5, y: 2));
             FloorRouteEdge incoming = rebuild.Spatial.DetachedCandidate.Floors[0].Layout.Edges.Single(e =>
                 e.EdgeId.EndsWith(".edge.incoming"));
@@ -304,7 +323,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(false)][TestCase(true)]
         public void PaidRenovationAndSessionUndoAreExact(bool replacement)
         {
-            var f = R1(); double now = 5; var service = Service(f, () => now);
+            var f = R1(initialTime:1000); double now = 5; var service = Service(f, () => now);
             var p = replacement ? Replace(f) : Move(f);
             Assert.That(p.IsValid, Is.True, string.Join(",", p.ReasonCodes));
             byte[] spatialBefore = CanonicalSpatialSaveSerializer.Serialize(f.State, f.Profile.Canonical).Value;
@@ -314,14 +333,36 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Validation.Investment.Sum(r => r.RenovationMana), Is.EqualTo(10));
             Assert.That(service.RenovationUndoRemainingSeconds, Is.EqualTo(30));
             Assert.That(Encoding.UTF8.GetString(result.GetPersistedBytes()), Does.Not.Contain("\"_undo\":").And.Not.Contain("\"Started\":"));
-            now = 34; result.RuntimeProjection.lastSavedUtcUnix = 987;
+            now = 34;
+            var boundary=result.RuntimeProjection.timeProvenance.AccountedBoundary;
+            byte[] paidBytes=result.GetPersistedBytes();
+            // A recognized metadata snapshot is not a time capability. Reject
+            // unobserved forward/backward/invalid seconds and retain the undo.
+            foreach(long invalid in new[] { boundary.Seconds+1,0L,boundary.Seconds-1 }) {
+                result.RuntimeProjection.lastSavedUtcUnix=invalid;
+                var refused=service.UndoStructuralRenovation(result.RuntimeProjection);
+                Assert.That(refused.IsSuccess,Is.False);Assert.That(refused.Reason,Is.EqualTo(RecoveryEpisode.Invalid));
+                CollectionAssert.AreEqual(paidBytes,f.FileSystem.ReadAllBytes(f.ActivePath));
+                Assert.That(service.RenovationUndoRemainingSeconds,Is.EqualTo(1));
+            }
+            result.RuntimeProjection.lastSavedUtcUnix=boundary.Seconds;
+            result.RuntimeProjection.lastKnownAppState="test.undo.metadata";
             var undone = service.UndoStructuralRenovation(result.RuntimeProjection);
             Assert.That(undone.IsSuccess, Is.True, undone.Reason);
             Assert.That(undone.RuntimeProjection.structureRuntime.ManaReserve, Is.EqualTo(1000));
-            Assert.That(undone.RuntimeProjection.lastSavedUtcUnix, Is.EqualTo(987));
+            Assert.That(undone.RuntimeProjection.lastSavedUtcUnix,Is.EqualTo(boundary.Seconds));
+            Assert.That(undone.RuntimeProjection.timeProvenance.AccountedBoundary,Is.EqualTo(boundary));
+            Assert.That(undone.RuntimeProjection.lastKnownAppState,Is.EqualTo("test.undo.metadata"));
             CollectionAssert.AreEqual(spatialBefore, CanonicalSpatialSaveSerializer.Serialize(undone.Validation.State, f.Profile.Canonical).Value);
             Assert.That(undone.Validation.Investment.Sum(r => r.RenovationMana), Is.Zero);
+            byte[] once=undone.GetPersistedBytes();
             Assert.That(service.UndoStructuralRenovation(undone.RuntimeProjection).IsSuccess, Is.False);
+            CollectionAssert.AreEqual(once,f.FileSystem.ReadAllBytes(f.ActivePath));
+            f.Reopen(); Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(1000));
+            Assert.That(f.Runtime.timeProvenance.AccountedBoundary,Is.EqualTo(boundary));
+            Assert.That(f.Runtime.lastKnownAppState,Is.EqualTo("test.undo.metadata"));
+            Assert.That(Service(f,()=>now).UndoStructuralRenovation(f.Runtime).IsSuccess,Is.False);
+            CollectionAssert.AreEqual(once,f.FileSystem.ReadAllBytes(f.ActivePath));
         }
         [Test] public void C2RenovationUndoRefundsOnlyRenovationAndRetainsRecoveredHealth()
         {
@@ -409,8 +450,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void RefundFloorsPaidInvestmentAndMovementDoesNotCompound()
         {
-            var f = R1(); var c = Config(); c.Rooms.Single(r => r.DefinitionId == "spatial.room.basic").Mana = 101;
-            Assert.That(StructuralEconomySnapshot.TryCreate(c, f.Production.Catalog, out f.Economy), Is.True);
+            var f = R1(c=>c.Rooms.Single(r=>r.DefinitionId=="spatial.room.basic").Mana=101);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Construct(Build(f))));
             Assert.That(Price(f, Delete(f)).Refund, Is.EqualTo(75));
             var first = R1(); var movement = Move(first); first.Accept(first.Execute(DetachedCanonicalMutationRequest.Move(movement)));
@@ -425,8 +465,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void UndoFailureRetainsCapabilityAndInjectedWindowUsesElapsedTime()
         {
-            var f = R1(); var c = Config(); c.UndoSeconds = 2;
-            Assert.That(StructuralEconomySnapshot.TryCreate(c, f.Production.Catalog, out f.Economy), Is.True);
+            var f = R1(c=>c.UndoSeconds=2);
             double now = 100; var service = Service(f, () => now);
             var paid = service.ExecuteCanonicalMutation(f.Runtime, DetachedCanonicalMutationRequest.Move(Move(f)));
             Assert.That(paid.IsSuccess, Is.True, paid.Reason); now = 101;
@@ -437,6 +476,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             f.FileSystem.DisableFailure(); var undo = service.UndoStructuralRenovation(paid.RuntimeProjection);
             Assert.That(undo.IsSuccess, Is.True, undo.Reason);
             Assert.That(undo.RuntimeProjection.structureRuntime.ManaReserve, Is.EqualTo(1000));
+            foreach(double invalid in new[] { 99d,double.NaN,double.PositiveInfinity }) {
+                var negative=R1(c=>c.UndoSeconds=2); double sample=100;
+                var invalidService=Service(negative,()=>sample);
+                var accepted=invalidService.ExecuteCanonicalMutation(negative.Runtime,DetachedCanonicalMutationRequest.Move(Move(negative)));
+                Assert.That(accepted.IsSuccess,Is.True,accepted.Reason);sample=invalid;
+                var refused=invalidService.UndoStructuralRenovation(accepted.RuntimeProjection);
+                Assert.That(refused.IsSuccess,Is.False);Assert.That(refused.Reason,Is.EqualTo(StructuralEconomyService.UndoUnavailableReason));
+                CollectionAssert.AreEqual(accepted.GetPersistedBytes(),negative.FileSystem.ReadAllBytes(negative.ActivePath));
+                negative.Reopen();Assert.That(negative.Runtime.structureRuntime.ManaReserve,Is.EqualTo(990));
+            }
         }
 
         [Test]
@@ -486,7 +535,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, f.Profile.Canonical, out thirteen), Is.True);
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(thirteen,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out thirteen),Is.True);
             Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(thirteen, f.Context, out thirteen), Is.True);
-            Assert.That(DetachedCanonicalSaveSession.Open(thirteen, f.Context, f.Profile).IsSuccess, Is.True);
+            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(thirteen,f.Context).IsValid,Is.True);
+            Assert.That(DetachedCanonicalSaveSession.Open(thirteen,f.Context,f.Profile).IsSuccess,Is.False);
             Assert.That(SchemaEightToNineUpgrade.TryPrepare(nine, f.Profile.Canonical, out _), Is.False);
             Assert.That(StructuralEconomyService.Preview(Delete(f), f.State, restored.Investment, 123.5, f.Economy).Refund, Is.Zero);
         }
@@ -682,8 +732,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(0, 321)][TestCase(17, 321)][TestCase(444, 444)]
         public void QaWalletFillUsesInjectedValidatedCapacityAndPreservesOverCap(double initial, double expected)
         {
-            var f = QaNative(initial); var c = Config(); c.ManaCapacity = 321;
-            Assert.That(StructuralEconomySnapshot.TryCreate(c, f.Production.Catalog, out f.Economy), Is.True);
+            var f = QaNative(initial,c=>c.ManaCapacity=321);
             var service = Service(f, () => 0); byte[] before = f.Session.GetCurrentBytes();
             var result = service.SetQaMana(f.Runtime, true);
             Assert.That(result.IsSuccess, Is.True, result.Reason);
@@ -735,7 +784,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Fixture.Create("\"mvpDungeonPlacements\":{\"Entries\":[{\"CategoryId\":\"placement.category.room\"," +
                 "\"OptionId\":\"placement.option.room.basic\",\"Revision\":1}],\"NextRevision\":2}," +
-                "\"qaExtension\":{\"evidence\":7}", "\"qaRootExtension\":[3,2,1]");
+                "\"qaExtension\":{\"evidence\":7}", "\"qaRootExtension\":[3,2,1]",workloadProfile:PhaseFourTestSupport.ProductionProfile());
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
                 MvpDungeonPlacementIds.BasicRoomOptionId)));
             var construction = Build(f, x: 5, y: 2);
@@ -791,7 +840,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 if (missing == "diagnostics") typeof(GameRoot).GetProperty("DevPanelEnabled").SetValue(root, false);
                 if (missing == "legacy") typeof(GameRoot).GetProperty("Save").SetValue(root, new SaveData());
                 if (missing == "content") typeof(ContentService).GetProperty("ProductionSpatialContent").SetValue(root.Content, null);
-                if (missing == "economy") service.ConfigureStructuralEconomy(null);
+                if (missing == "economy") {
+                    service.ConfigureStructuralEconomy(null);
+                    // Optional argument omission does not remove the immutable
+                    // consumed economy. This negative case removes its actual
+                    // validation authority too; no reconstruction is permitted.
+                    typeof(SaveService).GetField("_validationContext",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(service,null);
+                }
                 Assert.That(root.TrySetQaManaFromDevPanel(true), Is.False);
                 Assert.That(live.structureRuntime.ManaReserve, Is.Zero);
                 Assert.That(publications, Is.Zero);
@@ -838,18 +893,24 @@ namespace DungeonBuilder.M0.Tests.EditMode
             finally { UnityEngine.Object.DestroyImmediate(go); }
         }
 
-        private static Fixture QaNative(double mana = 0)
+        private static Fixture QaNative(double mana = 0,Action<StructuralEconomyConfiguration> author = null)
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(null,workloadProfile:PhaseFourTestSupport.ProductionProfile(),recoveryInputBytes:EconomicInputs(author));
             f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            var native = NativeCanonicalSaveCreator.Create(f.ActivePath, f.FileSystem,
+            var native = NativeCanonicalSaveCreator.CreatePrecise(f.ActivePath, f.FileSystem,
                 new SaveData { createdUtcUnix = 1, lastSavedUtcUnix = 1,
                     dungeonLayout = new DungeonBuilder.M0.Gameplay.DungeonLayout.DungeonLayoutState(),
                     structureRuntime = new StructureRuntimeState { ManaReserve = mana } },
-                f.Compatibility, f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile,
-                PhaseFourTestSupport.Acquisition(f.Economy, f.Profile.Canonical, mana), f.Occupancy);
+                f.Production,f.Profile,PhaseFourTestSupport.Acquisition(f.Economy,f.Profile.Canonical,Math.Min(mana,f.Economy.ManaCapacity)),
+                f.Context.RecoveryInputs,new UnixTimePoint(1,0));
             Assert.That(native.IsSuccess, Is.True, native.Reason);
             f.Session = native.Session; f.State = native.Validation.State; f.Runtime = native.RuntimeProjection;
+            if(mana>f.Economy.ManaCapacity) {
+                // Explicit synthetic precondition, with unchanged context/W.
+                // Test the QA action's obligation to preserve an existing excess.
+                f.Runtime.structureRuntime.ManaReserve=mana;
+                f.Accept(f.Authority.SaveRecognizedState(f.ActivePath,f.FileSystem,f.Session,f.Runtime));
+            }
             f.Reopen(); return f;
         }
 
@@ -881,16 +942,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static SaveService Service(Fixture f, Func<double> clock)
         {
-            var service = new SaveService(new SimpleLogger(false), null, Path.GetDirectoryName(f.ActivePath));
-            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration,
-                Encoding.UTF8.GetBytes(JsonUtility.ToJson(f.Configuration)),
-                f.PositionProfiles, f.Occupancy);
+            var service=PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
             service.ConfigureStructuralEconomy(f.Economy, clock); service.ConfigureStructuralRemovalPolicy(f.RemovalPolicy);
             service.ConfigureContentAcquisitionEconomy(f.Acquisition);
-            typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);
-            foreach (var pair in new[] { Tuple.Create("_canonicalSession", (object)f.Session), Tuple.Create("_canonicalFileSystem", (object)f.FileSystem),
-                Tuple.Create("_validationContext", (object)f.Context) })
-                typeof(SaveService).GetField(pair.Item1, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(service, pair.Item2);
             return service;
         }
     }

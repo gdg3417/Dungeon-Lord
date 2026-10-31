@@ -1,0 +1,81 @@
+# H1-F4 scene reproduction — 2026-10-30
+
+PR #259 remains draft. This is a diagnostic milestone, not a qualification pass or an owner-UAT/merge recommendation. Multiple independent causes require separate correction packets before broad edits.
+
+## Source and result
+
+- Branch `codex/h1-f4-recovery`; base `3eb6ccf93558b8145d64e9e63cbefcbd73484602`.
+- Selected reproduction at `ad9c690f96ac6198298f49d8cc0c83bc899d2bd2`: campaign `e43064bd906248c6a776a8d06e7a5fdf`, **22 total: 3 passed / 19 failed / 0 skipped**. All exact 19 original targets failed. Seventeen messages match the historical messages byte-for-byte; the two log messages contain a new timestamp/output path.
+- One-case read-only trace at `8b647803515f3182be6a74de8a37fa64f4e81d03`: campaign `30b57a01cf3f4bb996e9fb5981c511f1`, **1 total: 0 passed / 1 failed / 0 skipped**. The original assertion is unchanged.
+- Compile-only redirected Unity Roslyn Editor-assembly diagnostic passed. It is not a NUnit pass.
+- Recommendation: GPT-6.1 Sol Medium, Standard diagnostics; fallback GPT-6 Sol Medium. No production authority change or model escalation was required.
+
+## Exact original identities and current failures
+
+Every method below has NUnit prefix `DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.`. Complete original/current messages and stacks, historical previous/next case identities and original order indexes are in the companion JSON. Original inventory is the source-pinned 84-failure campaign `75bee8ad47764696bf3404388fe8f757`, not the obsolete 805-failure inventory.
+
+| Method | Original first failure | Packet | Current selected result |
+| --- | --- | --- | --- |
+| `AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen` | Expected is <System.Byte[18093]>, actual is <System.Byte[18095]> | P1 | Failed |
+| `AnalysisPhoneInvalidAndStaleDialogsRemainAccessible` | Expected is <System.Byte[8549]>, actual is <System.Byte[8551]> | P1 | Failed |
+| `AnalysisPhoneNavigationSafeAreaAndCoveredInput` | Expected is <System.Byte[18090]>, actual is <System.Byte[18092]> | P1 | Failed |
+| `AnalysisPhoneOpeningDuringReplayClosesPresentationOnly` | Expected is <System.Byte[18090]>, actual is <System.Byte[18092]> | P1 | Failed |
+| `CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence` | Expected is <System.Byte[19379]>, actual is <System.Byte[19381]> | P1 | Failed |
+| `CombatC1PartyFollowsRoomsCorridorsAndFloors` | branch.edit.invalid_context | P3 | Failed |
+| `CombatC1TargetFeedbackTracksRecordedHitsAndDefeats` | Expected is <System.Byte[18090]>, actual is <System.Byte[18092]> | P1 | Failed |
+| `FloorHudStatesAndInputCapture` | Expected is <System.Byte[9657]>, actual is <System.Byte[9659]> | P1 | Failed |
+| `GraphicalFloorReviewMeaningfulInvalidations` | Unhandled log message: '[Error] [2026-10-29 23:02:55 UTC] [ERROR] GD66 save failed: gd66.write.first_write_validation_failed'. Use UnityEngine.TestTools.LogAssert.Expect | P4 | Failed |
+| `GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges` | Expected and actual are both <System.Byte[10987]> | P2 | Failed |
+| `RoomContentCompactAcquisitionOwnedReassignAndOverflow` | Expected is <System.Byte[9417]>, actual is <System.Byte[9419]> | P1 | Failed |
+| `RoomContentExplicitReassignmentWithConstructionAndInspectionReuse` | Expected is <System.Byte[8548]>, actual is <System.Byte[8550]> | P1 | Failed |
+| `RoomContentMapReassignmentProductionMouseTouchRecovery` | Expected: True | P5 | Failed |
+| `RoomContentProductionPreviewCustodySaveDiscardAndLayouts` | Expected is <System.Byte[8548]>, actual is <System.Byte[8550]> | P1 | Failed |
+| `RoomContentUatBrowserIdentityAndDirectTargetSwitch` | Expected is <System.Byte[8548]>, actual is <System.Byte[8550]> | P1 | Failed |
+| `RoomContentUatPlacementGeometryAndLocalizedFeedback` | Expected is <System.Byte[8548]>, actual is <System.Byte[8550]> | P1 | Failed |
+| `RuntimeThemeAndLocalizedTextRenderInActualScene` | Unhandled log message: '[Log] Qualification capture: <worktree>\TestResults\qualification-supervisor\75bee8ad47764696bf3404388fe8f757\full-edit\fixture-inputs\screenshots\3b820171-phase7a4-theme-normal-1080x1920.png'. Use UnityEngine.TestTools.LogAssert.Expect | P6 | Failed |
+| `UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry` | Expected is <System.Byte[8546]>, actual is <System.Byte[8548]> | P1 | Failed |
+| `VisualRunReplayProductionLifecycleAndResponsiveControls` | Expected: True | P7 | Failed |
+
+## Correction packets, in dependency order
+
+**P1 — Read-only byte baselines (13 cases).** These cases all reproduce a two-byte increase with comma (44) becoming dot (46) around `structureRuntime.ManaReserve`. The independently isolated AnalysisNavigation case proves the *entire* difference is `993` → `993.0`; it is not an additional mana award. The trace identifies `GameRoot.Update → UpdateForeground → PumpForeground → SaveService.AdvanceForeground` after the manual run. W stays `2000.2500000`, A=C=0, both references identify the same TimeService, recovery/deferred flags are false, and no authority error occurs. `GameRoot.Foreground.cs` marks non-foreground publications dirty, so the next normal Update performs that pending publication. The fixture captures its baseline before this publication and yields during a UI-only assertion. Proposed minimum: finish the already-supported foreground pump before capturing each read-only baseline, retaining exact bytes and all gameplay assertions. Do not disable the real root, normalize compared bytes, or replace the clock. Only one case has whole-file/caller proof; confirm each other baseline before generalizing. No production settlement defect has been demonstrated.
+
+**P2 — Stale modal with deliberately unpublished mutation (1 case).** `GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges` changes live mana by +1 (then Research in the later branch) and yields with the normal root enabled. Its first differing byte is 48→49, not P1's decimal suffix. It must separately prove the modal never commits stale state while distinguishing an independent foreground publication from the modal action. First inspect/complete pending setup publication before opening the modal; retain the deliberate live mutation and exact no-publication assertion across the modal click. Do not silently accept publication of the fixture mutation or weaken the stale-preview contract. The precise publisher of this distinct value change has not yet been traced.
+
+**P3 — Post-binding combat configuration (1 case).** `CombatC1PartyFollowsRoomsCorridorsAndFloors` mutates the consumed service configuration (combat damage, health, branch thresholds and two-floor choices) after the canonical context exists, then fails at `PreviewOptionalBranchConstruction` with `branch.edit.invalid_context`. SaveService's preview first obtains a parsed/validated structural baseline; later geometry checks also share this reason. The public first failure is established, but this campaign did not instrument the exact internal validator branch. Proposed minimum: author the scenario's exact validated bootstrap bytes before real GameRoot Start consumes them, through the existing isolated scene setup. Preserve damage/traversal/branch/room/floor assertions; do not rebind current context or change production validation.
+
+**P4 — Foreign loot input plus runtime invalidation probes (1 case).** `GraphicalFloorReviewMeaningfulInvalidations` calls `ConfigureRunLoot(PhaseSixA4Tests.Loot())` after binding, then expects a successful ordinary publication. First failure is the unexpected error `gd66.write.first_write_validation_failed` at that save. Preserve the UI cache-invalidation probes as transient probes; preserve exact original consumed inputs and prove the mismatched-input write rejects without mutation. Restore the exact original reference and valid live state before the separate successful-publication assertion, or author a separately bound compatible fixture before ownership. Do not replace the expected positive save with a negative assertion and lose coverage. Exact internal first-write validator subguard remains to be instrumented if needed.
+
+**P5 — Direct pause before funding (1 case).** `RoomContentMapReassignmentProductionMouseTouchRecovery` directly calls `TimeService.OnPause()` to suppress autonomous ticks, then fails at `SetQaMana(...).IsSuccess`. This bypasses the real root's lifecycle coordination and creates a recovery barrier; the existing stationary prebound provider already controls elapsed time. Proposed minimum: remove this obsolete simulated suspension for the foreground input/custody scenario, or explicitly complete legitimate pause/return recovery before funding when pause is the intended assertion. Retain mouse/touch, draft, custody, replay and exact-byte assertions; never edit private recovery flags. The first observed failed API is funding, not a draft-null exception.
+
+**P6 — Expected capture log (1 case).** `RuntimeThemeAndLocalizedTextRenderInActualScene` reaches its final screenshot and then fails `LogAssert.NoUnexpectedReceived` on the known `Qualification capture: <owned path>` log from `ProductionDungeonScreenshots.Capture`. The preceding theme, localization and layout assertions passed. Proposed minimum: expect that exact capture's bounded, owned-path log before calling Capture and retain NoUnexpectedReceived for every other message. Do not suppress all logs or alter the screenshot utility.
+
+**P7 — Historical B1 replay/current C2 writer separation (1 case).** `VisualRunReplayProductionLifecycleAndResponsiveControls` mutates `historicalService.Config.CombatC0.Enabled=false` after binding; the first content unassignment fails before rendering. Moving this one mutation earlier is not sufficient justification for the fixture's later expectation of a non-C0 committed run. `StartManualSnapshot` selects the supported current persistent-combat executable; pure `StartSnapshot` and the explicit historical C0 entry are separate paths. Preserve historical B1 renderer assertions using proven read-only historical inputs/pure execution, and preserve current canonical manual-run/lifecycle assertions using C2. Inspect the existing presentation injection/reader seam before splitting the fixture. Do not fabricate historical producer authority, persist a synthetic B1 result under current ownership, or merely change the historical expected result. This is the last packet because it has a distinct executable contract.
+
+These are proposed corrections, not implemented/qualified fixes. Only two test files changed: bounded read-only publication/counter traces in `PhaseSevenA4ProductionSceneTests.cs` and whole-file first-difference diagnosis in `ProductionDungeonAnalysisSceneTests.cs`. No assertion, clock provider, input config, production code, save schema, migration, settlement, tuning or localization changed. The diagnostics are retained narrowly for P1; output is bounded to 16 publications/10 caller frames and one 96-byte before/after window. Remove them after the correction is proved, or justify further retention.
+
+## Isolated versus order evidence
+
+The selected 22 execute in their normal NUnit relative order, with fresh shared fixture setup per case; all 19 fail without the other full-class/full-suite predecessors. The AnalysisNavigation case also reproduces alone, with the same message and exact lexical/caller proof. Thus at least that failure is independent of another scene test. This does **not** establish that every target is order-independent.
+
+No full shared-class run was required by the task's conditional instruction because the selected cases failed. The class also contains the expressly prohibited `ForegroundPerformanceSustainedProduction68Runs`; it was neither run nor silently removed from a claimed complete-class result. A complete ordered-class comparison remains unqualified.
+
+Controls passed: `RoomContentLootRejectionReasons`, `RoomContentMapReassignmentCapacityMoveOwnedAndDiscard`, `LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish`. The capacity/draft-loss control retained one draft identity through Pending→Acknowledged and coroutine boundaries without a null or recovery fault. The old draft-loss exception remains historically observed and not reproduced; it is not declared fixed.
+
+## Supervisor and preservation
+
+Both campaigns remain permanently **FAILED**. Their test processes returned CLI exit 8 with host exit 0 and recorded child identities; the existing supervisor completed Job accounting and released each reservation normally. Later process/Job absence was independently rechecked; it is corroboration, not replacement for the recorded completion. No process termination, exceptional recovery, force release or supervisor change occurred.
+
+Preflight passed, test stage failed, and restore-preflight/restore/preservation supervisor stages did not start. They are **not** reported as five-stage passes. Each campaign then used the existing guarded normal-FAILED finalization with unchanged qualified inputs, exact archive/tool/process checks, held exclusive Lease, original settings restoration and final preservation checks. `generated-inputs/manifest.json` records no generated-input drift, so TMP needed no restoration. XML root is `Failed(Child)`; the unchanged supervisor records `Incomplete NUnit test-run` as its evidence error for that root spelling. Raw leaf/root counts and end-time are retained; this is not presented as a passing qualification or a missing-XML result.
+
+Independent receipt: `TestResults/h1-f4-20261027-sd02/independent-diagnostic-completion02.json`. It verifies both 1,494-member original ZIPs, all original member hashes, final current 1,494 inputs, exact selected leaf identities, pinned tools, process identities/Jobs, restored settings/TMP, unchanged owner/historical evidence and reservation `{campaign:null, previous:...30b57a01cf3f4bb996e9fb5981c511f1}`. The first campaign's 308 prior evidence directories and second campaign's 311 are preserved. The first independent verification stopped on a too-old other-save map; the retained second verifier proves the only addition is the explicitly owned successor sd02 namespace, all pre-existing entries unchanged, and verifies the successor's own original protection map exactly. No restoration or release occurred in either independent verifier.
+
+Preparations that stopped before Unity remain preserved: the initial sc01 name collided with a historical directory; the first sd02 map check rejected only the two newly committed diagnostic files. The replacement preparation requires those two exact source hashes and unchanged other inputs. No campaign was launched by either rejected preparation. All failed-scene saves, draft sidecars, screenshots, input archives, receipts and historical verdicts are retained; their exact paths/ownership are inventoried in JSON.
+
+## Reconciliation and next gate
+
+Original 84: **65 with qualified passing evidence / 19 still without qualified passing evidence**. No subtraction from historical full-suite results, no overlapping-control pass inflation, no changed historical verdicts. This diagnostic added zero qualified original-failure passes.
+
+Start with P1 baseline ownership and P6 expected capture-log corrections, then qualify those affected identities/adjacent negatives before broad edits. Follow with P2 and P3–P5 using real prebinding/lifecycle ownership. Resolve P7's historical presentation fixture separately. Run directly corresponding PlayMode wrappers after corrected scene behavior; none ran in this task. Full-class order/lifecycle coverage must be described accurately with respect to the separately prohibited sustained profile.
+
+Unit: read-only comparison/counter diagnosis and fixture invalid-state inspection. SIT: actual production scene, canonical manual run, normal foreground publication, UI and shared coroutine lifecycle reproduced in isolated Windows Editor EditMode UnityTests. No new production behavior is qualified. UAT remains required later and has not started. Full EditMode, applicable full PlayMode, interruption/reopen final gates, native Windows Player startup/shutdown and matched main/H1-F4 performance/memory remain pending. PR #259 is not ready, and owner UAT/merge are not authorized.

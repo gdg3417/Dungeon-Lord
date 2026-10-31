@@ -1,0 +1,103 @@
+{
+  "all_checks_passed": true,
+  "all_job_queries_absent_error2": true,
+  "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b481fef13741433dbb359899f757c09e",
+  "campaign_tree_unchanged": true,
+  "failed_save_namespace_unchanged": true,
+  "historical_completion_reinterpreted": false,
+  "later_process_checks": {
+    "scene-lifecycle-preflight/child_process": {
+      "current": null,
+      "recorded": {
+        "created": 134376669190042721,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 45508
+      }
+    },
+    "scene-lifecycle-preflight/process": {
+      "current": null,
+      "recorded": {
+        "created": 134376669188968608,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 25392
+      }
+    },
+    "scene-lifecycle/child_process": {
+      "current": null,
+      "recorded": {
+        "created": 134376669289576666,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 50712
+      }
+    },
+    "scene-lifecycle/process": {
+      "current": null,
+      "recorded": {
+        "created": 134376669288421481,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 45380
+      }
+    },
+    "supervisor": {
+      "current": null,
+      "recorded": {
+        "created": 134376669152686117,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 13920
+      }
+    }
+  },
+  "original_campaign_verdict": "INCOMPLETE / UNCERTAIN",
+  "preserved_current_versions_verified": {
+    "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "f53586850a70c4f308e7e71b99b63881a49f38de4bd40f4edb7fe7ae6ecf8a52",
+    "ProjectSettings/EditorBuildSettings.asset": "f72e8fd550133184822260c85b62c371189f88e1d390fb95839292e9247ee7cf",
+    "ProjectSettings/ProjectSettings.asset": "73bd698973a29d89461ce9e05e4bae48fca9684b5f1954d5954226995f4d71ef",
+    "ProjectSettings/ShaderGraphSettings.asset": "5c432c9c73fdf73fee91c8823ea02ab98e3b7a8edf341b5ae6901d699cce52a7"
+  },
+  "prior_evidence_directories_verified": 85,
+  "prior_readonly_receipt_unchanged": true,
+  "protected_evidence_unchanged": true,
+  "receipt": {
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b481fef13741433dbb359899f757c09e",
+    "diagnostic_sha256": "5f25371046a4d5de2c67df0281cd3c5531fc2e47375eed39137a05241835a48a",
+    "execute_requested": true,
+    "final_reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b481fef13741433dbb359899f757c09e"
+    },
+    "final_target_hashes": {
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+      "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+    },
+    "modification_attempts": [
+      "ProjectSettings/ProjectSettings.asset",
+      "ProjectSettings/EditorBuildSettings.asset",
+      "ProjectSettings/ShaderGraphSettings.asset",
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset"
+    ],
+    "phase": "completed",
+    "postchecks_passed": true,
+    "prechecks_passed": true,
+    "proposal_script_sha256": "9a9abb70783a9f7fd111aa0424e07087b7ab489d531b14d6fe3cb0dee57ff13a",
+    "released": true,
+    "restored": [
+      "ProjectSettings/ProjectSettings.asset",
+      "ProjectSettings/EditorBuildSettings.asset",
+      "ProjectSettings/ShaderGraphSettings.asset",
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset"
+    ],
+    "success": true,
+    "utc": "2026-10-28T14:01:42.476740+00:00"
+  },
+  "receipt_sha256": "c049cbf64898244d608e565d838d79d82eb845ad78c6e4dd65b48040883981dc",
+  "reservation": {
+    "campaign": null,
+    "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b481fef13741433dbb359899f757c09e"
+  },
+  "restored_input_count": 1494,
+  "source_sha": "4b5f9067cd313d5ee8b92a9b18102b8511a65ac8",
+  "tools_verified": 9,
+  "verified_utc": "2026-10-28T14:03:38.841520+00:00"
+}

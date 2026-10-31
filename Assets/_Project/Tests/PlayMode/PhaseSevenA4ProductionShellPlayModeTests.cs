@@ -18,6 +18,27 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         private object fixture;
         private Type fixtureType;
 
+
+        // Actual PlayMode entry; these reuse the same real scene bootstrap and
+        // one prebound clock owner, not an alternate simulation fixture.
+        [UnityTest] public IEnumerator LivingDungeonB3B2ActiveIdleFramesDoNotReconstructSaveOrRebuildUi() { yield return Invoke("LivingDungeonB3B2ActiveIdleFramesDoNotReconstructSaveOrRebuildUi"); }
+        [UnityTest] public IEnumerator LivingDungeonB3B2AutomaticSceneLoopSettlesAndAdmitsAgainstCommittedEdit() { yield return Invoke("LivingDungeonB3B2AutomaticSceneLoopSettlesAndAdmitsAgainstCommittedEdit"); }
+        [UnityTest] public IEnumerator LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish() { yield return Invoke("LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish"); }
+        [UnityTest] public IEnumerator LivingDungeonB3B2LiveFloorActionsValidateAfterTheirElapsedTimeBarrier() { yield return Invoke("LivingDungeonB3B2LiveFloorActionsValidateAfterTheirElapsedTimeBarrier"); }
+        [UnityTest] public IEnumerator LivingDungeonB3B2LiveLabelsSessionReplayAndLargeLayoutsObserveOnlyCommittedState() { yield return Invoke("LivingDungeonB3B2LiveLabelsSessionReplayAndLargeLayoutsObserveOnlyCommittedState"); }
+        [UnityTest] public IEnumerator LivingDungeonB3B2PresentationSnapsGapsAndInterruptionsAndHidesUnknownGeometry() { yield return Invoke("LivingDungeonB3B2PresentationSnapsGapsAndInterruptionsAndHidesUnknownGeometry"); }
+        [UnityTest] public IEnumerator LivingDungeonB3B2ProvenRollbackRetriesThroughRealSaveBarrier() { yield return Invoke("LivingDungeonB3B2ProvenRollbackRetriesThroughRealSaveBarrier"); }
+        [UnityTest] public IEnumerator LivingDungeonB3B2RecordedAdjacentMovementInterpolatesWithoutCanonicalEffects() { yield return Invoke("LivingDungeonB3B2RecordedAdjacentMovementInterpolatesWithoutCanonicalEffects"); }
+        [UnityTest] public IEnumerator LivingDungeonB3B2ResumeCompletesSeveralBoundedPassesBeforeRunningAgain() { yield return Invoke("LivingDungeonB3B2ResumeCompletesSeveralBoundedPassesBeforeRunningAgain"); }
+        [UnityTest] public IEnumerator LivingDungeonB3B2SuspendedDrainRecognizesItsDurablyPersistedPauseBoundary() { yield return Invoke("LivingDungeonB3B2SuspendedDrainRecognizesItsDurablyPersistedPauseBoundary"); }
+        [UnityTest] public IEnumerator LivingDungeonB3B2UncertainRollbackKeepsRealRootRecoveryLatch() { yield return Invoke("LivingDungeonB3B2UncertainRollbackKeepsRealRootRecoveryLatch"); }
+        [UnityTest] public IEnumerator SceneClockEligibilityRejectsOwnerProductAndNonBatchContext() { yield return Invoke("SceneClockEligibilityRejectsOwnerProductAndNonBatchContext"); }
+        [UnityTest] public IEnumerator SceneClockInvalidMonotonicFailsClosed() { yield return Invoke("SceneClockInvalidMonotonicFailsClosed"); }
+        [UnityTest] public IEnumerator SceneClockInvalidUtcFailsClosed() { yield return Invoke("SceneClockInvalidUtcFailsClosed"); }
+        [UnityTest] public IEnumerator SceneClockNativeFractionAndOwnerRemainBound() { yield return Invoke("SceneClockNativeFractionAndOwnerRemainBound"); }
+        [UnityTest] public IEnumerator SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit() { yield return Invoke("SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit"); }
+        [UnityTest] public IEnumerator SceneClockQualificationAdvanceRetainsTheCanonicalOwner() { yield return Invoke("SceneClockQualificationAdvanceRetainsTheCanonicalOwner"); }
+
         [UnityTest] public IEnumerator R0ResearchPrerequisiteNativeShellBlocks() { yield return Invoke("R0ResearchPrerequisiteNativeShellBlocksWithoutResearchWrite"); }
         [UnityTest] public IEnumerator R0ResearchPrerequisiteAutomaticSettlement() { yield return Invoke("R0ResearchPrerequisiteRequiresAutomaticTerminalSettlement"); }
         [UnityTest] public IEnumerator R0ResearchStartProgressClaimAndReopen() { yield return Invoke("R0ResearchStartProgressClaimAndReopenUseCommittedPublication"); }
