@@ -187,15 +187,7 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(ui.Q<Button>("navigationDiscard").text, Is.EqualTo(strings["ui.analysis.discard_changes"]));
                     Assert.That(ui.Q<Button>("cancel").text, Is.EqualTo(strings["ui.analysis.continue_editing"]));
                     yield return AnalysisPhoneDialog(null,"confirm","navigationDiscard","cancel");
-                    int observedClicks=0, observedDowns=0, observedUps=0;
-                    var chosen=ui.Q<Button>(choice);
-                    chosen.clicked += () => observedClicks++;
-                    chosen.RegisterCallback<PointerDownEvent>(_ => observedDowns++);
-                    chosen.RegisterCallback<PointerUpEvent>(_ => observedUps++);
-                    TraceSceneState("phone.before-"+size+"-"+choice);
                     yield return AnalysisPhoneTap(ui.Q<Button>(choice));
-                    TestContext.WriteLine("CO02 phone choice="+choice+" size="+size+" clicks="+observedClicks+" down="+observedDowns+" up="+observedUps+" status="+ui.Q<Label>("navigationStatus")?.text+" modal="+ui.Q<Label>("modalText")?.text);
-                    TraceSceneState("phone.after-"+size+"-"+choice);
                     Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.None),size+" "+choice);
                     if (choice=="cancel")
                     {

@@ -184,13 +184,7 @@ namespace DungeonBuilder.M0.Tests
             controller.TapWorld(ContentCell(a,1,1)); Assert.That(controller.SelectedContent.AssignmentId,Is.EqualTo(first.AssignmentId)); controller.BeginMove();
             controller.TapWorld(ContentCell(a,1,2)); Assert.That(controller.ConfirmContentPlacement(),Is.True); yield return SettleContentPanel();
             Assert.That(controller.Draft.ReadModel.Floors[0].RoomContents.Assignments.Single(x=>x.AssignmentId==sibling.AssignmentId).RoomLocalPosition,Is.EqualTo(new TileCoordinate(2,1)));
-            AssertCanonicalUnchanged(before,mana);
-            var commitPreview=root.SaveService.PreviewDungeonDraft(root.Save,controller.Draft);
-            TestContext.WriteLine("CO02 repeated-content commit category="+category+" preview="+commitPreview.Reason+" draft="+controller.Draft.Reason+" mana="+root.Save.structureRuntime.ManaReserve);
-            TraceSceneState("repeated-content.before-commit");
-            bool committed=controller.Commit();
-            TraceSceneState("repeated-content.after-commit");
-            Assert.That(committed,Is.True,"category="+category+" preview="+commitPreview.Reason+" draft="+controller.Draft?.Reason); yield return SettleContentPanel();
+            AssertCanonicalUnchanged(before,mana); Assert.That(controller.Commit(),Is.True); yield return SettleContentPanel();
             Assert.That(root.Save.structureRuntime.ManaReserve,Is.EqualTo(mana-2*price)); yield return RestartShell(); root=GameRoot.Instance;
             before=File.ReadAllBytes(root.SaveService.SavePath); mana=root.Save.structureRuntime.ManaReserve;
             controller.EnterEdit(); AssertInstanceCapacity(a,category,2);
