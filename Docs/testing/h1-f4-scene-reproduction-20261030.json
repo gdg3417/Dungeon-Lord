@@ -1,0 +1,575 @@
+{
+  "PR": 259,
+  "all_19_reproduced": true,
+  "artifact_inventory": [
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "TestResults/h1-f4-prepare-sc01.py",
+      "purpose": "New rejected preparation: historical sc01 directory already existed; no campaign or input change",
+      "retention": "preserve for independent review and correction reproduction"
+    },
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "TestResults/h1-f4-prepare-sd01.py",
+      "purpose": "Fresh selected-22 preparation wrapper",
+      "retention": "preserve for independent review and correction reproduction"
+    },
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "TestResults/h1-f4-20261027-sd01",
+      "purpose": "Selected-22 inputs/archive, failure stack/order inventory, runner, guarded finalization",
+      "retention": "preserve for independent review and correction reproduction"
+    },
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "TestResults/qualification-supervisor/e43064bd906248c6a776a8d06e7a5fdf",
+      "purpose": "Immutable FAILED selected-22 campaign and owned failed-scene copies",
+      "retention": "preserve for independent review and correction reproduction"
+    },
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "TestResults/h1-f4-prepare-sd02-rejected-original-map.py",
+      "purpose": "Retained rejected precondition before explicitly authorizing only two committed diagnostic input hashes",
+      "retention": "preserve for independent review and correction reproduction"
+    },
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "TestResults/h1-f4-prepare-sd02.py",
+      "purpose": "Fresh one-case preparation",
+      "retention": "preserve for independent review and correction reproduction"
+    },
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "TestResults/h1-f4-20261027-sd02",
+      "purpose": "One-case inputs/archive, runner, guarded finalization, retained first verifier and corrected cross-campaign verification",
+      "retention": "preserve for independent review and correction reproduction"
+    },
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "TestResults/qualification-supervisor/30b57a01cf3f4bb996e9fb5981c511f1",
+      "purpose": "Immutable FAILED one-case trace campaign",
+      "retention": "preserve for independent review and correction reproduction"
+    },
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "TestResults/h1-f4-scene-compile-20261030-01",
+      "purpose": "Redirected existing Roslyn compile outputs; compile-only, no NUnit qualification",
+      "retention": "preserve for independent review and correction reproduction"
+    },
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord B3B2 Smoke H1F4 20261027 sd01",
+      "purpose": "Owned failed scene saves retained",
+      "retention": "preserve for independent review and correction reproduction"
+    },
+    {
+      "owner": "H1-F4 scene diagnosis",
+      "path": "C:/Users/gdg34/AppData/LocalLow/gdg3417/Dungeon Lord B3B2 Smoke H1F4 20261027 sd02",
+      "purpose": "Owned failed scene save retained",
+      "retention": "preserve for independent review and correction reproduction"
+    }
+  ],
+  "base": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaigns": [
+    {
+      "TMP_sha256": {
+        "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d"
+      },
+      "archive_members_verified": 1494,
+      "archive_sha256": "45a8eb9043063ac121412f9c4d1b32db7f166a86bcc4f83c3452d827b503b03c",
+      "campaign": "e43064bd906248c6a776a8d06e7a5fdf",
+      "finalizer_receipt_sha256": "88a62c4fc60879e50cc538135259c6c31d26c338bd4e7049d49831f3d9766fd6",
+      "original_verdict": "FAILED",
+      "prior_evidence_directories_verified": 308,
+      "raw_NUnit": {
+        "failed": 19,
+        "passed": 3,
+        "skipped": 0,
+        "total": 22
+      },
+      "restoration_and_preservation_separately_verified": true,
+      "settings": {
+        "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+        "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+        "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+      },
+      "source": "ad9c690f96ac6198298f49d8cc0c83bc899d2bd2",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 8,
+          "evidence_error": "Incomplete NUnit test-run",
+          "host_exit": 0,
+          "job": "Local\\DLQ-016c19560c70475898abfcd734baa1a3",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134378764981283923,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 28516
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134378764979893876,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 34168
+              }
+            }
+          },
+          "result_sha256": "8827ec41015cc41eae2b383462a918193d1eb899f17b3e09e1430c8c0b4660a6",
+          "status": "FAILED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "evidence_error": null,
+          "host_exit": 0,
+          "job": "Local\\DLQ-5a2a4a645f654dc6ae5aae7f54394aee",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134378764870107345,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 3036
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134378764868908156,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 40316
+              }
+            }
+          },
+          "result_sha256": "7f514382e0724a6649889fdc5a20ec09b5e4883e6e24604ba9d64eb32dbc3f22",
+          "status": "PASSED"
+        }
+      },
+      "tools_verified": 10,
+      "xml_sha256": "a26a722e2dcc506114a3098cc6b3f4ba4f950b071c85dc43fc7e9ab4ffac7be6"
+    },
+    {
+      "TMP_sha256": {
+        "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d"
+      },
+      "archive_members_verified": 1494,
+      "archive_sha256": "fb7ac01bf39d34cd2a5bd2b4ec76be110c842693cb273799ca252044be89d92e",
+      "campaign": "30b57a01cf3f4bb996e9fb5981c511f1",
+      "finalizer_receipt_sha256": "2f7d984d9163d3877f9ca779578edc17155f87997302ea7d8c09f1cc7820e016",
+      "original_verdict": "FAILED",
+      "prior_evidence_directories_verified": 311,
+      "raw_NUnit": {
+        "failed": 1,
+        "passed": 0,
+        "skipped": 0,
+        "total": 1
+      },
+      "restoration_and_preservation_separately_verified": true,
+      "settings": {
+        "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+        "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+        "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+      },
+      "source": "8b647803515f3182be6a74de8a37fa64f4e81d03",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 8,
+          "evidence_error": "Incomplete NUnit test-run",
+          "host_exit": 0,
+          "job": "Local\\DLQ-17043919f255451e838f5f1c7ac98af1",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134378787051950361,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 25912
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134378787050677508,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 18172
+              }
+            }
+          },
+          "result_sha256": "2e7406a0f993c0865f5016563604f86c19b369b26d880108f41c0f773e66dc5d",
+          "status": "FAILED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "evidence_error": null,
+          "host_exit": 0,
+          "job": "Local\\DLQ-3249e56fbf14478f94ccc4e53096c663",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134378786935389182,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 28544
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134378786934172844,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 27148
+              }
+            }
+          },
+          "result_sha256": "3ed17c0f2772f8cca21d0f04c6f899890742a73be42e3e0cade3a1c1d2a00b00",
+          "status": "PASSED"
+        }
+      },
+      "tools_verified": 10,
+      "xml_sha256": "523283fd34729df3561f9dad0edb1fc21676c10108b80646a010008c627a578b"
+    }
+  ],
+  "controls": [
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentLootRejectionReasons",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentCapacityMoveOwnedAndDiscard",
+      "result": "Passed"
+    }
+  ],
+  "date": "2026-10-30 America/Chicago (second attempt completed 2026-10-31 UTC)",
+  "diagnostic_source": "8b647803515f3182be6a74de8a37fa64f4e81d03",
+  "full_class_order_run": false,
+  "full_class_reason": "Selected targets failed, so all-pass conditional was not reached. The complete class also includes ForegroundPerformanceSustainedProduction68Runs, expressly excluded by this task. No benchmark was run or silently removed from a claimed complete-class result.",
+  "historical_messages_exactly_equal": 17,
+  "independent_verification": {
+    "all_checks_passed": true,
+    "path": "TestResults/h1-f4-20261027-sd02/independent-diagnostic-completion02.json",
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\30b57a01cf3f4bb996e9fb5981c511f1"
+    },
+    "sha256": "56d0f523464f55f847901e50af9ff183a68cc6e11a44fb100bae2016ddd86d2e"
+  },
+  "initial_source": "ad9c690f96ac6198298f49d8cc0c83bc899d2bd2",
+  "model_recommendation": {
+    "classification": "Standard diagnostic investigation",
+    "fallback": "GPT-6 Sol Medium",
+    "model": "GPT-6.1 Sol",
+    "production_changes": false,
+    "reasoning": "Medium"
+  },
+  "new_qualified_original_failures": 0,
+  "original_84_qualified_passing": 65,
+  "original_84_still_without_qualified_passing": 19,
+  "original_failure_source": "TestResults/qualification-supervisor/75bee8ad47764696bf3404388fe8f757/full-edit/results.xml",
+  "original_failure_source_sha256": "7e97bff348cf2db65bbdc8671ee7a8354a85f0c565ed5f0986ed60dc54ad897a",
+  "read_only_byte_trace": [
+    "H1F4_SCENE drain.begin frame=289 controller=0 initialized= quiesced= draft=0 editing= durability= commands= draftReason= feedback= rootEnabled=True focused=False observedFocus=True observedPause=False paused=False time=-954441042 boundTime=-954441042 recovery=False deferred=True deferredBackground=True observedForeground=False presentation=False rootPumping=False bootPending=True failure= retry=False publication=False recoveryRequired=False save=-595262112 session=-1229576854 bytes=0af2b76687ccb9042b1c98aeeec8f3637dbcbe5f522c4e31919c7a1292e4e044 W=2000.2500000 A= C= banner= pauseLine=Pause: Running mouseUp= escape=",
+    "H1F4_SCENE setup.prebound-clock-ready frame=289 controller=-1867685296 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=True focused=False observedFocus=True observedPause=False paused=False time=-954441042 boundTime=-954441042 recovery=False deferred=False deferredBackground=False observedForeground=True presentation=True rootPumping=False bootPending=False failure= retry=False publication=False recoveryRequired=False save=-1136901088 session=1597770886 bytes=4fc057941ed787fda8efd51ade1eab977410eb7a188c03ef24a7fe27878dafe5 W=2000.2500000 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+    "H1F4_SCENE canonical-publication frame=290 controller=-1867685296 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=True focused=False observedFocus=True observedPause=False paused=False time=-954441042 boundTime=-954441042 recovery=False deferred=False deferredBackground=False observedForeground=True presentation=True rootPumping=True bootPending=False failure= retry=False publication=True recoveryRequired=False save=818475584 session=-1416443368 bytes=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a W=2000.2500000 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+    "H1F4_SCENE publication-caller PhaseSevenA4ProductionSceneTests.<SetUp>b__25_0 <- SaveService.AdvanceForeground <- GameRoot.PumpForeground <- GameRoot.UpdateForeground <- GameRoot.Update",
+    "H1F4_SCENE setup.after-yield frame=290 controller=-1867685296 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=True focused=False observedFocus=True observedPause=False paused=False time=-954441042 boundTime=-954441042 recovery=False deferred=False deferredBackground=False observedForeground=True presentation=True rootPumping=False bootPending=False failure= retry=False publication=False recoveryRequired=False save=818475584 session=-1416443368 bytes=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a W=2000.2500000 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+    "H1F4_SCENE canonical-publication frame=291 controller=-1867685296 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=True focused=False observedFocus=True observedPause=False paused=False time=-954441042 boundTime=-954441042 recovery=False deferred=False deferredBackground=False observedForeground=True presentation=True rootPumping=False bootPending=False failure= retry=False publication=False recoveryRequired=False save=2026437568 session=-7235546 bytes=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 W=2000.2500000 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+    "H1F4_SCENE publication-caller PhaseSevenA4ProductionSceneTests.<SetUp>b__25_0 <- SaveService.CommitPhaseFiveBRun <- GameRoot.SimulateResolvedRoute <- GameRoot.SimulateRunOnce <- GameRoot.SimulateRunOnce <- <AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen>d__87.MoveNext <- <Execute>d__7.MoveNext <- <ExecuteEnumerableAndRecordExceptions>d__4.MoveNext <- EnumerableTestMethodCommand.AdvanceEnumerator <- <ExecuteEnumerable>d__2.MoveNext",
+    "H1F4_SCENE analysis.before-read-only-baseline frame=291 controller=-1867685296 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=True focused=False observedFocus=True observedPause=False paused=False time=-954441042 boundTime=-954441042 recovery=False deferred=False deferredBackground=False observedForeground=True presentation=True rootPumping=False bootPending=False failure= retry=False publication=False recoveryRequired=False save=2026437568 session=-7235546 bytes=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 W=2000.2500000 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+    "H1F4_SCENE canonical-publication frame=292 controller=-1867685296 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=True focused=False observedFocus=True observedPause=False paused=False time=-954441042 boundTime=-954441042 recovery=False deferred=False deferredBackground=False observedForeground=True presentation=True rootPumping=True bootPending=False failure= retry=False publication=True recoveryRequired=False save=729076736 session=-1812078664 bytes=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 W=2000.2500000 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+    "H1F4_SCENE publication-caller PhaseSevenA4ProductionSceneTests.<SetUp>b__25_0 <- SaveService.AdvanceForeground <- GameRoot.PumpForeground <- GameRoot.UpdateForeground <- GameRoot.Update",
+    "H1F4_SCENE analysis.before-byte-assertion frame=293 controller=-1867685296 initialized=True quiesced=False draft=0 editing=False durability= commands= draftReason= feedback= rootEnabled=True focused=False observedFocus=True observedPause=False paused=False time=-954441042 boundTime=-954441042 recovery=False deferred=False deferredBackground=False observedForeground=True presentation=True rootPumping=False bootPending=False failure= retry=False publication=False recoveryRequired=False save=729076736 session=-1812078664 bytes=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 W=2000.2500000 A=0 C=0 banner= pauseLine=Pause: Running mouseUp= escape=",
+    "H1F4_SCENE byte-diff first=361 beforeLength=18093 afterLength=18095 decimalSuffixOnly=True before=otIndex\":0,\"structureRuntime\":{\"ManaReserve\":993,\"Heat\":0.0,\"IsHeatCrisisActive\":false,\"LastProc after=otIndex\":0,\"structureRuntime\":{\"ManaReserve\":993.0,\"Heat\":0.0,\"IsHeatCrisisActive\":false,\"LastPr"
+  ],
+  "scope": {
+    "PR_remains_draft": true,
+    "PlayMode_executed": false,
+    "W_R_A_C_S_Q_policy_changed": false,
+    "Windows_Player_executed": false,
+    "benchmark_executed": false,
+    "full_EditMode_executed": false,
+    "owner_UAT_started": false,
+    "production_code_changed": false,
+    "schemas_or_migrations_changed": false
+  },
+  "status": "diagnostic reproduction complete; correction packets proposed, not implemented or qualified",
+  "targets": [
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[18093]>, actual is <System.Byte[18095]>\n  Values differ at index [361]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen>d__86.MoveNext () [0x00156] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:297\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[18093]>, actual is <System.Byte[18095]>\n  Values differ at index [361]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPendingAndStaleSaveRemainDisabledWithDraftIntact",
+      "original_order_index": 1741,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisMissingLocalizationUsesExistingAvailabilityFeedback",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen>d__86.MoveNext () [0x00156] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:297\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[8549]>, actual is <System.Byte[8551]>\n  Values differ at index [360]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneInvalidAndStaleDialogsRemainAccessible>d__84.MoveNext () [0x0084c] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:255\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[8549]>, actual is <System.Byte[8551]>\n  Values differ at index [360]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneNavigationSafeAreaAndCoveredInput",
+      "original_order_index": 1743,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPendingAndStaleSaveRemainDisabledWithDraftIntact",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneInvalidAndStaleDialogsRemainAccessible>d__84.MoveNext () [0x0084c] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:255\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneNavigationSafeAreaAndCoveredInput>d__82.MoveNext () [0x0064c] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:167\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneNavigationSafeAreaAndCoveredInput",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneOpeningDuringReplayClosesPresentationOnly",
+      "original_order_index": 1744,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneNavigationSafeAreaAndCoveredInput>d__82.MoveNext () [0x0064c] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:167\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneOpeningDuringReplayClosesPresentationOnly>d__85.MoveNext () [0x002b0] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:280\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneOpeningDuringReplayClosesPresentationOnly",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneValidDraftChoicesUseTouchButtons",
+      "original_order_index": 1745,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneNavigationSafeAreaAndCoveredInput",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneOpeningDuringReplayClosesPresentationOnly>d__85.MoveNext () [0x002b0] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:280\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[19379]>, actual is <System.Byte[19381]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence>d__1.MoveNext () [0x00cfb] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:82\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[19379]>, actual is <System.Byte[19381]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+      "original_order_index": 1754,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1LocalizedNamesKeepHealthVisibleWithoutOverflow",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence>d__1.MoveNext () [0x00cfb] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:82\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  branch.edit.invalid_context\n  Expected: True\n  But was:  False\n",
+      "current_result": "Failed",
+      "current_stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1PartyFollowsRoomsCorridorsAndFloors>d__8.MoveNext () [0x002f7] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:341\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+      "historical_message_identical": true,
+      "message": "  branch.edit.invalid_context\n  Expected: True\n  But was:  False\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats",
+      "original_order_index": 1755,
+      "packet": "P3",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence",
+      "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1PartyFollowsRoomsCorridorsAndFloors>d__8.MoveNext () [0x002f7] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:341\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1TargetFeedbackTracksRecordedHitsAndDefeats>d__7.MoveNext () [0x00b46] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:316\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[18090]>, actual is <System.Byte[18092]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC2ConsecutiveRunsStartFromCommittedIndividualsAndReplayRemainsReadOnly",
+      "original_order_index": 1756,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<CombatC1TargetFeedbackTracksRecordedHitsAndDefeats>d__7.MoveNext () [0x00b46] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\CombatC1ReplaySceneTests.cs:316\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[9657]>, actual is <System.Byte[9659]>\n  Values differ at index [357]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<FloorHudStatesAndInputCapture>d__152.MoveNext () [0x00a44] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonOverlaySceneTests.cs:81\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.FloorHudStatesAndInputCapture",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[9657]>, actual is <System.Byte[9659]>\n  Values differ at index [357]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.ForegroundPerformanceSustainedProduction68Runs",
+      "original_order_index": 1767,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.FailedExplicitDeleteStillQuiescesProductionShellWithoutFurtherWrites",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<FloorHudStatesAndInputCapture>d__152.MoveNext () [0x00a44] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonOverlaySceneTests.cs:81\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "Unhandled log message: '[Error] [2026-10-30 23:29:56 UTC] [ERROR] GD66 save failed: gd66.write.first_write_validation_failed'. Use UnityEngine.TestTools.LogAssert.Expect",
+      "current_result": "Failed",
+      "current_stack": "DungeonBuilder.M0.SimpleLogger:Write (string,string,System.Action`1<object>) (at Assets/_Project/Scripts/Util/SimpleLogger.cs:41)\nDungeonBuilder.M0.SimpleLogger:Error (string) (at Assets/_Project/Scripts/Util/SimpleLogger.cs:34)\nDungeonBuilder.M0.SaveService:Save (DungeonBuilder.M0.SaveData,DungeonBuilder.M0.SaveReason) (at Assets/_Project/Scripts/Services/SaveService.cs:502)\nDungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests/<GraphicalFloorReviewMeaningfulInvalidations>d__114:MoveNext () (at Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonFloorSceneTests.cs:112)\nUnityEditor.EditorApplication:Internal_CallUpdateFunctions ()\n\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewMeaningfulInvalidations",
+      "historical_message_identical": false,
+      "message": "Unhandled log message: '[Error] [2026-10-29 23:02:55 UTC] [ERROR] GD66 save failed: gd66.write.first_write_validation_failed'. Use UnityEngine.TestTools.LogAssert.Expect",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges",
+      "original_order_index": 1769,
+      "packet": "P4",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.ForegroundPerformanceSustainedProduction68Runs",
+      "stack": "DungeonBuilder.M0.SimpleLogger:Write (string,string,System.Action`1<object>) (at Assets/_Project/Scripts/Util/SimpleLogger.cs:41)\nDungeonBuilder.M0.SimpleLogger:Error (string) (at Assets/_Project/Scripts/Util/SimpleLogger.cs:34)\nDungeonBuilder.M0.SaveService:Save (DungeonBuilder.M0.SaveData,DungeonBuilder.M0.SaveReason) (at Assets/_Project/Scripts/Services/SaveService.cs:502)\nDungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests/<GraphicalFloorReviewMeaningfulInvalidations>d__114:MoveNext () (at Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonFloorSceneTests.cs:112)\nUnityEditor.EditorApplication:Internal_CallUpdateFunctions ()\n\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected and actual are both <System.Byte[10987]>\n  Values differ at index [357]\n  Expected: 48\n  But was:  49\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges>d__115.MoveNext () [0x00299] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonFloorSceneTests.cs:148\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges",
+      "historical_message_identical": true,
+      "message": "  Expected and actual are both <System.Byte[10987]>\n  Values differ at index [357]\n  Expected: 48\n  But was:  49\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewTickProbe",
+      "original_order_index": 1770,
+      "packet": "P2",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewMeaningfulInvalidations",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges>d__115.MoveNext () [0x00299] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonFloorSceneTests.cs:148\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[9417]>, actual is <System.Byte[9419]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentCompactAcquisitionOwnedReassignAndOverflow>d__180.MoveNext () [0x00b10] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:523\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentCompactAcquisitionOwnedReassignAndOverflow",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[9417]>, actual is <System.Byte[9419]>\n  Values differ at index [358]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentCompactMoveAllCategoriesAndDraftCosts",
+      "original_order_index": 1807,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RepresentativeLayoutsKeepChromeInsideSafeRootAndCaptureEvidence",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentCompactAcquisitionOwnedReassignAndOverflow>d__180.MoveNext () [0x00b10] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:523\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentExplicitReassignmentWithConstructionAndInspectionReuse>d__186.MoveNext () [0x005b0] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:861\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentExplicitReassignmentWithConstructionAndInspectionReuse",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentLootRejectionReasons",
+      "original_order_index": 1809,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentCompactMoveAllCategoriesAndDraftCosts",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentExplicitReassignmentWithConstructionAndInspectionReuse>d__186.MoveNext () [0x005b0] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:861\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected: True\n  But was:  False\n",
+      "current_result": "Failed",
+      "current_stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMapReassignmentProductionMouseTouchRecovery>d__178.MoveNext () [0x00082] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:353\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentProductionMouseTouchRecovery",
+      "historical_message_identical": true,
+      "message": "  Expected: True\n  But was:  False\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated",
+      "original_order_index": 1813,
+      "packet": "P5",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentCategoriesInvalidRetryAndSave",
+      "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentMapReassignmentProductionMouseTouchRecovery>d__178.MoveNext () [0x00082] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:353\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentProductionPreviewCustodySaveDiscardAndLayouts>d__184.MoveNext () [0x00410] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:773\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentProductionPreviewCustodySaveDiscardAndLayouts",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentRepeatedLootInstances",
+      "original_order_index": 1815,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMouseTouchPreviewAndResumeKeepCanonicalIsolated",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentProductionPreviewCustodySaveDiscardAndLayouts>d__184.MoveNext () [0x00410] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:773\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentUatBrowserIdentityAndDirectTargetSwitch>d__181.MoveNext () [0x0088f] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:585\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatBrowserIdentityAndDirectTargetSwitch",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatGridAndMulticellInvalidTransitions",
+      "original_order_index": 1820,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentSequentialLootSaveBetween",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentUatBrowserIdentityAndDirectTargetSwitch>d__181.MoveNext () [0x0088f] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:585\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentUatPlacementGeometryAndLocalizedFeedback>d__183.MoveNext () [0x00646] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:739\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatPlacementGeometryAndLocalizedFeedback",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[8548]>, actual is <System.Byte[8550]>\n  Values differ at index [359]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RuntimeThemeAndLocalizedTextRenderInActualScene",
+      "original_order_index": 1822,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatGridAndMulticellInvalidTransitions",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<RoomContentUatPlacementGeometryAndLocalizedFeedback>d__183.MoveNext () [0x00646] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonRoomContentSceneTests.cs:739\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "Unhandled log message: '[Log] Qualification capture: <worktree>\\TestResults\\qualification-supervisor\\e43064bd906248c6a776a8d06e7a5fdf\\living-regressions\\fixture-inputs\\screenshots\\bb03d792-phase7a4-theme-normal-1080x1920.png'. Use UnityEngine.TestTools.LogAssert.Expect",
+      "current_result": "Failed",
+      "current_stack": "DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots:Capture (string) (at Assets/_Project/Scripts/BuildTools/ProductionDungeonScreenshots.cs:37)\nDungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests/<RuntimeThemeAndLocalizedTextRenderInActualScene>d__39:MoveNext () (at Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs:617)\nUnityEditor.EditorApplication:Internal_CallUpdateFunctions ()\n\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RuntimeThemeAndLocalizedTextRenderInActualScene",
+      "historical_message_identical": false,
+      "message": "Unhandled log message: '[Log] Qualification capture: <worktree>\\TestResults\\qualification-supervisor\\75bee8ad47764696bf3404388fe8f757\\full-edit\\fixture-inputs\\screenshots\\3b820171-phase7a4-theme-normal-1080x1920.png'. Use UnityEngine.TestTools.LogAssert.Expect",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClockEligibilityRejectsOwnerProductAndNonBatchContext",
+      "original_order_index": 1823,
+      "packet": "P6",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentUatPlacementGeometryAndLocalizedFeedback",
+      "stack": "DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots:Capture (string) (at Assets/_Project/Scripts/BuildTools/ProductionDungeonScreenshots.cs:37)\nDungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests/<RuntimeThemeAndLocalizedTextRenderInActualScene>d__39:MoveNext () (at Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs:617)\nUnityEditor.EditorApplication:Internal_CallUpdateFunctions ()\n\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected is <System.Byte[8546]>, actual is <System.Byte[8548]>\n  Values differ at index [357]\n  Expected: 44\n  But was:  46\n",
+      "current_result": "Failed",
+      "current_stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry>d__58.MoveNext () [0x0043e] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1175\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry",
+      "historical_message_identical": true,
+      "message": "  Expected is <System.Byte[8546]>, actual is <System.Byte[8548]>\n  Values differ at index [357]\n  Expected: 44\n  But was:  46\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.ValidRecoveryDiscardFailureRemovesResumeAndAllowsRetry",
+      "original_order_index": 1839,
+      "packet": "P1",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.UatRoomBoundariesRespectSavedConnectionsAndRotation",
+      "stack": "at NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual, System.String message, System.Object[] args) [0x00007] in <f577cd9686154d6ab10efd7e65e64366>:0\nat NUnit.Framework.CollectionAssert.AreEqual (System.Collections.IEnumerable expected, System.Collections.IEnumerable actual) [0x00000] in <f577cd9686154d6ab10efd7e65e64366>:0\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests.AssertCanonicalUnchanged (System.Byte[] bytes, System.Double mana) [0x00000] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1477\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry>d__58.MoveNext () [0x0043e] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:1175\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    },
+    {
+      "classname": "DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests",
+      "current_message": "  Expected: True\n  But was:  False\n",
+      "current_result": "Failed",
+      "current_stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<VisualRunReplayProductionLifecycleAndResponsiveControls>d__158.MoveNext () [0x00163] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonReplaySceneTests.cs:125\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls",
+      "historical_message_identical": true,
+      "message": "  Expected: True\n  But was:  False\n",
+      "next_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4TransactionalEditor.ActiveSnapshotIsolatedWhileLaterRunUsesCommittedPosition",
+      "original_order_index": 1843,
+      "packet": "P7",
+      "previous_case": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunFeedbackCasualtyAndMitigatedDamageAreRecordedAndReadOnly",
+      "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<VisualRunReplayProductionLifecycleAndResponsiveControls>d__158.MoveNext () [0x00163] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonReplaySceneTests.cs:125\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n"
+    }
+  ]
+}
