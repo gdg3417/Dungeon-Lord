@@ -20,6 +20,8 @@ namespace DungeonBuilder.M0.Tests
     {
         private string filename;
         private TextAsset disposableConfig;
+        private TextAsset disposableRunScenarioConfig;
+        private int combatFeedbackScenario;
         private int isolationCallbacks;
         private ProductionDungeonController controller;
         private Touchscreen simulatedTouch;
@@ -149,6 +151,7 @@ namespace DungeonBuilder.M0.Tests
             config.save.fileName = filename;
             byte[] one = null, two = null;
             string test = TestContext.CurrentContext.Test.Name;
+            AuthorCombatSceneConfiguration(root, test);
             if (test.Contains("ResumeCompletesSeveralBoundedPasses") || test.Contains("SuspendedDrainRecognizes") ||
                 test.Contains("ProvenRollbackRetriesThroughRealSaveBarrier") || test.Contains("UncertainRollbackKeepsRealRootRecoveryLatch")) {
                 byte[] Bounded(string name) {
@@ -339,7 +342,9 @@ namespace DungeonBuilder.M0.Tests
             if (!Application.isPlaying) yield return new EnterPlayMode();
             if (GameRoot.Instance != null) UnityEngine.Object.Destroy(GameRoot.Instance.gameObject);
             if (disposableConfig != null) UnityEngine.Object.Destroy(disposableConfig);
+            if (disposableRunScenarioConfig != null) UnityEngine.Object.Destroy(disposableRunScenarioConfig);
             yield return null;
+            combatFeedbackScenario = 0;
             SceneManager.sceneLoaded -= Isolate;
             if (filename != null && !failed)
                 foreach (string path in Directory.GetFiles(Application.persistentDataPath, filename + "*")) File.Delete(path);
