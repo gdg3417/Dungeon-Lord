@@ -167,22 +167,68 @@ namespace DungeonBuilder.M0.Tests
             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
             .Invoke(GameRoot.Instance, new object[] { focused });
 
-        // First prove the exact first-failure byte signature for every P1 case.
-        // The probe is read-only; no time sampling, pumping or byte rewriting.
+        // Finish only the legitimate pending foreground publication through the
+        // normal Update lifecycle. Never pump private methods or change time.
         private IEnumerator StabilizeReadOnlySceneBaseline()
         {
+            var root = GameRoot.Instance; var service = root.SaveService; var time = root.TimeService;
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            object RootField(string name) => typeof(GameRoot).GetField(name, flags).GetValue(root);
+            bool Pending() => (bool)RootField("foregroundDirty") || (bool)RootField("foregroundPumping") ||
+                (bool)RootField("bootRecoveryPending") || service.CanonicalPublicationPending;
+            void Healthy()
+            {
+                Assert.That(root.isActiveAndEnabled, Is.True, "Baseline keeps the real root running");
+                Assert.That(RootField("foregroundFailure"), Is.Null);
+                Assert.That(RootField("foregroundRetryPending"), Is.EqualTo(false));
+                Assert.That(time.RecoveryClockActive || time.HasDeferredRecovery || time.HasForegroundPersistenceStall ||
+                    service.RequiresCanonicalRecovery, Is.False, "Resolve lifecycle/recovery obligations before a read-only baseline");
+                Assert.That(root.Save.timeProvenance.Episode, Is.Null);
+                Assert.That(root.Save.livingDungeon.IsClosed, Is.True);
+                Assert.That(root.TimeService, Is.SameAs(time));
+                Assert.That(typeof(SaveService).GetField("recoveryTime", flags).GetValue(service), Is.SameAs(time));
+            }
+            Healthy();
             readOnlyBaselineOrdinal++;
-            readOnlyBaselineProbe = File.ReadAllBytes(GameRoot.Instance.SaveService.SavePath);
-            yield break;
+            var before = File.ReadAllBytes(service.SavePath);
+            CollectionAssert.AreEqual(service.CanonicalSession.GetCurrentBytes(), before);
+            string gameplay = JsonUtility.ToJson(root.Save);
+            var utc = sceneClock.Now; long monotonic = sceneClock.Elapsed100ns, through = time.ForegroundThrough;
+            bool wasPending = Pending(); int publications = 0;
+            Action<SaveData> published = _ => publications++;
+            service.CanonicalRuntimePublished += published;
+            try
+            {
+                const int maximumPublicationFrames = 8; // Test orchestration bound, never gameplay tuning.
+                for (int frame = 0; frame < maximumPublicationFrames && Pending(); frame++) {
+                    yield return null;
+                    Healthy();
+                }
+                Assert.That(Pending(), Is.False, "Pending foreground publication did not complete within the fixture bound");
+            }
+            finally { service.CanonicalRuntimePublished -= published; }
+            Healthy();
+            Assert.That(publications, Is.EqualTo(wasPending ? 1 : 0), "Exactly one pending publication; no frame retry loop");
+            Assert.That(sceneClock.Now, Is.EqualTo(utc)); Assert.That(sceneClock.Elapsed100ns, Is.EqualTo(monotonic));
+            Assert.That(time.ForegroundThrough, Is.EqualTo(through));
+            Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(gameplay),
+                "Stabilization cannot change wallet, ticks, W, accepted/closed work, rewards or recovery state");
+            var after = File.ReadAllBytes(service.SavePath);
+            CollectionAssert.AreEqual(service.CanonicalSession.GetCurrentBytes(), after, "Authoritative session and disk agree");
+            Assert.That(TraceReadOnlyBaselineDifference(before, after, "stabilized"), Is.True,
+                "Only unchanged bytes or the independently demonstrated mana decimal suffix is eligible");
+            TestContext.WriteLine("H1F4_BASELINE publication-count=" + publications + " ordinal=" + readOnlyBaselineOrdinal +
+                " gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True");
+            readOnlyBaselineProbe = after;
         }
 
-        private void TraceReadOnlyBaselineDifference(byte[] before, byte[] after, string phase)
+        private bool TraceReadOnlyBaselineDifference(byte[] before, byte[] after, string phase)
         {
             int first = 0;
             while (first < before.Length && first < after.Length && before[first] == after[first]) first++;
             string original = System.Text.Encoding.UTF8.GetString(before);
             int key = original.LastIndexOf("\"ManaReserve\":", System.Math.Min(first, original.Length - 1), StringComparison.Ordinal);
-            bool walletNumber = key >= 0 && original.Substring(key + "\"ManaReserve\":".Length,
+            bool walletNumber = key >= 0 && first >= key + "\"ManaReserve\":".Length && original.Substring(key + "\"ManaReserve\":".Length,
                 first - key - "\"ManaReserve\":".Length).All(c => c == '-' || c >= '0' && c <= '9');
             bool decimalSuffixOnly = after.Length == before.Length + 2 && first < before.Length &&
                 before[first] == (byte)',' && after[first] == (byte)'.' && after[first + 1] == (byte)'0' &&
@@ -191,6 +237,7 @@ namespace DungeonBuilder.M0.Tests
                 " identical=" + before.SequenceEqual(after) + " walletDecimalSuffixOnly=" + decimalSuffixOnly +
                 " beforeLength=" + before.Length + " afterLength=" + after.Length + " first=" + first +
                 " beforeSha=" + SpatialContractSha256.Compute(before) + " afterSha=" + SpatialContractSha256.Compute(after));
+            return before.SequenceEqual(after) || decimalSuffixOnly;
         }
 
         private void PumpSceneToClosed(bool establishForeground = false)

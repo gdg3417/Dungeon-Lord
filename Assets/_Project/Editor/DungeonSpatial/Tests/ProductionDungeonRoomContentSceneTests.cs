@@ -708,7 +708,8 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator RoomContentUatPlacementGeometryAndLocalizedFeedback()
         {
             var root = GameRoot.Instance; var room = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];
-            Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess, Is.True);
+            var funding = root.SaveService.SetQaMana(root.Save,true);
+            Assert.That(funding.IsSuccess, Is.True, funding.Reason);
             yield return StabilizeReadOnlySceneBaseline(); var before = File.ReadAllBytes(root.SaveService.SavePath); double mana = root.Save.structureRuntime.ManaReserve;
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             controller.EnterEdit(); controller.TapWorld(ContentCell(room,1,1));
