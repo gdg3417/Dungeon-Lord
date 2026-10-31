@@ -244,24 +244,6 @@ namespace DungeonBuilder.M0.Tests
                 " identical=" + before.SequenceEqual(after) + " walletDecimalSuffixOnly=" + decimalSuffixOnly +
                 " beforeLength=" + before.Length + " afterLength=" + after.Length + " first=" + first +
                 " beforeSha=" + SpatialContractSha256.Compute(before) + " afterSha=" + SpatialContractSha256.Compute(after));
-            if (!before.SequenceEqual(after) && !decimalSuffixOnly &&
-                TestContext.CurrentContext.Test.Name.Contains("VisualRunReplayProductionLifecycleAndResponsiveControls")) {
-                // Private, bounded diagnostic evidence. Never print raw saves or
-                // relax this helper's byte rule to accept an unexplained change.
-                string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
-                Assert.That(export, Is.Not.Null.And.Not.Empty);
-                var directory = new DirectoryInfo(Path.GetFullPath(export));
-                Assert.That(directory.Name, Is.EqualTo("fixture-inputs"));
-                Assert.That(directory.Parent?.Parent?.Parent?.FullName, Is.EqualTo(Path.GetFullPath(
-                    Path.Combine(Application.dataPath, "../TestResults/qualification-supervisor"))).IgnoreCase);
-                Assert.That(Guid.TryParseExact(directory.Parent.Parent.Name, "N", out _), Is.True);
-                foreach (var item in new[] { directory, directory.Parent, directory.Parent.Parent, directory.Parent.Parent.Parent })
-                    Assert.That(item.Exists && (item.Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
-                string owned = Path.Combine(directory.FullName, "replay-baseline-" + Guid.NewGuid().ToString("N"));
-                Directory.CreateDirectory(owned);
-                using (var stream = new FileStream(Path.Combine(owned, "before.json"), FileMode.CreateNew)) stream.Write(before, 0, before.Length);
-                using (var stream = new FileStream(Path.Combine(owned, "after.json"), FileMode.CreateNew)) stream.Write(after, 0, after.Length);
-            }
             return before.SequenceEqual(after) || decimalSuffixOnly;
         }
 

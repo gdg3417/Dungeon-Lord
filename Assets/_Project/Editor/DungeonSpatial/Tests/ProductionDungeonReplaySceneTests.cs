@@ -159,9 +159,35 @@ namespace DungeonBuilder.M0.Tests
             CollectionAssert.AreEqual(beforeHistorical, File.ReadAllBytes(root.SaveService.SavePath));
             Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(historicalLive), "Pure B1 execution cannot mutate the canonical owner");
             Assert.That(root.SimulateRunOnce(), Is.True);
+            Assert.That(CombatC0Diagnostics.IsCombatC0(root.Save.runHistory.LatestOutcome), Is.True);
+            // The manual run invalidates the next foreground opportunity. The
+            // real save barrier must reconcile that scheduler state before the
+            // stricter UI-only baseline (which never accepts substantive writes).
+            var beforeTime = root.Save.timeProvenance;
+            long beforeA = root.Save.livingDungeon.Scheduler.AcceptedThrough, beforeC = root.Save.livingDungeon.Scheduler.ClosedThrough;
+            long beforeTicks = root.Save.totalTicks, beforeRevision = root.Save.livingDungeon.Revision;
+            double beforeMana = root.Save.structureRuntime.ManaReserve;
+            string beforeHistory = JsonUtility.ToJson(root.Save.runHistory), beforeMonsters = JsonUtility.ToJson(root.Save.monsterContinuity);
+            bool initializeOpportunity = !root.Save.livingDungeon.Scheduler.NextOpportunityTime.HasValue;
+            Assert.That(root.SaveService.Save(root.Save, SaveReason.ManualDev), Is.True);
+            Assert.That(root.Save.timeProvenance.SameAs(beforeTime), Is.True);
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(beforeMana));
+            Assert.That(root.Save.totalTicks, Is.EqualTo(beforeTicks));
+            Assert.That(root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(beforeA));
+            Assert.That(root.Save.livingDungeon.Scheduler.ClosedThrough, Is.EqualTo(beforeC));
+            Assert.That(root.Save.livingDungeon.IsClosed, Is.True);
+            Assert.That(JsonUtility.ToJson(root.Save.runHistory), Is.EqualTo(beforeHistory));
+            Assert.That(JsonUtility.ToJson(root.Save.monsterContinuity), Is.EqualTo(beforeMonsters));
+            Assert.That(root.Save.livingDungeon.Scheduler.NextOpportunityTime.HasValue, Is.True);
+            Assert.That(root.Save.livingDungeon.Scheduler.NextOpportunityTime.Value, Is.GreaterThan(beforeC));
+            Assert.That(root.Save.livingDungeon.Revision, Is.EqualTo(beforeRevision + (initializeOpportunity ? 1 : 0)));
+            CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(), File.ReadAllBytes(root.SaveService.SavePath));
+            TestContext.WriteLine("H1F4_REPLAY_SETUP opportunityInitialized=" + initializeOpportunity +
+                " walletPreserved=True WPreserved=True ACPreserved=True ticksPreserved=True historyPreserved=True monstersPreserved=True");
+            yield return StabilizeReadOnlySceneBaseline();
             var canonicalOutcome = root.Save.runHistory.LatestOutcome;
             Assert.That(CombatC0Diagnostics.IsCombatC0(canonicalOutcome), Is.True);
-            yield return StabilizeReadOnlySceneBaseline();
+            Assert.That(historical.RunId, Is.EqualTo(canonicalOutcome.RunId));
             floor = root.Save.validatedCanonicalSpatialState.Floors[0];
             var originals = floor.RoomContents.Assignments.ToDictionary(a => a.AssignmentId, a => {
                 Assert.That(DungeonRunReplay.TryProject(a.RoomLocalPosition, RunPositionSpace.RoomLocal, a.RoomInstanceId,
