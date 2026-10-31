@@ -26,15 +26,15 @@ All outstanding names have prefix `DungeonBuilder.M0.EditorTools.DungeonSpatial.
 | --- | --- |
 | CombatC1PartyFollowsRoomsCorridorsAndFloors | PASSED exact identity and PlayMode wrapper at Packet A source |
 | CombatC1TargetFeedbackTracksRecordedHitsAndDefeats | PASSED exact identity and PlayMode wrapper at Packet A source |
-| GraphicalFloorReviewMeaningfulInvalidations | NOT RUN in closeout push; Packet B pending |
-| GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges | NOT RUN in closeout push; Packet D pending |
-| RoomContentMapReassignmentProductionMouseTouchRecovery | NOT RUN in closeout push; Packet C pending |
-| VisualRunReplayProductionLifecycleAndResponsiveControls | NOT RUN in closeout push; Packet E pending |
+| GraphicalFloorReviewMeaningfulInvalidations | PASSED EditMode and actual PlayMode counterpart at `ed5af6f3` |
+| GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges | PASSED EditMode and actual PlayMode counterpart at `ed5af6f3` |
+| RoomContentMapReassignmentProductionMouseTouchRecovery | PASSED EditMode and actual PlayMode counterpart at `ed5af6f3` |
+| VisualRunReplayProductionLifecycleAndResponsiveControls | PASSED EditMode and actual PlayMode counterpart at `ed5af6f3` |
 
 ## Mandatory remaining sequence
 
 1. Packet A complete; current original-84 coverage **80 qualified /4 outstanding**. Its historical missing-label risk remains explicitly unproven.
-2. Packets B/C/D/E with source-backed correction, exact-name tests and normal-order adjacent coverage.
+2. Packets B/C/D/E complete: **14/0/0 EditMode** (`3d35ed78a25d489eb700a5e280a11cbf`) and **14/0/0 actual PlayMode counterparts** (`1286fbafcdd8471190dca29f854e8fe1`) at `ed5af6f3473b95eabacfa2993a15ac49257d43b1`, all five stages and independent preservation. Exact-name original-84 reconciliation **84 qualified /0 outstanding**, not a full-suite result. Three replay diagnostic/failed attempts remain FAILED with guarded normal restoration and independent verification. [Report](h1-f4-scene-packets-qualification-20261031.md).
 3. Complete applicable ordinary production-scene/PlayMode integration; explicitly schedule the sustained 68-run method rather than silently omitting it from a claimed complete class.
 4. Fresh full discovery and complete EditMode/PlayMode suites with exact skips and final-source applicability.
 5. Remaining original/residual, accepted-work, rollback/uncertainty, repeated interruption and historical/current reopen gates using existing approved owned-process harnesses.
