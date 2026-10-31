@@ -285,6 +285,12 @@ namespace DungeonBuilder.M0.Tests
             finally {
                 TracePhone("before-restore");
                 strings["ui.analysis.leave_invalid"]=invalidText; strings[TransactionalDungeonDraft.StaleReason]=staleText;
+                Assert.That(GameRoot.Instance, Is.SameAs(rootOwner));
+                Assert.That(GameRoot.Instance.Content, Is.SameAs(stringOwner));
+                Assert.That(AnalysisPhoneStrings, Is.SameAs(strings));
+                Assert.That(controller.GetComponent<UIDocument>().rootVisualElement, Is.SameAs(ui));
+                Assert.That(strings["ui.analysis.leave_invalid"], Is.EqualTo(invalidText));
+                Assert.That(strings[TransactionalDungeonDraft.StaleReason], Is.EqualTo(staleText));
                 TracePhone("restored");
             }
         }
@@ -311,6 +317,62 @@ namespace DungeonBuilder.M0.Tests
             }
         }
 
+        // A loaded Save is not a completed recovery boot. Only real lifecycle
+        // observations and Update may satisfy the coordinator's existing barrier.
+        private IEnumerator AwaitAnalysisBootstrap(SaveData source, MonsterRecoveryRules rules, byte[] sourceBytes)
+        {
+            var root = GameRoot.Instance; var time = root.TimeService; var service = root.SaveService;
+            object Field(string name) => typeof(GameRoot).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root);
+            Assert.That(source.timeProvenance.Episode, Is.Null);
+            Assert.That(source.livingDungeon.IsClosed, Is.True); Assert.That(source.livingDungeon.Parties, Is.Empty);
+            Assert.That(source.timeProvenance.AccountedBoundary.CompareTo(sceneClock.Now), Is.Zero,
+                "This reopen has no elapsed eligible time; healing remains a separate canonical obligation");
+            var expectedMonsters = source.monsterContinuity.Copy();
+            double expectedWallet = MonsterContinuity.Recover(expectedMonsters, source.validatedCanonicalSpatialState,
+                rules, source.structureRuntime.ManaReserve, new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal));
+            Assert.That(MonsterContinuity.Recover(expectedMonsters, source.validatedCanonicalSpatialState, rules,
+                expectedWallet, new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal)), Is.EqualTo(expectedWallet),
+                "A second zero-duration settlement cannot repeat a completed readiness debit");
+            string history = JsonUtility.ToJson(source.runHistory);
+            long accepted = source.livingDungeon.Scheduler.AcceptedThrough, closed = source.livingDungeon.Scheduler.ClosedThrough;
+            var utc = sceneClock.Now; long monotonic = sceneClock.Elapsed100ns; int observations = 0;
+            bool Complete() => !(bool)Field("bootRecoveryPending") && !(bool)Field("foregroundPumping") &&
+                !(bool)Field("foregroundDirty") && !service.CanonicalPublicationPending &&
+                !time.RecoveryClockActive && !time.HasDeferredRecovery && root.Save.timeProvenance.Episode == null &&
+                root.Save.livingDungeon.IsClosed && time.RecoveryForegroundObserved;
+            const int maximumBootstrapFrames = 64; // Test orchestration bound; not a recovery/gameplay limit.
+            for (int frame = 0; frame < maximumBootstrapFrames && !Complete(); frame++) {
+                Assert.That(root.isActiveAndEnabled, Is.True); Assert.That(root.TimeService, Is.SameAs(time));
+                Assert.That(typeof(SaveService).GetField("recoveryTime", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(service), Is.SameAs(time));
+                Assert.That(Field("foregroundFailure"), Is.Null); Assert.That(Field("foregroundRetryPending"), Is.EqualTo(false));
+                Assert.That(service.RequiresCanonicalRecovery || time.HasForegroundPersistenceStall, Is.False);
+                if (!time.RecoveryForegroundObserved) {
+                    // Establish the isolated scene's current foreground observation
+                    // at the validated controlled cut; never backdate a callback.
+                    typeof(GameRoot).GetMethod("OnApplicationPause", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(root, new object[] { false });
+                    ObserveSceneFocus(true); observations++;
+                }
+                yield return null;
+            }
+            Assert.That(Complete(), Is.True, "Loaded root did not complete its real recovery boot within the fixture bound");
+            Assert.That(Field("foregroundFailure"), Is.Null); Assert.That(Field("foregroundRetryPending"), Is.EqualTo(false));
+            Assert.That(service.RequiresCanonicalRecovery || time.HasForegroundPersistenceStall, Is.False);
+            Assert.That(sceneClock.Now, Is.EqualTo(utc)); Assert.That(sceneClock.Elapsed100ns, Is.EqualTo(monotonic));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary, Is.EqualTo(source.timeProvenance.AccountedBoundary));
+            Assert.That(root.Save.timeProvenance.RecoveryContextSha256, Is.EqualTo(source.timeProvenance.RecoveryContextSha256));
+            Assert.That(root.Save.totalTicks, Is.EqualTo(source.totalTicks));
+            Assert.That(root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(accepted));
+            Assert.That(root.Save.livingDungeon.Scheduler.ClosedThrough, Is.EqualTo(closed));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(expectedWallet), "Only the configured canonical readiness spending is permitted");
+            Assert.That(JsonUtility.ToJson(root.Save.monsterContinuity), Is.EqualTo(JsonUtility.ToJson(expectedMonsters)));
+            Assert.That(JsonUtility.ToJson(root.Save.runHistory), Is.EqualTo(history), "Boot cannot replay or lose a confirmed run/reward");
+            var bytes = File.ReadAllBytes(service.SavePath);
+            CollectionAssert.AreEqual(service.CanonicalSession.GetCurrentBytes(), bytes);
+            TestContext.WriteLine("H1F4_ANALYSIS_BOOT complete=True foregroundObservations=" + observations +
+                " beforeSha=" + SpatialContractSha256.Compute(sourceBytes) + " afterSha=" + SpatialContractSha256.Compute(bytes) +
+                " walletMatchesConfiguredRecovery=True WPreserved=True ACPreserved=True historyPreserved=True");
+        }
+
         [UnityTest] public IEnumerator AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen()
         {
             var root = GameRoot.Instance;
@@ -325,6 +387,9 @@ namespace DungeonBuilder.M0.Tests
             controller.ReturnToDungeon(); yield return null;
             Assert.That(controller.SelectedFloorInstanceId, Is.EqualTo(floor));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
+            var recoverySource = root.Save;
+            var recoveryRules = ((DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root.SaveService)).MonsterRecovery;
             UnityEngine.Object.Destroy(controller.gameObject);
             UnityEngine.Object.Destroy(root.gameObject); yield return null;
             yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
@@ -332,6 +397,7 @@ namespace DungeonBuilder.M0.Tests
             root = GameRoot.Instance;
             controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
             for (int i=0;i<30 && controller.World==null;i++) yield return null;
+            yield return AwaitAnalysisBootstrap(recoverySource, recoveryRules, before);
             // Boot owns its clock/save metadata; Analysis must preserve the reopened bytes.
             yield return StabilizeReadOnlySceneBaseline(); before = File.ReadAllBytes(root.SaveService.SavePath);
             controller.OpenAnalysis(); yield return null;
