@@ -11,7 +11,7 @@ PR #259 stays draft. No owner UAT, ready-state change or merge is authorized.
 
 ## Current source work
 
-Packet A, **NOT YET QUALIFIED**: Combat C1 party/traversal configuration is authored as full validated bootstrap bytes before the real root starts. Target-feedback scenario 1/2 configurations receive fresh isolated root/save owners via the existing fixture lifecycle, rather than mutating consumed inputs. Original test-only coefficients and gameplay/replay assertions are preserved. No production configuration, validator, serializer, schema or recovery policy changed. Compile-only Editor-assembly diagnostic passed; it is not a NUnit result.
+Packet A, **QUALIFIED** at `654c02119acc43c4846f4474d231d5a36c03004a`: complete six-method C1 cohort plus two clock controls **8/0/0 EditMode** (`e77e46ba480d4ff6add230f5c1e52f87`) and **8/0/0 actual PlayMode wrappers** (`ccc0e4dfe3664ea687a45e0ebc92eb8e`). All five stages and independent checks passed. Bootstrap inputs are authored before ownership; feedback scenarios receive fresh isolated owners. The failed 3/1/0 focus is retained, with guarded normal restoration and independent verification. Its successive-boot filename readiness defect was corrected. No production or frozen-contract change. [Report](h1-f4-combat-c1-qualification-20261031.md).
 
 ## Retained gates and reconciliation
 
@@ -24,8 +24,8 @@ All outstanding names have prefix `DungeonBuilder.M0.EditorTools.DungeonSpatial.
 
 | Original identity | Current status |
 | --- | --- |
-| CombatC1PartyFollowsRoomsCorridorsAndFloors | Packet A correction; qualification pending |
-| CombatC1TargetFeedbackTracksRecordedHitsAndDefeats | Packet A correction; qualification pending |
+| CombatC1PartyFollowsRoomsCorridorsAndFloors | PASSED exact identity and PlayMode wrapper at Packet A source |
+| CombatC1TargetFeedbackTracksRecordedHitsAndDefeats | PASSED exact identity and PlayMode wrapper at Packet A source |
 | GraphicalFloorReviewMeaningfulInvalidations | NOT RUN in closeout push; Packet B pending |
 | GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges | NOT RUN in closeout push; Packet D pending |
 | RoomContentMapReassignmentProductionMouseTouchRecovery | NOT RUN in closeout push; Packet C pending |
@@ -33,7 +33,7 @@ All outstanding names have prefix `DungeonBuilder.M0.EditorTools.DungeonSpatial.
 
 ## Mandatory remaining sequence
 
-1. Qualify Packet A focus, complete C1 cohort and actual corresponding PlayMode wrappers; independently verify preservation and retain any failure.
+1. Packet A complete; current original-84 coverage **80 qualified /4 outstanding**. Its historical missing-label risk remains explicitly unproven.
 2. Packets B/C/D/E with source-backed correction, exact-name tests and normal-order adjacent coverage.
 3. Complete applicable ordinary production-scene/PlayMode integration; explicitly schedule the sustained 68-run method rather than silently omitting it from a claimed complete class.
 4. Fresh full discovery and complete EditMode/PlayMode suites with exact skips and final-source applicability.
@@ -46,4 +46,4 @@ Unit/SIT scope and exact source/campaign results will be appended at completed g
 
 ## Owned preparation artifacts
 
-`TestResults/h1-f4-scene-compile-20261031-03(.py)/` is owned by this closeout push for compile-only proof and retained for review. Campaign-owned preparations, captures, original archives, isolated save namespaces and process evidence remain under the existing supervisor's ownership model. No cleanup of historical/uncertain artifacts or owner saves is permitted.
+`TestResults/h1-f4-scene-compile-20261031-03.py`, `TestResults/h1-f4-scene-compile-20261031-03`, `TestResults/h1-f4-scene-compile-20261031-04.py` and `TestResults/h1-f4-scene-compile-20261031-04` are owned by this closeout push for compile-only proof and retained for review. Campaign-owned preparations, captures, original archives, isolated save namespaces and process evidence remain under the existing supervisor's ownership model. No cleanup of historical/uncertain artifacts or owner saves is permitted.

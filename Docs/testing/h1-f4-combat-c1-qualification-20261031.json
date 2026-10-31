@@ -1,0 +1,430 @@
+{
+  "PR": 259,
+  "applicability": {
+    "SIT": "Real production scenes, C1 replay, fresh bootstrap owners and exact read-only canonical bytes qualified in Editor EditMode and actual PlayMode wrappers.",
+    "UAT": "Not started; independent review remains required.",
+    "Unit": "Existing clock identity and repeated-credit controls passed."
+  },
+  "base": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaigns": [
+    {
+      "all_five_stages": "PASSED",
+      "bounded_evidence": [
+        "Isolated scene boot 1: phase7a4-scene-e72c5ffd0b13431c912cc772989476d3.json",
+        "Isolated scene boot 1: phase7a4-scene-32f7d5a7618448b6b8dceb67702ca6d8.json",
+        "Isolated scene boot 1: phase7a4-scene-baf0e6bc51f84792ac6e15657a9f14a5.json",
+        "Isolated scene boot 1: phase7a4-scene-11ce549249834286ae5d9859aeec4575.json",
+        "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=19379 afterLength=19381 first=358 beforeSha=b881c7a2483db50a1604148f1a3e1f4a0eef219d9e42822e159fa0b7f7bcc27c afterSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=19381 afterLength=19381 first=19381 beforeSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd afterSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd",
+        "H1F4_COMBAT preboot scenario=party bootstrapSha=80642a82731a25e7a58396ee5859339ee411fffa8f75889169030a465dd9a208",
+        "Isolated scene boot 1: phase7a4-scene-397e970d89664eb09c46ce20c549fd10.json",
+        "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=28215 afterLength=28217 first=359 beforeSha=754fcc945214061ae58ea024d433db31b546eb119c15dd02690aa96dd9f377e2 afterSha=63a4ab73f3c3e18ed5680963cd39b8125ae96747d50ae74b8ae0e2e102c37963",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=28217 afterLength=28217 first=28217 beforeSha=63a4ab73f3c3e18ed5680963cd39b8125ae96747d50ae74b8ae0e2e102c37963 afterSha=63a4ab73f3c3e18ed5680963cd39b8125ae96747d50ae74b8ae0e2e102c37963",
+        "Isolated scene boot 1: phase7a4-scene-f956705749ff40d0800e6f2e669abca8.json",
+        "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=18092 afterLength=18092 first=18092 beforeSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5 afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5",
+        "H1F4_COMBAT preboot scenario=1 bootstrapSha=0e20081e3328af5449c19aea2039dff4d4fe369a322a5fcc11bf7971ee6919d0",
+        "Isolated scene boot 2: phase7a4-scene-fbd29eddd0a54ea29576a082593bd40f.json",
+        "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=16649 afterLength=16649 first=16649 beforeSha=8773ce7d79a1752bb5d13058a2e24ebe40be887ca596234ab5113aaf08c21085 afterSha=8773ce7d79a1752bb5d13058a2e24ebe40be887ca596234ab5113aaf08c21085",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=16649 afterLength=16649 first=16649 beforeSha=8773ce7d79a1752bb5d13058a2e24ebe40be887ca596234ab5113aaf08c21085 afterSha=8773ce7d79a1752bb5d13058a2e24ebe40be887ca596234ab5113aaf08c21085",
+        "H1F4_COMBAT preboot scenario=2 bootstrapSha=d829beb35a7f5fc1a81ee43324376a8a75421936473f3c58831796e3e0adcf6c",
+        "Isolated scene boot 3: phase7a4-scene-f8673172791e4c18b49bed6de7368932.json",
+        "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=16649 afterLength=16649 first=16649 beforeSha=cbcc67be495e0a9c9a6e627910def6a70f394e1b879eb8bf4cb9e1c92090a1ff afterSha=cbcc67be495e0a9c9a6e627910def6a70f394e1b879eb8bf4cb9e1c92090a1ff",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=16649 afterLength=16649 first=16649 beforeSha=cbcc67be495e0a9c9a6e627910def6a70f394e1b879eb8bf4cb9e1c92090a1ff afterSha=cbcc67be495e0a9c9a6e627910def6a70f394e1b879eb8bf4cb9e1c92090a1ff",
+        "Isolated scene boot 1: phase7a4-scene-fc8a45fd87984982add4fadfeeae73f5.json",
+        "Isolated scene boot 1: phase7a4-scene-69c6e96af17e4ceba9f7f17808a6ae52.json"
+      ],
+      "campaign": "e77e46ba480d4ff6add230f5c1e52f87",
+      "counts": {
+        "failed": 0,
+        "passed": 8,
+        "skipped": 0
+      },
+      "independent_receipt": "TestResults/h1-f4-20261027-ca02/independent-completion01.json",
+      "independent_receipt_sha256": "78e60667d38907b59d5e58ad35089317cdfbdad3edd801488477f4e14e0c569e",
+      "leaf_names": [
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1EditSuspensionLayoutInvalidationAndPinnedRun",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1LocalizedNamesKeepHealthVisibleWithoutOverflow",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClockNativeFractionAndOwnerRemainBound",
+        "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit"
+      ],
+      "mode": "EditMode",
+      "original_inputs_verified": 1494,
+      "prior_evidence_directories_verified": 337,
+      "source": "654c02119acc43c4846f4474d231d5a36c03004a",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-aa1e08565d01406687d21b0f7792a2f2",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379375616762901,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 28872
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379375615526169,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 26180
+              }
+            }
+          },
+          "result_sha256": "399a01f3bdbf48e62b854feb5cfde965e90a49b7d3abb50af8de516c9f05172a",
+          "status": "PASSED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-c532accc448c4d7abb32a3fc0a86c402",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379375511308885,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 28172
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379375510237252,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 34960
+              }
+            }
+          },
+          "result_sha256": "b5cd4057ce4403706d23e7eb4b20889e77c0398560c9fdff0572e4992e46e385",
+          "status": "PASSED"
+        },
+        "preservation": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-89d917526f05444993e3681a8e3b1d93",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379376781857778,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 13540
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379376780645482,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 20400
+              }
+            }
+          },
+          "result_sha256": "0f38947510cee5381e4f9c259a85176d7b3d33514aadee51972b84bf4aff248b",
+          "status": "PASSED"
+        },
+        "restore": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-827dab94d6ff4e0e871c72cad5bff3af",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379376667418147,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 13080
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379376665035136,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 27228
+              }
+            }
+          },
+          "result_sha256": "f20c4a2ce68efe48b72bbf3532707872e10867e3065610fb1c6b918760cf0d13",
+          "status": "PASSED"
+        },
+        "restore-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-3ceac08225094d6f8d1b912fc447be44",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379376553505834,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 40472
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379376552364382,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 4100
+              }
+            }
+          },
+          "result_sha256": "92639466d692b4a63453f59232a8eb4ba4f5cfd817089dc5fc6f62c1ded14dd7",
+          "status": "PASSED"
+        }
+      },
+      "tool_pins_verified": 10,
+      "xml_sha256": "1f5bf28fdad7738b1ea6fe82198bf5a66fd362d3ec5680b4ab8aaaf1d27b3a9a"
+    },
+    {
+      "all_five_stages": "PASSED",
+      "bounded_evidence": [
+        "Isolated scene boot 1: phase7a4-scene-dca951f9b9eb43bb8cad8d0003e42d56.json",
+        "Isolated scene boot 1: phase7a4-scene-44647acf0fcd476fa94ee70e12eab253.json",
+        "Isolated scene boot 1: phase7a4-scene-ad4104958d02477cafeb89231e800644.json",
+        "Isolated scene boot 1: phase7a4-scene-daec0f32c0bb474ab82ece5d8ddf8745.json",
+        "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=19379 afterLength=19381 first=358 beforeSha=b881c7a2483db50a1604148f1a3e1f4a0eef219d9e42822e159fa0b7f7bcc27c afterSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=19381 afterLength=19381 first=19381 beforeSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd afterSha=933b744e70b3bea609a1a5146739723fbdb382aff36a3d4a6d8cd96e8eb60abd",
+        "H1F4_COMBAT preboot scenario=party bootstrapSha=80642a82731a25e7a58396ee5859339ee411fffa8f75889169030a465dd9a208",
+        "Isolated scene boot 1: phase7a4-scene-340ce5e58ab54660bf483982b5877832.json",
+        "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=28215 afterLength=28217 first=359 beforeSha=754fcc945214061ae58ea024d433db31b546eb119c15dd02690aa96dd9f377e2 afterSha=63a4ab73f3c3e18ed5680963cd39b8125ae96747d50ae74b8ae0e2e102c37963",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=28217 afterLength=28217 first=28217 beforeSha=63a4ab73f3c3e18ed5680963cd39b8125ae96747d50ae74b8ae0e2e102c37963 afterSha=63a4ab73f3c3e18ed5680963cd39b8125ae96747d50ae74b8ae0e2e102c37963",
+        "Isolated scene boot 1: phase7a4-scene-c79ccde1e4434fd2b775c80655f0a820.json",
+        "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18090 afterLength=18092 first=358 beforeSha=f75b5701220e176face49be4b6e47b599f96e8fc22ca5b43a17820aa2af8413f afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=18092 afterLength=18092 first=18092 beforeSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5 afterSha=ea3124c43f27d45fcd4982d42451ac6f3d9b92e237fe2005c79809632c5a65c5",
+        "H1F4_COMBAT preboot scenario=1 bootstrapSha=0e20081e3328af5449c19aea2039dff4d4fe369a322a5fcc11bf7971ee6919d0",
+        "Isolated scene boot 2: phase7a4-scene-6ddae56b4ca64579b6fb80ee39e224e1.json",
+        "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=16649 afterLength=16649 first=16649 beforeSha=8773ce7d79a1752bb5d13058a2e24ebe40be887ca596234ab5113aaf08c21085 afterSha=8773ce7d79a1752bb5d13058a2e24ebe40be887ca596234ab5113aaf08c21085",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=16649 afterLength=16649 first=16649 beforeSha=8773ce7d79a1752bb5d13058a2e24ebe40be887ca596234ab5113aaf08c21085 afterSha=8773ce7d79a1752bb5d13058a2e24ebe40be887ca596234ab5113aaf08c21085",
+        "H1F4_COMBAT preboot scenario=2 bootstrapSha=d829beb35a7f5fc1a81ee43324376a8a75421936473f3c58831796e3e0adcf6c",
+        "Isolated scene boot 3: phase7a4-scene-09b112ed56734bf8861e91316e40c9d1.json",
+        "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=16649 afterLength=16649 first=16649 beforeSha=cbcc67be495e0a9c9a6e627910def6a70f394e1b879eb8bf4cb9e1c92090a1ff afterSha=cbcc67be495e0a9c9a6e627910def6a70f394e1b879eb8bf4cb9e1c92090a1ff",
+        "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+        "H1F4_BASELINE probe-after-test ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=16649 afterLength=16649 first=16649 beforeSha=cbcc67be495e0a9c9a6e627910def6a70f394e1b879eb8bf4cb9e1c92090a1ff afterSha=cbcc67be495e0a9c9a6e627910def6a70f394e1b879eb8bf4cb9e1c92090a1ff",
+        "Isolated scene boot 1: phase7a4-scene-d09053995cc54a3e88498e7cae717e35.json",
+        "Isolated scene boot 1: phase7a4-scene-bcc71399f6244c6aa88dad2cd3993310.json"
+      ],
+      "campaign": "ccc0e4dfe3664ea687a45e0ebc92eb8e",
+      "counts": {
+        "failed": 0,
+        "passed": 8,
+        "skipped": 0
+      },
+      "independent_receipt": "TestResults/h1-f4-20261027-ca03/independent-completion01.json",
+      "independent_receipt_sha256": "47f4cb22dda1ddcbea6f44d3373c74ec1621deb90abb35d2fb6d02198ece65c0",
+      "leaf_names": [
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1EditSuspensionLayoutInvalidationAndPinnedRun",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1FloorSelectionDoesNotAnimateOffscreenOrInterpolateTransfers",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1LocalizedNamesKeepHealthVisibleWithoutOverflow",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.SceneClockNativeFractionAndOwnerRemainBound",
+        "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit"
+      ],
+      "mode": "PlayMode",
+      "original_inputs_verified": 1494,
+      "prior_evidence_directories_verified": 339,
+      "source": "654c02119acc43c4846f4474d231d5a36c03004a",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-27728aee5406485da7b7af3a2a6366e9",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379378340711405,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 39128
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379378339178780,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 35564
+              }
+            }
+          },
+          "result_sha256": "4d346059d473227efe2ff879aa2a4c3541c9d8b46a085ede952fd858853a47d3",
+          "status": "PASSED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-89b0ca1e4c714c21beb5bb1a63523757",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379378230445207,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 19280
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379378229127311,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 10372
+              }
+            }
+          },
+          "result_sha256": "f6e0b5c66256f0a9cc66e69806d213b8b915e5caa632eb204681eacc12e0b2b6",
+          "status": "PASSED"
+        },
+        "preservation": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-1678379a7d424e67aacaeba2d1206ea9",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379379191857713,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 10124
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379379190769714,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 24024
+              }
+            }
+          },
+          "result_sha256": "b05ff53c511a228a5ee499239694362c4d6aff7c91b155ef1e6bd157e2ce1e9a",
+          "status": "PASSED"
+        },
+        "restore": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-fcd9c56e76dc424db8460f8d64bea53a",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379379083396899,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 19868
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379379082116911,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 42296
+              }
+            }
+          },
+          "result_sha256": "931fdf38a3484e6e91aa138886784b17200d7bcea03aafcc1ad3ffdab11e0e55",
+          "status": "PASSED"
+        },
+        "restore-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-11eb72a5d27542eb829d5f687d710c74",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379378978756393,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 18068
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379378977303542,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 35668
+              }
+            }
+          },
+          "result_sha256": "31791f2bd2907e30046c71e0154a0f748d75ec6727bb6fe6f8385187bdb8cce7",
+          "status": "PASSED"
+        }
+      },
+      "tool_pins_verified": 10,
+      "xml_sha256": "44f6a77e611a09cc501e1698775ce8c5523e57f668a2ae458b114fae48af3385"
+    }
+  ],
+  "changed_source_files": [
+    "Assets/_Project/Editor/DungeonSpatial/Tests/CombatC1ReplaySceneTests.cs",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/PhaseSevenA4ProductionSceneTests.cs"
+  ],
+  "limitations": [
+    "Historical intermittent missing-label NullReferenceException did not reproduce in the ordered complete C1 cohort; its root cause is not claimed established.",
+    "Historical missing Draft cause remains unproven.",
+    "No full-suite, sustained profile, native Player, benchmark or owner-UAT result is established."
+  ],
+  "model": "GPT-6.1 Sol Medium recommended, Standard bounded fixture corrections; GPT-6 Sol Medium fallback. No deliberate selection change; exact app selection not exposed by tools.",
+  "newly_qualified_original_identities": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats"
+  ],
+  "original_84_qualified_before": 78,
+  "original_84_qualified_now": 80,
+  "original_84_remaining_unqualified": 4,
+  "production_changes": false,
+  "remaining_exact_original_identities": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewMeaningfulInvalidations",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentProductionMouseTouchRecovery",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls"
+  ],
+  "retained_failed_attempt": {
+    "campaign": "04aba41c4c5c482d9cc3e49592982b3a",
+    "counts": {
+      "failed": 1,
+      "passed": 3,
+      "skipped": 0
+    },
+    "first_message": "  Disposable scene save isolation\n  String lengths are both 52. Strings differ at index 15.\n  Expected: \"phase7a4-scene-c9fbc175f32f4482981e2f445ec52213.json\"\n  But was:  \"phase7a4-scene-21fa82761bef4ba4ae4577974f83afaa.json\"\n  --------------------------^\n",
+    "first_stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<SetUp>d__30.MoveNext () [0x001a3] in C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:104\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+    "independent_verification": "TestResults/h1-f4-20261027-ca01/independent-failed-finalization01.json",
+    "normal_finalization_receipt": "TestResults/h1-f4-20261027-ca01/post-failure-finalize01/receipt.json",
+    "source": "96a5da1234a9e64feffeab5795ee84370619c9b1",
+    "verdict": "FAILED"
+  },
+  "schema_migration_recovery_changes": false,
+  "tested_source": "654c02119acc43c4846f4474d231d5a36c03004a"
+}
