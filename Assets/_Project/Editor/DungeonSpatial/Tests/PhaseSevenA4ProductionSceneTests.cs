@@ -99,7 +99,11 @@ namespace DungeonBuilder.M0.Tests
             filename = "phase7a4-scene-" + Guid.NewGuid().ToString("N") + ".json";
             SceneManager.sceneLoaded += Isolate;
             yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
-            for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
+            // A successive isolated boot can still expose the departing root's
+            // loaded save before the new scene's Start. Wait for this boot's
+            // owned save, rather than treating any loaded Save as readiness.
+            for (int i = 0; i < 120 && (GameRoot.Instance?.Save == null ||
+                Path.GetFileName(GameRoot.Instance.SaveService?.SavePath) != filename); i++) yield return null;
             var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null);
             Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename), "Disposable scene save isolation");
             PumpSceneToClosed(establishForeground: true);
