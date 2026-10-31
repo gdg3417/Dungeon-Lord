@@ -348,9 +348,10 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator RoomContentMapReassignmentProductionMouseTouchRecovery()
         {
             var root=GameRoot.Instance;
-            // This preview-preservation fixture controls autonomous ticks while it compares exact save bytes.
-            root.TimeService.OnPause();
+            // The prebound provider is stationary. Keep the real root's
+            // foreground lifecycle intact while comparing preview-only bytes.
             Assert.That(root.SaveService.SetQaMana(root.Save,true).IsSuccess,Is.True);
+            yield return StabilizeReadOnlySceneBaseline();
             var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var source=floor.Layout.Rooms[0]; var original=floor.RoomContents.Assignments.Single();
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1920,1080); yield return SettleContentPanel();
