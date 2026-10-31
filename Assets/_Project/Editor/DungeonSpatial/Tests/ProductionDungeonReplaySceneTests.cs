@@ -113,11 +113,10 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator VisualRunReplayProductionLifecycleAndResponsiveControls()
         {
             var root = GameRoot.Instance;
-            // PR #236 qualifies the historical B1 event renderer. Explicitly select
-            // that supported executable for this fixture; new production runs use C0.
-            var historicalService = (RunSimulationService)typeof(GameRoot).GetField("_runSimulationService",
+            // PR #236's B1 renderer remains a read-only presentation contract.
+            // The real canonical run still uses the consumed current C2 inputs.
+            var simulation = (RunSimulationService)typeof(GameRoot).GetField("_runSimulationService",
                 System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(root);
-            historicalService.Config.CombatC0.Enabled = false;
             Assert.That(controller.StartReplay(), Is.False);
             root.Save.structureRuntime.ManaReserve = 1000; // Explicit fixture funding before content purchases.
             var floor = root.Save.validatedCanonicalSpatialState.Floors[0]; var room = floor.Layout.Rooms[0];
@@ -142,8 +141,27 @@ namespace DungeonBuilder.M0.Tests
             root.Save.structureRuntime.ManaReserve = 1000;
             Assert.That(root.SaveService.CommitFloorConstruction(root.Save, root.SaveService.PreviewFloorConstruction(root.Save)).IsSuccess, Is.True);
             string otherFloor = root.Save.validatedCanonicalSpatialState.Floors.Single(f => f.FloorIndex == 1).FloorInstanceId;
+            var context = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(root.SaveService);
+            var beforeHistorical = root.SaveService.CanonicalSession.GetCurrentBytes();
+            string historicalLive = JsonUtility.ToJson(root.Save);
+            var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(beforeHistorical, context);
+            Assert.That(owned.CurrentTargetValidated, Is.True);
+            var snapshot = ActiveFloorRunSnapshot.Create(owned, root.ProductionSpatialContent,
+                context.RecoveryInputs.Configuration, root.SaveSpatialMigrationLimits.Canonical,
+                context.RecoveryInputs.Loot, executionInputs: root.Save);
+            var historical = simulation.StartSnapshot(root.Save.runHistory.NextRunSequence, snapshot).DrainToCompletion(true);
+            Assert.That(CombatC0Diagnostics.IsCombatC0(historical), Is.False);
+            historical.PresentationLayoutFingerprint = root.SaveService.DungeonDraftContext.Fingerprint(root.Save.validatedCanonicalSpatialState);
+            Assert.That(RunTransientEvidence.TryCorridorFingerprint(historical, root.Save.corridorContent,
+                root.SaveSpatialMigrationLimits.Canonical, out var historicalCorridor), Is.True);
+            historical.PresentationCorridorFingerprint = historicalCorridor;
+            CollectionAssert.AreEqual(beforeHistorical, File.ReadAllBytes(root.SaveService.SavePath));
+            Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(historicalLive), "Pure B1 execution cannot mutate the canonical owner");
             Assert.That(root.SimulateRunOnce(), Is.True);
-            Assert.That(CombatC0Diagnostics.IsCombatC0(root.Save.runHistory.LatestOutcome), Is.False);
+            var canonicalOutcome = root.Save.runHistory.LatestOutcome;
+            Assert.That(CombatC0Diagnostics.IsCombatC0(canonicalOutcome), Is.True);
+            yield return StabilizeReadOnlySceneBaseline();
             floor = root.Save.validatedCanonicalSpatialState.Floors[0];
             var originals = floor.RoomContents.Assignments.ToDictionary(a => a.AssignmentId, a => {
                 Assert.That(DungeonRunReplay.TryProject(a.RoomLocalPosition, RunPositionSpace.RoomLocal, a.RoomInstanceId,
@@ -152,10 +170,24 @@ namespace DungeonBuilder.M0.Tests
             var actors = originals.ToDictionary(p => p.Key, p => controller.World.GetComponentsInChildren<SpriteRenderer>(true)
                 .Single(v => v.name == "Content" && v.gameObject.activeSelf && (Vector2)v.transform.localPosition == p.Value));
             var bytes = File.ReadAllBytes(root.SaveService.SavePath); var live = JsonUtility.ToJson(root.Save);
+            bool StartHistoricalPresentation()
+            {
+                // Existing transient presentation-input seam, held only during
+                // this synchronous call. No yield, writer, clock or publication
+                // runs with B1 evidence installed in the current runtime.
+                Assert.That(root.Save.runHistory.LatestOutcome, Is.SameAs(canonicalOutcome));
+                try { root.Save.runHistory.LatestOutcome = historical; return controller.StartReplay(); }
+                finally {
+                    root.Save.runHistory.LatestOutcome = canonicalOutcome;
+                    Assert.That(JsonUtility.ToJson(root.Save), Is.EqualTo(live));
+                    CollectionAssert.AreEqual(bytes, File.ReadAllBytes(root.SaveService.SavePath));
+                    CollectionAssert.AreEqual(bytes, root.SaveService.CanonicalSession.GetCurrentBytes());
+                }
+            }
             foreach (var size in new[] { new Vector2Int(1920,1080), new Vector2Int(1280,720), new Vector2Int(720,1280) })
             {
                 DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
-                Assert.That(controller.StartReplay(), Is.True); controller.ToggleReplayPause();
+                Assert.That(StartHistoricalPresentation(), Is.True); controller.ToggleReplayPause();
                 int views = controller.World.GetComponentsInChildren<SpriteRenderer>(true).Length;
                 foreach (var pair in originals) Assert.That((Vector2)actors[pair.Key].transform.localPosition, Is.EqualTo(pair.Value));
                 for (int i = 0; i < 15; i++) yield return null;
@@ -218,7 +250,7 @@ namespace DungeonBuilder.M0.Tests
                 }
                 foreach (var kind in new[] { RunStepKind.MonsterEngagement, RunStepKind.TrapTrigger, RunStepKind.LootInteraction })
                     Assert.That(captured, Does.Contain(kind));
-                Assert.That(controller.StartReplay(), Is.True); controller.ToggleReplayPause();
+                Assert.That(StartHistoricalPresentation(), Is.True); controller.ToggleReplayPause();
                 controller.EnterEdit(); Assert.That(controller.Replay.Paused, Is.True); Assert.That(controller.World.ReplayPartyVisible, Is.False);
                 Assert.That(controller.Discard(), Is.True); Assert.That(controller.Replay.Paused, Is.True);
                 controller.ToggleReplayPause(); controller.Replay.Advance(float.MaxValue); yield return null;
