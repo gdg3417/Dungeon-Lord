@@ -160,8 +160,11 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(manaBeforeReturn));
             Assert.That(controller.World.ForegroundPartyVisible, Is.True);
             for (int boundary = 0; boundary < 20 && root.ForegroundActivity.RecentInteraction?.Kind != RunStepKind.MonsterEngagement; boundary++) {
+                TestContext.WriteLine("CO02 encounter boundary="+boundary+" next="+root.ForegroundActivity.NextBoundary+" through="+root.TimeService.ForegroundThrough+" state="+root.ForegroundActivity.StateKey+" interaction="+root.ForegroundActivity.RecentInteraction?.Kind+" parties="+root.Save.livingDungeon.Parties.Count);
+                TraceSceneState("encounter.before");
                 advance(Math.Max(0, root.ForegroundActivity.NextBoundary - root.TimeService.SampleForeground()) / 1000d);
                 update(); yield return null;
+                TraceSceneState("encounter.after");
             }
             Assert.That(root.ForegroundActivity.RecentInteraction?.Kind, Is.EqualTo(RunStepKind.MonsterEngagement));
             Assert.That(ui.Q<Label>("foregroundActivity").text, Does.Contain("attacks").Or.Contain("bypassed"));

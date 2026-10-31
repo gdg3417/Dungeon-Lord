@@ -2,6 +2,18 @@
 
 PR #259 stays draft. No owner UAT, ready-state change or merge is authorized.
 
+## Ordered-scene continuation after approved co02 recovery
+
+- Starting source: `87de9780c170b09c751d79a770cd3f22fa237b43`, main `3eb6ccf93558b8145d64e9e63cbefcbd73484602`; fetched refs agree. Existing managed worktree retained.
+- Discovery co01's separately approved alternative completion review is accepted; retrospective PID access remains inaccessible, without new lookup or general policy change. It discovered 2,819 EditMode /4,297 PlayMode leaves and executed zero tests.
+- Ordered ordinary scene co02, campaign `c4c53a7c03a447668bf3b6992ef55000`, retains **103/5/0, INCOMPLETE / UNCERTAIN**. The sustained method was explicitly deferred. Owner-authorized hash-verified recovery ran once and independently passed: all four originals and 1,494 inputs restored, preserved current copies verified, 357 prior evidence directories and protected saves unchanged, correct reservation released, source clean. [Complete recovery receipt and independent evidence](https://github.com/gdg3417/Dungeon-Lord/pull/259#issuecomment-6549395886). No historical verdict changed.
+- Five broader/order failures are not a reversal or subtraction from original-84 exact-name passing evidence. New causes remain subject to current-source qualification.
+- `OverlayCompactFootprintCardsAndRuntimeCaptures`: **B, fixture modernization**. It directly assigned live mana=1000 while its disk baseline retained the canonical wallet=15; discard restores canonical state. Use the existing canonical QA funding action and strict normal-publication stabilization before the original raw-byte baseline. No expected value or gameplay assertion changed. Qualification pending.
+- `AnalysisPhoneValidDraftChoicesUseTouchButtons`, `LivingDungeonB3B2LiveLabelsSessionReplayAndLargeLayoutsObserveOnlyCommittedState`, `OverlayFullWidthSafeAreasAndTransparentInput`, `RoomContentRepeatedTrapInstances`: classification unresolved. Bounded test-only traces record actual click/down/up and modal rejection; scheduler boundaries/observation flags; wheel device/value/zoom; and draft preview/publication rejection. Existing assertions remain. No production defect is presumed.
+- Compile-only diagnostic `TestResults/h1-f4-scene-compile-20261031-09` passed using existing Roslyn response and isolated outputs, with unchanged input/protected maps, reservation and lock. This is not NUnit qualification.
+- New preparation/diagnostic artifacts remain closeout-owned under `TestResults/h1-f4-*`; purpose is five-failure reproduction and canonical baseline correction. Retain failed states, raw logs, original archives and independent receipts. No cleanup or owner-save operation is authorized.
+- Continue with one exact selected scene cohort containing the five targets, relevant predecessors, adjacent content/focus and clock controls. No full-suite/native/performance result is claimed. All required later gates remain pending.
+
 ## Source and model
 
 - Starting local/pushed source: `efc81e1a4a664741a6d2a09cfe944b56d39001e3`.

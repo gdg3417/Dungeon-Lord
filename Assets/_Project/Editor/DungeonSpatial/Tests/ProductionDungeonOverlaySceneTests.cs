@@ -147,8 +147,10 @@ namespace DungeonBuilder.M0.Tests
                         Assert.That(controller.IsChrome(emptyScreen),Is.False);
                         Assert.That(controller.IsChrome(CompositionButtonScreen(ui.Q<Button>("collapseFloors"))),Is.True);
                         controller.FitFloor(); float fit=controller.Viewport.Size;
+                        TestContext.WriteLine("CO02 wheel.before resolution="+resolution+" text="+text+" device="+mouse.deviceId+" current="+Mouse.current?.deviceId+" point="+emptyScreen+" fit="+fit+" chrome="+controller.IsChrome(emptyScreen));
                         InputSystem.QueueStateEvent(mouse,new MouseState {position=emptyScreen,scroll=new Vector2(0,1)});
                         yield return null; yield return null;
+                        TestContext.WriteLine("CO02 wheel.after device="+Mouse.current?.deviceId+" wheel="+Mouse.current?.scroll.ReadValue()+" size="+controller.Viewport.Size+" touchPressed="+simulatedTouch.touches.Any(t=>t.press.isPressed));
                         Assert.That(controller.Viewport.Size,Is.LessThan(fit),"Wheel passes through empty overlay space");
                         var oldCenter=controller.Viewport.Center;
                         InputSystem.QueueStateEvent(mouse,new MouseState {position=emptyScreen}.WithButton(MouseButton.Left)); yield return null;
@@ -184,7 +186,8 @@ namespace DungeonBuilder.M0.Tests
         [UnityTest]
         public IEnumerator OverlayCompactFootprintCardsAndRuntimeCaptures()
         {
-            var root=GameRoot.Instance; root.Save.structureRuntime.ManaReserve=1000;
+            var root=GameRoot.Instance; Assert.That(root.TrySetQaManaFromDevPanel(true),Is.True);
+            yield return StabilizeReadOnlySceneBaseline();
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
             var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             var firstRoom=root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];

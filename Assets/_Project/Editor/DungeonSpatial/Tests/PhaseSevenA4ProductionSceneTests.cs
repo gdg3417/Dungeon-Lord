@@ -46,6 +46,9 @@ namespace DungeonBuilder.M0.Tests
             }
         }
         private bool TraceSceneRecovery => TestContext.CurrentContext.Test.Name.Contains("RoomContentMapReassignmentCapacity") ||
+            TestContext.CurrentContext.Test.Name.Contains("LiveLabelsSessionReplay") ||
+            TestContext.CurrentContext.Test.Name.Contains("AnalysisPhoneValidDraftChoices") ||
+            TestContext.CurrentContext.Test.Name.Contains("RoomContentRepeatedTrap") ||
             TestContext.CurrentContext.Test.Name.Contains("SceneClock") ||
             TestContext.CurrentContext.Test.Name.Contains("LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish");
         // Read-only diagnosis: never sample/advance time, invoke a barrier, or
