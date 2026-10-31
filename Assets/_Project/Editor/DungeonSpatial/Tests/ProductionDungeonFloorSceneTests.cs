@@ -149,6 +149,9 @@ namespace DungeonBuilder.M0.Tests
             controller.TapWorld(new TileCoordinate(1, 2)); Assert.That(controller.ConfirmConstructionPlacement(), Is.True);
             yield return null; yield return null; Assert.That(controller.Commit(), Is.True);
             Assert.That(controller.ChangeFloorLifecycle(FloorLifecycleAction.Activate), Is.True);
+            // Close the authorized activation's foreground publication before
+            // opening a modal whose deliberate live mutation must stay unsaved.
+            yield return StabilizeReadOnlySceneBaseline();
             foreach (bool research in new[] { false, true })
             {
                 var preview = root.SaveService.PreviewFloorLifecycle(root.Save, FloorLifecycleAction.Deactivate, second);
