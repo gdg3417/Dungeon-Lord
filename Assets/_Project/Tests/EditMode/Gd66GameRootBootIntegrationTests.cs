@@ -15,6 +15,47 @@ namespace DungeonBuilder.M0.Tests.EditMode
     {
         private GameObject rootObject;
 
+        [Test]
+        public void MissingRecoveryBindingRefusesNativeCreationWithoutPublication()
+        {
+            var fixture = Fixture();
+            var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var service = UnboundService(fixture, fs, "root-unbound-native.json");
+            Assert.That(service.LoadOrCreate("gd66-live", out string banner), Is.Null);
+            var refused = NativeCanonicalSaveCreator.Create(service.SavePath, fs, new SaveData(),
+                fixture.Compatibility, fixture.Production, fixture.LegacyBytes,
+                service.CanonicalLimitsForTests, PhaseFourTestSupport.Acquisition(
+                    service.StructuralEconomyForTests, fixture.Limits, 1000),
+                PhaseFourTestSupport.Occupancy(fixture.Limits));
+            Assert.That(refused.Reason, Is.EqualTo(RecoveryEpisode.Invalid));
+            Assert.That(banner, Is.EqualTo(Gd66MigrationReasonRegistry.PlayerLocalizationKey(refused.Reason)));
+            Assert.That(service.CanonicalSession, Is.Null);
+            Assert.That(fs.Exists(service.SavePath), Is.False);
+            TestContext.WriteLine("Unbound native first guard: " + refused.Reason + "; banner=" + banner);
+        }
+
+        [Test]
+        public void MissingRecoveryBindingKeepsRepairedLegacyWithoutCanonicalAuthority()
+        {
+            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
+                "\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[{" +
+                "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\"," +
+                "\"Revision\":1}],\"NextRevision\":2}}}");
+            var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
+            var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var errors = new List<string>();
+            var service = UnboundService(fixture, fs, "root-unbound-repair.json", errors);
+            fs.Seed(service.SavePath, original);
+            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
+            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
+            Assert.That(service.NarrowHallRepairAvailable, Is.True);
+            Assert.That(service.RepairNarrowHallToBasicAndRetry("gd66-live", out string banner), Is.Null);
+            Assert.That(service.CanonicalSession, Is.Null);
+            Assert.That(errors.Count, Is.EqualTo(2));
+            Assert.That(errors[1], Does.StartWith("[ERROR] GD66 load failed: "));
+            TestContext.WriteLine("Unbound repaired legacy first load: " + errors[1] + "; banner=" + banner);
+        }
+
         [TearDown]
         public void TearDown()
         {
@@ -1139,6 +1180,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private static SaveService Service(
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,
+            ISpatialMigrationFileSystem fileSystem, string filename, ICollection<string> errors = null)
+            => UnboundService(fixture, fileSystem, filename, errors);
+
+        private static SaveService UnboundService(
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,
             ISpatialMigrationFileSystem fileSystem, string filename, ICollection<string> errors = null)
         {

@@ -470,7 +470,7 @@ namespace DungeonBuilder.M0.Tests
         [Test]
         public void SchemaSixAndOrdinarySaveJsonRemainWithoutCanonicalMembers()
         {
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
             var ordinary = new SaveData
             {
                 canonicalSpatialAuthority = NativeMarker(),

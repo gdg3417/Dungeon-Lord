@@ -1396,8 +1396,13 @@ namespace DungeonBuilder.M0.Tests
             // Preserve the complete save produced by the existing starter mutation
             // and QA funding authority for the later isolated owner handoff.
             // No save JSON is authored or imported from an owner/normal save.
-            string starter = Path.Combine(Application.persistentDataPath,"owner-uat-starter.json");
+            // The existing qualification root owns retained exports. Each invocation
+            // keeps its own complete starter, including consecutive Editor/Play runs.
+            string starterDirectory = Path.Combine(H1F4QualificationArtifacts.RequireOutputRoot(), "owner-starters");
+            Directory.CreateDirectory(starterDirectory);
+            string starter = Path.Combine(starterDirectory, Guid.NewGuid().ToString("N") + ".json");
             File.Copy(root.SaveService.SavePath,starter,false);
+            CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(), File.ReadAllBytes(starter));
             TestContext.WriteLine("Owner starter artifact: "+starter);
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             var room = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];
