@@ -912,9 +912,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"Revision\":1}],\"NextRevision\":2}}}"));
             var fixture = Fixture(original);
             var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            var service = Service(fixture, fs, "root-repair-recovery-barrier.json");
+            var errors = new List<string>();
+            var service = Service(fixture, fs, "root-repair-recovery-barrier.json", errors);
             fs.Seed(service.SavePath, original);
             Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
+            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
             GameRoot root = Root(service);
             TimeService observationOwner = root.TimeService;
 
