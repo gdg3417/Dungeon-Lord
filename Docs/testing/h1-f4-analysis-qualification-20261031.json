@@ -1,0 +1,1249 @@
+{
+  "PR": 259,
+  "analysis_boot_evidence": [
+    "H1F4_ANALYSIS_BOOT complete=True foregroundObservations=2 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 walletMatchesConfiguredRecovery=True WPreserved=True ACPreserved=True historyPreserved=True"
+  ],
+  "applicability": {
+    "SIT": "Actual isolated Windows Editor scenes, supported lifecycle callbacks, canonical recovery closure, disk/readback, stale drafts, rendering and UI navigation",
+    "UAT": "Not started or authorized; remains a later gate",
+    "Unit": "Readonly fixture invariants and existing invalid-clock/repeated-credit/publication controls passed"
+  },
+  "artifact_inventory": [
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/h1-f4-20261027-an01",
+      "purpose": "Inputs/archive, exact selection, runner, completion or normal-failure verification",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/h1-f4-20261027-an02",
+      "purpose": "Inputs/archive, exact selection, runner, completion or normal-failure verification",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/h1-f4-20261027-an03",
+      "purpose": "Inputs/archive, exact selection, runner, completion or normal-failure verification",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/h1-f4-20261027-an04",
+      "purpose": "Inputs/archive, exact selection, runner, completion or normal-failure verification",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/qualification-supervisor/1f88123a8a9e42d4bcd16de0fd98385c",
+      "purpose": "Immutable supervisor/NUnit/process/Job/capture evidence",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/qualification-supervisor/ee42963b62d241508715f87d0d3fbe66",
+      "purpose": "Immutable supervisor/NUnit/process/Job/capture evidence",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/qualification-supervisor/a703ae8f1cb24c119750ce615bd177a4",
+      "purpose": "Immutable supervisor/NUnit/process/Job/capture evidence",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/qualification-supervisor/8a8dc6e0e4ca448dab9a193940d40792",
+      "purpose": "Immutable supervisor/NUnit/process/Job/capture evidence",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/h1-f4-prepare-an02-rejected-current-applicability.py",
+      "purpose": "Rejected preparation preserved; no input changes or campaign launch",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/h1-f4-scene-compile-20261031-01",
+      "purpose": "Compile-only ownership diagnostics",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "TestResults/h1-f4-scene-compile-20261031-02",
+      "purpose": "Compile-only corrected bootstrap and restoration assertions",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 an01",
+      "purpose": "Owned isolated save namespace; diagnostic failed states retained",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 an02",
+      "purpose": "Owned isolated save namespace; diagnostic failed states retained",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 an03",
+      "purpose": "Owned isolated save namespace; diagnostic failed states retained",
+      "retention": "Preserve for independent review and failure reproduction"
+    },
+    {
+      "owner": "H1-F4 Analysis qualification",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 an04",
+      "purpose": "Owned isolated save namespace; diagnostic failed states retained",
+      "retention": "Preserve for independent review and failure reproduction"
+    }
+  ],
+  "base": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaigns": [
+    {
+      "archive_members_verified": 1494,
+      "archive_sha256": "5ab36d030d68d9fc1352566828efa3121f12f8473262a4086a1b8ce84552885b",
+      "attempt": "an01",
+      "campaign": "1f88123a8a9e42d4bcd16de0fd98385c",
+      "counts": {
+        "failed": 0,
+        "passed": 1,
+        "skipped": 0,
+        "total": 1
+      },
+      "normal_failed_finalizer_sha256": null,
+      "source": "92d91003d9656734e650c68db3b26505f65a00bf",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-4632decd67564b59a9270afc0efaffee",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379306275436003,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 36556
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379306273006518,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 40672
+              }
+            }
+          },
+          "result_sha256": "b17d79eca9aba1a4c332d144c1f521d874f73a0d5b7a9119082cb0735ced3e04",
+          "status": "PASSED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-f50aff0fcfe5449ea8071f5f345fccbe",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379306167721312,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 20492
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379306165358827,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 38660
+              }
+            }
+          },
+          "result_sha256": "7cda895d3ba9d7e6ac09d79c2855c883ebb171a094517291f2927a144bc69b77",
+          "status": "PASSED"
+        },
+        "preservation": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-4a7d938d566949538296f1daf04b8a25",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379306896441166,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 35656
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379306895368236,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 39380
+              }
+            }
+          },
+          "result_sha256": "ecc6c18d00d16b3c08209ac72bbf1062357b6d650cb98fe9615b116e202799d1",
+          "status": "PASSED"
+        },
+        "restore": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-ddd059bf5a254d0cb89fa91094fbb222",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379306783832714,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 33220
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379306782530112,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 25660
+              }
+            }
+          },
+          "result_sha256": "a39ad11be75f31c458f0305cb49483b48a0cf8f912e8ae977cec669895773bb6",
+          "status": "PASSED"
+        },
+        "restore-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-a643da04bcb9407daf066c12a8e3042b",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379306675450003,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 25096
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379306674210648,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 42276
+              }
+            }
+          },
+          "result_sha256": "dfd308697db856cdac5dfea15a534b4fcaa39cede4b7ffa9dc249efcb4005b26",
+          "status": "PASSED"
+        }
+      },
+      "tool_pins_verified": 10,
+      "verdict": "PASSED",
+      "xml_sha256": "8d714502e71fa78d8a22aa377034736636d3331270b97045b8829414c9a1152b"
+    },
+    {
+      "archive_members_verified": 1494,
+      "archive_sha256": "1d2ec638ca16a7bef81b21acda06f03af6d734ec03a8b5ed39bd120a2668b5ea",
+      "attempt": "an02",
+      "campaign": "ee42963b62d241508715f87d0d3fbe66",
+      "counts": {
+        "failed": 2,
+        "passed": 0,
+        "skipped": 0,
+        "total": 2
+      },
+      "normal_failed_finalizer_sha256": "3f5b2bcc96ab47a5fa8e717371d074bd0af7ba0097ebb0e661916bf2657cf319",
+      "source": "173bff0358f54e693c0f5954f761059b1eaed993",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 8,
+          "host_exit": 0,
+          "job": "Local\\DLQ-f70b52efd57c4d12a206afb0e87c3d7e",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379328627953115,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 41116
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379328625936703,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 19228
+              }
+            }
+          },
+          "result_sha256": "21cd1f5f20831f38bf216b8bfa7797d7e845b450ed4e1b74956a4b241390cedc",
+          "status": "FAILED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-ce69d1522afa4cafafd5711f64a1f60d",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379328522434186,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 42772
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379328519785286,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 38036
+              }
+            }
+          },
+          "result_sha256": "054eb70f7b6f30a79aac248df32c2cc135ece000be9a55755bdfcafacacdbd1a",
+          "status": "PASSED"
+        }
+      },
+      "tool_pins_verified": 10,
+      "verdict": "FAILED",
+      "xml_sha256": "9356f0b6b8f163b31049337e1339febd10b78daf552d85d3385593d4a3291b8d"
+    },
+    {
+      "archive_members_verified": 1494,
+      "archive_sha256": "50822729b044c93cc3926ac4c4bc16f4e35e20a247562cc2b4b2a62e8a8db326",
+      "attempt": "an03",
+      "campaign": "a703ae8f1cb24c119750ce615bd177a4",
+      "counts": {
+        "failed": 0,
+        "passed": 7,
+        "skipped": 0,
+        "total": 7
+      },
+      "normal_failed_finalizer_sha256": null,
+      "source": "596837f29377d4c3a9312384b7b8be975b306b2a",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-760d6c5110e447818123cec4c4362e53",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379337791904540,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 26312
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379337789519614,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 42396
+              }
+            }
+          },
+          "result_sha256": "d427b93fc84a6ddebceaf445bf1f60f3dcb3aae6dfde1a7360c72984a8254d5e",
+          "status": "PASSED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-2bbee0f1927041a8ba0978594cc78381",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379337684820627,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 21100
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379337683595464,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 10580
+              }
+            }
+          },
+          "result_sha256": "c017e47a8d32fba696e40c3874650a0cab91de4935b957936b875ff3df29c9af",
+          "status": "PASSED"
+        },
+        "preservation": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-b469867b3ef84209a7f7686ea61d98ef",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379338860681432,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 2680
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379338859585996,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 38704
+              }
+            }
+          },
+          "result_sha256": "6c3ecfba1c17bb84d1095e00653ead515593dcceafd788467043afc21d6b9c15",
+          "status": "PASSED"
+        },
+        "restore": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-07657db1775e4a3abde1fdbbe024e273",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379338747349764,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 19280
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379338745052492,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 37132
+              }
+            }
+          },
+          "result_sha256": "85a590186b0ccbf48a18a2ace39608422a1f9da92a161971ae09791b27a3e503",
+          "status": "PASSED"
+        },
+        "restore-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-bde5302b27b44dc6965308a96b5b0e8f",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379338641184586,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 43612
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379338640019651,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 28148
+              }
+            }
+          },
+          "result_sha256": "e17649da4f2cd51e11d7058eb6edfcf438418ec9d460af913409b635c6cba20e",
+          "status": "PASSED"
+        }
+      },
+      "tool_pins_verified": 10,
+      "verdict": "PASSED",
+      "xml_sha256": "057ac475eeec244d29f9b696188314622c8eb4ba658a4dabdcb8a044233fc486"
+    },
+    {
+      "archive_members_verified": 1494,
+      "archive_sha256": "31deb432105bea7b9d47f2c1df04e68727f0a64c12e34652a5e4e1c5e03c78df",
+      "attempt": "an04",
+      "campaign": "8a8dc6e0e4ca448dab9a193940d40792",
+      "counts": {
+        "failed": 0,
+        "passed": 21,
+        "skipped": 0,
+        "total": 21
+      },
+      "normal_failed_finalizer_sha256": null,
+      "source": "596837f29377d4c3a9312384b7b8be975b306b2a",
+      "stages": {
+        "living-regressions": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-c7d222911bbf45eba79ae41d191b9a49",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379341923812147,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 41760
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379341921698868,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 34692
+              }
+            }
+          },
+          "result_sha256": "3b17c0e3f98e9c3363e9fa703201f4a1821a904ba73050229cb0be118d01d76e",
+          "status": "PASSED"
+        },
+        "living-regressions-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-3ee109802a39439bb5c45cf437a93f92",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379341814945355,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 33924
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379341813280249,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 20620
+              }
+            }
+          },
+          "result_sha256": "472bca730804f98ecd07a46f0c618156bf2695c1baa0dd7c05850328e694926a",
+          "status": "PASSED"
+        },
+        "preservation": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-19dd36bc4136400986f77e619c110d4c",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379344539003036,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 31876
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379344537871578,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 33356
+              }
+            }
+          },
+          "result_sha256": "8ce013e8578a0f547b595221769a28db4d3ed140d405e337708bde504fab9e8c",
+          "status": "PASSED"
+        },
+        "restore": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-d0ca106987d84c26970ad19d99bd1a1d",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379344430057296,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 30508
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379344428923093,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 30276
+              }
+            }
+          },
+          "result_sha256": "c5e14048b61c564296ce130a4112be4c47b04c3cd8de0c8e1eb547f1bf7c0a3e",
+          "status": "PASSED"
+        },
+        "restore-preflight": {
+          "child_exit": 0,
+          "host_exit": 0,
+          "job": "Local\\DLQ-a7baaa4e62d94fdd9949426550f3590d",
+          "job_absent_error2": true,
+          "processes": {
+            "child_process": {
+              "current": null,
+              "recorded": {
+                "created": 134379344216865493,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 42296
+              }
+            },
+            "process": {
+              "current": null,
+              "recorded": {
+                "created": 134379344214676274,
+                "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+                "pid": 19804
+              }
+            }
+          },
+          "result_sha256": "e56459519ffa19e7262d41a6a215385d34b98289d8f40bf20ac6df4d900ff35f",
+          "status": "PASSED"
+        }
+      },
+      "tool_pins_verified": 10,
+      "verdict": "PASSED",
+      "xml_sha256": "bba5295ad9a1873ee81ce0233d9069b34df136c7f5a0866adcf3b51a38390bb2"
+    }
+  ],
+  "changed_source_files": [
+    "Assets/_Project/Editor/DungeonSpatial/Tests/ProductionDungeonAnalysisSceneTests.cs"
+  ],
+  "diagnostic_source": "173bff0358f54e693c0f5954f761059b1eaed993",
+  "first_phone_failure": {
+    "classification": "test iterator continuation/owner lifetime after the predecessor failed and a domain reload; no demonstrated ContentService map replacement",
+    "first_null_access": "ui.Q<Button>(\"confirm\") evaluating the next AnalysisPhoneTap argument, before the later strings[...] cleanup dereference",
+    "inference_boundary": "The first null access follows directly from the bounded trace and source. The installed program-counter save/restore implementation explains the continuation; no runner PC was modified or framework upgraded.",
+    "observed": "after-8 and before-9 traces resume with rootOwner/contentOwner/strings/document all null while the current root/content/controller are alive; no entry trace",
+    "source": "173bff0358f54e693c0f5954f761059b1eaed993"
+  },
+  "independent_verification": {
+    "TMP": {
+      "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d"
+    },
+    "all_checks_passed": true,
+    "path": "TestResults/h1-f4-20261027-an04/independent-completion01.json",
+    "prior_evidence_directories_verified": 331,
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\8a8dc6e0e4ca448dab9a193940d40792"
+    },
+    "settings": {
+      "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+    },
+    "sha256": "a5786844997a928ece96f0d7cb141b60935d5da84f2e77ffa51a3b64d5ad639b"
+  },
+  "model": {
+    "classification": "Standard, bounded fixture investigation/correction",
+    "fallback": "GPT-6 Sol Medium",
+    "production_authority_changed": false,
+    "recommended": "GPT-6.1 Sol Medium"
+  },
+  "newly_qualified_original_identities": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible"
+  ],
+  "original_84_qualified_before": 76,
+  "original_84_qualified_now": 78,
+  "original_84_remaining_unqualified": 6,
+  "phone_ownership_evidence": [
+    "H1F4_ANALYSIS_PHONE entry root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-1:AnalysisPhoneConfigure root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-1:AnalysisPhoneConfigure root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-2:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-2:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-3:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-3:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-4:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-4:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-5:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-5:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-6:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-6:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-7:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-7:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-8:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-8:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-9:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-9:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-10:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-10:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-11:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-11:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-12:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-12:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-13:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-13:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-14:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-14:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-15:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-15:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-16:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-16:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-17:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-17:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-18:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-18:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-19:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-19:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-20:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-20:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-21:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-21:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-1:AnalysisPhoneConfigure root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-1:AnalysisPhoneConfigure root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-2:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-2:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-3:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-3:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-4:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-4:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-5:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-5:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-6:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-6:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-7:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-7:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-8:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-8:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-9:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-9:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-10:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-10:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-11:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-11:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-12:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-12:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-13:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-13:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-14:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-14:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-15:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-15:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-16:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-16:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-17:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-17:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-18:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-18:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-19:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-19:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-20:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-20:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-21:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE after-21:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE before-restore root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+    "H1F4_ANALYSIS_PHONE restored root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode="
+  ],
+  "qualified_exact_leaf_inventory": [
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisCleanAndModifiedDraftContinueDiscardSave",
+      "id": "3321",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisDoesNotInterruptAuthoritativeForegroundAdmissionAndSettlement",
+      "id": "3328",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisFailedDiscardAndFailedSaveNeverNavigateOrLoseDraft",
+      "id": "3322",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisInvalidDraftOffersOnlyDiscardAndContinue",
+      "id": "3323",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisMissingLocalizationUsesExistingAvailabilityFeedback",
+      "id": "3326",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen",
+      "id": "3320",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPendingAndStaleSaveRemainDisabledWithDraftIntact",
+      "id": "3324",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+      "id": "3318",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneNavigationSafeAreaAndCoveredInput",
+      "id": "3316",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneOpeningDuringReplayClosesPresentationOnly",
+      "id": "3319",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneValidDraftChoicesUseTouchButtons",
+      "id": "3317",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisReplayEntryImmediatelyUsesCompactHeader",
+      "id": "3327",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisResponsiveSafeAreaLocalizationAndScroll",
+      "id": "3325",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.LivingDungeonB3B2FramesBeforeCachedBoundaryDoNotReconstructOrPublish",
+      "id": "3364",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.LivingDungeonB3B2ProvenRollbackRetriesThroughRealSaveBarrier",
+      "id": "3360",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClockInvalidMonotonicFailsClosed",
+      "id": "3293",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClockInvalidUtcFailsClosed",
+      "id": "3292",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClockNativeFractionAndOwnerRemainBound",
+      "id": "3289",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.SceneClockRepeatedFractionalOrdinaryCutsDoNotDuplicateCredit",
+      "id": "3291",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.UnresolvedRecoveryRetainsResolutionAndFailedDeleteCanRetry",
+      "id": "3311",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.ValidRecoveryResumeKeepsCanonicalAndManaUnchanged",
+      "id": "3312",
+      "result": "Passed"
+    }
+  ],
+  "qualified_tool_pins": {
+    "C:\\Program Files\\Git\\cmd\\git.EXE": {
+      "sha256": "81ef35ae005ca9318018d18e3327578ce939fb99feaad6b2d7c8ab15f3de8db5",
+      "version": "git version 2.54.0.windows.1"
+    },
+    "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.2f1\\Editor\\Unity.exe": {
+      "sha256": "c2f3d552a9f9a4639b2e54e9d41f360614d512ba6a9816c8c934568ecc2ad93d",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe": {
+      "sha256": "73dbf1f40507275d6fa636b49eb80b4753e313f649f52591abba86b31f1a1bce",
+      "version": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-an04\\run_selected01.py": {
+      "sha256": "d55b43523b3d5cd111499b2fce995463394d2e8b5350dddee9bd7972a18ceca8",
+      "version": "Exact P1/P6 diagnostic selection; no sustained profile or other correction packet"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_inputs.py": {
+      "sha256": "34d3ff45cf7512e21f242bc0e4ede876e5c8b68eddba853ad9b1e69192270c92",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_supervisor.py": {
+      "sha256": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_windows.py": {
+      "sha256": "234bce5f0ca8c7087bb999c603cfbb3d87f0eb4499501a1644dcbbabf3104db7",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py": {
+      "sha256": "cafa31627594654b4bc0d34a88c5a4bc3ad4db813a7451e7aa25a4756f86fbc0",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe": {
+      "sha256": "78761a0547cd4a9bc212e27a217c66e6a621bf48c753ba440e4b2327ee7ff8ac",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE": {
+      "sha256": "d8f182560210d43baaf767d482ad1dc1207372522e91413b9d5e515a875e552d",
+      "version": "Windows PowerShell 5.1; process-inspection dependency"
+    }
+  },
+  "read_only_framework_source_hashes": {
+    "Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEditor.TestRunner\\TestRunner\\EditModeRunner.cs": "a0f0ad677cabe9fbb5a50284602caccc694c2380efd2648806aaa33dbb810c39",
+    "Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEditor.TestRunner\\TestRunner\\EditorEnumeratorTestWorkItem.cs": "56a1d79a49a4000de7407eff48974aca741a675a144d1c399ec1ad0d20616723",
+    "Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEditor.TestRunner\\TestRunner\\EnumeratorStepHelper.cs": "17138c187270c0b359f1374f17124ec8e33828d8c6f42b8c4ccd5d1dd267c0bb",
+    "Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs": "fe120e10d8b73c3aa692521108b66533cb32dcbf6529af14dba18a972d594c65"
+  },
+  "remaining_exact_original_identities": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1PartyFollowsRoomsCorridorsAndFloors",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.CombatC1TargetFeedbackTracksRecordedHitsAndDefeats",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewMeaningfulInvalidations",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.GraphicalFloorReviewOpenConfirmationRejectsUnpublishedChanges",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.RoomContentMapReassignmentProductionMouseTouchRecovery",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.VisualRunReplayProductionLifecycleAndResponsiveControls"
+  ],
+  "scope": {
+    "Combat_C1_or_P2_P5_P7_changed": false,
+    "R1_changed": false,
+    "Windows_Player_or_benchmark": false,
+    "canonical_schema_migration_tuning_wallet_clock_or_recovery_authority_changed": false,
+    "full_EditMode_or_PlayMode": false,
+    "owner_UAT_or_merge": false,
+    "production_changes": false
+  },
+  "sealed_identity_files": {
+    "an01": {
+      "original-inputs.json": "9211da5cc4359c9bfc7e8bd54be1fb41fc889a33b91e09524dd2914027f39127",
+      "plan-selected01.json": "57a0ad93ad912f847d586a7f8129de992386f414ce900ca98f1695a9de400f59",
+      "qualified-inputs.json": "ac60d238c6512a42b2ab6e5addee435a5fcc63befb352926f3e907ee12b90002",
+      "selected-inventory.json": "a5dfb2c51762f263d4481769ddd55073e86c28c8a35a8c05ae6fddc7ccc54b45"
+    },
+    "an02": {
+      "original-inputs.json": "a425e568eaf4da75b73f0de9a9715326eef1a54b9c7c5d8e18a3761a6e23aa91",
+      "plan-selected01.json": "6721fdd1c589121555a3adc6569490de2d5ce045e0d09833334b3d4adb4c47a3",
+      "qualified-inputs.json": "72f50de4fd88216d824ef09011b108c1c60001563807f77063c7914cc6c7200d",
+      "selected-inventory.json": "99e6a08f304816941dfa09e050ffdebe4639ba877a899009110a82d3ac2e5736"
+    },
+    "an03": {
+      "original-inputs.json": "ac3327ea9c50ad36d5ee69289a215be0bdd69ed49cb8ff6f3fb83d0b83500c05",
+      "plan-selected01.json": "fff5a054ae66c08fbf8323d921b12c04f011c59f14835813151a1a1b449d1649",
+      "qualified-inputs.json": "16623045e26c8a2ba699e339d29fc1dedc70767711abd3ad03a80fbc5a07d232",
+      "selected-inventory.json": "54aa76e63b4985bb24716f4a9c9159d3550650cb3b147b6845718b1f71408d97"
+    },
+    "an04": {
+      "original-inputs.json": "ac3327ea9c50ad36d5ee69289a215be0bdd69ed49cb8ff6f3fb83d0b83500c05",
+      "plan-selected01.json": "3258682e761c6d2056667c0cf8ef34101cd9a633b57f0ba05d77d6fb11c326ce",
+      "qualified-inputs.json": "f17c0a50a0fbdb19ac7d7423da5da86233f829ea92b22a9d93aeede5dc117a65",
+      "selected-inventory.json": "ea4da66c5f3f40ce75da818edebf2a0851ae8138d2e357eefb35d10b910485f5"
+    }
+  },
+  "starting_head": "92d91003d9656734e650c68db3b26505f65a00bf",
+  "status": "Complete selected Analysis acceptance scope qualified; PR remains draft and full qualification incomplete",
+  "target_evidence": {
+    "an01": [
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+        "id": "3318",
+        "message": "",
+        "result": "Passed",
+        "stack": "",
+        "trace": [
+          "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=8551 afterLength=8551 first=8551 beforeSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a afterSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a",
+          "H1F4_BASELINE publication-count=0 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_BASELINE stabilized ordinal=2 identical=False walletDecimalSuffixOnly=True beforeLength=8549 afterLength=8551 first=360 beforeSha=07b6b609d8555e57e8e8551ac9fa9b8a9724b58f81306743ff59de680a37aa92 afterSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8",
+          "H1F4_BASELINE publication-count=1 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_BASELINE stabilized ordinal=3 identical=True walletDecimalSuffixOnly=False beforeLength=8551 afterLength=8551 first=8551 beforeSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8 afterSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8",
+          "H1F4_BASELINE publication-count=0 ordinal=3 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_BASELINE stabilized ordinal=4 identical=False walletDecimalSuffixOnly=True beforeLength=8549 afterLength=8551 first=360 beforeSha=4fc057941ed787fda8efd51ade1eab977410eb7a188c03ef24a7fe27878dafe5 afterSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a",
+          "H1F4_BASELINE publication-count=1 ordinal=4 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_BASELINE probe-after-test ordinal=4 identical=True walletDecimalSuffixOnly=False beforeLength=8551 afterLength=8551 first=8551 beforeSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a afterSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a"
+        ]
+      }
+    ],
+    "an02": [
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen",
+        "id": "3320",
+        "message": "  Resolve lifecycle/recovery obligations before a read-only baseline\n  Expected: False\n  But was:  True\n",
+        "result": "Failed",
+        "stack": "at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<>c__DisplayClass30_0.<StabilizeReadOnlySceneBaseline>g__Healthy|2 () [0x0004f] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:184\nat DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<StabilizeReadOnlySceneBaseline>d__30.MoveNext () [0x00084] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\PhaseSevenA4ProductionSceneTests.cs:191\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44\n",
+        "trace": [
+          "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18093 afterLength=18095 first=361 beforeSha=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253",
+          "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_BASELINE probe-after-test ordinal=1 identical=False walletDecimalSuffixOnly=False beforeLength=18095 afterLength=18421 first=18088 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=ddb172daf4951a35c4d8eccc6474c8e83aea2858d2d7c7ffd09fc2f569eb2c4c"
+        ]
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+        "id": "3318",
+        "message": "System.NullReferenceException : Object reference not set to an instance of an object",
+        "result": "Failed",
+        "stack": "  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneInvalidAndStaleDialogsRemainAccessible>d__89.<>m__Finally1 () [0x0001e] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:287 \n  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneInvalidAndStaleDialogsRemainAccessible>d__89.System.IDisposable.Dispose () [0x00016] in <95f297213fd34b7bbd3b9c08eef6e273>:0 \n  at DungeonBuilder.M0.Tests.PhaseSevenA4ProductionSceneTests+<AnalysisPhoneInvalidAndStaleDialogsRemainAccessible>d__89.MoveNext () [0x00cc2] in <worktree>\\Assets\\_Project\\Editor\\DungeonSpatial\\Tests\\ProductionDungeonAnalysisSceneTests.cs:290 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\\Library\\PackageCache\\com.unity.test-framework@0b7a23ab2e1d\\UnityEngine.TestRunner\\NUnitExtensions\\Attributes\\TestEnumerator.cs:44 ",
+        "trace": [
+          "H1F4_ANALYSIS_PHONE after-8:AnalysisPhoneOpenFromEdit root=1607636008 owner=0 content=1303435532 contentOwner=0 strings=0 document=0 attached=False controller=1273482280 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-9:AnalysisPhoneTap root=1607636008 owner=0 content=1303435532 contentOwner=0 strings=0 document=0 attached=False controller=1273482280 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-restore root=1607636008 owner=0 content=1303435532 contentOwner=0 strings=0 document=0 attached=False controller=1273482280 draft=0 recovery=False episode="
+        ]
+      }
+    ],
+    "an03": [
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen",
+        "id": "3320",
+        "message": "",
+        "result": "Passed",
+        "stack": "",
+        "trace": [
+          "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18093 afterLength=18095 first=361 beforeSha=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253",
+          "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_ANALYSIS_BOOT complete=True foregroundObservations=2 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 walletMatchesConfiguredRecovery=True WPreserved=True ACPreserved=True historyPreserved=True",
+          "H1F4_BASELINE stabilized ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=18095 afterLength=18095 first=18095 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253",
+          "H1F4_BASELINE publication-count=0 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_BASELINE probe-after-test ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=18095 afterLength=18095 first=18095 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253"
+        ]
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+        "id": "3318",
+        "message": "",
+        "result": "Passed",
+        "stack": "",
+        "trace": [
+          "H1F4_ANALYSIS_PHONE entry root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-1:AnalysisPhoneConfigure root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-1:AnalysisPhoneConfigure root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-2:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-2:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-3:StabilizeReadOnlySceneBaseline root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=8551 afterLength=8551 first=8551 beforeSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a afterSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a",
+          "H1F4_BASELINE publication-count=0 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_ANALYSIS_PHONE after-3:StabilizeReadOnlySceneBaseline root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-4:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-4:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-5:AnalysisPhoneDialog root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-5:AnalysisPhoneDialog root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-6:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-6:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-7:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-7:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-8:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-8:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-9:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=1089737616 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-9:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-10:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-10:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-11:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-11:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-12:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-12:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-13:StabilizeReadOnlySceneBaseline root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_BASELINE stabilized ordinal=2 identical=False walletDecimalSuffixOnly=True beforeLength=8549 afterLength=8551 first=360 beforeSha=07b6b609d8555e57e8e8551ac9fa9b8a9724b58f81306743ff59de680a37aa92 afterSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8",
+          "H1F4_BASELINE publication-count=1 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_ANALYSIS_PHONE after-13:StabilizeReadOnlySceneBaseline root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-14:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-14:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-15:AnalysisPhoneDialog root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-15:AnalysisPhoneDialog root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-16:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-16:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-17:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-17:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-18:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-18:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-19:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-19:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-20:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1879771476 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-20:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-21:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-21:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-1:AnalysisPhoneConfigure root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-1:AnalysisPhoneConfigure root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-2:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-2:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-3:StabilizeReadOnlySceneBaseline root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_BASELINE stabilized ordinal=3 identical=True walletDecimalSuffixOnly=False beforeLength=8551 afterLength=8551 first=8551 beforeSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8 afterSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8",
+          "H1F4_BASELINE publication-count=0 ordinal=3 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_ANALYSIS_PHONE after-3:StabilizeReadOnlySceneBaseline root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-4:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-4:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-5:AnalysisPhoneDialog root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-5:AnalysisPhoneDialog root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-6:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-6:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-7:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-7:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-8:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-8:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-9:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-885661520 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-9:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-10:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-10:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-11:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-11:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-12:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-12:null root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-13:StabilizeReadOnlySceneBaseline root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_BASELINE stabilized ordinal=4 identical=False walletDecimalSuffixOnly=True beforeLength=8549 afterLength=8551 first=360 beforeSha=4fc057941ed787fda8efd51ade1eab977410eb7a188c03ef24a7fe27878dafe5 afterSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a",
+          "H1F4_BASELINE publication-count=1 ordinal=4 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_ANALYSIS_PHONE after-13:StabilizeReadOnlySceneBaseline root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-14:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-14:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-15:AnalysisPhoneDialog root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-15:AnalysisPhoneDialog root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-16:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-16:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-17:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-17:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-18:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-18:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-19:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-19:AnalysisPhoneOpenFromEdit root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-20:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=-1067678714 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-20:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-21:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-21:AnalysisPhoneTap root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-restore root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE restored root=-1547550128 owner=-1547550128 content=-8707884 contentOwner=-8707884 strings=60399292 document=-1482607616 attached=True controller=362872400 draft=0 recovery=False episode=",
+          "H1F4_BASELINE probe-after-test ordinal=4 identical=True walletDecimalSuffixOnly=False beforeLength=8551 afterLength=8551 first=8551 beforeSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a afterSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a"
+        ]
+      }
+    ],
+    "an04": [
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisNavigationRetainsFloorAndReadOnlySaveAcrossShellReopen",
+        "id": "3320",
+        "message": "",
+        "result": "Passed",
+        "stack": "",
+        "trace": [
+          "H1F4_BASELINE stabilized ordinal=1 identical=False walletDecimalSuffixOnly=True beforeLength=18093 afterLength=18095 first=361 beforeSha=1f03e1ecac223f0dcc3847c3688b4430486ed6d843d7e837c8a130a46f89c210 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253",
+          "H1F4_BASELINE publication-count=1 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_ANALYSIS_BOOT complete=True foregroundObservations=2 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 walletMatchesConfiguredRecovery=True WPreserved=True ACPreserved=True historyPreserved=True",
+          "H1F4_BASELINE stabilized ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=18095 afterLength=18095 first=18095 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253",
+          "H1F4_BASELINE publication-count=0 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_BASELINE probe-after-test ordinal=2 identical=True walletDecimalSuffixOnly=False beforeLength=18095 afterLength=18095 first=18095 beforeSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253 afterSha=e8965cb50daa9190a0e0f1584de1214e6b3fccdeaefef875616fc7c4f01d8253"
+        ]
+      },
+      {
+        "fullname": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.AnalysisPhoneInvalidAndStaleDialogsRemainAccessible",
+        "id": "3318",
+        "message": "",
+        "result": "Passed",
+        "stack": "",
+        "trace": [
+          "H1F4_ANALYSIS_PHONE entry root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-1:AnalysisPhoneConfigure root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-1:AnalysisPhoneConfigure root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-2:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-2:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-3:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_BASELINE stabilized ordinal=1 identical=True walletDecimalSuffixOnly=False beforeLength=8551 afterLength=8551 first=8551 beforeSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a afterSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a",
+          "H1F4_BASELINE publication-count=0 ordinal=1 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_ANALYSIS_PHONE after-3:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-4:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-4:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-5:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-5:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-6:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-6:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-7:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-7:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-8:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-8:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-9:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-522995366 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-9:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-10:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-10:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-11:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-11:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-12:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-12:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-13:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_BASELINE stabilized ordinal=2 identical=False walletDecimalSuffixOnly=True beforeLength=8549 afterLength=8551 first=360 beforeSha=07b6b609d8555e57e8e8551ac9fa9b8a9724b58f81306743ff59de680a37aa92 afterSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8",
+          "H1F4_BASELINE publication-count=1 ordinal=2 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_ANALYSIS_PHONE after-13:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-14:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-14:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-15:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-15:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-16:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-16:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-17:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-17:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-18:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-18:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-19:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-19:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-20:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=1884609824 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-20:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-21:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-21:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-1:AnalysisPhoneConfigure root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-1:AnalysisPhoneConfigure root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-2:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-2:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-3:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_BASELINE stabilized ordinal=3 identical=True walletDecimalSuffixOnly=False beforeLength=8551 afterLength=8551 first=8551 beforeSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8 afterSha=2d174d0461ad626907d2bf71dc941e2355c5572e94ad9ea6fa56576d505ec0d8",
+          "H1F4_BASELINE publication-count=0 ordinal=3 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_ANALYSIS_PHONE after-3:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-4:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-4:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-5:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-5:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-6:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-6:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-7:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-7:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-8:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-8:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-9:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-1909466106 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-9:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-10:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-10:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-11:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-11:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-12:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-12:null root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-13:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_BASELINE stabilized ordinal=4 identical=False walletDecimalSuffixOnly=True beforeLength=8549 afterLength=8551 first=360 beforeSha=4fc057941ed787fda8efd51ade1eab977410eb7a188c03ef24a7fe27878dafe5 afterSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a",
+          "H1F4_BASELINE publication-count=1 ordinal=4 gameplayUnchanged=True timeOwnerUnchanged=True clockUnchanged=True",
+          "H1F4_ANALYSIS_PHONE after-13:StabilizeReadOnlySceneBaseline root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-14:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-14:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-15:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-15:AnalysisPhoneDialog root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-16:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-16:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-17:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-17:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-18:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-18:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-19:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-19:AnalysisPhoneOpenFromEdit root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-20:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=-629035406 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-20:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-21:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE after-21:AnalysisPhoneTap root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE before-restore root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_ANALYSIS_PHONE restored root=-598836144 owner=-598836144 content=1264191264 contentOwner=1264191264 strings=-1912495778 document=325855888 attached=True controller=-1051060696 draft=0 recovery=False episode=",
+          "H1F4_BASELINE probe-after-test ordinal=4 identical=True walletDecimalSuffixOnly=False beforeLength=8551 afterLength=8551 first=8551 beforeSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a afterSha=4a5aeee5a7baf661f44335831890ea0e0d596d69a87bd4d495e3fc13d98b487a"
+        ]
+      }
+    ]
+  },
+  "tested_source": "596837f29377d4c3a9312384b7b8be975b306b2a"
+}

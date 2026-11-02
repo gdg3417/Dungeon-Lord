@@ -84,24 +84,72 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 rows.Add("CASE " + spatial + "/" + rooms + "/" + mode + "/" + posture + "\n" + Structured(result) + "\n" + Structured(runtime));
             }
             foreach (bool branch in new[] { true, false }) {
-                var f = branch ? PhaseFiveBBranchIntegrationTests.Fixture() : PhaseSixA4Tests.Eligible();
+                var f = branch ? PhaseFiveBBranchIntegrationTests.Fixture() : PhaseSixA4Tests.Eligible(
+                    PhaseFourTestSupport.AuthoredInputs((config, _) => PhaseSixA4Tests.ForceDescent(config, true)));
                 if (!branch) {
                     PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
                     PhaseSixA4Tests.AddContent(f, 1, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId);
-                    PhaseSixA4Tests.ForceDescent(f.Configuration, true);
                     f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                         FloorLifecycleAction.Activate, PhaseSixA4Tests.FloorTwo(f)));
                 }
-                var result = PhaseSixA4Tests.Writer(f).CommitPhaseFiveBRun(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
-                    new RunSimulationService(f.Configuration, PhaseSixA4Tests.Loot()), RunPostureResolver.BalancedId, 1000);
-                Assert.That(result.IsSuccess, Is.True, result.Reason); f.Accept(result);
-                rows.Add("CASE canonical/" + branch + "\n" + Structured(f.Runtime.runHistory.LatestOutcome) + "\n" +
-                    JsonUtility.ToJson(f.Runtime.structureRuntime) + "\n" + JsonUtility.ToJson(f.Runtime.sharedBranchKnowledge) + "\n" +
-                    JsonUtility.ToJson(f.Runtime.sharedFloorKnowledge) + "\n" + JsonUtility.ToJson(f.Runtime.runHistory));
+                var historical = HistoricalB1Result(f);
+                rows.Add("CASE canonical/" + branch + "\n" + Structured(historical.runHistory.LatestOutcome) + "\n" +
+                    JsonUtility.ToJson(historical.structureRuntime) + "\n" + JsonUtility.ToJson(historical.sharedBranchKnowledge) + "\n" +
+                    JsonUtility.ToJson(historical.sharedFloorKnowledge) + "\n" + JsonUtility.ToJson(historical.runHistory));
             }
             Assert.That(string.Join("\n", rows), Is.EqualTo(File.ReadAllText(
                 "Assets/_Project/Tests/EditMode/phase-a-baseline.txt")));
             Assert.That(rows.Count, Is.EqualTo(38));
+        }
+
+        private static SaveData HistoricalB1Result(DetachedCanonicalWriteAuthorityTests.Fixture f)
+        {
+            // The frozen pre-refactor reference describes B1, not today's C2
+            // manual writer. Pure execution has no publication capability.
+            byte[] source = f.Session.GetCurrentBytes();
+            var frozen = PhaseFourTestSupport.FrozenFourteen(source);
+            var reader = DetachedCompleteSaveContract.ParseValidateFrozenSchemaFourteenAndRoundTrip(frozen,
+                f.Profile.Canonical.ForSchema(14), Array.Empty<LivingDungeonProfile>());
+            Assert.That(reader.IsValid, Is.True, reader.Reason);
+            Assert.That(reader.CurrentTargetValidated, Is.False);
+            CollectionAssert.AreEqual(frozen, reader.GetBytes());
+            var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(source, f.Context);
+            Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(owned, f.Production, out var candidate, out var reason), Is.True, reason);
+            var simulation = new RunSimulationService(f.Configuration, f.Context.RecoveryInputs.Loot);
+            var snapshot = ActiveFloorRunSnapshot.Create(owned, f.Production, f.Configuration,
+                f.Profile.Canonical, f.Context.RecoveryInputs.Loot, executionInputs: candidate, postureId: RunPostureResolver.BalancedId);
+            int sequence = Math.Max(1, candidate.runHistory.NextRunSequence);
+            var execution = simulation.StartSnapshot(sequence, snapshot);
+            var outcome = execution.DrainToCompletion(retainPresentationSteps: true);
+            Assert.That(CombatC0Diagnostics.IsCombatC2(outcome), Is.False);
+            if (outcome.RunHeatApplicationSummary?.RuleResolved == true)
+                candidate.structureRuntime.Heat = outcome.RunHeatApplicationSummary.HeatAfter;
+            var cooling = LootHeatCoolingResolver.Resolve(snapshot.Configuration, outcome.LootExtractionSummary,
+                candidate.structureRuntime.Heat, outcome.LootExtractionSummary?.DeterministicSeed ?? sequence);
+            outcome.LootHeatCoolingSummary = cooling;
+            if (cooling.RuleResolved && cooling.AppliedHeatDelta != 0d) {
+                var heat = new DungeonBuilder.M0.Economy.HeatSystem().ApplyEvent(new DungeonBuilder.M0.Economy.HeatEventInput(
+                    candidate.totalTicks, candidate.structureRuntime.Heat, cooling.AppliedHeatDelta));
+                candidate.structureRuntime.Heat = heat.NewHeat;
+                cooling.HeatAfterCooling = heat.NewHeat; cooling.AppliedHeatDelta = heat.NewHeat - cooling.HeatBeforeCooling;
+            }
+            candidate.sharedBranchKnowledge = BranchKnowledgeLearning.Propose(snapshot.BranchKnowledge, execution.Traversal.Evidence,
+                outcome.Party.ActiveCount > 0, outcome.RunId, snapshot.Configuration.PhaseFiveB.BranchDecision, execution.Traversal.Workload);
+            candidate.sharedFloorKnowledge = FloorKnowledgeLearning.Propose(snapshot, outcome);
+            Assert.That(StructuralEditService.TryFingerprint(owned.State, f.Profile.Canonical, out var layout), Is.True);
+            Assert.That(RunTransientEvidence.TryCorridorFingerprint(outcome, owned.CorridorContent, f.Profile.Canonical, out var corridor), Is.True);
+            outcome.PresentationLayoutFingerprint = layout; outcome.PresentationCorridorFingerprint = corridor;
+            candidate.runHistory.AppendOutcome(outcome, snapshot.Configuration.MaxRunHistoryEntries);
+            candidate.runHistory.NextRunSequence = checked(sequence + 1);
+            MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(candidate, snapshot.Configuration, f.Production);
+            // The old canonical publication projected serialized history. Retain
+            // that read-only JSON normalization (not a new save or a golden edit).
+            var beforeProjection = new SaveData { runHistory = candidate.runHistory };
+            candidate.runHistory = JsonUtility.FromJson<RunHistoryState>(JsonUtility.ToJson(candidate.runHistory));
+            RunTransientEvidence.Retain(beforeProjection, candidate);
+            CollectionAssert.AreEqual(source, f.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(source, f.FileSystem.ReadAllBytes(f.ActivePath));
+            return candidate;
         }
     }
 }

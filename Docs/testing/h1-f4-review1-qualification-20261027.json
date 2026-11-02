@@ -1,0 +1,742 @@
+{
+  "campaigns": [
+    {
+      "campaign": "f87a3cd4f3594da0a320c88ad1054d19",
+      "campaign_file_hashes": {
+        "campaign.json": "d91f27b1bdaee93df136bf7a8c38ee7c61517f07ed459c267e046410de7a4c6a",
+        "focused-preflight\\child.json": "447b369c1cbe5330a7ac5eafb70dec0cb9ca46104902e83afc2bb7b1e4c3c288",
+        "focused-preflight\\exit.json": "b36c50fb5fe70aee222b6f95b9e5cbedd328c74adc1f05a75cdff212f2d47511",
+        "focused-preflight\\preservation.json": "7772a76ba4781ad65a338138153601c6a303db4474755ff61101178ef98adc5a",
+        "focused-preflight\\result.json": "0819fb0a2843bde85e2378413f3400db4adac62d8dc0d2494abd421287a8c3c6",
+        "focused-preflight\\started.json": "8c306bbc8f1e3ce4c32c24080d3c55a3d5367b1f6cd71920cfb5eade236dded8",
+        "focused-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "focused\\child.json": "e9a8c7bea3862fcd3f1c5e48347daf02ee17fc9ac1e9f0d61360f4d920e0b613",
+        "focused\\cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "focused\\exit.json": "d563065444883328cfd053e69a3a24b5b0b3279be15c22880d76d51e30b52b37",
+        "focused\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+        "focused\\invocation.json": "280e1f0b3d8b9d9e9db2700f6a6e3ff33c2c4a77a717279eafd962fd488624ad",
+        "focused\\result.json": "cafc852322505f43b7a70db730ac2f2dd45644f56fdc416aa3798beebd6782dd",
+        "focused\\results.xml": "ac6ed4c9d00e6a34f3c7e913f7571c629a56ed3c3059c71fdd14827b86a6b2aa",
+        "focused\\started.json": "44973db7989b0828f082324e06279759a7a4c2d27d182aa6ad6a9c4d8c229af4",
+        "focused\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "focused\\unity.log": "cf8ffd1da3d9777268a6dbfc794991a53dffc851c04a331847570ea9657acbd6",
+        "launch.claim": "a2fbe1d15e499f21346c84cda0e792625165cae09aadb4d965279c5d0c0cb40e",
+        "launch.json": "85b0a98b9d17d7ce46bd594b109dbc6dafcde2e25fd3003246d9f2545ff57f98",
+        "launch.log": "55682dd8f2c3b8ffcd03c0f8935100c904763609651700810c56c7bee14bce0a",
+        "preservation\\child.json": "8c91a911e9b0ecf01c03e09955dfa05b3d4602833e2431c77cfd1fea7c459a40",
+        "preservation\\exit.json": "517d1458651c1660b16712bb80254165580c092f5c934cd70db007416fd2c0b2",
+        "preservation\\preservation.json": "1ef3a4c99364c23b2d86d534b497231773e8b199b16a0cad5d999e65fc858788",
+        "preservation\\result.json": "d08ea4b866c3c4b0d88a77b97b38fc106ae300dc18841877ee27eb1a5b93cf8c",
+        "preservation\\started.json": "62e7efaaf5fa1bdad65530fbe06c4f35dcb8d86eaf59c5d45695ce0f95d64b68",
+        "preservation\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "restore-preflight\\child.json": "27a88aba3cb92be9fbb2b024b91cd932578620167850239de8b95c812c6ab7de",
+        "restore-preflight\\exit.json": "0b4d679e709541270c324493ae1549bfcdb817476ec261ae68ed1c9de3b5d0ca",
+        "restore-preflight\\preservation.json": "7772a76ba4781ad65a338138153601c6a303db4474755ff61101178ef98adc5a",
+        "restore-preflight\\result.json": "79103ef3207ce4bc2ef728115304ebb5b26963bd30f881d84a7d7e0f805b1171",
+        "restore-preflight\\started.json": "4f13b9dde53fe81f82e2bfee624b208597ac97a4ec1c7d5b81dacc814f8ab401",
+        "restore-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "restore\\child.json": "05c8543c079486110719bb8ca78dee03effd4ddab2f01ae6c6d08e8677a61d83",
+        "restore\\exit.json": "fa1a61df724d705c6d6ee3fa481f25afcf284cb6b32b9b09f09a557bde507075",
+        "restore\\restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+        "restore\\result.json": "69e29cb0555efebb5d9af0f819a74d1b9076d9699f71fd2f760f02031d63a407",
+        "restore\\started.json": "23b368b83dbcc38133a2fd6c246a4e7c6318d1f4c60ba39c09f8530f5b6dd92b",
+        "restore\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "input_identity": "97b0028f6e026a03d79d7902419f55c345ceb8494253abde9df30465a3109c28",
+      "isolation": {
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 reviewbase01",
+        "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 reviewbase01\\save_primary.json"
+      },
+      "recorded_status": "PASSED",
+      "retention": "preserve; never relabel for a later source",
+      "source_sha": "eb95f2506b9982e675c5c53adc5545c1fc133205",
+      "stages": {
+        "focused": {
+          "child_finished_utc": "2026-10-27T20:58:34.030511+00:00",
+          "child_process": {
+            "created": 134376082758056214,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 49268
+          },
+          "child_started_utc": "2026-10-27T20:57:55.810020+00:00",
+          "evidence": {
+            "child.json": "e9a8c7bea3862fcd3f1c5e48347daf02ee17fc9ac1e9f0d61360f4d920e0b613",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "d563065444883328cfd053e69a3a24b5b0b3279be15c22880d76d51e30b52b37",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "280e1f0b3d8b9d9e9db2700f6a6e3ff33c2c4a77a717279eafd962fd488624ad",
+            "results.xml": "ac6ed4c9d00e6a34f3c7e913f7571c629a56ed3c3059c71fdd14827b86a6b2aa",
+            "started.json": "44973db7989b0828f082324e06279759a7a4c2d27d182aa6ad6a9c4d8c229af4",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "cf8ffd1da3d9777268a6dbfc794991a53dffc851c04a331847570ea9657acbd6"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T20:58:34.040546+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-45aec97193384191b1282d69d6864177",
+          "process": {
+            "created": 134376082756919228,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 18776
+          },
+          "source_sha": "eb95f2506b9982e675c5c53adc5545c1fc133205",
+          "status": "PASSED",
+          "tests": {
+            "discovered": 105,
+            "failed": 0,
+            "passed": 105,
+            "skipped": 0,
+            "skips": []
+          }
+        },
+        "focused-preflight": {
+          "child_finished_utc": "2026-10-27T20:57:50.344955+00:00",
+          "child_process": {
+            "created": 134376082659549599,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 30076
+          },
+          "child_started_utc": "2026-10-27T20:57:45.959199+00:00",
+          "evidence": {
+            "child.json": "447b369c1cbe5330a7ac5eafb70dec0cb9ca46104902e83afc2bb7b1e4c3c288",
+            "exit.json": "b36c50fb5fe70aee222b6f95b9e5cbedd328c74adc1f05a75cdff212f2d47511",
+            "preservation.json": "7772a76ba4781ad65a338138153601c6a303db4474755ff61101178ef98adc5a",
+            "started.json": "8c306bbc8f1e3ce4c32c24080d3c55a3d5367b1f6cd71920cfb5eade236dded8",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T20:57:50.354953+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-73fde821954d425286fd5b60d5b10b71",
+          "process": {
+            "created": 134376082658527917,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 40236
+          },
+          "source_sha": "eb95f2506b9982e675c5c53adc5545c1fc133205",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "preservation": {
+          "child_finished_utc": "2026-10-27T20:59:02.784596+00:00",
+          "child_process": {
+            "created": 134376083386010211,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 40036
+          },
+          "child_started_utc": "2026-10-27T20:58:58.604793+00:00",
+          "evidence": {
+            "child.json": "8c91a911e9b0ecf01c03e09955dfa05b3d4602833e2431c77cfd1fea7c459a40",
+            "exit.json": "517d1458651c1660b16712bb80254165580c092f5c934cd70db007416fd2c0b2",
+            "preservation.json": "1ef3a4c99364c23b2d86d534b497231773e8b199b16a0cad5d999e65fc858788",
+            "started.json": "62e7efaaf5fa1bdad65530fbe06c4f35dcb8d86eaf59c5d45695ce0f95d64b68",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T20:59:02.794594+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-0209b938fc6e4ca48d70729765fccd04",
+          "process": {
+            "created": 134376083384954289,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 36844
+          },
+          "source_sha": "eb95f2506b9982e675c5c53adc5545c1fc133205",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "restore": {
+          "child_finished_utc": "2026-10-27T20:58:53.977484+00:00",
+          "child_process": {
+            "created": 134376083286816667,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 36664
+          },
+          "child_started_utc": "2026-10-27T20:58:48.685422+00:00",
+          "evidence": {
+            "child.json": "05c8543c079486110719bb8ca78dee03effd4ddab2f01ae6c6d08e8677a61d83",
+            "exit.json": "fa1a61df724d705c6d6ee3fa481f25afcf284cb6b32b9b09f09a557bde507075",
+            "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+            "started.json": "23b368b83dbcc38133a2fd6c246a4e7c6318d1f4c60ba39c09f8530f5b6dd92b",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T20:58:53.987473+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-2302d17d36b642cd87b343ed6a274e43",
+          "process": {
+            "created": 134376083285674018,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 51776
+          },
+          "source_sha": "eb95f2506b9982e675c5c53adc5545c1fc133205",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "restore-preflight": {
+          "child_finished_utc": "2026-10-27T20:58:43.585384+00:00",
+          "child_process": {
+            "created": 134376083191254514,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 47268
+          },
+          "child_started_utc": "2026-10-27T20:58:39.128610+00:00",
+          "evidence": {
+            "child.json": "27a88aba3cb92be9fbb2b024b91cd932578620167850239de8b95c812c6ab7de",
+            "exit.json": "0b4d679e709541270c324493ae1549bfcdb817476ec261ae68ed1c9de3b5d0ca",
+            "preservation.json": "7772a76ba4781ad65a338138153601c6a303db4474755ff61101178ef98adc5a",
+            "started.json": "4f13b9dde53fe81f82e2bfee624b208597ac97a4ec1c7d5b81dacc814f8ab401",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T20:58:43.595806+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-8755f0017b53451a99994f7a8f971d3f",
+          "process": {
+            "created": 134376083190161675,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 46152
+          },
+          "source_sha": "eb95f2506b9982e675c5c53adc5545c1fc133205",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      }
+    },
+    {
+      "campaign": "7a2e083b24994e4880d971b98b4f58f5",
+      "campaign_file_hashes": {
+        "campaign.json": "804770b17bf9869bb9f690a9d8ee154765fcfe215205fde609ccd08082cf325a",
+        "focused-preflight\\child.json": "4c89053704aa2b88ac1069ccea1f5b335c3d7e3db6256e07f199b3b5123c8e68",
+        "focused-preflight\\exit.json": "bd71a9366830ebe8b5d07533a95af9ca9d65b623d3931fdcc743fa7e76936e1a",
+        "focused-preflight\\preservation.json": "d80c9895e6e35249c34cce2fa6511eacd3579a3c57968799169f74907758edc5",
+        "focused-preflight\\result.json": "7e2c485730797e2c79b719a8aa4e949ad4910f7ad60c50cc9b7491aefbbd544c",
+        "focused-preflight\\started.json": "28fe564e430e8f46a1350f1080dfcfcd5425a6eacd046a74587d0f0ef6bfce69",
+        "focused-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "focused\\child.json": "649e4bcea38ae5271d924b81a68290f67ca1d21efc86964bb92fe2bf49272306",
+        "focused\\cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+        "focused\\exit.json": "ddd2dc93d8a58e05d17fe0c4bc4f23a877b6a8ba0e779638200230c5c036ec3d",
+        "focused\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+        "focused\\invocation.json": "fcf9d947bb0b50951cfd2717a63ae3108164074d145bd175aeb04f521ce7f172",
+        "focused\\result.json": "36e5faae94fc26ad6b342427382a2209e53181c0c18b19ab523f3bcee336259d",
+        "focused\\results.xml": "f3129ae80041101e06a3e6e6a92bbf9976334f5d7665bede98d875916dcc3a24",
+        "focused\\started.json": "eb08c00bf05b5cbac169a8d049841c580f54e07ba03de3d96635f05b5cd06fe7",
+        "focused\\stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+        "focused\\unity.log": "49de7f6b18ab71360c2f09cc8190836ab40d3d9e69d182bbf5e520ae0f2976c8",
+        "launch.claim": "380375ae078b359b3a6ead9b972056ad29900cc93aa57c60b4162544635f24c5",
+        "launch.json": "d50287324c5a57522c495314b367196dfc49b50b16e87f804828d334f5e0161a",
+        "launch.log": "52634d337ff329a8ffa5eee6978945cc1a64afdc88de5e8ae2024eaacfc9cbe8"
+      },
+      "input_identity": "909bff3b64116fc319acaa5a395a1192338e5c7084219f9907de4169aa472b59",
+      "isolation": {
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 stallrepro01",
+        "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 stallrepro01\\save_primary.json"
+      },
+      "post_failure_preservation": {
+        "final": {
+          "inputs": 1494,
+          "original_inputs_restored": true,
+          "passed": true,
+          "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 stallrepro01",
+          "protected_evidence_unchanged": true,
+          "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 stallrepro01"
+        },
+        "preflight": {
+          "inputs": 1494,
+          "original_inputs_restored": false,
+          "passed": true,
+          "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 stallrepro01",
+          "protected_evidence_unchanged": true,
+          "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 stallrepro01"
+        },
+        "restore": {
+          "passed": true,
+          "restored": [
+            "ProjectSettings/ProjectSettings.asset",
+            "ProjectSettings/EditorBuildSettings.asset",
+            "ProjectSettings/ShaderGraphSettings.asset"
+          ]
+        }
+      },
+      "recorded_status": "FAILED",
+      "retention": "preserve; never relabel for a later source",
+      "source_sha": "1ee3c8e42b5085197725172baa29868191c6233e",
+      "stages": {
+        "focused": {
+          "child_finished_utc": "2026-10-27T21:11:52.133474+00:00",
+          "child_process": {
+            "created": 134376090772138552,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 52444
+          },
+          "child_started_utc": "2026-10-27T21:11:17.217760+00:00",
+          "evidence": {
+            "child.json": "649e4bcea38ae5271d924b81a68290f67ca1d21efc86964bb92fe2bf49272306",
+            "cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+            "exit.json": "ddd2dc93d8a58e05d17fe0c4bc4f23a877b6a8ba0e779638200230c5c036ec3d",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "fcf9d947bb0b50951cfd2717a63ae3108164074d145bd175aeb04f521ce7f172",
+            "results.xml": "f3129ae80041101e06a3e6e6a92bbf9976334f5d7665bede98d875916dcc3a24",
+            "started.json": "eb08c00bf05b5cbac169a8d049841c580f54e07ba03de3d96635f05b5cd06fe7",
+            "stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+            "unity.log": "49de7f6b18ab71360c2f09cc8190836ab40d3d9e69d182bbf5e520ae0f2976c8"
+          },
+          "exit_code": 8,
+          "failure": "CHILD_NONZERO",
+          "finished_utc": "2026-10-27T21:11:52.142460+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-424cedfe503444449ad932afcd1dfec4",
+          "process": {
+            "created": 134376090770764774,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 32864
+          },
+          "source_sha": "1ee3c8e42b5085197725172baa29868191c6233e",
+          "status": "FAILED",
+          "tests": {
+            "discovered": 106,
+            "failed": 1,
+            "passed": 105,
+            "skipped": 0,
+            "skips": []
+          }
+        },
+        "focused-preflight": {
+          "child_finished_utc": "2026-10-27T21:11:11.880877+00:00",
+          "child_process": {
+            "created": 134376090675524410,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 44204
+          },
+          "child_started_utc": "2026-10-27T21:11:07.555786+00:00",
+          "evidence": {
+            "child.json": "4c89053704aa2b88ac1069ccea1f5b335c3d7e3db6256e07f199b3b5123c8e68",
+            "exit.json": "bd71a9366830ebe8b5d07533a95af9ca9d65b623d3931fdcc743fa7e76936e1a",
+            "preservation.json": "d80c9895e6e35249c34cce2fa6511eacd3579a3c57968799169f74907758edc5",
+            "started.json": "28fe564e430e8f46a1350f1080dfcfcd5425a6eacd046a74587d0f0ef6bfce69",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T21:11:11.888868+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-6e5bd5780c074b30a7eb09f6b87704d1",
+          "process": {
+            "created": 134376090674458143,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 5704
+          },
+          "source_sha": "1ee3c8e42b5085197725172baa29868191c6233e",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      }
+    },
+    {
+      "campaign": "d9e8d4add7ac411b834e5c1fda5c217e",
+      "campaign_file_hashes": {
+        "campaign.json": "e06607beae227bddda5de6c62af8b46d917e0be3c42c053cc6ead5d8de862b8f",
+        "focused-preflight\\child.json": "5bf8facd3783b3ed6a275e7b74ca252daa138cf6ec878522c625ab3aaa0dc9ab",
+        "focused-preflight\\exit.json": "614a9478bc780acfb56e95a3b482ccb0b22818f15b1a38d5614c0703bb02f595",
+        "focused-preflight\\preservation.json": "e16f2f2307b32a68a56b21587805a81a2e8e6ff2f72be0cc9b7842c1b06b9baa",
+        "focused-preflight\\result.json": "283c94f165e43bb22a038396d18a2f49f7f185e67e4e1c546be9b0b67fc2b787",
+        "focused-preflight\\started.json": "97d583091945ee0b810689b9f595eae5d9afa15556bfe856ea49f3ed79072aea",
+        "focused-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "focused\\child.json": "05017f7d8a20006c9ae7cab8b1c8a24d7e708b354151324c838c3bf53fa39c9b",
+        "focused\\cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+        "focused\\exit.json": "5b93aadb86089c571a04b533bc64c08ae5265314310b81252c713011f1dcef49",
+        "focused\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+        "focused\\invocation.json": "8eef20228515622f684d0363e5c68be68129c8733512817311bbab782b3cc347",
+        "focused\\result.json": "9df1c060795fcc5e3ee45104421d6e06fdf3a94c7bf561396c6272c7f970952e",
+        "focused\\results.xml": "62b54a7bd75772b76e7bf1bf65da43a392ce89f27239a97170ae6e0387fef901",
+        "focused\\started.json": "abefdfb4cb5c492d18cb44f2c17b022ff644566a0d2c014c703bdde49319f9a3",
+        "focused\\stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+        "focused\\unity.log": "0369b4e16d750a3848abe29889113ac623d6677e8a04abd38f945dc767b87947",
+        "launch.claim": "590deb0a60f7a4f21ac76e68ad691ab3bee10ddce8aa78d2fb6b55db262e4d8b",
+        "launch.json": "a80af313dff5c98f4e3f4c985427e3f889c4430e1fdb0c9509e124d1280f20c0",
+        "launch.log": "a0d6881c010e33d72b6e46b833934e0e625ec6ebc45fded2dfef3197dde406c3"
+      },
+      "input_identity": "91ced981099fc9cfd68f987056b10e054aebb13bed96bdcd1fa6110ce141ae8f",
+      "isolation": {
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 stallfix01",
+        "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 stallfix01\\save_primary.json"
+      },
+      "post_failure_preservation": {
+        "final": {
+          "inputs": 1494,
+          "original_inputs_restored": true,
+          "passed": true,
+          "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 stallfix01",
+          "protected_evidence_unchanged": true,
+          "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 stallfix01"
+        },
+        "preflight": {
+          "inputs": 1494,
+          "original_inputs_restored": false,
+          "passed": true,
+          "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 stallfix01",
+          "protected_evidence_unchanged": true,
+          "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 stallfix01"
+        },
+        "restore": {
+          "passed": true,
+          "restored": [
+            "ProjectSettings/ProjectSettings.asset",
+            "ProjectSettings/EditorBuildSettings.asset",
+            "ProjectSettings/ShaderGraphSettings.asset"
+          ]
+        }
+      },
+      "recorded_status": "FAILED",
+      "retention": "preserve; never relabel for a later source",
+      "source_sha": "3bb229b97e2d45751152739c34cd32f40f386b20",
+      "stages": {
+        "focused": {
+          "child_finished_utc": "2026-10-27T21:19:57.807277+00:00",
+          "child_process": {
+            "created": 134376095628795182,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 32052
+          },
+          "child_started_utc": "2026-10-27T21:19:22.883875+00:00",
+          "evidence": {
+            "child.json": "05017f7d8a20006c9ae7cab8b1c8a24d7e708b354151324c838c3bf53fa39c9b",
+            "cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+            "exit.json": "5b93aadb86089c571a04b533bc64c08ae5265314310b81252c713011f1dcef49",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "8eef20228515622f684d0363e5c68be68129c8733512817311bbab782b3cc347",
+            "results.xml": "62b54a7bd75772b76e7bf1bf65da43a392ce89f27239a97170ae6e0387fef901",
+            "started.json": "abefdfb4cb5c492d18cb44f2c17b022ff644566a0d2c014c703bdde49319f9a3",
+            "stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+            "unity.log": "0369b4e16d750a3848abe29889113ac623d6677e8a04abd38f945dc767b87947"
+          },
+          "exit_code": 8,
+          "failure": "CHILD_NONZERO",
+          "finished_utc": "2026-10-27T21:19:57.816778+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-553f5c4f41bd4618b661a8d1280b741b",
+          "process": {
+            "created": 134376095627461827,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 41212
+          },
+          "source_sha": "3bb229b97e2d45751152739c34cd32f40f386b20",
+          "status": "FAILED",
+          "tests": {
+            "discovered": 107,
+            "failed": 1,
+            "passed": 106,
+            "skipped": 0,
+            "skips": []
+          }
+        },
+        "focused-preflight": {
+          "child_finished_utc": "2026-10-27T21:19:17.875431+00:00",
+          "child_process": {
+            "created": 134376095535428749,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 34380
+          },
+          "child_started_utc": "2026-10-27T21:19:13.547153+00:00",
+          "evidence": {
+            "child.json": "5bf8facd3783b3ed6a275e7b74ca252daa138cf6ec878522c625ab3aaa0dc9ab",
+            "exit.json": "614a9478bc780acfb56e95a3b482ccb0b22818f15b1a38d5614c0703bb02f595",
+            "preservation.json": "e16f2f2307b32a68a56b21587805a81a2e8e6ff2f72be0cc9b7842c1b06b9baa",
+            "started.json": "97d583091945ee0b810689b9f595eae5d9afa15556bfe856ea49f3ed79072aea",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T21:19:17.885439+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-9926b8f17d30450995e490170b7c7c4a",
+          "process": {
+            "created": 134376095534360844,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 22144
+          },
+          "source_sha": "3bb229b97e2d45751152739c34cd32f40f386b20",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      }
+    },
+    {
+      "campaign": "6e05f8f9c07c46b4aacd601a1d754051",
+      "campaign_file_hashes": {
+        "campaign.json": "8e04e93587c95e8cfc7729f3a8f8c67433bbcf615212b971602d6b37da0a68db",
+        "focused-preflight\\child.json": "fc9dc06651983fe6891303081efeac6f1c6f4ebb77c28cee6063d0f3b1e1b934",
+        "focused-preflight\\exit.json": "7a40da6248ed06b3db58779480af801f7083e8a3608ec1427381965735063a59",
+        "focused-preflight\\preservation.json": "7c9e6ec20379ae2c7bda40d15e26b09515ede6b2d367a0044a0c49da89d41311",
+        "focused-preflight\\result.json": "ac45ff137d5356b7392ae3abe6ebe8dcdd1e6a47144cc289138df4461762e72c",
+        "focused-preflight\\started.json": "a406caf7a5a08fd724281c72db20a3e082bfcd742678ad5767ecfc3c09c0509e",
+        "focused-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "focused\\child.json": "f1f948a7bcce99496c9dfe44f41480340f1be57762d12d669cb45bb9eb7b542d",
+        "focused\\cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "focused\\exit.json": "4267f02f240d9861cdaf3b21ae239bed60d406dcbedd4bd725298211eeb32e62",
+        "focused\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+        "focused\\invocation.json": "30ae9d7945e489dc98251a30f8b87e73aa7c27caaef20e18ec6da2bad9e92e85",
+        "focused\\result.json": "92000e6cfcb943a9dc58503cb1b648061a4bee19f8dc32198be5e9576adbda1c",
+        "focused\\results.xml": "cbe488170b00151371d00f02af558243a8316e938d21323c2e1e1519728cd48a",
+        "focused\\started.json": "424dc25131cbdeaeee7b7d3dde4dee5e457a82d07afe9afe16bf60059c64ec7c",
+        "focused\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "focused\\unity.log": "9bf96b644db8a8f02217c5d91b86db9615d1c047a32a7f72a68ab138588e54ab",
+        "launch.claim": "96789d6ab0656ad32302dafd235f7dcc13f78e8fe6c96b6e7d763f31e16666fd",
+        "launch.json": "728dfede2013057c3b5e1f772c652912d5256dce2b10e046624d5b4a217097c8",
+        "launch.log": "1467dc438c01c11c196ac9f678109b8f50b26048af1c7fa66ab01aee179cf398",
+        "preservation\\child.json": "6e61e24b2cd5d4b6c26b6b71f770fc691a69798f4c0c06797995f745720097b3",
+        "preservation\\exit.json": "b629f4336880ae9e1124495c89ac05f9982f51d6bf47de631dbc4ef5b80667fc",
+        "preservation\\preservation.json": "8445c6f9ce838cec5d3f81ee6021f190d7e86acaeec2cf0108975e04c3763cf2",
+        "preservation\\result.json": "b052d04990ba21b1c61d8528463c9b2699447738a4b0bc4ae961c492fc4c64c3",
+        "preservation\\started.json": "4ccca70f52dbc7e0fac5d08d760beed24c52a222afc09e640883cfc60c3c262d",
+        "preservation\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "restore-preflight\\child.json": "c46bd70b1cf27ae36472974571e20da5ff639872092b083389b8324e75f679af",
+        "restore-preflight\\exit.json": "b05431649d9d255248c48cef505bb679aa69fc7deb6cde568674d0ea11dc7a1d",
+        "restore-preflight\\preservation.json": "7c9e6ec20379ae2c7bda40d15e26b09515ede6b2d367a0044a0c49da89d41311",
+        "restore-preflight\\result.json": "3524e16502d77e65d264a0aecee5d87172ee84af333e0257538f9f5063391748",
+        "restore-preflight\\started.json": "66113bbb2154516e92d9c0791a9f7d903baa9fb035c23129e2571932690115f5",
+        "restore-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "restore\\child.json": "54fb48f2cdff8de8a8637d65828e2aa4dc9ccefd638b4f68915d8afb10d1a55b",
+        "restore\\exit.json": "777ade313e3d6c80731c7cfce183d163181dc763c1c433f2c21b6cfde9fd6583",
+        "restore\\restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+        "restore\\result.json": "9087fe13295aeccb29caca9777f28b8bf27ccba2281ff8813f67bf78ccf7c907",
+        "restore\\started.json": "c83f2a7d447c71ba8db68224ecce30a245911cb0675128214136a8cae1f40e2b",
+        "restore\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "input_identity": "a3432a11907a7ecde69bc3908f665671d0fedce55788e4a9f242963c3bb7720d",
+      "isolation": {
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 stallfix02",
+        "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 stallfix02\\save_primary.json"
+      },
+      "recorded_status": "PASSED",
+      "retention": "preserve; never relabel for a later source",
+      "source_sha": "5c52f301bbe919611966347ef15dfe3640cfd358",
+      "stages": {
+        "focused": {
+          "child_finished_utc": "2026-10-27T21:27:59.400153+00:00",
+          "child_process": {
+            "created": 134376100442720904,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 34424
+          },
+          "child_started_utc": "2026-10-27T21:27:24.275696+00:00",
+          "evidence": {
+            "child.json": "f1f948a7bcce99496c9dfe44f41480340f1be57762d12d669cb45bb9eb7b542d",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "4267f02f240d9861cdaf3b21ae239bed60d406dcbedd4bd725298211eeb32e62",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "30ae9d7945e489dc98251a30f8b87e73aa7c27caaef20e18ec6da2bad9e92e85",
+            "results.xml": "cbe488170b00151371d00f02af558243a8316e938d21323c2e1e1519728cd48a",
+            "started.json": "424dc25131cbdeaeee7b7d3dde4dee5e457a82d07afe9afe16bf60059c64ec7c",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "9bf96b644db8a8f02217c5d91b86db9615d1c047a32a7f72a68ab138588e54ab"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T21:27:59.409207+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-9f27a3a4d01c4378803147d2bdba8d86",
+          "process": {
+            "created": 134376100441602638,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 47932
+          },
+          "source_sha": "5c52f301bbe919611966347ef15dfe3640cfd358",
+          "status": "PASSED",
+          "tests": {
+            "discovered": 107,
+            "failed": 0,
+            "passed": 107,
+            "skipped": 0,
+            "skips": []
+          }
+        },
+        "focused-preflight": {
+          "child_finished_utc": "2026-10-27T21:27:19.275648+00:00",
+          "child_process": {
+            "created": 134376100349406287,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 39156
+          },
+          "child_started_utc": "2026-10-27T21:27:14.944374+00:00",
+          "evidence": {
+            "child.json": "fc9dc06651983fe6891303081efeac6f1c6f4ebb77c28cee6063d0f3b1e1b934",
+            "exit.json": "7a40da6248ed06b3db58779480af801f7083e8a3608ec1427381965735063a59",
+            "preservation.json": "7c9e6ec20379ae2c7bda40d15e26b09515ede6b2d367a0044a0c49da89d41311",
+            "started.json": "a406caf7a5a08fd724281c72db20a3e082bfcd742678ad5767ecfc3c09c0509e",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T21:27:19.284664+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-546862a2577c45f9a71c84b7384decbb",
+          "process": {
+            "created": 134376100348353833,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 25344
+          },
+          "source_sha": "5c52f301bbe919611966347ef15dfe3640cfd358",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "preservation": {
+          "child_finished_utc": "2026-10-27T21:28:28.014447+00:00",
+          "child_process": {
+            "created": 134376101039326834,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 36408
+          },
+          "child_started_utc": "2026-10-27T21:28:23.936872+00:00",
+          "evidence": {
+            "child.json": "6e61e24b2cd5d4b6c26b6b71f770fc691a69798f4c0c06797995f745720097b3",
+            "exit.json": "b629f4336880ae9e1124495c89ac05f9982f51d6bf47de631dbc4ef5b80667fc",
+            "preservation.json": "8445c6f9ce838cec5d3f81ee6021f190d7e86acaeec2cf0108975e04c3763cf2",
+            "started.json": "4ccca70f52dbc7e0fac5d08d760beed24c52a222afc09e640883cfc60c3c262d",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T21:28:28.024301+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-d65bd0d674a543359c913965da92794c",
+          "process": {
+            "created": 134376101038238743,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 49940
+          },
+          "source_sha": "5c52f301bbe919611966347ef15dfe3640cfd358",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "restore": {
+          "child_finished_utc": "2026-10-27T21:28:19.211754+00:00",
+          "child_process": {
+            "created": 134376100938285229,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 53652
+          },
+          "child_started_utc": "2026-10-27T21:28:13.832656+00:00",
+          "evidence": {
+            "child.json": "54fb48f2cdff8de8a8637d65828e2aa4dc9ccefd638b4f68915d8afb10d1a55b",
+            "exit.json": "777ade313e3d6c80731c7cfce183d163181dc763c1c433f2c21b6cfde9fd6583",
+            "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+            "started.json": "c83f2a7d447c71ba8db68224ecce30a245911cb0675128214136a8cae1f40e2b",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T21:28:19.220756+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-5249f7ae004d44a5be5422d54ac62653",
+          "process": {
+            "created": 134376100937245870,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 54432
+          },
+          "source_sha": "5c52f301bbe919611966347ef15dfe3640cfd358",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "restore-preflight": {
+          "child_finished_utc": "2026-10-27T21:28:08.736440+00:00",
+          "child_process": {
+            "created": 134376100844257420,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 42548
+          },
+          "child_started_utc": "2026-10-27T21:28:04.429080+00:00",
+          "evidence": {
+            "child.json": "c46bd70b1cf27ae36472974571e20da5ff639872092b083389b8324e75f679af",
+            "exit.json": "b05431649d9d255248c48cef505bb679aa69fc7deb6cde568674d0ea11dc7a1d",
+            "preservation.json": "7c9e6ec20379ae2c7bda40d15e26b09515ede6b2d367a0044a0c49da89d41311",
+            "started.json": "66113bbb2154516e92d9c0791a9f7d903baa9fb035c23129e2571932690115f5",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T21:28:08.746523+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-539dd5ab2ff8460c8c43b16fe1c3da53",
+          "process": {
+            "created": 134376100843081984,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 47100
+          },
+          "source_sha": "5c52f301bbe919611966347ef15dfe3640cfd358",
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      }
+    }
+  ],
+  "reported_utc": "2026-10-27T21:30:05.028684+00:00",
+  "scope": "Independent draft review 1: ordinary canonical save rollback, explicit retry, observed background and unchanged authority resolution"
+}

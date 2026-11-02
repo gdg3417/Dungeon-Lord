@@ -1,0 +1,330 @@
+{
+  "applicability": {
+    "SIT": "actual GameRoot/SaveService/TimeService coordinator, atomic/fault and reopen tests in the selected EditMode cohort",
+    "UAT": "required later; not authorized or started",
+    "Unit": "306 selected leaves, including legacy calculation/presenter, precision, time/recovery and canonical-writer cases",
+    "Windows_Player": "pending",
+    "full_EditMode": "pending",
+    "full_PlayMode": "pending",
+    "matched_performance_memory": "pending"
+  },
+  "artifacts": [
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-20261027-di03",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-20261027-rr01",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-20261027-rr02",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-compile-20261030-29",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-compile-20261030-30",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-compile-20261030-31",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-compile-20261030-32",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-r1-checkpoint01.py",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-prepare-di03.py",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-prepare-rr01.py",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-prepare-rr02.py",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-compile-20261030-29.py",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-compile-20261030-30.py",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-compile-20261030-31.py",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/h1-f4-compile-20261030-32.py",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/qualification-supervisor/fdbf8a236af1403aa1c78c4bca55e62c",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/qualification-supervisor/48ee840a893a42cea5ecca8f70c667fc",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    },
+    {
+      "owner": "H1-F4 R1 continuation",
+      "path": "TestResults/qualification-supervisor/7f3d8b5c387b4b65aee0bd0e8a6394a9",
+      "purpose": "source-pinned preparation, qualification or retained diagnostic evidence",
+      "retention": "preserve for independent review; no cleanup authorized by this report"
+    }
+  ],
+  "base": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaign": "7f3d8b5c387b4b65aee0bd0e8a6394a9",
+  "changed_files": [
+    "Assets/_Project/Data/Bootstrap/string_table_en.json",
+    "Assets/_Project/Scripts/Core/GameRoot.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalWriteAuthority.Recovery.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalWriteAuthority.cs",
+    "Assets/_Project/Scripts/Services/OfflinePassiveManaPresenter.cs",
+    "Assets/_Project/Scripts/Services/SaveService.Recovery.cs",
+    "Assets/_Project/Tests/EditMode/CombatC2Tests.cs",
+    "Assets/_Project/Tests/EditMode/H1F4RecoveryIntegrationTests.cs",
+    "Assets/_Project/Tests/EditMode/OfflinePassiveManaTests.cs",
+    "Docs/testing/h1-f4-recovery-reporting-decision-20261030.md"
+  ],
+  "class_counts": {
+    "DungeonBuilder.M0.Tests.EditMode.CombatC2Tests": 63,
+    "DungeonBuilder.M0.Tests.EditMode.DetachedCanonicalWriteAuthorityTests": 59,
+    "DungeonBuilder.M0.Tests.EditMode.H1F4RecoveryClockTests": 22,
+    "DungeonBuilder.M0.Tests.EditMode.H1F4RecoveryContractTests": 30,
+    "DungeonBuilder.M0.Tests.EditMode.H1F4RecoveryIntegrationTests": 45,
+    "DungeonBuilder.M0.Tests.EditMode.H1F4RecoveryTransitionTests": 18,
+    "DungeonBuilder.M0.Tests.EditMode.OfflinePassiveManaTests": 35,
+    "DungeonBuilder.M0.Tests.EditMode.RecoveryEntryAndPrecisePassiveManaTests": 34
+  },
+  "current_full_suite_failure_count": null,
+  "discovery": {
+    "EditMode": 2819,
+    "PlayMode": 4297,
+    "all_five_stages_and_independent_verification": true,
+    "campaign": "fdbf8a236af1403aa1c78c4bca55e62c",
+    "source": "91165c25d5e2af0039de1b8ba87d706cbc719360",
+    "tests_executed": false
+  },
+  "evidence_sha256": {
+    "TestResults/h1-f4-20261027-rr01/post-failure-finalize01/receipt.json": "a19f2426ecf2ce237755fb0d3065a21b17392c1730bb90ff6b847bdb430920fd",
+    "TestResults/h1-f4-20261027-rr02/independent-completion01.json": "a36eec2f16f3bc28c7403c5e2398b0f92424b625c4287ec38e0a24d938c6c220",
+    "TestResults/h1-f4-20261027-rr02/plan-selected01.json": "ec86882aedd565fbd71094172b1e27997ecc7ea9bf625d280fe7e9b53ad65dbf",
+    "TestResults/h1-f4-20261027-rr02/selected-inventory.json": "075bb53cb3f594cadac139399d039f90f955c774a7929f016cb554cad7e256ad",
+    "TestResults/qualification-supervisor/7f3d8b5c387b4b65aee0bd0e8a6394a9/living-regressions/results.xml": "1482d0e4c4bf2dae8419a0d15f9963da1aacdcced935b84ee88408cc4dfecbd2"
+  },
+  "failed": 0,
+  "failed_attempt": {
+    "campaign": "48ee840a893a42cea5ecca8f70c667fc",
+    "failed": 1,
+    "guarded_normal_restoration_verified": true,
+    "passed": 305,
+    "skipped": 0,
+    "source": "91165c25d5e2af0039de1b8ba87d706cbc719360",
+    "verdict": "FAILED"
+  },
+  "historical_verdicts_unchanged": true,
+  "implementation_commits": [
+    "91165c25d5e2af0039de1b8ba87d706cbc719360",
+    "2c90eca04cc8510672086dd9fe05130423bfc3d8"
+  ],
+  "original_84_newly_qualified": 3,
+  "original_84_qualified_before": 58,
+  "original_84_qualified_now": 61,
+  "original_84_remaining_unqualified": 23,
+  "original_three": {
+    "ColdStartCommitBootSaveAndFreshReopenCannotReplayInterval": [
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.ColdStartCommitBootSaveAndFreshReopenCannotReplayInterval",
+        "result": "Passed"
+      }
+    ],
+    "PauseResumeAppliesOnceAndRepeatedResumeDoesNotReplay": [
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.PauseResumeAppliesOnceAndRepeatedResumeDoesNotReplay",
+        "result": "Passed"
+      }
+    ],
+    "ResumePersistenceFailureKeepsSimulationPausedAndRetryDoesNotDuplicate": [
+      {
+        "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.ResumePersistenceFailureKeepsSimulationPausedAndRetryDoesNotDuplicate",
+        "result": "Passed"
+      }
+    ]
+  },
+  "passed": 306,
+  "preservation": {
+    "all_checks_passed": true,
+    "input_count": 1494,
+    "later_jobs_absent_error2": true,
+    "original_archive_members_verified": 1494,
+    "original_inputs_restored": true,
+    "prior_evidence_directories_verified": 286,
+    "protected_evidence_unchanged": true,
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\7f3d8b5c387b4b65aee0bd0e8a6394a9"
+    },
+    "tools_reverified": 10
+  },
+  "receipt_cases": [
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.CanonicalEpisodeReportsActualCapacityClampedGrant(990.0d,10.0d)",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.Editor.Tests.PhaseFourOfflinePassiveMana.CanonicalEpisodeReportsActualCapacityClampedGrant(1000.0d,0.0d)",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.LostPendingSpendingEvidenceCannotBecomeAZeroSpendingReceipt",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.ReportingCombinesOnlyProvenFractionalSettlementsWithoutWritingDisplayState",
+      "result": "Passed"
+    },
+    {
+      "fullname": "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.SyntheticPresentationKeepsDistinctRatesCapacityAndSpendingWithoutWalletInference",
+      "result": "Passed"
+    }
+  ],
+  "remaining_by_class": {
+    "Gd66WindowsSpatialMigrationFileSystemTests": 1,
+    "LivingDungeonPhaseABaselineTests": 1,
+    "MvpCanonicalJourneyIntegrationTests": 1,
+    "PhaseSevenA4ProductionSceneTests": 19,
+    "ResearchCompletionEligibilityDiagnosticsTests": 1
+  },
+  "schema_migration_time_settlement_changes": false,
+  "skipped": 0,
+  "stages": {
+    "living-regressions": {
+      "child_process": {
+        "created": 134378694869567111,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 3028
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-138a6536d0b9450fae7a08b599e9404c",
+      "process": {
+        "created": 134378694868249592,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 29124
+      },
+      "status": "PASSED"
+    },
+    "living-regressions-preflight": {
+      "child_process": {
+        "created": 134378694766986001,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 32688
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-360456d8005a4ad08ed4e4eda49bea20",
+      "process": {
+        "created": 134378694765757502,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 15356
+      },
+      "status": "PASSED"
+    },
+    "preservation": {
+      "child_process": {
+        "created": 134378695841971765,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 10740
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-80b89b003bd143d9a81b4cffc0993c41",
+      "process": {
+        "created": 134378695840894734,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 34892
+      },
+      "status": "PASSED"
+    },
+    "restore": {
+      "child_process": {
+        "created": 134378695734378397,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 41652
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-0c672dc0f9454b55b0a7a057a6b966b2",
+      "process": {
+        "created": 134378695733169674,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 43636
+      },
+      "status": "PASSED"
+    },
+    "restore-preflight": {
+      "child_process": {
+        "created": 134378695632501295,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 35652
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-df861c672cc3484daf130149701c8bb9",
+      "process": {
+        "created": 134378695631305117,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 37644
+      },
+      "status": "PASSED"
+    }
+  },
+  "tested_source": "2c90eca04cc8510672086dd9fe05130423bfc3d8"
+}

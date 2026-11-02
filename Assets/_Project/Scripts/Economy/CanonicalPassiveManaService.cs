@@ -113,6 +113,9 @@ namespace DungeonBuilder.M0.Economy
 
         public double ManaCapacity => structuralEconomy.ManaCapacity;
         public int TickSeconds => tickSeconds;
+        internal bool MatchesRecoveryInputs(RecoveryRuntimeInputs inputs) => inputs != null &&
+            ReferenceEquals(configuration, inputs.Passive) && ReferenceEquals(structuralEconomy, inputs.Economy) &&
+            tickSeconds == inputs.Bootstrap.tickSeconds && formulaEngine.GetType() == typeof(FormulaEngine);
 
         public PassiveManaRateSummary ResolveRate(SaveData save, RunSimulationConfig heatConfiguration)
         {

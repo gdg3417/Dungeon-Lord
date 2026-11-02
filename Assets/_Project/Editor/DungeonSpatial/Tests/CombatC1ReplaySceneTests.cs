@@ -13,6 +13,37 @@ namespace DungeonBuilder.M0.Tests
 {
     public abstract partial class PhaseSevenA4ProductionSceneTests
     {
+        // These are the original scenario coefficients, authored into complete
+        // bootstrap bytes before Start consumes them. Never mutate a bound config.
+        private void AuthorCombatSceneConfiguration(GameRoot root, string test)
+        {
+            bool party = test.Contains("CombatC1PartyFollowsRoomsCorridorsAndFloors");
+            bool feedback = test.Contains("CombatC1TargetFeedbackTracksRecordedHitsAndDefeats");
+            if (!party && (!feedback || combatFeedbackScenario == 0)) return;
+            Assert.That(root.SaveService, Is.Null);
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(root.runSimulationConfigJson.text, out var config), Is.True);
+            if (party) {
+                foreach (var c in config.CombatC0.Classes) c.Damage = 100;
+                foreach (var c in config.PhaseFiveB.Classes) c.LevelOneMaxHealth = 2;
+                var decision = config.PhaseFiveB.BranchDecision; decision.SkipThreshold = -1; decision.EnterThreshold = -.9;
+                foreach (var profile in decision.ProfileMinimums) profile.MinimumSurvivability = 0;
+                config.BaseSuccessChance = 1; config.SuccessThreshold = 0; config.HeatPenaltyPerPoint = 0; config.ManaReserveBonusPerPoint = 0;
+                config.PhaseSix.ExitThreshold = -1; config.PhaseSix.DescendThreshold = -.9;
+                foreach (var profile in config.PhaseSix.ProfileMinimums) profile.MinimumSurvivability = 0;
+            } else {
+                foreach (var m in config.CombatC0.Monsters) { m.Damage = combatFeedbackScenario == 1 ? 100 : 1; m.Initiative = 100; }
+                foreach (var c in config.CombatC0.Classes) c.Damage = 0;
+                foreach (var c in config.PhaseFiveB.Classes) c.LevelOneMaxHealth = 1;
+            }
+            string fields = JsonUtility.ToJson(config);
+            Assert.That(fields, Does.Not.Contain("\"CombatC0\""));
+            string full = fields.Substring(0, fields.Length - 1) + ",\"CombatC0\":" + JsonUtility.ToJson(config.CombatC0) + "}";
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(full, out var validated), Is.True);
+            if (disposableRunScenarioConfig != null) UnityEngine.Object.DestroyImmediate(disposableRunScenarioConfig);
+            disposableRunScenarioConfig = new UnityEngine.TextAsset(full); root.runSimulationConfigJson = disposableRunScenarioConfig;
+            TestContext.WriteLine("H1F4_COMBAT preboot scenario=" + (party ? "party" : combatFeedbackScenario.ToString()) +
+                " bootstrapSha=" + SpatialContractSha256.Compute(System.Text.Encoding.UTF8.GetBytes(full)));
+        }
         [UnityTest]
         public IEnumerator CombatC1MultiDefenderPlaybackControlsAndResponsiveEvidence()
         {
@@ -23,7 +54,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.SimulateRunOnce(),Is.True); var outcome=root.Save.runHistory.LatestOutcome;
             var selected=root.Save.runHistory.RecentOutcomes.Last();
             Assert.That(CombatC0Diagnostics.Events(selected),Is.EqualTo(CombatC0Diagnostics.Events(outcome)));
-            var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
+            yield return StabilizeReadOnlySceneBaseline(); var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
             var sprites=controller.World.GetComponentsInChildren<SpriteRenderer>(true).Where(v=>v.name=="Content").ToDictionary(v=>v,v=>v.sprite);
             int pooled=-1,pooledLabels=-1;
             foreach(var size in new[]{new Vector2Int(1920,1080),new Vector2Int(1280,720),new Vector2Int(720,1280)})
@@ -241,20 +272,19 @@ namespace DungeonBuilder.M0.Tests
         {
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720,1280);
             var root=GameRoot.Instance; root.Save.structureRuntime.ManaReserve=1000;
-            var service=(RunSimulationService)typeof(GameRoot).GetField("_runSimulationService",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(root);
             bool monsterDefeat=false,memberDefeat=false,zero=false;
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
             foreach(int scenario in new[]{0,1,2})
             {
                 if(scenario>0)
                 {
-                    foreach(var m in service.Config.CombatC0.Monsters) { m.Damage=scenario==1?100:1; m.Initiative=100; }
-                    // Visual-only casualty/zero-hit fixtures now retain persistent monster HP.
-                    // Keep the recorded party small enough to finish within the unchanged bound.
-                    foreach(var c in service.Config.CombatC0.Classes) c.Damage=0;
-                    foreach(var c in service.Config.PhaseFiveB.Classes) c.LevelOneMaxHealth=1;
+                    // Finish the prior isolated scenario, then construct a fresh
+                    // save owner with its authored inputs; no context rebinding.
+                    yield return TearDown(); combatFeedbackScenario = scenario; yield return SetUp();
+                    root = GameRoot.Instance; ui = controller.GetComponent<UIDocument>().rootVisualElement;
+                    root.Save.structureRuntime.ManaReserve = 1000;
                 }
-                Assert.That(root.SimulateRunOnce(),Is.True); var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
+                Assert.That(root.SimulateRunOnce(),Is.True); yield return StabilizeReadOnlySceneBaseline(); var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
                 Assert.That(controller.StartReplay(),Is.True); controller.ToggleReplayPause();
                 for(int i=0;i<3;i++) yield return null;
                 AssertCombatDeathVisibility(ui); Assert.That(controller.World.ReplayCasualtyCount,Is.Zero);
@@ -327,14 +357,6 @@ namespace DungeonBuilder.M0.Tests
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1920,1080);
             var root=GameRoot.Instance; root.Save.structureRuntime.ManaReserve=10000;
             root.Save.completedResearch=new CompletedResearchState { ProjectIds=new[]{BasicBranchingResearchAuthority.ResearchId,"ac_100"} };
-            var service=(RunSimulationService)typeof(GameRoot).GetField("_runSimulationService",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(root);
-            foreach(var c in service.Config.CombatC0.Classes) c.Damage=100;
-            foreach(var c in service.Config.PhaseFiveB.Classes) c.LevelOneMaxHealth=2;
-            var decision=service.Config.PhaseFiveB.BranchDecision; decision.SkipThreshold=-1; decision.EnterThreshold=-.9;
-            foreach(var profile in decision.ProfileMinimums) profile.MinimumSurvivability=0;
-            service.Config.BaseSuccessChance=1; service.Config.SuccessThreshold=0; service.Config.HeatPenaltyPerPoint=0; service.Config.ManaReserveBonusPerPoint=0;
-            service.Config.PhaseSix.ExitThreshold=-1; service.Config.PhaseSix.DescendThreshold=-.9;
-            foreach(var profile in service.Config.PhaseSix.ProfileMinimums) profile.MinimumSurvivability=0;
             var floor=root.Save.validatedCanonicalSpatialState.Floors[0]; var origin=floor.Layout.Nodes.Single(n=>n.Kind==FloorRouteNodeKind.Room);
             var preview=root.SaveService.PreviewOptionalBranchConstruction(new OptionalBranchConstructionRequest {
                 FloorInstanceId=floor.FloorInstanceId,OriginNodeId=origin.NodeId,OriginConnectionPointId="east",CorridorLength=2 },root.Save.completedResearch,root.Save);
@@ -356,7 +378,7 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.SaveService.CommitFloorLifecycle(root.Save,FloorLifecycleAction.Activate,other.FloorInstanceId).IsSuccess,Is.True);
             Assert.That(root.SimulateRunOnce(),Is.True);
             Assert.That(root.Save.runHistory.LatestOutcome.PresentationSteps.Any(s=>s.Kind==RunStepKind.FloorTransfer),Is.True);
-            var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
+            yield return StabilizeReadOnlySceneBaseline(); var bytes=File.ReadAllBytes(root.SaveService.SavePath); var live=JsonUtility.ToJson(root.Save);
             Assert.That(controller.StartReplay(),Is.True); controller.ToggleReplayPause();
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
             var floors=new System.Collections.Generic.HashSet<string>(); var positions=new System.Collections.Generic.HashSet<Vector2>(); bool corridor=false,captured=false,checkedHistory=false;

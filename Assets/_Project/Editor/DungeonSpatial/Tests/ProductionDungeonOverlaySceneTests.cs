@@ -26,7 +26,7 @@ namespace DungeonBuilder.M0.Tests
             quote=root.SaveService.PreviewFloorConstruction(root.Save);
             Assert.That(root.SaveService.CommitFloorConstruction(root.Save,quote).IsSuccess,Is.True);
             var state=root.Save.validatedCanonicalSpatialState;
-            var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            yield return StabilizeReadOnlySceneBaseline(); var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
             simulatedTouch=InputSystem.AddDevice<Touchscreen>();
             var mouse=InputSystem.AddDevice<Mouse>();
@@ -184,7 +184,8 @@ namespace DungeonBuilder.M0.Tests
         [UnityTest]
         public IEnumerator OverlayCompactFootprintCardsAndRuntimeCaptures()
         {
-            var root=GameRoot.Instance; root.Save.structureRuntime.ManaReserve=1000;
+            var root=GameRoot.Instance; Assert.That(root.TrySetQaManaFromDevPanel(true),Is.True);
+            yield return StabilizeReadOnlySceneBaseline();
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
             var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
             var firstRoom=root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];

@@ -51,10 +51,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(true, true, false, true)]
         public void EveryPrefixAndPartitionedFutureMatchesReference(bool twoFloors, bool descend, bool waiting, bool casualties)
         {
-            var f = T.Dungeon(descend);
+            var f = T.Dungeon(descend, author: config => {
+                if (casualties) foreach (var c in config.PhaseFiveB.Classes) c.LevelOneMaxHealth = 1;
+            });
             if (!twoFloors) f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session,
                 f.Runtime, FloorLifecycleAction.Deactivate, PhaseSixA4Tests.FloorTwo(f)));
-            if (casualties) foreach (var c in f.Configuration.PhaseFiveB.Classes) c.LevelOneMaxHealth = 1;
             var before = f.Session.GetCurrentBytes(); var limits = T.Profile(f).Checkpoints;
             using var preparation = new CombatStartCapture.AdmissionPreparation();
             var source = T.Start(f); bool blocked = false; int prefixes = 0;
@@ -212,7 +213,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void WarmReuseMatchesReferenceAtMeasuredCombatWorkBoundary(int delta)
         {
             var f = T.Dungeon(false); var limits = T.Profile(f).Checkpoints;
-            var before = f.Session.GetCurrentBytes(); var runtime = B.Structured(f.Runtime);
             int boundary; long pendingWork, encounterWork;
             var measured = T.Start(f);
             try {
@@ -229,7 +229,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             } finally { measured.Abandon(); }
             Assert.That(encounterWork, Is.GreaterThan(pendingWork));
             // Test-only captured config: adjacent limits measured from this fixture's real kernel.
-            f.Configuration.CombatC0.MaximumWork = encounterWork + delta;
+            f = T.Dungeon(false, author: config => config.CombatC0.MaximumWork = encounterWork + delta);
+            var before = f.Session.GetCurrentBytes(); var runtime = B.Structured(f.Runtime);
             var source = T.Start(f);
             using var preparation = new CombatStartCapture.AdmissionPreparation();
             bool enabled = Metrics.Enabled, detailed = Metrics.DetailedEnabled;

@@ -1,0 +1,371 @@
+{
+  "base": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaign": "a4725051c17b47bb8397adcd3066f8b1",
+  "complete": {
+    "B2": 82,
+    "B3A": 41,
+    "failed": 0,
+    "passed": 123,
+    "skipped": 0
+  },
+  "font_sha256": "6cd2faa131f346f601036104691f0223744c5806a51ceec454e6d4ff3bb6831d",
+  "identities": {
+    "TestResults/h1-f4-20261027-bf01/independent-completion01.json": "ed67a852e49ee9731bd1ede3503dec793ff58566b92277f32d2d2c7a70ea62ed",
+    "TestResults/h1-f4-20261027-bf01/original-inputs.json": "68caf4c9216ef732c0d039837df735392efade52b2f1734076cbf787670039e5",
+    "TestResults/h1-f4-20261027-bf01/original-inputs.zip": "804f0e16e626bc11f489881a5511f38ca521d7e3afed3aeef0d5f057573ee17f",
+    "TestResults/h1-f4-20261027-bf01/plan-correction01.json": "845964d5095c1d54c139b388d4dcfc198f11d965412e324460989186091d89e8",
+    "TestResults/h1-f4-20261027-bf01/plan-selected01.json": "35f4ca1a77ee05bef0bff0f98f5d447d424a83ce01cd61ff612c5e4c348553d1",
+    "TestResults/h1-f4-20261027-bf01/plan-selected02.json": "b9a6019bf885db52f9e7637b092a27eb10e14316806c5a68c24852e6fb399a02",
+    "TestResults/h1-f4-20261027-bf01/qualified-inputs.json": "12bce739d2fd276fa029ab4b986d40604dfff4b68db1a4604b8661eda5197bdb",
+    "TestResults/qualification-supervisor/a4725051c17b47bb8397adcd3066f8b1/campaign.json": "dc19d5a4d342a3288f594317362f73956e136134dbbb788e96694e5d8f209d32",
+    "TestResults/qualification-supervisor/a4725051c17b47bb8397adcd3066f8b1/legacy-scheduling/results.xml": "0e3efbf560ab4840511ec0ef2a67a9db35c7e31312277beb627b9281feb335b2",
+    "TestResults/qualification-supervisor/a4725051c17b47bb8397adcd3066f8b1/legacy-target/results.xml": "beec42e9789bf1d928599a9d07fd8cf4cfce9b14c8822e9dcb49494fdd588f9e"
+  },
+  "independent_all_checks_passed": true,
+  "input_count": 1494,
+  "native_disposable_artifacts": {
+    "TestResults/living-dungeon-b2-windows/1c713554b2b94979b42943af842b5394": {
+      "disposable-current17.json": "913c322c3f19bcd77c12cd93642dc5d67d88dcc97d3467de6b07d6adb79e33dc",
+      "disposable-schema14.json": "6aa13c63195193df165f718ba201dd53e5e4ee4ee6038ad269ba89532ffe059f",
+      "ownership.json": "6758b52e858e5deb9a8ce3e7c5fd4f9c6f296ba165a06589579671699717bc62"
+    },
+    "TestResults/living-dungeon-b3a-current-windows/5c8ff0b2de394785b8fab20f5703e24b": {
+      "ownership.json": "3d688d0ba8c2a78df69be2c247456385ad0c03ccc61a686eada10377875a10ec",
+      "qualified.json": "e4e4ee82d47ad45342c1e4b1fba3c38a7301a633c4bfefff893ab0562bb94d65"
+    },
+    "TestResults/living-dungeon-b3a-current-windows/84f85967cbf94325a9c735ded77c736b": {
+      "ownership.json": "3d688d0ba8c2a78df69be2c247456385ad0c03ccc61a686eada10377875a10ec",
+      "qualified.json": "e4e4ee82d47ad45342c1e4b1fba3c38a7301a633c4bfefff893ab0562bb94d65"
+    },
+    "TestResults/living-dungeon-b3a-current-windows/ecb277aa562449e0934175a192de6827": {
+      "ownership.json": "3d688d0ba8c2a78df69be2c247456385ad0c03ccc61a686eada10377875a10ec",
+      "qualified.json": "e4e4ee82d47ad45342c1e4b1fba3c38a7301a633c4bfefff893ab0562bb94d65"
+    }
+  },
+  "no_historical_uncertainty_reinterpreted": true,
+  "original_inputs_restored": true,
+  "passed_leaves": [
+    "LivingDungeonPhaseB2.ActivatedAllocatorAcceptsEqualFinalRecordAliasWithoutReferenceIdentity",
+    "LivingDungeonPhaseB2.ActivatedAllocatorRejectsMissingOrContradictoryFinalAlias(\"absent\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorRejectsMissingOrContradictoryFinalAlias(\"earlier\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorRejectsMissingOrContradictoryFinalAlias(\"score\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorRejectsMissingOrContradictoryFinalAlias(\"tags\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorRejectsMissingOrContradictoryFinalAlias(\"null\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorRejectsMissingOrContradictoryFinalAlias(\"default\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorRejectsMissingOrContradictoryFinalAlias(\"omitted\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorSourceRejectsAmbiguousOrCoercibleAuthority(\"{\\\"NextRunSequence\\\":1,\\\"RecentOutcomes\\\":7}\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorSourceRejectsAmbiguousOrCoercibleAuthority(\"{\\\"NextRunSequence\\\":1,\\\"LatestOutcome\\\":7}\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorSourceRejectsAmbiguousOrCoercibleAuthority(\"{\\\"NextRunSequence\\\":1,\\\"NextRunSequence\\\":2}\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorSourceRejectsAmbiguousOrCoercibleAuthority(\"{\\\"nextRunSequence\\\":1}\")",
+    "LivingDungeonPhaseB2.ActivatedAllocatorSourceRejectsAmbiguousOrCoercibleAuthority(\"{\\\"NextRunSequence\\\":3,\\\"RecentOutcomes\\\":[{\\\"RunId\\\":\\\"run-1\\\",\\\"RunId\\\":\\\"run-2\\\"}]}\")",
+    "LivingDungeonPhaseB2.ActivatedCanonicalSaveRejectsConflictingAliasWithoutRewritingSource(\"absent\")",
+    "LivingDungeonPhaseB2.ActivatedCanonicalSaveRejectsConflictingAliasWithoutRewritingSource(\"earlier\")",
+    "LivingDungeonPhaseB2.ActivatedCanonicalSaveRejectsConflictingAliasWithoutRewritingSource(\"score\")",
+    "LivingDungeonPhaseB2.ActivatedCanonicalSaveRejectsConflictingAliasWithoutRewritingSource(\"tags\")",
+    "LivingDungeonPhaseB2.ActivatedCanonicalSaveRejectsConflictingAliasWithoutRewritingSource(\"null\")",
+    "LivingDungeonPhaseB2.ActivatedCanonicalSaveRejectsConflictingAliasWithoutRewritingSource(\"default\")",
+    "LivingDungeonPhaseB2.ActivatedCanonicalSaveRejectsConflictingAliasWithoutRewritingSource(\"omitted\")",
+    "LivingDungeonPhaseB2.ActiveCapacityAndRetainedCapacityRemainIndependent",
+    "LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"readback\")",
+    "LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"replace\")",
+    "LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"partial\")",
+    "LivingDungeonPhaseB2.AtomicFailurePreservesPublicationAndRequiresRecoveryWhenRollbackIsUnproven(\"rollback\")",
+    "LivingDungeonPhaseB2.C2FundingWaitsForProvenCanonicalVacancyAtClosedB2Boundary",
+    "LivingDungeonPhaseB2.CanonicalEditAffectsOnlyLaterPartyAndCannotResetActivatedAllocator",
+    "LivingDungeonPhaseB2.CheckpointByteAndReplayBoundariesUseExactLegalEngineBytes",
+    "LivingDungeonPhaseB2.CollisionAndPopulatedBlankHistoryCannotEnableAllocation",
+    "LivingDungeonPhaseB2.CompatibleLargerProfilePreservesCheckpointBytes",
+    "LivingDungeonPhaseB2.CompleteSaveProfileRetainedLimitMeasurement",
+    "LivingDungeonPhaseB2.CompleteSaveSplitBatchAndRestartEqualUninterruptedBytes(1)",
+    "LivingDungeonPhaseB2.CompleteSaveSplitBatchAndRestartEqualUninterruptedBytes(2)",
+    "LivingDungeonPhaseB2.CompleteSaveSplitBatchAndRestartEqualUninterruptedBytes(7)",
+    "LivingDungeonPhaseB2.CompleteSaveSplitBatchAndRestartEqualUninterruptedBytes(1000)",
+    "LivingDungeonPhaseB2.DormantFixtureAllocatorDiagnostics",
+    "LivingDungeonPhaseB2.DormantMigrationPreservesEveryPredecessorByteAndHistoricalAllocator",
+    "LivingDungeonPhaseB2.DormantNoncanonicalAllocatorCannotBeNormalizedByActivation(\"1.0\")",
+    "LivingDungeonPhaseB2.DormantNoncanonicalAllocatorCannotBeNormalizedByActivation(\"1e0\")",
+    "LivingDungeonPhaseB2.DormantNoncanonicalAllocatorCannotBeNormalizedByActivation(\"omitted\")",
+    "LivingDungeonPhaseB2.DormantSchemaThirteenPreservesConflictingAliasAndActivationRejectsWithoutMutation(\"absent\")",
+    "LivingDungeonPhaseB2.DormantSchemaThirteenPreservesConflictingAliasAndActivationRejectsWithoutMutation(\"earlier\")",
+    "LivingDungeonPhaseB2.DormantSchemaThirteenPreservesConflictingAliasAndActivationRejectsWithoutMutation(\"score\")",
+    "LivingDungeonPhaseB2.DormantSchemaThirteenPreservesConflictingAliasAndActivationRejectsWithoutMutation(\"tags\")",
+    "LivingDungeonPhaseB2.DormantSchemaThirteenPreservesConflictingAliasAndActivationRejectsWithoutMutation(\"null\")",
+    "LivingDungeonPhaseB2.DormantSchemaThirteenPreservesConflictingAliasAndActivationRejectsWithoutMutation(\"default\")",
+    "LivingDungeonPhaseB2.DormantSchemaThirteenPreservesConflictingAliasAndActivationRejectsWithoutMutation(\"omitted\")",
+    "LivingDungeonPhaseB2.DuplicateOpportunitiesNoOpsRetroactiveInstallationAndRevisionOverflowFailClosed",
+    "LivingDungeonPhaseB2.EveryCanonicalReplacementPathPreservesNonemptyPartyOwner(\"spatial\")",
+    "LivingDungeonPhaseB2.EveryCanonicalReplacementPathPreservesNonemptyPartyOwner(\"investment\")",
+    "LivingDungeonPhaseB2.EveryCanonicalReplacementPathPreservesNonemptyPartyOwner(\"corridor\")",
+    "LivingDungeonPhaseB2.EveryCanonicalReplacementPathPreservesNonemptyPartyOwner(\"branchKnowledge\")",
+    "LivingDungeonPhaseB2.EveryCanonicalReplacementPathPreservesNonemptyPartyOwner(\"floorKnowledge\")",
+    "LivingDungeonPhaseB2.EveryCanonicalReplacementPathPreservesNonemptyPartyOwner(\"recognizedManaResearch\")",
+    "LivingDungeonPhaseB2.FailedAdmissionPersistencePublishesNeitherSequenceNorCheckpoint(1)",
+    "LivingDungeonPhaseB2.FailedAdmissionPersistencePublishesNeitherSequenceNorCheckpoint(2)",
+    "LivingDungeonPhaseB2.FrozenHistoricalOwnerCollisionIsPreservedAndMigrationFails(\"livingDungeon\")",
+    "LivingDungeonPhaseB2.FrozenHistoricalOwnerCollisionIsPreservedAndMigrationFails(\"LivingDungeon\")",
+    "LivingDungeonPhaseB2.FrozenProductionBudgetsRemainDistinctFromCurrentEnvelope",
+    "LivingDungeonPhaseB2.HistoricalEmptyLatestRepresentationsRemainActivatableWithoutRewritingHistory(False)",
+    "LivingDungeonPhaseB2.HistoricalEmptyLatestRepresentationsRemainActivatableWithoutRewritingHistory(True)",
+    "LivingDungeonPhaseB2.ManualAndAutomaticRunsUseOneSequenceAndManualMutationPreservesParty",
+    "LivingDungeonPhaseB2.NearLimitFrozenSchemaThirteenMigratesWithReservedHeadroom",
+    "LivingDungeonPhaseB2.OwnerChunkAndContractContradictionsAreRejected(\"whitespace\")",
+    "LivingDungeonPhaseB2.OwnerChunkAndContractContradictionsAreRejected(\"order\")",
+    "LivingDungeonPhaseB2.OwnerChunkAndContractContradictionsAreRejected(\"version\")",
+    "LivingDungeonPhaseB2.OwnerChunkAndContractContradictionsAreRejected(\"profile\")",
+    "LivingDungeonPhaseB2.RealWindowsMigrationAndUnfinishedPrefixReopenUseOneAtomicAuthority",
+    "LivingDungeonPhaseB2.SameTimeTerminalReleaseAdmissionAndNewbornOrderSurvivesEveryActionRestart",
+    "LivingDungeonPhaseB2.SchedulerAndOrdinaryWritesPreserveHistoricalHistoryNullsAndExtensions",
+    "LivingDungeonPhaseB2.SharedAllocatorCannotActivateHistoricalAnomalyOrExhaustion(0)",
+    "LivingDungeonPhaseB2.SharedAllocatorCannotActivateHistoricalAnomalyOrExhaustion(-1)",
+    "LivingDungeonPhaseB2.SharedAllocatorCannotActivateHistoricalAnomalyOrExhaustion(int.MaxValue)",
+    "LivingDungeonPhaseB2.SyntheticTaggedFloorScaleRetainsEngineOrderingAndReconstruction(25,20)",
+    "LivingDungeonPhaseB2.SyntheticTaggedFloorScaleRetainsEngineOrderingAndReconstruction(100,5)",
+    "LivingDungeonPhaseB2.TwoFloorCompleteSavePartiesRestoreActualFloorTransitions",
+    "LivingDungeonPhaseB2.UnfinishedLifecycleSavePreservesPrefixAndDefersGameplayMutation",
+    "LivingDungeonPhaseB2.UnsupportedOrContradictoryTrustedPartyFailsClosed(\"pin\")",
+    "LivingDungeonPhaseB2.UnsupportedOrContradictoryTrustedPartyFailsClosed(\"ordinal\")",
+    "LivingDungeonPhaseB2.UnsupportedOrContradictoryTrustedPartyFailsClosed(\"format\")",
+    "LivingDungeonPhaseB2.UnsupportedOrContradictoryTrustedPartyFailsClosed(\"rules\")",
+    "LivingDungeonPhaseB2.UnsupportedOrContradictoryTrustedPartyFailsClosed(\"consumed\")",
+    "LivingDungeonPhaseB3A.AbsoluteCompletionOverflowFailsClosed",
+    "LivingDungeonPhaseB3A.ChangedObjectiveConfigurationCannotAuthorizeOldObjectiveCompletion",
+    "LivingDungeonPhaseB3A.CompatibleSurvivorLearningUsesCanonicalRecordsAndNoFabricatedC2State",
+    "LivingDungeonPhaseB3A.ContentChangedBranchAndFloorCannotLearnFromMatchingTopology",
+    "LivingDungeonPhaseB3A.ContradictoryTerminalPinsAndOrdinalsAreRejectedByCompleteSave(\"ordinal\")",
+    "LivingDungeonPhaseB3A.ContradictoryTerminalPinsAndOrdinalsAreRejectedByCompleteSave(\"checkpoint\")",
+    "LivingDungeonPhaseB3A.ContradictoryTerminalPinsAndOrdinalsAreRejectedByCompleteSave(\"identity\")",
+    "LivingDungeonPhaseB3A.CurrentHeatUsesResolvedDeltaThenIndependentCoolingWithoutStartOverwrite",
+    "LivingDungeonPhaseB3A.CurrentOccupiedFloorBlocksRecoveryDuringAnOlderPartySettlement",
+    "LivingDungeonPhaseB3A.EarliestUnqualifiedTerminalBlocksLaterQualifiedParty",
+    "LivingDungeonPhaseB3A.EqualCompletionOrdersRun2BeforeRun10UsingNumericIdentity",
+    "LivingDungeonPhaseB3A.FailedAtomicSettlementPublishesNothingAndProvenRollbackCanRetry(Write,1)",
+    "LivingDungeonPhaseB3A.FailedAtomicSettlementPublishesNothingAndProvenRollbackCanRetry(Write,2)",
+    "LivingDungeonPhaseB3A.FailedAtomicSettlementPublishesNothingAndProvenRollbackCanRetry(Replace,1)",
+    "LivingDungeonPhaseB3A.FailedAtomicSettlementPublishesNothingAndProvenRollbackCanRetry(Flush,1)",
+    "LivingDungeonPhaseB3A.FakeRequestAndForegroundAppStateCannotAuthorizeAnything",
+    "LivingDungeonPhaseB3A.GenericHistoryMutationStillCannotPublishAnAllocatedDurableIdentity",
+    "LivingDungeonPhaseB3A.InterleavedManualAndDurableHistoryRetainsAllocatorAndRolloverRules",
+    "LivingDungeonPhaseB3A.LaterManualLearningIsPreservedAgainstOlderDurableSnapshot",
+    "LivingDungeonPhaseB3A.OnlyTheIndividuallyVerifiedConfiguredFirstSessionObjectiveIsCompleted",
+    "LivingDungeonPhaseB3A.OrderingUsesAbsoluteCompletionAndNumericSequenceRegardlessOfEnumeration(False)",
+    "LivingDungeonPhaseB3A.OrderingUsesAbsoluteCompletionAndNumericSequenceRegardlessOfEnumeration(True)",
+    "LivingDungeonPhaseB3A.PartialCandidateAndDurableReadbackFailuresDoNotRetireOrPublish(\"partial\")",
+    "LivingDungeonPhaseB3A.PartialCandidateAndDurableReadbackFailuresDoNotRetireOrPublish(\"readback\")",
+    "LivingDungeonPhaseB3A.PartyWipeRetainsHistoricalExtractionButPublishesNoSurvivorLearning",
+    "LivingDungeonPhaseB3A.ProductionDefaultContextCannotInstallQualification",
+    "LivingDungeonPhaseB3A.QualifiedTerminalPublishesExistingIdentityAndOneRevisionThenRetires",
+    "LivingDungeonPhaseB3A.RealWindowsAtomicReplacementRollbackRetryAndReopenAreExactlyOnce",
+    "LivingDungeonPhaseB3A.ReopenedB2TerminalCannotAcquireProvenanceAfterTheFact",
+    "LivingDungeonPhaseB3A.ReplayAndParserLimitsRemainIndependentOfQualification",
+    "LivingDungeonPhaseB3A.RetiredBytesAndReplayReleaseCapacityForLaterAdmission",
+    "LivingDungeonPhaseB3A.SettlementDoesNotCompleteUnmetObjectivesOrResearchOrGrantMana",
+    "LivingDungeonPhaseB3A.SettlementUsesCurrentHistoryRetentionRatherThanTheOlderStartBound",
+    "LivingDungeonPhaseB3A.SettlementWorkAndReleasedStorageAreMeasuredWithinProfileBounds",
+    "LivingDungeonPhaseB3A.SplitBudgetAndReopenGroupingsProduceByteIdenticalSettlement(1)",
+    "LivingDungeonPhaseB3A.SplitBudgetAndReopenGroupingsProduceByteIdenticalSettlement(2)",
+    "LivingDungeonPhaseB3A.SplitBudgetAndReopenGroupingsProduceByteIdenticalSettlement(7)",
+    "LivingDungeonPhaseB3A.UncertainRollbackBlocksTheQualificationScope",
+    "LivingDungeonPhaseB3A.UnfinishedHorizonRejectsBeforeEligibility",
+    "LivingDungeonPhaseB3A.UnknownHistoryAndRetainedOutcomeExtensionsSurviveAlongsideCompatibleNulls",
+    "LivingDungeonPhaseB3A.UnobservedCanonicalWriteInvalidatesExactPrefixAuthorization"
+  ],
+  "preparation": "TestResults\\h1-f4-20261027-bf01",
+  "prior_evidence_directories_verified": 216,
+  "protected_evidence_unchanged": true,
+  "qualified_source": "6bb1e89584b1296ba74d9d6c9f900f34cb0964f3",
+  "reservation": {
+    "campaign": null,
+    "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\a4725051c17b47bb8397adcd3066f8b1"
+  },
+  "retention": "All listed preparations/campaigns/native files are H1-F4-owned retained review evidence; no cleanup.",
+  "stages": [
+    {
+      "child_process": {
+        "created": 134377655591182858,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 32344
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-32d95c9b05444e91b700634e8b543cda",
+      "process": {
+        "created": 134377655589947082,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 36948
+      },
+      "result_sha256": "7d3384828aedcdfa2dfcc4f4938e279fc41f7f7896a6833ecf89e185b378488a",
+      "stage": "legacy-target-preflight",
+      "status": "PASSED"
+    },
+    {
+      "child_process": {
+        "created": 134377655688729693,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 42904
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-98e87f56e9da4c7caa85cc934b49204f",
+      "process": {
+        "created": 134377655687644391,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 31124
+      },
+      "result_sha256": "5e6ff13d99d38deeeb6cd35331e29eae75996e7589973ef9a7ab52496b3a2115",
+      "stage": "legacy-target",
+      "status": "PASSED"
+    },
+    {
+      "child_process": {
+        "created": 134377656331559567,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 16376
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-11c0d71d1b8b462992e70ecb1ae06574",
+      "process": {
+        "created": 134377656330385656,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 23624
+      },
+      "result_sha256": "d8bd30e865cb8fa0ec3254b2b599cb8cbb50896f19d5a2e22b9a5094741eb88c",
+      "stage": "legacy-scheduling-preflight",
+      "status": "PASSED"
+    },
+    {
+      "child_process": {
+        "created": 134377656431542647,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 1812
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-e4105cdab7ed4ae2bffd4002ec865159",
+      "process": {
+        "created": 134377656430444806,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 7724
+      },
+      "result_sha256": "09bdd8f83b6c6f3df03149a5471f61e3eefb42ef885604ae0ed63cfd5f729ac9",
+      "stage": "legacy-scheduling",
+      "status": "PASSED"
+    },
+    {
+      "child_process": {
+        "created": 134377659432908775,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 19028
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-7966ca05fe4648d680df4dcd23dc6de4",
+      "process": {
+        "created": 134377659431703139,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 26224
+      },
+      "result_sha256": "9e6584ca7efc6651624fb32333af86eb32fc2a0ca9a880313f005670150df498",
+      "stage": "restore-preflight",
+      "status": "PASSED"
+    },
+    {
+      "child_process": {
+        "created": 134377659532751271,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 9272
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-c429b47658494a899b523b57b634e661",
+      "process": {
+        "created": 134377659531617197,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 41084
+      },
+      "result_sha256": "9e89273dd2b55ed0c6a64b69ebd5e817eec5886ac4c7ee51e1e0ea291bf09e64",
+      "stage": "restore",
+      "status": "PASSED"
+    },
+    {
+      "child_process": {
+        "created": 134377659634542583,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 42400
+      },
+      "exit_code": 0,
+      "host_exit_code": 0,
+      "job": "Local\\DLQ-4e3b0284b3964c51ba24832e699b293d",
+      "process": {
+        "created": 134377659633474552,
+        "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "pid": 34656
+      },
+      "result_sha256": "a96477c237bc8afe91e84fdda3bb7a9d5bc2dc4633df2f20bf9b6e10227aa844",
+      "stage": "preservation",
+      "status": "PASSED"
+    }
+  ],
+  "status": "PASSED",
+  "target": {
+    "failed": 0,
+    "overlaps_complete": true,
+    "passed": 9,
+    "skipped": 0
+  },
+  "target_leaves": [
+    "LivingDungeonPhaseB3A.FailedAtomicSettlementPublishesNothingAndProvenRollbackCanRetry(Write,1)",
+    "LivingDungeonPhaseB3A.FailedAtomicSettlementPublishesNothingAndProvenRollbackCanRetry(Write,2)",
+    "LivingDungeonPhaseB3A.FailedAtomicSettlementPublishesNothingAndProvenRollbackCanRetry(Replace,1)",
+    "LivingDungeonPhaseB3A.FailedAtomicSettlementPublishesNothingAndProvenRollbackCanRetry(Flush,1)",
+    "LivingDungeonPhaseB3A.PartialCandidateAndDurableReadbackFailuresDoNotRetireOrPublish(\"partial\")",
+    "LivingDungeonPhaseB3A.PartialCandidateAndDurableReadbackFailuresDoNotRetireOrPublish(\"readback\")",
+    "LivingDungeonPhaseB3A.RealWindowsAtomicReplacementRollbackRetryAndReopenAreExactlyOnce",
+    "LivingDungeonPhaseB3A.UncertainRollbackBlocksTheQualificationScope",
+    "LivingDungeonPhaseB3A.UnobservedCanonicalWriteInvalidatesExactPrefixAuthorization"
+  ],
+  "test_name_prefix": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.",
+  "tools": {
+    "C:\\Program Files\\Git\\cmd\\git.EXE": {
+      "sha256": "81ef35ae005ca9318018d18e3327578ce939fb99feaad6b2d7c8ab15f3de8db5",
+      "version": "git version 2.54.0.windows.1"
+    },
+    "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.2f1\\Editor\\Unity.exe": {
+      "sha256": "c2f3d552a9f9a4639b2e54e9d41f360614d512ba6a9816c8c934568ecc2ad93d",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe": {
+      "sha256": "73dbf1f40507275d6fa636b49eb80b4753e313f649f52591abba86b31f1a1bce",
+      "version": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-bf01\\run_selected01.py": {
+      "sha256": "a2dd32755f173f709f30a88828f6b09d89ea6b69bacd3605588c62da01880e44",
+      "version": "9 actual protocol-cut faults then complete exact 123-case B2/B3A cohort"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_inputs.py": {
+      "sha256": "34d3ff45cf7512e21f242bc0e4ede876e5c8b68eddba853ad9b1e69192270c92",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_supervisor.py": {
+      "sha256": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualification_windows.py": {
+      "sha256": "234bce5f0ca8c7087bb999c603cfbb3d87f0eb4499501a1644dcbbabf3104db7",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\Tools\\Presentation\\qualify_h1_f4.py": {
+      "sha256": "cafa31627594654b4bc0d34a88c5a4bc3ad4db813a7451e7aa25a4756f86fbc0",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe": {
+      "sha256": "78761a0547cd4a9bc212e27a217c66e6a621bf48c753ba440e4b2327ee7ff8ac",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE": {
+      "sha256": "d8f182560210d43baaf767d482ad1dc1207372522e91413b9d5e515a875e552d",
+      "version": "Windows PowerShell 5.1; process-inspection dependency"
+    }
+  }
+}

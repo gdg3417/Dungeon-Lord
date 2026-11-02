@@ -130,13 +130,24 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         new CanonicalSpatialSerializationLimits(schema15.Profile.Canonical.Serialized,
                             schema15.Profile.Canonical.Spatial, prior14, CanonicalSaveSchemaVersions.FrozenSchemaFifteen),
                         schema15.Profile.Whole);
+                    var schema16 = LoadCore(Resources.Load<TextAsset>("save_spatial_migration_limits_schema16")?.bytes, false);
+                    if (!schema16.IsSuccess) { historical = null; return Failure(schema16.Reason); }
+                    var prior15 = historical; var raw16 = schema16.Profile.Raw;
+                    historical = new SaveSpatialMigrationLimitsProfile(new RawSavePayloadClassificationLimits(
+                        raw16.MaximumInputBytes, raw16.MaximumNestingDepth, raw16.MaximumObjectMembers,
+                        raw16.MaximumArrayElements, raw16.MaximumStringBytes, raw16.MaximumScanWork,
+                        prior15, CanonicalSaveSchemaVersions.FrozenSchemaFifteen,
+                        schema16.Profile.Canonical.Spatial.MaximumRecords, true),
+                        new CanonicalSpatialSerializationLimits(schema16.Profile.Canonical.Serialized,
+                            schema16.Profile.Canonical.Spatial, prior15, CanonicalSaveSchemaVersions.FrozenSchemaFifteen, true),
+                        schema16.Profile.Whole);
                 }
                 raw = new RawSavePayloadClassificationLimits(values[0], values[1], values[2], values[3], values[4], values[5],
-                    historical, CanonicalSaveSchemaVersions.FrozenSchemaFifteen, values[11], true);
+                    historical, CanonicalSaveSchemaVersions.FrozenSchemaSixteen, values[11], true);
             }
             return new SaveSpatialMigrationLimitsLoadResult(new SaveSpatialMigrationLimitsProfile(raw,
                 new CanonicalSpatialSerializationLimits(serialized, spatial, includeHistorical ? historical : null,
-                    CanonicalSaveSchemaVersions.FrozenSchemaFifteen, true), whole), null);
+                    CanonicalSaveSchemaVersions.FrozenSchemaSixteen, true), whole), null);
         }
 
         private static SaveSpatialMigrationLimitsLoadResult Failure(string reason) =>

@@ -63,7 +63,7 @@ namespace DungeonBuilder.M0
         public FloorConstructionPreview FloorConstructionPreview { get; private set; }
         public string StructuralConstructionReasonKey { get; private set; } = string.Empty;
         public SaveSpatialMigrationLimitsProfile SaveSpatialMigrationLimits { get; private set; }
-        public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : null;
+        public RunSimulationConfig RunSimulationConfig => _runSimulationService != null ? _runSimulationService.Config : recoveryRuntimeInputs?.Configuration;
         public ProductionSpatialContentSnapshot ProductionSpatialContent => Content?.ProductionSpatialContent;
 
         public string BannerMessage { get; private set; } = string.Empty;
@@ -265,6 +265,9 @@ namespace DungeonBuilder.M0
 
         private void Start()
         {
+#if UNITY_EDITOR
+            editorRecoveryStartEntered = true;
+#endif
             _sm.SetState(new BootState(this));
         }
 
@@ -332,6 +335,9 @@ namespace DungeonBuilder.M0
                 TimeService.AttachSave(null);
             }
             TimeService = null;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            qualificationObservationOwner = null; qualificationClockControl = null;
+#endif
             _structureSimulationPass = null;
             _runSimulationService = null;
             Save = null;
@@ -361,6 +367,14 @@ namespace DungeonBuilder.M0
             else
             {
                 if (TimeService == null || !TimeService.IsPaused) return;
+                if (Save?.timeProvenance?.Mode == TimeProvenance.PreciseMode || recoveryRuntimeInputs != null) {
+                    string observedBanner = TimeService.OnResume();
+                    if (!string.IsNullOrEmpty(observedBanner)) SetBanner(Content.GetString(observedBanner, observedBanner));
+                    foregroundResumePending = false;
+                    PauseLine = "Pause: Running";
+                    FlushForeground();
+                    return;
+                }
                 if (!FlushForeground()) { foregroundResumePending = true; return; }
                 if (_resumeOfflineBoundaryPersisted && !TryApplyOfflinePassiveMana())
                 {
@@ -571,16 +585,35 @@ namespace DungeonBuilder.M0
                     SetBanner(Content.GetString(invalidSpatialSaveBanner, invalidSpatialSaveBanner));
                 return false;
             }
-            if (!TryConfigureCanonicalPassiveMana())
+            if (UsesAtomicRecoveryRuntime ? !TryConfigureRecoveryRuntime(spatialLimits.Limits) : !TryConfigureCanonicalPassiveMana())
                 return false;
             SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
-            Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
+            SaveData loaded = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
+            return CompleteLoadedBoot(loaded, saveBanner);
+        }
+
+        private bool CompleteLoadedBoot(SaveData loaded, string saveBanner)
+        {
+            Save = loaded;
             if (Save == null)
             {
                 if (!string.IsNullOrEmpty(saveBanner)) SetBanner(Content.GetString(saveBanner, saveBanner));
                 return false;
             }
-            if (!TryApplyOfflinePassiveMana())
+            if (UsesAtomicRecoveryRuntime) {
+                TimeService.BindLoadedForegroundHorizon(Save.livingDungeon?.Scheduler?.AcceptedThrough ?? -1);
+                TimeService.AttachSave(Save);
+                if (Save.timeProvenance.Episode != null || !SaveService.LastLoadCreatedNative) {
+                    SaveService.BeginCanonicalRecovery(Save);
+                    bootRecoveryPending = true; bootRecoveryBanner = saveBanner;
+                    return false;
+                }
+                if (TimeService.HasDeferredRecovery) {
+                    bootRecoveryPending = true; bootRecoveryBanner = saveBanner;
+                    return false;
+                }
+            }
+            else if (!TryApplyOfflinePassiveMana())
             {
                 string key = OfflinePassiveManaPresenter.PersistenceFailureReasonKey;
                 SetBanner(Content.GetString(key, key));
@@ -611,15 +644,19 @@ namespace DungeonBuilder.M0
                 ? Content.Bootstrap.timeRules.detectClockSkewSeconds
                 : 300;
 
-            if (TimeService != null) return false;
+            if (TimeService != null && !UsesAtomicRecoveryRuntime) return false;
+            if (TimeService == null) {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             var qualificationClock = LivingDungeonForegroundDevelopmentSmoke.ReopenClock(
                 Environment.GetCommandLineArgs(), Application.productName, SaveService.SavePath);
+            qualificationClockControl = qualificationClock?.Target as PreboundForegroundQualificationClock;
             TimeService = qualificationClock == null ? new TimeService(Logger, tickSeconds, skewSeconds) :
                 new TimeService(Logger, tickSeconds, skewSeconds, new SystemTimeSource(), qualificationClock);
+            qualificationObservationOwner = TimeService;
 #else
             TimeService = new TimeService(Logger, tickSeconds, skewSeconds);
 #endif
+            }
             TimeService.AttachSave(Save);
             TimeService.OnTick += HandleSimulationTick;
             TimeService.OnTick += HandleTickTelemetry;
@@ -638,8 +675,9 @@ namespace DungeonBuilder.M0
             _selectedSlotIndex = 0;
             InitializeStructureSimulationPass();
             InitializeRunSimulationService();
+            if (UsesAtomicRecoveryRuntime) InitializeForeground();
             SaveService.Save(Save, SaveReason.Boot);
-            InitializeForeground();
+            if (!UsesAtomicRecoveryRuntime) InitializeForeground();
             overlay?.RefreshStructuralConstructionAuthority();
             SaveLine = "Save: Boot";
 
@@ -1085,6 +1123,10 @@ namespace DungeonBuilder.M0
         private void InitializeRunSimulationService()
         {
             _runSimulationService = null;
+            if (recoveryRuntimeInputs != null) {
+                _runSimulationService = new RunSimulationService(recoveryRuntimeInputs.Configuration, recoveryRuntimeInputs.Loot);
+                return;
+            }
             string json = runSimulationConfigJson != null ? runSimulationConfigJson.text : string.Empty;
             string lootJson = lootConfigJson != null ? lootConfigJson.text : string.Empty;
             if (!TryCreateRunSimulationService(json, lootJson, out _runSimulationService))
@@ -1139,11 +1181,15 @@ namespace DungeonBuilder.M0
                     SetBanner(Content.GetString(bannerKey, bannerKey));
                 return false;
             }
-            if (!CompleteSuccessfulBoot(repaired, bannerKey)) return false;
+            // A repaired legacy save must cross the same recovery barrier as an
+            // ordinary load. Accept the repair while the existing coordinator
+            // completes its episode; only FinishRecoveryBoot may enter Home.
+            bool completed = CompleteLoadedBoot(repaired, bannerKey);
+            if (!completed && !bootRecoveryPending) return false;
             if (string.IsNullOrEmpty(bannerKey) && string.Equals(
                     BannerMessage, preRepairBlockedBanner, System.StringComparison.Ordinal))
                 SetBanner(string.Empty);
-            GoHomeStub();
+            if (completed) GoHomeStub();
             return true;
         }
 
@@ -1820,7 +1866,8 @@ namespace DungeonBuilder.M0
             }
 
             CurrentHeat = Save.structureRuntime != null ? Save.structureRuntime.Heat : 0d;
-            Save.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
+            if (Save.timeProvenance?.Mode != TimeProvenance.PreciseMode)
+                Save.lastSavedUtcUnix = TimeUtil.UtcNowUnixSeconds();
             CaptureOfflineSummaryDiagnostics();
             RefreshDashboardState();
             RefreshOfflineSummaryLines();
@@ -2623,6 +2670,13 @@ namespace DungeonBuilder.M0
             Func<string, string> localize = key => Content != null
                 ? Content.GetString(key, key)
                 : key;
+            if (Save?.timeProvenance?.Mode == TimeProvenance.PreciseMode) {
+                OfflinePassiveManaLine = OfflinePassiveManaPresenter.BuildRecovery(
+                    SaveService?.RecoveryReport, Save.structureRuntime.ManaReserve,
+                    _passiveManaService != null ? _passiveManaService.ManaCapacity : double.NaN,
+                    PassiveManaPresenter.ResolveFormatProvider(Content?.Strings?.language), localize);
+                return;
+            }
             OfflinePassiveManaLine = OfflinePassiveManaPresenter.Build(
                 _latestOfflinePassiveManaResult,
                 PassiveManaPresenter.ResolveFormatProvider(Content?.Strings?.language),

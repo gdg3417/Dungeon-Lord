@@ -574,8 +574,13 @@ namespace DungeonBuilder.M0.Tests
             root.Save.structureRuntime.ManaReserve+=quote.Profile.ConstructionMana;
             quote=root.SaveService.PreviewFloorConstruction(root.Save);
             Assert.That(root.SaveService.CommitFloorConstruction(root.Save,quote).IsSuccess,Is.True);
+            // Close the construction's legitimate pending foreground publication
+            // before measuring subsequent read-only navigation and input.
+            yield return StabilizeReadOnlySceneBaseline();
             var state=root.Save.validatedCanonicalSpatialState;
             var before=File.ReadAllBytes(root.SaveService.SavePath); double mana=root.Save.structureRuntime.ManaReserve;
+            string baselineGameplay=JsonUtility.ToJson(root.Save);
+            var baselineTime=root.TimeService;
             var ui=controller.GetComponent<UIDocument>().rootVisualElement;
             for(int i=0;i<12;i++) yield return null;
             var floors=ui.Q("floors").Children().Cast<Button>().ToArray();
@@ -593,6 +598,9 @@ namespace DungeonBuilder.M0.Tests
             for(int i=0;i<8;i++) yield return null;
             Assert.That(controller.FloorRailCollapsed,Is.False);
             Assert.That(controller.Viewport.Center,Is.EqualTo(railCamera));
+            Assert.That(JsonUtility.ToJson(root.Save),Is.EqualTo(baselineGameplay),"Read-only floor controls cannot change canonical gameplay, W, A/C or rewards");
+            Assert.That(root.TimeService,Is.SameAs(baselineTime));
+            CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(),File.ReadAllBytes(root.SaveService.SavePath));
             AssertCanonicalUnchanged(before,mana);
             yield return CompositionTap(CompositionButtonScreen(floors[1]));
             Assert.That(controller.SelectedFloorInstanceId,Is.EqualTo(state.Floors[1].FloorInstanceId));

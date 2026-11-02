@@ -1,0 +1,144 @@
+{
+  "adjacent_research_cases": 18,
+  "base": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "branch": "codex/h1-f4-recovery",
+  "campaign": "c97282ff29634dd9aa1216d76cdc4593",
+  "changed_files": [
+    "Assets/_Project/Editor/DungeonSpatial/Tests/RoomContentPositionMigrationProfileTests.cs",
+    "Assets/_Project/Tests/EditMode/Gd66DetachedCompleteSaveContractTests.cs",
+    "Assets/_Project/Tests/EditMode/Gd66SaveWorkloadMeasurementTests.cs",
+    "Assets/_Project/Tests/EditMode/PhaseSevenA2PositionalCanonicalStateTests.cs",
+    "Assets/_Project/Tests/EditMode/PhaseSevenA4DraftDurabilityTests.cs",
+    "Assets/_Project/Tests/EditMode/PhaseSevenA4TransactionalEditorTests.cs",
+    "Assets/_Project/Tests/EditMode/PhaseSixAActivationTests.cs",
+    "Assets/_Project/Tests/EditMode/ProductionSpatialContentLoadingTests.cs",
+    "Assets/_Project/Tests/EditMode/ResearchDurableAcknowledgementTests.cs",
+    "Assets/_Project/Tests/EditMode/SaveSpatialMigrationLimitsTests.cs",
+    "Assets/_Project/Tests/EditMode/SpatialLayoutCompatibilityProfileTests.cs",
+    "Assets/_Project/Tests/EditMode/TransactionalRoomContentTests.cs"
+  ],
+  "evidence_sha256": {
+    "TestResults/h1-f4-20261027-fe02/owner-approved-recovery01/receipt.json": "3e0bb9034d29e2d0f8f8ec5a3f7befbdedb2349f5e940d821e50fd9985f5f6e7",
+    "TestResults/h1-f4-20261027-fe02/preservation-review01/independent-owner-recovery01.json": "07b38414ead0238f89cc3754f610df0928b80c810431ccf5e9111f3dc78c0bcb",
+    "TestResults/h1-f4-20261027-rx04/independent-completion01.json": "82cc7de0d2b0f652f82255be5ca4c3959f41908afd8c74a77f52a9fbc97d4f5c",
+    "TestResults/h1-f4-20261027-rx04/plan-selected01.json": "e1c7bd6cdd4b9061040457c29728835cddb3a5fda4eb2fdd477bfafa6bbadbd0",
+    "TestResults/h1-f4-20261027-rx04/selected-inventory.json": "966c53a839fdd4a5c5ec9bcd751b99ab37c02e76dface1853345cdf5fcba2043",
+    "TestResults/qualification-supervisor/c97282ff29634dd9aa1216d76cdc4593/living-regressions/results.xml": "2e00a505beeb0dd02720237c580832f47c299a55cf7f5e094e04a2d621a7c625"
+  },
+  "failed": 0,
+  "frozen_contracts_changed": false,
+  "full_suite_failure_count_at_new_source": null,
+  "merge_performed": false,
+  "original_328_preserved": true,
+  "original_36_identities": [
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourCompatibility.ProductionConfiguration_IsCanonicalAuthorizedReleaseAndRecomputesEveryHash",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourCompatibility.ProductionReleasePolicyPreservesFrozenSevenEightAndCurrentNineBoundaries",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourCompleteSave.FrozenSchemaSevenUpgrade_PreservesIssuedNativeRoomIdentityAndAdvancesHighWater",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourContent.EveryPublishedGraphIsDetachedAndDoesNotBecomeSavePersistenceAuthority",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourContent.ProductionPublicationHasOnlyApprovedCanonicalRuntimeConsumers",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.Historical64RecordLifecycleBoundaryPreservesCustodyAndRejectsNextRecordAtomically",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(0)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(1)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(2)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(3)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(4)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeCompleteCandidate_EnforcesEachRawReadBudget(5)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.PhaseThreeLifecycle_EmitExactCompleteSaveMeasurements",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.ProductionCustodyArrayBoundaryRedeploysWithoutInflatingRecords",
+    "DungeonBuilder.M0.Editor.Tests.PhaseFourWorkload.ProductionLifecycle_CustodyArrayBoundaryRejectsNextReturnBeforePersistence",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSevenA2PositionalCanonicalState.CurrentSchemaRecoveryUsesExplicitOccupancyAndFailsClosedWhenItIsMissing",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixAActivation.CurrentConstantsAndNativeEmptyCreationUseThirteen",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixAActivation.FrozenChainContinuesThroughEachHistoricalStepToThirteen(10)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixAActivation.FrozenChainContinuesThroughEachHistoricalStepToThirteen(7)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixAActivation.FrozenChainContinuesThroughEachHistoricalStepToThirteen(8)",
+    "DungeonBuilder.M0.Editor.Tests.PhaseSixAActivation.FrozenChainContinuesThroughEachHistoricalStepToThirteen(9)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.DurabilityMatrix_SuccessHasIndependentCommitChainAndCanonicalCommitAfterRecovery",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftContainmentFailureDeletesNothing",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftFailureBeforeOrAfterMutationPreservesCanonical(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftFailureBeforeOrAfterMutationPreservesCanonical(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteDraftFlushFailureCannotClaimTotalDeletion",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteOversizedDraftEvidenceFailsClosedBeforeCanonicalDeletion",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4DraftDurability.ExplicitDeleteRemovesDraftLegacyAndCanonicalEvidenceBeforeFreshBoot",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4TransactionalEditor.RepositionPreservesIdentityWalletCanonicalBytesAndReopensExactPosition(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4TransactionalEditor.RepositionPreservesIdentityWalletCanonicalBytesAndReopensExactPosition(\"placement.category.monster\",\"placement.option.monster.skeleton\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4TransactionalEditor.RepositionPreservesIdentityWalletCanonicalBytesAndReopensExactPosition(\"placement.category.trap\",\"placement.option.trap.spike\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.loot_node\",\"placement.option.loot_node.basic\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.monster\",\"placement.option.monster.skeleton\")",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.TransactionalRoomContent.PreviewConfirmDurableRecoverAndAtomicPurchaseRetainExactIdentity(\"placement.category.trap\",\"placement.option.trap.spike\")",
+    "DungeonBuilder.M0.EditorTools.Tests.FrozenSchemaFifteenMigrationRegression.EstablishedHistoricalLimitLoaderAssertions",
+    "DungeonBuilder.M0.Tests.EditMode.RoomContentPositionMigrationProfileTests.SchemaTwelveContractRemainsFrozenWhileSchemaThirteenActivatesPosition"
+  ],
+  "original_84_covered": 36,
+  "original_84_remaining_without_new_passing_evidence": 48,
+  "owner_uat_started": false,
+  "passed": 346,
+  "preservation": {
+    "input_count": 1494,
+    "original_archive_members_verified": 1494,
+    "original_inputs_restored": true,
+    "prior_evidence_directories_verified": 255,
+    "protected_evidence_unchanged": true,
+    "reservation": {
+      "campaign": null,
+      "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\c97282ff29634dd9aa1216d76cdc4593"
+    },
+    "tools_reverified": 10
+  },
+  "preserved_failed_campaigns": [
+    {
+      "campaign": "b4c8042264f54c4781e311dacbd2e24b",
+      "counts": [
+        312,
+        16,
+        0
+      ],
+      "guarded_restoration_receipt": "TestResults/h1-f4-20261027-rx01/post-failure-finalize01/receipt.json",
+      "receipt_sha256": "06ba4a82abc8dc7bf84ea5229c039b227a8fec5b122a4fdd2404c764809b1616",
+      "verdict": "FAILED"
+    },
+    {
+      "campaign": "7a7d5b9202f94679875fbb37083e32ed",
+      "counts": [
+        324,
+        4,
+        0
+      ],
+      "guarded_restoration_receipt": "TestResults/h1-f4-20261027-rx02/post-failure-finalize01/receipt.json",
+      "receipt_sha256": "50b00c291382a1d45f3212eeba41aaaa8c6184e0da6ba197d7af7b3dbe006cb3",
+      "verdict": "FAILED"
+    },
+    {
+      "campaign": "bc4b520fcdea48358110329518b125c5",
+      "counts": [
+        327,
+        1,
+        0
+      ],
+      "guarded_restoration_receipt": "TestResults/h1-f4-20261027-rx03/post-failure-finalize01/receipt.json",
+      "receipt_sha256": "de33a7c774a363f3588b072699a598b2dd62cbda1ca953e5c0130d3af355e5f5",
+      "verdict": "FAILED"
+    }
+  ],
+  "production_changed": false,
+  "remaining_by_class": {
+    "Gd66WindowsSpatialMigrationFileSystemTests": 1,
+    "LivingDungeonPhaseABaselineTests": 1,
+    "MvpCanonicalJourneyIntegrationTests": 1,
+    "OfflinePassiveManaTests": 12,
+    "PhaseSevenA4ProductionSceneTests": 19,
+    "PhaseSevenA5TransactionalRoomMovementTests": 4,
+    "PhaseSixA5ATests": 6,
+    "PhaseSixA5BTests": 2,
+    "RecoveryEntryAndPrecisePassiveManaTests": 1,
+    "ResearchCompletionEligibilityDiagnosticsTests": 1
+  },
+  "skipped": 0,
+  "supervisor_stages": {
+    "living-regressions": "PASSED",
+    "living-regressions-preflight": "PASSED",
+    "preservation": "PASSED",
+    "restore": "PASSED",
+    "restore-preflight": "PASSED"
+  },
+  "tested_source": "65c40334aed92a8143c0ac353f81d1557eecb3e3"
+}

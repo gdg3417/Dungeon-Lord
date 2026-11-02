@@ -176,10 +176,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.Throws<InvalidOperationException>(()=> { execution=Start(c,B.Room(0,true,Monster())); execution.DrainToCompletion(); });
             if(execution!=null) Assert.Throws<InvalidOperationException>(()=>execution.TakeOutcome());
         }
-        private static DetachedCanonicalWriteAuthorityTests.Fixture Canonical(bool two=false)
+        private static DetachedCanonicalWriteAuthorityTests.Fixture Canonical(bool two=false, Action<RunSimulationConfig> author=null)
         {
-            var f=two ? PhaseSixA4Tests.Eligible() : PhaseFiveBBranchIntegrationTests.Fixture(false);
-            f.Configuration.CombatC0=Config().CombatC0; PhaseSixA4Tests.ForceDescent(f.Configuration,true);
+            void Author(RunSimulationConfig config) {
+                config.CombatC0=Config().CombatC0;
+                PhaseSixA4Tests.ForceDescent(config,true);
+                author?.Invoke(config);
+            }
+            var f=two ? PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs((config, _) => Author(config)))
+                : PhaseFiveBBranchIntegrationTests.Fixture(false, Author);
             PhaseSixA4Tests.AddContent(f,0,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.GoblinOptionId);
             if(two) { PhaseSixA4Tests.AddContent(f,1,MvpDungeonPlacementIds.MonsterCategoryId,MvpDungeonPlacementIds.SkeletonOptionId);
                 f.Accept(PhaseSixA4Tests.Writer(f).CommitFloorLifecycle(f.ActivePath,f.FileSystem,f.Session,f.Runtime,FloorLifecycleAction.Activate,PhaseSixA4Tests.FloorTwo(f))); }
@@ -196,7 +201,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(CombatC0Diagnostics.Events(run).Count(e=>e.Kind==CombatC0EventKind.EncounterStart),Is.EqualTo(1));
             Assert.That(run.RunId,Is.EqualTo("run-"+sequence)); Assert.That(f.Runtime.runHistory.NextRunSequence,Is.EqualTo(sequence+1));
             double settledMana = mana - f.Runtime.monsterContinuity.Inspect().Sum(m => m.Health - run.CombatMonsters.Single(c => c.AssignmentId == m.AssignmentId).Health);
-            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(settledMana)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget,Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve,Is.EqualTo(settledMana)); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget,Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
             string aggregate=JsonUtility.ToJson(run); Assert.That(aggregate,Does.Not.Contain("Combat").And.Not.Contain("Health"));
             var clone=JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(f.Runtime)); RunTransientEvidence.Retain(f.Runtime,clone);
             Assert.That(B.Structured(CombatC0Diagnostics.Events(clone.runHistory.LatestOutcome)),Is.EqualTo(B.Structured(CombatC0Diagnostics.Events(run))));
@@ -228,11 +233,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void LaterCombatTechnicalFailureRollsBackEarlierDamageLootAndAllCanonicalState()
         {
-            var f=Canonical(true); foreach(var p in f.Configuration.CombatC0.Monsters) { p.Damage=0; p.MaxHealth=p.Id==MvpDungeonPlacementIds.GoblinOptionId?1:int.MaxValue; }
+            var f=Canonical(true, config => {
+                // Bound the intended late combat fault without exhausting the
+                // canonical recovery reserve before combat can start.
+                config.CombatC0.MaximumRounds=1;
+                int beyondOneRound=checked(config.CombatC0.Classes.Max(p=>p.Damage)*config.PhaseFiveB.MaxPartySize+1);
+                foreach(var p in config.CombatC0.Monsters) { p.Damage=0; p.MaxHealth=p.Id==MvpDungeonPlacementIds.GoblinOptionId?1:beyondOneRound; }
+            });
             var snapshot=PhaseSixA4Tests.Snapshot(f); var staged=PhaseFiveBBranchIntegrationTests.Service(f.Configuration).StartHistoricalCombatC0Snapshot(1,snapshot);
             RunStep step; do { step=staged.AdvanceToNextEvent(staged.NextOrdinal); } while(step.Kind!=RunStepKind.RoomComplete);
             Assert.That(staged.Inspect().CarriedLootValue,Is.GreaterThan(0));
-            Assert.Throws<InvalidOperationException>(()=>staged.DrainToCompletion());
+            var fault=Assert.Throws<InvalidOperationException>(()=>staged.DrainToCompletion());
+            while(fault.InnerException is InvalidOperationException inner) fault=inner;
+            Assert.That(fault.Message,Is.EqualTo("combat.c0.round_limit"));
             byte[] before=f.FileSystem.ReadAllBytes(f.ActivePath); string live=B.Structured(f.Runtime); var session=f.Session;
             var result=PhaseFiveBBranchIntegrationTests.Run(f); Assert.That(result.IsSuccess,Is.False); Assert.That(result.RuntimeProjection,Is.Null);
             CollectionAssert.AreEqual(before,f.FileSystem.ReadAllBytes(f.ActivePath)); Assert.That(f.Session,Is.SameAs(session)); Assert.That(B.Structured(f.Runtime),Is.EqualTo(live));
@@ -295,17 +308,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [Test] public void EnabledC0CannotChangeInjectedB2OpportunityExecutionOrItsDurableCheckpoint()
         {
-            var f=Canonical(); var t=typeof(LivingDungeonPhaseB2Tests); var flags=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static;
-            f=(DetachedCanonicalWriteAuthorityTests.Fixture)t.GetMethod("Qualify",flags).Invoke(null,new object[]{f});
-            t.GetMethod("Activate",flags).Invoke(null,new object[]{f}); t.GetMethod("Admit",flags).Invoke(null,new object[]{f,0L,0L});
-            foreach(var p in f.Runtime.livingDungeon.Parties)
+            var f=Canonical();
+            // Historical B1 execution is a pure scheduler/read-only claim. It
+            // cannot acquire current-schema publication through an old profile.
+            var model=new LivingDungeonPhaseB2Tests.HistoricalModel(f); model.Admit(0,0);
+            foreach(var p in model.State.Parties)
             {
-                var profile=(LivingDungeonProfile)t.GetMethod("ProfileA",flags).Invoke(null,null);
+                var profile=model.Profile;
                 var execution=LivingDungeonContracts.Restore(p,profile);
                 Assert.That(execution.StartIdentity,Is.Not.Null); Assert.That(execution.Combat,Is.Null);
                 Assert.That(execution.ExportCheckpoint(profile.Checkpoints),Is.Not.Null); execution.Abandon();
             }
-            Assert.That(f.Runtime.livingDungeon.Parties,Is.Not.Empty);
+            Assert.That(model.State.Parties,Is.Not.Empty);
+            model.FrozenReaderBytes(); model.AssertSourceUnchanged();
         }
         [Test] public void ExecutionBatchSizeCannotChangeCompletedCombatOrChronology()
         {

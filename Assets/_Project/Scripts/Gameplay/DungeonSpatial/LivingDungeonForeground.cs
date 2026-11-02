@@ -13,13 +13,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         // one final exact predecessor-to-candidate write publishes the whole pump.
         internal DetachedCanonicalWriteResult AdvanceForeground(string path, ISpatialMigrationFileSystem fs,
             DetachedCanonicalSaveSession session, SaveData current, LivingDungeonForegroundConfig policy,
-            long observedThrough, int tickSeconds, Action<SaveData, long> passiveTick, long savedUtcUnix)
+            long observedThrough, int tickSeconds, Action<SaveData, long> passiveTick, long savedUtcUnix,
+            CanonicalTimeTransition timeTransition = null, Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null)
         {
             using var pumpDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.Pump,
                 ForegroundQualificationMetrics.Origin.Pump);
             const string invalid = "living.foreground.invalid_state";
             var executions = new Dictionary<int, RunExecution>();
             try {
+                var bound = context?.RecoveryInputs;
+                if (bound != null && ((!ReferenceEquals(policy, bound.OneFloor) && !ReferenceEquals(policy, bound.TwoFloor)) ||
+                    tickSeconds != bound.Bootstrap.tickSeconds)) return Failure(RecoveryEpisode.ContextMismatch);
                 if (policy == null || current == null || session == null || fs == null || observedThrough < 0 || tickSeconds <= 0 || passiveTick == null ||
                     !session.GetCurrentBytes().SequenceEqual(fs.ReadAllBytes(path))) return Failure(invalid);
                 var profile = context.LivingDungeonProfiles.SingleOrDefault(p => p.Id == (current.livingDungeon?.Scheduler?.ProfileId ?? policy.Id));
@@ -35,6 +39,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 RunTransientEvidence.Retain(current, runtime);
                 runtime.lastSavedUtcUnix = savedUtcUnix;
                 var owner = owned.LivingDungeon;
+                if (owned.TimeProvenance?.Episode != null &&
+                    (owner.IsDormant || observedThrough != owner.Scheduler.AcceptedThrough)) return Failure(RecoveryEpisode.Invalid);
                 runtime.livingDungeon = owner;
                 DetachedCanonicalSaveSessionResult staged = null;
                 string admissionReason = null;
@@ -55,9 +61,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     var before = working.GetCurrentBytes();
                     var prepared = working.PrepareForegroundReplacement(DetachedRecognizedSaveStateSnapshot.Capture(runtime, limits),
                         owned, owner, monsters ?? runtime.monsterContinuity,
-                        knowledge ? runtime.sharedBranchKnowledge : null, knowledge ? runtime.sharedFloorKnowledge : null, history, lineage.Permit(before));
+                        knowledge ? runtime.sharedBranchKnowledge : null, knowledge ? runtime.sharedFloorKnowledge : null, history, lineage.Permit(before), timeTransition);
                     prepareMeasurement.Dispose();
                     if (!prepared.IsSuccess) throw new InvalidOperationException(prepared.Reason);
+                    timeTransition = null; // One full time cut belongs only to the first detached stage.
                     // Prepare already round-tripped these exact bytes under this
                     // context. Do not parse/replay the same candidate twice more.
                     staged = prepared; working = prepared.Session; owned = prepared.ForegroundValidation;
@@ -307,7 +314,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 // A bounded pump may retain an accepted horizon. It resumes that exact
                 // prefix before accepting additional observed time on a later invocation.
-                var result = PrepareAndPersist(path, fs, session, staged, false);
+                var result = PrepareAndPersist(path, fs, session, staged, false, candidatePrepared: candidatePrepared);
                 if (result.IsSuccess && recoveredManaSpent != 0) result = new DetachedCanonicalWriteResult(true, result.Reason,
                     result.IsNoOp, result.ApplyExplicitRoomEffect, result.GetPersistedBytes(), result.Session, result.Validation,
                     result.RuntimeProjection, result.RecoveryManaSpent + recoveredManaSpent);
