@@ -71,6 +71,12 @@ Unit/SIT scope and exact source/campaign results will be appended at completed g
 
 ## Owned preparation artifacts
 
+### 2026-11-02 boot/starter packet qualified
+
+Implementation `9381f86103e5d6ae36e48a9767799e13d8a68888`; co18 `4669ef904f6448a9a53d4b9faa22eec6` PASSED13 stages. Complete boot/schema PlayMode18/0/8 existing skips; consecutive starter EditMode1/0/0 and PlayMode1/0/0. All14 co12 failed names now passed. Independent SHA `9df6529eb54b305a0cb60dc21efe82e57d3607b13eab8654f8804a16f6f35636`,1494 inputs/archive and395 prior directories preserved, reservation released. [Source-pinned report and exact-name JSON](h1-f4-boot-starter-qualification-20261102.md).
+
+Bounded production fix shares ordinary loaded-save recovery barrier with Narrow Hall repair; it prevents Home before episode closure. Fixture fixes preserve one prebound clock, consumed configuration, frozen reader refusal, schema17 writer and GUID-owned starter copies. Co15 FAILED9/8/0 and co17 FAILED132/1/8 retain their verdicts and independently verified normal-failure restoration. Co16 passed17/0/0; co17's115 recovery cases retain applicability across the final test-only logger fix. No new exceptional recovery. Original84 remains84/84 focused evidence; full suites/native/performance/UAT gates remain pending. Next: fresh full discovery and complete mandatory suites including sustained workload, then remaining lifecycle/native/performance and accumulated review. Owner UAT NOT STARTED.
+
 ### 2026-11-02 continuation — co13 recovered; boot corrections in qualification
 
 - Starting local `affcb6281056989b8a0672869b8bb6a232bdb4ab`, pushed `ee3528821afbb21282bb1152cd19d715b204a8af`; refreshed main remains `3eb6ccf93558b8145d64e9e63cbefcbd73484602`. No owner-checkout operations.

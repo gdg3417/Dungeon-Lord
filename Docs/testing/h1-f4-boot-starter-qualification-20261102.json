@@ -1,0 +1,321 @@
+{
+  "campaign": "4669ef904f6448a9a53d4b9faa22eec6",
+  "source": "9381f86103e5d6ae36e48a9767799e13d8a68888",
+  "tests": {
+    "living-regressions": {
+      "exact_cases": [
+        {
+          "id": "2196",
+          "name": "DungeonBuilder.M0.Tests.DetachedCanonicalSpatialSaveContractTests.SchemaSixAndOrdinarySaveJsonRemainWithoutCanonicalMembers",
+          "result": "Passed"
+        },
+        {
+          "id": "3360",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapDeletionPresentationLocalizesReturnedRemovedAndAllBlockingContentWithoutRawIds",
+          "result": "Skipped"
+        },
+        {
+          "id": "3369",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesDownstreamRoomAndTerminalMovement",
+          "result": "Passed"
+        },
+        {
+          "id": "3368",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesLocalizedMovementReplacementAndCapacityConsequences",
+          "result": "Skipped"
+        },
+        {
+          "id": "3370",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapSameDefinitionReplacementShowsLocalizedReasonAndCannotCommit",
+          "result": "Passed"
+        },
+        {
+          "id": "3377",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.CanonicalActionFeedbackNamesEachPlacementWithoutWritingLegacyEvidence",
+          "result": "Passed"
+        },
+        {
+          "id": "3378",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.CanonicalAdditiveFeedbackDoesNotClaimReplacementAndFailureDoesNotInventSuccess",
+          "result": "Passed"
+        },
+        {
+          "id": "3367",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.CanonicalInterveningWritePublishesClearsFeedbackAndRejectsRetainedRenovation",
+          "result": "Passed"
+        },
+        {
+          "id": "3372",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.ExplicitDevDeleteQuiescesCanonicalRuntimeAndFreshRootCreatesNativeSave",
+          "result": "Passed"
+        },
+        {
+          "id": "3371",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.FailedBootCompletionLeavesGameplayAndHomeUninitialized",
+          "result": "Passed"
+        },
+        {
+          "id": "3373",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.FailedExplicitDevDeleteStillQuiescesAndBlocksLifecycleWrites",
+          "result": "Passed"
+        },
+        {
+          "id": "3376",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.FailedNarrowHallRepairKeepsRootBlockedWithoutPartialServices",
+          "result": "Passed"
+        },
+        {
+          "id": "3353",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.MissingRecoveryBindingKeepsRepairedLegacyWithoutCanonicalAuthority",
+          "result": "Passed"
+        },
+        {
+          "id": "3352",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.MissingRecoveryBindingRefusesNativeCreationWithoutPublication",
+          "result": "Passed"
+        },
+        {
+          "id": "3374",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.NarrowHallBlockedRootRepairsThroughRealBootCompletionOnce",
+          "result": "Passed"
+        },
+        {
+          "id": "3375",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.NarrowHallRepairDefersHomeUntilCanonicalRecoveryCloses",
+          "result": "Passed"
+        },
+        {
+          "id": "3355",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.PassiveManaUsesConfiguredPeriodicSaveAndReopensFractionalBalance",
+          "result": "Passed"
+        },
+        {
+          "id": "3361",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralConstructionThroughRealRootPersistsPublishesAndClearsPreview",
+          "result": "Skipped"
+        },
+        {
+          "id": "3359",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionMissingRuntimePolicyFailsClosedThroughRealRoot",
+          "result": "Skipped"
+        },
+        {
+          "id": "3356",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(6,\"north\",DirectDoorway,\"Direct Doorway\",\"\")",
+          "result": "Skipped"
+        },
+        {
+          "id": "3357",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralDeletionThroughRealRootPersistsPublishesAndPresents(7,\"east\",PhysicalCorridor,\"Straight Stone Corridor\",\"(1,6)\")",
+          "result": "Skipped"
+        },
+        {
+          "id": "3362",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralMovementThroughRealRootPersistsPublishesAndReopens",
+          "result": "Passed"
+        },
+        {
+          "id": "3366",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralRenovationPersistenceFailureDoesNotPublishOrReplaceSession",
+          "result": "Passed"
+        },
+        {
+          "id": "3363",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(False)",
+          "result": "Skipped"
+        },
+        {
+          "id": "3364",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralReplacementThroughRealRootPersistsPublishesAndReopens(True)",
+          "result": "Skipped"
+        },
+        {
+          "id": "3354",
+          "name": "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.SuccessfulCanonicalBootCompletionInstallsAuthorityAndEntersHome",
+          "result": "Passed"
+        }
+      ],
+      "failed": 0,
+      "mode": "PlayMode",
+      "passed": 18,
+      "skipped": 8,
+      "total": 26,
+      "xml_sha256": "44f47de6c14aac5a6ddc1d75136d9cf6c5762e600a4872a4be7cbfecd014bcc5"
+    },
+    "scene-play": {
+      "exact_cases": [
+        {
+          "id": "5895",
+          "name": "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.OwnerUsabilityConstructionAndContentReachability",
+          "result": "Passed"
+        }
+      ],
+      "failed": 0,
+      "mode": "PlayMode",
+      "passed": 1,
+      "skipped": 0,
+      "total": 1,
+      "xml_sha256": "3af54670fb687567e460d33b595d12511e08bd6ff50b4102053cc72618c3ed8c"
+    },
+    "scene-repro": {
+      "exact_cases": [
+        {
+          "id": "3315",
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.PhaseSevenA4ProductionScene.OwnerUsabilityConstructionAndContentReachability",
+          "result": "Passed"
+        }
+      ],
+      "failed": 0,
+      "mode": "EditMode",
+      "passed": 1,
+      "skipped": 0,
+      "total": 1,
+      "xml_sha256": "57d1af53b69277f804a050dd0adc5ddaea48f4359a0c86b30f5967cd4162a6f2"
+    }
+  },
+  "original14_all_passed": [
+    "DungeonBuilder.M0.Tests.DetachedCanonicalSpatialSaveContractTests.SchemaSixAndOrdinarySaveJsonRemainWithoutCanonicalMembers",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapRenovationPresentationDisclosesDownstreamRoomAndTerminalMovement",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.BootstrapSameDefinitionReplacementShowsLocalizedReasonAndCannotCommit",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.CanonicalActionFeedbackNamesEachPlacementWithoutWritingLegacyEvidence",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.CanonicalAdditiveFeedbackDoesNotClaimReplacementAndFailureDoesNotInventSuccess",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.CanonicalInterveningWritePublishesClearsFeedbackAndRejectsRetainedRenovation",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.ExplicitDevDeleteQuiescesCanonicalRuntimeAndFreshRootCreatesNativeSave",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.FailedExplicitDevDeleteStillQuiescesAndBlocksLifecycleWrites",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.NarrowHallBlockedRootRepairsThroughRealBootCompletionOnce",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.PassiveManaUsesConfiguredPeriodicSaveAndReopensFractionalBalance",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralMovementThroughRealRootPersistsPublishesAndReopens",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.StructuralRenovationPersistenceFailureDoesNotPublishOrReplaceSession",
+    "DungeonBuilder.M0.Tests.EditMode.Gd66GameRootBootIntegrationTests.SuccessfulCanonicalBootCompletionInstallsAuthorityAndEntersHome",
+    "DungeonBuilder.M0.Tests.PlayMode.PhaseSevenA4ProductionShellPlayModeTests.OwnerUsabilityConstructionAndContentReachability"
+  ],
+  "owner_starter_copies": [
+    {
+      "bytes": 8551,
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\4669ef904f6448a9a53d4b9faa22eec6\\scene-repro\\fixture-inputs\\owner-starters\\bdd129f3c2974a4eac0e1133fb2df313.json",
+      "sha256": "a667533206fe357179d578f65cf9570f74ebb0f1ec432cc65c99230e4be56431",
+      "stage": "scene-repro"
+    },
+    {
+      "bytes": 8551,
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\4669ef904f6448a9a53d4b9faa22eec6\\scene-play\\fixture-inputs\\owner-starters\\27400aaf9b2549d8b606695f85a6a898.json",
+      "sha256": "a667533206fe357179d578f65cf9570f74ebb0f1ec432cc65c99230e4be56431",
+      "stage": "scene-play"
+    }
+  ],
+  "original_input_archive_members": 1494,
+  "protected_saves_and_historical_evidence_unchanged": true,
+  "prior_evidence_directories": 395,
+  "reservation_released": true,
+  "source_tree_clean": true,
+  "independent_receipt": {
+    "path": "TestResults\\h1-f4-20261027-co18\\independent-completion01.json",
+    "sha256": "9df6529eb54b305a0cb60dc21efe82e57d3607b13eab8654f8804a16f6f35636"
+  },
+  "supervisor_stages": {
+    "inventory": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "4e86dd558875489adc1ec6901c9c3c4bfb755047069158b58150b90282611bf3",
+      "status": "PASSED"
+    },
+    "inventory-preflight": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "895f9547d127bb5f8035716d4680188ec3b76a4106b4984dd0761ffdbe238646",
+      "status": "PASSED"
+    },
+    "living-regressions": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "0c95f25d0e805c3a1aaea099b3f349786e49a52bf646490fba74c18c0cc9aa2c",
+      "status": "PASSED"
+    },
+    "living-regressions-preflight": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "f698c6e2075037ef02e1a499690a9fe9f8bc6b656ffc43dd2fb020ac6c15b505",
+      "status": "PASSED"
+    },
+    "preservation": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "8ff6fd3468eac201a11eceff2812b8edd7ce2b7b0467e8aa3384fafbf91dd5d9",
+      "status": "PASSED"
+    },
+    "restore": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "ff9b1012f541b5a2455d8c6537747f4466cfe171f6c5c53fbce5d067c97c7286",
+      "status": "PASSED"
+    },
+    "restore-preflight": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "55f1169f761ffc6b818c5b53f1c5d3081101c7bfa66fb84e84165f6b612f8c78",
+      "status": "PASSED"
+    },
+    "scene-play": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "80a30fdfbebd7cc00ee8199cfb4bf18cd8b12bff4291fdefffdf66c458394651",
+      "status": "PASSED"
+    },
+    "scene-play-preflight": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "6f3559360dc3cfd91d1520eae23086379f3794702cd70136b51c077627b461a0",
+      "status": "PASSED"
+    },
+    "scene-repro": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "da962853995ec216fadbe31ab8ba12f80e7005d55e644c36c847831380a19fdc",
+      "status": "PASSED"
+    },
+    "scene-repro-preflight": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "acd506ea66bc4bc368134ea3e3d226428748052c455cd55ef1dd0aeae12d44fe",
+      "status": "PASSED"
+    },
+    "starter-evidence": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "2d79da303330c9f5d7b11a46353db8b274437eac04920d5b107067fe84e9c611",
+      "status": "PASSED"
+    },
+    "starter-evidence-preflight": {
+      "child_exit": 0,
+      "host_exit": 0,
+      "job_absent": true,
+      "result_sha256": "63296f1b6d3864de0a4043fa2f2d6981b2a9aed881b91ad29b50bcc77520f3f1",
+      "status": "PASSED"
+    }
+  },
+  "historical_verdicts_preserved": {
+    "co13": "INCOMPLETE / UNCERTAIN; no NUnit execution",
+    "co15": "FAILED 9/8/0; guarded normal finalization independently verified",
+    "co17": "FAILED 132/1/8; guarded normal finalization independently verified"
+  },
+  "original84": "84/84 retained exact-name focused coverage; not a final full-suite pass",
+  "pending": [
+    "Fresh full EditMode and applicable PlayMode including sustained workload",
+    "Remaining interruption/reopen applicability audit",
+    "Windows Development Player build and native runtime/exit",
+    "Matched main/final one/two-floor performance/memory",
+    "Accumulated PR audit and independently reviewed owner-UAT package"
+  ]
+}
