@@ -32,6 +32,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal ProductionSpatialContentSnapshot Production;
             internal BootClock Clock;
             internal TimeService Time;
+            internal ISpatialMigrationFileSystem FileSystem;
         }
 
         [Test]
@@ -93,7 +94,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalSaveSession beforeSession = service.CanonicalSession;
             GameRoot root = Root(service, canonical);
 
-            bool completed = root.CompleteSuccessfulBootForTests(canonical, true);
+            bool completed = CompleteBoot(root, canonical, true);
 
             Assert.That(completed, Is.True);
             Assert.That(root.Save, Is.Not.Null);
@@ -124,15 +125,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalWriteResult cleared = service.SetQaMana(starter.RuntimeProjection, false);
             Assert.That(cleared.IsSuccess, Is.True, cleared.Reason);
             GameRoot root = Root(service, cleared.RuntimeProjection);
-            Assert.That(root.CompleteSuccessfulBootForTests(cleared.RuntimeProjection, true), Is.True);
+            Assert.That(CompleteBoot(root, cleared.RuntimeProjection, true), Is.True);
             byte[] bootBytes = fileSystem.ReadAllBytes(service.SavePath);
             ContentBootstrap bootstrap = JsonUtility.FromJson<ContentBootstrap>(RequiredAsset(
                 "Assets/_Project/Data/Bootstrap/content_bootstrap.json").text);
 
-            AdvanceForeground(root, service, bootstrap.tickSeconds);
+            root.TimeService.Update(bootstrap.tickSeconds);
             CollectionAssert.AreEqual(bootBytes, fileSystem.ReadAllBytes(service.SavePath));
-            AdvanceForeground(root, service, bootstrap.tickSeconds);
+            root.TimeService.Update(bootstrap.tickSeconds);
             CollectionAssert.AreEqual(bootBytes, fileSystem.ReadAllBytes(service.SavePath));
+            root.TimeService.Update(bootstrap.tickSeconds);
+            CollectionAssert.AreEqual(bootBytes, fileSystem.ReadAllBytes(service.SavePath),
+                "The legacy delta-time pump cannot progress a bound canonical foreground owner");
+            // Schema17 publishes accepted foreground work atomically. Three real
+            // observations, rather than the inactive legacy tick pump, must own
+            // the same three ticks and durable fractional balance on reopen.
+            AdvanceForeground(root, service, bootstrap.tickSeconds);
+            AdvanceForeground(root, service, bootstrap.tickSeconds);
             AdvanceForeground(root, service, bootstrap.tickSeconds);
             CollectionAssert.AreNotEqual(bootBytes, fileSystem.ReadAllBytes(service.SavePath));
 
@@ -167,7 +176,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(r2.IsSuccess, Is.True, r2.Reason);
             GameRoot root = Root(service, r2.RuntimeProjection); LoadPlayerFacingContent(root);
             var overlay = rootObject.AddComponent<BootstrapOverlay>(); root.overlay = overlay; overlay.Bind(root);
-            Assert.That(root.CompleteSuccessfulBootForTests(r2.RuntimeProjection, true), Is.True);
+            Assert.That(CompleteBoot(root, r2.RuntimeProjection, true), Is.True);
             string target = "compat.floor.00.room.player.0000";
             string completionId = root.Save.validatedCanonicalSpatialState.Floors[0].Layout.Nodes.Single(value =>
                 value.Kind == FloorRouteNodeKind.Completion).NodeId;
@@ -241,7 +250,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             DetachedCanonicalWriteResult r2 = service.ExecuteCanonicalMutation(starter.RuntimeProjection,
                 DetachedCanonicalMutationRequest.Construct(construction));
             service.ConfigureStructuralRemovalPolicy(null);
-            GameRoot root = Root(service, r2.RuntimeProjection); Assert.That(root.CompleteSuccessfulBootForTests(r2.RuntimeProjection, true), Is.True);
+            GameRoot root = Root(service, r2.RuntimeProjection); Assert.That(CompleteBoot(root, r2.RuntimeProjection, true), Is.True);
             SaveData before = root.Save;
             StructuralEditPreview preview = root.PreviewStructuralDeletion(new StructuralDeletionRequest
                 { TargetRoomInstanceId = "compat.floor.00.room.player.0000" });
@@ -276,7 +285,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     MvpDungeonPlacementIds.SpikeTrapOptionId, target));
             GameRoot root = Root(service, trap.RuntimeProjection); LoadPlayerFacingContent(root);
             var overlay = rootObject.AddComponent<BootstrapOverlay>(); root.overlay = overlay; overlay.Bind(root);
-            Assert.That(root.CompleteSuccessfulBootForTests(trap.RuntimeProjection, true), Is.True);
+            Assert.That(CompleteBoot(root, trap.RuntimeProjection, true), Is.True);
             StructuralEditPreview returned = root.PreviewStructuralDeletion(
                 new StructuralDeletionRequest { TargetRoomInstanceId = target });
             string returnedText = overlay.BuildDeletionPreviewPresentation(returned);
@@ -332,7 +341,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             overlay.Bind(root);
             Assert.That(overlay.StructuralConstructionControlsAvailable, Is.False);
             Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.Null);
-            Assert.That(root.CompleteSuccessfulBootForTests(starter.RuntimeProjection, true), Is.True);
+            Assert.That(CompleteBoot(root, starter.RuntimeProjection, true), Is.True);
             SaveData before = root.Save;
             Assert.That(overlay.StructuralConstructionControlsAvailable, Is.True);
             Assert.That(overlay.SelectedStructuralRoomDefinitionId, Is.EqualTo("spatial.room.basic"));
@@ -745,7 +754,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             GameRoot root = Root(null);
 
-            bool completed = root.CompleteSuccessfulBootForTests(null, true);
+            bool completed = CompleteBoot(root, null, true);
 
             Assert.That(completed, Is.False);
             Assert.That(root.Save, Is.Null);
@@ -765,7 +774,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveData canonical = service.LoadOrCreate("gd66-live", out string loadBanner);
             Assert.That(canonical, Is.Not.Null, loadBanner);
             GameRoot root = Root(service, canonical);
-            Assert.That(root.CompleteSuccessfulBootForTests(canonical, true), Is.True);
+            Assert.That(CompleteBoot(root, canonical, true), Is.True);
             SaveData deletedRuntime = root.Save;
             long ticksBeforeDelete = deletedRuntime.totalTicks;
 
@@ -802,7 +811,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fresh, Is.Not.Null, restartBanner);
             Assert.That(fresh.validatedCanonicalSpatialState, Is.Not.Null);
             GameRoot restartedRoot = Root(restartedService, fresh);
-            Assert.That(restartedRoot.CompleteSuccessfulBootForTests(fresh, true), Is.True);
+            Assert.That(CompleteBoot(restartedRoot, fresh, true), Is.True);
             Assert.That(restartedRoot.Save, Is.Not.Null);
             Assert.That(restartedRoot.TimeService.AttachedSaveForTests,
                 Is.SameAs(restartedRoot.Save));
@@ -823,7 +832,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SaveData canonical = service.LoadOrCreate("gd66-live", out string loadBanner);
             Assert.That(canonical, Is.Not.Null, loadBanner);
             GameRoot root = Root(service, canonical);
-            Assert.That(root.CompleteSuccessfulBootForTests(canonical, true), Is.True);
+            Assert.That(CompleteBoot(root, canonical, true), Is.True);
             fileSystem.EnableFailure(
                 Gd66DetachedSpatialMigrationTransactionTests.OperationType.Delete, 1);
 
@@ -873,6 +882,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             bool repaired = root.TryRepairMigrationBlockedNarrowHall();
 
             Assert.That(repaired, Is.True);
+            ObserveForegroundReturn(root);
             Assert.That(root.Save, Is.Not.Null);
             Assert.That(root.Save.validatedCanonicalSpatialState, Is.Not.Null);
             Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(root.Save));
@@ -935,7 +945,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(canonical, Is.Not.Null, loadBanner);
             GameRoot root = Root(service, canonical);
             LoadPlayerFacingContent(root);
-            Assert.That(root.CompleteSuccessfulBootForTests(canonical, true), Is.True);
+            Assert.That(CompleteBoot(root, canonical, true), Is.True);
             string frozenLegacyEvidence = CaptureLegacySpatialEvidence(root.Save);
             var overlay = rootObject.AddComponent<BootstrapOverlay>();
             overlay.Bind(root);
@@ -979,7 +989,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(canonical, Is.Not.Null, loadBanner);
             GameRoot root = Root(service, canonical);
             LoadPlayerFacingContent(root);
-            Assert.That(root.CompleteSuccessfulBootForTests(canonical, true), Is.True);
+            Assert.That(CompleteBoot(root, canonical, true), Is.True);
             string frozenLegacyEvidence = CaptureLegacySpatialEvidence(root.Save);
             var overlay = rootObject.AddComponent<BootstrapOverlay>();
             overlay.Bind(root);
@@ -1136,7 +1146,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var overlay = rootObject.AddComponent<BootstrapOverlay>();
             root.overlay = overlay;
             overlay.Bind(root);
-            Assert.That(root.CompleteSuccessfulBootForTests(starter.RuntimeProjection, true), Is.True);
+            Assert.That(CompleteBoot(root, starter.RuntimeProjection, true), Is.True);
             StructuralEditPreview construction = root.PreviewStructuralConstruction(
                 new StructuralConstructionRequest { RoomDefinitionId = definitionId, Anchor = anchor,
                     Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" });
@@ -1231,7 +1241,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);
             service.SetTimeSourceForTests(clock);
             service.ConfigureRecovery(inputs, time);
-            bootOwners.Add(service, new BootOwner { Inputs = inputs, Production = fixture.Production, Clock = clock, Time = time });
+            bootOwners.Add(service, new BootOwner { Inputs = inputs, Production = fixture.Production, Clock = clock, Time = time, FileSystem = fileSystem });
             return service;
         }
 
@@ -1243,6 +1253,45 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(root.TimeService, Is.SameAs(bootOwners[service].Time));
             Assert.That(typeof(GameRoot).GetField("foregroundFailure", BindingFlags.Instance | BindingFlags.NonPublic)
                 .GetValue(root), Is.Null);
+        }
+
+        private bool CompleteBoot(GameRoot root, SaveData loaded, bool enterHome)
+        {
+            bool completed = root.CompleteSuccessfulBootForTests(loaded, enterHome);
+            if (completed) ObserveForegroundReturn(root);
+            return completed;
+        }
+
+        private void ObserveForegroundReturn(GameRoot root)
+        {
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            long ticks = root.Save.totalTicks;
+            double mana = root.Save.structureRuntime.ManaReserve;
+            UnixTimePoint accounted = root.Save.timeProvenance.AccountedBoundary;
+            TestContext.WriteLine("Boot foreground return: focused=" + Application.isFocused +
+                "; paused=" + root.TimeService.IsPaused + "; deferred=" + root.TimeService.HasDeferredRecovery +
+                "; episode=" + (root.Save.timeProvenance.Episode != null));
+            typeof(GameRoot).GetMethod("OnApplicationFocus", flags).Invoke(root, new object[] { true });
+            for (int i = 0; i < 8; i++)
+            {
+                typeof(GameRoot).GetMethod("UpdateForeground", flags).Invoke(root, null);
+                if (!root.TimeService.IsPaused && !root.TimeService.HasDeferredRecovery &&
+                    !root.TimeService.RecoveryClockActive && root.Save.timeProvenance.Episode == null &&
+                    root.Save.livingDungeon.IsClosed) break;
+            }
+            Assert.That(root.TimeService, Is.SameAs(bootOwners[root.SaveService].Time));
+            Assert.That(root.TimeService.IsPaused, Is.False);
+            Assert.That(root.TimeService.HasDeferredRecovery, Is.False);
+            Assert.That(root.TimeService.RecoveryClockActive, Is.False);
+            Assert.That(root.Save.timeProvenance.Episode, Is.Null);
+            Assert.That(root.Save.livingDungeon.IsClosed, Is.True);
+            Assert.That(typeof(GameRoot).GetField("foregroundFailure", flags).GetValue(root), Is.Null);
+            Assert.That(root.Save.totalTicks, Is.EqualTo(ticks));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary.Seconds, Is.EqualTo(accounted.Seconds));
+            Assert.That(root.Save.timeProvenance.AccountedBoundary.Fraction100ns, Is.EqualTo(accounted.Fraction100ns));
+            CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(),
+                bootOwners[root.SaveService].FileSystem.ReadAllBytes(root.SaveService.SavePath));
         }
 
         private static SaveService UnboundService(
