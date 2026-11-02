@@ -588,7 +588,13 @@ namespace DungeonBuilder.M0
             if (UsesAtomicRecoveryRuntime ? !TryConfigureRecoveryRuntime(spatialLimits.Limits) : !TryConfigureCanonicalPassiveMana())
                 return false;
             SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
-            Save = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
+            SaveData loaded = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
+            return CompleteLoadedBoot(loaded, saveBanner);
+        }
+
+        private bool CompleteLoadedBoot(SaveData loaded, string saveBanner)
+        {
+            Save = loaded;
             if (Save == null)
             {
                 if (!string.IsNullOrEmpty(saveBanner)) SetBanner(Content.GetString(saveBanner, saveBanner));
@@ -1175,11 +1181,15 @@ namespace DungeonBuilder.M0
                     SetBanner(Content.GetString(bannerKey, bannerKey));
                 return false;
             }
-            if (!CompleteSuccessfulBoot(repaired, bannerKey)) return false;
+            // A repaired legacy save must cross the same recovery barrier as an
+            // ordinary load. Accept the repair while the existing coordinator
+            // completes its episode; only FinishRecoveryBoot may enter Home.
+            bool completed = CompleteLoadedBoot(repaired, bannerKey);
+            if (!completed && !bootRecoveryPending) return false;
             if (string.IsNullOrEmpty(bannerKey) && string.Equals(
                     BannerMessage, preRepairBlockedBanner, System.StringComparison.Ordinal))
                 SetBanner(string.Empty);
-            GoHomeStub();
+            if (completed) GoHomeStub();
             return true;
         }
 

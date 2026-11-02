@@ -904,6 +904,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
+        public void NarrowHallRepairDefersHomeUntilCanonicalRecoveryCloses()
+        {
+            byte[] original = ExplicitLegacyBootState(Encoding.UTF8.GetBytes(
+                "{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[{" +
+                "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\"," +
+                "\"Revision\":1}],\"NextRevision\":2}}}"));
+            var fixture = Fixture(original);
+            var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var service = Service(fixture, fs, "root-repair-recovery-barrier.json");
+            fs.Seed(service.SavePath, original);
+            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
+            GameRoot root = Root(service);
+            TimeService observationOwner = root.TimeService;
+
+            Assert.That(root.TryRepairMigrationBlockedNarrowHall(), Is.True);
+
+            Assert.That(root.Save.timeProvenance.Episode, Is.Not.Null);
+            Assert.That(root.TimeService.RecoveryClockActive, Is.True);
+            Assert.That(root.StateLine, Does.Not.Contain("Home"));
+            Assert.That(root.GameplayServicesInitializedForTests, Is.False);
+            CollectionAssert.AreEqual(service.CanonicalSession.GetCurrentBytes(), fs.ReadAllBytes(service.SavePath));
+            ObserveForegroundReturn(root);
+            Assert.That(root.StateLine, Does.Contain("Home"));
+            Assert.That(root.GameplayServicesInitializedForTests, Is.True);
+            Assert.That(root.TimeService, Is.SameAs(observationOwner));
+            byte[] completed = fs.ReadAllBytes(service.SavePath);
+            Assert.That(root.TryRepairMigrationBlockedNarrowHall(), Is.False);
+            CollectionAssert.AreEqual(completed, fs.ReadAllBytes(service.SavePath));
+        }
+
+        [Test]
         public void FailedNarrowHallRepairKeepsRootBlockedWithoutPartialServices()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
@@ -1271,9 +1302,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TestContext.WriteLine("Boot foreground return: focused=" + Application.isFocused +
                 "; paused=" + root.TimeService.IsPaused + "; deferred=" + root.TimeService.HasDeferredRecovery +
                 "; episode=" + (root.Save.timeProvenance.Episode != null));
-            typeof(GameRoot).GetMethod("OnApplicationFocus", flags).Invoke(root, new object[] { true });
             for (int i = 0; i < 8; i++)
             {
+                // Recovery boot completion can install the real foreground
+                // lifecycle during this pump. Batch Editor focus remains false;
+                // deliver the observed test return to that newly enabled path.
+                typeof(GameRoot).GetMethod("OnApplicationFocus", flags).Invoke(root, new object[] { true });
                 typeof(GameRoot).GetMethod("UpdateForeground", flags).Invoke(root, null);
                 if (!root.TimeService.IsPaused && !root.TimeService.HasDeferredRecovery &&
                     !root.TimeService.RecoveryClockActive && root.Save.timeProvenance.Episode == null &&
