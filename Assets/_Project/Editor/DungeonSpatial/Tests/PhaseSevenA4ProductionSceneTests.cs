@@ -1398,7 +1398,7 @@ namespace DungeonBuilder.M0.Tests
             // No save JSON is authored or imported from an owner/normal save.
             // The existing qualification root owns retained exports. Each invocation
             // keeps its own complete starter, including consecutive Editor/Play runs.
-            string starterDirectory = Path.Combine(H1F4QualificationArtifacts.RequireOutputRoot(), "owner-starters");
+            string starterDirectory = Path.Combine(DungeonBuilder.M0.EditorTools.H1F4QualificationArtifacts.RequireOutputRoot().FullName, "owner-starters");
             Directory.CreateDirectory(starterDirectory);
             string starter = Path.Combine(starterDirectory, Guid.NewGuid().ToString("N") + ".json");
             File.Copy(root.SaveService.SavePath,starter,false);
