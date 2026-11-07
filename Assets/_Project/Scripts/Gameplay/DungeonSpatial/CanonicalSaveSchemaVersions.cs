@@ -11,6 +11,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const int MonsterContinuityIntroduction = 15;
         public const int FrozenSchemaFifteen = MonsterContinuityIntroduction;
         public const int TimeProvenanceIntroduction = 16;
-        public const int CurrentWritableTarget = TimeProvenanceIntroduction;
+        public const int FrozenSchemaSixteen = TimeProvenanceIntroduction;
+        public const int AtomicRecoveryIntroduction = 17;
+        public const int CurrentWritableTarget = AtomicRecoveryIntroduction;
     }
 }

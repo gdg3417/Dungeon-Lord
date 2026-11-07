@@ -28,6 +28,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DetachedCompleteSaveValidationResult Validation { get; }
         public SaveData RuntimeProjection { get; }
         public double RecoveryManaSpent { get; }
+        internal RecoveryGrantReceipt RecoveryReceipt { get; set; }
         public string ForegroundAdmissionReason { get; internal set; }
         public byte[] GetPersistedBytes() => persistedBytes == null ? null : (byte[])persistedBytes.Clone();
     }
@@ -54,6 +55,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly FloorConstructionProfileSnapshot floorConstructionProfiles;
         private readonly FloorConstructionResearchSnapshot floorConstructionResearch;
         private readonly FormulaModifier[] economyModifiers;
+        private readonly bool recoveryBindingsValid = true;
+        internal Action<DetachedCanonicalSaveSession, DetachedCanonicalSaveSession, TimeProvenance> CandidatePrepared;
+        internal Action<DetachedCanonicalWriteResult> PublicationObserved;
 
         public DetachedCanonicalWriteAuthority(ProductionSpatialContentSnapshot production,
             SpatialLayoutCompatibilitySnapshot compatibility, RunSimulationConfig configuration,
@@ -73,6 +77,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             this.floorConstructionProfiles = floorConstructionProfiles;
             this.floorConstructionResearch = floorConstructionResearch;
             this.economyModifiers = economyModifiers?.ToArray() ?? Array.Empty<FormulaModifier>();
+            if (CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction) {
+                var bound = context?.RecoveryInputs;
+                recoveryBindingsValid = bound != null && ReferenceEquals(production, context.Production) &&
+                    compatibility != null && compatibility.CanonicalBytes.AsSpan().SequenceEqual(context.Compatibility.CanonicalBytes) &&
+                    ReferenceEquals(configuration, bound.Configuration) &&
+                    (runLoot == null || ReferenceEquals(runLoot, bound.Loot)) && (economy == null || ReferenceEquals(economy, bound.Economy));
+                if (bound != null) { this.runLoot = bound.Loot; this.economy = bound.Economy; }
+            }
         }
 
         public DetachedCanonicalWriteResult ConstructFloor(string activePath,
@@ -371,6 +383,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCompleteSaveValidationResult owned = ValidateSession(session);
             if (owned?.IsValid != true || !owned.CurrentTargetValidated)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+            if (owned.TimeProvenance?.Mode == TimeProvenance.PreciseMode)
+                return Failure(RecoveryEpisode.Invalid);
             try
             {
                 if (!session.GetCurrentBytes().SequenceEqual(fileSystem.ReadAllBytes(activePath)))
@@ -391,12 +405,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private DetachedCanonicalWriteResult PrepareAndPersist(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
-            DetachedCanonicalSaveSessionResult prepared, bool roomEffect, bool ordinarySpend = false, bool recover = false)
+            DetachedCanonicalSaveSessionResult prepared, bool roomEffect, bool ordinarySpend = false, bool recover = false,
+            Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null, double preparedRecoveryManaSpent = 0,
+            Action<byte[], TimeProvenance, double, double> reportingPrepared = null)
         {
+            if (!recoveryBindingsValid) return Failure(RecoveryEpisode.ContextMismatch);
             if (prepared == null || !prepared.IsSuccess || prepared.Update == null)
                 return Failure(prepared?.Reason ?? DetachedCanonicalSpatialMutation.ValidationFailedReason);
             byte[] candidate = prepared.Update.GetBytes();
-            double recoveryManaSpent = 0;
+            double recoveryManaSpent = preparedRecoveryManaSpent;
             bool foregroundStage = prepared.ForegroundValidation?.CurrentTargetValidated == true && prepared.Session != null &&
                 prepared.ForegroundValidation.GetBytes().SequenceEqual(candidate) && prepared.Session.GetCurrentBytes().SequenceEqual(candidate);
             DetachedCompleteSaveValidationResult validated =
@@ -430,7 +447,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             proposed.structureRuntime.ManaReserve, occupied);
                         if (balance != proposed.structureRuntime.ManaReserve)
                         {
-                            recoveryManaSpent = proposed.structureRuntime.ManaReserve - balance;
+                            recoveryManaSpent += proposed.structureRuntime.ManaReserve - balance;
                             var intermediate = DetachedCanonicalSaveSession.Open(candidate, context, limits);
                             var capture = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(proposed, balance, limits);
                             var recovered = intermediate.Session.PrepareLiveReplacement(capture, validated.State, monsterContinuity: healed);
@@ -443,7 +460,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 catch { return Failure(MonsterRecoveryRules.Invalid); }
             }
             DetachedCanonicalSaveSessionResult reopened = validated.IsValid
-                ? (foregroundStage ? prepared : DetachedCanonicalSaveSession.Open(candidate, context, limits)) : null;
+                ? (foregroundStage && ExactCompleteSaveAtomicPersistence.Same(prepared.Session.GetCurrentBytes(), candidate)
+                    ? prepared : DetachedCanonicalSaveSession.Open(candidate, context, limits)) : null;
             if (!validated.IsValid || !validated.CurrentTargetValidated || reopened == null ||
                 !reopened.IsSuccess)
                 return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
@@ -458,6 +476,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     validated, production, configuration, limits.Canonical, runLoot); }
                 catch { return Failure("floor.lifecycle.invalid_state"); }
             }
+            // Retain the exact final candidate (including healing) before any IO.
+            // The observer receives an immutable session, never writable bytes.
+            reportingPrepared?.Invoke((byte[])candidate.Clone(), validated.TimeProvenance, recoveryManaSpent, runtime.structureRuntime.ManaReserve);
+            candidatePrepared?.Invoke(reopened.Session, validated.TimeProvenance);
+            CandidatePrepared?.Invoke(session, reopened.Session, validated.TimeProvenance);
             string persistenceReason = ExactCompleteSaveAtomicPersistence.Persist(activePath, fileSystem, session.GetCurrentBytes(), candidate,
                 limits.Canonical.Serialized.MaximumCollectionRecords, durable =>
                 {
@@ -475,14 +498,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     validated = readValidation; reopened = readSession; runtime = readRuntime;
                     return true;
                 });
-            return persistenceReason == null
+            var result = persistenceReason == null
                 ? new DetachedCanonicalWriteResult(true, null, false, roomEffect, candidate,
                     reopened.Session, validated, runtime, recoveryManaSpent)
                 : Failure(persistenceReason);
+            PublicationObserved?.Invoke(result);
+            return result;
         }
 
         private DetachedCompleteSaveValidationResult ValidateSession(DetachedCanonicalSaveSession session) =>
-            session == null ? null : DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
+            session == null || !recoveryBindingsValid ? null : DetachedCompleteSaveContract.ParseValidateAndRoundTrip(
                 session.GetCurrentBytes(), context);
 
         private System.Collections.Generic.ISet<string> OccupiedFloors(DetachedCompleteSaveValidationResult owned)

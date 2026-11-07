@@ -124,7 +124,7 @@ namespace DungeonBuilder.M0.Tests
                 floor.Layout.Rooms[0].RoomInstanceId, floor.FloorInstanceId, new TileCoordinate(1, 1))).IsSuccess, Is.True);
             var advance = InstallForegroundBoundaryTestClock();
             var update = (Action)Delegate.CreateDelegate(typeof(Action), root, typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.NonPublic | BindingFlags.Instance));
-            root.TimeService.SetForegroundFocus(true); update();
+            ObserveSceneFocus(true); update();
             advance((root.Save.livingDungeon.Scheduler.NextOpportunityTime.Value - root.TimeService.SampleForeground()) / 1000d); update();
             for (int frame = 0; frame < 16 && !controller.World.ForegroundPartyVisible; frame++) { advance(.25); update(); yield return null; }
             Assert.That(controller.World.ForegroundPartyVisible, Is.True);
@@ -134,10 +134,9 @@ namespace DungeonBuilder.M0.Tests
             byte[] canonical = root.SaveService.CanonicalSession.GetCurrentBytes();
             foreach (var size in new[] { new Vector2Int(720, 1280), new Vector2Int(1280, 720), new Vector2Int(360, 640) }) {
                 EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y); controller.SetTextSize(DungeonTextSize.Large);
-                // Editor Game View resizing can deliver focus callbacks even
-                // though the fixture disables root.Update. Resume only this
-                // explicit test clock; production focus handling is unchanged.
-                for (int frame = 0; frame < 8; frame++) { root.TimeService.SetForegroundFocus(true); yield return null; }
+                // Observe resize-related focus changes through the real root;
+                // the prebound TimeService remains the sole clock owner.
+                for (int frame = 0; frame < 8; frame++) { ObserveSceneFocus(true); yield return null; }
                 var marker = ui.Q<Label>("foregroundPartyLabel");
                 TestContext.WriteLine("Live layout " + size + " marker=" + controller.World.ForegroundPartyVisible +
                     " label=" + marker.resolvedStyle.display + " bounds=" + marker.worldBound +
@@ -148,9 +147,17 @@ namespace DungeonBuilder.M0.Tests
             }
             yield return ForegroundMarkerBoundaryLayouts(ui);
             CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
-            root.TimeService.SetForegroundFocus(false); yield return null;
+            ObserveSceneFocus(false); yield return null;
             Assert.That(controller.World.ForegroundPartyVisible, Is.False);
-            root.TimeService.SetForegroundFocus(true); yield return null;
+            ObserveSceneFocus(true);
+            Assert.That(root.TimeService.HasDeferredRecovery || root.TimeService.RecoveryClockActive, Is.True);
+            Assert.That(root.ForegroundPresentationActive, Is.False, "Focus return cannot bypass durable recovery closure");
+            long acceptedBeforeReturn = root.Save.livingDungeon.Scheduler.AcceptedThrough;
+            long ticksBeforeReturn = root.Save.totalTicks; double manaBeforeReturn = root.Save.structureRuntime.ManaReserve;
+            PumpSceneToClosed(); yield return null;
+            Assert.That(root.Save.livingDungeon.Scheduler.AcceptedThrough, Is.EqualTo(acceptedBeforeReturn));
+            Assert.That(root.Save.totalTicks, Is.EqualTo(ticksBeforeReturn));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(manaBeforeReturn));
             Assert.That(controller.World.ForegroundPartyVisible, Is.True);
             for (int boundary = 0; boundary < 20 && root.ForegroundActivity.RecentInteraction?.Kind != RunStepKind.MonsterEngagement; boundary++) {
                 advance(Math.Max(0, root.ForegroundActivity.NextBoundary - root.TimeService.SampleForeground()) / 1000d);
@@ -161,7 +168,7 @@ namespace DungeonBuilder.M0.Tests
             canonical = root.SaveService.CanonicalSession.GetCurrentBytes();
             foreach (var size in new[] { new Vector2Int(720, 1280), new Vector2Int(1280, 720), new Vector2Int(360, 640) }) {
                 EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
-                for (int frame = 0; frame < 8; frame++) { root.TimeService.SetForegroundFocus(true); yield return null; }
+                for (int frame = 0; frame < 8; frame++) { ObserveSceneFocus(true); yield return null; }
                 var activity = ui.Q<Label>("foregroundActivity"); var map = ui.Q("mapArea");
                 var activityScroll = ui.Q<ScrollView>("foregroundActivityScroll");
                 var visibleActivity = activityScroll != null && activityScroll.resolvedStyle.display != DisplayStyle.None
@@ -202,7 +209,7 @@ namespace DungeonBuilder.M0.Tests
                 typeof(ProductionDungeonController).GetMethod("PresentForegroundPartyLabel", flags));
             foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(720, 1280), new Vector2Int(360, 640) }) {
                 EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
-                for (int frame = 0; frame < 8; frame++) { GameRoot.Instance.TimeService.SetForegroundFocus(true); yield return null; }
+                for (int frame = 0; frame < 8; frame++) { ObserveSceneFocus(true); yield return null; }
                 controller.enabled = false;
                 var position = camera.transform.position; float zoom = camera.orthographicSize;
                 try {
@@ -242,7 +249,7 @@ namespace DungeonBuilder.M0.Tests
                 floor.Layout.Rooms[0].RoomInstanceId, floor.FloorInstanceId, new TileCoordinate(1, 1))).IsSuccess, Is.True);
             var advance = InstallForegroundBoundaryTestClock();
             var update = (Action)Delegate.CreateDelegate(typeof(Action), root, typeof(GameRoot).GetMethod("UpdateForeground", BindingFlags.NonPublic | BindingFlags.Instance));
-            root.TimeService.SetForegroundFocus(true); update();
+            ObserveSceneFocus(true); update();
             advance((root.Save.livingDungeon.Scheduler.NextOpportunityTime.Value - root.TimeService.SampleForeground()) / 1000d); update();
             yield return null;
             Assert.That(root.Save.livingDungeon.Parties.Count, Is.EqualTo(1));

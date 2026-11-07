@@ -225,7 +225,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static CanonicalSpatialSaveValidationResult ValidateForSchema(
             DetachedCanonicalSpatialSaveState state, CanonicalSpatialSerializationLimits limits,
-            bool ordered, int schemaVersion) => schemaVersion <= CanonicalSaveSchemaVersions.FrozenSchemaFifteen
+            bool ordered, int schemaVersion) => schemaVersion <= CanonicalSaveSchemaVersions.FrozenSchemaSixteen
                 ? CanonicalSpatialSaveContracts.ValidateFrozenWithLifecycle(state, limits.Spatial, schemaVersion, ordered)
                 : CanonicalSpatialSaveContracts.Validate(state, limits.Spatial, ordered);
 

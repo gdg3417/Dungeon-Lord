@@ -276,7 +276,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(RawSavePayloadClassifier.Classify(bytes, profile.Raw,
                 new RawSaveEnvelopeVersionContract(1, SaveMigration.LatestSchemaVersion), BlankFloor()).IsSuccess, Is.True);
             var context = new DetachedCurrentTargetValidationContext(fixture.Compatibility, fixture.Production,
-                LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), profile.Canonical);
+                LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), profile.Canonical,
+                fixture.Context.RecoveryInputs.Occupancy, allowEditorTestOccupancyFallback: false,
+                monsterRecovery: fixture.Context.RecoveryInputs.Monsters);
+            context.BindRecoveryInputs(fixture.Context.RecoveryInputs);
             var opened = DetachedCanonicalSaveSession.Open(bytes, context, profile);
             Assert.That(opened.IsSuccess, Is.True, opened.Reason);
             var repeated = opened.Session.PrepareSpatialOnlyReplacement(fixture.State);
@@ -324,14 +327,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static LifecycleFixture CreateLifecycle(SaveSpatialMigrationLimitsProfile profile)
         {
-            LifecycleFixture fixture = LifecycleFixture.Create("\"phase3UnknownPrimary\":{\"note\":\"preserve\"}",
-                "\"phase3UnknownRoot\":[1,true]", profile);
             // Isolate the retained-custody workload from funding. Paid transactions have their own economy fixtures.
+            // Author the economy and durable fixture timestamp before immutable ownership.
+            var inputs = H1F4RecoveryContractTests.Inputs();
             var economy = JsonUtility.FromJson<DungeonBuilder.M0.Economy.StructuralEconomyConfiguration>(
-                System.IO.File.ReadAllText("Assets/_Project/Resources/structural_economy.json"));
+                Encoding.UTF8.GetString(inputs[2]));
             foreach (var price in economy.Rooms.Concat(economy.Corridors)) price.Mana = 0;
-            Assert.That(DungeonBuilder.M0.Economy.StructuralEconomySnapshot.TryCreate(economy,
-                fixture.Production.Catalog, out fixture.Economy), Is.True);
+            inputs[2] = Encoding.UTF8.GetBytes(JsonUtility.ToJson(economy));
+            LifecycleFixture fixture = LifecycleFixture.Create("\"lastSavedUtcUnix\":1700172800,\"phase3UnknownPrimary\":{\"note\":\"preserve\"}",
+                "\"phase3UnknownRoot\":[1,true]", profile, inputs);
+            Assert.That(fixture.Economy, Is.SameAs(fixture.Context.RecoveryInputs.Economy));
             var acquisition = JsonUtility.FromJson<DungeonBuilder.M0.Economy.ContentAcquisitionEconomyConfiguration>(
                 System.IO.File.ReadAllText("Assets/_Project/Resources/content_acquisition_economy.json"));
             foreach (var price in acquisition.Prices) price.Mana = 0; // Explicit test-only workload isolation.
@@ -427,12 +432,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             // Current canonical owners are not unknown preservation data, even though the
             // frozen legacy raw classifier describes them as unknown primary members.
             string[] owners = { "canonicalSpatialAuthority", "spatialFloors", "structuralLifecycleAndOwnership",
-                "structuralInvestment", "corridorContent", "sharedBranchKnowledge", "sharedFloorKnowledge", "livingDungeon", "monsterContinuity" };
+                "structuralInvestment", "corridorContent", "sharedBranchKnowledge", "sharedFloorKnowledge", "livingDungeon", "monsterContinuity", TimeProvenance.Owner };
             var unknown = classification.UnknownRootMembers.Concat(classification.UnknownPrimaryMembers.Where(value =>
                 !owners.Contains(value.Name))).ToArray();
             int copied = classification.Members.Where(value => value.State != RawSaveMemberState.Absent &&
                 value.Name != "corridorContent" && value.Name != "sharedBranchKnowledge" &&
-                value.Name != "sharedFloorKnowledge" && value.Name != "livingDungeon" && value.Name != "monsterContinuity")
+                value.Name != "sharedFloorKnowledge" && value.Name != "livingDungeon" && value.Name != "monsterContinuity" && value.Name != TimeProvenance.Owner)
                 .Sum(value => value.ByteLength);
             Assert.That(MinimumWhole(fixture, 0), Is.EqualTo(bytes.Length));
             Assert.That(MinimumWhole(fixture, 1), Is.EqualTo(copied));

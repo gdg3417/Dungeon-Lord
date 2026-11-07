@@ -3,6 +3,9 @@
   "schemaVersion": 1,
   "language": "en",
   "entries": [
+    {"key":"ui.time.recovery.invalid_state","text":"Recovery could not establish a supported save state. Your save has been preserved."},
+    {"key":"ui.time.recovery.context_mismatch","text":"This save requires the configuration that produced it. Recovery is paused and your save has been preserved."},
+    {"key":"ui.time.recovery.historical_proof_required","text":"This historical save has unfinished accepted work whose original rules could not be verified. Your save has been preserved."},
     {"key":"ui.analysis.discard_changes","text":"Discard Changes"},
     {"key":"ui.analysis.title","text":"Analysis"},
     {"key":"ui.analysis.dungeon","text":"Dungeon"},
@@ -469,6 +472,22 @@
     {
       "key": "ui.offline_mana.applied_format",
       "text": "Away for {0:N0} seconds. Offline rate: {1} mana/hour. Earned: {2} mana. Current mana: {3} / {4}."
+    },
+    {
+      "key": "ui.recovery.completed_format",
+      "text": "Recovery complete. Current mana: {0} / {1}."
+    },
+    {
+      "key": "ui.recovery.summary_format",
+      "text": "Eligible recovery time: {0} seconds. {1} Earned: {2} mana. Current mana: {3} / {4}."
+    },
+    {
+      "key": "ui.recovery.rate_format",
+      "text": "Offline rate: {0} mana/hour."
+    },
+    {
+      "key": "ui.recovery.rates_format",
+      "text": "Original offline rate: {0} mana/hour; residual offline rate: {1} mana/hour."
     },
     {
       "key": "ui.offline_mana.capacity_limited",

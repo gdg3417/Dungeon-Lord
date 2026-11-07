@@ -15,6 +15,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class Gd66WindowsSpatialMigrationFileSystemTests
     {
+        private string ownedTemporaryRoot;
+        [SetUp] public void OwnWindowsFixturePaths()
+        {
+            string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+            Assert.That(export, Is.Not.Null.And.Not.Empty, "Windows filesystem qualification requires the existing campaign-owned fixture export root");
+            Assert.That(Application.productName, Does.StartWith("Dungeon Lord B3B2 Smoke H1F4 "));
+            // Keep the existing 240-character native bound meaningful. Stage
+            // paths are too long for the deliberately long journal leaf below.
+            ownedTemporaryRoot = Path.GetFullPath(Path.Combine(Application.persistentDataPath, "wf-" + Guid.NewGuid().ToString("N").Substring(0, 12)));
+            Assert.That(Directory.Exists(ownedTemporaryRoot), Is.False);
+            Directory.CreateDirectory(ownedTemporaryRoot);
+        }
+        [TearDown] public void ReleaseEmptyWindowsFixturePaths()
+        {
+            if (ownedTemporaryRoot == null || !Directory.Exists(ownedTemporaryRoot)) return;
+            // Unexpected leftovers remain owned, sealed evidence, never recursive
+            // speculative cleanup of an unknown or failed reproduction state.
+            Assert.That(Directory.GetFileSystemEntries(ownedTemporaryRoot), Is.Empty, "Retain unexpected Windows fixture evidence");
+            Directory.Delete(ownedTemporaryRoot);
+        }
         [Test]
         public void EvidenceProbeAndTransactionShareExtensionlessSaveStemGrammar()
         {
@@ -119,12 +139,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-qualification");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-qualification");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
             {
                 string active = Path.Combine(directory, "save.json");
+                Assert.That(active, Is.EqualTo(Path.GetFullPath(active)), "The transaction consumes a normalized absolute path");
                 SpatialMigrationActivationPreflight preflight = SpatialMigrationFileSystemSelector.Evaluate(active);
                 Assert.That(preflight.IsSupported, Is.True, preflight.Reason);
                 ISpatialMigrationFileSystem fileSystem = preflight.FileSystem;
@@ -179,19 +200,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "\"RoomOptionId\":\"placement.option.room.basic\"," +
                 "\"MonsterOptionIds\":[\"placement.option.monster.skeleton\"]," +
                 "\"TrapOptionIds\":[],\"LootNodeOptionIds\":[]}],\"NextRevision\":3}}}");
+            byte[] omittedResearchSource = original;
+            // This inline synthetic migration fixture intends no Research state.
+            // Preserve that explicitly; an omitted nullable object is not proof
+            // that JsonUtility's historical projection represents no project.
+            original = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(original).Replace(
+                "\"lastSavedUtcUnix\":1,", "\"lastSavedUtcUnix\":1,\"researchPending\":null,\"researchProgress\":null,"));
+            var workload = PhaseFourTestSupport.ProductionProfile();
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
+                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original,
+                    workload.Raw, workload.Whole, workload.Canonical);
             string filename = "gd66-unity-save-service-" + Guid.NewGuid().ToString("N") + ".json";
             string unityShapedPath = Path.Combine(Application.persistentDataPath, filename);
             string schemaTwelveFilename = "gd66-unity-schema12-service-" +
                 Guid.NewGuid().ToString("N") + ".json";
             string schemaTwelvePath = Path.Combine(Application.persistentDataPath, schemaTwelveFilename);
-            SaveService migratedService = WindowsService(fixture, filename);
             try
             {
                 File.WriteAllBytes(unityShapedPath, original);
 
-                SaveData migrated = migratedService.LoadOrCreate("gd66-live", out string migrationBanner);
+                SaveData migrated = LoadWindowsService(fixture, filename, out var migratedService, out string migrationBanner);
 
                 Assert.That(migrated, Is.Not.Null, migrationBanner);
                 Assert.That(migrated.validatedCanonicalSpatialState, Is.Not.Null);
@@ -200,12 +228,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(File.ReadAllText(migratedService.SavePath), Does.Contain("\"RoomLocalPosition\""));
                 Assert.That(migrated.validatedCanonicalSpatialState.Floors.Single().RoomContents.Assignments,
                     Has.Length.EqualTo(1));
+                var actualContext = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                    BindingFlags.Instance | BindingFlags.NonPublic).GetValue(migratedService);
+                var omitted = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, omittedResearchSource,
+                    workload.Raw, workload.Whole, workload.Canonical);
+                Assert.That(PhaseFourTestSupport.UpgradeFrozenSixteen(omitted.Result.Attempt.Candidate.GetBytes(),
+                    fixture.Limits, out var omittedSixteen), Is.True);
+                var historicalOmitted = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(omittedSixteen, actualContext);
+                Assert.That(historicalOmitted.IsValid, Is.True, historicalOmitted.Reason);
+                Assert.That(DetachedCompleteSaveContract.ResearchStateValid(historicalOmitted, actualContext.RecoveryInputs), Is.False,
+                    "The old ambiguous Research fixture must not acquire current activation authority");
 
                 migratedService.DeleteSave(out string originalDeleteBanner);
                 Assert.That(File.Exists(migratedService.SavePath), Is.False, originalDeleteBanner);
 
-                SaveService nativeService = WindowsService(fixture, filename);
-                SaveData created = nativeService.LoadOrCreate("gd66-live", out string nativeBanner);
+                SaveData created = LoadWindowsService(fixture, filename, out var nativeService, out string nativeBanner);
                 Assert.That(created, Is.Not.Null, nativeBanner);
                 Assert.That(created.validatedCanonicalSpatialState, Is.Not.Null);
                 Assert.That(nativeService.CanonicalSession, Is.Not.Null);
@@ -227,11 +264,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 byte[] frozenSchemaTwelve = PhaseFourTestSupport.FrozenTwelve(firstCurrentBytes);
                 Assert.That(Encoding.UTF8.GetString(frozenSchemaTwelve),
                     Does.Contain("\"schemaVersion\":12").And.Not.Contain("RoomLocalPosition"));
+                var readerContext = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                    BindingFlags.Instance | BindingFlags.NonPublic).GetValue(nativeService);
+                var historical = DetachedCompleteSaveContract.ParseValidateFrozenSchemaTwelveAndRoundTrip(frozenSchemaTwelve, fixture.Limits);
+                Assert.That(historical.IsValid, Is.True, historical.Reason);
+                Assert.That(historical.CurrentTargetValidated, Is.False, "Frozen reader proof is not current write authority");
+                Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(frozenSchemaTwelve, readerContext).IsValid,
+                    Is.False, "The current reader must continue rejecting a frozen source as current write authority");
                 File.WriteAllBytes(schemaTwelvePath, frozenSchemaTwelve);
 
-                SaveService schemaTwelveService = WindowsService(fixture, schemaTwelveFilename);
-                SaveData schemaTwelveMigrated = schemaTwelveService.LoadOrCreate(
-                    "gd66-live", out string schemaTwelveBanner);
+                SaveData schemaTwelveMigrated = LoadWindowsService(fixture, schemaTwelveFilename,
+                    out var schemaTwelveService, out string schemaTwelveBanner);
                 Assert.That(schemaTwelveMigrated, Is.Not.Null, schemaTwelveBanner);
                 RoomContentAssignment remigratedAssignment = schemaTwelveMigrated
                     .validatedCanonicalSpatialState.Floors.Single().RoomContents.Assignments.Single();
@@ -244,14 +287,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Is.EqualTo(firstAssignment.RoomLocalPosition.X));
                 Assert.That(remigratedAssignment.RoomLocalPosition.Y,
                     Is.EqualTo(firstAssignment.RoomLocalPosition.Y));
-                CollectionAssert.AreEqual(firstCurrentBytes, File.ReadAllBytes(schemaTwelveService.SavePath));
+                byte[] migratedBytes = File.ReadAllBytes(schemaTwelveService.SavePath);
+                // Frozen migration/activation is not native creation: its legacy
+                // interval contract is preserved, not stamped with native proof.
+                CollectionAssert.AreEqual(frozenSchemaTwelve, PhaseFourTestSupport.FrozenTwelve(migratedBytes));
+                Assert.That(schemaTwelveMigrated.timeProvenance.Mode, Is.EqualTo(TimeProvenance.PreciseMode));
+                Assert.That(schemaTwelveMigrated.timeProvenance.AccountedBoundary.Seconds, Is.EqualTo(1000));
+                Assert.That(schemaTwelveMigrated.timeProvenance.RecoveryContextSha256,
+                    Is.EqualTo(created.timeProvenance.RecoveryContextSha256));
 
-                SaveService reopenedService = WindowsService(fixture, schemaTwelveFilename);
-                SaveData reopened = reopenedService.LoadOrCreate("gd66-live", out string reopenBanner);
+                SaveData reopened = LoadWindowsService(fixture, schemaTwelveFilename, out var reopenedService, out string reopenBanner);
                 Assert.That(reopened, Is.Not.Null, reopenBanner);
                 Assert.That(reopened.validatedCanonicalSpatialState, Is.Not.Null);
                 Assert.That(reopenedService.CanonicalSession, Is.Not.Null);
-                CollectionAssert.AreEqual(firstCurrentBytes, File.ReadAllBytes(reopenedService.SavePath));
+                CollectionAssert.AreEqual(migratedBytes, File.ReadAllBytes(reopenedService.SavePath));
 
                 reopenedService.DeleteSave(out string deleteBanner);
                 Assert.That(File.Exists(reopenedService.SavePath), Is.False, deleteBanner);
@@ -280,8 +329,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.Ignore("gd66.test.windows_only");
             var fileSystem = new WindowsSpatialMigrationFileSystem();
             Assert.Throws<IOException>(() => fileSystem.MoveSameDirectoryAtomic(
-                Path.Combine(Path.GetTempPath(), "a", "source"),
-                Path.Combine(Path.GetTempPath(), "b", "destination")));
+                Path.Combine(ownedTemporaryRoot, "a", "source"),
+                Path.Combine(ownedTemporaryRoot, "b", "destination")));
         }
 
         [Test]
@@ -289,7 +338,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-collapse");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-collapse");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -315,7 +364,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-create-new");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-create-new");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -338,7 +387,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-lock");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-lock");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -362,7 +411,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-existing-destination");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-existing-destination");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -386,7 +435,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-destination-lock");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-destination-lock");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -411,7 +460,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-missing-source");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-missing-source");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -459,7 +508,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(nativeSize, Is.EqualTo(24));
             }
 
-            string destination = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-layout-Ω.json"));
+            string destination = Path.GetFullPath(Path.Combine(ownedTemporaryRoot, "gd66-layout-Ω.json"));
             byte[] expected = Encoding.Unicode.GetBytes(destination);
             MethodInfo allocate = fileSystemType.GetMethod("AllocateRenameInfo",
                 BindingFlags.Static | BindingFlags.NonPublic);
@@ -486,7 +535,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-long-journal");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-long-journal");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -513,7 +562,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-file-identity");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-file-identity");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -554,7 +603,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string directory = Path.Combine(Path.GetTempPath(), "gd66-winfs-path-bound");
+            string directory = Path.Combine(ownedTemporaryRoot, "gd66-winfs-path-bound");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -578,7 +627,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
-            string root = Path.Combine(Path.GetTempPath(), "gd66-winfs-reparse");
+            string root = Path.Combine(ownedTemporaryRoot, "gd66-winfs-reparse");
             string target = Path.Combine(root, "target");
             string ordinaryChild = Path.Combine(target, "ordinary-child");
             string junction = Path.Combine(root, "junction");
@@ -617,13 +666,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
-            string directory = Path.Combine(Path.GetTempPath(), populated
+            string directory = Path.Combine(ownedTemporaryRoot, populated
                 ? "gd66-winfs-transaction-populated" : "gd66-winfs-transaction-empty");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
             {
                 string active = Path.Combine(directory, "save.json");
+                Assert.That(active, Is.EqualTo(Path.GetFullPath(active)), "Recovery consumes a normalized absolute path");
                 SpatialMigrationActivationPreflight preflight = SpatialMigrationFileSystemSelector.Evaluate(active);
                 Assert.That(preflight.IsSupported, Is.True, preflight.Reason);
                 File.WriteAllBytes(active, original);
@@ -655,7 +705,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
-            string directory = Path.Combine(Path.GetTempPath(), includeBackup
+            string directory = Path.Combine(ownedTemporaryRoot, includeBackup
                 ? "gd66-winfs-replaced-backup" : "gd66-winfs-replaced-no-backup");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
@@ -729,8 +779,50 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Reason, Is.EqualTo(SpatialMigrationCapabilityReason.NativeProbeFailed));
         }
 
+        private sealed class WindowsFixtureClock : IPreciseTimeSource
+        {
+            public UnixTimePoint UtcNow() => new UnixTimePoint(1000, 0);
+            public long UtcNowUnixSeconds() => 1000;
+        }
+
+        private static SaveData LoadWindowsService(Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,
+            string filename, out SaveService service, out string banner)
+        {
+            service = WindowsService(fixture, filename, out var time, out var inputs);
+            var current = service.LoadOrCreate("gd66-live", out banner);
+            string diagnostic = banner;
+            if (current == null) {
+                var context = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                    BindingFlags.Instance | BindingFlags.NonPublic).GetValue(service);
+                if (PhaseFourTestSupport.UpgradeFrozenSixteen(fixture.Result.Attempt.Candidate.GetBytes(), fixture.Limits, out var bytes)) {
+                    var frozen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(bytes, context);
+                    diagnostic += "; frozen16=" + frozen.IsValid + "; reason=" + frozen.Reason +
+                        "; research=" + (frozen.IsValid && DetachedCompleteSaveContract.ResearchStateValid(frozen, inputs)) +
+                        "; W=" + frozen.TimeProvenance?.AccountedBoundary.Seconds + "; R=" + time.RetainedRecoveryEntry?.WallEndpoint.Seconds;
+                }
+            }
+            Assert.That(current, Is.Not.Null, diagnostic);
+            time.BindLoadedForegroundHorizon(current.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
+            time.AttachSave(current);
+            service.CanonicalRuntimePublished += value => { current = value; time.AttachSave(value); };
+            if (time.RecoveryClockActive || current.timeProvenance.Episode != null) {
+                service.BeginCanonicalRecovery(current);
+                var online = new DungeonBuilder.M0.Economy.CanonicalPassiveManaService(inputs.Passive, inputs.Economy,
+                    new DungeonBuilder.M0.Economy.FormulaEngine(), fixture.Limits.Spatial, inputs.Bootstrap.tickSeconds);
+                var mana = new DungeonBuilder.M0.Economy.CanonicalOfflinePassiveManaService(inputs.Passive, online);
+                for (int i = 0; i < 8 && time.RecoveryClockActive; i++) {
+                    var result = service.AdvanceCanonicalRecovery(current, mana, (_, __) => Assert.Fail("Historical A=C owns no accepted ticks"));
+                    Assert.That(result.IsSuccess, Is.True, result.Reason);
+                }
+                Assert.That(time.RecoveryClockActive, Is.False);
+            }
+            Assert.That(current.timeProvenance.Episode, Is.Null);
+            return current;
+        }
+
         private static SaveService WindowsService(
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture, string filename)
+            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture, string filename,
+            out TimeService time, out RecoveryRuntimeInputs inputs)
         {
             var service = new SaveService(new SimpleLogger(false),
                 new SaveConfig { fileName = filename, useAtomicWrites = true },
@@ -741,10 +833,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
                 PhaseFourTestSupport.PositionProfiles(fixture.Limits),
                 PhaseFourTestSupport.Occupancy(fixture.Limits));
-            var economy = PhaseFourTestSupport.Economy(fixture.Production, fixture.Limits);
+            var contentLimits = ProductionSpatialContentWorkloadLimitParser.Parse(UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(
+                "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json")).Limits;
+            inputs = new RecoveryRuntimeInputs(H1F4RecoveryContractTests.Inputs(), fixture.Production, contentLimits, fixture.Limits);
+            var economy = inputs.Economy;
             service.ConfigureStructuralEconomy(economy);
             service.ConfigureContentAcquisitionEconomy(
                 PhaseFourTestSupport.Acquisition(economy, fixture.Limits));
+            var clock = new WindowsFixtureClock();
+            time = new TimeService(new SimpleLogger(false), inputs.Bootstrap.tickSeconds,
+                inputs.Bootstrap.timeRules.detectClockSkewSeconds, clock, () => 0);
+            time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);
+            service.SetTimeSourceForTests(clock);
+            service.ConfigureRecovery(inputs, time);
             return service;
         }
 

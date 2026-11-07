@@ -215,10 +215,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void DurableKnowledgeSurvivesOneActiveFloorLimitAndReopen()
         {
-            var f = PhaseSixA4Tests.Eligible();
+            var f = PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs((config, _) => {
+                config.PhaseSix.MaximumActiveFloors = 1;
+                config.PhaseSix.Objectives.Single(x => x.Mode == "target_depth").Weight = 0;
+            }));
             var records = new[] { Record(f, 0), Record(f, 1) };
-            f.Configuration.PhaseSix.MaximumActiveFloors = 1;
-            f.Configuration.PhaseSix.Objectives.Single(x => x.Mode == "target_depth").Weight = 0;
             Assert.That(PhaseSixRunConfigValidation.IsValid(f.Configuration.PhaseSix), Is.True);
             Assert.That(f.State.Floors.Single(x => x.FloorIndex == 1).ActivationState,
                 Is.Not.EqualTo(FloorActivationState.Active));
@@ -229,9 +230,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 new SharedFloorKnowledgeAuthority { Records = records });
             Assert.That(update.IsSuccess, Is.True, update.Reason);
             byte[] bytes = update.Update.GetBytes();
-            var oneActiveContext = new DetachedCurrentTargetValidationContext(f.Compatibility,
-                f.Production, LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration),
-                f.Profile.Canonical);
+            var oneActiveContext = f.Context;
             var validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, oneActiveContext);
             Assert.That(validated.CurrentTargetValidated, Is.True);
             Assert.That(validated.FloorKnowledge.Records.Length, Is.EqualTo(2));
@@ -248,10 +247,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void LaterRunUsesApplicablePreRunKnowledgeAndCurrentRunCannotLearnRetroactively()
         {
-            var f = PhaseSixA4Tests.Eligible();
+            var f = PhaseSixA4Tests.Eligible(PhaseFourTestSupport.AuthoredInputs(
+                (config, _) => PhaseSixA4Tests.ForceDescent(config, true)));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId,
                 MvpDungeonPlacementIds.HiddenCacheOptionId);
-            PhaseSixA4Tests.ForceDescent(f.Configuration, true);
             f.Accept(PhaseSixA4Tests.Writer(f)
                 .CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                     FloorLifecycleAction.Activate, PhaseSixA4Tests.FloorTwo(f)));

@@ -30,6 +30,7 @@ namespace DungeonBuilder.M0
         private readonly ITimeSource _timeSource;
         private readonly Func<double> _monotonicSeconds;
         internal double MonotonicSeconds => _monotonicSeconds();
+        internal bool HasPreciseUtc => _timeSource is IPreciseTimeSource;
         internal UnixTimePoint CaptureUtc() => _timeSource is IPreciseTimeSource precise
             ? precise.UtcNow() : new UnixTimePoint(_timeSource.UtcNowUnixSeconds(), 0);
 

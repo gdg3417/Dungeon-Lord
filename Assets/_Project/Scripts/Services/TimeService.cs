@@ -38,7 +38,7 @@ namespace DungeonBuilder.M0
 
         public void Update(float deltaTime)
         {
-            if (HasForegroundClock) return; // one clock/owner, no duplicate passive ticks
+            if (HasForegroundClock || recoveryClockActive) return; // one clock/owner, no duplicate passive ticks
             if (_save == null || _isPaused)
             {
                 return;
@@ -55,9 +55,14 @@ namespace DungeonBuilder.M0
 
         public void OnPause()
         {
+            RecoveryLifecycleObservation(foregroundFocused, true);
             if (HasForegroundClock) SampleForeground();
             if (_save == null || _isPaused)
             {
+                if (_save == null && (recoveryClockActive || HasForegroundClock)) {
+                    if (!_isPaused) _clock.MarkPaused();
+                    _isPaused = true;
+                }
                 return;
             }
 
@@ -67,9 +72,11 @@ namespace DungeonBuilder.M0
 
         public string OnResume()
         {
+            RecoveryLifecycleObservation(foregroundFocused, false);
             if (HasForegroundClock) SampleForeground(); // suspended sample reanchors without elapsed credit
             if (_save == null || !_isPaused)
             {
+                if (_save == null && (recoveryClockActive || HasForegroundClock)) _isPaused = false;
                 return string.Empty;
             }
 

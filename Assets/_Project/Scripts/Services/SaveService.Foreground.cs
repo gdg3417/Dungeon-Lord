@@ -11,12 +11,19 @@ namespace DungeonBuilder.M0
         internal Func<bool> BeforeForegroundAction;
         internal Func<SaveData> ForegroundCurrent;
         internal bool ForegroundWriting { get; private set; }
+        internal bool CanonicalPublicationPending => ForegroundWriting || pendingCandidate != null;
         private bool foregroundRecoveryRequired;
         internal bool RequiresCanonicalRecovery => foregroundRecoveryRequired;
         private bool PrepareForegroundAction(ref SaveData current)
         {
+            // A lifecycle callback can arrive while synchronous atomic IO is in
+            // flight. Observe its time through TimeService, but never start a
+            // second writer against the outstanding predecessor/candidate pair.
+            if (CanonicalPublicationPending) return false;
             if (foregroundRecoveryRequired) return false;
-            if (ForegroundWriting || BeforeForegroundAction == null) return true;
+            if (recoveryTime?.RecoveryClockActive == true) return false;
+            if (current?.timeProvenance?.Episode != null && BeforeForegroundAction == null) return false;
+            if (BeforeForegroundAction == null) return true;
             if (!BeforeForegroundAction()) return false;
             current = ForegroundCurrent?.Invoke() ?? current;
             return current != null;
@@ -40,7 +47,7 @@ namespace DungeonBuilder.M0
         internal DetachedCanonicalWriteResult AdvanceForeground(SaveData current, ForegroundObservation observation, int tickSeconds, Action<SaveData, long> passiveTick,
             long? suspendedSaveUtc = null)
         {
-            if (foregroundRecoveryRequired || ForegroundWriting || _canonicalSession == null || ForegroundConfiguration == null)
+            if (foregroundRecoveryRequired || CanonicalPublicationPending || _canonicalSession == null || ForegroundConfiguration == null)
                 return ForegroundBlocked();
             if (observation == null || !observation.Authorizes(_canonicalSession, current, observation.CapturedThrough)) return ForegroundBlocked();
             long through = observation.CapturedThrough;
@@ -56,8 +63,17 @@ namespace DungeonBuilder.M0
                 // when that sample is accepted by a later suspended pump.
                 if (suspendedSaveUtc.HasValue)
                     savedBoundary = Math.Max(current.lastSavedUtcUnix, Math.Min(savedBoundary, suspendedSaveUtc.Value));
+                CanonicalTimeTransition time = null;
+                if (current.timeProvenance?.Mode == TimeProvenance.PreciseMode) {
+                    if (current.timeProvenance.Episode != null || recoveryTime?.RecoveryClockActive == true) return ForegroundBlocked();
+                    savedBoundary = current.lastSavedUtcUnix;
+                    if (current.livingDungeon?.IsClosed != false && observation.Context == ForegroundObservationContext.EligibleForeground) {
+                        time = CanonicalTimeTransition.Foreground(_canonicalSession.GetCurrentBytes(), current.timeProvenance, observation, current.livingDungeon);
+                        savedBoundary = time.Successor.AccountedBoundary.Seconds;
+                    }
+                }
                 var result = CreateWriteAuthority().AdvanceForeground(SavePath, _canonicalFileSystem, _canonicalSession, current,
-                    ForegroundConfiguration, through, tickSeconds, passiveTick, savedBoundary);
+                    ForegroundConfiguration, through, tickSeconds, passiveTick, savedBoundary, time);
                 if (result.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason) foregroundRecoveryRequired = true;
                 if (result.IsSuccess) {
                     _canonicalSession = result.Session; _undo = null;

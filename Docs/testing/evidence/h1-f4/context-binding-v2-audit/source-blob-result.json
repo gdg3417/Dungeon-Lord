@@ -1,0 +1,130 @@
+{
+  "historical_source": "c2b82030b15e3d5e5a9e5aa9fb5dae37fcba314d",
+  "baseline_source": "3eb6ccf93558b8145d64e9e63cbefcbd73484602",
+  "probe_sha256": "b03599063b190721c7e551c9fe0b7c6a6aee639a774079440727df1403737bb8",
+  "files": [
+    {
+      "path": "Assets/_Project/Data/Bootstrap/run_simulation_config.json",
+      "historical_git_blob_sha256": "43da828acf523f2904f2a62f619e4d615d5cdc1f152fa7d654589536c570e95a",
+      "baseline_git_blob_sha256": "43da828acf523f2904f2a62f619e4d615d5cdc1f152fa7d654589536c570e95a",
+      "checkout_sha256": "f07657572530df1955ae904c66a76feeb71ca7ae8a6e8382c25bb8b7a1cf4e16",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": false,
+      "checkout_differs_only_by_crlf": true
+    },
+    {
+      "path": "Assets/_Project/Resources/passive_online_mana.json",
+      "historical_git_blob_sha256": "6da00556c2027723d2fd12633c47d7fe5414f23c5ff7ca19960c522c331347b3",
+      "baseline_git_blob_sha256": "6da00556c2027723d2fd12633c47d7fe5414f23c5ff7ca19960c522c331347b3",
+      "checkout_sha256": "2848ccfa6ffde744ade883edb0171bfbe993bbee5c32758a70d8ee4b690e6639",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": false,
+      "checkout_differs_only_by_crlf": true
+    },
+    {
+      "path": "Assets/_Project/Resources/structural_economy.json",
+      "historical_git_blob_sha256": "a285ddafcb4f430472f691fb4c25225a132feadaa6bc13feb74d430df33d2803",
+      "baseline_git_blob_sha256": "a285ddafcb4f430472f691fb4c25225a132feadaa6bc13feb74d430df33d2803",
+      "checkout_sha256": "f33799b480d27bd65356c182dee67a8473cfed0db061bba9e8de55eb6c0addaf",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": false,
+      "checkout_differs_only_by_crlf": true
+    },
+    {
+      "path": "Assets/_Project/Resources/monster_recovery.json",
+      "historical_git_blob_sha256": "5d82724b0673c3ef1a2053b47c9282489857b67e5f4767910c8a5d6b9157c892",
+      "baseline_git_blob_sha256": "5d82724b0673c3ef1a2053b47c9282489857b67e5f4767910c8a5d6b9157c892",
+      "checkout_sha256": "1a5e199c55cc28678099dc56bf0ea5a4796038090d6f2f3e7f8e67494ad4595d",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": false,
+      "checkout_differs_only_by_crlf": true
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json",
+      "historical_git_blob_sha256": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227",
+      "baseline_git_blob_sha256": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227",
+      "checkout_sha256": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": true,
+      "checkout_differs_only_by_crlf": false
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json",
+      "historical_git_blob_sha256": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b",
+      "baseline_git_blob_sha256": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b",
+      "checkout_sha256": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": true,
+      "checkout_differs_only_by_crlf": false
+    },
+    {
+      "path": "Assets/_Project/Resources/living_dungeon_foreground.json",
+      "historical_git_blob_sha256": "7edc60a6c06d4ce29678b5818a348b8bfc3fb78aff3f6367744eaa3a06c957f6",
+      "baseline_git_blob_sha256": "7edc60a6c06d4ce29678b5818a348b8bfc3fb78aff3f6367744eaa3a06c957f6",
+      "checkout_sha256": "840001642c9b3d2d53ef7ebfcac7170459f012589a6206d8bb58a9727cfc2331",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": false,
+      "checkout_differs_only_by_crlf": true
+    },
+    {
+      "path": "Assets/_Project/Resources/living_dungeon_foreground_v2.json",
+      "historical_git_blob_sha256": "3840464778ff2756f73920a5e5f414c9a1947fd1cd4ad62f6b9cd4319ea60b94",
+      "baseline_git_blob_sha256": "3840464778ff2756f73920a5e5f414c9a1947fd1cd4ad62f6b9cd4319ea60b94",
+      "checkout_sha256": "2183efa3f7540442c861bd2fe7ab7912007ad725b33ab21546795803c0d331a1",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": false,
+      "checkout_differs_only_by_crlf": true
+    },
+    {
+      "path": "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json",
+      "historical_git_blob_sha256": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600",
+      "baseline_git_blob_sha256": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600",
+      "checkout_sha256": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": true,
+      "checkout_differs_only_by_crlf": false
+    },
+    {
+      "path": "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json",
+      "historical_git_blob_sha256": "8248d3037e24bd50f5a2df1f64292e6fa4f857949e5f4fcb37091a478f55443a",
+      "baseline_git_blob_sha256": "6caa36bb2b6cd7cf40227e762197a798e262b84ad7e40980584902b14524e8c9",
+      "checkout_sha256": "6caa36bb2b6cd7cf40227e762197a798e262b84ad7e40980584902b14524e8c9",
+      "historical_blob_equals_baseline_blob": false,
+      "historical_json_equals_baseline_json": false,
+      "checkout_equals_baseline_blob": true,
+      "checkout_differs_only_by_crlf": false
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/content_bootstrap.json",
+      "historical_git_blob_sha256": "37301db2165eca85f2567a0cc55968714497e12b71068e92bf74fdc0f3a7f17d",
+      "baseline_git_blob_sha256": "37301db2165eca85f2567a0cc55968714497e12b71068e92bf74fdc0f3a7f17d",
+      "checkout_sha256": "8a90c78da4e0941f4da7e02292de7df0e8cd53bc84ac3ab2c78d3014d9500b8f",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": false,
+      "checkout_differs_only_by_crlf": true
+    },
+    {
+      "path": "Assets/_Project/Data/Bootstrap/loot_config.json",
+      "historical_git_blob_sha256": "7f9f77ff7bcaacbf78027db9e70a7f62f03469df4275d2903cb03332ab4a09dd",
+      "baseline_git_blob_sha256": "7f9f77ff7bcaacbf78027db9e70a7f62f03469df4275d2903cb03332ab4a09dd",
+      "checkout_sha256": "f0efb530aa6673c7cd12d2b2d5cbf87b4b93a49f77af6fd2af30e761d6ba327a",
+      "historical_blob_equals_baseline_blob": true,
+      "historical_json_equals_baseline_json": true,
+      "checkout_equals_baseline_blob": false,
+      "checkout_differs_only_by_crlf": true
+    }
+  ],
+  "unchanged_source_blobs": 11,
+  "total": 12,
+  "limitation": "Git source comparison, not historical imported TextAsset/runtime byte evidence. CRLF comparison is diagnostic only; production binding still hashes exact captured bytes without normalization. No legacy activation authority is granted."
+}

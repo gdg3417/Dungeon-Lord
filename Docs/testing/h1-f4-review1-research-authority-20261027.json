@@ -1,0 +1,634 @@
+{
+  "campaigns": [
+    {
+      "campaign": "33c5be6308bb453c85f48b15b005763f",
+      "campaign_file_hashes": {
+        "campaign.json": "e3d8e0622a40d1bd5f7056a0553475c86faf7131e296dc2389e805b185129609",
+        "launch.claim": "5b98bc650be5c0c767d10ee2f893f4acb4cc4ab15eadd08b93ba06deb91f41d5",
+        "launch.json": "53e3cd82eb1e33a55c74fff02d8051f2992ed95413f68f416acf50cb41ed15f4",
+        "launch.log": "6472110268ad31be1cc9c194418e903bf531b130fd194c72d2dd17f1dcb614e4",
+        "research-regressions-preflight\\child.json": "3818660e2c3f1e97c5e6abfca7c55514746e04aa7fc1db177f8545f124a54818",
+        "research-regressions-preflight\\exit.json": "998a019b9a961d8565ef7f0df3877f34f9ff9d3d8629a77c4143d7fe8a80cde7",
+        "research-regressions-preflight\\preservation.json": "a09f1cd7e64e863c3d06f82e11c3e23dfa2f3dda03d6dc6d1b2b1481b07b2daf",
+        "research-regressions-preflight\\result.json": "8ea200f6f79a85d0f0419ceea50a2a3619d58f3a2e4b2815b12e4f7f9a341c03",
+        "research-regressions-preflight\\started.json": "6affb7cac51d139d1b5eafe4e49fe0ed04ec73f6f799039e5c7a68c86cb6b468",
+        "research-regressions-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "research-regressions\\child.json": "3e1d412f1c88e1814b1203f74e590c56fd3e106c0a6846e98379d5b57505e282",
+        "research-regressions\\cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+        "research-regressions\\exit.json": "074b731da599050b1ca08ca6d909daa743f3d43d7d5ee870125ce1816017f58c",
+        "research-regressions\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+        "research-regressions\\invocation.json": "23f0f4e6af56624fdacd6f08400006c0d577f7157d93d881cc7006370cf30db9",
+        "research-regressions\\result.json": "efd472e00b60a19f8d1f55452eca92d7160a90412dd3312e5ce58bfa4d5815e4",
+        "research-regressions\\results.xml": "0339513d0c66b2f7c615589f966feb953a8410b524f3a21c7e82ccff0d10d487",
+        "research-regressions\\started.json": "e4a0d6df2c7d5eb7386ea02f468c5f9bc338d50d80f6985337f4d6f5e50395bb",
+        "research-regressions\\stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+        "research-regressions\\unity.log": "76e904c25d93f5faf5d5b88be5ef871e779fdcd6b897bcfc9ab268aac24294f2"
+      },
+      "isolation": {
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 research01",
+        "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 research01\\save_primary.json"
+      },
+      "post_failure_preservation": {
+        "final": {
+          "inputs": 1494,
+          "original_inputs_restored": true,
+          "passed": true,
+          "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 research01",
+          "protected_evidence_unchanged": true,
+          "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 research01"
+        },
+        "preflight": {
+          "inputs": 1494,
+          "original_inputs_restored": false,
+          "passed": true,
+          "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 research01",
+          "protected_evidence_unchanged": true,
+          "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 research01"
+        },
+        "restore": {
+          "passed": true,
+          "restored": [
+            "ProjectSettings/ProjectSettings.asset",
+            "ProjectSettings/EditorBuildSettings.asset",
+            "ProjectSettings/ShaderGraphSettings.asset"
+          ]
+        }
+      },
+      "recorded_status": "FAILED",
+      "retention": "preserve exact verdict and evidence",
+      "source_sha": "8c0721f5e48c703df9f02e65bce4c8da4c82b90d",
+      "stages": {
+        "research-regressions": {
+          "child_process": {
+            "created": 134376110993351455,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 48872
+          },
+          "evidence": {
+            "child.json": "3e1d412f1c88e1814b1203f74e590c56fd3e106c0a6846e98379d5b57505e282",
+            "cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+            "exit.json": "074b731da599050b1ca08ca6d909daa743f3d43d7d5ee870125ce1816017f58c",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "23f0f4e6af56624fdacd6f08400006c0d577f7157d93d881cc7006370cf30db9",
+            "results.xml": "0339513d0c66b2f7c615589f966feb953a8410b524f3a21c7e82ccff0d10d487",
+            "started.json": "e4a0d6df2c7d5eb7386ea02f468c5f9bc338d50d80f6985337f4d6f5e50395bb",
+            "stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+            "unity.log": "76e904c25d93f5faf5d5b88be5ef871e779fdcd6b897bcfc9ab268aac24294f2"
+          },
+          "exit_code": 8,
+          "failure": "CHILD_NONZERO",
+          "finished_utc": "2026-10-27T21:45:52.316078+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-0a2190c164bb4d40bf445dae60886b56",
+          "process": {
+            "created": 134376110992288450,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 47552
+          },
+          "status": "FAILED",
+          "tests": {
+            "discovered": 264,
+            "failed": 21,
+            "passed": 243,
+            "skipped": 0,
+            "skips": []
+          }
+        },
+        "research-regressions-preflight": {
+          "child_process": {
+            "created": 134376110900123056,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 17812
+          },
+          "evidence": {
+            "child.json": "3818660e2c3f1e97c5e6abfca7c55514746e04aa7fc1db177f8545f124a54818",
+            "exit.json": "998a019b9a961d8565ef7f0df3877f34f9ff9d3d8629a77c4143d7fe8a80cde7",
+            "preservation.json": "a09f1cd7e64e863c3d06f82e11c3e23dfa2f3dda03d6dc6d1b2b1481b07b2daf",
+            "started.json": "6affb7cac51d139d1b5eafe4e49fe0ed04ec73f6f799039e5c7a68c86cb6b468",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T21:44:54.397983+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-afdd7dbe8f884ce08857671461e30482",
+          "process": {
+            "created": 134376110899049601,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 27252
+          },
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      }
+    },
+    {
+      "campaign": "0c50dfb080ea4bd9ad31ec3f59a6282d",
+      "campaign_file_hashes": {
+        "campaign.json": "84e5f145eaa2bc9375fc196b1780b069c17e5311c6a2dd15f1db150ade03343b",
+        "launch.claim": "2fd12c5cc8a6da22a4112bb00427d8cbf214adafcb38d5450a8a2d9f500513d6",
+        "launch.json": "574c60c107a9df3e437f497de35e767fb65d0af16e307cf767d9ab314730e267",
+        "launch.log": "fa35ae429fdb5e7e4eb402573509a91ae04bd9b842b026c88847844b9f4d80bf",
+        "research-regressions-preflight\\child.json": "66be809a7f66c191251ace36b76acd1f2f9553eed2081bb6dfd6469292aa9b07",
+        "research-regressions-preflight\\exit.json": "0eadacb371178117eabcedd9ff0d179404fb573c7468cf0cffacead85cd7c4aa",
+        "research-regressions-preflight\\preservation.json": "0e2f1bc8878bde35d19cbc19400bda050f49c19fa177e07265cde5fdfd1e5ae2",
+        "research-regressions-preflight\\result.json": "5087d7aae62872e24ec06e7d87a38854161faeade516a421ca9454e0b5622c9b",
+        "research-regressions-preflight\\started.json": "eda89d93d1cf171330f6ea716398b16781aa8e1d51c9c978c12ade69dc243582",
+        "research-regressions-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "research-regressions\\child.json": "e8a18e8c4692cd057aca74456900e54668d7f66ff80c723431ed49ea62030fb1",
+        "research-regressions\\cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+        "research-regressions\\exit.json": "8c8a2494d222a89e5a97318cabb8beab6dc85626675422da2ed256f94f666de9",
+        "research-regressions\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+        "research-regressions\\invocation.json": "7b15aba0e76633bf7d5ecaf052773adced8d7aee83475ad099dccb10e48eaf90",
+        "research-regressions\\result.json": "645a71d26cd0067e722d26d44a500db0d2a12750df0080101fb2a123882b926c",
+        "research-regressions\\results.xml": "05df0ea6faba2114e45d97be1f37c86ae700a26041859328cf50fb17676f0e7d",
+        "research-regressions\\started.json": "07d19f7365a5bf87e132aaebc5ef34156b63a9c4196c656e45ca9207ca9c0575",
+        "research-regressions\\stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+        "research-regressions\\unity.log": "9439a92491cddff9275ef6d04dc2fa566cf54a52644113026a9c7afd13818907"
+      },
+      "isolation": {
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 research02",
+        "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 research02\\save_primary.json"
+      },
+      "post_failure_preservation": {
+        "final": {
+          "inputs": 1494,
+          "original_inputs_restored": true,
+          "passed": true,
+          "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 research02",
+          "protected_evidence_unchanged": true,
+          "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 research02"
+        },
+        "preflight": {
+          "inputs": 1494,
+          "original_inputs_restored": false,
+          "passed": true,
+          "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 research02",
+          "protected_evidence_unchanged": true,
+          "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 research02"
+        },
+        "restore": {
+          "passed": true,
+          "restored": [
+            "ProjectSettings/ProjectSettings.asset",
+            "ProjectSettings/EditorBuildSettings.asset",
+            "ProjectSettings/ShaderGraphSettings.asset"
+          ]
+        }
+      },
+      "recorded_status": "FAILED",
+      "retention": "preserve exact verdict and evidence",
+      "source_sha": "20a99e9978ec3c77d15c226f0be66228d7050f09",
+      "stages": {
+        "research-regressions": {
+          "child_process": {
+            "created": 134376113915901586,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 51300
+          },
+          "evidence": {
+            "child.json": "e8a18e8c4692cd057aca74456900e54668d7f66ff80c723431ed49ea62030fb1",
+            "cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+            "exit.json": "8c8a2494d222a89e5a97318cabb8beab6dc85626675422da2ed256f94f666de9",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "7b15aba0e76633bf7d5ecaf052773adced8d7aee83475ad099dccb10e48eaf90",
+            "results.xml": "05df0ea6faba2114e45d97be1f37c86ae700a26041859328cf50fb17676f0e7d",
+            "started.json": "07d19f7365a5bf87e132aaebc5ef34156b63a9c4196c656e45ca9207ca9c0575",
+            "stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+            "unity.log": "9439a92491cddff9275ef6d04dc2fa566cf54a52644113026a9c7afd13818907"
+          },
+          "exit_code": 8,
+          "failure": "CHILD_NONZERO",
+          "finished_utc": "2026-10-27T21:50:44.602899+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-10ad39574f394db5b09d1ee249b07acf",
+          "process": {
+            "created": 134376113914855824,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 8008
+          },
+          "status": "FAILED",
+          "tests": {
+            "discovered": 264,
+            "failed": 1,
+            "passed": 263,
+            "skipped": 0,
+            "skips": []
+          }
+        },
+        "research-regressions-preflight": {
+          "child_process": {
+            "created": 134376113821794218,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 51428
+          },
+          "evidence": {
+            "child.json": "66be809a7f66c191251ace36b76acd1f2f9553eed2081bb6dfd6469292aa9b07",
+            "exit.json": "0eadacb371178117eabcedd9ff0d179404fb573c7468cf0cffacead85cd7c4aa",
+            "preservation.json": "0e2f1bc8878bde35d19cbc19400bda050f49c19fa177e07265cde5fdfd1e5ae2",
+            "started.json": "eda89d93d1cf171330f6ea716398b16781aa8e1d51c9c978c12ade69dc243582",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T21:49:46.548028+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-f9e37ce90b8c4a6b9ce0cab873ec1dce",
+          "process": {
+            "created": 134376113820595331,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 53432
+          },
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      }
+    },
+    {
+      "campaign": "9068c209892f418ea3a6d29a8754bfd2",
+      "campaign_file_hashes": {
+        "campaign.json": "d40852480fc602206c85d03a244abf8fee7878a2828e81ed30cd2b16438b9ba0",
+        "launch.claim": "d423c559a35ebe8c1e0ec6af2d83e134c32abebbd4b381024b048b18d69a0b15",
+        "launch.json": "d1c22ede8709f4d0728ea15f9de4e8d95351943eabe625588ce8b6b04dcb07a1",
+        "launch.log": "eff58f1f4c9a018ed965a0389844baaf5b61593ecc79e9d8c02ea88ac3b4c760",
+        "research-regressions-preflight\\child.json": "ec7ce91373023b732f137350a3c6d2e9e96fb5dbcecdd5c83f8b6b9bcff91a0d",
+        "research-regressions-preflight\\exit.json": "55c4c05d8d3d35376d92ebca0772342e9c50f0f530e60d61099106f3e53273bc",
+        "research-regressions-preflight\\preservation.json": "6fd938cebe4ade2756375e443011593955b79a7d3a5f22514c82014273071cd9",
+        "research-regressions-preflight\\result.json": "7ac04c5144666223bab87c69db1d446ad5f6333e5c085993221d297148c4fe4d",
+        "research-regressions-preflight\\started.json": "3fc7974db43e6d4adfae22a45ae6085719fd2f6cf8b56b75e840bbc801e533ec",
+        "research-regressions-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "research-regressions\\child.json": "44710294d1f2d3a473032afd5d42a8bbf3b857f28bba248bc3c08595ac2c61f5",
+        "research-regressions\\cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+        "research-regressions\\exit.json": "62c5134d23ab37d14d6439faa9146267ffc8b317797699ca77d3977539859323",
+        "research-regressions\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+        "research-regressions\\invocation.json": "9d8a489b7f7160244a34f6bb25eaeb5e53476fdfce7136bd6fefd095210ad2e0",
+        "research-regressions\\result.json": "8d869421f538b7b933646a0cb2519da039e7cc6b3616cbab29090b5029b32515",
+        "research-regressions\\results.xml": "1798ccae644a58bfea6cc9f8418cc496d7fa81e246f764d94e88443dcfa03610",
+        "research-regressions\\started.json": "9f4332c01ee8a5da89a14746411ed6e7703465551f3417eb0a37199f0fded6ab",
+        "research-regressions\\stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+        "research-regressions\\unity.log": "bd9ec719e96fcdef9bc1e18ca51dd934d2c56bba9bf0486e716bda040f6014d0"
+      },
+      "isolation": {
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 dormantrepro01",
+        "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 dormantrepro01\\save_primary.json"
+      },
+      "post_failure_preservation": {
+        "final": {
+          "inputs": 1494,
+          "original_inputs_restored": true,
+          "passed": true,
+          "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 dormantrepro01",
+          "protected_evidence_unchanged": true,
+          "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 dormantrepro01"
+        },
+        "preflight": {
+          "inputs": 1494,
+          "original_inputs_restored": false,
+          "passed": true,
+          "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 dormantrepro01",
+          "protected_evidence_unchanged": true,
+          "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 dormantrepro01"
+        },
+        "restore": {
+          "passed": true,
+          "restored": [
+            "ProjectSettings/ProjectSettings.asset",
+            "ProjectSettings/EditorBuildSettings.asset",
+            "ProjectSettings/ShaderGraphSettings.asset"
+          ]
+        }
+      },
+      "recorded_status": "FAILED",
+      "retention": "preserve exact verdict and evidence",
+      "source_sha": "a878d6a03c0630b45266ac075aa7f414afeda454",
+      "stages": {
+        "research-regressions": {
+          "child_process": {
+            "created": 134376120212551482,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 46468
+          },
+          "evidence": {
+            "child.json": "44710294d1f2d3a473032afd5d42a8bbf3b857f28bba248bc3c08595ac2c61f5",
+            "cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+            "exit.json": "62c5134d23ab37d14d6439faa9146267ffc8b317797699ca77d3977539859323",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "9d8a489b7f7160244a34f6bb25eaeb5e53476fdfce7136bd6fefd095210ad2e0",
+            "results.xml": "1798ccae644a58bfea6cc9f8418cc496d7fa81e246f764d94e88443dcfa03610",
+            "started.json": "9f4332c01ee8a5da89a14746411ed6e7703465551f3417eb0a37199f0fded6ab",
+            "stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+            "unity.log": "bd9ec719e96fcdef9bc1e18ca51dd934d2c56bba9bf0486e716bda040f6014d0"
+          },
+          "exit_code": 8,
+          "failure": "CHILD_NONZERO",
+          "finished_utc": "2026-10-27T22:01:17.375381+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-6bcbda96ac724a54a0a44042ef9066cc",
+          "process": {
+            "created": 134376120211467279,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 43820
+          },
+          "status": "FAILED",
+          "tests": {
+            "discovered": 267,
+            "failed": 3,
+            "passed": 264,
+            "skipped": 0,
+            "skips": []
+          }
+        },
+        "research-regressions-preflight": {
+          "child_process": {
+            "created": 134376120118573292,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 40116
+          },
+          "evidence": {
+            "child.json": "ec7ce91373023b732f137350a3c6d2e9e96fb5dbcecdd5c83f8b6b9bcff91a0d",
+            "exit.json": "55c4c05d8d3d35376d92ebca0772342e9c50f0f530e60d61099106f3e53273bc",
+            "preservation.json": "6fd938cebe4ade2756375e443011593955b79a7d3a5f22514c82014273071cd9",
+            "started.json": "3fc7974db43e6d4adfae22a45ae6085719fd2f6cf8b56b75e840bbc801e533ec",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T22:00:16.223593+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-907284e3a9da4ab49f21f23bfda0c2a6",
+          "process": {
+            "created": 134376120117432381,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 22852
+          },
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      }
+    },
+    {
+      "campaign": "7608b6e14bce46c5a2a8121cecd2fc20",
+      "campaign_file_hashes": {
+        "campaign.json": "396d7169e7c88031d9c78fb0c4129d54ad0e0fb958fe2437ef6494b1f4cc8c24",
+        "launch.claim": "c482393892bc7d57a70b9f2a57076a0d615f9a6ccd40cc10c8707d1b064dd26c",
+        "launch.json": "1cf937f2681aceb305140c905d73f6cad6145a5add92529927c46fd3510112d2",
+        "launch.log": "ca570380996eb2c49453b66b42cadafe84b564215f90155ca2b194c84edb440f",
+        "preservation\\child.json": "44eece0c2f4422b6f8f68952c22f1f020683c1dfa68489936b991538b6063fdb",
+        "preservation\\exit.json": "9b3c92d3719b1b7519b8aeac312b90352c34b0cd21e922881e8804069895e275",
+        "preservation\\preservation.json": "bb7719a9cc5ea18fc308077a465cddae6f21563245db7a08b7d96e528e9c8d4b",
+        "preservation\\result.json": "c061cbbd618e922f56f7f1be2f729a1665db44ed44881c373662591681c3f12c",
+        "preservation\\started.json": "40930335910ed33e62dd9e63d5d79d47f04009efbcabac119a2011d4a84e15e2",
+        "preservation\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "research-regressions-preflight\\child.json": "9825decd3ddee6d820dcd06ec0075bec7a0a8923893bc34b3957811094ce3f64",
+        "research-regressions-preflight\\exit.json": "a47f1cb0b42a2739dcb9bccacd3702cc12269a5deb5ec9729d05a5dfa1a8496f",
+        "research-regressions-preflight\\preservation.json": "dde2bfd1732fc39a491758c4ee9b6610508408ac62354db3314f84ce956d1ab2",
+        "research-regressions-preflight\\result.json": "8bcc4cc4e45cfce99594b02d1ad1b0235d4c57acf6766e5f474b6468725930de",
+        "research-regressions-preflight\\started.json": "a20fa7621d74ef915118a89998144a89fa84579d246cb3375911eaf2e437dc5d",
+        "research-regressions-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "research-regressions\\child.json": "60a7af0ea2a625eda58a4349c1db9dad02529cbafa035332b379091fb1eaa126",
+        "research-regressions\\cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+        "research-regressions\\exit.json": "fd9ac25d1c2beb12aa651f2780170c0fa83bb9e207d77834367605a1ba135682",
+        "research-regressions\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+        "research-regressions\\invocation.json": "306b51eea7886a70baf96f63e04684dc3538f41add556c48a814c4815f10f2d8",
+        "research-regressions\\result.json": "9f441e3be663868e23c2f7cc25d1912abfc5293da69e289a13ba3e29fd4cfcd8",
+        "research-regressions\\results.xml": "cde8536938d6438155e25c6266cb0c2168ea1a8e50f5908e00bc5f62d06c3293",
+        "research-regressions\\started.json": "9a671fe79088c13fe9b82091fb56c69bbf14c8450ad487577532df67c66c5217",
+        "research-regressions\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "research-regressions\\unity.log": "136ef59f891c34f9e7b88a84c39aa6d551a57af0518150edb3d369b07335e3c9",
+        "restore-preflight\\child.json": "e1f47a36a4c8d7a01519085018f329f1e6f25cdd46e082346d968bc31db57d78",
+        "restore-preflight\\exit.json": "34c8b119c459e85627c5be166a08afca7318a9a3489a693494f7cd07a4131927",
+        "restore-preflight\\preservation.json": "dde2bfd1732fc39a491758c4ee9b6610508408ac62354db3314f84ce956d1ab2",
+        "restore-preflight\\result.json": "e5d3ca14d693c31702ef3c2c830565982d89ecd00887e48e54ebab11d5ed3a44",
+        "restore-preflight\\started.json": "0f813f0c35cb9ded875aa8d3247411ce99df91be53ca19d7381fd77d39715955",
+        "restore-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "restore\\child.json": "1a78c46f936ac8147f1387d45cc2cda8054c6ca3398af5a9ae64e410d33aa586",
+        "restore\\exit.json": "f7bae7da8f45a6172ac3a69bc0a9f971055a1a54d4854ce4fa90282a9a45d78b",
+        "restore\\restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+        "restore\\result.json": "f6048199cac0324ebe3cb765001e79bb61b6df04bbc36514733948b258615ba9",
+        "restore\\started.json": "b4dfc32597d041efd3c631199821ad5f6026813ef048b2f80b6a180056a910e9",
+        "restore\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "isolation": {
+        "product": "Dungeon Lord B3B2 Smoke H1F4 20261027 dormantfix01",
+        "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord",
+        "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 dormantfix01\\save_primary.json"
+      },
+      "recorded_status": "PASSED",
+      "retention": "preserve exact verdict and evidence",
+      "source_sha": "b9e455a430095326b02a704036296d5a54b52549",
+      "stages": {
+        "preservation": {
+          "child_process": {
+            "created": 134376125210541758,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 46224
+          },
+          "evidence": {
+            "child.json": "44eece0c2f4422b6f8f68952c22f1f020683c1dfa68489936b991538b6063fdb",
+            "exit.json": "9b3c92d3719b1b7519b8aeac312b90352c34b0cd21e922881e8804069895e275",
+            "preservation.json": "bb7719a9cc5ea18fc308077a465cddae6f21563245db7a08b7d96e528e9c8d4b",
+            "started.json": "40930335910ed33e62dd9e63d5d79d47f04009efbcabac119a2011d4a84e15e2",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T22:08:45.331585+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-5d55ebf31355433592a2bfa6f879a4c4",
+          "process": {
+            "created": 134376125209444111,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 38488
+          },
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "research-regressions": {
+          "child_process": {
+            "created": 134376124397722517,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 42124
+          },
+          "evidence": {
+            "child.json": "60a7af0ea2a625eda58a4349c1db9dad02529cbafa035332b379091fb1eaa126",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "fd9ac25d1c2beb12aa651f2780170c0fa83bb9e207d77834367605a1ba135682",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "306b51eea7886a70baf96f63e04684dc3538f41add556c48a814c4815f10f2d8",
+            "results.xml": "cde8536938d6438155e25c6266cb0c2168ea1a8e50f5908e00bc5f62d06c3293",
+            "started.json": "9a671fe79088c13fe9b82091fb56c69bbf14c8450ad487577532df67c66c5217",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "136ef59f891c34f9e7b88a84c39aa6d551a57af0518150edb3d369b07335e3c9"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T22:08:15.782373+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-3a9475972ac6402e8c8a540266a2d6f3",
+          "process": {
+            "created": 134376124396548258,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 45964
+          },
+          "status": "PASSED",
+          "tests": {
+            "discovered": 268,
+            "failed": 0,
+            "passed": 268,
+            "skipped": 0,
+            "skips": []
+          }
+        },
+        "research-regressions-preflight": {
+          "child_process": {
+            "created": 134376124302531535,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 52336
+          },
+          "evidence": {
+            "child.json": "9825decd3ddee6d820dcd06ec0075bec7a0a8923893bc34b3957811094ce3f64",
+            "exit.json": "a47f1cb0b42a2739dcb9bccacd3702cc12269a5deb5ec9729d05a5dfa1a8496f",
+            "preservation.json": "dde2bfd1732fc39a491758c4ee9b6610508408ac62354db3314f84ce956d1ab2",
+            "started.json": "a20fa7621d74ef915118a89998144a89fa84579d246cb3375911eaf2e437dc5d",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T22:07:14.756951+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-bcd6ae6da6404d86a592570d50e2d0e0",
+          "process": {
+            "created": 134376124301334466,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 54152
+          },
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "restore": {
+          "child_process": {
+            "created": 134376125109326138,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 32392
+          },
+          "evidence": {
+            "child.json": "1a78c46f936ac8147f1387d45cc2cda8054c6ca3398af5a9ae64e410d33aa586",
+            "exit.json": "f7bae7da8f45a6172ac3a69bc0a9f971055a1a54d4854ce4fa90282a9a45d78b",
+            "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+            "started.json": "b4dfc32597d041efd3c631199821ad5f6026813ef048b2f80b6a180056a910e9",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T22:08:36.247678+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-50c937c751af43b9ace29a200ae227a0",
+          "process": {
+            "created": 134376125108165878,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 43416
+          },
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        },
+        "restore-preflight": {
+          "child_process": {
+            "created": 134376125013692495,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 10732
+          },
+          "evidence": {
+            "child.json": "e1f47a36a4c8d7a01519085018f329f1e6f25cdd46e082346d968bc31db57d78",
+            "exit.json": "34c8b119c459e85627c5be166a08afca7318a9a3489a693494f7cd07a4131927",
+            "preservation.json": "dde2bfd1732fc39a491758c4ee9b6610508408ac62354db3314f84ce956d1ab2",
+            "started.json": "0f813f0c35cb9ded875aa8d3247411ce99df91be53ca19d7381fd77d39715955",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "exit_code": 0,
+          "failure": null,
+          "finished_utc": "2026-10-27T22:08:25.800562+00:00",
+          "host_exit_code": 0,
+          "job": "Local\\DLQ-aa1f4d1c96bb4d08852e798b546ba11e",
+          "process": {
+            "created": 134376125012470744,
+            "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+            "pid": 55244
+          },
+          "status": "PASSED",
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          }
+        }
+      }
+    }
+  ],
+  "current_cases": 268,
+  "previous_failed_research_cases_now_passing": [
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.CandidatePreparationFailureAndRejectedActions_DoNotWriteOrPublish",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.DetachedProgression_RemainsCallbackFreeAndDoesNotWritePerTick",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ForegroundFailureBlocksResearchBeforeStaging",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ForegroundPreparationReplacesStateBeforeValidationAndStaging",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.PostReplacementReadbackFailure_RestoresCompletePredecessor(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.PostReplacementReadbackFailure_RestoresCompletePredecessor(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(False,Write,1)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(False,Write,2)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(False,Replace,1)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(False,Flush,1)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(True,Write,2)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(True,Replace,1)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.ProvenRollback_NoLiveMutationNoSuccessAndSafeExplicitRetry(True,Flush,1)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.SemanticallyInvalidCandidate_IsRejectedBeforeAnyWrite",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.StartProgressClaimReopen_PublishesOnlyDurableStateAndAtomicObjectiveUnlock",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.UncertainRollback_LatchesAuthorityAndRequiresReopenWithoutAutomaticRetry(False)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.UncertainRollback_LatchesAuthorityAndRequiresReopenWithoutAutomaticRetry(True)",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchDurability.UnconfiguredLegacyService_RejectsResearchWithoutChangingLegacySaveCompatibility",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchSaveIntegration.EmptyResearchSerializationShells_NormalizeToNull",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchSaveIntegration.PartiallyPopulatedAndMismatchedResearchState_IsPreserved",
+    "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.R0ResearchSaveIntegration.StartPartialReadyAndClaim_RoundTripThroughActualSaveService"
+  ],
+  "scope": "Review-1 Research and dormant/ordinary-publication authority milestone, not full-suite qualification"
+}

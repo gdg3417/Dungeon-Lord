@@ -146,6 +146,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator,
                 fixture.Profile.Whole, fixture.Occupancy);
 
+            context.BindRecoveryInputs(fixture.Context.RecoveryInputs);
             DetachedSpatialMigrationOutcome recovered =
                 new DetachedSpatialMigrationTransaction(fixture.FileSystem, context)
                     .Recover(fixture.ActivePath);

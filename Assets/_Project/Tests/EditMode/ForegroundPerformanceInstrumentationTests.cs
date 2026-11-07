@@ -114,8 +114,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             if (enabled) Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.TransferReleased], Is.GreaterThan(0));
             return snapshots;
         }
-        private static DetachedCanonicalWriteResult Pump(Fixture f, long through) => PhaseSixA4Tests.Writer(f).AdvanceForeground(
-            f.ActivePath, f.FileSystem, f.Session, f.Runtime, LivingDungeonTwoFloorTests.Policy, through, 10, (save, tick) => { }, 1000);
+        private static DetachedCanonicalWriteResult Pump(Fixture f, long through) =>
+            PhaseFourTestSupport.PumpForeground(f, f.Context.RecoveryInputs.TwoFloor, through);
 
         [Test] public void ForegroundBlockedTransferIsAttributedAndExactlyNeutral()
         {

@@ -54,7 +54,7 @@ namespace DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests
         {
             var f = PhaseSixA4Tests.Eligible();
             var service = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
-            service.ConfigureRunLoot(PhaseSixA4Tests.Loot());
+            service.ConfigureRunLoot(f.Context.RecoveryInputs.Loot);
             service.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
                 PhaseSixA3FloorActivationEligibilityTests.Research(f));
             string id = PhaseSixA4Tests.FloorTwo(f);
@@ -68,8 +68,15 @@ namespace DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests
             var rejected = service.CommitFloorLifecycle(f.Runtime, FloorLifecycleAction.Activate, id, preview);
             Assert.That(rejected.Reason, Is.EqualTo("floor.lifecycle.stale_preview"));
             CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath));
-            Assert.That(service.CommitFloorLifecycle(f.Runtime, FloorLifecycleAction.Activate, id).IsSuccess, Is.True,
-                "The existing Bootstrap path intentionally revalidates current inputs without a captured confirmation");
+            Assert.That(service.CommitFloorLifecycle(f.Runtime, FloorLifecycleAction.Activate, id).IsSuccess, Is.False,
+                "Post-binding reconfiguration cannot reconstruct lost recovery authority");
+            CollectionAssert.AreEqual(bytes, f.FileSystem.ReadAllBytes(f.ActivePath));
+            var fresh = PhaseFiveBBranchIntegrationTests.CanonicalSaveService(f);
+            fresh.ConfigureRunLoot(f.Context.RecoveryInputs.Loot);
+            fresh.ConfigureFloorConstruction(PhaseSixA3FloorActivationEligibilityTests.Profiles(f),
+                PhaseSixA3FloorActivationEligibilityTests.Research(f));
+            Assert.That(fresh.CommitFloorLifecycle(f.Runtime, FloorLifecycleAction.Activate, id).IsSuccess, Is.True,
+                "A fresh prebound load verifies the same context without adopting changed rules");
         }
 
         [Test]

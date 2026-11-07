@@ -13,17 +13,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
 {
     public class PhaseSevenA4DraftDurabilityTests
     {
+        // Service bootstrap consumes the production foreground base budget. Author
+        // the same budget before this isolated current owner is constructed.
+        private static Fixture DeleteContent() => PhaseSevenA4TransactionalEditorTests.Content(
+            profile: PhaseFourTestSupport.ProductionProfile());
         private static SaveService DeleteService(Fixture f)
         {
-            byte[] legacy = (byte[])typeof(DetachedCurrentTargetValidationContext).GetField("legacyConfiguration",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(f.Context);
-            var service = new SaveService(new SimpleLogger(false, (level, message) => { }),
-                new SaveConfig { fileName = Path.GetFileName(f.ActivePath), useAtomicWrites = true }, Path.GetDirectoryName(f.ActivePath));
-            service.ConfigureCanonical(f.Profile, f.Production, f.Compatibility, f.Configuration, legacy, f.PositionProfiles, f.Occupancy);
+            var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(f, out _);
             service.ConfigureStructuralEconomy(f.Economy); service.ConfigureContentAcquisitionEconomy(f.Acquisition);
-            service.SetPreflightEvaluatorForTests(path => new SpatialMigrationActivationPreflight(true,
-                SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, f.FileSystem, path));
-            Assert.That(service.LoadOrCreate("a4-explicit-delete", out string banner), Is.Not.Null, banner);
             return service;
         }
         private static SaveService CommittedDeleteDraft(Fixture f)
@@ -35,7 +32,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ExplicitDeleteRemovesDraftLegacyAndCanonicalEvidenceBeforeFreshBoot()
         {
-            var f = PhaseSevenA4TransactionalEditorTests.Content(); var service = CommittedDeleteDraft(f);
+            var f = DeleteContent(); var service = CommittedDeleteDraft(f);
             string ordinary = f.ActivePath + ".canonical-write-0123456789abcdef-fedcba9876543210.rollback";
             string migration = Path.Combine(Path.GetDirectoryName(f.ActivePath), Path.GetFileNameWithoutExtension(f.ActivePath) + ".gd66-invalid-id.journal.json");
             string unrelated = f.ActivePath + ".editor-draft-not-owned.keep";
@@ -50,13 +47,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             int firstCanonical = Array.FindIndex(deletes, o => o.Paths[0] == ordinary || o.Paths[0] == migration || o.Paths[0] == f.ActivePath);
             Assert.That(firstCanonical, Is.GreaterThan(0));
             Assert.That(deletes.Skip(firstCanonical).Any(o => o.Paths[0].StartsWith(f.ActivePath + ".editor-draft", StringComparison.Ordinal)), Is.False);
-            Assert.That(service.LoadOrCreate("a4-explicit-delete", out string freshBanner), Is.Not.Null, freshBanner);
-            Assert.That(service.CreateDungeonDraftStore().Read(), Is.Null);
+            // A fresh boot creates its own observation owner. The deleted root
+            // is quiesced in production; its attached TimeService is not reused.
+            var freshService = DeleteService(f); // Loads/creates through the real prebound service path.
+            Assert.That(freshService.CanonicalSession, Is.Not.Null);
+            Assert.That(freshService.CreateDungeonDraftStore().Read(), Is.Null);
         }
         [TestCase(false)] [TestCase(true)]
         public void ExplicitDeleteDraftFailureBeforeOrAfterMutationPreservesCanonical(bool afterMutation)
         {
-            var f = PhaseSevenA4TransactionalEditorTests.Content(); var service = CommittedDeleteDraft(f);
+            var f = DeleteContent(); var service = CommittedDeleteDraft(f);
             byte[] canonical = f.FileSystem.ReadAllBytes(f.ActivePath);
             string unrelated = f.ActivePath + ".editor-draft-not-owned.keep"; f.FileSystem.Seed(unrelated, new byte[] { 8 });
             string ordinary = f.ActivePath + ".canonical-write-0123456789abcdef-fedcba9876543210.rollback";
@@ -71,7 +71,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ExplicitDeleteDraftContainmentFailureDeletesNothing()
         {
-            var f = PhaseSevenA4TransactionalEditorTests.Content(); var service = CommittedDeleteDraft(f);
+            var f = DeleteContent(); var service = CommittedDeleteDraft(f);
             string[] paths = f.FileSystem.Paths.OrderBy(p => p, StringComparer.Ordinal).ToArray();
             f.FileSystem.EnableTargetedFailure(Operation.Containment, p => p.Length == 2 &&
                 p[1].StartsWith(f.ActivePath + ".editor-draft", StringComparison.Ordinal), 1, false);
@@ -81,7 +81,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ExplicitDeleteOversizedDraftEvidenceFailsClosedBeforeCanonicalDeletion()
         {
-            var f = PhaseSevenA4TransactionalEditorTests.Content(); var service = DeleteService(f);
+            var f = DeleteContent(); var service = DeleteService(f);
             int maximum = (f.Profile.Raw.MaximumArrayElements + 1) * 2;
             string prefix = f.ActivePath + ".editor-draft.draft-" + new string('a', 32) + ".";
             for (int i = 0; i <= maximum; i++) f.FileSystem.Seed(prefix + i.ToString("D6") + ".candidate", new byte[] { 1 });
@@ -92,7 +92,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void ExplicitDeleteDraftFlushFailureCannotClaimTotalDeletion()
         {
-            var f = PhaseSevenA4TransactionalEditorTests.Content(); var service = CommittedDeleteDraft(f);
+            var f = DeleteContent(); var service = CommittedDeleteDraft(f);
             byte[] canonical = f.FileSystem.ReadAllBytes(f.ActivePath);
             f.FileSystem.EnableFailure(Operation.Flush, 1);
             Assert.That(service.DeleteSave(out _), Is.False);
@@ -125,7 +125,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(recovered.CanSave, Is.True);
             f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, recovered));
             f.Reopen(); Assert.That(f.State.Floors[0].RoomContents.Assignments[0].RoomLocalPosition, Is.EqualTo(new TileCoordinate(2, 1)));
-            Assert.That(Store(f).Read(), Is.Null); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(Store(f).Read(), Is.Null); Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
         }
 
         [TestCase("candidate-before", 0)]

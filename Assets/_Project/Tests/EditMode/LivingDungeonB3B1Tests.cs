@@ -19,10 +19,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static readonly RunLogicalTiming Timing = new RunLogicalTiming(3, 7, 5, 2, 11); // synthetic, injected
         private static RunCheckpointLimits Limits => new RunCheckpointLimits(65536, 2048, 1000000);
         private static RunSimulationService Service => new RunSimulationService(CombatC0IntegrationTests.Config(), PhaseSixA4Tests.Loot());
-        private static Fixture Dungeon(bool two = false, int hp = 8, bool revival = false)
+        private static Fixture Dungeon(bool two = false, int hp = 8, bool revival = false, Action<RunSimulationConfig> author = null)
         {
-            var f = two ? PhaseSixA4Tests.Eligible() : Fixture.Create(null);
-            f.Configuration = CombatC0IntegrationTests.Config();
+            var inputs = PhaseFourTestSupport.AuthoredInputs((config, _) => {
+                PhaseSixA4Tests.ForceDescent(config, true);
+                author?.Invoke(config);
+            });
+            var f = two ? PhaseSixA4Tests.Eligible(inputs) : Fixture.Create(null, recoveryInputBytes: inputs);
             if (!two) f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             if (two) {
@@ -33,6 +36,38 @@ namespace DungeonBuilder.M0.Tests.EditMode
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
             if (!two) CombatC2Tests.SetState(f, hp, revival, 0);
             return f;
+        }
+        [Test] public void SchemaSeventeenWriterRejectsReloadedConfigurationBeforeCandidatePreparation()
+        {
+            var f = Fixture.Create(null);
+            var before = f.Session.GetCurrentBytes();
+            var bound = f.Context.RecoveryInputs.Configuration;
+            Assert.That(f.Configuration, Is.SameAs(bound));
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, f.Context).CurrentTargetValidated, Is.True);
+            // Even an equal legacy projection is not proof that a later reload
+            // produced the immutable configuration consumed by this owner.
+            Assert.That(BootstrapConfigValidationService.TryParseRunSimulationConfig(
+                Encoding.UTF8.GetString(f.Context.RecoveryInputs.Identity.GetInput(0)), out var reloaded), Is.True);
+            f.Configuration = reloaded;
+            CollectionAssert.AreEqual(LegacyGameplayConfigurationContract.SerializeCanonical(bound),
+                LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration));
+            var writer = f.Authority;
+            var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            Assert.That(typeof(DetachedCanonicalWriteAuthority).GetField("recoveryBindingsValid", flags).GetValue(writer), Is.False);
+            Assert.That(typeof(DetachedCanonicalWriteAuthority).GetMethod("ValidateSession", flags).Invoke(writer, new object[] { f.Session }), Is.Null);
+            var rejected = f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId));
+            Assert.That(rejected.IsSuccess, Is.False);
+            Assert.That(rejected.Reason, Is.EqualTo(DetachedCanonicalSpatialMutation.ValidationFailedReason));
+            CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            // Restoring the actual consumed object permits the identical write;
+            // this does not rebind a save or change its persistent digest.
+            f.Configuration = bound;
+            f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId)));
+            Assert.That(f.Runtime.timeProvenance.RecoveryContextSha256, Is.EqualTo(f.Context.RecoveryInputs.Identity.Digest));
+            TestContext.WriteLine("First guard: recoveryBindingsValid=false; ValidateSession=null before preparation; consumed object succeeds.");
         }
         private static RunExecution Start(ActiveFloorRunSnapshot snapshot, bool persistent = true, int sequence = 1) =>
             Service.StartTimedCombatSnapshot(sequence, snapshot, Timing, persistent);
@@ -178,17 +213,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("wipe")] [TestCase("retreat")] [TestCase("multiple")] [TestCase("repeated")]
         public void CombatCasualtyRetreatAndStableMultipleMonsterReceiptsMatchManual(string mode)
         {
-            var f = Dungeon(true);
+            var f = Dungeon(true, author: config => {
+                if (mode == "wipe") {
+                    foreach (var p in config.PhaseFiveB.Classes) p.LevelOneMaxHealth = 1;
+                    foreach (var p in config.CombatC0.Monsters) p.Damage = 100;
+                }
+                if (mode == "retreat") { config.BaseSuccessChance = 0; config.SuccessThreshold = 1; }
+                if (mode == "repeated") {
+                    foreach (var p in config.CombatC0.Classes) { p.AttackType = CombatC0Config.Melee; p.Range = 1; p.Damage = 10; }
+                    foreach (var p in config.CombatC0.Monsters) { p.AttackType = CombatC0Config.Ranged; p.Range = 1; }
+                }
+            });
             PhaseSixA4Tests.AddContent(f, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
-            if (mode == "wipe") {
-                foreach (var p in f.Configuration.PhaseFiveB.Classes) p.LevelOneMaxHealth = 1;
-                foreach (var p in f.Configuration.CombatC0.Monsters) p.Damage = 100;
-            }
-            if (mode == "retreat") { f.Configuration.BaseSuccessChance = 0; f.Configuration.SuccessThreshold = 1; }
-            if (mode == "repeated") {
-                foreach (var p in f.Configuration.CombatC0.Classes) { p.AttackType = CombatC0Config.Melee; p.Range = 1; p.Damage = 10; }
-                foreach (var p in f.Configuration.CombatC0.Monsters) { p.AttackType = CombatC0Config.Ranged; p.Range = 1; }
-            }
             var s = PhaseSixA4Tests.Snapshot(f); var expected = Service.StartManualSnapshot(1, s).DrainToCompletion(); var e = Start(s);
             while (!e.IsTerminal) { e.Advance(1, e.NextOrdinal); e = Restore(e); }
             var outcome = e.TakeOutcome(); EqualOutcome(outcome, expected);
@@ -242,12 +278,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var f = Dungeon(); var first = Start(PhaseSixA4Tests.Snapshot(f)).ExportCheckpoint(Limits);
             int padding = Limits.MaximumBytes - first.GetBytes().Length;
             // Test-only unused rule-name padding qualifies bytes, not production content size.
-            f.Configuration.PhaseFiveB.EncounterRuleSourceId += new string('x', padding);
-            var exact = Start(PhaseSixA4Tests.Snapshot(f)).ExportCheckpoint(Limits);
+            var exactFixture = Dungeon(author: config => config.PhaseFiveB.EncounterRuleSourceId += new string('x', padding));
+            var exact = Start(PhaseSixA4Tests.Snapshot(exactFixture)).ExportCheckpoint(Limits);
             Assert.That(exact.GetBytes().Length, Is.EqualTo(65536));
             Assert.That(Service.RestoreCheckpoint(exact.GetBytes(), exact.Identity, exact.StartIdentity, 0, Limits).IsValid, Is.True);
-            f.Configuration.PhaseFiveB.EncounterRuleSourceId += "x";
-            Assert.Throws<InvalidOperationException>(() => Start(PhaseSixA4Tests.Snapshot(f)).ExportCheckpoint(Limits));
+            var excessive = Dungeon(author: config => config.PhaseFiveB.EncounterRuleSourceId += new string('x', padding + 1));
+            Assert.Throws<InvalidOperationException>(() => Start(PhaseSixA4Tests.Snapshot(excessive)).ExportCheckpoint(Limits));
         }
         [Test] public void ExportStandaloneTechnicalFixturesAndMeasurements()
         {
@@ -269,8 +305,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 TestContext.WriteLine("Combat variant=" + (persistent ? "C2" : "C0") + " terminalBytes=" + final.ExportCheckpoint(Limits).GetBytes().Length +
                     " events=" + final.NextOrdinal + " work=" + final.CommittedCombatWork);
             }
-            string folder = "TestResults/living-dungeon-b3b1-20261018/smoke-input-" + Guid.NewGuid().ToString("N");
-            Directory.CreateDirectory(folder);
+            string export = Environment.GetEnvironmentVariable("DUNGEON_H1F4_TEST_EXPORT_ROOT");
+            Assert.That(UnityEngine.Application.isBatchMode, Is.True);
+            Assert.That(UnityEngine.Application.productName, Does.StartWith("Dungeon Lord B3B2 Smoke H1F4 "));
+            Assert.That(export, Is.Not.Null.And.Not.Empty);
+            var output = new DirectoryInfo(Path.GetFullPath(export));
+            var stage = output.Parent; var campaign = stage?.Parent; var supervisor = campaign?.Parent;
+            Assert.That(output.Name, Is.EqualTo("fixture-inputs"));
+            Assert.That(supervisor?.FullName, Is.EqualTo(Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath,
+                "../TestResults/qualification-supervisor"))).IgnoreCase);
+            Assert.That(Guid.TryParseExact(campaign?.Name, "N", out _), Is.True);
+            Assert.That(stage?.Name, Is.EqualTo("b3b1-regressions").Or.EqualTo("full-edit").Or.EqualTo("full-play"));
+            foreach (var directory in new[] { supervisor, campaign, stage, output }) {
+                Assert.That(directory.Exists, Is.True);
+                Assert.That((directory.Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
+            }
+            string folder = Path.Combine(output.FullName, "b3b1-smoke-input");
+            Assert.That(Directory.Exists(folder), Is.False); Directory.CreateDirectory(folder);
             File.WriteAllText(folder + "/input.json", UnityEngine.JsonUtility.ToJson(new DungeonBuilder.M0.BuildTools.CombatCheckpointDevelopmentSmoke.Input {
                 MaximumBytes = Limits.MaximumBytes, MaximumReplayEvents = Limits.MaximumReplayEvents, MaximumCombatWork = Limits.MaximumCombatWork, Rows = rows.ToArray() }));
             TestContext.WriteLine("Standalone input=" + Path.GetFullPath(folder + "/input.json"));
@@ -310,22 +361,59 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(LivingDungeonContracts.Validate(owner, new[] { b1 }), Is.False);
             Assert.Throws<InvalidOperationException>(() => LivingDungeonTerminalSettlement.Select(owner, profile));
             var original = owner.Parties.Select(p => p.Checkpoint).ToArray();
-            f.Context = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
+            var historicalContext = new DetachedCurrentTargetValidationContext(f.Compatibility, f.Production,
                 LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile.Canonical,
                 f.Occupancy, livingDungeonProfiles: new[] { profile });
-            f.Reopen(); // owner was still dormant on disk
-            var recognized = DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile);
+            // Historical synthetic profiles retain their reader contract; they
+            // cannot acquire schema-17 writer or producer-bound activation authority.
+            Assert.That(Assert.Throws<ArgumentException>(() => historicalContext.BindRecoveryInputs(f.Context.RecoveryInputs)).Message,
+                Is.EqualTo(RecoveryEpisode.ContextMismatch));
             // The shared allocator was advanced by the real scheduler above.
             f.Runtime.runHistory.NextRunSequence = 4;
-            recognized = DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile);
+            var recognized = DetachedRecognizedSaveStateSnapshot.Capture(f.Runtime, f.Profile);
+            Assert.That(recognized.IsSuccess, Is.True, recognized.Reason);
+            var before = f.Session.GetCurrentBytes();
             var candidate = f.Session.PrepareLivingDungeonReplacement(recognized, f.State, owner);
-            Assert.That(candidate.IsSuccess, Is.True, candidate.Reason);
-            f.FileSystem.Seed(f.ActivePath, candidate.Update.GetBytes()); f.Reopen();
-            var reopened = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context);
+            Assert.That(candidate.IsSuccess, Is.False, "Unsupported historical profile must not become a current writer");
+            CollectionAssert.AreEqual(before, f.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            var historical = SyntheticHistoricalMixedOwner(f, recognized.Snapshot, owner);
+            var reopened = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(historical, historicalContext);
             Assert.That(reopened.IsValid, Is.True, reopened.Reason);
+            Assert.That(reopened.CurrentTargetValidated, Is.False);
+            Assert.That(DetachedCanonicalSaveSession.Open(historical, historicalContext, f.Profile).IsSuccess, Is.False);
             for (int i = 0; i < original.Length; i++) CollectionAssert.AreEqual(original[i], reopened.LivingDungeon.Parties[i].Checkpoint);
             Assert.That(reopened.LivingDungeon.Parties.Select(p => BitConverter.ToInt32(p.Checkpoint, 0)), Is.EqualTo(new[] { 1, 2, 2 }));
-            TestContext.WriteLine("Mixed owner completeSaveBytes=" + f.Session.GetCurrentBytes().Length + " aggregateReplay=" + owner.Parties.Sum(p => p.NextOrdinal));
+            TestContext.WriteLine("Synthetic schema-16 reader fixture only; no production producer proof: completeSaveBytes=" + historical.Length + " aggregateReplay=" + owner.Parties.Sum(p => p.NextOrdinal));
+        }
+
+        // Authored test-only historical reader input, never migration output or
+        // historical producer evidence. Frozen serializers and sources are unchanged.
+        private static byte[] SyntheticHistoricalMixedOwner(Fixture f, DetachedRecognizedSaveStateSnapshot recognized,
+            LivingDungeonState owner)
+        {
+            var limits = f.Profile.Canonical.ForSchema(16).Serialized;
+            var issues = new SpatialIssueCollector(limits.MaximumDiagnostics);
+            Assert.That(ContractJson.TryParse(f.Session.GetCurrentBytes(), f.Profile.Canonical.Serialized, issues, out var root), Is.True);
+            Assert.That(recognized.TryGet("runHistory", out var history), Is.True);
+            var w = new ContractJsonWriter(limits); w.Node(); w.Token("{");
+            for (int i = 0; i < root.Fields.Count; i++) {
+                if (i != 0) w.Token(","); var field = root.Fields[i]; w.String(field.Key); w.Token(":");
+                if (field.Key == "schemaVersion") w.Token("16");
+                else if (field.Key != "primary") DetachedCompleteSaveContract.WriteCanonicalNode(w, field.Value);
+                else {
+                    w.Node(); w.Token("{");
+                    for (int j = 0; j < field.Value.Fields.Count; j++) {
+                        if (j != 0) w.Token(","); var p = field.Value.Fields[j]; w.String(p.Key); w.Token(":");
+                        if (p.Key == TimeProvenance.Owner) w.Token(TimeProvenance.LegacyJson);
+                        else if (p.Key == "livingDungeon") LivingDungeonContracts.Write(w, owner);
+                        else if (p.Key == "runHistory") w.Token(Encoding.UTF8.GetString(history));
+                        else DetachedCompleteSaveContract.WriteCanonicalNode(w, p.Value);
+                    }
+                    w.Token("}");
+                }
+            }
+            w.Token("}"); return w.Finish();
         }
 
         [Test] public void PendingGeometryWorkExhaustionIsTheSameBeforeAndAfterReopen()
@@ -336,8 +424,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var reference = Start(s); for (int i = 0; i < encounter; i++) reference.Advance(1, reference.NextOrdinal);
             long committed = reference.CommittedCombatWork; reference.NextDueTime(); long work = reference.Combat.Kernel.WorkCount;
             Assert.That(work, Is.GreaterThan(committed));
-            f.Configuration.CombatC0.MaximumWork = work - 1;
-            var limited = PhaseSixA4Tests.Snapshot(f); var e = Start(limited);
+            var bounded = Dungeon(author: config => config.CombatC0.MaximumWork = work - 1);
+            var limited = PhaseSixA4Tests.Snapshot(bounded); var e = Start(limited);
             for (int i = 0; i < encounter; i++) e.Advance(1, e.NextOrdinal);
             var restored = Restore(e);
             string Failure(RunExecution run, bool probe) {
@@ -366,8 +454,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(pendingWork, Is.GreaterThan(committed)); Assert.That(encounterWork, Is.GreaterThan(pendingWork));
             foreach (var point in new[] { (Name: "pending", Work: pendingWork), (Name: "commit", Work: encounterWork), (Name: "terminal", Work: total) })
             foreach (int delta in new[] { -1, 0, 1 }) {
-                f.Configuration.CombatC0.MaximumWork = point.Work + delta;
-                var limited = PhaseSixA4Tests.Snapshot(f);
+                var bounded = Dungeon(twoFloors, author: config => config.CombatC0.MaximumWork = point.Work + delta);
+                var limited = PhaseSixA4Tests.Snapshot(bounded);
                 var direct = RunAtMeasuredCeiling(Start(limited, persistent), false);
                 var cycling = RunAtMeasuredCeiling(Start(limited, persistent), true);
                 Assert.That(cycling.Failure, Is.EqualTo(direct.Failure), point.Name + delta);
@@ -434,8 +522,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = Dungeon(); var canonical = f.Session.GetCurrentBytes(); var runtime = B.Structured(f.Runtime);
             var full = Start(PhaseSixA4Tests.Snapshot(f), persistent); full.DrainToCompletion();
-            f.Configuration.CombatC0.MaximumWork = full.CommittedCombatWork - 1;
-            var limited = Start(PhaseSixA4Tests.Snapshot(f), persistent);
+            var bounded = Dungeon(author: config => config.CombatC0.MaximumWork = full.CommittedCombatWork - 1);
+            var limited = Start(PhaseSixA4Tests.Snapshot(bounded), persistent);
             // Independently accepted synthetic pins request the full ordinal under
             // the smaller captured budget; replay must fail before evidence comparison.
             full.StartInputs = limited.StartInputs;
@@ -477,8 +565,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var steps = Drain(Start(snapshot, persistent), 1); int boundary = steps.FindIndex(s => s.Kind == RunStepKind.MonsterEngagement);
             var measured = Start(snapshot, persistent);
             for (int i = 0; i < boundary; i++) measured.Advance(1, measured.NextOrdinal);
-            measured.NextDueTime(); f.Configuration.CombatC0.MaximumWork = measured.Combat.Kernel.WorkCount - 1;
-            var limited = Start(PhaseSixA4Tests.Snapshot(f), persistent);
+            measured.NextDueTime();
+            var bounded = Dungeon(author: config => config.CombatC0.MaximumWork = measured.Combat.Kernel.WorkCount - 1);
+            var limited = Start(PhaseSixA4Tests.Snapshot(bounded), persistent);
             for (int i = 0; i < boundary; i++) limited.Advance(1, limited.NextOrdinal);
             var c = limited.ExportCheckpoint(Limits);
             var profile = new LivingDungeonProfile("test.b3b1.work.v1", 2, 4, 65536, 2048, 8192, 262144, 357996,

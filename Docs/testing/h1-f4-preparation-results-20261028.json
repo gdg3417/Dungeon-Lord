@@ -1,0 +1,29 @@
+{
+  "current_gameplay_changes": false,
+  "fresh_unity_qualification_pending": true,
+  "historical_campaign_requalified": false,
+  "measured_campaign": "d16c05a430f7404189ab22034383ec50",
+  "measured_product_output_sha256": "9748e7d76082d943f194386d65ed978175f30fe013f96f360815eb82df4ea56d",
+  "original_settings_sha256": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+  "scope": "Preparation-only measured PlayerSettings serialization; no supervisor/runtime/schema change",
+  "supervisor_changed": false,
+  "tools": {
+    "Tools/Presentation/qualify_h1_f4.py": "5492602325a560f043e37a87cafb8523c89ea904de138cf57aa7765dc2794ed2",
+    "Tools/Presentation/test_qualify_h1_f4.py": "37b4e1ac32a5e5234d83f977824f02dba51b24b40722fc73a07dd370f595a513"
+  },
+  "unit_tests": {
+    "command": "pinned Python -B -m unittest discover -s Tools/Presentation -p test_qualify_h1_f4.py -v",
+    "failed": 0,
+    "initial_run": {
+      "cause": "Existing fake runner fixtures omitted inventory.json for the previously introduced export ownership manifest; fixed fixture setup, not production guards",
+      "errors": 2,
+      "passed": 19,
+      "total": 21
+    },
+    "passed": 22,
+    "raw_log": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-preparation-correction-20261028-01\\disposable-tests03.log",
+    "raw_log_sha256": "d5f49f0f02c2cd2865ca65e9db71f063a82a2081ee7fbf0b133e0c1cb0a19f3a",
+    "skipped": 0,
+    "total": 22
+  }
+}

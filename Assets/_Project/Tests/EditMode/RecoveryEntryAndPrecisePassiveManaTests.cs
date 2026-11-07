@@ -21,14 +21,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             public long UtcNowUnixSeconds() => throw new AssertionException("Split observation requested");
         }
 
-        private static Fixture OneFloor(double wallet = 0)
+        private static Fixture OneFloor(double wallet = 0, bool recoveryOwner = false)
         {
-            var f = Fixture.Create(null);
+            var f = Fixture.Create(recoveryOwner ? "\"lastSavedUtcUnix\":1000" : null,
+                workloadProfile: recoveryOwner ? PhaseFourTestSupport.ProductionProfile() : null);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             f.Runtime.structureRuntime.Heat = f.Configuration.HeatPeaceMinimum;
             f.Runtime.structureRuntime.ManaReserve = wallet;
             f.Runtime.lastSavedUtcUnix = 1000;
+            if (recoveryOwner) f.Accept(f.Authority.SaveRecognizedState(f.ActivePath, f.FileSystem, f.Session, f.Runtime));
             return f;
         }
         private static CanonicalPassiveManaService Online(Fixture f) => new CanonicalPassiveManaService(
@@ -213,7 +215,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void CalculationAndObservationCannotPublishOrMutateCanonicalState()
         {
-            var f = OneFloor(12.5d); string runtime = JsonUtility.ToJson(f.Runtime);
+            var f = OneFloor(12.5d, recoveryOwner: true); string runtime = JsonUtility.ToJson(f.Runtime);
             byte[] session = f.Session.GetCurrentBytes(), disk = f.FileSystem.ReadAllBytes(f.ActivePath);
             var entry = RecoveryEntryObservation.Capture(new Clock { Now = new UnixTimePoint(1000, 5000000) },
                 Provenance(f), RecoveryEntryContext.UnknownPostCrash);
@@ -227,14 +229,32 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(calculated.GetType().GetProperties(System.Reflection.BindingFlags.Instance |
                 System.Reflection.BindingFlags.NonPublic).All(p => p.SetMethod == null), Is.True);
 
-            // Only the existing whole-second grant can enter the actual writer.
+            // Pure calculations confer no publication capability. Schema 17 also
+            // rejects the historical direct grant API; only the coordinator settles.
             var legacy = Offline(f).Resolve(f.Runtime, f.Configuration, entry.WallEndpoint.Seconds);
             Assert.That(legacy.Reason, Is.EqualTo(OfflinePassiveManaReason.ZeroElapsedInterval));
             Assert.That(legacy.PersistenceRequired, Is.False);
             legacy = Offline(f).Resolve(f.Runtime, f.Configuration, 1001);
             var write = f.Authority.SaveOfflinePassiveMana(f.ActivePath, f.FileSystem, f.Session,
                 f.Runtime, legacy.WalletAfter, legacy.SourceSavedUtcUnix, legacy.ObservedCurrentUtcUnix);
-            Assert.That(write.IsSuccess, Is.True, write.Reason);
+            Assert.That(write.IsSuccess, Is.False);
+            Assert.That(write.Reason, Is.EqualTo(RecoveryEpisode.Invalid));
+            CollectionAssert.AreEqual(session, f.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(disk, f.FileSystem.ReadAllBytes(f.ActivePath));
+            var clock = new Clock { Now = new UnixTimePoint(1001, 0) };
+            var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(
+                f, out var current, clock, () => 0, out _);
+            service.CanonicalRuntimePublished += value => current = value;
+            var inputs = f.Context.RecoveryInputs;
+            var online = new CanonicalPassiveManaService(inputs.Passive, inputs.Economy,
+                new FormulaEngine(), f.Profile.Canonical.Spatial, inputs.Bootstrap.tickSeconds);
+            var mana = new CanonicalOfflinePassiveManaService(inputs.Passive, online);
+            service.BeginCanonicalRecovery(current);
+            for (int i = 0; i < 3; i++) {
+                write = service.AdvanceCanonicalRecovery(current, mana,
+                    (_, __) => Assert.Fail("Offline time cannot advance adventurers"));
+                Assert.That(write.IsSuccess, Is.True, write.Reason);
+            }
             Assert.That(write.RuntimeProjection.structureRuntime.ManaReserve, Is.EqualTo(12.5075d).Within(1e-12));
             var reopened = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(write.GetPersistedBytes(), f.Context);
             Assert.That(reopened.CurrentTargetValidated, Is.True);

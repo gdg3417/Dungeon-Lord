@@ -19,13 +19,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CurrentConstantsAndNativeEmptyCreationUseThirteen()
         {
             Fixture f = Fixture.Create(null);
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.TimeProvenanceIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
             var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.Create(f.ActivePath, fs,
-                f.Runtime, f.Compatibility, f.Production,
-                    LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration), f.Profile,
-                    f.Acquisition, f.Occupancy);
+            NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.CreatePrecise(f.ActivePath, fs,
+                f.Runtime, f.Production, f.Profile, f.Acquisition,
+                f.Context.RecoveryInputs, f.Runtime.timeProvenance.AccountedBoundary);
             Assert.That(created.IsSuccess, Is.True, created.Reason);
             Assert.That(created.Validation.State.Floors, Is.Empty);
             Assert.That(Encoding.UTF8.GetString(created.Session.GetCurrentBytes()),
@@ -359,8 +358,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(current, f.Profile.Canonical, out current), Is.True);
             Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(current,f.Profile.Canonical,MonsterRecoveryRules.EditorFallback(),out current),Is.True);
             Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(current, f.Context, out current), Is.True);
-            var result = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current, f.Context);
-            Assert.That(result.CurrentTargetValidated, Is.True);
+            var result = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(current, f.Profile.Canonical);
+            Assert.That(result.IsValid, Is.True, result.Reason);
+            Assert.That(result.CurrentTargetValidated, Is.False);
+            CollectionAssert.AreEqual(current, result.GetBytes());
+            Assert.That(DetachedCanonicalSaveSession.Open(current, f.Context, f.Profile).IsSuccess, Is.False,
+                "A frozen migration result is not current writable authority");
             Assert.That(result.State.Floors.Single().ActivationState, Is.EqualTo(FloorActivationState.Active));
             Assert.That(result.State.Floors.Single().FloorInstanceId, Is.EqualTo(f.State.Floors.Single().FloorInstanceId));
             CollectionAssert.AreEqual(source, Encoding.UTF8.GetBytes(text.Replace("\"schemaVersion\":10", "\"schemaVersion\":" + schema)));

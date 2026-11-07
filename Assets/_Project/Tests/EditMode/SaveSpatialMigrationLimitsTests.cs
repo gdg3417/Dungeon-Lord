@@ -21,20 +21,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     SaveSpatialMigrationLimitsLoader.ProductionPath));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
-            Assert.That(result.Profile.Raw.MaximumInputBytes, Is.EqualTo(2752696));
+            Assert.That(result.Profile.Raw.MaximumInputBytes, Is.EqualTo(2753692));
             Assert.That(result.Profile.Raw.MaximumNestingDepth, Is.EqualTo(32));
             Assert.That(result.Profile.Raw.MaximumObjectMembers, Is.EqualTo(64));
             Assert.That(result.Profile.Raw.MaximumArrayElements, Is.EqualTo(128));
             Assert.That(result.Profile.Raw.MaximumStringBytes, Is.EqualTo(4096));
-            Assert.That(result.Profile.Raw.MaximumScanWork, Is.EqualTo(5505392));
-            Assert.That(result.Profile.Canonical.Serialized.MaximumInputBytes, Is.EqualTo(1376348));
-            Assert.That(result.Profile.Canonical.Serialized.MaximumParsedNodes, Is.EqualTo(10244));
-            Assert.That(result.Profile.Canonical.Serialized.MaximumCollectionRecords, Is.EqualTo(5380));
-            Assert.That(result.Profile.Canonical.Serialized.MaximumStringCharacters, Is.EqualTo(1376327));
+            Assert.That(result.Profile.Raw.MaximumScanWork, Is.EqualTo(5507384));
+            Assert.That(result.Profile.Canonical.Serialized.MaximumInputBytes, Is.EqualTo(1376846));
+            Assert.That(result.Profile.Canonical.Serialized.MaximumParsedNodes, Is.EqualTo(10256));
+            Assert.That(result.Profile.Canonical.Serialized.MaximumCollectionRecords, Is.EqualTo(5392));
+            Assert.That(result.Profile.Canonical.Serialized.MaximumStringCharacters, Is.EqualTo(1376684));
             Assert.That(result.Profile.Canonical.Serialized.MaximumDiagnostics, Is.EqualTo(64));
             Assert.That(result.Profile.Canonical.Spatial.MaximumRecords, Is.EqualTo(165));
             Assert.That(result.Profile.Canonical.Spatial.MaximumMaterializedTiles, Is.EqualTo(64));
-            Assert.That(result.Profile.Whole.MaximumCandidateBytes, Is.EqualTo(1376348));
+            Assert.That(result.Profile.Whole.MaximumCandidateBytes, Is.EqualTo(1376846));
             Assert.That(result.Profile.Whole.MaximumCopiedValueBytes, Is.EqualTo(524288));
             Assert.That(result.Profile.Whole.MaximumUnknownMembers, Is.EqualTo(64));
             Assert.That(result.Profile.Whole.MaximumUnknownMemberBytes, Is.EqualTo(131072));
@@ -80,11 +80,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SaveSpatialMigrationLimitsLoader.InvalidReason);
             AssertFailure(ProductionJson.Replace(",\"MaximumUnknownMembers\":64", ""),
                 SaveSpatialMigrationLimitsLoader.InvalidReason);
-            AssertFailure(ProductionJson.Replace("\"MaximumRawSaveBytes\":2752696",
-                "\"MaximumRawSaveBytes\":2752696,\"MaximumRawSaveBytes\":2752696"),
+            AssertFailure(ProductionJson.Replace("\"MaximumRawSaveBytes\":2753692",
+                "\"MaximumRawSaveBytes\":2753692,\"MaximumRawSaveBytes\":2753692"),
                 SaveSpatialMigrationLimitsLoader.InvalidReason);
-            AssertFailure(ProductionJson.Replace("\"MaximumRawSaveBytes\":2752696",
-                "\"MaximumRawSaveBytes\":\"2752696\""),
+            AssertFailure(ProductionJson.Replace("\"MaximumRawSaveBytes\":2753692",
+                "\"MaximumRawSaveBytes\":\"2753692\""),
                 SaveSpatialMigrationLimitsLoader.InvalidReason);
             AssertFailure(ProductionJson.Replace("\"Schema\":\"save_spatial_migration_limits\"," +
                 "\"SchemaVersion\":1", "\"SchemaVersion\":1,\"Schema\":" +
@@ -97,12 +97,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             AssertFailure(ProductionJson.Replace("\"MaximumRawNestingDepth\":32",
                 "\"MaximumRawNestingDepth\":0"), SaveSpatialMigrationLimitsLoader.InvalidReason);
-            AssertFailure(ProductionJson.Replace("\"MaximumWholeSaveCandidateBytes\":1376348",
-                "\"MaximumWholeSaveCandidateBytes\":1376349"), SaveSpatialMigrationLimitsLoader.InvalidReason);
+            AssertFailure(ProductionJson.Replace("\"MaximumWholeSaveCandidateBytes\":1376846",
+                "\"MaximumWholeSaveCandidateBytes\":1376847"), SaveSpatialMigrationLimitsLoader.InvalidReason);
             AssertFailure(ProductionJson.Replace("\"MaximumCopiedSourceValueBytes\":524288",
-                "\"MaximumCopiedSourceValueBytes\":2752697"), SaveSpatialMigrationLimitsLoader.InvalidReason);
+                "\"MaximumCopiedSourceValueBytes\":2753693"), SaveSpatialMigrationLimitsLoader.InvalidReason);
             AssertFailure(ProductionJson.Replace("\"MaximumUnknownMemberBytes\":131072",
-                "\"MaximumUnknownMemberBytes\":2752697"), SaveSpatialMigrationLimitsLoader.InvalidReason);
+                "\"MaximumUnknownMemberBytes\":2753693"), SaveSpatialMigrationLimitsLoader.InvalidReason);
         }
 
         [Test]
@@ -126,14 +126,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             SaveSpatialMigrationLimitsLoadResult result = SaveSpatialMigrationLimitsLoader.Load(asset);
             Assert.That(result.IsSuccess, Is.True, result.Reason);
-            Assert.That(result.Profile.Raw.MaximumInputBytes, Is.EqualTo(2752696));
-            Assert.That(result.Profile.Whole.MaximumCandidateBytes, Is.EqualTo(1376348));
-            Assert.That(result.Profile.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(2752512));
-            Assert.That(result.Profile.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(1376256));
-            Assert.That(result.Profile.Raw.Historical.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(1310720));
-            Assert.That(result.Profile.Canonical.Historical.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(655360));
-            Assert.That(result.Profile.Raw.Historical.Raw.Historical.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(524288));
-            Assert.That(result.Profile.Canonical.Historical.Canonical.Historical.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(262144));
+            Assert.That(result.Profile.Raw.MaximumInputBytes, Is.EqualTo(2753692));
+            Assert.That(result.Profile.Whole.MaximumCandidateBytes, Is.EqualTo(1376846));
+            var frozenSixteen = result.Profile.Raw.Historical;
+            Assert.That(frozenSixteen.Raw.MaximumInputBytes, Is.EqualTo(2752696));
+            Assert.That(frozenSixteen.Whole.MaximumCandidateBytes, Is.EqualTo(1376348));
+            Assert.That(frozenSixteen.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(2752512));
+            Assert.That(frozenSixteen.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(1376256));
+            Assert.That(frozenSixteen.Raw.Historical.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(1310720));
+            Assert.That(frozenSixteen.Canonical.Historical.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(655360));
+            Assert.That(frozenSixteen.Raw.Historical.Raw.Historical.Raw.Historical.Raw.MaximumInputBytes, Is.EqualTo(524288));
+            Assert.That(frozenSixteen.Canonical.Historical.Canonical.Historical.Canonical.Historical.Whole.MaximumCandidateBytes, Is.EqualTo(262144));
         }
 
         [Test]

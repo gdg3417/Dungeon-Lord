@@ -37,6 +37,9 @@ namespace DungeonBuilder.M0
                 !Path.GetFileName(SaveService.SavePath).StartsWith("living-dungeon-b3b2-qualification-", StringComparison.Ordinal))
                 throw new InvalidOperationException("b3b2.smoke.isolation_required");
             report.Product = Application.productName; report.SavePath = SaveService.SavePath;
+            var advance = QualificationAdvance();
+            var preparation = PrepareForegroundQualification();
+            while (preparation.MoveNext()) yield return preparation.Current;
             ForegroundSmokeReport prior = null;
             string PendingGeometry()
             {
@@ -73,26 +76,20 @@ namespace DungeonBuilder.M0
                     Save.livingDungeon.Parties[0].CheckpointIdentity != prior.CheckpointIdentity || Save.livingDungeon.Parties[0].NextOrdinal != prior.Ordinal)
                     throw new InvalidOperationException("b3b2.smoke.exact_pending_reopen");
             }
-            double sample = 1000; // test-only injected monotonic epoch
-            TimeService = new TimeService(Logger, _configuredSimulationTickSeconds,
-                Content.Bootstrap.timeRules.detectClockSkewSeconds, new SystemTimeSource(), () => sample);
-            TimeService.AttachSave(Save); TimeService.SetForegroundFocus(true);
-            TimeService.BeginForeground(SaveService.ForegroundConfiguration.UnitsPerSecond, Save.livingDungeon.Scheduler.AcceptedThrough);
             foregroundApplicationFocused = true; foregroundApplicationPaused = false; foregroundDirty = true;
-            _resumeOfflineBoundaryPersisted = false;
             string initial = Save.livingDungeon.Parties.Count == 1 ? "run-" + Save.livingDungeon.Parties[0].Sequence : null;
             bool completed = false;
             var controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
             for (int frame = 0; frame < 1600; frame++) {
                 foregroundApplicationFocused = true; foregroundApplicationPaused = false;
-                TimeService.SetForegroundFocus(true); TimeService.OnResume(); sample += .25; UpdateForeground();
+                TimeService.SetForegroundFocus(true); TimeService.OnResume(); advance(.25); UpdateForeground();
                 if (foregroundFailure != null) throw new InvalidOperationException(foregroundFailure);
                 yield return null;
                 if (controller?.World?.ForegroundPartyVisible == true) report.MarkerVisible = true;
                 if (phase == "admit" && Save.livingDungeon.Parties.Count == 1 && report.MarkerVisible) {
                     if (Environment.GetCommandLineArgs().Contains("-b3b2MarkerVisuals")) {
                         var visual = QualifyForegroundMarkerVisuals(controller, report, seconds => {
-                            sample += seconds; TimeService.SetForegroundFocus(true); UpdateForeground();
+                            advance(seconds); TimeService.SetForegroundFocus(true); UpdateForeground();
                         });
                         while (visual.MoveNext()) yield return visual.Current;
                     }
@@ -206,19 +203,48 @@ namespace DungeonBuilder.M0
             controller.SetTextSize(DungeonTextSize.Default);
         }
     }
+    // Opt-in development qualification input only. It is constructed before
+    // the sole TimeService binds recovery, never a replacement time authority.
+    internal sealed class PreboundForegroundQualificationClock
+    {
+        private Func<double> realSource;
+        private double sample;
+        internal bool IsRealTime => realSource != null;
+        internal PreboundForegroundQualificationClock(bool realTime)
+        {
+            if (realTime) {
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                realSource = () => watch.Elapsed.TotalSeconds;
+            }
+        }
+        internal PreboundForegroundQualificationClock(Func<double> realSource)
+        { this.realSource = realSource ?? throw new ArgumentNullException(nameof(realSource)); }
+        internal double Read() => realSource == null ? sample : realSource();
+        internal void Advance(double seconds)
+        {
+            double before = Read(), next = before + seconds;
+            if (double.IsNaN(seconds) || double.IsInfinity(seconds) || seconds < 0 ||
+                double.IsNaN(before) || double.IsInfinity(before) || before < 0 ||
+                double.IsNaN(next) || double.IsInfinity(next) || next < before)
+                throw new InvalidOperationException("living.foreground.clock_invalid");
+            // Freeze a real source at its current value, then add the requested
+            // suffix. No reset or lost pre-handoff monotonic time.
+            sample = next; realSource = null;
+        }
+    }
     internal sealed class LivingDungeonForegroundDevelopmentSmoke : MonoBehaviour
     {
         internal static Func<double> ReopenClock(string[] args, string product, string savePath)
         {
             int index = Array.IndexOf(args, "-b3b2ForegroundSmoke");
-            if (index < 0 || index + 1 >= args.Length || args[index + 1] != "settle" && args[index + 1] != "finish" && args[index + 1] != "profile" &&
+            if (index < 0 || index + 1 >= args.Length || args[index + 1] != "admit" && args[index + 1] != "settle" && args[index + 1] != "finish" && args[index + 1] != "profile" &&
                 !args[index + 1].StartsWith("two-floor-", StringComparison.Ordinal) && args[index + 1] != "v1-upgrade" ||
                 product == null || !product.Contains("B3B2 Smoke") || string.IsNullOrEmpty(savePath) ||
                 !Path.GetFileName(savePath).StartsWith("living-dungeon-b3b2-qualification-", StringComparison.Ordinal)) return null;
-            // Qualification-only epoch: inspect the exact loaded prefix before
-            // startup frames accrue new eligible time. QualifyForeground then
-            // replaces this source with the existing advancing injected clock.
-            return () => 0d;
+            // One instance exists before recovery binding. Admission starts on
+            // a real monotonic source; reopen/profile start stationary. Later
+            // acceleration advances this provider without replacing TimeService.
+            return new PreboundForegroundQualificationClock(args[index + 1] == "admit").Read;
         }
         private string phase, destination, previous;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]

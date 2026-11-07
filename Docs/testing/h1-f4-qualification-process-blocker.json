@@ -1,0 +1,183 @@
+{
+  "files_changed_since_baseline": [
+    ".gitattributes",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/H1F4RecoveryEditModeFixtures.cs",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/H1F4RecoveryEditModeFixtures.cs.meta",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema16.json",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema16.json.meta",
+    "Assets/_Project/Scripts/Economy/CanonicalOfflinePassiveManaService.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSaveSchemaVersions.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSpatialSaveContracts.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalSpatialSaveSerializer.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalTimeTransition.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/CanonicalTimeTransition.cs.meta",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalSaveSession.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalWriteAuthority.Recovery.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalWriteAuthority.Recovery.cs.meta",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalWriteAuthority.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCompleteSaveContract.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/MonsterContinuity.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RecoveryContextIdentity.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RecoveryContextIdentity.cs.meta",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RecoveryEpisode.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RecoveryEpisode.cs.meta",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RecoveryRuntimeInputs.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/RecoveryRuntimeInputs.cs.meta",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SaveSpatialMigrationLimits.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaFifteenToSixteenUpgrade.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaSixteenRecoveryActivation.cs",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/SchemaSixteenRecoveryActivation.cs.meta",
+    "Assets/_Project/Scripts/Gameplay/DungeonSpatial/TimeProvenance.cs",
+    "Assets/_Project/Tests/EditMode/H1F4RecoveryContractTests.cs",
+    "Assets/_Project/Tests/EditMode/H1F4RecoveryContractTests.cs.meta",
+    "Assets/_Project/Tests/EditMode/H1F4RecoveryTransitionTests.cs",
+    "Assets/_Project/Tests/EditMode/H1F4RecoveryTransitionTests.cs.meta",
+    "Docs/planning/h1-f4-recovery-design-gate.md",
+    "Docs/testing/evidence/h1-f4/context-binding-blocker/approved-design-before-context-v2.md",
+    "Docs/testing/evidence/h1-f4/context-binding-blocker/probe.py",
+    "Docs/testing/evidence/h1-f4/context-binding-blocker/result.json",
+    "Docs/testing/evidence/h1-f4/context-binding-v2-audit/continuity-result.json",
+    "Docs/testing/evidence/h1-f4/context-binding-v2-audit/continuity_probe.py",
+    "Docs/testing/evidence/h1-f4/context-binding-v2-audit/probe.py",
+    "Docs/testing/evidence/h1-f4/context-binding-v2-audit/result.json",
+    "Docs/testing/evidence/h1-f4/context-binding-v2-audit/source-blob-result.json",
+    "Docs/testing/evidence/h1-f4/context-binding-v2-audit/source_blob_comparison.py",
+    "Docs/testing/evidence/h1-f4/final-compatibility/active-v1.test-only-schema15.json",
+    "Docs/testing/evidence/h1-f4/final-compatibility/active-v1.test-only-schema16.json",
+    "Docs/testing/evidence/h1-f4/final-compatibility/active-v2.test-only-schema15.json",
+    "Docs/testing/evidence/h1-f4/final-compatibility/active-v2.test-only-schema16.json",
+    "Docs/testing/evidence/h1-f4/final-compatibility/fixtures.json",
+    "Docs/testing/evidence/h1-f4/final-compatibility/prepare_fixtures.py",
+    "Docs/testing/evidence/h1-f4/foundation-20261027/qualification.json",
+    "Docs/testing/h1-f4-context-binding-blocker.md",
+    "Docs/testing/h1-f4-context-v2-dependency-audit.md",
+    "Tools/Presentation/qualify_h1_f4.py",
+    "Tools/Presentation/test_qualify_h1_f4.py"
+  ],
+  "finding": {
+    "actions_not_taken": [
+      "No process termination",
+      "No reservation release",
+      "No settings restoration",
+      "No new qualification campaign",
+      "No change to supervisor, timeout, job drain or exemption rules"
+    ],
+    "artifact_owner": "H1-F4 task",
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\9ed872130a134ce7a5627f6c001b8e2f",
+    "campaign_file_hashes": {
+      "campaign.json": "e022305887d4e3cd83d37a95225e8157804d3d53f3d0ea8180a9d20b6ff7cba7",
+      "focused-preflight\\child.json": "b8fe1b07b8d7c6bb97a9b107f57d8febe3dc7a60a1669215412b18bd0fcab541",
+      "focused-preflight\\exit.json": "53fea092ca31bba10b65c397cfe6f4a9ec25d3101efb0d66de915e7d66f8c55a",
+      "focused-preflight\\preservation.json": "71555f7948ba022b6a752df45737749a6e49c3e2e229680a1f3a317e0598b658",
+      "focused-preflight\\result.json": "ee92f7f4d9a58b9789b946ee7372389bce523aa50437cda0d3029724d8bd5d4f",
+      "focused-preflight\\started.json": "a51e869f4629aa8ad5d9c1088c761353b332b69fec8cce273b502f682209639f",
+      "focused-preflight\\stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "focused\\child.json": "da053af3eda487230a7f0b5ecef2682667eb0801b3a5da2f63497126269df319",
+      "focused\\cli-exit.json": "bfc392838fab2550470057b5667aad99cc3e1bb852331cfcdb592e8fe90e8c50",
+      "focused\\exit.json": "52c0e4dab35ca9408a111128f94cc5d86ad9a0fcc8e5ae8fb01e4cd61457c186",
+      "focused\\generated-inputs\\manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+      "focused\\invocation.json": "df5e506c6c40fb94db9ad5625ac81b1aa6c00dfab5221141ce8434ba62f05c4c",
+      "focused\\result.json": "7726026eb4170406d13bab8fcdd1b505a7163e11a141b6f6e66cf0f008a97486",
+      "focused\\started.json": "cf43396d4201b895765e577068b8a0281fab43c5314d93b48400c06d93a1322a",
+      "focused\\stdout.log": "6939ae47c4affa183a13a9f5c10db53b12410beb2e5f9b639c825c65d0192884",
+      "focused\\unity.log": "9bdbdada041185ba7540df9a9aa657961f8c3c28949ddde2c555aced49d7ae7a",
+      "launch.claim": "57a511a865c3786c60d5e573d6ee4f7196bfce5dbf194bf0bab1a8c274d6c945",
+      "launch.json": "b3b8702ed332c14682b6f03f2df610500ec7a9b27b7324eb185661da98f18c3b",
+      "launch.log": "e7a36663946ed32836fbd1983b2e50cbc4faafa7928f8c571e6d899a8e543f7b"
+    },
+    "cli_exit_code": 6,
+    "job_read_only_check": {
+      "read_only_open_succeeded": false,
+      "windows_error": 2
+    },
+    "no_unity_editor_or_player": true,
+    "nunit_xml_exists": false,
+    "observed_utc": "2026-10-27T13:01:12.871912+00:00",
+    "preparation_archive_sha256": "12ad811e2c849dacc2b0f25a46c3dc401e04bb9f4a539b542d2b59f1cd31d1d1",
+    "process_audit": {
+      "host": {
+        "matching_live_process": false,
+        "recorded": {
+          "created": 134375784707227234,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 43560
+        }
+      },
+      "runner": {
+        "matching_live_process": false,
+        "recorded": {
+          "created": 134375784708308671,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 25108
+        }
+      },
+      "supervisor": {
+        "matching_live_process": false,
+        "recorded": {
+          "created": 134375784580112532,
+          "executable": "c:\\users\\gdg34\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+          "pid": 33824
+        }
+      }
+    },
+    "protected_evidence_matches": true,
+    "protected_manifest_sha256": "0576f23f52b846ca965cc4e5e63663afb9bff872901cb2073723de635a2000a1",
+    "qualified_input_map_matches": true,
+    "recorded_reason": "Owned descendants still active; completion uncertain",
+    "recorded_status": "INCOMPLETE",
+    "reservation_sha256": "40193a01b0e4e946deadc9c88521b4db39ee68049b0a17149a77b6ed54aec47b",
+    "retention": "Preserve full campaign, preparation, generated settings and sanitized diagnostic",
+    "root_compile_error": "CS0103: missing namespace import for CanonicalMvpRouteProjection in DetachedCanonicalWriteAuthority.Recovery.cs:22",
+    "source_sha": "f5ef3e7310c81fe2d22e7979dd72796f4731cfe2",
+    "stage": "focused",
+    "test_counts": null
+  },
+  "full_implementation_status": "Incomplete: schema 17 activation, live boot/lifecycle integration, interruption qualification, PlayMode/Windows and fresh benchmarks pending",
+  "historical_foundation": {
+    "campaign": "234d81c04b3648d3965c479ab98fd966",
+    "failed": 0,
+    "passed": 30,
+    "skipped": 0,
+    "source_sha": "831b1acb159c11e885fe5039b5b26a6ea04c3b1d"
+  },
+  "qualification_tool_tests": {
+    "failed": 0,
+    "passed": 6,
+    "scope": "Disposable qualification-preparation tests only",
+    "skipped": 0
+  },
+  "recovery_proposal": {
+    "approval_required_by": "Docs/testing/qualification-supervisor.md \u2014 Resume, failure and cancellation",
+    "artifact_owner": "H1-F4 task",
+    "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\9ed872130a134ce7a5627f6c001b8e2f",
+    "next_attempt": "Fresh unused isolated campaign and product identity at corrected source; repeat all 48 cases. No replay/resume of the incomplete campaign.",
+    "no_process_termination_authorized_or_proposed": true,
+    "preconditions": [
+      "Acquire existing supervisor Lease execution lock",
+      "Verify reservation still identifies only campaign 9ed872130a134ce7a5627f6c001b8e2f",
+      "Recheck exact recorded supervisor/host/runner identities are not live; process-query errors refuse",
+      "Verify no Unity Editor/player; preserve unrelated Unity Hub broker",
+      "Verify every retained campaign file against diagnostic hash inventory",
+      "Verify protected owner/saves/historical evidence unchanged",
+      "Verify full Unity input map equals the sealed qualified map except the one reviewed namespace import hash below"
+    ],
+    "preserve_full_campaign_and_preparation": true,
+    "release_authority": "Existing qualification_supervisor.Lease.release, invoked only after explicit owner approval and all preceding checks. Do not edit campaign status/evidence.",
+    "restoration_verification": "Exact original input map with only the reviewed source import retained. Archive pre/post hashes. Any other change refuses.",
+    "restore_authority": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-transitions01\\original-inputs.zip",
+    "restore_only": [
+      "ProjectSettings/ProjectSettings.asset",
+      "ProjectSettings/EditorBuildSettings.asset",
+      "ProjectSettings/ShaderGraphSettings.asset"
+    ],
+    "retain_status": "INCOMPLETE; never relabel as passing",
+    "retention": "Preserve",
+    "reviewed_source_correction": {
+      "after_sha256": "fb6f993d245627956841d01c4f5f01fadf9b07e616e3b4771459d261b3e23fe7",
+      "before_sha256": "b910178fa8d7f014b3cff5388596a574348f20b6599baf350375b0b50ccf2f91",
+      "change": "Add using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;",
+      "path": "Assets/_Project/Scripts/Gameplay/DungeonSpatial/DetachedCanonicalWriteAuthority.Recovery.cs"
+    },
+    "supervisor_tools": "Unchanged; no altered completion window, skip, exemption or automatic recovery option"
+  }
+}

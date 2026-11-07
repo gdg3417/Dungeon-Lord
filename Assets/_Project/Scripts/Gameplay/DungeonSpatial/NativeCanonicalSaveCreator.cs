@@ -28,7 +28,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             byte[] legacyConfiguration, SaveSpatialMigrationLimitsProfile limits,
             ContentAcquisitionEconomySnapshot acquisition,
             RoomContentSpatialOccupancySnapshot roomContentOccupancy = null,
-            MonsterRecoveryRules monsterRecovery = null)
+            MonsterRecoveryRules monsterRecovery = null) => CreateCore(activePath, fileSystem, recognizedState,
+                compatibility, production, legacyConfiguration, limits, acquisition, roomContentOccupancy,
+                monsterRecovery, null, null, null);
+
+        internal static NativeCanonicalSaveResult CreatePrecise(string activePath,
+            ISpatialMigrationFileSystem fileSystem, SaveData recognizedState,
+            ProductionSpatialContentSnapshot production, SaveSpatialMigrationLimitsProfile limits,
+            ContentAcquisitionEconomySnapshot acquisition, RecoveryRuntimeInputs inputs, UnixTimePoint creation,
+            Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null) =>
+            inputs == null ? Failure(RecoveryEpisode.ContextMismatch) : CreateCore(activePath, fileSystem, recognizedState,
+                inputs.Compatibility, production, LegacyGameplayConfigurationContract.SerializeCanonical(inputs.Configuration),
+                limits, acquisition, inputs.Occupancy, inputs.Monsters, inputs, creation, candidatePrepared);
+
+        private static NativeCanonicalSaveResult CreateCore(string activePath,
+            ISpatialMigrationFileSystem fileSystem, SaveData recognizedState,
+            SpatialLayoutCompatibilitySnapshot compatibility, ProductionSpatialContentSnapshot production,
+            byte[] legacyConfiguration, SaveSpatialMigrationLimitsProfile limits,
+            ContentAcquisitionEconomySnapshot acquisition, RoomContentSpatialOccupancySnapshot roomContentOccupancy,
+            MonsterRecoveryRules monsterRecovery, RecoveryRuntimeInputs recoveryInputs, UnixTimePoint creation,
+            Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared)
         {
             if (fileSystem == null || recognizedState == null || compatibility == null || production == null ||
                 legacyConfiguration == null || limits == null || fileSystem.Exists(activePath))
@@ -36,10 +55,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (roomContentOccupancy == null)
                 return Failure(RoomContentSpatialOccupancyAuthority.InvalidReason);
             if (acquisition == null) return Failure(ContentAcquisitionEconomySnapshot.InvalidReason);
+            bool precise = CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
+            if (precise && (recoveryInputs == null || creation == null || creation.Seconds <= 0) ||
+                !precise && recoveryInputs != null) return Failure(RecoveryEpisode.Invalid);
             try
             {
                 // Detached initialization only: loading or migrating existing saves never enters here.
+                bool pendingAbsent = recognizedState.researchPending == null;
+                bool progressAbsent = recognizedState.researchProgress == null;
+                bool summaryAbsent = recognizedState.lastOfflineSummary == null;
                 recognizedState = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(recognizedState));
+                if (precise) {
+                    recognizedState.lastSavedUtcUnix = creation.Seconds;
+                    if (pendingAbsent) recognizedState.researchPending = null;
+                    if (progressAbsent) recognizedState.researchProgress = null;
+                    if (summaryAbsent) recognizedState.lastOfflineSummary = null;
+                }
                 if (recognizedState.structureRuntime == null) recognizedState.structureRuntime = new StructureRuntimeState();
                 recognizedState.structureRuntime.ManaReserve = acquisition.StartingMana;
                 CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
@@ -80,7 +111,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (value == null) continue;
                     if (!first) writer.Token(","); first = false;
                     writer.String(name); writer.Token(":");
-                    DetachedCompleteSaveContract.WriteCanonicalNode(writer, value);
+                    // Preserve the caller's actual absence in a new schema-17 save.
+                    // This neither changes frozen native bytes nor repairs a saved shell.
+                    if (precise && (name == "researchPending" && pendingAbsent ||
+                        name == "researchProgress" && progressAbsent || name == "lastOfflineSummary" && summaryAbsent))
+                    { writer.Node(); writer.Token("null"); }
+                    else DetachedCompleteSaveContract.WriteCanonicalNode(writer, value);
                 }
                 if (!first) writer.Token(",");
                 ContractJsonNode authorityNode = Parse(spatial.Value.Authority, limits);
@@ -105,11 +141,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 LivingDungeonContracts.Write(writer, LivingDungeonState.Empty());
                 writer.Token(","); writer.String(MonsterContinuity.Owner); writer.Token(":");
                 MonsterContinuity.Write(writer, MonsterContinuityState.Empty());
-                writer.Token(","); writer.String(TimeProvenance.Owner); writer.Token(":"); TimeProvenance.WriteLegacy(writer);
+                writer.Token(","); writer.String(TimeProvenance.Owner); writer.Token(":");
+                if (precise) new TimeProvenance(creation, recoveryInputs.Identity.Digest, null).Write(writer);
+                else TimeProvenance.WriteLegacy(writer);
                 writer.Token("}}");
                 byte[] bytes = writer.Finish();
                 var context = new DetachedCurrentTargetValidationContext(compatibility, production,
                     legacyConfiguration, limits.Canonical, roomContentOccupancy, monsterRecovery: monsterRecovery);
+                if (precise) context.BindRecoveryInputs(recoveryInputs);
                 DetachedCompleteSaveValidationResult validation =
                     DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, context);
                 DetachedCanonicalSaveSessionResult opened = validation.IsValid && validation.CurrentTargetValidated
@@ -129,6 +168,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     hash.Substring(0, 16) + ".candidate";
                 if (!fileSystem.IsPathContainedWithoutRedirection(directory, staging))
                     return Failure(SpatialMigrationCapabilityReason.PathRedirected);
+                candidatePrepared?.Invoke(opened.Session, validation.TimeProvenance);
                 try
                 {
                     fileSystem.WriteAllBytesDurable(staging, bytes);
@@ -140,9 +180,21 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     byte[] readback = fileSystem.ReadAllBytes(activePath);
                     if (readback == null || SpatialContractSha256.Compute(readback) != hash)
                         throw new InvalidOperationException();
+                    if (precise) {
+                        var durableValidation = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(readback, context);
+                        var durableSession = DetachedCanonicalSaveSession.Open(readback, context, limits);
+                        if (!durableValidation.CurrentTargetValidated || !durableSession.IsSuccess ||
+                            !DungeonBuilder.M0.Gameplay.MvpDungeonPlacements.CanonicalMvpRouteProjection.TryPublishValidated(
+                                durableValidation, production, out var durableRuntime, out _)) throw new InvalidOperationException();
+                        return new NativeCanonicalSaveResult(null, durableSession.Session, durableValidation, durableRuntime);
+                    }
                 }
                 catch
                 {
+                    // A failed successor flush/readback does not establish Q.
+                    // Retain its exact candidate/evidence for independent proof.
+                    // The frozen legacy creator's behavior remains below.
+                    if (precise) return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
                     try { if (fileSystem.Exists(staging)) fileSystem.DeleteFile(staging); } catch { }
                     try
                     {

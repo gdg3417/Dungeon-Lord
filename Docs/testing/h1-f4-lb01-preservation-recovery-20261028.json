@@ -1,0 +1,152 @@
+{
+  "owner_authorized_campaign": "8fdb906232d24b64a8a655c5c340cca3",
+  "source_sha": "b31f418332bb636500ca7cb71929a4606a270033",
+  "historical_verdict_unchanged": "INCOMPLETE / UNCERTAIN",
+  "inputs_restored": 1494,
+  "records": {
+    "TestResults\\h1-f4-20261027-lb01\\preservation-review01\\owner-preexecution01.json": {
+      "sha256": "021a19ccd102e46a9d9adc293bd7b491c4f5ec41a9015991458c0e71eb9f3324",
+      "content": {
+        "all_original_guards_passed": true,
+        "branch": "codex/h1-f4-recovery",
+        "finished_utc": "2026-10-29T01:56:51.373704+00:00",
+        "font_unchanged": true,
+        "input_count": 1494,
+        "prior_evidence_directories_verified": 166,
+        "reservation": {
+          "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\8fdb906232d24b64a8a655c5c340cca3"
+        },
+        "reservation_released": false,
+        "restoration_executed": false,
+        "restoration_targets": [
+          "ProjectSettings/ProjectSettings.asset",
+          "ProjectSettings/EditorBuildSettings.asset",
+          "ProjectSettings/ShaderGraphSettings.asset"
+        ],
+        "source_sha": "b31f418332bb636500ca7cb71929a4606a270033",
+        "started_utc": "2026-10-29T01:56:42.128286+00:00",
+        "success": true,
+        "unused_receipt": "owner-approved-recovery01"
+      }
+    },
+    "TestResults\\h1-f4-20261027-lb01\\owner-approved-recovery01\\receipt.json": {
+      "sha256": "e86e19ba450c01343771f5f92839a43eed68f802f0a15827a086d3c31df07a21",
+      "content": {
+        "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\8fdb906232d24b64a8a655c5c340cca3",
+        "diagnostic_sha256": "7904639fbcae8da560da631ef86f6f130bbfd26d221792271979e92de03b22b4",
+        "execute_requested": true,
+        "final_reservation": {
+          "campaign": null,
+          "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\8fdb906232d24b64a8a655c5c340cca3"
+        },
+        "final_target_hashes": {
+          "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+          "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+          "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+        },
+        "modification_attempts": [
+          "ProjectSettings/ProjectSettings.asset",
+          "ProjectSettings/EditorBuildSettings.asset",
+          "ProjectSettings/ShaderGraphSettings.asset"
+        ],
+        "phase": "completed",
+        "postchecks_passed": true,
+        "prechecks_passed": true,
+        "proposal_script_sha256": "980ea6f5ec9d70dc3e858e31a5dac1ce0222a4e777c73403b179f25892689e6c",
+        "released": true,
+        "restored": [
+          "ProjectSettings/ProjectSettings.asset",
+          "ProjectSettings/EditorBuildSettings.asset",
+          "ProjectSettings/ShaderGraphSettings.asset"
+        ],
+        "success": true,
+        "utc": "2026-10-29T01:57:07.325206+00:00"
+      }
+    },
+    "TestResults\\h1-f4-20261027-lb01\\owner-approved-recovery01\\independent-verification01.json": {
+      "sha256": "5be7753f73f189cada67c2b6a45cd1ef279a86df3aa0f9d237da2c2862ca343b",
+      "content": {
+        "all_checks_passed": true,
+        "all_three_current_versions_preserved": true,
+        "archive_unchanged_verified": true,
+        "both_local_commits_preserved": true,
+        "branch": "codex/h1-f4-recovery",
+        "campaign_evidence_unchanged": true,
+        "historical_descendant_completion_reinterpreted": false,
+        "historical_verdict_unchanged": "INCOMPLETE / UNCERTAIN",
+        "later_job_queries": [
+          {
+            "error": 2,
+            "name": "Local\\DLQ-7760a2ed565c44f2a9becfc22f443378",
+            "present": false
+          },
+          {
+            "error": 2,
+            "name": "Local\\DLQ-db5ae15d1ed6484e8e9d564d4597b767",
+            "present": false
+          }
+        ],
+        "later_process_absences": {
+          "campaign/stages/legacy-boundaries-preflight/child_process": null,
+          "campaign/stages/legacy-boundaries-preflight/process": null,
+          "campaign/stages/legacy-boundaries/process": null,
+          "campaign/supervisor_process": null,
+          "legacy-boundaries-preflight\\child.json/process": null,
+          "legacy-boundaries-preflight\\exit.json/process": null,
+          "legacy-boundaries-preflight\\result.json/child_process": null,
+          "legacy-boundaries-preflight\\result.json/process": null,
+          "legacy-boundaries-preflight\\started.json/process": null,
+          "legacy-boundaries\\child.json/process": null,
+          "legacy-boundaries\\exit.json/process": null,
+          "legacy-boundaries\\result.json/process": null,
+          "legacy-boundaries\\started.json/process": null
+        },
+        "original_inputs_restored": 1494,
+        "prior_evidence_directories_verified": 166,
+        "protected_evidence_unchanged": true,
+        "recovery_receipt": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\h1-f4-20261027-lb01\\owner-approved-recovery01\\receipt.json",
+        "recovery_receipt_complete": {
+          "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\8fdb906232d24b64a8a655c5c340cca3",
+          "diagnostic_sha256": "7904639fbcae8da560da631ef86f6f130bbfd26d221792271979e92de03b22b4",
+          "execute_requested": true,
+          "final_reservation": {
+            "campaign": null,
+            "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\8fdb906232d24b64a8a655c5c340cca3"
+          },
+          "final_target_hashes": {
+            "ProjectSettings/EditorBuildSettings.asset": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+            "ProjectSettings/ProjectSettings.asset": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+            "ProjectSettings/ShaderGraphSettings.asset": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72"
+          },
+          "modification_attempts": [
+            "ProjectSettings/ProjectSettings.asset",
+            "ProjectSettings/EditorBuildSettings.asset",
+            "ProjectSettings/ShaderGraphSettings.asset"
+          ],
+          "phase": "completed",
+          "postchecks_passed": true,
+          "prechecks_passed": true,
+          "proposal_script_sha256": "980ea6f5ec9d70dc3e858e31a5dac1ce0222a4e777c73403b179f25892689e6c",
+          "released": true,
+          "restored": [
+            "ProjectSettings/ProjectSettings.asset",
+            "ProjectSettings/EditorBuildSettings.asset",
+            "ProjectSettings/ShaderGraphSettings.asset"
+          ],
+          "success": true,
+          "utc": "2026-10-29T01:57:07.325206+00:00"
+        },
+        "recovery_receipt_sha256": "e86e19ba450c01343771f5f92839a43eed68f802f0a15827a086d3c31df07a21",
+        "reservation": {
+          "campaign": null,
+          "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h1-f4-recovery\\Dungeon-Lord\\TestResults\\qualification-supervisor\\8fdb906232d24b64a8a655c5c340cca3"
+        },
+        "source_sha": "b31f418332bb636500ca7cb71929a4606a270033",
+        "tmp_unchanged_not_restored": true,
+        "tools_verified": 9,
+        "verified_utc": "2026-10-29T02:02:34.196465+00:00",
+        "working_tree_clean": true
+      }
+    }
+  }
+}
