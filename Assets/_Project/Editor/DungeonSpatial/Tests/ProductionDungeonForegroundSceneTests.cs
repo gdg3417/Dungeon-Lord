@@ -210,7 +210,7 @@ namespace DungeonBuilder.M0.Tests
             finally
             {
                 fsField.SetValue(service, native);
-                typeof(SaveService).GetField("_canonicalSession", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(service, session);
+                typeof(SaveService).GetProperty("_canonicalSession", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(service, session);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.Save)).SetValue(root, original);
                 typeof(GameRoot).GetField("_explicitSaveDeleteQuiesced", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(root, true);
             }
@@ -369,7 +369,7 @@ namespace DungeonBuilder.M0.Tests
                 // Restore the disposable native fixture; do not flush the in-memory
                 // failure experiment during object teardown.
                 fsField.SetValue(service, native);
-                typeof(SaveService).GetField("_canonicalSession", flags).SetValue(service, session);
+                typeof(SaveService).GetProperty("_canonicalSession", flags).SetValue(service, session);
                 typeof(GameRoot).GetProperty(nameof(GameRoot.Save)).SetValue(root, original);
                 typeof(GameRoot).GetField("_explicitSaveDeleteQuiesced", flags).SetValue(root, true);
             }

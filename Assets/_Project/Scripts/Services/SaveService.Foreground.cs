@@ -8,6 +8,8 @@ namespace DungeonBuilder.M0
     public partial class SaveService
     {
         public LivingDungeonForegroundConfig ForegroundConfiguration { get; private set; }
+        private readonly LivingDungeonForegroundExecutions foregroundExecutions = new LivingDungeonForegroundExecutions();
+        internal void InvalidateForegroundExecutions() => foregroundExecutions.Clear();
         internal Func<bool> BeforeForegroundAction;
         internal Func<SaveData> ForegroundCurrent;
         internal bool ForegroundWriting { get; private set; }
@@ -23,8 +25,9 @@ namespace DungeonBuilder.M0
             if (foregroundRecoveryRequired) return false;
             if (recoveryTime?.RecoveryClockActive == true) return false;
             if (current?.timeProvenance?.Episode != null && BeforeForegroundAction == null) return false;
-            if (BeforeForegroundAction == null) return true;
-            if (!BeforeForegroundAction()) return false;
+            if (BeforeForegroundAction == null) { InvalidateForegroundExecutions(); return true; }
+            if (!BeforeForegroundAction()) { InvalidateForegroundExecutions(); return false; }
+            InvalidateForegroundExecutions();
             current = ForegroundCurrent?.Invoke() ?? current;
             return current != null;
         }
@@ -48,10 +51,12 @@ namespace DungeonBuilder.M0
             long? suspendedSaveUtc = null)
         {
             if (foregroundRecoveryRequired || CanonicalPublicationPending || _canonicalSession == null || ForegroundConfiguration == null)
-                return ForegroundBlocked();
-            if (observation == null || !observation.Authorizes(_canonicalSession, current, observation.CapturedThrough)) return ForegroundBlocked();
+            { InvalidateForegroundExecutions(); return ForegroundBlocked(); }
+            if (observation == null || !observation.Authorizes(_canonicalSession, current, observation.CapturedThrough))
+            { InvalidateForegroundExecutions(); return ForegroundBlocked(); }
             long through = observation.CapturedThrough;
             ForegroundWriting = true;
+            bool published = false;
             try {
                 // Closing/reinspecting already accepted time while suspended must
                 // retain the existing offline passive-mana boundary. Only newly
@@ -73,14 +78,18 @@ namespace DungeonBuilder.M0
                     }
                 }
                 var result = CreateWriteAuthority().AdvanceForeground(SavePath, _canonicalFileSystem, _canonicalSession, current,
-                    ForegroundConfiguration, through, tickSeconds, passiveTick, savedBoundary, time);
+                    ForegroundConfiguration, through, tickSeconds, passiveTick, savedBoundary, time, retained: foregroundExecutions);
                 if (result.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason) foregroundRecoveryRequired = true;
                 if (result.IsSuccess) {
                     _canonicalSession = result.Session; _undo = null;
                     CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
+                    published = true;
                 }
                 return result;
-            } finally { ForegroundWriting = false; }
+            } finally {
+                if (!published) InvalidateForegroundExecutions();
+                ForegroundWriting = false;
+            }
         }
 
         internal LivingDungeonForegroundInspection InspectForeground(SaveData current, int tickSeconds)

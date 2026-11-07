@@ -21,7 +21,8 @@ namespace DungeonBuilder.M0
             OwnerValidation, Restoration, SupportedReader, StartRecreation, PrefixReplay, AdmissionAssurance,
             FinalPredecessor, SemanticReadback, DurableFileSystem, PostPublicationInspection, ReleaseCheck,
             SettlementPredecessor, Feasibility, SessionOpen, ExecutionReconstruction, AdmissionReconstruction, Acceptance,
-            LifetimeBranch, TransferBlocked, TransferReleased, StartPreparation, AdmissionStartReuse }
+            LifetimeBranch, TransferBlocked, TransferReleased, StartPreparation, AdmissionStartReuse,
+            RetainedExecutionReuse, RetainedExecutionRebind }
         internal enum Origin { Unspecified, Pump, Acceptance, Execution, TerminalPin, Settlement, Release,
             Recovery, Opportunity, PassiveTick, Closure, Admission, LifetimeNormal, LifetimeAlternative,
             FinalWrite, Readback, Inspection }

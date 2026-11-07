@@ -14,12 +14,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal DetachedCanonicalWriteResult AdvanceForeground(string path, ISpatialMigrationFileSystem fs,
             DetachedCanonicalSaveSession session, SaveData current, LivingDungeonForegroundConfig policy,
             long observedThrough, int tickSeconds, Action<SaveData, long> passiveTick, long savedUtcUnix,
-            CanonicalTimeTransition timeTransition = null, Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null)
+            CanonicalTimeTransition timeTransition = null, Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null,
+            LivingDungeonForegroundExecutions retained = null)
         {
             using var pumpDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.Pump,
                 ForegroundQualificationMetrics.Origin.Pump);
             const string invalid = "living.foreground.invalid_state";
             var executions = new Dictionary<int, RunExecution>();
+            bool published = false;
             try {
                 var bound = context?.RecoveryInputs;
                 if (bound != null && ((!ReferenceEquals(policy, bound.OneFloor) && !ReferenceEquals(policy, bound.TwoFloor)) ||
@@ -30,6 +32,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (profile == null) return Failure("living.foreground.provenance_required");
                 var working = session; var owned = ValidateSession(working);
                 if (owned?.CurrentTargetValidated != true || !CanonicalEqual(current.validatedCanonicalSpatialState, owned.State)) return Failure(invalid);
+                if (retained != null) executions = retained.Borrow(session, owned, context, policy, profile, configuration, production, runLoot, limits);
                 var runtime = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(current));
                 if (current.researchPending == null) runtime.researchPending = null;
                 if (current.researchProgress == null) runtime.researchProgress = null;
@@ -172,6 +175,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                                 using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.ReleaseCheck,
                                     ForegroundQualificationMetrics.Origin.Settlement))
                                     lineage.Retired(terminalPredecessor, owned, profile, p.Sequence, e);
+                                executions.Remove(p.Sequence); e.Abandon();
                             }
                     }
                 }
@@ -320,13 +324,20 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     result.RuntimeProjection, result.RecoveryManaSpent + recoveredManaSpent);
                 result.ForegroundAdmissionReason = admissionReason;
                 if (result.IsSuccess) RunTransientEvidence.Retain(runtime, result.RuntimeProjection);
+                if (result.IsSuccess) {
+                    retained?.Retain(result, executions, context, policy, profile, configuration, production, runLoot, limits);
+                    published = true;
+                }
                 return result;
             }
             catch (Exception error) {
                 return Failure(error.Message.StartsWith("living.", StringComparison.Ordinal) || error.Message.StartsWith("combat.", StringComparison.Ordinal)
                     ? error.Message : invalid);
             }
-            finally { foreach (var e in executions.Values) e.Abandon(); }
+            finally {
+                foreach (var e in executions.Values) e.Abandon();
+                if (!published) retained?.Clear();
+            }
         }
     }
 }

@@ -137,7 +137,12 @@ namespace DungeonBuilder.M0
         private byte[] _legacyConfiguration;
         private RunSimulationConfig _legacyGameplayConfiguration;
         private DetachedCurrentTargetValidationContext _validationContext;
-        private DetachedCanonicalSaveSession _canonicalSession;
+        private DetachedCanonicalSaveSession canonicalSession;
+        private DetachedCanonicalSaveSession _canonicalSession
+        {
+            get => canonicalSession;
+            set { foregroundExecutions.InvalidateUnlessBoundTo(value); canonicalSession = value; }
+        }
         private ISpatialMigrationFileSystem _canonicalFileSystem;
         private SpatialMigrationActivationPreflight _canonicalPreflight;
         private bool _canonicalConfigured;
@@ -221,6 +226,7 @@ namespace DungeonBuilder.M0
             RoomContentPositionMigrationProfilesSnapshot positionMigrationProfiles = null,
             RoomContentSpatialOccupancySnapshot roomContentOccupancy = null)
         {
+            InvalidateForegroundExecutions();
             FloorPreviewConfigurationVersion++;
             _canonicalConfigured = true;
             _limits = limits; _production = production; _compatibility = compatibility;
@@ -270,6 +276,7 @@ namespace DungeonBuilder.M0
 
         public SaveData LoadOrCreate(string contentVersion, out string banner)
         {
+            InvalidateForegroundExecutions();
             _undo = null;
             LastLoadCreatedNative = false;
             banner = string.Empty;
@@ -803,6 +810,7 @@ namespace DungeonBuilder.M0
 
         public bool DeleteSave(out string banner)
         {
+            InvalidateForegroundExecutions();
             banner = string.Empty;
 
             try

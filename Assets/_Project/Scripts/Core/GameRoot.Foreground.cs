@@ -19,7 +19,8 @@ namespace DungeonBuilder.M0
         {
             if (TimeService?.HasForegroundClock != true) return;
             TimeService.SetForegroundFocus(false);
-            FlushForeground(); // close eligible time before the service is suspended
+            try { FlushForeground(); } // close eligible time before the service is suspended
+            finally { SaveService?.InvalidateForegroundExecutions(); }
         }
         private void OnEnable()
         {

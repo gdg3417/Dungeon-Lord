@@ -303,7 +303,8 @@ namespace DungeonBuilder.M0
                 return;
             }
 
-            FlushForeground(); SaveService.Save(Save, SaveReason.AppQuit);
+            try { FlushForeground(); SaveService.Save(Save, SaveReason.AppQuit); }
+            finally { SaveService.InvalidateForegroundExecutions(); }
             SaveLine = "Save: AppQuit";
         }
 

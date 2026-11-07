@@ -48,7 +48,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         internal static DetachedCanonicalWriteResult PumpForeground(DetachedCanonicalWriteAuthorityTests.Fixture f,
             LivingDungeonForegroundConfig policy, long through, long? wallSeconds = null,
             string activePath = null, ISpatialMigrationFileSystem fileSystem = null,
-            System.Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null)
+            System.Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null,
+            LivingDungeonForegroundExecutions retained = null)
         {
             var prior = f.Runtime.timeProvenance;
             long wall = wallSeconds ?? System.Math.Max(1000, prior.AccountedBoundary.Seconds);
@@ -60,7 +61,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 ? CanonicalTimeTransition.Foreground(f.Session.GetCurrentBytes(), prior, observation, f.Runtime.livingDungeon) : null;
             return PhaseSixA4Tests.Writer(f).AdvanceForeground(activePath ?? f.ActivePath, fileSystem ?? f.FileSystem, f.Session, f.Runtime,
                 policy, through, f.Context.RecoveryInputs.Bootstrap.tickSeconds, (_, __) => { },
-                transition?.Successor.AccountedBoundary.Seconds ?? prior.AccountedBoundary.Seconds, transition, candidatePrepared);
+                transition?.Successor.AccountedBoundary.Seconds ?? prior.AccountedBoundary.Seconds, transition, candidatePrepared, retained);
         }
 
         internal static bool Upgrade(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] current)

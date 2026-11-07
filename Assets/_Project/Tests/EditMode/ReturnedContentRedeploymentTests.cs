@@ -311,7 +311,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     f.PositionProfiles, f.Occupancy);
                 service.ConfigureContentAcquisitionEconomy(f.Acquisition);
                 typeof(SaveService).GetProperty("SavePath").SetValue(service, f.ActivePath);
-                foreach (var pair in new[] { Tuple.Create("_canonicalSession", (object)f.Session), Tuple.Create("_canonicalFileSystem", (object)f.FileSystem),
+                typeof(SaveService).GetProperty("_canonicalSession", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(service, f.Session);
+                foreach (var pair in new[] { Tuple.Create("_canonicalFileSystem", (object)f.FileSystem),
                     Tuple.Create("_validationContext", (object)f.Context) })
                     typeof(SaveService).GetField(pair.Item1, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(service, pair.Item2);
                 root.AttachSaveServiceForTests(service);
