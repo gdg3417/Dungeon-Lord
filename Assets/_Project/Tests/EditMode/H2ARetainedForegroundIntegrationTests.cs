@@ -263,7 +263,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(false)] [TestCase(true)] public void PumpPartitionsPreserveExactReferenceBytesAndCanonicalOutcomes(bool two)
         {
             var f = two ? LivingDungeonTwoFloorTests.Dungeon() : LivingDungeonB3B2Tests.Dungeon(); var seed = f.Session.GetCurrentBytes();
-            string outcome = null, wallet = null, monsters = null;
+            string outcome = null, wallet = null;
+            byte[] monsters = null, branches = null, floors = null;
             foreach (bool split in new[] { false, true }) {
                 var snapshots = new List<byte[]>();
                 foreach (bool retain in new[] { false, true }) {
@@ -280,9 +281,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 // Partition-dependent revision bookkeeping is not normalized out
                 // of a save. Compare full bytes to each partition's own reference,
                 // and compare the canonical consequences across partitions.
-                string result = JsonUtility.ToJson(f.Runtime.runHistory), balance = JsonUtility.ToJson(f.Runtime.structureRuntime), condition = JsonUtility.ToJson(f.Runtime.monsterContinuity);
-                if (!split) { outcome = result; wallet = balance; monsters = condition; }
-                else { Assert.That(result, Is.EqualTo(outcome)); Assert.That(balance, Is.EqualTo(wallet)); Assert.That(condition, Is.EqualTo(monsters)); }
+                string result = JsonUtility.ToJson(f.Runtime.runHistory), balance = JsonUtility.ToJson(f.Runtime.structureRuntime);
+                var condition = new ContractJsonWriter(f.Profile.Canonical.Serialized);
+                MonsterContinuity.Write(condition, f.Runtime.monsterContinuity);
+                var branch = new ContractJsonWriter(f.Profile.Canonical.Serialized);
+                PhaseFiveSaveContracts.Write(branch, f.Runtime.sharedBranchKnowledge);
+                var floor = new ContractJsonWriter(f.Profile.Canonical.Serialized);
+                PhaseSixFloorKnowledge.Write(floor, f.Runtime.sharedFloorKnowledge);
+                if (!split) { outcome = result; wallet = balance; monsters = condition.Finish(); branches = branch.Finish(); floors = floor.Finish(); }
+                else {
+                    Assert.That(result, Is.EqualTo(outcome)); Assert.That(balance, Is.EqualTo(wallet));
+                    CollectionAssert.AreEqual(monsters, condition.Finish());
+                    CollectionAssert.AreEqual(branches, branch.Finish()); CollectionAssert.AreEqual(floors, floor.Finish());
+                }
             }
         }
         [MethodImpl(MethodImplOptions.NoInlining)] private static long CalibrateHeap()
