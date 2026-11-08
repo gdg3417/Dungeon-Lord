@@ -35,8 +35,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             // A reentrant lifecycle callback can invalidate a lent set while the
             // synchronous writer is in IO. Its eventual success cannot undo that.
             epoch = new object();
-            foreach (var execution in executions.Values) execution.Abandon();
-            executions.Clear(); binding = null;
+            var obsolete = executions;
+            executions = new Dictionary<int, RunExecution>(); binding = null;
+            foreach (var execution in obsolete.Values) execution.Abandon();
+            obsolete.Clear();
         }
         internal Dictionary<int, RunExecution> Borrow(DetachedCanonicalSaveSession session,
             DetachedCompleteSaveValidationResult validated, DetachedCurrentTargetValidationContext context,

@@ -269,6 +269,14 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         }
         internal void RestoreMetadata(long deadline, bool consumed)
         { acceptedDeadline = deadline; taken = consumed; }
-        internal void Abandon() { cursor?.Dispose(); failure = "run.execution.failed"; }
+        internal void Abandon()
+        {
+            // Abandonment is cleanup, including after confirmed publication.
+            // Revoke usability and detach before calling arbitrary iterator
+            // disposal, so a throwing/reentrant disposer cannot resurrect it.
+            var obsolete = cursor; cursor = null; failure = "run.execution.failed";
+            try { obsolete?.Dispose(); }
+            catch (Exception) { } // Never mask persistence/readback with private cleanup.
+        }
     }
 }

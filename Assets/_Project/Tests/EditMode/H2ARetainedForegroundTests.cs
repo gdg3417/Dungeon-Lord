@@ -11,7 +11,7 @@ using Operation = DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationT
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
-    public class H2ARetainedForegroundTests
+    public partial class H2ARetainedForegroundTests
     {
         private readonly List<LivingDungeonForegroundExecutions> owners = new List<LivingDungeonForegroundExecutions>();
         private bool enabled, detailed;
