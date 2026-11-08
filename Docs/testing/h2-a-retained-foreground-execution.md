@@ -1,5 +1,7 @@
 # H2-A retained foreground execution — checkpoint 1
 
+Historical checkpoint-1 packet. See [checkpoint 2 integration and performance findings](h2-a-checkpoint2-integration-report.md) for the current review recommendation; its measured frame results do not justify proceeding directly to final qualification.
+
 Initial working implementation and focused gate passed. Independent architecture review is next; this is not final H2-A qualification or merge readiness.
 
 Base: 01ff418143c0400d8e6fafba7a260f399bcdb2aa (merged PR #259; no newer main commit or overlapping open PR at recheck). Branch: codex/h2-a-retained-foreground-execution. Tested source: 5d585c07e083369925a199a6f2154a72fe824419. Later evidence/documentation commits do not change Unity inputs.

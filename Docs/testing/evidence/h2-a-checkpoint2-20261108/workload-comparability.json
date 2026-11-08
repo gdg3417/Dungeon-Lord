@@ -1,0 +1,1007 @@
+{
+  "method": "Exact hashes and unmodified JSON comparisons. No timestamp, ordering, revision or saved-state normalization.",
+  "workloads": {
+    "owner-inactive": {
+      "main_manifest": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ca7fc8906b1c449492923e69a909b406\\living-regressions\\fixture-inputs\\two-floor\\61b30ffc\\owner-inactive-f219f9402ec34720a06e670d98f58cc8.manifest.json",
+      "pr_manifest": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\TestResults\\qualification-supervisor\\4862ecc09db74edf85c97020a217c147\\living-regressions\\fixture-inputs\\two-floor\\3a3931cb\\owner-inactive-eee7f858028249d395d5024c81ba4c81.manifest.json",
+      "main_seed_sha256": "dab5160f05bf722d306b86fbe820faf6f259951403baca3c3a5bec6676e51172",
+      "pr_seed_sha256": "617a054d878857009225cd4f9399843b43a4e29ef45773a32aeec3c77bd7d0f5",
+      "seed_bytes_identical": false,
+      "all_seed_differences": [
+        {
+          "path": "$.primary.canonicalSpatialAuthority.MigrationDescriptorFingerprint",
+          "main": "89182a56b06f39df65785b841062bfe92ed2a6505753283e8750857a04e2429c",
+          "pr": "8a9833f23d2a4aba6515da0897fc1e02e8232ecbb097f8388ed57b79b2eac3b5"
+        },
+        {
+          "path": "$.primary.canonicalSpatialAuthority.MigrationTransactionId",
+          "main": "gd66-4b5786b5d1811e2066a348f07a282f20f914741c5e8115bb9e394bde8d3311d9",
+          "pr": "gd66-2847d87779ed7e4f64d799a9d47023e1d29f807629659006ee2f6f2fb67e6a0b"
+        },
+        {
+          "path": "$.primary.lastPausedUtcUnix",
+          "main": 1794154645,
+          "pr": 1794157083
+        },
+        {
+          "path": "$.primary.lastSavedUtcUnix",
+          "main": 1794154645,
+          "pr": 1794157083
+        }
+      ],
+      "descent_samples": [
+        0,
+        0
+      ],
+      "longest_floor_two": [
+        0,
+        0
+      ]
+    },
+    "two-floor": {
+      "main_manifest": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ca7fc8906b1c449492923e69a909b406\\living-regressions\\fixture-inputs\\two-floor\\905ccdb6\\two-floor-6479c735110449c28a15ef8b05db22d6.manifest.json",
+      "pr_manifest": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\TestResults\\qualification-supervisor\\4862ecc09db74edf85c97020a217c147\\living-regressions\\fixture-inputs\\two-floor\\9870d15c\\two-floor-fce5be56f8c54099b9fafe3e095cfb2c.manifest.json",
+      "main_seed_sha256": "42e98b60b423a08a4e767a607a63db02aaab8768c4de8d7dbae7a6373257af46",
+      "pr_seed_sha256": "778e231de98c6749ff7978ca8397693805385a15ea17f76ea0cd0681f94f657b",
+      "seed_bytes_identical": false,
+      "all_seed_differences": [
+        {
+          "path": "$.primary.canonicalSpatialAuthority.MigrationDescriptorFingerprint",
+          "main": "2f5c42f2372ec9124119017454bbe6c492f7bc1a69614dcfa29676b23a56d634",
+          "pr": "8cc0f76dd67b0c5a77b25752d6f11f811f24b87582bc813a1cc041ea0a148f27"
+        },
+        {
+          "path": "$.primary.canonicalSpatialAuthority.MigrationTransactionId",
+          "main": "gd66-50aac10e370c3273aa12291d97baf4d11531c391aa9d229fd1da8f85786c8c03",
+          "pr": "gd66-198b9e159d8272d76bb4fc7ea1ac66409bcb018f1de78592e271de63ed9bc52c"
+        },
+        {
+          "path": "$.primary.lastPausedUtcUnix",
+          "main": 1794155005,
+          "pr": 1794157451
+        },
+        {
+          "path": "$.primary.lastSavedUtcUnix",
+          "main": 1794155005,
+          "pr": 1794157451
+        }
+      ],
+      "descent_samples": [
+        29,
+        29
+      ],
+      "longest_floor_two": [
+        44000,
+        44000
+      ]
+    }
+  },
+  "control_input_hashes": {
+    "Assets/_Project/Data/Bootstrap.meta": {
+      "main": "fe461c5e9a7b09327490ab62e4ab7319e49f9bc700868c33f8a2d181699a115c",
+      "pr": "fe461c5e9a7b09327490ab62e4ab7319e49f9bc700868c33f8a2d181699a115c",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/build_config.json": {
+      "main": "edf2b29d6ffa3f3cecfd03d1607acd4370742719d316cf2889e43c3e5ac26828",
+      "pr": "edf2b29d6ffa3f3cecfd03d1607acd4370742719d316cf2889e43c3e5ac26828",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/build_config.json.meta": {
+      "main": "6ec62fa702643104bb302ae2066ee6f9d560e08d69071014df72a8c34f5e02a9",
+      "pr": "6ec62fa702643104bb302ae2066ee6f9d560e08d69071014df72a8c34f5e02a9",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/content_bootstrap.json": {
+      "main": "8a90c78da4e0941f4da7e02292de7df0e8cd53bc84ac3ab2c78d3014d9500b8f",
+      "pr": "8a90c78da4e0941f4da7e02292de7df0e8cd53bc84ac3ab2c78d3014d9500b8f",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/content_bootstrap.json.meta": {
+      "main": "aa51b33c9e7ddf807fbafd67eb0c34e9dca6f15c7575cb02ebcb1c215668bb0d",
+      "pr": "aa51b33c9e7ddf807fbafd67eb0c34e9dca6f15c7575cb02ebcb1c215668bb0d",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/content_manifest.json": {
+      "main": "757dc615bb2d9a418ba947536617aba629e5efcdbd5589d1ad771fedc79af4d3",
+      "pr": "757dc615bb2d9a418ba947536617aba629e5efcdbd5589d1ad771fedc79af4d3",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/content_manifest.json.meta": {
+      "main": "fc60169d45ac36c460a7fa5a13dfc4cdfa83631540fdda43318813acf9425809",
+      "pr": "fc60169d45ac36c460a7fa5a13dfc4cdfa83631540fdda43318813acf9425809",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/dev_commands.json": {
+      "main": "bf1ce67cf81637fc09060d4d4ed575a848654cfe796d357ccf518ce372e1ff86",
+      "pr": "bf1ce67cf81637fc09060d4d4ed575a848654cfe796d357ccf518ce372e1ff86",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/dev_commands.json.meta": {
+      "main": "423b2ca28817fd4ada8750315b9710bf4adeb807fdf745a22b435ff321140cf9",
+      "pr": "423b2ca28817fd4ada8750315b9710bf4adeb807fdf745a22b435ff321140cf9",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/heat_runtime.json": {
+      "main": "94d5ce5af73bcb7cddc0e0f9a54bcc4de5f221b558b6562a1c6443ec423e04a9",
+      "pr": "94d5ce5af73bcb7cddc0e0f9a54bcc4de5f221b558b6562a1c6443ec423e04a9",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/heat_runtime.json.meta": {
+      "main": "7a89d89ecd86ed1b74cd07eed6f8e5f9ce104deb9c30a7d48883773df324bb54",
+      "pr": "7a89d89ecd86ed1b74cd07eed6f8e5f9ce104deb9c30a7d48883773df324bb54",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/loot_config.json": {
+      "main": "f0efb530aa6673c7cd12d2b2d5cbf87b4b93a49f77af6fd2af30e761d6ba327a",
+      "pr": "f0efb530aa6673c7cd12d2b2d5cbf87b4b93a49f77af6fd2af30e761d6ba327a",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/loot_config.json.meta": {
+      "main": "2103fc7573dfc351fd0226d8b749451443c4760a5ce01dc8bee0eaccbf4262a2",
+      "pr": "2103fc7573dfc351fd0226d8b749451443c4760a5ce01dc8bee0eaccbf4262a2",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/run_simulation_config.json": {
+      "main": "f07657572530df1955ae904c66a76feeb71ca7ae8a6e8382c25bb8b7a1cf4e16",
+      "pr": "f07657572530df1955ae904c66a76feeb71ca7ae8a6e8382c25bb8b7a1cf4e16",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/run_simulation_config.json.meta": {
+      "main": "ceffc6d1aaa741ce36917bec928aad83f9131401cdfc14169fe49b006c6e474b",
+      "pr": "ceffc6d1aaa741ce36917bec928aad83f9131401cdfc14169fe49b006c6e474b",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/schema_versions.json": {
+      "main": "175ed4122c34284cea980fcde266eb4cc6d62454f810520e8fba6fb38d6e538a",
+      "pr": "175ed4122c34284cea980fcde266eb4cc6d62454f810520e8fba6fb38d6e538a",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/schema_versions.json.meta": {
+      "main": "1c68bcffb2ab2ce40f52514f4d9745d144ef2ab6385ea2360e2e8dd0b6ae3971",
+      "pr": "1c68bcffb2ab2ce40f52514f4d9745d144ef2ab6385ea2360e2e8dd0b6ae3971",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/string_table_en.json": {
+      "main": "cf60cd0a186df5958a5f78a1ec0f2e0cd0a7dd6289f9822ed33e5d9674706933",
+      "pr": "cf60cd0a186df5958a5f78a1ec0f2e0cd0a7dd6289f9822ed33e5d9674706933",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/string_table_en.json.meta": {
+      "main": "fb141f6a05d73ae06c7e75ea78eb87a5a7b03d162a6685aca591caabdf9c3f97",
+      "pr": "fb141f6a05d73ae06c7e75ea78eb87a5a7b03d162a6685aca591caabdf9c3f97",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/structure_simulation_config.json": {
+      "main": "21c3a64cdc9a9658711d1c3fea2dd609294c0cfceafdcbd83f20f96de10f7a45",
+      "pr": "21c3a64cdc9a9658711d1c3fea2dd609294c0cfceafdcbd83f20f96de10f7a45",
+      "identical": true
+    },
+    "Assets/_Project/Data/Bootstrap/structure_simulation_config.json.meta": {
+      "main": "e7ce3c2e29ab2c987d453be44911ebdf71e15b53335ea55c98aa3ec98a0a2e0d",
+      "pr": "e7ce3c2e29ab2c987d453be44911ebdf71e15b53335ea55c98aa3ec98a0a2e0d",
+      "identical": true
+    },
+    "Assets/_Project/Data/Localization.meta": {
+      "main": "d9e41bcca9b19c5c538ad2b0baa0c41ae79fea0fe7a1db578d226892b438c4df",
+      "pr": "d9e41bcca9b19c5c538ad2b0baa0c41ae79fea0fe7a1db578d226892b438c4df",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production.meta": {
+      "main": "20ce710e930945338e97784fe5587b3c13ab91e61d964c6fd8aefd4ff75025df",
+      "pr": "20ce710e930945338e97784fe5587b3c13ab91e61d964c6fd8aefd4ff75025df",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial.meta": {
+      "main": "76a8bdc078b872bad490a736f22e21434fab59a122830790a6d5501d7e9ee52a",
+      "pr": "76a8bdc078b872bad490a736f22e21434fab59a122830790a6d5501d7e9ee52a",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json": {
+      "main": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227",
+      "pr": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json.meta": {
+      "main": "d9899a84f8538eb6e4bb4c5606161a8d069949db56c47af4d1d86823814fcfea",
+      "pr": "d9899a84f8538eb6e4bb4c5606161a8d069949db56c47af4d1d86823814fcfea",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json": {
+      "main": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b",
+      "pr": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json.meta": {
+      "main": "9ec0d7deddd32c996566976058ccd797bf4b7e58c6a7fbcbe5ce94e1a3ded3ef",
+      "pr": "9ec0d7deddd32c996566976058ccd797bf4b7e58c6a7fbcbe5ce94e1a3ded3ef",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json": {
+      "main": "cbb523afd7de68ed973697f2300b7b56857f19df7f07339837196f03fdc181e2",
+      "pr": "cbb523afd7de68ed973697f2300b7b56857f19df7f07339837196f03fdc181e2",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json.meta": {
+      "main": "46759c1e3bb98fe3f2159a705e0af50f67d3c85ebdf12f57ed38a4ab7f1d4c4e",
+      "pr": "46759c1e3bb98fe3f2159a705e0af50f67d3c85ebdf12f57ed38a4ab7f1d4c4e",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json": {
+      "main": "37ece030181bb51ff887a75aa41a2293bdece9eed8d292ef6ec40e48beef3262",
+      "pr": "37ece030181bb51ff887a75aa41a2293bdece9eed8d292ef6ec40e48beef3262",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json.meta": {
+      "main": "55fb1be105353032dc5afe2add138ad4786d09de5cba4299e9367dd9d8e1ff8c",
+      "pr": "55fb1be105353032dc5afe2add138ad4786d09de5cba4299e9367dd9d8e1ff8c",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json": {
+      "main": "9d279717c15b9a1397d86261b8fd95df835cb2688ffa35b20e3c5d2773fa47c1",
+      "pr": "9d279717c15b9a1397d86261b8fd95df835cb2688ffa35b20e3c5d2773fa47c1",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json.meta": {
+      "main": "c4887999253e0ca105bcf813c24a902176daf6564c241ae75d666703c65b0846",
+      "pr": "c4887999253e0ca105bcf813c24a902176daf6564c241ae75d666703c65b0846",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research.meta": {
+      "main": "82a3dbbf1af33291fd0299f73240f4456668462bcb16d6a48ca83879b6b2cf4c",
+      "pr": "82a3dbbf1af33291fd0299f73240f4456668462bcb16d6a48ca83879b6b2cf4c",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle.meta": {
+      "main": "cec1450b2808a3b7ff0017e08fe6b3ab0b07559317e1a1829331c3707cab948a",
+      "pr": "cec1450b2808a3b7ff0017e08fe6b3ab0b07559317e1a1829331c3707cab948a",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/README.txt": {
+      "main": "c5aa6a754c61b9dbf418c0835b4d0f1fa0b68e3b222d87d9105ff3b0a315119e",
+      "pr": "c5aa6a754c61b9dbf418c0835b4d0f1fa0b68e3b222d87d9105ff3b0a315119e",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/README.txt.meta": {
+      "main": "a62c406495e6fa6aaf06a37a96a3c26cbd0b813323ff90cf761521e37196f758",
+      "pr": "a62c406495e6fa6aaf06a37a96a3c26cbd0b813323ff90cf761521e37196f758",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/all_research_nodes.json": {
+      "main": "56232db70606b0ec9ad358112fd9ec69cd8c4ba9a0277e19cd76e77542124291",
+      "pr": "56232db70606b0ec9ad358112fd9ec69cd8c4ba9a0277e19cd76e77542124291",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/all_research_nodes.json.meta": {
+      "main": "fa5cbfde1861f3b492f89f7f2398f8e26a9e77334f9da5207de9dd5a4e8c9f6d",
+      "pr": "fa5cbfde1861f3b492f89f7f2398f8e26a9e77334f9da5207de9dd5a4e8c9f6d",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology.meta": {
+      "main": "483f2d6590bd76cf60a8e61f2e801223576aaf0842832dc3b071d0644c791d2a",
+      "pr": "483f2d6590bd76cf60a8e61f2e801223576aaf0842832dc3b071d0644c791d2a",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/cost_profiles.json": {
+      "main": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+      "pr": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/cost_profiles.json.meta": {
+      "main": "033bd051cf9a6613f3fe91b3bc80e17e3e0a5e810264aa04b86176e3490af83c",
+      "pr": "033bd051cf9a6613f3fe91b3bc80e17e3e0a5e810264aa04b86176e3490af83c",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/lint_rules.json": {
+      "main": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+      "pr": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/lint_rules.json.meta": {
+      "main": "e0c663c29cdfbf148a5cf86064e5488f441787bb1596613acd153b8cc6a27ec3",
+      "pr": "e0c663c29cdfbf148a5cf86064e5488f441787bb1596613acd153b8cc6a27ec3",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/migration_map.json": {
+      "main": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "pr": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/migration_map.json.meta": {
+      "main": "1e20bede937d9f7d390274930e0ead5b09da7885fc92080fa759dc0ec1806cc7",
+      "pr": "1e20bede937d9f7d390274930e0ead5b09da7885fc92080fa759dc0ec1806cc7",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/research_nodes.json": {
+      "main": "4d2277f1965d94a910cb40b0191ef1d48cd688106aecf2d1bf8eea2479c1b038",
+      "pr": "4d2277f1965d94a910cb40b0191ef1d48cd688106aecf2d1bf8eea2479c1b038",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/research_nodes.json.meta": {
+      "main": "1a72cff537456ae77a213f6ad0b207a1037c05ce47c5b542932d74769268bbb0",
+      "pr": "1a72cff537456ae77a213f6ad0b207a1037c05ce47c5b542932d74769268bbb0",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/tables.json": {
+      "main": "b1205a2f9c1169e91ee0d57d49afcb3cb2fc78c527b002c3e31d8bca85c41f00",
+      "pr": "b1205a2f9c1169e91ee0d57d49afcb3cb2fc78c527b002c3e31d8bca85c41f00",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/tables.json.meta": {
+      "main": "49c353c2d8e28391b63d467364caf6598f0a19f56f8b96b2fd565ab95f5c575a",
+      "pr": "49c353c2d8e28391b63d467364caf6598f0a19f56f8b96b2fd565ab95f5c575a",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture.meta": {
+      "main": "4227461e7d8aad1a4954c936c330fed1f2547b04604040738fb10fb4372a1a89",
+      "pr": "4227461e7d8aad1a4954c936c330fed1f2547b04604040738fb10fb4372a1a89",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/cost_profiles.json": {
+      "main": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+      "pr": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/cost_profiles.json.meta": {
+      "main": "798390abe140adca14b632c7637f6dcb4b2d12e2d4b2c7d9769f4c0decd54767",
+      "pr": "798390abe140adca14b632c7637f6dcb4b2d12e2d4b2c7d9769f4c0decd54767",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/lint_rules.json": {
+      "main": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+      "pr": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/lint_rules.json.meta": {
+      "main": "d23b416ef5122d23f52078c3e97ed6a00b6b3b672891e37acaf84288ba4371b3",
+      "pr": "d23b416ef5122d23f52078c3e97ed6a00b6b3b672891e37acaf84288ba4371b3",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/migration_map.json": {
+      "main": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "pr": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/migration_map.json.meta": {
+      "main": "953b635abd91b550c98503375ae478f3547a198e03ac65243585ed0be6dc6948",
+      "pr": "953b635abd91b550c98503375ae478f3547a198e03ac65243585ed0be6dc6948",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/research_nodes.json": {
+      "main": "4c89c5ca09a5778826929f85e4dc3039aaec0957842110b97842b383b148174e",
+      "pr": "4c89c5ca09a5778826929f85e4dc3039aaec0957842110b97842b383b148174e",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/research_nodes.json.meta": {
+      "main": "62bd940365f0222a6b010a700ac1704754d3baf845cbc9aba041afd3b17f9ff4",
+      "pr": "62bd940365f0222a6b010a700ac1704754d3baf845cbc9aba041afd3b17f9ff4",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json": {
+      "main": "6b83faeff4a1180a86bf2c6b109110888022baad720311fd02808a0c2fc62870",
+      "pr": "6b83faeff4a1180a86bf2c6b109110888022baad720311fd02808a0c2fc62870",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json.meta": {
+      "main": "b31293337a7fcb91ee0050ab573d36e8c57356a2389a123974c3deb79fbe0683",
+      "pr": "b31293337a7fcb91ee0050ab573d36e8c57356a2389a123974c3deb79fbe0683",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech.meta": {
+      "main": "ab199b4001eafe8a49354f484557af2d5866db7de01dc953a6d29d79b77c1312",
+      "pr": "ab199b4001eafe8a49354f484557af2d5866db7de01dc953a6d29d79b77c1312",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/cost_profiles.json": {
+      "main": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+      "pr": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/cost_profiles.json.meta": {
+      "main": "0402497170698f48b5357f3d0b46483df63395b46ea2d8afb03f148d0d7b600d",
+      "pr": "0402497170698f48b5357f3d0b46483df63395b46ea2d8afb03f148d0d7b600d",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/lint_rules.json": {
+      "main": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+      "pr": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/lint_rules.json.meta": {
+      "main": "1921945707515693ae95c09e9bd6567bd5ced1703156051fa9cd2c483fa13e6c",
+      "pr": "1921945707515693ae95c09e9bd6567bd5ced1703156051fa9cd2c483fa13e6c",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/migration_map.json": {
+      "main": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "pr": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/migration_map.json.meta": {
+      "main": "1717c74853f36efa2acb52d0b1e3f3f9ae5f11ada8d51470e541417ca07b8fe8",
+      "pr": "1717c74853f36efa2acb52d0b1e3f3f9ae5f11ada8d51470e541417ca07b8fe8",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/research_nodes.json": {
+      "main": "fb3a4bdcf0b57cd7695cb03ac6896c4ada71300d9f49a7e369c3fbbb633027b0",
+      "pr": "fb3a4bdcf0b57cd7695cb03ac6896c4ada71300d9f49a7e369c3fbbb633027b0",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/research_nodes.json.meta": {
+      "main": "94988d71000146a273d67c3b741b98680df15caaed72dfccbf56411b2da7ed18",
+      "pr": "94988d71000146a273d67c3b741b98680df15caaed72dfccbf56411b2da7ed18",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/tables.json": {
+      "main": "a301687c2c0f863cb731e3edfbde6a8f62fbc11ce860d80aff9a3283cd534519",
+      "pr": "a301687c2c0f863cb731e3edfbde6a8f62fbc11ce860d80aff9a3283cd534519",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/tables.json.meta": {
+      "main": "8dcae52f3d6ec40e334d780e0b28612c107247561d3b6c0e7ebd6b4a00d9fb39",
+      "pr": "8dcae52f3d6ec40e334d780e0b28612c107247561d3b6c0e7ebd6b4a00d9fb39",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy.meta": {
+      "main": "ef4f5b3f013936fb666c428fa6465f2915ccd281a459787405dba74a87a7e71d",
+      "pr": "ef4f5b3f013936fb666c428fa6465f2915ccd281a459787405dba74a87a7e71d",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/cost_profiles.json": {
+      "main": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+      "pr": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/cost_profiles.json.meta": {
+      "main": "e578024bac3ec66b172992bca6408cdf23d1835ca4d6a92cb399c05c50b3b156",
+      "pr": "e578024bac3ec66b172992bca6408cdf23d1835ca4d6a92cb399c05c50b3b156",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/lint_rules.json": {
+      "main": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+      "pr": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/lint_rules.json.meta": {
+      "main": "0007e5d4b60558610abec50c8d021b3bfad0635b88cffdb42c6fbf0fd2b9bb38",
+      "pr": "0007e5d4b60558610abec50c8d021b3bfad0635b88cffdb42c6fbf0fd2b9bb38",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/migration_map.json": {
+      "main": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "pr": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/migration_map.json.meta": {
+      "main": "06c29297757de562ca14aa260625775c17d907e6cf6d150b7985c66c61322a65",
+      "pr": "06c29297757de562ca14aa260625775c17d907e6cf6d150b7985c66c61322a65",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/research_nodes.json": {
+      "main": "b29068659ccbc92951154ad47996d0d89cb63a0d9e53314f6991fce72961013d",
+      "pr": "b29068659ccbc92951154ad47996d0d89cb63a0d9e53314f6991fce72961013d",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/research_nodes.json.meta": {
+      "main": "278c80cae687faf2ba90c50672e99713e4b4c1f5878e5e1573eec5649821d2be",
+      "pr": "278c80cae687faf2ba90c50672e99713e4b4c1f5878e5e1573eec5649821d2be",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/tables.json": {
+      "main": "097fd12a8c777e87c47314e30612c6efa25ec90b64e049dcaec6d05ae671768d",
+      "pr": "097fd12a8c777e87c47314e30612c6efa25ec90b64e049dcaec6d05ae671768d",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/tables.json.meta": {
+      "main": "08e20b160957060bfefa3476b83b087efdacd63d3523d6eff989776b057b9b7f",
+      "pr": "08e20b160957060bfefa3476b83b087efdacd63d3523d6eff989776b057b9b7f",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/manifest.json": {
+      "main": "cbb1b1825ddad3c6344d34130433cbab9144b08e9bd9dd704850826698da642b",
+      "pr": "cbb1b1825ddad3c6344d34130433cbab9144b08e9bd9dd704850826698da642b",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/manifest.json.meta": {
+      "main": "0c8ffee8da89810673ec1e51595410c175c2c74135a11d71c9d9b170f39b963f",
+      "pr": "0c8ffee8da89810673ec1e51595410c175c2c74135a11d71c9d9b170f39b963f",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology.meta": {
+      "main": "79924c6d0818c0f80adacd992d4c3b867f801693e4fee4d3eb8a740ebfa82a35",
+      "pr": "79924c6d0818c0f80adacd992d4c3b867f801693e4fee4d3eb8a740ebfa82a35",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/cost_profiles.json": {
+      "main": "380fa552588e508f3120fdeec96a0ae2c40583c4b470c05422003cc34160d594",
+      "pr": "380fa552588e508f3120fdeec96a0ae2c40583c4b470c05422003cc34160d594",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/cost_profiles.json.meta": {
+      "main": "896f2f00bb3bb9f0f8abc11a1bdef50ee9c6dda8342862d7049f05b39928a4f5",
+      "pr": "896f2f00bb3bb9f0f8abc11a1bdef50ee9c6dda8342862d7049f05b39928a4f5",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/lint_rules.json": {
+      "main": "89e24e75a042bdebb241854159b8e81723b0901831fe130b6678a25365a93cad",
+      "pr": "89e24e75a042bdebb241854159b8e81723b0901831fe130b6678a25365a93cad",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/lint_rules.json.meta": {
+      "main": "f788db5bc38b78372eb85f3fea0c90a6b61bd52334a704eca9074bfca7a434c9",
+      "pr": "f788db5bc38b78372eb85f3fea0c90a6b61bd52334a704eca9074bfca7a434c9",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/migration_map.json": {
+      "main": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "pr": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/migration_map.json.meta": {
+      "main": "8df254c1e8df06e7aaabf89f8502cadeeef1662eab5e7e643ac914da44dc4e9a",
+      "pr": "8df254c1e8df06e7aaabf89f8502cadeeef1662eab5e7e643ac914da44dc4e9a",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/research_nodes.json": {
+      "main": "eb9dd8b3a9900e90852ce3dd843d210f368b0236dab5e873c4a520eec07d7144",
+      "pr": "eb9dd8b3a9900e90852ce3dd843d210f368b0236dab5e873c4a520eec07d7144",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/research_nodes.json.meta": {
+      "main": "50f6377f9deab65f3103ed09daef9b9ad93f3be1bd90f8bc0077166a23ad60cb",
+      "pr": "50f6377f9deab65f3103ed09daef9b9ad93f3be1bd90f8bc0077166a23ad60cb",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/tables.json": {
+      "main": "774579042d82819619e6d649e305d2ef9c95dffc1e620f79bb74bd87299a3c6c",
+      "pr": "774579042d82819619e6d649e305d2ef9c95dffc1e620f79bb74bd87299a3c6c",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/tables.json.meta": {
+      "main": "70073e557db70a4875d8bc4f3bb0a541d1b5c1c3d48206c2b9098028eb1041e5",
+      "pr": "70073e557db70a4875d8bc4f3bb0a541d1b5c1c3d48206c2b9098028eb1041e5",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/schemas.json": {
+      "main": "3c79a38ee5cab3177234621c0c51ef1e5b8e6838764ea1051cef6bad79ec9496",
+      "pr": "3c79a38ee5cab3177234621c0c51ef1e5b8e6838764ea1051cef6bad79ec9496",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/schemas.json.meta": {
+      "main": "535d40d19f7b092dec4219879fcc5f3de4d5e85437f209b10ae9aaa50f5092db",
+      "pr": "535d40d19f7b092dec4219879fcc5f3de4d5e85437f209b10ae9aaa50f5092db",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft.meta": {
+      "main": "ab5e48d148b8251c517e1bf7177b9c3c7b276a74d13767183a149a522e8816c8",
+      "pr": "ab5e48d148b8251c517e1bf7177b9c3c7b276a74d13767183a149a522e8816c8",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/cost_profiles.json": {
+      "main": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+      "pr": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/cost_profiles.json.meta": {
+      "main": "fe27fc09f9348f9cc40e3643cb6dd81b02b6eedeb473a358584d5aefbfc5b8d2",
+      "pr": "fe27fc09f9348f9cc40e3643cb6dd81b02b6eedeb473a358584d5aefbfc5b8d2",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/lint_rules.json": {
+      "main": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+      "pr": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/lint_rules.json.meta": {
+      "main": "5760bd839fe2f5233d92f690cf56b709d5a697c875c89f5b12eb93a909c7386d",
+      "pr": "5760bd839fe2f5233d92f690cf56b709d5a697c875c89f5b12eb93a909c7386d",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/migration_map.json": {
+      "main": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "pr": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/migration_map.json.meta": {
+      "main": "96f5429d9574b4e0064a25eae28b8f358128048cec240b27ac685b2e3ed10c3a",
+      "pr": "96f5429d9574b4e0064a25eae28b8f358128048cec240b27ac685b2e3ed10c3a",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/research_nodes.json": {
+      "main": "c1d97843a98e4df969706a7e91d2ef82a5d09f43fc0b7da9a11908a9fa10cae4",
+      "pr": "c1d97843a98e4df969706a7e91d2ef82a5d09f43fc0b7da9a11908a9fa10cae4",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/research_nodes.json.meta": {
+      "main": "0163e8c247fe987e14fe87ee0a77a1923f4ca80e66cb012f956ec843072d6b0b",
+      "pr": "0163e8c247fe987e14fe87ee0a77a1923f4ca80e66cb012f956ec843072d6b0b",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/tables.json": {
+      "main": "5d5f7b119d8663fc65decc8dd433892921b2a967ffdd67da2b81f7bcc0d8db5e",
+      "pr": "5d5f7b119d8663fc65decc8dd433892921b2a967ffdd67da2b81f7bcc0d8db5e",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/tables.json.meta": {
+      "main": "2c0f8bf17ddb22a0ce8b6a9d8381bf646a2ab423df989f8585428e9a0b85133d",
+      "pr": "2c0f8bf17ddb22a0ce8b6a9d8381bf646a2ab423df989f8585428e9a0b85133d",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save.meta": {
+      "main": "8798510c8d758992be07cdb6fd3a4d341275f0e05755db01fb1f456051c17aae",
+      "pr": "8798510c8d758992be07cdb6fd3a4d341275f0e05755db01fb1f456051c17aae",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save/living_dungeon_qualification_profile.json": {
+      "main": "7a424f236b9af83cae4eb553a20a1506af7f8f6bc63d744cdbc0a203419242fb",
+      "pr": "7a424f236b9af83cae4eb553a20a1506af7f8f6bc63d744cdbc0a203419242fb",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save/living_dungeon_qualification_profile.json.meta": {
+      "main": "36abd86a4ca84c17dca1a9060f939066e6d57df6e2390914fb8126454289930c",
+      "pr": "36abd86a4ca84c17dca1a9060f939066e6d57df6e2390914fb8126454289930c",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save/room_content_position_migration_profiles.json": {
+      "main": "599db0c16f1b3414bb4d887ef953d2c8cb1acba03dbab68a60fd65a83e1468f1",
+      "pr": "599db0c16f1b3414bb4d887ef953d2c8cb1acba03dbab68a60fd65a83e1468f1",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save/room_content_position_migration_profiles.json.meta": {
+      "main": "9e1a56583bce40a5a469ab4722be8a40cbcce36c457338bcdd83f41d2499cc25",
+      "pr": "9e1a56583bce40a5a469ab4722be8a40cbcce36c457338bcdd83f41d2499cc25",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json": {
+      "main": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600",
+      "pr": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json.meta": {
+      "main": "5cfc0facfb85a6839d400ac84f2c166c74d88391df42261420d01e0de927ebca",
+      "pr": "5cfc0facfb85a6839d400ac84f2c166c74d88391df42261420d01e0de927ebca",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save/save_spatial_migration_limits.json": {
+      "main": "a426b897ab6fe350d9c1048af597615adb925b5137658e33534765ad11f282d4",
+      "pr": "a426b897ab6fe350d9c1048af597615adb925b5137658e33534765ad11f282d4",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save/save_spatial_migration_limits.json.meta": {
+      "main": "e94029f05b31e38856617d0197dc979a460aaabf8ed0b0a9ab2abfea3c199685",
+      "pr": "e94029f05b31e38856617d0197dc979a460aaabf8ed0b0a9ab2abfea3c199685",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save/structural_content_removal_policy.json": {
+      "main": "5edad7716383b9d2689263556e4e071903d09e001fcae99c130b2d23b7a6d64a",
+      "pr": "5edad7716383b9d2689263556e4e071903d09e001fcae99c130b2d23b7a6d64a",
+      "identical": true
+    },
+    "Assets/_Project/Data/Production/Save/structural_content_removal_policy.json.meta": {
+      "main": "ad47049486a8b32123e7644bac215cad197739d622362b7444ecf722311f8729",
+      "pr": "ad47049486a8b32123e7644bac215cad197739d622362b7444ecf722311f8729",
+      "identical": true
+    },
+    "Assets/_Project/Data/Schemas.meta": {
+      "main": "d129408f3566d40120c697829bcc7a7f3cefb0dd3318b29439ecbe1c1a037959",
+      "pr": "d129408f3566d40120c697829bcc7a7f3cefb0dd3318b29439ecbe1c1a037959",
+      "identical": true
+    },
+    "Assets/_Project/Data/Schemas/heat_modifiers.schema.json": {
+      "main": "a1e5e81c71b5bc0a7d8ea079c8a75ba78d8cd2d1bdaf81fddaf75ffe336a6f59",
+      "pr": "a1e5e81c71b5bc0a7d8ea079c8a75ba78d8cd2d1bdaf81fddaf75ffe336a6f59",
+      "identical": true
+    },
+    "Assets/_Project/Data/Schemas/heat_modifiers.schema.json.meta": {
+      "main": "c3eace85652ce9ce02415f9966dcb27b67094c1c1c00c9a32bfae729fea855ae",
+      "pr": "c3eace85652ce9ce02415f9966dcb27b67094c1c1c00c9a32bfae729fea855ae",
+      "identical": true
+    },
+    "Assets/_Project/Data/Schemas/mana_modifiers.schema.json": {
+      "main": "9ecdc73b4235710cd988045b148f8c6a4dee8cd1b4d06b8716dbe731738cae30",
+      "pr": "9ecdc73b4235710cd988045b148f8c6a4dee8cd1b4d06b8716dbe731738cae30",
+      "identical": true
+    },
+    "Assets/_Project/Data/Schemas/mana_modifiers.schema.json.meta": {
+      "main": "fb0bb0f19868a75be853ffd3fe45a57a6f790c74cf9868277ff0febfebb58a97",
+      "pr": "fb0bb0f19868a75be853ffd3fe45a57a6f790c74cf9868277ff0febfebb58a97",
+      "identical": true
+    },
+    "Assets/_Project/Data/Schemas/research_modifiers.schema.json": {
+      "main": "3321a1269ee2e190839d182bb109e8b05c8975cb896ab48cea1ebc2a35323615",
+      "pr": "3321a1269ee2e190839d182bb109e8b05c8975cb896ab48cea1ebc2a35323615",
+      "identical": true
+    },
+    "Assets/_Project/Data/Schemas/research_modifiers.schema.json.meta": {
+      "main": "c794f90af5325c3e068fafaf41c558413316dc686697a0b638a21e1a982f5c99",
+      "pr": "c794f90af5325c3e068fafaf41c558413316dc686697a0b638a21e1a982f5c99",
+      "identical": true
+    },
+    "Assets/_Project/Data/Schemas/schema_bundle.json": {
+      "main": "14e2a462387ddbabdfa6c9164fd442f27333a3793956edf3b889a2f09aefcfbb",
+      "pr": "14e2a462387ddbabdfa6c9164fd442f27333a3793956edf3b889a2f09aefcfbb",
+      "identical": true
+    },
+    "Assets/_Project/Data/Schemas/schema_bundle.json.meta": {
+      "main": "dca109f6100aed3cf58b3f264d8cbbdeac24b7db2ddb29db6fbf46cb8beb47e6",
+      "pr": "dca109f6100aed3cf58b3f264d8cbbdeac24b7db2ddb29db6fbf46cb8beb47e6",
+      "identical": true
+    },
+    "Assets/_Project/Editor/DungeonSpatial/Tests/LivingDungeonTwoFloorProductionProfileSceneTests.cs": {
+      "main": "abed121e238980db3802c272543f49585ec4e83bb3517277ac028c79b2804923",
+      "pr": "abed121e238980db3802c272543f49585ec4e83bb3517277ac028c79b2804923",
+      "identical": true
+    },
+    "Assets/_Project/Resources/content_acquisition_economy.json": {
+      "main": "2761a84ccc358cdb053c6cba6631e86900fd158b51fc91885b33d4bb7ac9c39f",
+      "pr": "2761a84ccc358cdb053c6cba6631e86900fd158b51fc91885b33d4bb7ac9c39f",
+      "identical": true
+    },
+    "Assets/_Project/Resources/content_acquisition_economy.json.meta": {
+      "main": "59dbc705618ea88a49ca889867f72315b96c9a5bb05ad29556074912b673ff7d",
+      "pr": "59dbc705618ea88a49ca889867f72315b96c9a5bb05ad29556074912b673ff7d",
+      "identical": true
+    },
+    "Assets/_Project/Resources/floor_construction_profiles.json": {
+      "main": "8f585b7f60863fde617cf7a63cdf8f62831792b8da27c3327b823a85754ca960",
+      "pr": "8f585b7f60863fde617cf7a63cdf8f62831792b8da27c3327b823a85754ca960",
+      "identical": true
+    },
+    "Assets/_Project/Resources/floor_construction_profiles.json.meta": {
+      "main": "b21ebed200f4b637752d89e16620c4ea941b4626787724f29127f0f684ab6a89",
+      "pr": "b21ebed200f4b637752d89e16620c4ea941b4626787724f29127f0f684ab6a89",
+      "identical": true
+    },
+    "Assets/_Project/Resources/living_dungeon_foreground.json": {
+      "main": "840001642c9b3d2d53ef7ebfcac7170459f012589a6206d8bb58a9727cfc2331",
+      "pr": "840001642c9b3d2d53ef7ebfcac7170459f012589a6206d8bb58a9727cfc2331",
+      "identical": true
+    },
+    "Assets/_Project/Resources/living_dungeon_foreground.json.meta": {
+      "main": "12dece2855a8b7005b6581727be7b62d2e872637f8eeaf38ef2bf31b1aeaf86b",
+      "pr": "12dece2855a8b7005b6581727be7b62d2e872637f8eeaf38ef2bf31b1aeaf86b",
+      "identical": true
+    },
+    "Assets/_Project/Resources/living_dungeon_foreground_v2.json": {
+      "main": "2183efa3f7540442c861bd2fe7ab7912007ad725b33ab21546795803c0d331a1",
+      "pr": "2183efa3f7540442c861bd2fe7ab7912007ad725b33ab21546795803c0d331a1",
+      "identical": true
+    },
+    "Assets/_Project/Resources/living_dungeon_foreground_v2.json.meta": {
+      "main": "0999a7c51bc1eaa86332d9470dc5f8dfcba8985ff2d9609e041d5db96fedc4ef",
+      "pr": "0999a7c51bc1eaa86332d9470dc5f8dfcba8985ff2d9609e041d5db96fedc4ef",
+      "identical": true
+    },
+    "Assets/_Project/Resources/monster_recovery.json": {
+      "main": "1a5e199c55cc28678099dc56bf0ea5a4796038090d6f2f3e7f8e67494ad4595d",
+      "pr": "1a5e199c55cc28678099dc56bf0ea5a4796038090d6f2f3e7f8e67494ad4595d",
+      "identical": true
+    },
+    "Assets/_Project/Resources/monster_recovery.json.meta": {
+      "main": "91c973edb94d516beb294d0b1b88c2466cfdd905219e3493d27c5dd31bf8a724",
+      "pr": "91c973edb94d516beb294d0b1b88c2466cfdd905219e3493d27c5dd31bf8a724",
+      "identical": true
+    },
+    "Assets/_Project/Resources/passive_online_mana.json": {
+      "main": "2848ccfa6ffde744ade883edb0171bfbe993bbee5c32758a70d8ee4b690e6639",
+      "pr": "2848ccfa6ffde744ade883edb0171bfbe993bbee5c32758a70d8ee4b690e6639",
+      "identical": true
+    },
+    "Assets/_Project/Resources/passive_online_mana.json.meta": {
+      "main": "04a8721135507cbfb5d85e59ae5d4db699d727cc92bc5261a60df6947edce01a",
+      "pr": "04a8721135507cbfb5d85e59ae5d4db699d727cc92bc5261a60df6947edce01a",
+      "identical": true
+    },
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema13.json": {
+      "main": "e3ba04771aea8955afec08f52f67b7b5f124aec46d2803802d66208435c750ea",
+      "pr": "e3ba04771aea8955afec08f52f67b7b5f124aec46d2803802d66208435c750ea",
+      "identical": true
+    },
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema13.json.meta": {
+      "main": "5117aa37c0c9a17c68d51426df77dddb1390d2286d61ee1f50a2551b71ced883",
+      "pr": "5117aa37c0c9a17c68d51426df77dddb1390d2286d61ee1f50a2551b71ced883",
+      "identical": true
+    },
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema14.json": {
+      "main": "f535a0f7ba406916eb088dc499e58630e95eac340e88f18ce47227914bde642f",
+      "pr": "f535a0f7ba406916eb088dc499e58630e95eac340e88f18ce47227914bde642f",
+      "identical": true
+    },
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema14.json.meta": {
+      "main": "0bd34ca9bd997826fabb86299637b4a2e8a9feadb02692715464e456f4bdebee",
+      "pr": "0bd34ca9bd997826fabb86299637b4a2e8a9feadb02692715464e456f4bdebee",
+      "identical": true
+    },
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema15.json": {
+      "main": "aa162762f7c437ca58f8a4f8f4cccb22e6868801269dc6f04dd3d241482a9782",
+      "pr": "aa162762f7c437ca58f8a4f8f4cccb22e6868801269dc6f04dd3d241482a9782",
+      "identical": true
+    },
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema15.json.meta": {
+      "main": "7315371d5b060a950645763ef9fb3a8b0ac5baeaf8aaa98aa4edfad7f3a72101",
+      "pr": "7315371d5b060a950645763ef9fb3a8b0ac5baeaf8aaa98aa4edfad7f3a72101",
+      "identical": true
+    },
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema16.json": {
+      "main": "0afdf5dc4f4228d8589ec3093b52c595d4851602414dec88750de3aea4d3cdef",
+      "pr": "0afdf5dc4f4228d8589ec3093b52c595d4851602414dec88750de3aea4d3cdef",
+      "identical": true
+    },
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema16.json.meta": {
+      "main": "0f94134cea2b7d3e073bd00d9accc8a94a191de2a80a61f72a52b42c07b55b94",
+      "pr": "0f94134cea2b7d3e073bd00d9accc8a94a191de2a80a61f72a52b42c07b55b94",
+      "identical": true
+    },
+    "Assets/_Project/Resources/structural_economy.json": {
+      "main": "f33799b480d27bd65356c182dee67a8473cfed0db061bba9e8de55eb6c0addaf",
+      "pr": "f33799b480d27bd65356c182dee67a8473cfed0db061bba9e8de55eb6c0addaf",
+      "identical": true
+    },
+    "Assets/_Project/Resources/structural_economy.json.meta": {
+      "main": "638ca46663c5011b69e1eb9236d163393e491e6040e8c4e120765708432e4d97",
+      "pr": "638ca46663c5011b69e1eb9236d163393e491e6040e8c4e120765708432e4d97",
+      "identical": true
+    },
+    "Assets/_Project/Scenes/Bootstrap.unity": {
+      "main": "1bf0597959acd95636b1cabbf033855fdd0f173eb7b183a61516cdaf1db2374a",
+      "pr": "1bf0597959acd95636b1cabbf033855fdd0f173eb7b183a61516cdaf1db2374a",
+      "identical": true
+    },
+    "Assets/_Project/Scripts/Core/GameRoot.ForegroundProfile.cs": {
+      "main": "a6e7d6208f6a649af5304e7bf515a6aacac826744ff9df1ef14cd8213bb41769",
+      "pr": "a6e7d6208f6a649af5304e7bf515a6aacac826744ff9df1ef14cd8213bb41769",
+      "identical": true
+    },
+    "Assets/_Project/Tests/EditMode/LivingDungeonTwoFloorTests.cs": {
+      "main": "1b0fc5eda992f118662e63007e479d198aafdf4fe62e69f9f835fc771cdb433f",
+      "pr": "1b0fc5eda992f118662e63007e479d198aafdf4fe62e69f9f835fc771cdb433f",
+      "identical": true
+    },
+    "Packages/manifest.json": {
+      "main": "2f588f98c98748f66bf2ce1904fc53c8cde092b7f77356d22dd5427abe1c4b8f",
+      "pr": "2f588f98c98748f66bf2ce1904fc53c8cde092b7f77356d22dd5427abe1c4b8f",
+      "identical": true
+    },
+    "Packages/packages-lock.json": {
+      "main": "6631ee6b5b91852643e7626bfb0ca499a88e7fe4264914776bff02a39a8b1386",
+      "pr": "6631ee6b5b91852643e7626bfb0ca499a88e7fe4264914776bff02a39a8b1386",
+      "identical": true
+    },
+    "ProjectSettings/AudioManager.asset": {
+      "main": "282586eacd02fca9b7b803b93641647abee5a9d1a7369381025546f0c9808ccf",
+      "pr": "282586eacd02fca9b7b803b93641647abee5a9d1a7369381025546f0c9808ccf",
+      "identical": true
+    },
+    "ProjectSettings/ClusterInputManager.asset": {
+      "main": "06a192320121e445dcff1ae8ddad2a948ff671ca134603c043d9f4e920427ea9",
+      "pr": "06a192320121e445dcff1ae8ddad2a948ff671ca134603c043d9f4e920427ea9",
+      "identical": true
+    },
+    "ProjectSettings/DynamicsManager.asset": {
+      "main": "7bf32032957eb76dea137d4521b8f057ffdb55259acbf130d0954c2d201eec68",
+      "pr": "7bf32032957eb76dea137d4521b8f057ffdb55259acbf130d0954c2d201eec68",
+      "identical": true
+    },
+    "ProjectSettings/EditorBuildSettings.asset": {
+      "main": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "pr": "53b28254e635e69536453567ccf17ced2aa18b42f73c896ed7251fbdbfd84fd9",
+      "identical": true
+    },
+    "ProjectSettings/EditorSettings.asset": {
+      "main": "6146f67666d3129a8b9846fa9b31d9c886b794ca05e6b7503b5ca3c534728119",
+      "pr": "6146f67666d3129a8b9846fa9b31d9c886b794ca05e6b7503b5ca3c534728119",
+      "identical": true
+    },
+    "ProjectSettings/GraphicsSettings.asset": {
+      "main": "8710ad47acd750da1c8795178bf5fdd153ab29708ec5b3a304b11a920beccb24",
+      "pr": "8710ad47acd750da1c8795178bf5fdd153ab29708ec5b3a304b11a920beccb24",
+      "identical": true
+    },
+    "ProjectSettings/InputManager.asset": {
+      "main": "776c8b6c71e1101973e1f3ab569cf9058b857372a8a19210b50b3c1c6a1a42a6",
+      "pr": "776c8b6c71e1101973e1f3ab569cf9058b857372a8a19210b50b3c1c6a1a42a6",
+      "identical": true
+    },
+    "ProjectSettings/MemorySettings.asset": {
+      "main": "a660cb9890d880df92f3b80fa40723f183cc5ef2cb3ecc850b366191f05834c7",
+      "pr": "a660cb9890d880df92f3b80fa40723f183cc5ef2cb3ecc850b366191f05834c7",
+      "identical": true
+    },
+    "ProjectSettings/MultiplayerManager.asset": {
+      "main": "83ded116ca3ed35a6acac9b0fed830f04dfe5c008c185be50b1c132c88aea505",
+      "pr": "83ded116ca3ed35a6acac9b0fed830f04dfe5c008c185be50b1c132c88aea505",
+      "identical": true
+    },
+    "ProjectSettings/NavMeshAreas.asset": {
+      "main": "deca65f3094943a1af148cf64fd6c0deb503219d12de0e172b7f948d07a8e6a8",
+      "pr": "deca65f3094943a1af148cf64fd6c0deb503219d12de0e172b7f948d07a8e6a8",
+      "identical": true
+    },
+    "ProjectSettings/NetworkManager.asset": {
+      "main": "aa28e567e0f09d53d4dc57a068c913a4a9a0f09c602c49f0278990bf666550a9",
+      "pr": "aa28e567e0f09d53d4dc57a068c913a4a9a0f09c602c49f0278990bf666550a9",
+      "identical": true
+    },
+    "ProjectSettings/PackageManagerSettings.asset": {
+      "main": "df7efc61620e3bf184916cb09fc8dfba45043228c70bf7bf7929cecf04d8fd4d",
+      "pr": "df7efc61620e3bf184916cb09fc8dfba45043228c70bf7bf7929cecf04d8fd4d",
+      "identical": true
+    },
+    "ProjectSettings/Packages/com.unity.dedicated-server/MultiplayerRolesSettings.asset": {
+      "main": "ac896c654a18e69f252621a5f440c95196591f7ac6457cbb2fe55b15d0408bb5",
+      "pr": "ac896c654a18e69f252621a5f440c95196591f7ac6457cbb2fe55b15d0408bb5",
+      "identical": true
+    },
+    "ProjectSettings/Physics2DSettings.asset": {
+      "main": "5cdca2da0c015869216c9976a233c888e636718457729b0c74e6d4032d3576c1",
+      "pr": "5cdca2da0c015869216c9976a233c888e636718457729b0c74e6d4032d3576c1",
+      "identical": true
+    },
+    "ProjectSettings/PresetManager.asset": {
+      "main": "6ba879310e2be2e5ba18702578cda93b26b030ecd88e883fef22ab456a9f9697",
+      "pr": "6ba879310e2be2e5ba18702578cda93b26b030ecd88e883fef22ab456a9f9697",
+      "identical": true
+    },
+    "ProjectSettings/ProjectSettings.asset": {
+      "main": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "pr": "34da6d701e4c4629ca7b1cecb638f801d9c5ea4f40d33b09feca46777073b993",
+      "identical": true
+    },
+    "ProjectSettings/ProjectVersion.txt": {
+      "main": "e73efc41b94f6a8523e3bab8da46ec57a26a6eb7bed9a8c7f4be890d04bc6f6f",
+      "pr": "e73efc41b94f6a8523e3bab8da46ec57a26a6eb7bed9a8c7f4be890d04bc6f6f",
+      "identical": true
+    },
+    "ProjectSettings/QualitySettings.asset": {
+      "main": "9e9c785de3bef6c89082ef0888a04c719c0443d32c67551ac3572a84dca9f984",
+      "pr": "9e9c785de3bef6c89082ef0888a04c719c0443d32c67551ac3572a84dca9f984",
+      "identical": true
+    },
+    "ProjectSettings/SceneTemplateSettings.json": {
+      "main": "e0cbb98bd0aa9449840ce663a4b81751ab0828f5d8d2bd37923644fee7095e62",
+      "pr": "e0cbb98bd0aa9449840ce663a4b81751ab0828f5d8d2bd37923644fee7095e62",
+      "identical": true
+    },
+    "ProjectSettings/ShaderGraphSettings.asset": {
+      "main": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72",
+      "pr": "6d98840f808336cd3b599d4ae82ef1582cc4bcb74b1f27bb4ad64c6c1d8a2f72",
+      "identical": true
+    },
+    "ProjectSettings/TagManager.asset": {
+      "main": "9234e7ac4d5cd6d4d21b26fbbb2530b754e87a147df38e852bf774ccf5179b44",
+      "pr": "9234e7ac4d5cd6d4d21b26fbbb2530b754e87a147df38e852bf774ccf5179b44",
+      "identical": true
+    },
+    "ProjectSettings/TimeManager.asset": {
+      "main": "6c320ee59ae1e55aa74558f012437f63cb9de59d69fda62fc321c4f1971c52cb",
+      "pr": "6c320ee59ae1e55aa74558f012437f63cb9de59d69fda62fc321c4f1971c52cb",
+      "identical": true
+    },
+    "ProjectSettings/URPProjectSettings.asset": {
+      "main": "c7fb928e0aabab57310310d78f03b61c028a8818ee6f183fc150b8eb6ca249a5",
+      "pr": "c7fb928e0aabab57310310d78f03b61c028a8818ee6f183fc150b8eb6ca249a5",
+      "identical": true
+    },
+    "ProjectSettings/UnityConnectSettings.asset": {
+      "main": "edbc2c8b4e180ca0734f320b51d6f560342563862923509d94d15492b200ad27",
+      "pr": "edbc2c8b4e180ca0734f320b51d6f560342563862923509d94d15492b200ad27",
+      "identical": true
+    },
+    "ProjectSettings/VFXManager.asset": {
+      "main": "a8950860670c6fa8f83a43e37deb966beacfd7b535721c4cd9c2a7e5b46305e8",
+      "pr": "a8950860670c6fa8f83a43e37deb966beacfd7b535721c4cd9c2a7e5b46305e8",
+      "identical": true
+    },
+    "ProjectSettings/VersionControlSettings.asset": {
+      "main": "3fe15395f872b9cfe908a111a1e87be2055c6ee367e2876e7e83a408c2b89d57",
+      "pr": "3fe15395f872b9cfe908a111a1e87be2055c6ee367e2876e7e83a408c2b89d57",
+      "identical": true
+    },
+    "ProjectSettings/XRSettings.asset": {
+      "main": "71f175773593ba28d42bf1af0543b2a465e0316d3b8f435aebf48ea66b31b621",
+      "pr": "71f175773593ba28d42bf1af0543b2a465e0316d3b8f435aebf48ea66b31b621",
+      "identical": true
+    }
+  },
+  "all_control_inputs_identical": true
+}

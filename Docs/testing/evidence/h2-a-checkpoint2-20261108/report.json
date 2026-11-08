@@ -1,0 +1,2251 @@
+{
+  "base_sha": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+  "integration_source": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+  "final_executable_source": "e265d76309f55a867ad514816259d6baad6edd03",
+  "campaigns": [
+    {
+      "id": "5b140d1a20754f0c96a17fc3fcd2e61c",
+      "label": "initial-focused",
+      "source_sha": "d1c92124f62f3372b9454a6e34b60a26c9ff5383",
+      "recorded_status": "PASSED",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\5b140d1a20754f0c96a17fc3fcd2e61c",
+      "created_utc": "2026-11-08T03:09:13.973796+00:00",
+      "finished_utc": "2026-11-08T03:11:55.449593+00:00",
+      "campaign_sha256": "2375825d9ee1b0ab0fb44faff50a24d5565a77940baac5081ab3bc87ae195984",
+      "stages": [
+        {
+          "stage": "focused",
+          "status": "PASSED",
+          "source_sha": "d1c92124f62f3372b9454a6e34b60a26c9ff5383",
+          "started_utc": "2026-11-08T03:10:17.800292+00:00",
+          "finished_utc": "2026-11-08T03:11:29.347575+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": 29,
+            "failed": 0,
+            "passed": 29,
+            "skipped": 0,
+            "skips": []
+          },
+          "input_identity": "79090356f812b2d2b3517ecf96223b9096c233669f225b424b78152225d239f2",
+          "evidence": {
+            "child.json": "b0874c9a4d1eb398a299d6956d4b3464a42f40b441377d7c0e7636fba96d46f7",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "5b1c3a15f08caac734ed1ede206994b1d243484e064a4f81a5f87e1bd3255d8a",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "1ff1fe93784b7d2c8584f37d666abefa3086f8311bc758ee308fb56c2aad5ab3",
+            "results.xml": "0928edd33fa0e584e19e3b5875b9abba73d0cfdc4ad62c38e1358c70ccc7f66f",
+            "started.json": "a33d1c67dff424a8c258d7d5fd4203f66e45d269d6d62c31700ad22eb78656d5",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "b3003b8e68dd1fbabd25d5b1c1d84de3c8b5600b22845d2b0827a741531c3bfa"
+          },
+          "process": {
+            "created": 134385810181199707,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 20756
+          },
+          "child_process": {
+            "created": 134385810182644407,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 7952
+          }
+        },
+        {
+          "stage": "focused-preflight",
+          "status": "PASSED",
+          "source_sha": "d1c92124f62f3372b9454a6e34b60a26c9ff5383",
+          "started_utc": "2026-11-08T03:10:10.058644+00:00",
+          "finished_utc": "2026-11-08T03:10:13.544461+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "79090356f812b2d2b3517ecf96223b9096c233669f225b424b78152225d239f2",
+          "evidence": {
+            "child.json": "300dfc136e073ce84918374218b09846c3617796bf93e7f2b7ebe1c5d61f944f",
+            "exit.json": "e4142cc386fbb6aa6d950b9dd83ed0c127f1e0ab9b7666c37f405e723ee5313a",
+            "preservation.json": "5fb49bf78444ef3fd71354421809aca9f6c2768e5fb1bc88320b96fd2a871384",
+            "started.json": "302cf9bdf0952e1131314a8a03b6cd954669d530cfa5223bafc5a52eab919ae9",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134385810100686762,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 11028
+          },
+          "child_process": {
+            "created": 134385810101973085,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 20184
+          }
+        },
+        {
+          "stage": "preservation",
+          "status": "PASSED",
+          "source_sha": "d1c92124f62f3372b9454a6e34b60a26c9ff5383",
+          "started_utc": "2026-11-08T03:11:50.831426+00:00",
+          "finished_utc": "2026-11-08T03:11:54.226894+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "43fae523ab14693b4f469033f77f0f89a4cbb7e8e3d8f73fccd206aa3e16aef1",
+          "evidence": {
+            "child.json": "05c48074613aa751e4d94427ccf7e51209cc4682522c5010c8b54a83d72d0910",
+            "exit.json": "a3e1472d56919846688b49de547e063dfc3eac81a117d4e7c751b33c0240dbdd",
+            "preservation.json": "1fb94c5548b1cb4cbc89d749d56f5fa9dfc8772d434e5d2fff3d6f8393e3f8bd",
+            "started.json": "a49975e67dc97eed9900fb96634163b324d12d84daf88192b0e7222973c65568",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134385811108400976,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 18512
+          },
+          "child_process": {
+            "created": 134385811109641846,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 41524
+          }
+        },
+        {
+          "stage": "restore",
+          "status": "PASSED",
+          "source_sha": "d1c92124f62f3372b9454a6e34b60a26c9ff5383",
+          "started_utc": "2026-11-08T03:11:42.462030+00:00",
+          "finished_utc": "2026-11-08T03:11:46.564155+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "79090356f812b2d2b3517ecf96223b9096c233669f225b424b78152225d239f2",
+          "evidence": {
+            "child.json": "2ec3ff5959d276423ee540fac5c95f6bc6d49ec48c0a7840d4b10cf07ddc18f7",
+            "exit.json": "a2e7c781990def8e425f0bdaf2ba7da59cf6619b8d44007a21533309bae1d5aa",
+            "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+            "started.json": "4d1ae08b0bffcfa4f8bba571ca48ef27a13316a17d5ef5fadb67124df902de01",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134385811024719018,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 34964
+          },
+          "child_process": {
+            "created": 134385811025967517,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 54172
+          }
+        },
+        {
+          "stage": "restore-preflight",
+          "status": "PASSED",
+          "source_sha": "d1c92124f62f3372b9454a6e34b60a26c9ff5383",
+          "started_utc": "2026-11-08T03:11:33.724635+00:00",
+          "finished_utc": "2026-11-08T03:11:37.962205+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "79090356f812b2d2b3517ecf96223b9096c233669f225b424b78152225d239f2",
+          "evidence": {
+            "child.json": "c0c081e88172d1ebad661cf0426243c7c0c74018be3909441464e327dd587e56",
+            "exit.json": "d97f49b1fc0b0e3b13e788ed9431e90cb4974a4c575289f02e28ae0d7fe998d1",
+            "preservation.json": "5fb49bf78444ef3fd71354421809aca9f6c2768e5fb1bc88320b96fd2a871384",
+            "started.json": "3960813b413e0c760a6e28c2487a3f4e459ae44cfcdff6162144d0f77616b8bf",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134385810937333791,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 41860
+          },
+          "child_process": {
+            "created": 134385810938655879,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 53688
+          }
+        }
+      ]
+    },
+    {
+      "id": "b1d0fe38d61f4d489a79684407ed959a",
+      "label": "discovery",
+      "source_sha": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+      "recorded_status": "PASSED",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b1d0fe38d61f4d489a79684407ed959a",
+      "created_utc": "2026-11-08T03:26:46.390753+00:00",
+      "finished_utc": "2026-11-08T03:28:39.118139+00:00",
+      "campaign_sha256": "e0df3d52c3f2aecaa4f1b111d39613871de8e19c6414812585d429da6c3e60a5",
+      "stages": [
+        {
+          "stage": "inventory",
+          "status": "PASSED",
+          "source_sha": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+          "started_utc": "2026-11-08T03:27:51.209755+00:00",
+          "finished_utc": "2026-11-08T03:28:12.724553+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "b6bbba937ffc1aa85e8ed0e6dcf591a4f89d98a9d8cb1ef5987836ca8702ac1a",
+          "evidence": {
+            "child.json": "926d0511aacdfe11e44c1e22088138de9e162fb96b1bf4e9091e69735c50bbbd",
+            "editor-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "7ba5248fccf52b38efc68cab7cddc72a3ab62a67b36c3524e88c0f6c78d7e4e9",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "inventory.json": "e98c772949f7be69cee71804ea2965446dca4a1074c1544bd73c6961beaf140a",
+            "invocation.json": "dd97c813efb8ea76074f914057311e4ca471cd6624055fe59e837d70e60f98a0",
+            "started.json": "fa61274cce0af2ae359db3d5aaeae23965f5f953d8824c4384b35769bb402b32",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "47fdbdfa9a4471798831e8d3b9f3ee224a8cb8a7101eb1beb67378f2b2102b94"
+          },
+          "process": {
+            "created": 134385820712188784,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 50572
+          },
+          "child_process": {
+            "created": 134385820713457169,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 51408
+          }
+        },
+        {
+          "stage": "inventory-preflight",
+          "status": "PASSED",
+          "source_sha": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+          "started_utc": "2026-11-08T03:27:43.336444+00:00",
+          "finished_utc": "2026-11-08T03:27:46.837215+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "b6bbba937ffc1aa85e8ed0e6dcf591a4f89d98a9d8cb1ef5987836ca8702ac1a",
+          "evidence": {
+            "child.json": "93f190dbd47cd40cbbf999e74a25fe4a70385689ee54b3ad8e0b06fcb50183d7",
+            "exit.json": "47f8c2dea35e0aff96f037ba966fd9410fc888eb7687b28e65395f3d64d6862b",
+            "preservation.json": "7bfb89bb33b2ba8684c7d140b62e4f8a595b25b995cfb582b4c46438c65dbf62",
+            "started.json": "be1d85c25b6a14e6d8d5e509cbc22f0d2662cfe33393953b63bbef2e72397ef0",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134385820633458793,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 24060
+          },
+          "child_process": {
+            "created": 134385820634700348,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 49808
+          }
+        },
+        {
+          "stage": "preservation",
+          "status": "PASSED",
+          "source_sha": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+          "started_utc": "2026-11-08T03:28:34.039081+00:00",
+          "finished_utc": "2026-11-08T03:28:37.868259+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "e7a1e8801949a6bf28221f0d17dea31746960518d61d3024b2845d7115fe8d2f",
+          "evidence": {
+            "child.json": "d9639baa7087b283c35275f4bdf7b5feb383e0ca76b8c52e3069de1a6b042b94",
+            "exit.json": "66fe6d53d11050bd397f378a3ff81432db5b6ac155f5b4411821d37ecd140a08",
+            "preservation.json": "4eb52f59432717c4ff18a23b5d4673bac7ba9d1aba751cb442d4bc95d5f860a8",
+            "started.json": "f4221c98ec4224508436a400b3bb81f035442c5582bf798422825909083f7a6a",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134385821140486610,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 34848
+          },
+          "child_process": {
+            "created": 134385821141743340,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 30096
+          }
+        },
+        {
+          "stage": "restore",
+          "status": "PASSED",
+          "source_sha": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+          "started_utc": "2026-11-08T03:28:25.638897+00:00",
+          "finished_utc": "2026-11-08T03:28:29.739070+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "b6bbba937ffc1aa85e8ed0e6dcf591a4f89d98a9d8cb1ef5987836ca8702ac1a",
+          "evidence": {
+            "child.json": "5bc50b81c228f69e2798cc25bf4d9faab3913909cb89c2ab5235cbb5fb156dbf",
+            "exit.json": "21a8ffd0d78b8158f0a9f0c3d2a5463241c800d3732ce1f75d57519725ce428f",
+            "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+            "started.json": "e7709957ffd7c5e6c3ab92e48c785f4717d50c3e3ae55df9e4ea0df2210ebd4c",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134385821056480018,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 52008
+          },
+          "child_process": {
+            "created": 134385821057717634,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 45072
+          }
+        },
+        {
+          "stage": "restore-preflight",
+          "status": "PASSED",
+          "source_sha": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+          "started_utc": "2026-11-08T03:28:17.446878+00:00",
+          "finished_utc": "2026-11-08T03:28:21.055072+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "b6bbba937ffc1aa85e8ed0e6dcf591a4f89d98a9d8cb1ef5987836ca8702ac1a",
+          "evidence": {
+            "child.json": "cabc328684cd73d2e94eb5e2f90cb969a22459c434ac830207db50f08a5e178a",
+            "exit.json": "1c469f54d255f1e6aae1be579aa5975f437e0006f242d4266a4c6c7a08a714b0",
+            "preservation.json": "7bfb89bb33b2ba8684c7d140b62e4f8a595b25b995cfb582b4c46438c65dbf62",
+            "started.json": "4e64a21000bf9f87ca4202c347bfc3ad167aa4f650358b725f86072d4d0058e4",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134385820974560232,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 17568
+          },
+          "child_process": {
+            "created": 134385820975893304,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 49272
+          }
+        }
+      ]
+    },
+    {
+      "id": "9db056bd3206478a9e79a9404e9956da",
+      "label": "failed-product",
+      "source_sha": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+      "recorded_status": "FAILED",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\9db056bd3206478a9e79a9404e9956da",
+      "created_utc": "2026-11-08T03:34:35.315661+00:00",
+      "finished_utc": "2026-11-08T03:42:44.885589+00:00",
+      "campaign_sha256": "d944042795e0db64cd9f7e3bb830cc620c0f3f736af4b2b0773ca9c08681c15f",
+      "stages": [
+        {
+          "stage": "edit-preflight",
+          "status": "PASSED",
+          "source_sha": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+          "started_utc": "2026-11-08T03:34:54.024569+00:00",
+          "finished_utc": "2026-11-08T03:34:57.601956+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "91b5c46ecf0257691d2601ba290cdff0412fb6433ddd5135e4d32f40460bda4c",
+          "evidence": {
+            "child.json": "43dfa9c33110a122db5f5207e5d7810b39603478e83cf1a522a25aeaac90e934",
+            "exit.json": "e317d928b985fba416c504530fb2c69a030361a913c22a528e1f13dc563ca535",
+            "preservation.json": "6674fdb1cb3370de18fbae6e290219135d1680d501ae96f9b60cd4164fc51158",
+            "started.json": "adc7087ae40b260c2d7227a574aa3722a47c7904d7026795da7196d77645d36b",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134385824940339617,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 34844
+          },
+          "child_process": {
+            "created": 134385824941595552,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 3480
+          }
+        },
+        {
+          "stage": "living-regressions",
+          "status": "FAILED",
+          "source_sha": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+          "started_utc": "2026-11-08T03:35:02.302118+00:00",
+          "finished_utc": "2026-11-08T03:42:43.406281+00:00",
+          "exit_code": 8,
+          "host_exit_code": 0,
+          "failure": "CHILD_NONZERO",
+          "tests": {
+            "discovered": 299,
+            "failed": 2,
+            "passed": 297,
+            "skipped": 0,
+            "skips": []
+          },
+          "input_identity": "91b5c46ecf0257691d2601ba290cdff0412fb6433ddd5135e4d32f40460bda4c",
+          "evidence": {
+            "child.json": "cd366fb7ae819b1de7d04427b5cd2e9fecc14a27f856622af95b1788c59f4ec6",
+            "cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+            "exit.json": "779cb6353a2998a5eb0676a788a5320d9b662d9e8d8488c5a6b8afa9921b25a2",
+            "fixture-inputs": {
+              "ownership.json": "eebdf74e9f1d22600a1b1f32e7b4395819846096eb60312b37c83af0b97b26cc"
+            },
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "20a36cfff710cb271495ea1d6a70f5159ec1ad14de701593c81f2c089d1a5321",
+            "results.xml": "420c2b1a04f7f9d98607d5c65339f0e1576a6eaf9b414607852f6d20ac0ef196",
+            "started.json": "25f63caff387f0bd4e895127b71ad2247131d0317c8213f04c6a4fed0ddeca3a",
+            "stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+            "unity.log": "c42b2e14f76e3e55816647df5a9e9d2d3da5c40b0670582b9a0ccfab634317c1"
+          },
+          "process": {
+            "created": 134385825023115619,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 51172
+          },
+          "child_process": {
+            "created": 134385825024403444,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 50348
+          }
+        }
+      ]
+    },
+    {
+      "id": "6f23090cc5104a4ab67ddba28f0e6a5d",
+      "label": "failed-adapter-and-heap",
+      "source_sha": "ca651ef27b0ace8cdc34cce18c08dbac91f167e3",
+      "recorded_status": "FAILED",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\6f23090cc5104a4ab67ddba28f0e6a5d",
+      "created_utc": "2026-11-08T12:20:52.805163+00:00",
+      "finished_utc": "2026-11-08T12:31:01.122536+00:00",
+      "campaign_sha256": "f0c510f7f63b38cf1040573f6c412ac45a5051ded132e7217540fec981afe99c",
+      "stages": [
+        {
+          "stage": "edit-preflight",
+          "status": "PASSED",
+          "source_sha": "ca651ef27b0ace8cdc34cce18c08dbac91f167e3",
+          "started_utc": "2026-11-08T12:22:29.439271+00:00",
+          "finished_utc": "2026-11-08T12:22:32.895076+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "e2b80ac0610c6b513a1f42ff6b37a06143b9648a012384f5135995f684aa40aa",
+          "evidence": {
+            "child.json": "070c227e6684cb928137b16bfea3335ed33d82199468e57f311587be1d1ea27b",
+            "exit.json": "74b7a3173a0e44815ebf78b460ec71e2e3bebd37444257bb0c4b8e4c8f3aacc7",
+            "preservation.json": "127e60e982d7e5829ed27a82f9bfe453377e93e4fe44f606cc2ae0d14256721d",
+            "started.json": "d73d7c9c5aa26c9af5fff3a50c80b663c7d32a2a99131495251fd2007704a448",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386141494495300,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 53500
+          },
+          "child_process": {
+            "created": 134386141495736573,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 42572
+          }
+        },
+        {
+          "stage": "living-regressions",
+          "status": "FAILED",
+          "source_sha": "ca651ef27b0ace8cdc34cce18c08dbac91f167e3",
+          "started_utc": "2026-11-08T12:22:37.146041+00:00",
+          "finished_utc": "2026-11-08T12:30:59.199429+00:00",
+          "exit_code": 8,
+          "host_exit_code": 0,
+          "failure": "CHILD_NONZERO",
+          "tests": {
+            "discovered": 299,
+            "failed": 3,
+            "passed": 296,
+            "skipped": 0,
+            "skips": []
+          },
+          "input_identity": "e2b80ac0610c6b513a1f42ff6b37a06143b9648a012384f5135995f684aa40aa",
+          "evidence": {
+            "child.json": "82516d5da6ac64336f50ac4f55da23d91c64f78142f3b2485c326dfafd534886",
+            "cli-exit.json": "84f3df71ef65b81bb7e0c312a5833adb89ff37caa24fabc1418e9af796bcbb7e",
+            "exit.json": "cfe46c8e03e246d6242c5d706dbc32073a61dae01b2d822dd3729562d246e496",
+            "fixture-inputs": {
+              "ownership.json": "02d686a92b15c9c16ce3f11214ecf6cc0dd5ec390eb2c132582443e9d2040bc6",
+              "two-floor/40d543d0/owner-inactive-52633458ffa8408a8d24408186387bfd.save.json": "2b9f4e04eba6c984d59103281f2c983c90609881af3de26c7e1a4bf2e820853d"
+            },
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "69d50ba0c22a6d7588925945f109289f83e4f0479a892bceeb76da61f3f4051f",
+            "results.xml": "272d5e99a575bf92b98105604dada997b8a6221a366b10bc95eae99eaa901278",
+            "started.json": "a810c3ae985e8cd8a4a3b31f167181fcf5787b42ad1c6350b435044edfd9f3f7",
+            "stdout.log": "73f7baba89273ba8fa52c31a78418e701e337b441606e02f690fa8ec6284cf7c",
+            "unity.log": "0b9567f00830793b3b8c221af041256e36bf519c86e14ea77c34f04392bc4d3e"
+          },
+          "process": {
+            "created": 134386141571550663,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 55148
+          },
+          "child_process": {
+            "created": 134386141572786567,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 41512
+          }
+        }
+      ]
+    },
+    {
+      "id": "d097076751414278ac7710f28346a151",
+      "label": "targeted",
+      "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+      "recorded_status": "PASSED",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d097076751414278ac7710f28346a151",
+      "created_utc": "2026-11-08T15:34:30.981515+00:00",
+      "finished_utc": "2026-11-08T15:55:42.308268+00:00",
+      "campaign_sha256": "5dc8c71f1dde4ac309e2b81f7e05213f4c80e69d7ba1fd8e392eb49c9100f13f",
+      "stages": [
+        {
+          "stage": "b3b1-preflight",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:45:30.641655+00:00",
+          "finished_utc": "2026-11-08T15:45:34.191207+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "8bd8526548484820fde2ddbcd2c91ff1d143e8a995291f347df326d5594ed128",
+          "evidence": {
+            "child.json": "24e76e2d5325e92052b1cd185071037d549e76dc77bc3a7ad550bce32a0d4e57",
+            "exit.json": "bd3e05e1d91cc02b9efe3e91b13f69197bb734cb230c01bb5e7c3a7a64453c9e",
+            "preservation.json": "403fbb4b63860786a800c962f607392a08573f2101599ac145de440c72800c64",
+            "started.json": "009255a2b418c64926c641049dace8a122b8fa16637b6b1fcc5b840fb36737f4",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386263306521097,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 47260
+          },
+          "child_process": {
+            "created": 134386263307849012,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 25876
+          }
+        },
+        {
+          "stage": "b3b1-regressions",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:45:38.828948+00:00",
+          "finished_utc": "2026-11-08T15:46:58.301461+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": 51,
+            "failed": 0,
+            "passed": 51,
+            "skipped": 0,
+            "skips": []
+          },
+          "input_identity": "8bd8526548484820fde2ddbcd2c91ff1d143e8a995291f347df326d5594ed128",
+          "evidence": {
+            "child.json": "a6346e8873639abcf7541ab321aa9dbc5bda6d95b24713a25bf35d80bae1a680",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "caa41a1fde0888f035c6d16d8b6d5c1eeb454d268adee259049e1d61a1f8dd6b",
+            "fixture-inputs": {
+              "b3b1-smoke-input/input.json": "55ef1a6c5447a38a20ca84539c52122aee5aa72f9fa207624abf2d181fc0a174",
+              "ownership.json": "d80d1942420896657137a18ba467804ccf0bb272755217370333c5abfb6220b0"
+            },
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "c02a3484b2b6d467737d9b7cbfaa52c6544b16de215238f7c6057c6ffe2eab90",
+            "results.xml": "fd9ceebf1f675bbadf24ee55f03df94cdf21a2ddb494bfcc577e23c019464e4f",
+            "started.json": "4b7a95a24c2b8bac485f4dd74c809c51d33d112595424c290f3ec00cb6bd869f",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "3e937cc52122a2a227184a9086ace26a8094eda388ac670a4223848c945bb1cc"
+          },
+          "process": {
+            "created": 134386263388389610,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 51704
+          },
+          "child_process": {
+            "created": 134386263389628649,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 35560
+          }
+        },
+        {
+          "stage": "edit-preflight",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:47:03.131813+00:00",
+          "finished_utc": "2026-11-08T15:47:06.987923+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "8bd8526548484820fde2ddbcd2c91ff1d143e8a995291f347df326d5594ed128",
+          "evidence": {
+            "child.json": "e13802dd9ca02b94ca081fdf3c087229f10d7e6384267f99cc57404705f5df7e",
+            "exit.json": "aa52967aa294bd7101299890e8b978e878a5bae0df6eac2e14a0ffe88e13982a",
+            "preservation.json": "403fbb4b63860786a800c962f607392a08573f2101599ac145de440c72800c64",
+            "started.json": "9e60a19cfa43709293b4486ccbb5767f4aab9f41df4de1467b5e03b4c6a34d03",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386264231408978,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 43324
+          },
+          "child_process": {
+            "created": 134386264232690787,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 35568
+          }
+        },
+        {
+          "stage": "focused",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:44:25.572407+00:00",
+          "finished_utc": "2026-11-08T15:45:25.907165+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": 1,
+            "failed": 0,
+            "passed": 1,
+            "skipped": 0,
+            "skips": []
+          },
+          "input_identity": "8bd8526548484820fde2ddbcd2c91ff1d143e8a995291f347df326d5594ed128",
+          "evidence": {
+            "child.json": "a4f4f73463fe4b41ea98e9ad64e19dacd2a91e4bf7e993e5e686b7d5ed6b014b",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "b032b4515ba1125a206861d86a7c36f64804fba7ed97ad3150fc508f9d70acb5",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "e5ee212389f950e5d50a747bac9a6c13b49ad49ad2ae8398dd749474e162b4f4",
+            "results.xml": "e3e3639b60649e60d803b91af0ec712f47368e40f63ae2b1f9184be6b8114537",
+            "started.json": "a26bc8aeeb6962ac47b92ec586a93bf38ce223eebb8d371ff8dcd49120fc1b09",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "9e6eacdeb058d90a510ad0b3d5ed388d358351eaecdf4c8c499183a66465325d"
+          },
+          "process": {
+            "created": 134386262655809542,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 50132
+          },
+          "child_process": {
+            "created": 134386262657095576,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 53612
+          }
+        },
+        {
+          "stage": "living-regressions",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:47:11.259141+00:00",
+          "finished_utc": "2026-11-08T15:54:07.413845+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": 248,
+            "failed": 0,
+            "passed": 248,
+            "skipped": 0,
+            "skips": []
+          },
+          "input_identity": "8bd8526548484820fde2ddbcd2c91ff1d143e8a995291f347df326d5594ed128",
+          "evidence": {
+            "child.json": "52b745bef1dd0d28ba39ea2004963b2e3e66ee4d558a8f2ed7a9bb7ba3fac120",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "5a6f4e4ffa8b28faea515ac5d6f4a3352679ed4201ad493e65d73dc376670405",
+            "fixture-inputs": {
+              "ownership.json": "cffbcdc4fa98fab20b84f7a16df848f5c24304738066d7958232f445bab9890c",
+              "two-floor/1b94b9b2/owner-inactive-901e422dbe694e16b81292a11bdbb262.manifest.json": "ec46f8cdb72349283a0848ae631301d5ad44c1ddcbcd9a29d656a70e772497a6",
+              "two-floor/1b94b9b2/owner-inactive-901e422dbe694e16b81292a11bdbb262.save.json": "e5521f19b577740e72d07c179606f1a05d5669a982fb519394c6843bac2a6bc0",
+              "two-floor/1b94b9b2/two-floor-52891d0c6328441187acfa9407499f92.manifest.json": "9f7c274dc8b48af1c0dce486ef21340df22ebb1893ff2d9c784015abff399d59",
+              "two-floor/1b94b9b2/two-floor-52891d0c6328441187acfa9407499f92.save.json": "cb44a850733fb70f87592a874d76c23f1bba2810e28d69208a46a7d11ae9b7f6",
+              "two-floor/1b94b9b2/v1-caf1febea4f84189818c4e0b942f814a.manifest.json": "2552192fe4c7a714c500ccb8f5a802906573f2d16d1b22a5aef2f5ae1ebe4c71",
+              "two-floor/1b94b9b2/v1-caf1febea4f84189818c4e0b942f814a.save.json": "8beaada2c2f473ea552b9ff59ffc0defa5af59d355fac54dbf4c6a677a88f96d"
+            },
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "702e17290cbfb981c0f752a2540354ed05a3423f05688b90dc4db63423774cbf",
+            "results.xml": "6e823e22527b1a2b5d9b0663510eed2c94bf23f02d868319ce4a463179a32f80",
+            "started.json": "8ef4ce106097544fbbd8ac6b31f545dc7c35b86aceca808e6fa56edbeb5942ae",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "089efcd612958e3089b8a05bc5c2e702a84ec135b13879d7524400e8932e2620"
+          },
+          "process": {
+            "created": 134386264315963096,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 53716
+          },
+          "child_process": {
+            "created": 134386264317287962,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 49616
+          }
+        },
+        {
+          "stage": "memory-preflight",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:44:17.325426+00:00",
+          "finished_utc": "2026-11-08T15:44:20.887943+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "8bd8526548484820fde2ddbcd2c91ff1d143e8a995291f347df326d5594ed128",
+          "evidence": {
+            "child.json": "2e7398a5fa0138d87b4db826021f54e70a4ceeaf810843290d43810cd745687b",
+            "exit.json": "d439d94bc830376acfabad7d702708879720adca2a914925e48079ba8ad05e78",
+            "preservation.json": "403fbb4b63860786a800c962f607392a08573f2101599ac145de440c72800c64",
+            "started.json": "86b0e541e84745403adb3ca26c3bfe829d01fa30ad59040db22952f41a758464",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386262573344643,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 47064
+          },
+          "child_process": {
+            "created": 134386262574609794,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 36132
+          }
+        },
+        {
+          "stage": "play-preflight",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:54:11.974421+00:00",
+          "finished_utc": "2026-11-08T15:54:15.488202+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "8bd8526548484820fde2ddbcd2c91ff1d143e8a995291f347df326d5594ed128",
+          "evidence": {
+            "child.json": "4ec5ed135b94661370f714ea8190a52387c49e35a82983d963f7457a07083293",
+            "exit.json": "f6299508a162625e992ba41940e1833595194aa70157fa883605d91d8b2929b1",
+            "preservation.json": "403fbb4b63860786a800c962f607392a08573f2101599ac145de440c72800c64",
+            "started.json": "5612b4d97f16a2c3094914bfd5f32875300f0c637918c03a75d191b4958ffeac",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386268519835846,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 53772
+          },
+          "child_process": {
+            "created": 134386268521097059,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 47064
+          }
+        },
+        {
+          "stage": "preservation",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:55:37.467613+00:00",
+          "finished_utc": "2026-11-08T15:55:41.033998+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "c3f86a846c96b649b6a5c615c3b0a56a47488bd59822c73323279d3868ad3320",
+          "evidence": {
+            "child.json": "c517ed8b94156fe24137c51e64f6b99e61a57f74202ce15c9eb4781c5404af0b",
+            "exit.json": "7fca5b97db91d13bab217be434d17f6e02e3d5c7f551c8063c39313c6745fd95",
+            "preservation.json": "92ab810a8249b019c5cac0aedf13d916c5815d0ead884df3dfb0b1411d39343a",
+            "started.json": "1c94b1f6535538f6f2de3e2d4728c38e51cceb312d38268615e37f5db2774be3",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386269374775286,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 6928
+          },
+          "child_process": {
+            "created": 134386269376142806,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 44564
+          }
+        },
+        {
+          "stage": "restore",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:55:28.501049+00:00",
+          "finished_utc": "2026-11-08T15:55:32.621095+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "8bd8526548484820fde2ddbcd2c91ff1d143e8a995291f347df326d5594ed128",
+          "evidence": {
+            "child.json": "37f6a2fafe9281a322a39c65d44e06625ef7d5e0d17c83db09f0e82c447b7058",
+            "exit.json": "1e832f258a2612e9f0b8f72dc6f1df314f0d42f7b78e1f39114d7efb1aea8bb1",
+            "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+            "started.json": "f5cfeaceede464eef01d61a32878dcc274b5e7916f423601ddb60f1da1c1d2eb",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386269285102763,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 45468
+          },
+          "child_process": {
+            "created": 134386269286362938,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 7248
+          }
+        },
+        {
+          "stage": "restore-preflight",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:55:20.254184+00:00",
+          "finished_utc": "2026-11-08T15:55:23.790228+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "8bd8526548484820fde2ddbcd2c91ff1d143e8a995291f347df326d5594ed128",
+          "evidence": {
+            "child.json": "a46ea3f2866a75bc09d9ce9d9020ea16c12e432a119fecd80634ba125c2f2042",
+            "exit.json": "d2430aedb6ef82d68582b1d85e970afea671d924ca3d89b1239295262b657886",
+            "preservation.json": "403fbb4b63860786a800c962f607392a08573f2101599ac145de440c72800c64",
+            "started.json": "4d52dc33161e6f80c7ea2e03b9877c46b22dcea24128bdfdcbe6e232afa94912",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386269202635552,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 49240
+          },
+          "child_process": {
+            "created": 134386269204040937,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 50524
+          }
+        },
+        {
+          "stage": "scene-play",
+          "status": "PASSED",
+          "source_sha": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+          "started_utc": "2026-11-08T15:54:19.828262+00:00",
+          "finished_utc": "2026-11-08T15:55:15.591072+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": 14,
+            "failed": 0,
+            "passed": 14,
+            "skipped": 0,
+            "skips": []
+          },
+          "input_identity": "8bd8526548484820fde2ddbcd2c91ff1d143e8a995291f347df326d5594ed128",
+          "evidence": {
+            "child.json": "0d1aff96d693d1528212ebd282340128f87c5137dc314bdefebf453e1f77be59",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "40662ea3a53c2ea0d5acf519901ac081b65b5da1f93f578973603b4dbf5c3935",
+            "fixture-inputs": {
+              "ownership.json": "a7e70551a0debc630e4a4427787f487477faa134b161c8e103c8a7b2f465c354",
+              "screenshots/0340e7f5-living-marker-edge-720x1280-0.95.png": "3c11b5e545ea83678b333199c963ec7121a3f996ca764341529ba4d698029c16",
+              "screenshots/094d8f17-living-marker-edge-360x640-0.05.png": "31056f7e8ae3d91574bd2d4f5fa923bd3104a2ed64ce822567bcdc9374b6a444",
+              "screenshots/0d6a2d93-living-live-encounter-large-360x640.png": "f547247e9f75cc9c70f50a64723e25b12a652861e4aa6ad7b7a54b7f83d4d3eb",
+              "screenshots/2fbcd98d-living-live-large-1280x720.png": "4630f52c8084308cce52a29a0c1bbf644d86e8685d8b6b270f6ef3c6ece4c465",
+              "screenshots/4a8b882d-living-live-large-720x1280.png": "4d8c8008cb2c8e015926ce65b0ab3b089d5bb11d2a6b3ebd0ee03160436f018d",
+              "screenshots/51a98bfb-living-marker-edge-1280x720-0.95.png": "c5b24e6be5af421e8b95c2553a00b81f1d0c935a18b9574e71a9ceefabba7153",
+              "screenshots/51c10662-living-live-large-360x640.png": "7d29d77263240a868befbad8709637621fcb94d63af1dc0b1f71b2b30fec4c78",
+              "screenshots/7fb70211-living-live-encounter-large-1280x720.png": "0409efff8d94e900f53769d27d2308f7049ce53252548605e1b4821fa9b60955",
+              "screenshots/8ed6ae5d-living-marker-edge-1280x720-0.05.png": "4bbe2412fdff24f690681b948004b09e504565b16fde98244f729fff66633eaa",
+              "screenshots/9b5c9892-living-live-encounter-large-720x1280.png": "7288d3cad7f10ec67fa49e3c9aaead05bf1c7f18ec42f659963f865198ce04f8",
+              "screenshots/a7f70a3f-living-marker-edge-720x1280-0.05.png": "88985c41a81d0efc929694bff47f56bbb1818d5991aa272ea880e02fc518f2c7",
+              "screenshots/dab78faf-living-marker-edge-360x640-0.95.png": "2e6769bfc18d4c3084ec52e2c347dcf932d2b773a27f5e3f44b11b6e27811f64"
+            },
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "9ec7642ef7c532809c43ae8cb89a0ff23e6e099c7a6ee1cc453e94c30c15e710",
+            "results.xml": "d774ffd15a3756ce360b7196e29291ae9510beef6b74b602e425ef8ac8372ec3",
+            "started.json": "858b2d84e56c05aa9ed9a6c9ba8734adda22437a9f62b311213b319f1fe644bd",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "f8f48b6ba133951d06a0e0b87640a881842ed3be47f23fdd0a783a04c4945792"
+          },
+          "process": {
+            "created": 134386268601491473,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 46028
+          },
+          "child_process": {
+            "created": 134386268602720772,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 39456
+          }
+        }
+      ]
+    },
+    {
+      "id": "d82e30053fa043a2ad5bcc5df2cabe2f",
+      "label": "partitions",
+      "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+      "recorded_status": "PASSED",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d82e30053fa043a2ad5bcc5df2cabe2f",
+      "created_utc": "2026-11-08T16:52:05.194527+00:00",
+      "finished_utc": "2026-11-08T16:53:44.711450+00:00",
+      "campaign_sha256": "7d74b193671262d92cb74f3bbdfa9d9e16bd6fce6c14913dcaf65be635450f09",
+      "stages": [
+        {
+          "stage": "focused",
+          "status": "PASSED",
+          "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+          "started_utc": "2026-11-08T16:52:29.697336+00:00",
+          "finished_utc": "2026-11-08T16:53:19.033774+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": 2,
+            "failed": 0,
+            "passed": 2,
+            "skipped": 0,
+            "skips": []
+          },
+          "input_identity": "1bdea0d3d1695a2bf52a8b1be82b00d0a49401bf2122727a9658e1a6f579aab2",
+          "evidence": {
+            "child.json": "1c70dba1bd9e0f1b901848b916a9ea2860c9370884054b00838b5726a9eac794",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "032dc4c90b867b4ffb36a017a8301af6d97636ccbaf1f51cb678131f994a9995",
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "32b65f1407ad65c3c97a0dba804d657ac5931c74bdcfe8a4b27fcb8d7cc40a2a",
+            "results.xml": "393c24eba3b55ba5336dd2a43656f42f9b38e58236465c781969a518a1ad49cd",
+            "started.json": "0122f1f6dd4652f9dc185502a10364724c1298cdb4623ca7d7977b0ac36ce02c",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "64e3d083a94c779dba330925cac62a8a1f165ef0f6f0c8fba86d89329b830e9c"
+          },
+          "process": {
+            "created": 134386303497062644,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 52516
+          },
+          "child_process": {
+            "created": 134386303498366248,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 53404
+          }
+        },
+        {
+          "stage": "focused-preflight",
+          "status": "PASSED",
+          "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+          "started_utc": "2026-11-08T16:52:21.858799+00:00",
+          "finished_utc": "2026-11-08T16:52:25.317808+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "1bdea0d3d1695a2bf52a8b1be82b00d0a49401bf2122727a9658e1a6f579aab2",
+          "evidence": {
+            "child.json": "4884abc02760e1d4bf882bc1b6b646390bb03128a68d6adb82aedf1509dbf2d8",
+            "exit.json": "bb500a13ab775fa39eb8eac24be60e2e18250da7912f2ad566e3daf387e321dc",
+            "preservation.json": "1b9c232b55db8b3d08470904780286303d35aab9ebe3d654ca0e1710f2a00351",
+            "started.json": "38d97d7935ec5d783c412691dc25c8a8671a8724a9251aa777402bb68e84b0b4",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386303418678234,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 50816
+          },
+          "child_process": {
+            "created": 134386303420007581,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 46504
+          }
+        },
+        {
+          "stage": "preservation",
+          "status": "PASSED",
+          "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+          "started_utc": "2026-11-08T16:53:39.904336+00:00",
+          "finished_utc": "2026-11-08T16:53:43.397594+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "02ca17c5036c5befad0529fb85c2d2c9cd9e7410bfb0906e60f0719635b274ef",
+          "evidence": {
+            "child.json": "5c1199a06397b88183b21f114812c5048f6196b32fad41f71d320adcdd126f6d",
+            "exit.json": "aea279a64fe80b46d1cd6f22e7ec83c9d2bd961bc1154d962535296c75633794",
+            "preservation.json": "837ed3000f2aa80113ff1eac2f2e9537dc96c3a6fd4ad24bd098fec32ddeee9e",
+            "started.json": "cc2d7440aea62ea81b0044c546e8de887e0fb4329369310a91e2bb8e5b123a19",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386304199148607,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 25060
+          },
+          "child_process": {
+            "created": 134386304200405977,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 37796
+          }
+        },
+        {
+          "stage": "restore",
+          "status": "PASSED",
+          "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+          "started_utc": "2026-11-08T16:53:31.470987+00:00",
+          "finished_utc": "2026-11-08T16:53:35.503654+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "1bdea0d3d1695a2bf52a8b1be82b00d0a49401bf2122727a9658e1a6f579aab2",
+          "evidence": {
+            "child.json": "aeb023ce4ea454d073c9e751799cd5fab9cf92a4552623f3653504c46175be6f",
+            "exit.json": "c7d1b2a39bc74fb7fb154b0453f71a9e53247817fbd4b39d1bed98e26b260c5b",
+            "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+            "started.json": "f5021d17c8723afe949b192a0d9082839f121f50ab52fd7c2db55b975ec8edfa",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386304114823696,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 46960
+          },
+          "child_process": {
+            "created": 134386304116166401,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 14632
+          }
+        },
+        {
+          "stage": "restore-preflight",
+          "status": "PASSED",
+          "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+          "started_utc": "2026-11-08T16:53:23.638984+00:00",
+          "finished_utc": "2026-11-08T16:53:27.076517+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "1bdea0d3d1695a2bf52a8b1be82b00d0a49401bf2122727a9658e1a6f579aab2",
+          "evidence": {
+            "child.json": "9f44d12e270cb93c1c84572abf27ccb96e0979fe2519a33782796c6cbb2e78de",
+            "exit.json": "c5488154a9880691b7dccf8794b67e0875a343aa2ee38a24bd3a1dd5c089cabe",
+            "preservation.json": "1b9c232b55db8b3d08470904780286303d35aab9ebe3d654ca0e1710f2a00351",
+            "started.json": "d0c3762b44626b29bf10f0d33485c4713d2bd4f242c7486fa3993fce6919691f",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386304036479076,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 13624
+          },
+          "child_process": {
+            "created": 134386304037760030,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 54104
+          }
+        }
+      ]
+    },
+    {
+      "id": "ca7fc8906b1c449492923e69a909b406",
+      "label": "main-performance",
+      "source_sha": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+      "recorded_status": "PASSED",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ca7fc8906b1c449492923e69a909b406",
+      "created_utc": "2026-11-08T16:00:25.552167+00:00",
+      "finished_utc": "2026-11-08T16:50:45.678898+00:00",
+      "campaign_sha256": "c2bd4eedc33763806f27abef7d570f3c17a7a6aa99125fba46f87044b231678a",
+      "stages": [
+        {
+          "stage": "focused-preflight",
+          "status": "PASSED",
+          "source_sha": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+          "started_utc": "2026-11-08T16:15:04.415532+00:00",
+          "finished_utc": "2026-11-08T16:15:07.986052+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "fb37dc5c575c4fe9c562da54632444bda251ac26cd101e07d3a4cec9ce7bbfa4",
+          "evidence": {
+            "child.json": "e38be17bc8b444df10e8c426e3cd3c64f8d44e9162c067b12ba5a6f2510309da",
+            "exit.json": "866b19adc1b054d8e9b80225dd102e91af35c030a20f6f71fcaf98425480f886",
+            "preservation.json": "d2b4055e326e5807f33788f3f49bd94e42a0af8db203463c24beea9bd2d32139",
+            "started.json": "fa59b82700c95ceb2ab21e85625e9df13addffb088d9ac7b5c1fa85a3f9f90d4",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386281044248564,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 24768
+          },
+          "child_process": {
+            "created": 134386281045533208,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 48528
+          }
+        },
+        {
+          "stage": "living-regressions",
+          "status": "PASSED",
+          "source_sha": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+          "started_utc": "2026-11-08T16:15:12.439003+00:00",
+          "finished_utc": "2026-11-08T16:50:08.533401+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": 2,
+            "failed": 0,
+            "passed": 2,
+            "skipped": 0,
+            "skips": []
+          },
+          "input_identity": "fb37dc5c575c4fe9c562da54632444bda251ac26cd101e07d3a4cec9ce7bbfa4",
+          "evidence": {
+            "child.json": "86bac86bcdc5e202f7c8c35a67b64a44f543647448f91a6cca29ee4190589111",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "9821bb19bb67f4526c97c1130b481402204e4347a31060e50a216b1d06a92cf2",
+            "fixture-inputs": {
+              "ownership.json": "aee35c5763dc27de2c6ae5e3484dc243ab2f12d04de783726b12d8a955968568",
+              "two-floor/61b30ffc/editor-owner-inactive.profile.json": "1cc3ca41df643ba4f8d8ff3cbb34e0a3b6e91fa33bf94b0616d06ac968c528a9",
+              "two-floor/61b30ffc/owner-inactive-f219f9402ec34720a06e670d98f58cc8.manifest.json": "7734585b977293b8bb8da1ea882c94fa9e376f2ef7a006533f74eff3caffbbc5",
+              "two-floor/61b30ffc/owner-inactive-f219f9402ec34720a06e670d98f58cc8.save.json": "dab5160f05bf722d306b86fbe820faf6f259951403baca3c3a5bec6676e51172",
+              "two-floor/61b30ffc/two-floor-e8de5112c4d547dd93f5e8e011de5fa0.manifest.json": "c8f2ad2b7b794a63753b29b14d46e4fa542225943c2b605c7b8696ed6aeebf46",
+              "two-floor/61b30ffc/two-floor-e8de5112c4d547dd93f5e8e011de5fa0.save.json": "8434f7faccec52781ac8ee8abd4221ba1ac2451721ef7b73dcfa41a215c54ceb",
+              "two-floor/61b30ffc/v1-c9bd05ca36dc46e29173939ed0022553.manifest.json": "6aed6570aeb0155f247273622b3e5754a93c806f0fbf9b81c59fea7f02eb39c9",
+              "two-floor/61b30ffc/v1-c9bd05ca36dc46e29173939ed0022553.save.json": "c2acb863b0c3e5f01c27137a216100ad172fbcdc9b7bc7e72706dd2d8aa36283",
+              "two-floor/905ccdb6/editor-two-floor.profile.json": "abed3f52d13ce00f3d3833e26d259a511650351e9ba32ff1b761e198e792c1fd",
+              "two-floor/905ccdb6/owner-inactive-b7ff0202777447389beb52d0c2d7f834.manifest.json": "12f74fd7bf649b583353cc6611818b3c38dcbace7d792777fad8cb2912bdde41",
+              "two-floor/905ccdb6/owner-inactive-b7ff0202777447389beb52d0c2d7f834.save.json": "27edfd36f365d99638456d8dd6f43be1eadf5ee4b43e2297655a1e69ad949c7c",
+              "two-floor/905ccdb6/two-floor-6479c735110449c28a15ef8b05db22d6.manifest.json": "c8db88d94294ea3f189e68ce7f16334162d3741e25ad630f8edc2a9373c20f68",
+              "two-floor/905ccdb6/two-floor-6479c735110449c28a15ef8b05db22d6.save.json": "42e98b60b423a08a4e767a607a63db02aaab8768c4de8d7dbae7a6373257af46",
+              "two-floor/905ccdb6/v1-3af724faeff14d888ee415697d64e7fa.manifest.json": "ed4789be3618da6021aa60a1b2bef47b48b9e7884b3376ede41d995b63489f5b",
+              "two-floor/905ccdb6/v1-3af724faeff14d888ee415697d64e7fa.save.json": "2060ceac26c0e3a0a08a5af7b0369d37be1d13e8ea365bebfe0789d594de7a96"
+            },
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "efe9cf050956362de5e1820309ceb4835e4c11aaeca46ac655c65fdadf8d04ce",
+            "results.xml": "ce75fefb17c4111557e7121b16082a7010ed96e1f687b31b4244bf7b2de1733f",
+            "started.json": "b32045d4839e080b56f58b667a8aca48537b3b0805b7282dc6831c8e7e6b7904",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "4e31b091bc06c4938b6affc468aa0aba21a0bd4e9bf524209ae11348fd7a5e6d"
+          },
+          "process": {
+            "created": 134386281124494763,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 54828
+          },
+          "child_process": {
+            "created": 134386281125745521,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 39516
+          }
+        },
+        {
+          "stage": "preservation",
+          "status": "PASSED",
+          "source_sha": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+          "started_utc": "2026-11-08T16:50:40.754462+00:00",
+          "finished_utc": "2026-11-08T16:50:44.294616+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "be2386c09bd735bab889fcbeecf126f8f5a632c1a7088a3006357e688ab5f729",
+          "evidence": {
+            "child.json": "98e5b98d91d53004ff856cec8ede19be6ffe10cdbf30e35bf40cf5e7b916814b",
+            "exit.json": "6d5bfcd9d0a7b6f17d77bfbdd46bbcf8ab185f218448e863a947791a41d427a3",
+            "preservation.json": "665d3d3db3a62777b418b18bb32c75080f9e0a58370493ddf91d19a1bbad2b19",
+            "started.json": "6cdca0704b1ebe8a6364cee8dd272fb7377de998578cac645f6f2280ce1e28f6",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386302407650717,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 24708
+          },
+          "child_process": {
+            "created": 134386302408902642,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 11080
+          }
+        },
+        {
+          "stage": "restore",
+          "status": "PASSED",
+          "source_sha": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+          "started_utc": "2026-11-08T16:50:31.799224+00:00",
+          "finished_utc": "2026-11-08T16:50:35.966494+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "fb37dc5c575c4fe9c562da54632444bda251ac26cd101e07d3a4cec9ce7bbfa4",
+          "evidence": {
+            "child.json": "8098678de3fbc34d53dadf463c4ad2f65009cb0e9dc57eb93e98cac5040f7591",
+            "exit.json": "2e006364c97fbe062757ede97a2070888fb3a43ebc2eba859deb3a6fbf52c8bb",
+            "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+            "started.json": "dcca6bc516f1e04ac006f4b2c64901935bcc54b6a77898909a7f25fa924f94df",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386302318084156,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 25872
+          },
+          "child_process": {
+            "created": 134386302319372810,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 21368
+          }
+        },
+        {
+          "stage": "restore-preflight",
+          "status": "PASSED",
+          "source_sha": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+          "started_utc": "2026-11-08T16:50:13.431264+00:00",
+          "finished_utc": "2026-11-08T16:50:27.319565+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "fb37dc5c575c4fe9c562da54632444bda251ac26cd101e07d3a4cec9ce7bbfa4",
+          "evidence": {
+            "child.json": "5dd02877e6a6e661b345b2e8401eb1c2fc624248e42253d78e93cceaf9e0c253",
+            "exit.json": "18af7d0f687f4fe4ba24e63fa84f3a7693e0e723b90fcceb1c3d0fe679cd176b",
+            "preservation.json": "d2b4055e326e5807f33788f3f49bd94e42a0af8db203463c24beea9bd2d32139",
+            "started.json": "b79502bbda3db2a9478c4b82f1faac42f12d5bdcbf408e23c96ec97d43e71c0e",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386302134405579,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 51428
+          },
+          "child_process": {
+            "created": 134386302135781155,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 50816
+          }
+        }
+      ]
+    },
+    {
+      "id": "4862ecc09db74edf85c97020a217c147",
+      "label": "pr-performance",
+      "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+      "recorded_status": "PASSED",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\TestResults\\qualification-supervisor\\4862ecc09db74edf85c97020a217c147",
+      "created_utc": "2026-11-08T16:55:05.916682+00:00",
+      "finished_utc": "2026-11-08T17:32:58.140366+00:00",
+      "campaign_sha256": "d2e454fdac3567ba645f339ca5a93ed591bbd6e6e9dbf6fdbc7d875755cfac25",
+      "stages": [
+        {
+          "stage": "focused-preflight",
+          "status": "PASSED",
+          "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+          "started_utc": "2026-11-08T16:55:36.421461+00:00",
+          "finished_utc": "2026-11-08T16:55:39.929384+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "a9f64d1adc499bfa1207ca4e8f8ffeefda3c2eaba6a2e6ba0db7e82fa2562574",
+          "evidence": {
+            "child.json": "ba3884b60165bb223fe152bf14abbf782eeefa2b5cfaf349da47df9bfb814525",
+            "exit.json": "e09f99def5b4de47bbcc0e498cc239b566f55c643f19859e40bc4d91d43d276f",
+            "preservation.json": "088106ab8884bcdbcc48f6cd4d95a32260b08b051a082659d0ba9c11f56ef14e",
+            "started.json": "2fddba015534d8ef49babc4d23d6c71caf42ccf721420fdf5528369bb8b02abf",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386305364303867,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 38336
+          },
+          "child_process": {
+            "created": 134386305365614611,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 13068
+          }
+        },
+        {
+          "stage": "living-regressions",
+          "status": "PASSED",
+          "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+          "started_utc": "2026-11-08T16:55:44.669780+00:00",
+          "finished_utc": "2026-11-08T17:32:22.506261+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": 2,
+            "failed": 0,
+            "passed": 2,
+            "skipped": 0,
+            "skips": []
+          },
+          "input_identity": "a9f64d1adc499bfa1207ca4e8f8ffeefda3c2eaba6a2e6ba0db7e82fa2562574",
+          "evidence": {
+            "child.json": "a01cceb624941e329472a7290fc387d7774ea3167d949ce98672c25770af82f5",
+            "cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+            "exit.json": "7f07b6cbc9d57be0129c5358783838316de0cc36dd51b438d931c6cde0c21a8f",
+            "fixture-inputs": {
+              "ownership.json": "af89bd9a77b8300c1915c882301e290f0c70f34869cc9d27c917945e8e9baa7b",
+              "two-floor/3a3931cb/editor-owner-inactive.profile.json": "21173035de6544da49f2cd7e294929d79e03c37b17f714a7489798867dfe9c9f",
+              "two-floor/3a3931cb/owner-inactive-eee7f858028249d395d5024c81ba4c81.manifest.json": "082bb4997e6393b1b633de5239a6aa397844e033db2743786d3f8c99f65e6009",
+              "two-floor/3a3931cb/owner-inactive-eee7f858028249d395d5024c81ba4c81.save.json": "617a054d878857009225cd4f9399843b43a4e29ef45773a32aeec3c77bd7d0f5",
+              "two-floor/3a3931cb/two-floor-5a2ea6913a8d4fffa583befd2e8d40e9.manifest.json": "12c52c960eb9892e24a199cb0f56d2698886b8e433da04af0fba1ed26c4e0d97",
+              "two-floor/3a3931cb/two-floor-5a2ea6913a8d4fffa583befd2e8d40e9.save.json": "81dd4be8b8fc8afcf3813cafd3cc370bd49850f434153016b96a86a18aa77d84",
+              "two-floor/3a3931cb/v1-e225bac959ed4c94a4d277696f495f20.manifest.json": "949cc9eafb7be9beb5aaf99418b935cc9984d994db4f4c2091ad9bb7da96774c",
+              "two-floor/3a3931cb/v1-e225bac959ed4c94a4d277696f495f20.save.json": "b1e65f9a94e957bbbfbaa99d98bd1d3d6c33c2dc210a12319fdc03324419b03b",
+              "two-floor/9870d15c/editor-two-floor.profile.json": "9de0826f2c351e23708c5068cd7ad3b0097b9edfe6e8473acf9120f5da465b5c",
+              "two-floor/9870d15c/owner-inactive-f840c2b5d2ca460a86fdd72840e1dff9.manifest.json": "31a59d8e8431923642e7f324236f64619bccf59f9b773e92ad4625a5c46535d3",
+              "two-floor/9870d15c/owner-inactive-f840c2b5d2ca460a86fdd72840e1dff9.save.json": "0e70917c27444a998fd6fa50cfc3efedd13dd38e765e95801eb97a5438c7deaf",
+              "two-floor/9870d15c/two-floor-fce5be56f8c54099b9fafe3e095cfb2c.manifest.json": "5970ac5c41602a52552aedc36a974513fcc24dc60d9e2de3f0775167af8bfd85",
+              "two-floor/9870d15c/two-floor-fce5be56f8c54099b9fafe3e095cfb2c.save.json": "778e231de98c6749ff7978ca8397693805385a15ea17f76ea0cd0681f94f657b",
+              "two-floor/9870d15c/v1-e3e12bfe8ad94afeb85e3a62dc27ccd5.manifest.json": "bb9674391795c5c916c9df1cf16cd8047bb80202b8cbe30d5c4f370073c19415",
+              "two-floor/9870d15c/v1-e3e12bfe8ad94afeb85e3a62dc27ccd5.save.json": "88a640e4802a82fa615e3eb8599b6d2e5c929c9893d2388c6f3f90d307af0840"
+            },
+            "generated-inputs": {
+              "manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b"
+            },
+            "invocation.json": "906ab21b30a22e61483eea9ecc16bd30238cf63cd2e7c4f99dcf69c2f16e40c9",
+            "results.xml": "dad042b279f3bb1e42070f3c7c2b66658660023b72059f99fb18d2651032e271",
+            "started.json": "d55a70ab18945bec735ce2b946dcea3fcccde7d0cf86cb3a9a7214e43bfa00dc",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "unity.log": "dacaccaf0c870ddccf5df34ac98a1d6a783572cb88089673c8aa11fb5331ea76"
+          },
+          "process": {
+            "created": 134386305446794881,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 48732
+          },
+          "child_process": {
+            "created": 134386305448146955,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 45720
+          }
+        },
+        {
+          "stage": "preservation",
+          "status": "PASSED",
+          "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+          "started_utc": "2026-11-08T17:32:53.329195+00:00",
+          "finished_utc": "2026-11-08T17:32:56.841155+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "0476e7c45ee35ec775e614aa0830259b8e33796ab1d4d28719d67448a69a3b17",
+          "evidence": {
+            "child.json": "b124ca938be76f7e7e69c528e4273f8e6bf95ac338bdce82432bc18b3f9e0b1c",
+            "exit.json": "87edd621e779e642ea033ff23226753581257bda1b18b28575c2d4c97e3534e1",
+            "preservation.json": "1505cf75c0ffbd0c8acc30cf9902fab9fe110cb48e2bd3ca14f78179a0ddd9b8",
+            "started.json": "c9953d1b2c618832f4f1547e2194fb2e7fdb220e972630c7e92c7fccac173254",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386327733400431,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 48320
+          },
+          "child_process": {
+            "created": 134386327734634653,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 46100
+          }
+        },
+        {
+          "stage": "restore",
+          "status": "PASSED",
+          "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+          "started_utc": "2026-11-08T17:32:44.725900+00:00",
+          "finished_utc": "2026-11-08T17:32:48.923870+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "a9f64d1adc499bfa1207ca4e8f8ffeefda3c2eaba6a2e6ba0db7e82fa2562574",
+          "evidence": {
+            "child.json": "9e47befa07f3ba9f4fd0ae7782381f63c7b350330a4e04c6a71ce88e51f6df8d",
+            "exit.json": "4d202db51bbf38db52e58c49918902132ae52cbf4755992a92d095fc83a93639",
+            "restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+            "started.json": "3ab9efb51e1c0fbe449e5f65ec84bd0d71376fe5aa27b3bfdaf724e7439b59d1",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386327647349861,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 56412
+          },
+          "child_process": {
+            "created": 134386327648591833,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 49336
+          }
+        },
+        {
+          "stage": "restore-preflight",
+          "status": "PASSED",
+          "source_sha": "e265d76309f55a867ad514816259d6baad6edd03",
+          "started_utc": "2026-11-08T17:32:27.132316+00:00",
+          "finished_utc": "2026-11-08T17:32:40.247163+00:00",
+          "exit_code": 0,
+          "host_exit_code": 0,
+          "failure": null,
+          "tests": {
+            "discovered": null,
+            "failed": null,
+            "passed": null,
+            "skipped": null
+          },
+          "input_identity": "a9f64d1adc499bfa1207ca4e8f8ffeefda3c2eaba6a2e6ba0db7e82fa2562574",
+          "evidence": {
+            "child.json": "503b955f294e19c7559b8e6d2caef08e622b17ba4f1a94ce13018b0c6dc20cda",
+            "exit.json": "aa576f05cf25a139f288118c88dbcfadf1a5154cda06b05b1f3618037d5cb3d2",
+            "preservation.json": "088106ab8884bcdbcc48f6cd4d95a32260b08b051a082659d0ba9c11f56ef14e",
+            "started.json": "819c6c162719d1950b2db665eeac07dda77a536a91af4f10a051d01d835d7ba6",
+            "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "process": {
+            "created": 134386327471454406,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 44836
+          },
+          "child_process": {
+            "created": 134386327472756629,
+            "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+            "pid": 58852
+          }
+        }
+      ]
+    }
+  ],
+  "qualification_archive_sha256": "a234ee748396e90d1bb8e48ebef21e9b896197b643f03f7d505ec9b8941a1858",
+  "qualification_archive_members": {
+    "initial-focused/focused/receipt.json": "c800870947f187e5fbdbd8942a7c88248006034656cd67f4a32f0d04befaf140",
+    "initial-focused/focused-preflight/receipt.json": "94c200eaec56c3f6dacd1f345b9e5c3171b47a548034cdab79a511271a0ef271",
+    "initial-focused/preservation/receipt.json": "5d457d8bf7cc65b7af6a782f3678061ce996d0f6406fb93d035ce6a5bb537233",
+    "initial-focused/restore/receipt.json": "00bd76657effea18a7b928870a19af572847d02475df881de7802f7baa8fc3e8",
+    "initial-focused/restore-preflight/receipt.json": "dea0fc644a07b5e450c51503c85f36562f50a73d48e3c57c941af40d309e0366",
+    "initial-focused/focused/cases.json": "d6396ac6a2cd68511b7dab703e681681b012d2750a5613fb7e4b4136691a58fa",
+    "initial-focused/focused-preflight/preservation.json": "5fb49bf78444ef3fd71354421809aca9f6c2768e5fb1bc88320b96fd2a871384",
+    "initial-focused/preservation/preservation.json": "1fb94c5548b1cb4cbc89d749d56f5fa9dfc8772d434e5d2fff3d6f8393e3f8bd",
+    "initial-focused/restore-preflight/preservation.json": "5fb49bf78444ef3fd71354421809aca9f6c2768e5fb1bc88320b96fd2a871384",
+    "initial-focused/restore/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "initial-focused/plan.json": "64e97e761a00c5193d8fb188d00d1960a9958e70e56502ea8ebdb0c650553864",
+    "discovery/inventory/receipt.json": "b8365a9bfe5fe08b2aacd52e7957f913819e79a19480a3e4749d7668f2270aea",
+    "discovery/inventory-preflight/receipt.json": "f7549cab06a16b10aa4638712869d4565533ba2b05347ea266dc15ddb607a710",
+    "discovery/preservation/receipt.json": "fcb92d0d1a131bc9a82a40a09b445ceec958b3dfafcfd430af429e9c366eee4d",
+    "discovery/restore/receipt.json": "5417ff9aec58e6f15da23ed30411b7dda9270f83ffc8f19261116f4b3fb38f4e",
+    "discovery/restore-preflight/receipt.json": "4afe85037197718a4e1453ec81e6df9455d366bb3336d220318ca0ebeb6d8827",
+    "discovery/inventory-preflight/preservation.json": "7bfb89bb33b2ba8684c7d140b62e4f8a595b25b995cfb582b4c46438c65dbf62",
+    "discovery/preservation/preservation.json": "4eb52f59432717c4ff18a23b5d4673bac7ba9d1aba751cb442d4bc95d5f860a8",
+    "discovery/restore-preflight/preservation.json": "7bfb89bb33b2ba8684c7d140b62e4f8a595b25b995cfb582b4c46438c65dbf62",
+    "discovery/restore/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "discovery/plan.json": "16564fdac33e22ef8d66958be689ccb55a4bc298837ba732fb95ceffab44feaa",
+    "failed-product/edit-preflight/receipt.json": "47c59a026384a48bd17289cb628722bb6e19d77a8617631cb2863cd55b0a65bb",
+    "failed-product/living-regressions/receipt.json": "cdccd89d1993b82706a7682a62af9a882e90e7bfc35fe3a80b9e8e5d5228a4a6",
+    "failed-product/living-regressions/cases.json": "0a57f952642b659161dede9c846c5c002b495f5b288163a516380f552c5e5c90",
+    "failed-product/edit-preflight/preservation.json": "6674fdb1cb3370de18fbae6e290219135d1680d501ae96f9b60cd4164fc51158",
+    "failed-product/plan.json": "4c2725d834ec2e22cd791a8e317f8b1944677f38d5117d17d2ff2376298668f0",
+    "failed-adapter-and-heap/edit-preflight/receipt.json": "155af2c947abdf57ec2775b93b4cd05f05cc55a5f8f3ea6db8a682fcab7e11a1",
+    "failed-adapter-and-heap/living-regressions/receipt.json": "0b401b6220d32e80abb133c53afe3fa828dcc40ec24b85c0f76a5be3ffe6b5a4",
+    "failed-adapter-and-heap/living-regressions/cases.json": "1f27d695661564b1cd71c07507968c2edcc8bc69dfd9dc29fee6365e0da2337c",
+    "failed-adapter-and-heap/edit-preflight/preservation.json": "127e60e982d7e5829ed27a82f9bfe453377e93e4fe44f606cc2ae0d14256721d",
+    "failed-adapter-and-heap/plan.json": "f48de3b12f81767427f95d0f5e8a49b7f6b646718a72930ccde7b74d409400c5",
+    "targeted/b3b1-preflight/receipt.json": "6bf0d5e9256ef8c01013fb6c9f92b76c9ee55beea06054e86eabc7ae6b71c9f6",
+    "targeted/b3b1-regressions/receipt.json": "5123a319996b5062b70aa191b0356f0816745914a7ba8546d2ea2d48edb93e73",
+    "targeted/edit-preflight/receipt.json": "1f6515845a896148ae966e3fb12d32f3d644ae9cf0f970038d5a16c3abac6d24",
+    "targeted/focused/receipt.json": "3986949f8bce6d70098cf86c5db42db093f381e5069573e4f91f2b08e1a5f846",
+    "targeted/living-regressions/receipt.json": "56c832df3758baf7e80a23b2ed866e290f4be956d66f98e9ea0224837a74b2e4",
+    "targeted/memory-preflight/receipt.json": "06a2ad2fcc00b98cf1b0f40277348a70aadfdd71a26bd3014b736ffe160105af",
+    "targeted/play-preflight/receipt.json": "93b1a21d906cb2491954a5e51a29972da65eafeee48f1f939e263a38eb3c63cd",
+    "targeted/preservation/receipt.json": "f3c8ce6f40903337a70fbbb5dbf575ef0e2e0853701e2d1a1e3479a2ecaea3a9",
+    "targeted/restore/receipt.json": "58c5b114d85ab6fa189df933fef1cc759f98ca6261c3c3eeac6d0ee31bcfefde",
+    "targeted/restore-preflight/receipt.json": "2c28da30180f9cde8e705a1900b466f68a45cbecbae7053ae2862d0d8b44f728",
+    "targeted/scene-play/receipt.json": "dbd06b8853420211fbf2de0c0a37c2efbaa8ff36faf23ad8c32e5848ca074660",
+    "targeted/b3b1-regressions/cases.json": "0a376e318e1d7a9514343e8060cefb5c92a5aa4be420e9c3a38c551eb3ce5441",
+    "targeted/focused/cases.json": "47caeda55a611f1c15234f541d496e84bffb601e8767f7acf4dd157b2d586310",
+    "targeted/living-regressions/cases.json": "0c49d6480e98faa0fdd0032d512066be0d2ae5dae4d598a6b85798f3b5396354",
+    "targeted/scene-play/cases.json": "63a398dfa900dc8104db1bfb0a09f54ed656069b7b33d54d6ff111808e1c2acd",
+    "targeted/b3b1-preflight/preservation.json": "403fbb4b63860786a800c962f607392a08573f2101599ac145de440c72800c64",
+    "targeted/edit-preflight/preservation.json": "403fbb4b63860786a800c962f607392a08573f2101599ac145de440c72800c64",
+    "targeted/memory-preflight/preservation.json": "403fbb4b63860786a800c962f607392a08573f2101599ac145de440c72800c64",
+    "targeted/play-preflight/preservation.json": "403fbb4b63860786a800c962f607392a08573f2101599ac145de440c72800c64",
+    "targeted/preservation/preservation.json": "92ab810a8249b019c5cac0aedf13d916c5815d0ead884df3dfb0b1411d39343a",
+    "targeted/restore-preflight/preservation.json": "403fbb4b63860786a800c962f607392a08573f2101599ac145de440c72800c64",
+    "targeted/restore/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "targeted/plan.json": "10b7584cdbaa65771ddef7f0f7fd92f76a5dd506171e389bf83eb66edf199015",
+    "partitions/focused/receipt.json": "341772c3b671b76289383e367cb101704272e787c32b1ce4f509ab655cb6f056",
+    "partitions/focused-preflight/receipt.json": "3cc82f4a34641b93dd62cff8e8010e2a00414d9352e96af6d02ccaec8f44fa82",
+    "partitions/preservation/receipt.json": "540fbfa9c7bdb82fd77bc17bdb8e9add1a9b4dfe7c28de943d945d7329c7e14d",
+    "partitions/restore/receipt.json": "2766a54accc54923fc10afd9480916e70aba49252c53ebadd677556148d9a4c2",
+    "partitions/restore-preflight/receipt.json": "783d162ca1ff4c273076dfd22b49d3ff4d518adfac84bf90a02902948841123a",
+    "partitions/focused/cases.json": "381691f88bb36448a8df24ec8906a3423b11d042af01c03ff7bb2c9d4d6bac33",
+    "partitions/focused-preflight/preservation.json": "1b9c232b55db8b3d08470904780286303d35aab9ebe3d654ca0e1710f2a00351",
+    "partitions/preservation/preservation.json": "837ed3000f2aa80113ff1eac2f2e9537dc96c3a6fd4ad24bd098fec32ddeee9e",
+    "partitions/restore-preflight/preservation.json": "1b9c232b55db8b3d08470904780286303d35aab9ebe3d654ca0e1710f2a00351",
+    "partitions/restore/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "partitions/plan.json": "5cc71305602e3fe0da0f753a2d939d5003889458b93e79ba3342c4711cb48764",
+    "main-performance/focused-preflight/receipt.json": "91decdbb357bef6b93ab07fcffb8cc2d6eef2e4c4b744a3dff9c949b75aa56f0",
+    "main-performance/living-regressions/receipt.json": "fae676e5cd3e33c539cee43ba473d0906207158a5c5809ea93a6bc0c63b55ab9",
+    "main-performance/preservation/receipt.json": "b2ccf7a42b729c1277d71094881ae96067a15eb6372d2644d622893449cea1f3",
+    "main-performance/restore/receipt.json": "4ee56a618188f797b543bfe99721334ef124ad39141cc641a90184ae471a877a",
+    "main-performance/restore-preflight/receipt.json": "90be17841d6737348b507ce2bc959c9ebf9e502a87af90dc7924cf25876413ec",
+    "main-performance/living-regressions/cases.json": "b250e28a86a7db88f2e4e5d45a0aed28fb19d14e2af80f31852c6ef768121b78",
+    "main-performance/focused-preflight/preservation.json": "d2b4055e326e5807f33788f3f49bd94e42a0af8db203463c24beea9bd2d32139",
+    "main-performance/preservation/preservation.json": "665d3d3db3a62777b418b18bb32c75080f9e0a58370493ddf91d19a1bbad2b19",
+    "main-performance/restore-preflight/preservation.json": "d2b4055e326e5807f33788f3f49bd94e42a0af8db203463c24beea9bd2d32139",
+    "main-performance/restore/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "main-performance/plan.json": "cfd90330d0f892ccb0f0dcfee69bbeffe7d1637b39a676e377a4125728f19829",
+    "pr-performance/focused-preflight/receipt.json": "9ed9827047555b4dc9a72aa415d0005c79987827eca650f8923d974a64fc3cd6",
+    "pr-performance/living-regressions/receipt.json": "b8a30a25e19c98c1f6b3717887b104c29def51ece46452290dc519a53ccd24dc",
+    "pr-performance/preservation/receipt.json": "905aa50f668d3f70a24988b5be4d27cc8f13f722911ad2bb41ef597cc0b14b10",
+    "pr-performance/restore/receipt.json": "93974644a581ad2955ab221abfc9c01a234552133b07bf976caf398491c292ea",
+    "pr-performance/restore-preflight/receipt.json": "07cfb1e94acbf0fc124ca2b33d846d91d515a26fa5d43190d7d1407a20083788",
+    "pr-performance/living-regressions/cases.json": "efab5488b86430c8808ece24e592b772e3ec8a9219ea8b03ea3b7008719350e7",
+    "pr-performance/focused-preflight/preservation.json": "088106ab8884bcdbcc48f6cd4d95a32260b08b051a082659d0ba9c11f56ef14e",
+    "pr-performance/preservation/preservation.json": "1505cf75c0ffbd0c8acc30cf9902fab9fe110cb48e2bd3ca14f78179a0ddd9b8",
+    "pr-performance/restore-preflight/preservation.json": "088106ab8884bcdbcc48f6cd4d95a32260b08b051a082659d0ba9c11f56ef14e",
+    "pr-performance/restore/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "pr-performance/plan.json": "47acf981859a321c827ce16dfc528a449a32d0287c7ee2036d8493edc52b4d1d",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-focused-20261107-01/inventory.json": "59d9efe8deb41ffb7a05f0ab86f015681d35f0690fe34795e3493ea6bcc90b60",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-focused-20261107-01/campaign.py": "251bc73e6f92bc136926bca3b2f260ed8e28b5284406b0e37ec6ee543ab90d0c",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-focused-20261107-01/plan.json": "501332f3d8b851ad5aa066686c8a517bf3e86a9ee5225fc062567c7cd5c7d968",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-partitions-20261108-01/inventory.json": "e338b721322c8f83be7295e9ebebd37a36387459c94155242d258c79d002edc4",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-partitions-20261108-01/campaign.py": "c7b064c2a9cdb994e7bbe2427bda2b65eaefa3b0e57667ae34b6a5e5fec9f2d8",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-partitions-20261108-01/plan.json": "69f15ddfe50e28c03b17ef4b575e0ea9d7010b06e99f4214b4275e18f82960f9",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-performance-pr-20261108-01/campaign.py": "bef7015e6d8e6dfe5e93afa4c1bfb9bc1686719ec2aef73f33d48feb085787d9",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-regressions-20261107-01/inventory.json": "24b775307fbc2aa0da32d6bc389b2a3af27ef467542e12737f620d9edfcac580",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-regressions-20261107-01/campaign.py": "e090eb779c46770b0b1084265d8a33a83ce1ed18400b695343315f5920d3b19c",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-regressions-20261107-01/plan.json": "a56ae2b08539b20d0298ed4330eef109232639e8b311a277c970687ebe92fb59",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261107-01/inventory.json": "a2443d5de4a81a3920cd8177ace6694f88510135e4efd716664f166910c67d73",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261107-01/campaign.py": "34b0bcf32ceb0ff5c14499838bb6b4133b6ad1f55995bf99b0829ab5e752e6db",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261107-01/plan.json": "d586d46caec135a225c96ffa8792953404c46ef4245db18fda4204b18eb8706e",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261107-01/selection.json": "ff21d8c4caa87a1c6ab39aa155f92be6968fe00aa0f1a5b18defa1d2ac1f99b8",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261107-01/manual-preservation/preservation.json": "64eebefae3b3fad502379d26403d2361353da2861d4c7c00c5d4a972c89e9731",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261107-01/manual-restoration/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261108-02/inventory.json": "89e2c2bd871d6925754c70e2a0ec24b6e99b8e473193ae6b4597ab6e197ae30e",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261108-02/campaign.py": "9872a598dae90062d15fc77546d926ed2431c09b473c6e7e66b7a6461ce26aaf",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261108-02/plan.json": "d85a38cbbb9b6be86107452f5f8a3294a9e0bb2110ab7e24872e41c91e1ad386",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261108-02/selection.json": "0e4d87b9078875a57d9bfec07cbff4763cd6252f5ce7a03b8064c4b5776ebcad",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261108-02/manual-preservation/preservation.json": "d4bf37ac0e668479c37d1b5ab6bc4c986b7760a1b9ec58e7672d7605cc664654",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261108-02/manual-restoration/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261108-03/inventory.json": "a75389cdfd5aca0aba2281c17b255e2399bfe618ca32bfb211ec5ae378de7220",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261108-03/campaign.py": "e55f0ba42a9f7adaaf4b2f25be3cf3a2109be322545020d4ce42dcfa0921f556",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261108-03/plan.json": "b98e2ab0e84d2afa103e53b46e160bc72a7864ea56c461cf69194109c4c4d6ba",
+    "preparations/h2-a-retained-foreground/h2-a-checkpoint2-targeted-20261108-03/selection.json": "62a289f616a99c8117556abbb30b573da7d09d477be2a6e087f6b189fe5e243e",
+    "preparations/h2-a-performance-main/h2-a-checkpoint2-performance-main-20261107-01/inventory.json": "36136f88d61a8e36812fcaf9912f42d82632f75131606ba2d73005b690dbebd1",
+    "preparations/h2-a-performance-main/h2-a-checkpoint2-performance-main-20261107-01/campaign.py": "db919de49b77a00fc28f46e5e32862ab4e642ac05935fecdc25a391f53b13f09",
+    "preparations/h2-a-performance-main/h2-a-checkpoint2-performance-main-20261107-01/plan.json": "1b7aa94b75b3bb19769831697fca4a568908f117e6f7d0ccdbe9c31a7aeb2644",
+    "preparations/h2-a-performance-pr/h2-a-checkpoint2-performance-pr-20261108-01/inventory.json": "cc4c2de79ca9826cccaab949f948fdec9488e5eb9be61011a8cf487786680a12",
+    "preparations/h2-a-performance-pr/h2-a-checkpoint2-performance-pr-20261108-01/campaign.py": "bef7015e6d8e6dfe5e93afa4c1bfb9bc1686719ec2aef73f33d48feb085787d9",
+    "preparations/h2-a-performance-pr/h2-a-checkpoint2-performance-pr-20261108-01/plan.json": "3de713e1d15ce04c5cef5561b7508eb1293404c05444db5e6c54354695ee313f"
+  },
+  "raw_profile_archive_sha256": "76cf4e6db93b46b7c6c3f90964a3780f41e904d383b11c1b0c399898612568be",
+  "raw_profiles": {
+    "main-performance/editor-owner-inactive.profile.json": {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ca7fc8906b1c449492923e69a909b406\\living-regressions\\fixture-inputs\\two-floor\\61b30ffc\\editor-owner-inactive.profile.json",
+      "sha256": "1cc3ca41df643ba4f8d8ff3cbb34e0a3b6e91fa33bf94b0616d06ac968c528a9"
+    },
+    "main-performance/editor-two-floor.profile.json": {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ca7fc8906b1c449492923e69a909b406\\living-regressions\\fixture-inputs\\two-floor\\905ccdb6\\editor-two-floor.profile.json",
+      "sha256": "abed3f52d13ce00f3d3833e26d259a511650351e9ba32ff1b761e198e792c1fd"
+    },
+    "pr-performance/editor-owner-inactive.profile.json": {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\TestResults\\qualification-supervisor\\4862ecc09db74edf85c97020a217c147\\living-regressions\\fixture-inputs\\two-floor\\3a3931cb\\editor-owner-inactive.profile.json",
+      "sha256": "21173035de6544da49f2cd7e294929d79e03c37b17f714a7489798867dfe9c9f"
+    },
+    "pr-performance/editor-two-floor.profile.json": {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\TestResults\\qualification-supervisor\\4862ecc09db74edf85c97020a217c147\\living-regressions\\fixture-inputs\\two-floor\\9870d15c\\editor-two-floor.profile.json",
+      "sha256": "9de0826f2c351e23708c5068cd7ad3b0097b9edfe6e8473acf9120f5da465b5c"
+    }
+  },
+  "artifact_inventory": [
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord",
+      "purpose": "managed implementation checkout",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "owner",
+      "path": "C:\\Dev\\Dungeon-Lord",
+      "purpose": "normal checkout; unchanged",
+      "retention": "preserve; no cleanup authority"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint1-20261107",
+      "purpose": "campaign adapter, preparation, original input archives/maps and preservation/recovery receipts",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint1-r2-20261107",
+      "purpose": "campaign adapter, preparation, original input archives/maps and preservation/recovery receipts",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint1-r3-20261107",
+      "purpose": "campaign adapter, preparation, original input archives/maps and preservation/recovery receipts",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "qualification supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ff0c1234cd734ea39b501f7c7332bee7",
+      "purpose": "source-pinned campaign and original evidence",
+      "retention": "preserve original verdict and all evidence"
+    },
+    {
+      "exists": true,
+      "owner": "qualification supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\73fc1c2962e34677b3daf1797150e8fa",
+      "purpose": "source-pinned campaign and original evidence",
+      "retention": "preserve original verdict and all evidence"
+    },
+    {
+      "exists": true,
+      "owner": "qualification supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\94389388133a4f39a6f61e12f616a7f1",
+      "purpose": "source-pinned campaign and original evidence",
+      "retention": "preserve original verdict and all evidence"
+    },
+    {
+      "exists": true,
+      "owner": "qualification supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor-reservation\\active.json",
+      "purpose": "released reservation record; not an active claim",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord H2A Checkpoint1 20261107",
+      "purpose": "isolated product namespace and default NUnit runner report",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord H2A Checkpoint1 R2 20261107",
+      "purpose": "isolated product namespace and default NUnit runner report",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord H2A Checkpoint1 R3 20261107",
+      "purpose": "isolated product namespace and default NUnit runner report",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Library",
+      "purpose": "generated Editor state/cache/logs if present",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": false,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Temp",
+      "purpose": "generated Editor state/cache/logs if present",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Logs",
+      "purpose": "generated Editor state/cache/logs if present",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Docs\\testing\\evidence\\h2-a-checkpoint1-20261107",
+      "purpose": "sanitized review evidence and reproducible campaign adapters",
+      "retention": "retain committed review evidence"
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\5b140d1a20754f0c96a17fc3fcd2e61c",
+      "owner": "qualification supervisor",
+      "purpose": "source-pinned raw evidence, logs, receipts, fixtures and failure reproduction; original verdict preserved",
+      "source": "d1c92124f62f3372b9454a6e34b60a26c9ff5383",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b1d0fe38d61f4d489a79684407ed959a",
+      "owner": "qualification supervisor",
+      "purpose": "source-pinned raw evidence, logs, receipts, fixtures and failure reproduction; original verdict preserved",
+      "source": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\9db056bd3206478a9e79a9404e9956da",
+      "owner": "qualification supervisor",
+      "purpose": "source-pinned raw evidence, logs, receipts, fixtures and failure reproduction; original verdict preserved",
+      "source": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\6f23090cc5104a4ab67ddba28f0e6a5d",
+      "owner": "qualification supervisor",
+      "purpose": "source-pinned raw evidence, logs, receipts, fixtures and failure reproduction; original verdict preserved",
+      "source": "ca651ef27b0ace8cdc34cce18c08dbac91f167e3",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d097076751414278ac7710f28346a151",
+      "owner": "qualification supervisor",
+      "purpose": "source-pinned raw evidence, logs, receipts, fixtures and failure reproduction; original verdict preserved",
+      "source": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d82e30053fa043a2ad5bcc5df2cabe2f",
+      "owner": "qualification supervisor",
+      "purpose": "source-pinned raw evidence, logs, receipts, fixtures and failure reproduction; original verdict preserved",
+      "source": "e265d76309f55a867ad514816259d6baad6edd03",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ca7fc8906b1c449492923e69a909b406",
+      "owner": "qualification supervisor",
+      "purpose": "source-pinned raw evidence, logs, receipts, fixtures and failure reproduction; original verdict preserved",
+      "source": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\TestResults\\qualification-supervisor\\4862ecc09db74edf85c97020a217c147",
+      "owner": "qualification supervisor",
+      "purpose": "source-pinned raw evidence, logs, receipts, fixtures and failure reproduction; original verdict preserved",
+      "source": "e265d76309f55a867ad514816259d6baad6edd03",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord",
+      "owner": "Codex H2-A",
+      "purpose": "managed implementation or matched performance checkout; raw evidence dependency",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Library",
+      "owner": "Unity through qualification supervisor",
+      "purpose": "generated project cache/process output; preserve while evidence depends on checkout",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Temp",
+      "owner": "Unity through qualification supervisor",
+      "purpose": "generated project cache/process output; preserve while evidence depends on checkout",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": false
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Logs",
+      "owner": "Unity through qualification supervisor",
+      "purpose": "generated project cache/process output; preserve while evidence depends on checkout",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor-reservation\\active.json",
+      "owner": "qualification supervisor",
+      "purpose": "reservation marker; completed campaigns release normally",
+      "source": null,
+      "retention": "released normally; retained marker has campaign=null; no forced release",
+      "exists": true,
+      "reservation_state": {
+        "campaign": null,
+        "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d82e30053fa043a2ad5bcc5df2cabe2f"
+      }
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint2-analysis",
+      "owner": "Codex H2-A",
+      "purpose": "campaign preparation, original-input archives/maps, analysis or unused prepared adapter",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint2-focused-20261107-01",
+      "owner": "Codex H2-A",
+      "purpose": "campaign preparation, original-input archives/maps, analysis or unused prepared adapter",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H2A Checkpoint2 Focused 20261107 01",
+      "owner": "qualification supervisor",
+      "purpose": "isolated product/save namespace; never owner default save",
+      "source": "d1c92124f62f3372b9454a6e34b60a26c9ff5383",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint2-partitions-20261108-01",
+      "owner": "Codex H2-A",
+      "purpose": "campaign preparation, original-input archives/maps, analysis or unused prepared adapter",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 H2AC2P",
+      "owner": "qualification supervisor",
+      "purpose": "isolated product/save namespace; never owner default save",
+      "source": "e265d76309f55a867ad514816259d6baad6edd03",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint2-performance-pr-20261108-01",
+      "owner": "Codex H2-A",
+      "purpose": "campaign preparation, original-input archives/maps, analysis or unused prepared adapter",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint2-regressions-20261107-01",
+      "owner": "Codex H2-A",
+      "purpose": "campaign preparation, original-input archives/maps, analysis or unused prepared adapter",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 H2A Checkpoint2 Discovery 20261107 01",
+      "owner": "qualification supervisor",
+      "purpose": "isolated product/save namespace; never owner default save",
+      "source": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint2-targeted-20261107-01",
+      "owner": "Codex H2-A",
+      "purpose": "campaign preparation, original-input archives/maps, analysis or unused prepared adapter",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H2A Checkpoint2 Targeted 20261107 01",
+      "owner": "qualification supervisor",
+      "purpose": "isolated product/save namespace; never owner default save",
+      "source": "9fb945209fb49d0b314a9d96f57b660de78b63f3",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint2-targeted-20261108-02",
+      "owner": "Codex H2-A",
+      "purpose": "campaign preparation, original-input archives/maps, analysis or unused prepared adapter",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 H2A Checkpoint2 Targeted 20261108 02",
+      "owner": "qualification supervisor",
+      "purpose": "isolated product/save namespace; never owner default save",
+      "source": "ca651ef27b0ace8cdc34cce18c08dbac91f167e3",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint2-targeted-20261108-03",
+      "owner": "Codex H2-A",
+      "purpose": "campaign preparation, original-input archives/maps, analysis or unused prepared adapter",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 H2AC2R3",
+      "owner": "qualification supervisor",
+      "purpose": "isolated product/save namespace; never owner default save",
+      "source": "8875a52cb5ffc5c8da169811ac2474fb9df3bd16",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord",
+      "owner": "Codex H2-A",
+      "purpose": "managed implementation or matched performance checkout; raw evidence dependency",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\Library",
+      "owner": "Unity through qualification supervisor",
+      "purpose": "generated project cache/process output; preserve while evidence depends on checkout",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\Temp",
+      "owner": "Unity through qualification supervisor",
+      "purpose": "generated project cache/process output; preserve while evidence depends on checkout",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": false
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\Logs",
+      "owner": "Unity through qualification supervisor",
+      "purpose": "generated project cache/process output; preserve while evidence depends on checkout",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\TestResults\\qualification-supervisor-reservation\\active.json",
+      "owner": "qualification supervisor",
+      "purpose": "reservation marker; completed campaigns release normally",
+      "source": null,
+      "retention": "released normally; retained marker has campaign=null; no forced release",
+      "exists": true,
+      "reservation_state": {
+        "campaign": null,
+        "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ca7fc8906b1c449492923e69a909b406"
+      }
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\TestResults\\h2-a-checkpoint2-performance-main-20261107-01",
+      "owner": "Codex H2-A",
+      "purpose": "campaign preparation, original-input archives/maps, analysis or unused prepared adapter",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 H2AMain",
+      "owner": "qualification supervisor",
+      "purpose": "isolated product/save namespace; never owner default save",
+      "source": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord",
+      "owner": "Codex H2-A",
+      "purpose": "managed implementation or matched performance checkout; raw evidence dependency",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\Library",
+      "owner": "Unity through qualification supervisor",
+      "purpose": "generated project cache/process output; preserve while evidence depends on checkout",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\Temp",
+      "owner": "Unity through qualification supervisor",
+      "purpose": "generated project cache/process output; preserve while evidence depends on checkout",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": false
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\Logs",
+      "owner": "Unity through qualification supervisor",
+      "purpose": "generated project cache/process output; preserve while evidence depends on checkout",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\TestResults\\qualification-supervisor-reservation\\active.json",
+      "owner": "qualification supervisor",
+      "purpose": "reservation marker; completed campaigns release normally",
+      "source": null,
+      "retention": "released normally; retained marker has campaign=null; no forced release",
+      "exists": true,
+      "reservation_state": {
+        "campaign": null,
+        "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\TestResults\\qualification-supervisor\\4862ecc09db74edf85c97020a217c147"
+      }
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\TestResults\\h2-a-checkpoint2-performance-pr-20261108-01",
+      "owner": "Codex H2-A",
+      "purpose": "campaign preparation, original-input archives/maps, analysis or unused prepared adapter",
+      "source": null,
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 H2APR",
+      "owner": "qualification supervisor",
+      "purpose": "isolated product/save namespace; never owner default save",
+      "source": "e265d76309f55a867ad514816259d6baad6edd03",
+      "retention": "preserve through independent review; no cleanup eligible",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Docs\\testing\\evidence\\h2-a-checkpoint2-20261108",
+      "owner": "Codex H2-A",
+      "purpose": "sanitized review evidence, raw isolated profiles, comparisons and exact artifact ledger",
+      "retention": "retained evidence; preserve",
+      "source": "e265d76309f55a867ad514816259d6baad6edd03",
+      "exists": true
+    }
+  ],
+  "privacy": "No raw Unity/CLI logs, auth arguments, protected owner maps or owner saves are published. Raw evidence retained locally.",
+  "unproven_process_preservation": {
+    "created_filetime": 134385682998835767,
+    "executable": "C:/Program Files/Unity/Hub/Editor/6000.3.2f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb.exe",
+    "ownership": "unproven; original named Job Object unavailable",
+    "pid": 40928,
+    "retention": "preserved without termination; no cleanup authority"
+  },
+  "final_postflight": [
+    {
+      "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord",
+      "original_inputs_exact": true,
+      "inputs": 1502,
+      "reservation": {
+        "campaign": null,
+        "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\d82e30053fa043a2ad5bcc5df2cabe2f"
+      },
+      "owned_campaigns_completed": true
+    },
+    {
+      "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord",
+      "original_inputs_exact": true,
+      "inputs": 1494,
+      "reservation": {
+        "campaign": null,
+        "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ca7fc8906b1c449492923e69a909b406"
+      },
+      "owned_campaigns_completed": true
+    },
+    {
+      "project": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord",
+      "original_inputs_exact": true,
+      "inputs": 1502,
+      "reservation": {
+        "campaign": null,
+        "previous": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-performance-pr\\Dungeon-Lord\\TestResults\\qualification-supervisor\\4862ecc09db74edf85c97020a217c147"
+      },
+      "owned_campaigns_completed": true
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "first_divergent_frame": 6721,
+  "diagnosis": "Full configured workloads completed, but exact full-frame match failed. Cause of baseline extra passive/recovery-shaped writes is unproven; no trace was normalized or repaired.",
+  "prefix": {
+    "main": {
+      "frames": 6721,
+      "work_frames": 1588,
+      "settlements": 35,
+      "all_frame_ms": {
+        "mean": 118.29594192819818,
+        "p95": 516.6847705841064,
+        "max": 2056.962490081787
+      },
+      "work_frame_ms": {
+        "mean": 490.82595320601456,
+        "p95": 878.2457113265991,
+        "max": 2056.962490081787
+      },
+      "work_update_ms": {
+        "mean": 488.37082934508817,
+        "p95": 875.4507,
+        "max": 2054.7225
+      },
+      "gc_last": 2216
+    },
+    "pr": {
+      "frames": 6721,
+      "work_frames": 1588,
+      "settlements": 35,
+      "all_frame_ms": {
+        "mean": 126.87384368525936,
+        "p95": 560.4767799377441,
+        "max": 2284.95192527771
+      },
+      "work_frame_ms": {
+        "mean": 526.6295191116387,
+        "p95": 915.681779384613,
+        "max": 2284.95192527771
+      },
+      "work_update_ms": {
+        "mean": 523.9976166876575,
+        "p95": 912.7083,
+        "max": 2282.4083
+      },
+      "gc_last": 2201
+    }
+  }
+}
