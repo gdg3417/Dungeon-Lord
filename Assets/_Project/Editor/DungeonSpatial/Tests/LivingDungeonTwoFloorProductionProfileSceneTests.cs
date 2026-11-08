@@ -21,20 +21,10 @@ namespace DungeonBuilder.M0.Tests
         [UnityTest, Timeout(7200000)]
         public IEnumerator LivingDungeonSingleFloorEditorProductionProfile() => MatchedProfile("owner-inactive");
         [UnityTest, Timeout(900000)]
-        public IEnumerator LivingDungeonSingleFloorFocusedFourRuns() => FocusedProfile("owner-inactive");
+        public IEnumerator LivingDungeonSingleFloorFocusedFourRuns() => MatchedProfile("owner-inactive", 4, 1794000000);
         [UnityTest, Timeout(900000)]
-        public IEnumerator LivingDungeonTwoFloorFocusedFourRuns() => FocusedProfile("two-floor");
-        private IEnumerator FocusedProfile(string variant)
-        {
-            bool detailed = ForegroundQualificationMetrics.DetailedEnabled;
-            try {
-                ForegroundQualificationMetrics.DetailedEnabled = true;
-                // Test-only authored seed time, before canonical ownership. Both
-                // source-pinned comparisons must produce identical seed bytes.
-                var operation = MatchedProfile(variant, 4, 1794000000);
-                while (operation.MoveNext()) yield return operation.Current;
-            } finally { ForegroundQualificationMetrics.DetailedEnabled = detailed; }
-        }
+        // Fixed test-only seed time, authored before ownership on both sources.
+        public IEnumerator LivingDungeonTwoFloorFocusedFourRuns() => MatchedProfile("two-floor", 4, 1794000000);
         [UnityTest, Timeout(300000)]
         public IEnumerator LivingDungeonTwoFloorWaitingSelectedFloorLayoutsPreserveCanonicalState()
         {
@@ -214,6 +204,7 @@ namespace DungeonBuilder.M0.Tests
                 }
                 SceneManager.sceneLoaded += Isolate;
                 var report = new GameRoot.ForegroundProfileReport();
+                bool detailed = ForegroundQualificationMetrics.DetailedEnabled;
                 try {
                     yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
                     yield return AwaitRecoveryReady();
@@ -222,6 +213,8 @@ namespace DungeonBuilder.M0.Tests
                     EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
                     UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>().SetTextSize(DungeonTextSize.Default);
                     for (int frame = 0; frame < 8; frame++) yield return null;
+                    // Set after EnterPlayMode's domain reload, outside timed work.
+                    if (completedRunTarget != 68) ForegroundQualificationMetrics.DetailedEnabled = true;
                     var operation = root.ProfileForeground(report, clock.Advance, completedRunTarget);
                     while (true) {
                         bool more; object current = null;
@@ -231,6 +224,7 @@ namespace DungeonBuilder.M0.Tests
                         yield return current;
                     }
                 } finally {
+                    ForegroundQualificationMetrics.DetailedEnabled = detailed;
                     SceneManager.sceneLoaded -= Isolate;
                     string path = Path.Combine(directory, "editor-" + variant + ".profile.json");
                     using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write))
