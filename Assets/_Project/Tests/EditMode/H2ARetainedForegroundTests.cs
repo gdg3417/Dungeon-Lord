@@ -120,6 +120,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.RetainedExecutionReuse], Is.Zero);
             owner.InvalidateUnlessBoundTo(null); Assert.That(owner.Count, Is.Zero);
         }
+        [Test] public void InvalidationWhilePublicationIsPendingCancelsSuccessfulRebind()
+        {
+            var f = LivingDungeonB3B2Tests.Dungeon(); var owner = Owner(); Admit(f, false, owner);
+            long due = Due(f);
+            var result = PhaseFourTestSupport.PumpForeground(f, Policy(f, false), due,
+                candidatePrepared: (_, __) => owner.Clear(), retained: owner);
+            Assert.That(result.IsSuccess, Is.True, result.Reason); f.Accept(result);
+            Assert.That(owner.Count, Is.Zero, "A late durable success must respect lifecycle invalidation during IO");
+            Metrics.Reset(); Pump(f, false, Due(f), owner);
+            Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.RetainedExecutionReuse], Is.Zero);
+            Assert.That(owner.Count, Is.EqualTo(1));
+        }
         [Test] public void ChangedDiskPredecessorAndConsumedInputsInvalidateBeforeAnyWrite()
         {
             var f = LivingDungeonB3B2Tests.Dungeon(); var owner = Owner(); Admit(f, false, owner);

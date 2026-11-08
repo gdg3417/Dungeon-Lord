@@ -22,6 +22,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             const string invalid = "living.foreground.invalid_state";
             var executions = new Dictionary<int, RunExecution>();
             bool published = false;
+            object retentionEpoch = null;
             try {
                 var bound = context?.RecoveryInputs;
                 if (bound != null && ((!ReferenceEquals(policy, bound.OneFloor) && !ReferenceEquals(policy, bound.TwoFloor)) ||
@@ -33,6 +34,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var working = session; var owned = ValidateSession(working);
                 if (owned?.CurrentTargetValidated != true || !CanonicalEqual(current.validatedCanonicalSpatialState, owned.State)) return Failure(invalid);
                 if (retained != null) executions = retained.Borrow(session, owned, context, policy, profile, configuration, production, runLoot, limits);
+                retentionEpoch = retained?.Epoch;
                 var runtime = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(current));
                 if (current.researchPending == null) runtime.researchPending = null;
                 if (current.researchProgress == null) runtime.researchProgress = null;
@@ -325,7 +327,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 result.ForegroundAdmissionReason = admissionReason;
                 if (result.IsSuccess) RunTransientEvidence.Retain(runtime, result.RuntimeProjection);
                 if (result.IsSuccess) {
-                    retained?.Retain(result, executions, context, policy, profile, configuration, production, runLoot, limits);
+                    retained?.Retain(result, executions, context, policy, profile, configuration, production, runLoot, limits, retentionEpoch);
                     published = true;
                 }
                 return result;

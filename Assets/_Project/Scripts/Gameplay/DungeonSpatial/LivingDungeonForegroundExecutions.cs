@@ -12,6 +12,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         private Dictionary<int, RunExecution> executions = new Dictionary<int, RunExecution>();
         private Binding binding;
+        private object epoch = new object();
+        internal object Epoch => epoch;
         private sealed class Binding
         {
             internal DetachedCanonicalSaveSession Session;
@@ -30,6 +32,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
         internal void Clear()
         {
+            // A reentrant lifecycle callback can invalidate a lent set while the
+            // synchronous writer is in IO. Its eventual success cannot undo that.
+            epoch = new object();
             foreach (var execution in executions.Values) execution.Abandon();
             executions.Clear(); binding = null;
         }
@@ -62,13 +67,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal void Retain(DetachedCanonicalWriteResult durable, Dictionary<int, RunExecution> working,
             DetachedCurrentTargetValidationContext context, LivingDungeonForegroundConfig policy, LivingDungeonProfile profile,
             RunSimulationConfig configuration, ProductionSpatialContentSnapshot production, LootConfig loot,
-            SaveSpatialMigrationLimitsProfile limits)
+            SaveSpatialMigrationLimitsProfile limits, object expectedEpoch)
         {
+            bool stillEligible = ReferenceEquals(epoch, expectedEpoch);
             Clear();
             // An optimization failure after a confirmed commit must not turn that
             // commit into an apparent persistence failure. Simply reconstruct later.
             try {
-                if (durable?.IsSuccess != true || !Eligible(durable.Session, durable.Validation, context, policy, profile)) return;
+                if (!stillEligible || durable?.IsSuccess != true || !Eligible(durable.Session, durable.Validation, context, policy, profile)) return;
                 foreach (var party in durable.Validation.LivingDungeon.Parties.OrderBy(p => p.Sequence)) {
                     if (!working.TryGetValue(party.Sequence, out var execution) || !Matches(execution, party, profile)) continue;
                     executions.Add(party.Sequence, execution); working.Remove(party.Sequence);
