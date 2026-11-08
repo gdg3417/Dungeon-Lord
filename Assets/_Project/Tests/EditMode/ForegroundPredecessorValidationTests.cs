@@ -107,6 +107,57 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
         }
 
+        [TestCase(false)] [TestCase(true)]
+        public void PartitionedPumpsPreserveExactCanonicalOwnerConsequences(bool two)
+        {
+            var f = two ? LivingDungeonTwoFloorTests.Dungeon() : LivingDungeonB3B2Tests.Dungeon();
+            var seed = f.Session.GetCurrentBytes(); byte[][] expected = null;
+            foreach (bool split in new[] { false, true }) {
+                f.FileSystem.Seed(f.ActivePath, seed); f.Reopen();
+                Pump(f, two, 0, true); Pump(f, two, f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value, true);
+                long finish = Next(f, true);
+                if (split) for (int i = 0; i < 3; i++) Pump(f, two, Next(f), true);
+                Pump(f, two, finish, true);
+                byte[] Write(Action<ContractJsonWriter> action) {
+                    var writer = new ContractJsonWriter(f.Profile.Canonical.Serialized); action(writer); return writer.Finish();
+                }
+                var actual = new[] {
+                    System.Text.Encoding.UTF8.GetBytes(UnityEngine.JsonUtility.ToJson(f.Runtime.runHistory)),
+                    System.Text.Encoding.UTF8.GetBytes(UnityEngine.JsonUtility.ToJson(f.Runtime.structureRuntime)),
+                    Write(w => MonsterContinuity.Write(w, f.Runtime.monsterContinuity)),
+                    Write(w => PhaseFiveSaveContracts.Write(w, f.Runtime.sharedBranchKnowledge)),
+                    Write(w => PhaseSixFloorKnowledge.Write(w, f.Runtime.sharedFloorKnowledge))
+                };
+                if (!split) expected = actual;
+                else for (int i = 0; i < actual.Length; i++) CollectionAssert.AreEqual(expected[i], actual[i]);
+            }
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void AlreadyAcceptedUnclosedPrefixesDrainExactlyLikeFreshValidation(bool two)
+        {
+            // Existing test-only producer narrows the pump before context binding.
+            var f = two ? LivingDungeonTwoFloorTests.Dungeon(oneBoundary: true) : LivingDungeonB3B2Tests.Dungeon(oneBoundary: true);
+            var seed = f.Session.GetCurrentBytes(); var expected = new List<byte[]>();
+            foreach (bool reuse in new[] { false, true }) {
+                f.FileSystem.Seed(f.ActivePath, seed); f.Reopen(); int index = 0; bool sawDebt = false;
+                void Drain(long target) {
+                    for (int attempt = 0; attempt < 100; attempt++) {
+                        Pump(f, two, target, reuse);
+                        if (!reuse) expected.Add(f.Session.GetCurrentBytes());
+                        else CollectionAssert.AreEqual(expected[index++], f.Session.GetCurrentBytes());
+                        sawDebt |= !f.Runtime.livingDungeon.IsClosed;
+                        if (f.Runtime.livingDungeon.IsClosed) return;
+                    }
+                    Assert.Fail("Existing bounded accepted prefix did not close");
+                }
+                Drain(0); Drain(f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value); Drain(Next(f, true));
+                Assert.That(sawDebt, Is.True, "Exercise durable A>C rather than only closed horizons");
+                Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
+                if (reuse) Assert.That(index, Is.EqualTo(expected.Count));
+            }
+        }
+
         [Test] public void ExposedValidationAndReturnedPartyCopiesCannotMutateEvidence()
         {
             var f = Admitted(); var owned = f.Session.ValidateForegroundPredecessor(f.Context, out var proof);
