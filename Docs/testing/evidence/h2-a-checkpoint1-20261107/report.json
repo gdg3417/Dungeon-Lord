@@ -1,0 +1,285 @@
+{
+  "archive_members": {
+    "first/recovery-execution.json": "79c7031052e64f8278ec479008498cfa6800823bbbd956a4da3dcfb35aef6056",
+    "first/recovery-postflight.json": "e83d1aefe07f0b2db6eeed9beaf6890b9623ef99e393ea29d2130e4b0c67549b",
+    "first/result.json": "b3f107e42e0a6f7c664e1b47665abcbd97741fc337cc4f4f3bd9a1f6e4e2044c",
+    "first/results.xml": "c2b32f1504439db1859134773c5746d2f921f5626f73fcf24ee5c0c5dc6901c7",
+    "r2/preservation.json": "a60438cc152068fcd7767a2c2bd01cdd5995d625bc4c5e4b3e99f59c10af8b8a",
+    "r2/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "r2/result.json": "c7af217045c093850df6ffc3fad625a4c5b537098b1ee80e6d6c540a4995c556",
+    "r2/results.xml": "2c7712bc2f7c105ed3911e18cca03d1bd6582d20f6032d5e09a14a06764d8b37",
+    "r3/focused-preflight/result.json": "b4afee3cd87fefa886df35b5fe1c1332ebae82b5a68eccb61a82d034b7def882",
+    "r3/focused/result.json": "c1302acf7d9ba8db1165f127094ec857e5cbb78822cf278e959a6453046a6215",
+    "r3/preservation.json": "86a4141d73a884e2e423536026d4ca7ce23d11564714511463c6c7d1cd5a24ed",
+    "r3/preservation/result.json": "5d02d290743d3ec0b9fefef5dcfbc1e6e2bafb34760a4bf8223367171213f30b",
+    "r3/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+    "r3/restore-preflight/result.json": "14433413f65c3d3bc542c6e86e1a08794ed4902e6c133b25b61e590459cfe07e",
+    "r3/restore/result.json": "2f818a418890f4eda2b95eba59160365549b558ea06858618d643ce8f5d77a3c",
+    "r3/results.xml": "b1047e1d0f2434e72430f24edadc8d51ff7dea52b48942b0b4a4a4005dcbaf26"
+  },
+  "archive_sha256": "9021c10eeefb0b07514c99879790acf596a7e5eb88ab237ecf961cdd2ef371d3",
+  "artifact_inventory": [
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord",
+      "purpose": "managed implementation checkout",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "owner",
+      "path": "C:\\Dev\\Dungeon-Lord",
+      "purpose": "normal checkout; unchanged",
+      "retention": "preserve; no cleanup authority"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint1-20261107",
+      "purpose": "campaign adapter, preparation, original input archives/maps and preservation/recovery receipts",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint1-r2-20261107",
+      "purpose": "campaign adapter, preparation, original input archives/maps and preservation/recovery receipts",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint1-r3-20261107",
+      "purpose": "campaign adapter, preparation, original input archives/maps and preservation/recovery receipts",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "qualification supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ff0c1234cd734ea39b501f7c7332bee7",
+      "purpose": "source-pinned campaign and original evidence",
+      "retention": "preserve original verdict and all evidence"
+    },
+    {
+      "exists": true,
+      "owner": "qualification supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\73fc1c2962e34677b3daf1797150e8fa",
+      "purpose": "source-pinned campaign and original evidence",
+      "retention": "preserve original verdict and all evidence"
+    },
+    {
+      "exists": true,
+      "owner": "qualification supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor\\94389388133a4f39a6f61e12f616a7f1",
+      "purpose": "source-pinned campaign and original evidence",
+      "retention": "preserve original verdict and all evidence"
+    },
+    {
+      "exists": true,
+      "owner": "qualification supervisor",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\qualification-supervisor-reservation\\active.json",
+      "purpose": "released reservation record; not an active claim",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord H2A Checkpoint1 20261107",
+      "purpose": "isolated product namespace and default NUnit runner report",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord H2A Checkpoint1 R2 20261107",
+      "purpose": "isolated product namespace and default NUnit runner report",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord H2A Checkpoint1 R3 20261107",
+      "purpose": "isolated product namespace and default NUnit runner report",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Library",
+      "purpose": "generated Editor state/cache/logs if present",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": false,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Temp",
+      "purpose": "generated Editor state/cache/logs if present",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Logs",
+      "purpose": "generated Editor state/cache/logs if present",
+      "retention": "preserve through independent review"
+    },
+    {
+      "exists": true,
+      "owner": "H2-A",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\Docs\\testing\\evidence\\h2-a-checkpoint1-20261107",
+      "purpose": "sanitized review evidence and reproducible campaign adapters",
+      "retention": "retain committed review evidence"
+    }
+  ],
+  "base_sha": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+  "campaign": "94389388133a4f39a6f61e12f616a7f1",
+  "campaign_reproduction": {
+    "members": {
+      "first-recovery/recovery-inspection.json": "77e2f15db5617ade6ef9fada485bff3b3201f1c8acf9da745c65dde601289ebf",
+      "first-recovery/recovery.py": "363bec4044f6b7f0edafb283335786134539a6c6da11b7091b0efa8032bdb952",
+      "h2-a-checkpoint1-20261107/campaign.py": "648406867f7551d51ff82f72f35cf84be247812b8bd20d290baec97b9b3c47a7",
+      "h2-a-checkpoint1-20261107/plan.json": "7e79cb0f49efaddc04b11dfe1bf08ec514032702e7d2ca628db1be91098baf0f",
+      "h2-a-checkpoint1-r2-20261107/campaign.py": "8f78264ede752ce7320f3393f184ed0268c261d21e56f76989ff20dbd41a17ef",
+      "h2-a-checkpoint1-r2-20261107/plan.json": "ae287bb62756960c8fe4d0ca946d3c32ce50ed64a567e962949b4b18413241dd",
+      "h2-a-checkpoint1-r3-20261107/campaign.py": "f692ab55ceab26c9d0864e8b83c86149e98dca8f8179036d434ba20875839314",
+      "h2-a-checkpoint1-r3-20261107/plan.json": "ebe115c2785749a846614f355089a3564a309b06c758e788c9b1b9ecb7f3b644"
+    },
+    "path": "campaign-reproduction.zip",
+    "sha256": "b0398b86025a013db66ac8de4668b0aeb04875577d70b0edb0774b6654452c78"
+  },
+  "cases": [
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.H2ARetainedForeground.ChangedDiskPredecessorAndConsumedInputsInvalidateBeforeAnyWrite",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.H2ARetainedForeground.FailedWriteAbandonsSpeculationAndNeverReusesIt(False)",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.H2ARetainedForeground.FailedWriteAbandonsSpeculationAndNeverReusesIt(True)",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.H2ARetainedForeground.InvalidationWhilePublicationIsPendingCancelsSuccessfulRebind",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.H2ARetainedForeground.ReopenEvenWithIdenticalBytesDropsTheOldSessionBinding",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.H2ARetainedForeground.SuccessivePumpsReuseRealExecutionsAndMatchEveryCanonicalByte(False)",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.H2ARetainedForeground.SuccessivePumpsReuseRealExecutionsAndMatchEveryCanonicalByte(True)",
+      "result": "Passed"
+    },
+    {
+      "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.H2ARetainedForeground.WaitingSurvivesRebindAndGenuineRetirementReleasesExactlyOnce",
+      "result": "Passed"
+    }
+  ],
+  "diagnostics": [
+    {
+      "all_checkpoint_replays": 52,
+      "execution_restorations": 5,
+      "final_retained_population": 0,
+      "retained": false,
+      "six_pump_series_ms": 954.0477,
+      "thread_allocation_counter": 0,
+      "workload": "one-floor"
+    },
+    {
+      "all_checkpoint_replays": 48,
+      "execution_restorations": 1,
+      "final_retained_population": 0,
+      "retained": true,
+      "six_pump_series_ms": 909.664,
+      "thread_allocation_counter": 0,
+      "workload": "one-floor"
+    },
+    {
+      "all_checkpoint_replays": 146,
+      "execution_restorations": 5,
+      "final_retained_population": 0,
+      "retained": false,
+      "six_pump_series_ms": 1968.2668,
+      "thread_allocation_counter": 0,
+      "workload": "two-floor"
+    },
+    {
+      "all_checkpoint_replays": 142,
+      "execution_restorations": 1,
+      "final_retained_population": 0,
+      "retained": true,
+      "six_pump_series_ms": 1911.832,
+      "thread_allocation_counter": 0,
+      "workload": "two-floor"
+    }
+  ],
+  "limitations": [
+    "Only eight focused EditMode cases; no full suites or PlayMode or Windows standalone",
+    "Six-pump in-memory comparison against reconstruction reference in this source, not a matched main/branch frame benchmark",
+    "Single ordered timing sample per mode; no FPS, p95, latency improvement or retained-heap claim",
+    "Thread allocation counter returned zero; no allocation-free claim or calibrated allocation measurement",
+    "Broader invalidation/failure/lifecycle/partition matrix and independent review remain pending"
+  ],
+  "original_input_map_sha256": "8152cea4f0b75502b055b4f8d4cc7c73840f542ab9b0fab4100248b3d0a28289",
+  "preservation": {
+    "inputs": 1500,
+    "original_inputs_restored": true,
+    "passed": true,
+    "product": "Dungeon Lord H2A Checkpoint1 R3 20261107",
+    "protected_evidence_unchanged": true,
+    "save": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord H2A Checkpoint1 R3 20261107"
+  },
+  "prior_attempts": [
+    {
+      "campaign": "ff0c1234cd734ea39b501f7c7332bee7",
+      "disposition": "Exact owner-approved recovery passed; original artifacts preserved; adb not terminated",
+      "executed": 0,
+      "status": "INCOMPLETE_UNCERTAIN"
+    },
+    {
+      "campaign": "73fc1c2962e34677b3daf1797150e8fa",
+      "disposition": "Fault-fixture evidence contamination corrected; ordinary completion and separate exact restoration/preservation passed",
+      "failed": 1,
+      "passed": 7,
+      "status": "FAILED"
+    }
+  ],
+  "qualified_input_map_sha256": "c70592e281139e9290a6e5b6bb7bf17446e9b6c4f3c4421a5c0b2ec94a301ab7",
+  "retained_local_artifacts": [
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint1-20261107",
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint1-r2-20261107",
+    "C:\\Users\\gdg34\\.codex\\worktrees\\h2-a-retained-foreground\\Dungeon-Lord\\TestResults\\h2-a-checkpoint1-r3-20261107"
+  ],
+  "source_sha": "5d585c07e083369925a199a6f2154a72fe824419",
+  "stage_status": {
+    "focused": "PASSED",
+    "focused-preflight": "PASSED",
+    "preservation": "PASSED",
+    "restore": "PASSED",
+    "restore-preflight": "PASSED"
+  },
+  "status": "CHECKPOINT_1_FOCUSED_PASSED_NOT_FINAL_QUALIFICATION",
+  "tests": {
+    "duration": "13.9264223",
+    "failed": "0",
+    "passed": "8",
+    "skipped": "0",
+    "total": "8"
+  },
+  "unity_cli": "1.0.0-beta.17",
+  "unity_editor": "6000.3.2f1",
+  "unproven_process_preservation": {
+    "created_filetime": 134385682998835767,
+    "executable": "C:/Program Files/Unity/Hub/Editor/6000.3.2f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb.exe",
+    "ownership": "unproven; original named Job Object unavailable",
+    "pid": 40928,
+    "retention": "preserved without termination; no cleanup authority"
+  }
+}
