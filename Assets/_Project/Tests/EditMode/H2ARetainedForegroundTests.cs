@@ -101,6 +101,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var f = LivingDungeonB3B2Tests.Dungeon(); var owner = Owner(); Admit(f, false, owner);
             var predecessor = f.Session.GetCurrentBytes(); long due = Due(f);
+            // Match the established uncertain-rollback fixture: earlier synthetic
+            // transaction evidence must not consume the injected first flush.
+            f.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            f.FileSystem.Seed(f.ActivePath, predecessor);
             if (uncertain) f.FileSystem.EnableFailureSequence(Operation.Flush, 1, Operation.Replace, 2);
             else f.FileSystem.EnableFailure(Operation.Replace, 1);
             var failed = PhaseFourTestSupport.PumpForeground(f, Policy(f, false), due, retained: owner);
