@@ -24,9 +24,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private sealed class ThrowingDisposal : IEnumerator<RunStep>
         {
             private readonly IEnumerator<RunStep> inner;
+            private readonly int successfulDisposals;
             internal int Disposals;
-            internal ThrowingDisposal(RunExecution execution)
+            internal ThrowingDisposal(RunExecution execution, int successfulDisposals = 0)
             {
+                this.successfulDisposals = successfulDisposals;
                 var field = typeof(RunExecution).GetField("cursor", Hidden);
                 inner = (IEnumerator<RunStep>)field.GetValue(execution); field.SetValue(execution, this);
             }
@@ -34,7 +36,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             object IEnumerator.Current => Current;
             public bool MoveNext() => inner.MoveNext();
             public void Reset() => throw new NotSupportedException();
-            public void Dispose() { Disposals++; inner.Dispose(); throw new InvalidOperationException("test.only.disposal"); }
+            public void Dispose()
+            {
+                Disposals++; inner.Dispose();
+                if (Disposals > successfulDisposals) throw new InvalidOperationException("test.only.disposal");
+            }
         }
         [Test] public void ThrowingPrivateCleanupAfterDurableCommitCannotReportFailure()
         {
@@ -59,6 +65,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(disposals.All(d => d.Disposals == 1), Is.True);
             Pump(f, true, f.Runtime.livingDungeon.Scheduler.ClosedThrough, owner);
             Assert.That(PrivateSet(owner).Values.All(e => !executions.Contains(e)), Is.True);
+        }
+        [Test] public void TerminalDisposalAbandonsConsumedExecutionAndReopenCannotDuplicateSettlement()
+        {
+            var f = LivingDungeonB3B2Tests.Dungeon(); var owner = Owner(); Admit(f, false, owner);
+            var execution = PrivateSet(owner).Values.Single(); var disposal = new ThrowingDisposal(execution, successfulDisposals: 1);
+            long finish = Finish(f); Pump(f, false, finish, owner);
+            Assert.That(disposal.Disposals, Is.EqualTo(2), "Terminal iterator disposal followed by private abandonment");
+            Assert.That(execution.OutcomeTaken, Is.True); Assert.That(owner.Count, Is.Zero);
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
+            f.Reopen(); Pump(f, false, finish, owner);
+            Assert.That(f.Runtime.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
         }
         private sealed class ServiceClock : IPreciseTimeSource
         {
@@ -202,6 +219,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             else if (changed == "prefix") stale.PrefixDigest[0] ^= 1;
             else typeof(CombatC0Kernel).GetField("<RulesId>k__BackingField", Hidden).SetValue(stale.Combat.Kernel, "test.only.incompatible.executable");
             Metrics.Reset(); Pump(f, false, Due(f), owner);
+            Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.RetainedExecutionReuse], Is.Zero);
+            Assert.That(PrivateSet(owner).Values.Single(), Is.Not.SameAs(stale));
+        }
+        [Test] public void EquivalentReplacementProfileStillInvalidatesTheExactInstanceBinding()
+        {
+            var f = LivingDungeonB3B2Tests.Dungeon(); var owner = Owner(); Admit(f, false, owner);
+            var stale = PrivateSet(owner).Values.Single(); var session = f.Session;
+            var profiles = (LivingDungeonProfile[])f.Context.LivingDungeonProfiles;
+            int index = Array.FindIndex(profiles, p => p.Id == f.Runtime.livingDungeon.Scheduler.ProfileId);
+            profiles[index] = f.Context.RecoveryInputs.OneFloor.CreateProfile(profiles[index].BaseBudget);
+            Assert.That(f.Session, Is.SameAs(session)); Metrics.Reset(); Pump(f, false, Due(f), owner);
             Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.RetainedExecutionReuse], Is.Zero);
             Assert.That(PrivateSet(owner).Values.Single(), Is.Not.SameAs(stale));
         }
