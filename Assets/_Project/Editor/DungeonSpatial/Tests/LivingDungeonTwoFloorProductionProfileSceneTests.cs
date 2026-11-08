@@ -20,6 +20,21 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator LivingDungeonTwoFloorEditorProductionProfile() => MatchedProfile("two-floor");
         [UnityTest, Timeout(7200000)]
         public IEnumerator LivingDungeonSingleFloorEditorProductionProfile() => MatchedProfile("owner-inactive");
+        [UnityTest, Timeout(900000)]
+        public IEnumerator LivingDungeonSingleFloorFocusedFourRuns() => FocusedProfile("owner-inactive");
+        [UnityTest, Timeout(900000)]
+        public IEnumerator LivingDungeonTwoFloorFocusedFourRuns() => FocusedProfile("two-floor");
+        private IEnumerator FocusedProfile(string variant)
+        {
+            bool detailed = ForegroundQualificationMetrics.DetailedEnabled;
+            try {
+                ForegroundQualificationMetrics.DetailedEnabled = true;
+                // Test-only authored seed time, before canonical ownership. Both
+                // source-pinned comparisons must produce identical seed bytes.
+                var operation = MatchedProfile(variant, 4, 1794000000);
+                while (operation.MoveNext()) yield return operation.Current;
+            } finally { ForegroundQualificationMetrics.DetailedEnabled = detailed; }
+        }
         [UnityTest, Timeout(300000)]
         public IEnumerator LivingDungeonTwoFloorWaitingSelectedFloorLayoutsPreserveCanonicalState()
         {
@@ -166,7 +181,7 @@ namespace DungeonBuilder.M0.Tests
             }
         }
 
-        private IEnumerator MatchedProfile(string selectedVariant)
+        private IEnumerator MatchedProfile(string selectedVariant, int completedRunTarget = 68, long? authoredUtc = null)
         {
             // Entering play reloads the domain. Create captured fixture objects
             // only afterward, so the test runner need not serialize them.
@@ -177,7 +192,7 @@ namespace DungeonBuilder.M0.Tests
             }
             // Build fresh production-content inputs through the canonical test
             // writer. Their only difference is Floor 2's activation state.
-            string directory = EditMode.LivingDungeonTwoFloorTests.ExportProductionTwoFloorInputs();
+            string directory = EditMode.LivingDungeonTwoFloorTests.ExportProductionTwoFloorInputs(authoredUtc);
             foreach (string variant in new[] { selectedVariant }) {
                 string manifestPath = Directory.GetFiles(directory, variant + "-*.manifest.json")
                     .OrderByDescending(File.GetLastWriteTimeUtc).First();
@@ -207,7 +222,7 @@ namespace DungeonBuilder.M0.Tests
                     EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
                     UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>().SetTextSize(DungeonTextSize.Default);
                     for (int frame = 0; frame < 8; frame++) yield return null;
-                    var operation = root.ProfileForeground(report, clock.Advance);
+                    var operation = root.ProfileForeground(report, clock.Advance, completedRunTarget);
                     while (true) {
                         bool more; object current = null;
                         try { more = operation.MoveNext(); if (more) current = operation.Current; }
