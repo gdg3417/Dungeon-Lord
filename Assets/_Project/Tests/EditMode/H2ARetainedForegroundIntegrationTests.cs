@@ -293,6 +293,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         [MethodImpl(MethodImplOptions.NoInlining)] private static WeakReference[] WeakExecutions(LivingDungeonForegroundExecutions owner) =>
             PrivateSet(owner).Values.Select(e => new WeakReference(e)).ToArray();
+        [MethodImpl(MethodImplOptions.NoInlining)] private static void ReleaseOutsideMeasurementStack(LivingDungeonForegroundExecutions owner)
+        {
+            // Mono's conservative collector can see the last dictionary pair in
+            // an inlined Clear's caller frame. End that frame before measuring.
+            owner.Clear();
+        }
         [MethodImpl(MethodImplOptions.NoInlining)] private static string ResourcesHeld(LivingDungeonForegroundExecutions owner) =>
             string.Join(";", PrivateSet(owner).OrderBy(p => p.Key).Select(p => p.Key + "/" + p.Value.NextOrdinal + "/" +
                 p.Value.PresentationSteps.Count + "/" + p.Value.Combat.Events.Count + "/" + p.Value.StartInputs.Length));
@@ -310,7 +316,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Assert.That(ResourcesHeld(owner), Is.EqualTo(resources));
                 }
                 var references = WeakExecutions(owner); long retained = GC.GetTotalMemory(true);
-                owner.Clear(); long released = GC.GetTotalMemory(true); deltas.Add(retained - released);
+                ReleaseOutsideMeasurementStack(owner);
+                GC.Collect(); GC.WaitForPendingFinalizers();
+                long released = GC.GetTotalMemory(true); deltas.Add(retained - released);
+                Assert.That(owner.Count, Is.Zero);
                 Assert.That(references.All(r => !r.IsAlive), Is.True, "No hidden execution archive may survive Clear");
                 TestContext.WriteLine("H2-A retained heap pair=" + sample + " retained=" + retained + " released=" + released + " resources=" + resources);
             }
