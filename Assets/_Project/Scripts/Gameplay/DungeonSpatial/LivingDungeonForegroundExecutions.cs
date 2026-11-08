@@ -12,7 +12,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     {
         private Dictionary<int, RunExecution> executions = new Dictionary<int, RunExecution>();
         private Binding binding;
-        private object epoch = new object();
+        private object epoch;
         internal object Epoch => epoch;
         private sealed class Binding
         {
@@ -25,7 +25,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             internal LootConfig Loot;
             internal SaveSpatialMigrationLimitsProfile Limits;
         }
-        internal int Count => executions.Count;
+        internal int Count => executions?.Count ?? 0;
         internal void InvalidateUnlessBoundTo(DetachedCanonicalSaveSession session)
         {
             if (!ReferenceEquals(binding?.Session, session)) Clear();
@@ -34,10 +34,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             // A reentrant lifecycle callback can invalidate a lent set while the
             // synchronous writer is in IO. Its eventual success cannot undo that.
-            epoch = new object();
+            epoch = null; binding = null;
             var obsolete = executions;
-            executions = new Dictionary<int, RunExecution>(); binding = null;
-            foreach (var execution in obsolete.Values) execution.Abandon();
+            executions = null;
+            if (obsolete == null) return;
+            // No replacement container/token allocation in post-commit cleanup.
+            foreach (var pair in obsolete) pair.Value.Abandon();
             obsolete.Clear();
         }
         internal Dictionary<int, RunExecution> Borrow(DetachedCanonicalSaveSession session,
@@ -51,10 +53,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !ReferenceEquals(prior.Configuration, configuration) || !ReferenceEquals(prior.Production, production) ||
                 !ReferenceEquals(prior.Loot, loot) || !ReferenceEquals(prior.Limits, limits) ||
                 !Eligible(session, validated, context, policy, profile)) {
-                Clear(); return new Dictionary<int, RunExecution>();
+                Clear(); epoch = new object(); return new Dictionary<int, RunExecution>();
             }
             var borrowed = executions;
-            executions = new Dictionary<int, RunExecution>(); binding = null;
+            executions = null; binding = null; epoch = new object();
             foreach (int sequence in borrowed.Keys.OrderBy(n => n).ToArray()) {
                 var party = validated.LivingDungeon.Parties.SingleOrDefault(p => p.Sequence == sequence);
                 if (!Matches(borrowed[sequence], party, profile)) {
@@ -71,12 +73,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RunSimulationConfig configuration, ProductionSpatialContentSnapshot production, LootConfig loot,
             SaveSpatialMigrationLimitsProfile limits, object expectedEpoch)
         {
-            bool stillEligible = ReferenceEquals(epoch, expectedEpoch);
+            bool stillEligible = expectedEpoch != null && ReferenceEquals(epoch, expectedEpoch);
             Clear();
             // An optimization failure after a confirmed commit must not turn that
             // commit into an apparent persistence failure. Simply reconstruct later.
             try {
                 if (!stillEligible || durable?.IsSuccess != true || !Eligible(durable.Session, durable.Validation, context, policy, profile)) return;
+                executions = new Dictionary<int, RunExecution>();
                 foreach (var party in durable.Validation.LivingDungeon.Parties.OrderBy(p => p.Sequence)) {
                     if (!working.TryGetValue(party.Sequence, out var execution) || !Matches(execution, party, profile)) continue;
                     executions.Add(party.Sequence, execution); working.Remove(party.Sequence);

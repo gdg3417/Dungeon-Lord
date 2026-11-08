@@ -337,7 +337,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     ? error.Message : invalid);
             }
             finally {
-                foreach (var e in executions.Values) e.Abandon();
+                foreach (var pair in executions) pair.Value.Abandon();
                 if (!published) retained?.Clear();
             }
         }
