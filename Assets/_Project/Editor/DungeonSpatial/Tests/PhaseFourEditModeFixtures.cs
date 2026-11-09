@@ -21,7 +21,12 @@ namespace DungeonBuilder.M0.Editor.Tests
     [TestFixture] public sealed class PhaseFourDeletion : StructuralDeletionServiceTests { }
     [TestFixture] public sealed class PhaseFourLifecycle : SchemaEightLifecycleOwnershipTests { }
     [TestFixture] public sealed class PhaseFourSessions : DetachedCanonicalSaveSessionTests { }
-    [TestFixture] public sealed class PhaseFourWorkload : Gd66SaveWorkloadMeasurementTests { }
+    [TestFixture] public sealed class PhaseFourWorkload : Gd66SaveWorkloadMeasurementTests
+    {
+        // Keep the complete sizing regression in EditMode without repeating it in PlayMode.
+        [Test] public new void PhaseThreeLifecycle_EmitExactCompleteSaveMeasurements() =>
+            base.PhaseThreeLifecycle_EmitExactCompleteSaveMeasurements();
+    }
     [TestFixture] public sealed class PhaseFourLoad : DetachedSpatialSaveLoadCoordinatorTests { }
     [TestFixture] public sealed class PhaseFourCompleteSave : Gd66DetachedCompleteSaveContractTests { }
     [TestFixture] public sealed class PhaseFourSaveSemantics : Gd66DetachedCompleteSaveSemanticValidationTests { }

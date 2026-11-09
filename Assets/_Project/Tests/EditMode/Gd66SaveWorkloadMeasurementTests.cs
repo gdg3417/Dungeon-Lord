@@ -22,7 +22,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         // The retained-custody horizon is derived from the already approved raw-array bound,
         // not a proposed unlimited lifetime or a new gameplay policy. Preparation is test-only.
-        [Test]
+        // Discovered by PhaseFourWorkload in the Editor assembly. This synchronous,
+        // in-memory sizing measurement needs one execution, with every assertion retained.
         public void PhaseThreeLifecycle_EmitExactCompleteSaveMeasurements()
         {
             SaveSpatialMigrationLimitsProfile production = ProductionSaveLimits();
