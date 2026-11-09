@@ -1,0 +1,879 @@
+{
+  "artifact_ledger": [
+    {
+      "owner": "Qualification supervisor / Codex foreground predecessor task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b0312f18e857458e87593dbe62b4919c",
+      "purpose": "initial-15",
+      "retention": "preserve evidence and failure state; no cleanup eligible"
+    },
+    {
+      "owner": "Qualification supervisor / Codex foreground predecessor task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\5fa7899129d34d8e8671827236ccfe85",
+      "purpose": "faults-27",
+      "retention": "preserve evidence and failure state; no cleanup eligible"
+    },
+    {
+      "owner": "Qualification supervisor / Codex foreground predecessor task",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\foreground-predecessor-baseline\\Dungeon-Lord\\TestResults\\qualification-supervisor\\1ab9bbdba8a7485eb4246a9df23617bd",
+      "purpose": "failed-baseline-path-limit",
+      "retention": "preserve evidence and failure state; no cleanup eligible"
+    },
+    {
+      "owner": "Qualification supervisor / Codex foreground predecessor task",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\foreground-predecessor-baseline\\Dungeon-Lord\\TestResults\\qualification-supervisor\\60352a706881473b81bdff2b20ba846c",
+      "purpose": "failed-baseline-exact-restoration",
+      "retention": "preserve evidence and failure state; no cleanup eligible"
+    },
+    {
+      "owner": "Qualification supervisor / Codex foreground predecessor task",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\fgpv-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\353693297e044a439f6f1499cf19f64a",
+      "purpose": "baseline-with-EOL-mismatch",
+      "retention": "preserve evidence and failure state; no cleanup eligible"
+    },
+    {
+      "owner": "Qualification supervisor / Codex foreground predecessor task",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\fgpv-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\eca7367938034a89840776ec741d0b96",
+      "purpose": "baseline-performance",
+      "retention": "preserve evidence and failure state; no cleanup eligible"
+    },
+    {
+      "owner": "Qualification supervisor / Codex foreground predecessor task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ef6c5409cc6d45a2908ce809060263e8",
+      "purpose": "final-focused",
+      "retention": "preserve evidence and failure state; no cleanup eligible"
+    },
+    {
+      "owner": "Qualification supervisor / Codex foreground predecessor task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\e381f9285f3b4e75b140839f53e2ab2d",
+      "purpose": "pr-performance",
+      "retention": "preserve evidence and failure state; no cleanup eligible"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\foreground-predecessor-comparison-20261108\\faults",
+      "purpose": "faults preparation",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 FGPF",
+      "purpose": "faults save",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\foreground-predecessor-comparison-20261108\\main",
+      "purpose": "main preparation",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 FGPM",
+      "purpose": "main save",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\foreground-predecessor-comparison-20261108\\faults2",
+      "purpose": "faults2 preparation",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 FGPF2",
+      "purpose": "faults2 save",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\foreground-predecessor-comparison-20261108\\main2",
+      "purpose": "main2 preparation",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 FGPM2",
+      "purpose": "main2 save",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\foreground-predecessor-comparison-20261108\\main3",
+      "purpose": "main3 preparation",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 FGPM3",
+      "purpose": "main3 save",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\foreground-predecessor-comparison-20261108\\pr",
+      "purpose": "pr preparation",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor validation task",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 FGPP",
+      "purpose": "pr save",
+      "retention": "preserve pending independent review"
+    },
+    {
+      "owner": "Codex foreground predecessor task",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\foreground-predecessor-baseline\\Dungeon-Lord",
+      "purpose": "Restored failed path-length reproduction",
+      "retention": "preserve; evidence/review dependency"
+    },
+    {
+      "owner": "Codex foreground predecessor task",
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\fgpv-main\\Dungeon-Lord",
+      "purpose": "Qualified bounded baseline checkout",
+      "retention": "preserve; evidence/review dependency"
+    },
+    {
+      "owner": "Codex foreground predecessor task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\foreground-predecessor-20261108-01",
+      "purpose": "Initial preparation, original inputs and tool",
+      "retention": "preserve; evidence/review dependency"
+    },
+    {
+      "owner": "Codex foreground predecessor task",
+      "path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 20261027 foreground-predecessor-01",
+      "purpose": "Initial isolated test namespace",
+      "retention": "preserve; evidence/review dependency"
+    },
+    {
+      "owner": "Codex foreground predecessor task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\foreground-predecessor-comparison-20261108",
+      "purpose": "Local adapters, original input archives, reports and analysis",
+      "retention": "preserve; evidence/review dependency"
+    },
+    {
+      "owner": "Codex foreground predecessor task",
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\foreground-predecessor-comparison-20261108\\partial-evidence",
+      "purpose": "Preserved first collector output before explicit scene EOL proof",
+      "retention": "preserve; evidence/review dependency"
+    },
+    {
+      "owner": "Codex foreground predecessor task",
+      "path": "C:\\Dev\\Dungeon-Lord\\Docs\\testing\\evidence\\foreground-predecessor-validation-20261108",
+      "purpose": "Sanitized retained evidence",
+      "retention": "preserve; evidence/review dependency"
+    }
+  ],
+  "artifacts": {
+    "comparison.json": {
+      "bytes": 30965,
+      "sha256": "8615e7df8f551c7125d58b6305cf33b9090268cf07ca9498bf3c05b982747d60"
+    },
+    "qualification-evidence.zip": {
+      "bytes": 671652,
+      "sha256": "6fb8b8d5be784f49d59cb24a103864b5707e93edb6d3f73919bcb78ae88e2afb"
+    },
+    "raw-control-alignment.json": {
+      "bytes": 4652,
+      "sha256": "71020c64f3b500a2bbbc34364c35145c875842125e82c99559ace38ca0f061a1"
+    },
+    "raw-profiles.zip": {
+      "bytes": 349210,
+      "sha256": "abdf084c87e33919cbc57f0f66660cf153f2d1a958376dd2e39d520af1fec53f"
+    },
+    "unmatched-comparison.json": {
+      "bytes": 30977,
+      "sha256": "4b4b697d5450d3bd77738ec8221d9a6a03cd1a51d072b122701600305b460f3d"
+    },
+    "unmatched-save-differences.json": {
+      "bytes": 1168,
+      "sha256": "987006f8ed77281a13889166d01b93b3eeaf6de890976c796721f7124cdcb0a9"
+    }
+  },
+  "baseline_main": "01ff418143c0400d8e6fafba7a260f399bcdb2aa",
+  "bootstrap_scene_checkout_proof": {
+    "explanation": "Scene YAML has an explicitly retained checkout line-ending difference. Its Git blob and serialized values are unchanged. No raw profile, save, timestamp or gameplay field is normalized.",
+    "identical_git_blob_sha256": "654e43d1697b3bc1d894b2786b2f2a7147586f239e675fcfec05e864a75276f5",
+    "main_raw_sha256": "1bf0597959acd95636b1cabbf033855fdd0f173eb7b183a61516cdaf1db2374a",
+    "only_CRLF_LF_checkout_difference": true,
+    "path": "Assets/_Project/Scenes/Bootstrap.unity",
+    "pr_raw_sha256": "654e43d1697b3bc1d894b2786b2f2a7147586f239e675fcfec05e864a75276f5",
+    "raw_bytes_equal": false
+  },
+  "campaigns": {
+    "baseline-performance": {
+      "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\fgpv-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\eca7367938034a89840776ec741d0b96",
+      "case_count": 2,
+      "cases": [
+        {
+          "duration": 25.315063,
+          "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonSingleFloorFocusedFourRuns",
+          "result": "Passed"
+        },
+        {
+          "duration": 73.672846,
+          "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonTwoFloorFocusedFourRuns",
+          "result": "Passed"
+        }
+      ],
+      "id": "eca7367938034a89840776ec741d0b96",
+      "preservation_receipt": "C:\\Users\\gdg34\\.codex\\worktrees\\fgpv-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\eca7367938034a89840776ec741d0b96\\preservation\\preservation.json",
+      "recorded_status": "PASSED",
+      "source_sha": "dfe6808f21c7298d5d994f93e888433f7aabbdc2",
+      "xml_sha256": "5e02bee5bcf2550c8b632f862ac45dce4aeab21414eabe43bf0e2157f7756e63"
+    },
+    "baseline-with-EOL-mismatch": {
+      "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\fgpv-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\353693297e044a439f6f1499cf19f64a",
+      "case_count": 2,
+      "cases": [
+        {
+          "duration": 25.565201,
+          "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonSingleFloorFocusedFourRuns",
+          "result": "Passed"
+        },
+        {
+          "duration": 77.188216,
+          "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonTwoFloorFocusedFourRuns",
+          "result": "Passed"
+        }
+      ],
+      "id": "353693297e044a439f6f1499cf19f64a",
+      "preservation_receipt": "C:\\Users\\gdg34\\.codex\\worktrees\\fgpv-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\353693297e044a439f6f1499cf19f64a\\preservation\\preservation.json",
+      "recorded_status": "PASSED",
+      "source_sha": "dfe6808f21c7298d5d994f93e888433f7aabbdc2",
+      "xml_sha256": "047daad52326ba342264827b3de559fada719f1083b24d63c279c09549cb9c5d"
+    },
+    "failed-baseline-exact-restoration": {
+      "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\foreground-predecessor-baseline\\Dungeon-Lord\\TestResults\\qualification-supervisor\\60352a706881473b81bdff2b20ba846c",
+      "case_count": 0,
+      "cases": [],
+      "id": "60352a706881473b81bdff2b20ba846c",
+      "preservation_receipt": "C:\\Users\\gdg34\\.codex\\worktrees\\foreground-predecessor-baseline\\Dungeon-Lord\\TestResults\\qualification-supervisor\\60352a706881473b81bdff2b20ba846c\\preservation\\preservation.json",
+      "recorded_status": "PASSED",
+      "source_sha": "dfe6808f21c7298d5d994f93e888433f7aabbdc2",
+      "xml_sha256": null
+    },
+    "failed-baseline-path-limit": {
+      "campaign": "C:\\Users\\gdg34\\.codex\\worktrees\\foreground-predecessor-baseline\\Dungeon-Lord\\TestResults\\qualification-supervisor\\1ab9bbdba8a7485eb4246a9df23617bd",
+      "case_count": 2,
+      "cases": [
+        {
+          "duration": 6.107895,
+          "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonSingleFloorFocusedFourRuns",
+          "result": "Failed"
+        },
+        {
+          "duration": 4.707299,
+          "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonTwoFloorFocusedFourRuns",
+          "result": "Failed"
+        }
+      ],
+      "id": "1ab9bbdba8a7485eb4246a9df23617bd",
+      "preservation_receipt": null,
+      "recorded_status": "FAILED",
+      "source_sha": "dfe6808f21c7298d5d994f93e888433f7aabbdc2",
+      "xml_sha256": "5e7c77ec7babce9c0e06260e73d8f064ac3cc001513acf38e7cf8eb8006168a8"
+    },
+    "faults-27": {
+      "campaign": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\5fa7899129d34d8e8671827236ccfe85",
+      "case_count": 27,
+      "cases": [
+        {
+          "duration": 0.395954,
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RollbackDeleteFailureAfterCandidateProofReturnsCandidateSuccessAndNextSaveSettlesEvidence",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.521981,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"reopen\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.486025,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"changed\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.372985,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"context\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.366616,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"profile\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.369353,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"configuration\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.405101,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.ExposedValidationAndReturnedPartyCopiesCannotMutateEvidence",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.510993,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.InvalidBytesCannotIssueEvidence(False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.352947,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.InvalidBytesCannotIssueEvidence(True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 1.30662,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(False,False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 1.606106,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(False,True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 3.373766,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(True,False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 3.840589,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(True,True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.041536,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.SharedWriterDefaultsStillValidateThePredecessor(False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.039477,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.SharedWriterDefaultsStillValidateThePredecessor(True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.540618,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.WaitingReleaseMatchesFreshValidationAndKeepsCausalProof",
+          "result": "Passed"
+        },
+        {
+          "duration": 1.082742,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Flush,1)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.925685,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Replace,1)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.969871,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Write,2)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.416689,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.RecoveryConditionChangesAreStagedBeforeAdmissionWhenDoubleWalletDebitRoundsAway",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.618563,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.UnprovenRollbackRequiresRecoveryAndDoesNotPublishTerminalEffects",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.104577,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Write,2)",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.244395,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Replace,1)",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.126451,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Flush,1)",
+          "result": "Passed"
+        },
+        {
+          "duration": 1.268416,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.UnprovenWaitingReleaseRollbackRequiresRecoveryWithoutPublishingEitherParty",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.185372,
+          "name": "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.CommittedSettlementWithInterruptedAcknowledgementResolvesWithoutAnotherGrant(False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.134075,
+          "name": "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.CommittedSettlementWithInterruptedAcknowledgementResolvesWithoutAnotherGrant(True)",
+          "result": "Passed"
+        }
+      ],
+      "id": "5fa7899129d34d8e8671827236ccfe85",
+      "preservation_receipt": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\5fa7899129d34d8e8671827236ccfe85\\preservation\\preservation.json",
+      "recorded_status": "PASSED",
+      "source_sha": "e0b30457991c92ad0182180a3a05b0d12c2ba82a",
+      "xml_sha256": "a8d75a5e5b6e9554d4644478aa33f77c13724a5ca0305600ae4adc61a9deb151"
+    },
+    "final-focused": {
+      "campaign": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ef6c5409cc6d45a2908ce809060263e8",
+      "case_count": 31,
+      "cases": [
+        {
+          "duration": 0.414578,
+          "name": "DungeonBuilder.M0.Editor.Tests.PhaseFourWrites.RollbackDeleteFailureAfterCandidateProofReturnsCandidateSuccessAndNextSaveSettlesEvidence",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.362928,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.AlreadyAcceptedUnclosedPrefixesDrainExactlyLikeFreshValidation(False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 6.368544,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.AlreadyAcceptedUnclosedPrefixesDrainExactlyLikeFreshValidation(True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.395027,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"reopen\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.498372,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"changed\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.359514,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"context\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.455419,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"profile\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.384601,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"configuration\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.38816,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.ExposedValidationAndReturnedPartyCopiesCannotMutateEvidence",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.346966,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.InvalidBytesCannotIssueEvidence(False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.343846,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.InvalidBytesCannotIssueEvidence(True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 1.179431,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PartitionedPumpsPreserveExactCanonicalOwnerConsequences(False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.989877,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PartitionedPumpsPreserveExactCanonicalOwnerConsequences(True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 1.254175,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(False,False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 1.761617,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(False,True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 3.208494,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(True,False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 3.851252,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(True,True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.041242,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.SharedWriterDefaultsStillValidateThePredecessor(False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.038699,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.SharedWriterDefaultsStillValidateThePredecessor(True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.465275,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.WaitingReleaseMatchesFreshValidationAndKeepsCausalProof",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.905501,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Flush,1)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.912724,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Replace,1)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.907937,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.FailedTerminalPumpPublishesNothingAndProvenRollbackRetriesExactlyOnce(Write,2)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.591309,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.RecoveryConditionChangesAreStagedBeforeAdmissionWhenDoubleWalletDebitRoundsAway",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.609679,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonB3B2.UnprovenRollbackRequiresRecoveryAndDoesNotPublishTerminalEffects",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.102465,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Write,2)",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.063286,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Replace,1)",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.245226,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.FailedReleaseTransactionPublishesNoSettlementOrTransferAndRetryIsExactlyOnce(Flush,1)",
+          "result": "Passed"
+        },
+        {
+          "duration": 1.228385,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.LivingDungeonTwoFloor.UnprovenWaitingReleaseRollbackRequiresRecoveryWithoutPublishingEitherParty",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.154142,
+          "name": "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.CommittedSettlementWithInterruptedAcknowledgementResolvesWithoutAnotherGrant(False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.161434,
+          "name": "DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract.CommittedSettlementWithInterruptedAcknowledgementResolvesWithoutAnotherGrant(True)",
+          "result": "Passed"
+        }
+      ],
+      "id": "ef6c5409cc6d45a2908ce809060263e8",
+      "preservation_receipt": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\ef6c5409cc6d45a2908ce809060263e8\\preservation\\preservation.json",
+      "recorded_status": "PASSED",
+      "source_sha": "13797005244cd78f7ba8594c0ca713421554997b",
+      "xml_sha256": "613a886ef4c2c1333ba976abd30bb7acc87bb2897367e41427b50d1493dcbf08"
+    },
+    "initial-15": {
+      "campaign": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b0312f18e857458e87593dbe62b4919c",
+      "case_count": 15,
+      "cases": [
+        {
+          "duration": 0.869752,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"reopen\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.455863,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"changed\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.390011,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"context\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.384183,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"profile\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.39101,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.EvidenceRejectsStaleOrChangedDependencies(\"configuration\")",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.407962,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.ExposedValidationAndReturnedPartyCopiesCannotMutateEvidence",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.36814,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.InvalidBytesCannotIssueEvidence(False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.350794,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.InvalidBytesCannotIssueEvidence(True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 1.30838,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(False,False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 1.647891,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(False,True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 3.499001,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(True,False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 3.822515,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.PumpPartitionsMatchFreshValidationAtEveryPublication(True,True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.045453,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.SharedWriterDefaultsStillValidateThePredecessor(False)",
+          "result": "Passed"
+        },
+        {
+          "duration": 0.044544,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.SharedWriterDefaultsStillValidateThePredecessor(True)",
+          "result": "Passed"
+        },
+        {
+          "duration": 2.693816,
+          "name": "DungeonBuilder.M0.EditorTools.DungeonSpatial.Tests.ForegroundPredecessorValidation.WaitingReleaseMatchesFreshValidationAndKeepsCausalProof",
+          "result": "Passed"
+        }
+      ],
+      "id": "b0312f18e857458e87593dbe62b4919c",
+      "preservation_receipt": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\b0312f18e857458e87593dbe62b4919c\\preservation\\preservation.json",
+      "recorded_status": "PASSED",
+      "source_sha": "a9c8965376922d1225e78e19a2b386c62517d651",
+      "xml_sha256": "b871119c68c1b993b8631416d59815dc946334e5f97b49104857a3a4f7fee633"
+    },
+    "pr-performance": {
+      "campaign": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\e381f9285f3b4e75b140839f53e2ab2d",
+      "case_count": 2,
+      "cases": [
+        {
+          "duration": 21.725638,
+          "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonSingleFloorFocusedFourRuns",
+          "result": "Passed"
+        },
+        {
+          "duration": 65.553664,
+          "name": "DungeonBuilder.M0.Tests.LivingDungeonTwoFloorProductionProfileSceneTests.LivingDungeonTwoFloorFocusedFourRuns",
+          "result": "Passed"
+        }
+      ],
+      "id": "e381f9285f3b4e75b140839f53e2ab2d",
+      "preservation_receipt": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\e381f9285f3b4e75b140839f53e2ab2d\\preservation\\preservation.json",
+      "recorded_status": "PASSED",
+      "source_sha": "13797005244cd78f7ba8594c0ca713421554997b",
+      "xml_sha256": "162b597ea3455cc8a7a8a58bb52819add3a39cfda870eca5f713c5f087a09664"
+    }
+  },
+  "historical_preservation": "PR #260 and its original ledgers, commits, failed campaigns and worktrees are unchanged. No owner save, build or unrelated process was changed/deleted/terminated.",
+  "identical_control_input_count": 176,
+  "identical_control_inputs": {
+    "Assets/_Project/Data/Bootstrap.meta": "fe461c5e9a7b09327490ab62e4ab7319e49f9bc700868c33f8a2d181699a115c",
+    "Assets/_Project/Data/Bootstrap/build_config.json": "edf2b29d6ffa3f3cecfd03d1607acd4370742719d316cf2889e43c3e5ac26828",
+    "Assets/_Project/Data/Bootstrap/build_config.json.meta": "6ec62fa702643104bb302ae2066ee6f9d560e08d69071014df72a8c34f5e02a9",
+    "Assets/_Project/Data/Bootstrap/content_bootstrap.json": "8a90c78da4e0941f4da7e02292de7df0e8cd53bc84ac3ab2c78d3014d9500b8f",
+    "Assets/_Project/Data/Bootstrap/content_bootstrap.json.meta": "aa51b33c9e7ddf807fbafd67eb0c34e9dca6f15c7575cb02ebcb1c215668bb0d",
+    "Assets/_Project/Data/Bootstrap/content_manifest.json": "757dc615bb2d9a418ba947536617aba629e5efcdbd5589d1ad771fedc79af4d3",
+    "Assets/_Project/Data/Bootstrap/content_manifest.json.meta": "fc60169d45ac36c460a7fa5a13dfc4cdfa83631540fdda43318813acf9425809",
+    "Assets/_Project/Data/Bootstrap/dev_commands.json": "bf1ce67cf81637fc09060d4d4ed575a848654cfe796d357ccf518ce372e1ff86",
+    "Assets/_Project/Data/Bootstrap/dev_commands.json.meta": "423b2ca28817fd4ada8750315b9710bf4adeb807fdf745a22b435ff321140cf9",
+    "Assets/_Project/Data/Bootstrap/heat_runtime.json": "94d5ce5af73bcb7cddc0e0f9a54bcc4de5f221b558b6562a1c6443ec423e04a9",
+    "Assets/_Project/Data/Bootstrap/heat_runtime.json.meta": "7a89d89ecd86ed1b74cd07eed6f8e5f9ce104deb9c30a7d48883773df324bb54",
+    "Assets/_Project/Data/Bootstrap/loot_config.json": "f0efb530aa6673c7cd12d2b2d5cbf87b4b93a49f77af6fd2af30e761d6ba327a",
+    "Assets/_Project/Data/Bootstrap/loot_config.json.meta": "2103fc7573dfc351fd0226d8b749451443c4760a5ce01dc8bee0eaccbf4262a2",
+    "Assets/_Project/Data/Bootstrap/run_simulation_config.json": "f07657572530df1955ae904c66a76feeb71ca7ae8a6e8382c25bb8b7a1cf4e16",
+    "Assets/_Project/Data/Bootstrap/run_simulation_config.json.meta": "ceffc6d1aaa741ce36917bec928aad83f9131401cdfc14169fe49b006c6e474b",
+    "Assets/_Project/Data/Bootstrap/schema_versions.json": "175ed4122c34284cea980fcde266eb4cc6d62454f810520e8fba6fb38d6e538a",
+    "Assets/_Project/Data/Bootstrap/schema_versions.json.meta": "1c68bcffb2ab2ce40f52514f4d9745d144ef2ab6385ea2360e2e8dd0b6ae3971",
+    "Assets/_Project/Data/Bootstrap/string_table_en.json": "cf60cd0a186df5958a5f78a1ec0f2e0cd0a7dd6289f9822ed33e5d9674706933",
+    "Assets/_Project/Data/Bootstrap/string_table_en.json.meta": "fb141f6a05d73ae06c7e75ea78eb87a5a7b03d162a6685aca591caabdf9c3f97",
+    "Assets/_Project/Data/Bootstrap/structure_simulation_config.json": "21c3a64cdc9a9658711d1c3fea2dd609294c0cfceafdcbd83f20f96de10f7a45",
+    "Assets/_Project/Data/Bootstrap/structure_simulation_config.json.meta": "e7ce3c2e29ab2c987d453be44911ebdf71e15b53335ea55c98aa3ec98a0a2e0d",
+    "Assets/_Project/Data/Localization.meta": "d9e41bcca9b19c5c538ad2b0baa0c41ae79fea0fe7a1db578d226892b438c4df",
+    "Assets/_Project/Data/Production.meta": "20ce710e930945338e97784fe5587b3c13ab91e61d964c6fd8aefd4ff75025df",
+    "Assets/_Project/Data/Production/DungeonSpatial.meta": "76a8bdc078b872bad490a736f22e21434fab59a122830790a6d5501d7e9ee52a",
+    "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json": "d50b6bec4e378ac486d813a3c01c7cdc2a56c138eddf50e2eae224c8c758d227",
+    "Assets/_Project/Data/Production/DungeonSpatial/content_manifest.json.meta": "d9899a84f8538eb6e4bb4c5606161a8d069949db56c47af4d1d86823814fcfea",
+    "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json": "5909423440d0923db58c5f2433807f9a3e943cbeedc51c220bafe9950610bb4b",
+    "Assets/_Project/Data/Production/DungeonSpatial/dungeon_spatial_content.json.meta": "9ec0d7deddd32c996566976058ccd797bf4b7e58c6a7fbcbe5ce94e1a3ded3ef",
+    "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json": "cbb523afd7de68ed973697f2300b7b56857f19df7f07339837196f03fdc181e2",
+    "Assets/_Project/Data/Production/DungeonSpatial/spatial_layout_compatibility_profiles.json.meta": "46759c1e3bb98fe3f2159a705e0af50f67d3c85ebdf12f57ed38a4ab7f1d4c4e",
+    "Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json": "37ece030181bb51ff887a75aa41a2293bdece9eed8d292ef6ec40e48beef3262",
+    "Assets/_Project/Data/Production/DungeonSpatial/string_table_en.json.meta": "55fb1be105353032dc5afe2add138ad4786d09de5cba4299e9367dd9d8e1ff8c",
+    "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json": "9d279717c15b9a1397d86261b8fd95df835cb2688ffa35b20e3c5d2773fa47c1",
+    "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json.meta": "c4887999253e0ca105bcf813c24a902176daf6564c241ae75d666703c65b0846",
+    "Assets/_Project/Data/Production/Research.meta": "82a3dbbf1af33291fd0299f73240f4456668462bcb16d6a48ca83879b6b2cf4c",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle.meta": "cec1450b2808a3b7ff0017e08fe6b3ab0b07559317e1a1829331c3707cab948a",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/README.txt": "c5aa6a754c61b9dbf418c0835b4d0f1fa0b68e3b222d87d9105ff3b0a315119e",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/README.txt.meta": "a62c406495e6fa6aaf06a37a96a3c26cbd0b813323ff90cf761521e37196f758",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/all_research_nodes.json": "56232db70606b0ec9ad358112fd9ec69cd8c4ba9a0277e19cd76e77542124291",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/all_research_nodes.json.meta": "fa5cbfde1861f3b492f89f7f2398f8e26a9e77334f9da5207de9dd5a4e8c9f6d",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology.meta": "483f2d6590bd76cf60a8e61f2e801223576aaf0842832dc3b071d0644c791d2a",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/cost_profiles.json": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/cost_profiles.json.meta": "033bd051cf9a6613f3fe91b3bc80e17e3e0a5e810264aa04b86176e3490af83c",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/lint_rules.json": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/lint_rules.json.meta": "e0c663c29cdfbf148a5cf86064e5488f441787bb1596613acd153b8cc6a27ec3",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/migration_map.json": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/migration_map.json.meta": "1e20bede937d9f7d390274930e0ead5b09da7885fc92080fa759dc0ec1806cc7",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/research_nodes.json": "4d2277f1965d94a910cb40b0191ef1d48cd688106aecf2d1bf8eea2479c1b038",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/research_nodes.json.meta": "1a72cff537456ae77a213f6ad0b207a1037c05ce47c5b542932d74769268bbb0",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/tables.json": "b1205a2f9c1169e91ee0d57d49afcb3cb2fc78c527b002c3e31d8bca85c41f00",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/arcanology/tables.json.meta": "49c353c2d8e28391b63d467364caf6598f0a19f56f8b96b2fd565ab95f5c575a",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture.meta": "4227461e7d8aad1a4954c936c330fed1f2547b04604040738fb10fb4372a1a89",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/cost_profiles.json": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/cost_profiles.json.meta": "798390abe140adca14b632c7637f6dcb4b2d12e2d4b2c7d9769f4c0decd54767",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/lint_rules.json": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/lint_rules.json.meta": "d23b416ef5122d23f52078c3e97ed6a00b6b3b672891e37acaf84288ba4371b3",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/migration_map.json": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/migration_map.json.meta": "953b635abd91b550c98503375ae478f3547a198e03ac65243585ed0be6dc6948",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/research_nodes.json": "4c89c5ca09a5778826929f85e4dc3039aaec0957842110b97842b383b148174e",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/research_nodes.json.meta": "62bd940365f0222a6b010a700ac1704754d3baf845cbc9aba041afd3b17f9ff4",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json": "6b83faeff4a1180a86bf2c6b109110888022baad720311fd02808a0c2fc62870",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/architecture/tables.json.meta": "b31293337a7fcb91ee0050ab573d36e8c57356a2389a123974c3deb79fbe0683",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech.meta": "ab199b4001eafe8a49354f484557af2d5866db7de01dc953a6d29d79b77c1312",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/cost_profiles.json": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/cost_profiles.json.meta": "0402497170698f48b5357f3d0b46483df63395b46ea2d8afb03f148d0d7b600d",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/lint_rules.json": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/lint_rules.json.meta": "1921945707515693ae95c09e9bd6567bd5ced1703156051fa9cd2c483fa13e6c",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/migration_map.json": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/migration_map.json.meta": "1717c74853f36efa2acb52d0b1e3f3f9ae5f11ada8d51470e541417ca07b8fe8",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/research_nodes.json": "fb3a4bdcf0b57cd7695cb03ac6896c4ada71300d9f49a7e369c3fbbb633027b0",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/research_nodes.json.meta": "94988d71000146a273d67c3b741b98680df15caaed72dfccbf56411b2da7ed18",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/tables.json": "a301687c2c0f863cb731e3edfbde6a8f62fbc11ce860d80aff9a3283cd534519",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/coretech/tables.json.meta": "8dcae52f3d6ec40e334d780e0b28612c107247561d3b6c0e7ebd6b4a00d9fb39",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy.meta": "ef4f5b3f013936fb666c428fa6465f2915ccd281a459787405dba74a87a7e71d",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/cost_profiles.json": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/cost_profiles.json.meta": "e578024bac3ec66b172992bca6408cdf23d1835ca4d6a92cb399c05c50b3b156",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/lint_rules.json": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/lint_rules.json.meta": "0007e5d4b60558610abec50c8d021b3bfad0635b88cffdb42c6fbf0fd2b9bb38",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/migration_map.json": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/migration_map.json.meta": "06c29297757de562ca14aa260625775c17d907e6cf6d150b7985c66c61322a65",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/research_nodes.json": "b29068659ccbc92951154ad47996d0d89cb63a0d9e53314f6991fce72961013d",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/research_nodes.json.meta": "278c80cae687faf2ba90c50672e99713e4b4c1f5878e5e1573eec5649821d2be",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/tables.json": "097fd12a8c777e87c47314e30612c6efa25ec90b64e049dcaec6d05ae671768d",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/diplomacy/tables.json.meta": "08e20b160957060bfefa3476b83b087efdacd63d3523d6eff989776b057b9b7f",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/manifest.json": "cbb1b1825ddad3c6344d34130433cbab9144b08e9bd9dd704850826698da642b",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/manifest.json.meta": "0c8ffee8da89810673ec1e51595410c175c2c74135a11d71c9d9b170f39b963f",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology.meta": "79924c6d0818c0f80adacd992d4c3b867f801693e4fee4d3eb8a740ebfa82a35",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/cost_profiles.json": "380fa552588e508f3120fdeec96a0ae2c40583c4b470c05422003cc34160d594",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/cost_profiles.json.meta": "896f2f00bb3bb9f0f8abc11a1bdef50ee9c6dda8342862d7049f05b39928a4f5",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/lint_rules.json": "89e24e75a042bdebb241854159b8e81723b0901831fe130b6678a25365a93cad",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/lint_rules.json.meta": "f788db5bc38b78372eb85f3fea0c90a6b61bd52334a704eca9074bfca7a434c9",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/migration_map.json": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/migration_map.json.meta": "8df254c1e8df06e7aaabf89f8502cadeeef1662eab5e7e643ac914da44dc4e9a",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/research_nodes.json": "eb9dd8b3a9900e90852ce3dd843d210f368b0236dab5e873c4a520eec07d7144",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/research_nodes.json.meta": "50f6377f9deab65f3103ed09daef9b9ad93f3be1bd90f8bc0077166a23ad60cb",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/tables.json": "774579042d82819619e6d649e305d2ef9c95dffc1e620f79bb74bd87299a3c6c",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/monsterology/tables.json.meta": "70073e557db70a4875d8bc4f3bb0a541d1b5c1c3d48206c2b9098028eb1041e5",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/schemas.json": "3c79a38ee5cab3177234621c0c51ef1e5b8e6838764ea1051cef6bad79ec9496",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/schemas.json.meta": "535d40d19f7b092dec4219879fcc5f3de4d5e85437f209b10ae9aaa50f5092db",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft.meta": "ab5e48d148b8251c517e1bf7177b9c3c7b276a74d13767183a149a522e8816c8",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/cost_profiles.json": "27c9609005415f9615d0fad9ad06697de2c6be2be3e8be6511c11e39850b6926",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/cost_profiles.json.meta": "fe27fc09f9348f9cc40e3643cb6dd81b02b6eedeb473a358584d5aefbfc5b8d2",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/lint_rules.json": "e168a482d762684326c032b7449005b0a118a032a8cc8fceb926b1fc2ab79692",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/lint_rules.json.meta": "5760bd839fe2f5233d92f690cf56b709d5a697c875c89f5b12eb93a909c7386d",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/migration_map.json": "7b59fed5f828d977329f908bf0ece83437c5f709a46cd98a8b1d30df345ca197",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/migration_map.json.meta": "96f5429d9574b4e0064a25eae28b8f358128048cec240b27ac685b2e3ed10c3a",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/research_nodes.json": "c1d97843a98e4df969706a7e91d2ef82a5d09f43fc0b7da9a11908a9fa10cae4",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/research_nodes.json.meta": "0163e8c247fe987e14fe87ee0a77a1923f4ca80e66cb012f956ec843072d6b0b",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/tables.json": "5d5f7b119d8663fc65decc8dd433892921b2a967ffdd67da2b81f7bcc0d8db5e",
+    "Assets/_Project/Data/Production/Research/Dungeon_Builder_Research_Export_Bundle/trapcraft/tables.json.meta": "2c0f8bf17ddb22a0ce8b6a9d8381bf646a2ab423df989f8585428e9a0b85133d",
+    "Assets/_Project/Data/Production/Save.meta": "8798510c8d758992be07cdb6fd3a4d341275f0e05755db01fb1f456051c17aae",
+    "Assets/_Project/Data/Production/Save/living_dungeon_qualification_profile.json": "7a424f236b9af83cae4eb553a20a1506af7f8f6bc63d744cdbc0a203419242fb",
+    "Assets/_Project/Data/Production/Save/living_dungeon_qualification_profile.json.meta": "fed34bf9c0d497fd56c58704ab0f65c4e4a3a8b15e0641668ec60fc359bec15b",
+    "Assets/_Project/Data/Production/Save/room_content_position_migration_profiles.json": "599db0c16f1b3414bb4d887ef953d2c8cb1acba03dbab68a60fd65a83e1468f1",
+    "Assets/_Project/Data/Production/Save/room_content_position_migration_profiles.json.meta": "9e1a56583bce40a5a469ab4722be8a40cbcce36c457338bcdd83f41d2499cc25",
+    "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json": "ae033c8f7ab6dfde5cc66b8abbb6878070a7e377d99dd7d969a32b3f1dfc8600",
+    "Assets/_Project/Data/Production/Save/room_content_spatial_occupancy.json.meta": "5cfc0facfb85a6839d400ac84f2c166c74d88391df42261420d01e0de927ebca",
+    "Assets/_Project/Data/Production/Save/save_spatial_migration_limits.json": "a426b897ab6fe350d9c1048af597615adb925b5137658e33534765ad11f282d4",
+    "Assets/_Project/Data/Production/Save/save_spatial_migration_limits.json.meta": "e94029f05b31e38856617d0197dc979a460aaabf8ed0b0a9ab2abfea3c199685",
+    "Assets/_Project/Data/Production/Save/structural_content_removal_policy.json": "5edad7716383b9d2689263556e4e071903d09e001fcae99c130b2d23b7a6d64a",
+    "Assets/_Project/Data/Production/Save/structural_content_removal_policy.json.meta": "ad47049486a8b32123e7644bac215cad197739d622362b7444ecf722311f8729",
+    "Assets/_Project/Data/Schemas.meta": "d129408f3566d40120c697829bcc7a7f3cefb0dd3318b29439ecbe1c1a037959",
+    "Assets/_Project/Data/Schemas/heat_modifiers.schema.json": "a1e5e81c71b5bc0a7d8ea079c8a75ba78d8cd2d1bdaf81fddaf75ffe336a6f59",
+    "Assets/_Project/Data/Schemas/heat_modifiers.schema.json.meta": "c3eace85652ce9ce02415f9966dcb27b67094c1c1c00c9a32bfae729fea855ae",
+    "Assets/_Project/Data/Schemas/mana_modifiers.schema.json": "9ecdc73b4235710cd988045b148f8c6a4dee8cd1b4d06b8716dbe731738cae30",
+    "Assets/_Project/Data/Schemas/mana_modifiers.schema.json.meta": "fb0bb0f19868a75be853ffd3fe45a57a6f790c74cf9868277ff0febfebb58a97",
+    "Assets/_Project/Data/Schemas/research_modifiers.schema.json": "3321a1269ee2e190839d182bb109e8b05c8975cb896ab48cea1ebc2a35323615",
+    "Assets/_Project/Data/Schemas/research_modifiers.schema.json.meta": "c794f90af5325c3e068fafaf41c558413316dc686697a0b638a21e1a982f5c99",
+    "Assets/_Project/Data/Schemas/schema_bundle.json": "14e2a462387ddbabdfa6c9164fd442f27333a3793956edf3b889a2f09aefcfbb",
+    "Assets/_Project/Data/Schemas/schema_bundle.json.meta": "dca109f6100aed3cf58b3f264d8cbbdeac24b7db2ddb29db6fbf46cb8beb47e6",
+    "Assets/_Project/Editor/DungeonSpatial/Tests/LivingDungeonTwoFloorProductionProfileSceneTests.cs": "3256594e543dc6e6078448f4bf2b6f49c503d2c183ca1afa4b6a4a2a4524d607",
+    "Assets/_Project/Resources/content_acquisition_economy.json": "2761a84ccc358cdb053c6cba6631e86900fd158b51fc91885b33d4bb7ac9c39f",
+    "Assets/_Project/Resources/content_acquisition_economy.json.meta": "59dbc705618ea88a49ca889867f72315b96c9a5bb05ad29556074912b673ff7d",
+    "Assets/_Project/Resources/floor_construction_profiles.json": "a890300afe306035a43fbbc60e10f94f7ba6b1f8f9b018ce5d513a3a522f0117",
+    "Assets/_Project/Resources/floor_construction_profiles.json.meta": "faebdef7ab4c8b0e1989e99263e59120d5a0fe8cfa957288c34ea07cfe8275aa",
+    "Assets/_Project/Resources/living_dungeon_foreground.json": "7edc60a6c06d4ce29678b5818a348b8bfc3fb78aff3f6367744eaa3a06c957f6",
+    "Assets/_Project/Resources/living_dungeon_foreground.json.meta": "36552e4a66ec6f5fb25cbea277b73dde3dc5b78ce539ab752398ccda2e96738d",
+    "Assets/_Project/Resources/living_dungeon_foreground_v2.json": "696b80459259d590145f9a312e288b003f26d589d5fe53e3d46e9ac73b88ef79",
+    "Assets/_Project/Resources/living_dungeon_foreground_v2.json.meta": "0999a7c51bc1eaa86332d9470dc5f8dfcba8985ff2d9609e041d5db96fedc4ef",
+    "Assets/_Project/Resources/monster_recovery.json": "5d82724b0673c3ef1a2053b47c9282489857b67e5f4767910c8a5d6b9157c892",
+    "Assets/_Project/Resources/monster_recovery.json.meta": "91c973edb94d516beb294d0b1b88c2466cfdd905219e3493d27c5dd31bf8a724",
+    "Assets/_Project/Resources/passive_online_mana.json": "2848ccfa6ffde744ade883edb0171bfbe993bbee5c32758a70d8ee4b690e6639",
+    "Assets/_Project/Resources/passive_online_mana.json.meta": "04a8721135507cbfb5d85e59ae5d4db699d727cc92bc5261a60df6947edce01a",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema13.json": "e3ba04771aea8955afec08f52f67b7b5f124aec46d2803802d66208435c750ea",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema13.json.meta": "20a5046929205fa237cc80b1ba92a8c9bbe25b7a6849df59ade374a31f1db223",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema14.json": "f535a0f7ba406916eb088dc499e58630e95eac340e88f18ce47227914bde642f",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema14.json.meta": "0bd34ca9bd997826fabb86299637b4a2e8a9feadb02692715464e456f4bdebee",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema15.json": "aa162762f7c437ca58f8a4f8f4cccb22e6868801269dc6f04dd3d241482a9782",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema15.json.meta": "7315371d5b060a950645763ef9fb3a8b0ac5baeaf8aaa98aa4edfad7f3a72101",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema16.json": "0afdf5dc4f4228d8589ec3093b52c595d4851602414dec88750de3aea4d3cdef",
+    "Assets/_Project/Resources/save_spatial_migration_limits_schema16.json.meta": "0f94134cea2b7d3e073bd00d9accc8a94a191de2a80a61f72a52b42c07b55b94",
+    "Assets/_Project/Resources/structural_economy.json": "a285ddafcb4f430472f691fb4c25225a132feadaa6bc13feb74d430df33d2803",
+    "Assets/_Project/Resources/structural_economy.json.meta": "f4e69161fa0c8624e5741cd5dbb62c65fb084e943643e5e47bf57ede0550f362",
+    "Assets/_Project/Scripts/Core/GameRoot.ForegroundProfile.cs": "4de5fc3d9e5b1fe0f1968b8bd7674134b37780c2ba5b0e539c2f32347bb7f453",
+    "Assets/_Project/Tests/EditMode/LivingDungeonTwoFloorTests.cs": "ac730c8dddc8680484e04de031fa63bc24a4418dc094de6323c034e6fb8bc3b5",
+    "ContentAuthoring/DungeonSpatial/authoring_manifest.json": "7db1ab54c76e5f4e1ed1510902d198a90d07923637edb91dc7c40ecf152ef70a",
+    "ContentAuthoring/DungeonSpatial/authoring_schema.json": "f2ff81c31c693448881c00b0e24c004aa49d7ac509af731199f66d4b2c329294",
+    "ContentAuthoring/DungeonSpatial/tables/corridor_compatible_sockets.csv": "654c6160f88ab72e0d32eadac8cb7f654b707bb83fb0a3a493a47bc1cc44cd5b",
+    "ContentAuthoring/DungeonSpatial/tables/corridor_orientations.csv": "fde5ea5acc46ac04e9f371fe539520f1a50a94140e7f476f477391f1b65d7c88",
+    "ContentAuthoring/DungeonSpatial/tables/corridors.csv": "20b0be549b08a649b7f425c6d14ca5ff8ae6b0dd939c0b9abf543215ca999b32",
+    "ContentAuthoring/DungeonSpatial/tables/fixed_structure_connection_points.csv": "30588b415dbc76bee01c6e425ee5426048c295f35adfc34bc7d699eebad6d107",
+    "ContentAuthoring/DungeonSpatial/tables/fixed_structure_orientations.csv": "7ee7db62474a942fc190829efb0a6519faa4a9cbaf9eacb745f9eb69060bdef1",
+    "ContentAuthoring/DungeonSpatial/tables/fixed_structure_reserved_offsets.csv": "1656164348bb1fa604e7d29fe0e141a58bcfc6af01e17c648464678183132778",
+    "ContentAuthoring/DungeonSpatial/tables/fixed_structures.csv": "b0629bec11d2098f8421fa882b7f1256d3d04d082886a930a7acd2acdaacd995",
+    "ContentAuthoring/DungeonSpatial/tables/floor_allowed_corridors.csv": "cd82b24a5c34e1952adaae8e2e6f2a3ecfa509d8e295c9c557c24749b37ba568",
+    "ContentAuthoring/DungeonSpatial/tables/floor_allowed_rooms.csv": "71c5d504e40421f5f7ba8abba2aceab7d6ed55b00e9d9a97bbc52a23abd2e0f1",
+    "ContentAuthoring/DungeonSpatial/tables/floors.csv": "4cebdba104cb747f2c93fb4005f9b8b630e04995b614f51bfd0d8ef8323b0069",
+    "ContentAuthoring/DungeonSpatial/tables/localization_en.csv": "534330a30f1278bc7b7ac01c5f7263f6bdbdb15970903f41db41592a48f86e4a",
+    "ContentAuthoring/DungeonSpatial/tables/room_connection_points.csv": "b891267d400cd0e148a5b69db59f3db654069c74ceb067a482e4a548d5db1fe5",
+    "ContentAuthoring/DungeonSpatial/tables/room_orientations.csv": "7954bd7574471309fb24b13a7ab978227da10fae6b66e7071f26fdbaeb5484df",
+    "ContentAuthoring/DungeonSpatial/tables/room_reserved_offsets.csv": "c83130911b7af69f67557ffbf8fee4efc14a217bdd7113337181399080e32ee1",
+    "ContentAuthoring/DungeonSpatial/tables/rooms.csv": "714f722487d188c21331926f920a94d6f1a43d0bbe8a206a5ebb4df2fc47e793",
+    "ContentAuthoring/DungeonSpatial/tables/socket_compatibility.csv": "e016564613674f5e29158c0e6be6d5fbe60f0e88816c6483f5c084f149aa21dd",
+    "ContentAuthoring/DungeonSpatial/tables/socket_types.csv": "320f5562636ed4a475a99acaef2acdb056a4074352f61e83d534513e53e61240",
+    "Packages/manifest.json": "2f588f98c98748f66bf2ce1904fc53c8cde092b7f77356d22dd5427abe1c4b8f",
+    "Packages/packages-lock.json": "6631ee6b5b91852643e7626bfb0ca499a88e7fe4264914776bff02a39a8b1386"
+  },
+  "pr": "https://github.com/gdg3417/Dungeon-Lord/pull/261",
+  "scope": "Focused Unit/SIT and bounded Editor frame comparison only. No broad suites, Windows player qualification, UAT or merge.",
+  "unique_focused_test_cases": 31
+}

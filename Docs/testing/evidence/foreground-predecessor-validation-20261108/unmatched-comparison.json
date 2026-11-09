@@ -1,0 +1,1038 @@
+{
+  "owner-inactive": {
+    "main": {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\fgpv-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\353693297e044a439f6f1499cf19f64a\\living-regressions\\fixture-inputs\\two-floor\\f9f9d0eb\\editor-owner-inactive.profile.json",
+      "sha256": "3b1b91fad04774177333db27491989324addbd2e9a78c69337662373cbde418a",
+      "completed": 4,
+      "frames": 664,
+      "dimensions": [
+        1280,
+        720,
+        "Default"
+      ],
+      "prior_validation_calls": 96,
+      "complete_validation_calls": 397,
+      "durable_semantic_readback_calls": 67,
+      "areas": {
+        "Stage": {
+          "calls": 96,
+          "inclusive_ms": 4867.1378
+        },
+        "Prepare": {
+          "calls": 96,
+          "inclusive_ms": 4760.9081
+        },
+        "Open": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "Validate": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "Projection": {
+          "calls": 96,
+          "inclusive_ms": 64.2551
+        },
+        "Restore": {
+          "calls": 556,
+          "inclusive_ms": 2257.3184
+        },
+        "LifetimeProbe": {
+          "calls": 4,
+          "inclusive_ms": 330.4059
+        },
+        "Inspect": {
+          "calls": 67,
+          "inclusive_ms": 323.6507
+        },
+        "AtomicWrite": {
+          "calls": 67,
+          "inclusive_ms": 2786.4608
+        },
+        "Publication": {
+          "calls": 67,
+          "inclusive_ms": 403.7957
+        },
+        "Present": {
+          "calls": 67,
+          "inclusive_ms": 228.3056
+        },
+        "WorldRender": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "TransferBlocked": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "TransferReleased": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "RecoveryApplied": {
+          "calls": 4,
+          "inclusive_ms": 188.4416
+        },
+        "Settlement": {
+          "calls": 4,
+          "inclusive_ms": 635.1574
+        },
+        "CheckpointReplay": {
+          "calls": 628,
+          "inclusive_ms": 2541.243
+        }
+      },
+      "thread_allocation_supported": false,
+      "frame_allocation_responsive": true,
+      "natural_gc_increments": 29,
+      "managed_heap_peak_bytes": 937521152,
+      "categories": {
+        "all": {
+          "count": 664,
+          "frame_ms": {
+            "mean": 21.690801836386132,
+            "p95": 168.27690601348877,
+            "max": 491.0891056060791
+          },
+          "update_ms": {
+            "mean": 18.775744578313255,
+            "p95": 164.1412,
+            "max": 488.3903
+          },
+          "frame_allocated_bytes": {
+            "mean": 6357137.409638554,
+            "p95": 58375816,
+            "max": 148828830
+          },
+          "update_allocated_bytes": null
+        },
+        "work": {
+          "count": 67,
+          "frame_ms": {
+            "mean": 190.58561692042136,
+            "p95": 315.053790807724,
+            "max": 491.0891056060791
+          },
+          "update_ms": {
+            "mean": 186.07057910447762,
+            "p95": 312.362,
+            "max": 488.3903
+          },
+          "frame_allocated_bytes": {
+            "mean": 62835443.7761194,
+            "p95": 114911516,
+            "max": 148828830
+          },
+          "update_allocated_bytes": null
+        },
+        "admission": {
+          "count": 4,
+          "frame_ms": {
+            "mean": 314.12334740161896,
+            "p95": 315.053790807724,
+            "max": 360.605388879776
+          },
+          "update_ms": {
+            "mean": 311.706525,
+            "p95": 312.362,
+            "max": 358.6455
+          },
+          "frame_allocated_bytes": {
+            "mean": 107464228.5,
+            "p95": 114911516,
+            "max": 126888385
+          },
+          "update_allocated_bytes": null
+        },
+        "between-events": {
+          "count": 478,
+          "frame_ms": {
+            "mean": 2.8616443196522017,
+            "p95": 4.907702561467886,
+            "max": 22.57939986884594
+          },
+          "update_ms": {
+            "mean": 0.0006244769874476987,
+            "p95": 0.001,
+            "max": 0.0021
+          },
+          "frame_allocated_bytes": {
+            "mean": 18785.489539748953,
+            "p95": 18710,
+            "max": 42070
+          },
+          "update_allocated_bytes": null
+        },
+        "event": {
+          "count": 52,
+          "frame_ms": {
+            "mean": 172.37770070250218,
+            "p95": 206.6512107849121,
+            "max": 266.99408888816833
+          },
+          "update_ms": {
+            "mean": 169.76908653846155,
+            "p95": 204.2132,
+            "max": 264.6262
+          },
+          "frame_allocated_bytes": {
+            "mean": 56855326.307692304,
+            "p95": 66385124,
+            "max": 92813206
+          },
+          "update_allocated_bytes": null
+        },
+        "idle-empty": {
+          "count": 119,
+          "frame_ms": {
+            "mean": 2.231849587381575,
+            "p95": 2.567800460383296,
+            "max": 3.710898570716381
+          },
+          "update_ms": {
+            "mean": 0.0005638655462184874,
+            "p95": 0.0009,
+            "max": 0.0036
+          },
+          "frame_allocated_bytes": {
+            "mean": 18361.70588235294,
+            "p95": 18341,
+            "max": 19397
+          },
+          "update_allocated_bytes": null
+        },
+        "passive": {
+          "count": 7,
+          "frame_ms": {
+            "mean": 150.24822843926293,
+            "p95": 178.8059026002884,
+            "max": 214.16449546813965
+          },
+          "update_ms": {
+            "mean": 129.20912857142858,
+            "p95": 156.4537,
+            "max": 176.777
+          },
+          "frame_allocated_bytes": {
+            "mean": 46748243.428571425,
+            "p95": 60118444,
+            "max": 66979326
+          },
+          "update_allocated_bytes": null
+        },
+        "settlement": {
+          "count": 4,
+          "frame_ms": {
+            "mean": 374.3412271142006,
+            "p95": 372.56279587745667,
+            "max": 491.0891056060791
+          },
+          "update_ms": {
+            "mean": 371.861575,
+            "p95": 370.2242,
+            "max": 488.3903
+          },
+          "frame_allocated_bytes": {
+            "mean": 124100786.75,
+            "p95": 132813112,
+            "max": 148828830
+          },
+          "update_allocated_bytes": null
+        }
+      }
+    },
+    "pr": {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\e381f9285f3b4e75b140839f53e2ab2d\\living-regressions\\fixture-inputs\\two-floor\\bcae1696\\editor-owner-inactive.profile.json",
+      "sha256": "f7dc534e72c2e995528789a50ccacf839ca0e430dc90212dc1a32ae08dc1343f",
+      "completed": 4,
+      "frames": 664,
+      "dimensions": [
+        1280,
+        720,
+        "Default"
+      ],
+      "prior_validation_calls": 0,
+      "complete_validation_calls": 301,
+      "durable_semantic_readback_calls": 67,
+      "areas": {
+        "Stage": {
+          "calls": 96,
+          "inclusive_ms": 3031.294
+        },
+        "Prepare": {
+          "calls": 96,
+          "inclusive_ms": 2930.8136
+        },
+        "Open": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "Validate": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "Projection": {
+          "calls": 96,
+          "inclusive_ms": 61.1898
+        },
+        "Restore": {
+          "calls": 488,
+          "inclusive_ms": 1910.0443
+        },
+        "LifetimeProbe": {
+          "calls": 4,
+          "inclusive_ms": 308.9945
+        },
+        "Inspect": {
+          "calls": 67,
+          "inclusive_ms": 308.5437
+        },
+        "AtomicWrite": {
+          "calls": 67,
+          "inclusive_ms": 2612.4877
+        },
+        "Publication": {
+          "calls": 67,
+          "inclusive_ms": 392.6009
+        },
+        "Present": {
+          "calls": 67,
+          "inclusive_ms": 223.4156
+        },
+        "WorldRender": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "TransferBlocked": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "TransferReleased": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "RecoveryApplied": {
+          "calls": 4,
+          "inclusive_ms": 105.9815
+        },
+        "Settlement": {
+          "calls": 4,
+          "inclusive_ms": 338.5696
+        },
+        "CheckpointReplay": {
+          "calls": 560,
+          "inclusive_ms": 2174.5001
+        }
+      },
+      "thread_allocation_supported": false,
+      "frame_allocation_responsive": true,
+      "natural_gc_increments": 26,
+      "managed_heap_peak_bytes": 878968832,
+      "categories": {
+        "all": {
+          "count": 664,
+          "frame_ms": {
+            "mean": 17.98437771240827,
+            "p95": 142.4849033355713,
+            "max": 282.3854088783264
+          },
+          "update_ms": {
+            "mean": 15.33417876506024,
+            "p95": 138.4049,
+            "max": 280.3817
+          },
+          "frame_allocated_bytes": {
+            "mean": 5327255.838855422,
+            "p95": 50078926,
+            "max": 114542449
+          },
+          "update_allocated_bytes": null
+        },
+        "work": {
+          "count": 67,
+          "frame_ms": {
+            "mean": 156.19088064378766,
+            "p95": 268.9501941204071,
+            "max": 282.3854088783264
+          },
+          "update_ms": {
+            "mean": 151.96337462686566,
+            "p95": 266.8349,
+            "max": 280.3817
+          },
+          "frame_allocated_bytes": {
+            "mean": 52655111.014925376,
+            "p95": 89655277,
+            "max": 114542449
+          },
+          "update_allocated_bytes": null
+        },
+        "admission": {
+          "count": 4,
+          "frame_ms": {
+            "mean": 261.84727624058723,
+            "p95": 273.0560004711151,
+            "max": 282.3854088783264
+          },
+          "update_ms": {
+            "mean": 259.81577500000003,
+            "p95": 271.0148,
+            "max": 280.3817
+          },
+          "frame_allocated_bytes": {
+            "mean": 88985067.75,
+            "p95": 94760332,
+            "max": 104108394
+          },
+          "update_allocated_bytes": null
+        },
+        "between-events": {
+          "count": 478,
+          "frame_ms": {
+            "mean": 2.5713573106190495,
+            "p95": 4.329202231019735,
+            "max": 19.536996260285378
+          },
+          "update_ms": {
+            "mean": 0.0005939330543933054,
+            "p95": 0.0009,
+            "max": 0.0139
+          },
+          "frame_allocated_bytes": {
+            "mean": 15836.359832635982,
+            "p95": 15774,
+            "max": 23998
+          },
+          "update_allocated_bytes": null
+        },
+        "event": {
+          "count": 52,
+          "frame_ms": {
+            "mean": 144.89693094331486,
+            "p95": 179.32330071926117,
+            "max": 277.5745093822479
+          },
+          "update_ms": {
+            "mean": 142.42639615384616,
+            "p95": 176.8732,
+            "max": 274.6845
+          },
+          "frame_allocated_bytes": {
+            "mean": 48510624.884615384,
+            "p95": 57116194,
+            "max": 74397749
+          },
+          "update_allocated_bytes": null
+        },
+        "idle-empty": {
+          "count": 119,
+          "frame_ms": {
+            "mean": 2.0817563313396037,
+            "p95": 2.618197351694107,
+            "max": 4.219501279294491
+          },
+          "update_ms": {
+            "mean": 0.0005436974789915966,
+            "p95": 0.0008,
+            "max": 0.0044
+          },
+          "frame_allocated_bytes": {
+            "mean": 15425.70588235294,
+            "p95": 15405,
+            "max": 16461
+          },
+          "update_allocated_bytes": null
+        },
+        "passive": {
+          "count": 7,
+          "frame_ms": {
+            "mean": 122.16891454798835,
+            "p95": 153.97560596466064,
+            "max": 190.4733031988144
+          },
+          "update_ms": {
+            "mean": 102.59517142857143,
+            "p95": 119.1867,
+            "max": 151.9375
+          },
+          "frame_allocated_bytes": {
+            "mean": 38323434.85714286,
+            "p95": 53173428,
+            "max": 56310320
+          },
+          "update_allocated_bytes": null
+        },
+        "settlement": {
+          "count": 4,
+          "frame_ms": {
+            "mean": 256.8942718207836,
+            "p95": 252.63699889183044,
+            "max": 279.49678897857666
+          },
+          "update_ms": {
+            "mean": 254.48605,
+            "p95": 249.906,
+            "max": 277.1891
+          },
+          "frame_allocated_bytes": {
+            "mean": 95283907.25,
+            "p95": 102009277,
+            "max": 114542449
+          },
+          "update_allocated_bytes": null
+        }
+      }
+    },
+    "comparability": {
+      "signature_keys": [
+        "Frame",
+        "Sequence",
+        "Ordinal",
+        "Category",
+        "PartyCount",
+        "CheckpointBytes"
+      ],
+      "exact_entire_frame_workload_equal": true,
+      "mismatches": 0,
+      "first_mismatches": [],
+      "main_seed_sha256": "c1a2aba37f5924f85d790a9ef2ddf37515c3a3c492add3989d59f30a0aeb123e",
+      "pr_seed_sha256": "abbc5b54830e223efa42d1e7a3c41a9c740ad59625bac9abc7ffc585a7d08597",
+      "exact_seed_bytes_equal": false,
+      "same_dimensions": true,
+      "same_area_order": true,
+      "main_final_save_path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 FGPM2\\phase7a4-scene-9cf8800516b94cc68cf5dfc7829d9bcc.json",
+      "pr_final_save_path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 FGPP\\phase7a4-scene-b61378b5e9ed48eb9a71951e8f1991c8.json",
+      "main_final_save_sha256": "811eff747ad9ecfe54bffb5b605a41b359678d42d6202c7a1cf865eb2350817c",
+      "pr_final_save_sha256": "9560accf7874f5ccb59118a71b1b3ee9d1e05f8f5d353f39ff102b184fbbd225",
+      "exact_final_save_bytes_equal": false,
+      "same_stage_count": true,
+      "same_write_count": true,
+      "same_readback_count": true
+    },
+    "limitations": [
+      "Four completions per profile, one ordered campaign per source on the same host; no statistical or platform qualification.",
+      "Full Editor frame includes UI/render/scheduling. Inclusive Stage/Prepare/AtomicWrite scopes overlap and are not summed.",
+      "Natural GC and frame allocations are whole-Editor observations. The existing frame recorder has no isolated live-allocation calibration.",
+      "Thread allocation must pass its live calibration; unsupported is not zero. Global managed heap is not an isolated retained-state budget."
+    ]
+  },
+  "two-floor": {
+    "main": {
+      "path": "C:\\Users\\gdg34\\.codex\\worktrees\\fgpv-main\\Dungeon-Lord\\TestResults\\qualification-supervisor\\353693297e044a439f6f1499cf19f64a\\living-regressions\\fixture-inputs\\two-floor\\ed220a29\\editor-two-floor.profile.json",
+      "sha256": "8f24a05da1807facdf0b3dba71473e9509ae5502f92fea2e4d406c298c5ad9b3",
+      "completed": 4,
+      "frames": 1020,
+      "dimensions": [
+        1280,
+        720,
+        "Default"
+      ],
+      "prior_validation_calls": 240,
+      "complete_validation_calls": 1066,
+      "durable_semantic_readback_calls": 194,
+      "areas": {
+        "Stage": {
+          "calls": 240,
+          "inclusive_ms": 22431.5273
+        },
+        "Prepare": {
+          "calls": 240,
+          "inclusive_ms": 21839.9543
+        },
+        "Open": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "Validate": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "Projection": {
+          "calls": 240,
+          "inclusive_ms": 369.2736
+        },
+        "Restore": {
+          "calls": 2804,
+          "inclusive_ms": 20275.5205
+        },
+        "LifetimeProbe": {
+          "calls": 5,
+          "inclusive_ms": 5305.4344
+        },
+        "Inspect": {
+          "calls": 194,
+          "inclusive_ms": 2454.2005
+        },
+        "AtomicWrite": {
+          "calls": 194,
+          "inclusive_ms": 12407.9782
+        },
+        "Publication": {
+          "calls": 194,
+          "inclusive_ms": 1126.6271
+        },
+        "Present": {
+          "calls": 194,
+          "inclusive_ms": 623.9645
+        },
+        "WorldRender": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "TransferBlocked": {
+          "calls": 2,
+          "inclusive_ms": 0.0866
+        },
+        "TransferReleased": {
+          "calls": 2,
+          "inclusive_ms": 4.6019
+        },
+        "RecoveryApplied": {
+          "calls": 7,
+          "inclusive_ms": 647.2942
+        },
+        "Settlement": {
+          "calls": 4,
+          "inclusive_ms": 1028.8779
+        },
+        "CheckpointReplay": {
+          "calls": 3449,
+          "inclusive_ms": 24986.8945
+        }
+      },
+      "thread_allocation_supported": false,
+      "frame_allocation_responsive": true,
+      "natural_gc_increments": 159,
+      "managed_heap_peak_bytes": 978518016,
+      "categories": {
+        "all": {
+          "count": 1020,
+          "frame_ms": {
+            "mean": 66.04105848031502,
+            "p95": 342.33540296554565,
+            "max": 1664.9740934371948
+          },
+          "update_ms": {
+            "mean": 63.083467156862746,
+            "p95": 339.7458,
+            "max": 1661.7938
+          },
+          "frame_allocated_bytes": {
+            "mean": 22208894.369607843,
+            "p95": 123513761,
+            "max": 551181936
+          },
+          "update_allocated_bytes": null
+        },
+        "work": {
+          "count": 194,
+          "frame_ms": {
+            "mean": 334.82212665462004,
+            "p95": 588.4944796562195,
+            "max": 1664.9740934371948
+          },
+          "update_ms": {
+            "mean": 331.6732912371134,
+            "p95": 586.0018,
+            "max": 1661.7938
+          },
+          "frame_allocated_bytes": {
+            "mean": 116688735.46391752,
+            "p95": 200841856,
+            "max": 551181936
+          },
+          "update_allocated_bytes": null
+        },
+        "admission": {
+          "count": 5,
+          "frame_ms": {
+            "mean": 1494.9288368225098,
+            "p95": 1560.5641603469849,
+            "max": 1664.9740934371948
+          },
+          "update_ms": {
+            "mean": 1492.28334,
+            "p95": 1558.1848,
+            "max": 1661.7938
+          },
+          "frame_allocated_bytes": {
+            "mean": 487338140.6,
+            "p95": 513994267,
+            "max": 551181936
+          },
+          "update_allocated_bytes": null
+        },
+        "between-events": {
+          "count": 707,
+          "frame_ms": {
+            "mean": 3.014082565101435,
+            "p95": 5.0580003298819065,
+            "max": 18.81599985063076
+          },
+          "update_ms": {
+            "mean": 0.0006314002828854314,
+            "p95": 0.0009,
+            "max": 0.0255
+          },
+          "frame_allocated_bytes": {
+            "mean": 18781.44837340877,
+            "p95": 18660,
+            "max": 42020
+          },
+          "update_allocated_bytes": null
+        },
+        "event": {
+          "count": 181,
+          "frame_ms": {
+            "mean": 297.94507527219656,
+            "p95": 463.7337923049927,
+            "max": 613.6021018028259
+          },
+          "update_ms": {
+            "mean": 295.4979226519337,
+            "p95": 461.5399,
+            "max": 611.1398
+          },
+          "frame_allocated_bytes": {
+            "mean": 103896559.5082873,
+            "p95": 143177224,
+            "max": 235367415
+          },
+          "update_allocated_bytes": null
+        },
+        "idle-empty": {
+          "count": 119,
+          "frame_ms": {
+            "mean": 2.314543742843035,
+            "p95": 3.239399055019021,
+            "max": 3.7366992328315973
+          },
+          "update_ms": {
+            "mean": 0.0006016806722689076,
+            "p95": 0.0009,
+            "max": 0.0037
+          },
+          "frame_allocated_bytes": {
+            "mean": 18311.70588235294,
+            "p95": 18291,
+            "max": 19347
+          },
+          "update_allocated_bytes": null
+        },
+        "passive": {
+          "count": 4,
+          "frame_ms": {
+            "mean": 152.6438482105732,
+            "p95": 126.56739354133606,
+            "max": 272.22710847854614
+          },
+          "update_ms": {
+            "mean": 116.611575,
+            "p95": 124.4106,
+            "max": 136.592
+          },
+          "frame_allocated_bytes": {
+            "mean": 43929633.25,
+            "p95": 38626656,
+            "max": 70041538
+          },
+          "update_allocated_bytes": null
+        },
+        "settlement": {
+          "count": 4,
+          "frame_ms": {
+            "mean": 735.5535924434662,
+            "p95": 747.8523254394531,
+            "max": 878.3960938453674
+          },
+          "update_ms": {
+            "mean": 732.907875,
+            "p95": 745.1754,
+            "max": 875.8031
+          },
+          "frame_allocated_bytes": {
+            "mean": 304982043.25,
+            "p95": 311183812,
+            "max": 372398188
+          },
+          "update_allocated_bytes": null
+        }
+      }
+    },
+    "pr": {
+      "path": "C:\\Dev\\Dungeon-Lord\\TestResults\\qualification-supervisor\\e381f9285f3b4e75b140839f53e2ab2d\\living-regressions\\fixture-inputs\\two-floor\\0a7187e3\\editor-two-floor.profile.json",
+      "sha256": "a4687d499cd73521b3ff54651043dabecbfa3a9615fa3e8b15980bb4dbeca3f1",
+      "completed": 4,
+      "frames": 1020,
+      "dimensions": [
+        1280,
+        720,
+        "Default"
+      ],
+      "prior_validation_calls": 0,
+      "complete_validation_calls": 826,
+      "durable_semantic_readback_calls": 194,
+      "areas": {
+        "Stage": {
+          "calls": 240,
+          "inclusive_ms": 14234.848
+        },
+        "Prepare": {
+          "calls": 240,
+          "inclusive_ms": 13656.4038
+        },
+        "Open": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "Validate": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "Projection": {
+          "calls": 240,
+          "inclusive_ms": 356.183
+        },
+        "Restore": {
+          "calls": 2466,
+          "inclusive_ms": 17312.45
+        },
+        "LifetimeProbe": {
+          "calls": 5,
+          "inclusive_ms": 5532.8989
+        },
+        "Inspect": {
+          "calls": 194,
+          "inclusive_ms": 2521.9834
+        },
+        "AtomicWrite": {
+          "calls": 194,
+          "inclusive_ms": 10233.2848
+        },
+        "Publication": {
+          "calls": 194,
+          "inclusive_ms": 1110.4277
+        },
+        "Present": {
+          "calls": 194,
+          "inclusive_ms": 628.9291
+        },
+        "WorldRender": {
+          "calls": 0,
+          "inclusive_ms": 0.0
+        },
+        "TransferBlocked": {
+          "calls": 2,
+          "inclusive_ms": 0.0826
+        },
+        "TransferReleased": {
+          "calls": 2,
+          "inclusive_ms": 2.002
+        },
+        "RecoveryApplied": {
+          "calls": 7,
+          "inclusive_ms": 440.9756
+        },
+        "Settlement": {
+          "calls": 4,
+          "inclusive_ms": 724.0256
+        },
+        "CheckpointReplay": {
+          "calls": 3111,
+          "inclusive_ms": 22212.2315
+        }
+      },
+      "thread_allocation_supported": false,
+      "frame_allocation_responsive": true,
+      "natural_gc_increments": 144,
+      "managed_heap_peak_bytes": 951066624,
+      "categories": {
+        "all": {
+          "count": 1020,
+          "frame_ms": {
+            "mean": 55.551307232178495,
+            "p95": 285.24959087371826,
+            "max": 1612.1587753295898
+          },
+          "update_ms": {
+            "mean": 52.69217568627451,
+            "p95": 282.111,
+            "max": 1609.828
+          },
+          "frame_allocated_bytes": {
+            "mean": 19257442.87647059,
+            "p95": 106889943,
+            "max": 504903052
+          },
+          "update_allocated_bytes": null
+        },
+        "work": {
+          "count": 194,
+          "frame_ms": {
+            "mean": 280.1597076900226,
+            "p95": 491.48088693618774,
+            "max": 1612.1587753295898
+          },
+          "update_ms": {
+            "mean": 277.0385355670103,
+            "p95": 488.5844,
+            "max": 1609.828
+          },
+          "frame_allocated_bytes": {
+            "mean": 101182954.70618556,
+            "p95": 164683467,
+            "max": 504903052
+          },
+          "update_allocated_bytes": null
+        },
+        "admission": {
+          "count": 5,
+          "frame_ms": {
+            "mean": 1446.9163179397583,
+            "p95": 1510.7547044754028,
+            "max": 1612.1587753295898
+          },
+          "update_ms": {
+            "mean": 1444.4159,
+            "p95": 1506.9496,
+            "max": 1609.828
+          },
+          "frame_allocated_bytes": {
+            "mean": 454327835.8,
+            "p95": 474869214,
+            "max": 504903052
+          },
+          "update_allocated_bytes": null
+        },
+        "between-events": {
+          "count": 707,
+          "frame_ms": {
+            "mean": 2.9345670179167533,
+            "p95": 5.540504585951567,
+            "max": 13.542701490223408
+          },
+          "update_ms": {
+            "mean": 0.0006869872701555869,
+            "p95": 0.0009,
+            "max": 0.0581
+          },
+          "frame_allocated_bytes": {
+            "mean": 15925.44837340877,
+            "p95": 15804,
+            "max": 39164
+          },
+          "update_allocated_bytes": null
+        },
+        "event": {
+          "count": 181,
+          "frame_ms": {
+            "mean": 244.90320180331804,
+            "p95": 329.24678921699524,
+            "max": 535.4756116867065
+          },
+          "update_ms": {
+            "mean": 242.46845359116023,
+            "p95": 326.5704,
+            "max": 532.7866
+          },
+          "frame_allocated_bytes": {
+            "mean": 89842283.59116022,
+            "p95": 124715286,
+            "max": 184656408
+          },
+          "update_allocated_bytes": null
+        },
+        "idle-empty": {
+          "count": 119,
+          "frame_ms": {
+            "mean": 1.9883294394161521,
+            "p95": 2.353798132389784,
+            "max": 3.2847009133547544
+          },
+          "update_ms": {
+            "mean": 0.00048403361344537813,
+            "p95": 0.0008,
+            "max": 0.0035
+          },
+          "frame_allocated_bytes": {
+            "mean": 15455.70588235294,
+            "p95": 15435,
+            "max": 16491
+          },
+          "update_allocated_bytes": null
+        },
+        "passive": {
+          "count": 4,
+          "frame_ms": {
+            "mean": 130.67304715514183,
+            "p95": 98.93249720335007,
+            "max": 241.24929308891296
+          },
+          "update_ms": {
+            "mean": 95.15,
+            "p95": 96.9072,
+            "max": 107.5372
+          },
+          "frame_allocated_bytes": {
+            "mean": 38214230,
+            "p95": 31026045,
+            "max": 66220100
+          },
+          "update_allocated_bytes": null
+        },
+        "settlement": {
+          "count": 4,
+          "frame_ms": {
+            "mean": 566.5574967861176,
+            "p95": 563.4709000587463,
+            "max": 651.7909169197083
+          },
+          "update_ms": {
+            "mean": 564.001575,
+            "p95": 560.7185,
+            "max": 649.5511
+          },
+          "frame_allocated_bytes": {
+            "mean": 235885946,
+            "p95": 244425348,
+            "max": 283990841
+          },
+          "update_allocated_bytes": null
+        }
+      }
+    },
+    "comparability": {
+      "signature_keys": [
+        "Frame",
+        "Sequence",
+        "Ordinal",
+        "Category",
+        "PartyCount",
+        "CheckpointBytes"
+      ],
+      "exact_entire_frame_workload_equal": true,
+      "mismatches": 0,
+      "first_mismatches": [],
+      "main_seed_sha256": "6dcc30cf7d0d61eea37e1d5492ef240ea63df6541612362b4c9441b4ee6f643f",
+      "pr_seed_sha256": "34ec91e13cbe5977432e29e4d7c858071205e4bd67b7e69c6c6431cd41b265b7",
+      "exact_seed_bytes_equal": false,
+      "same_dimensions": true,
+      "same_area_order": true,
+      "main_final_save_path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 FGPM2\\phase7a4-scene-b2128e305361411c8a7680f248d82198.json",
+      "pr_final_save_path": "C:\\Users\\gdg34\\AppData\\LocalLow\\gdg3417\\Dungeon Lord B3B2 Smoke H1F4 FGPP\\phase7a4-scene-adab9821bb0a42dcaeb5525e52a8849e.json",
+      "main_final_save_sha256": "5cf08cd8eeb148291c3d4401f05e9dcf43c8a4a0bb4e112835a82cd8a96cd1c4",
+      "pr_final_save_sha256": "4b42a7d46cac19603a77ff80cc7fbe2f3e51a741ec0d8a1f78903e70834f61f2",
+      "exact_final_save_bytes_equal": false,
+      "same_stage_count": true,
+      "same_write_count": true,
+      "same_readback_count": true
+    },
+    "limitations": [
+      "Four completions per profile, one ordered campaign per source on the same host; no statistical or platform qualification.",
+      "Full Editor frame includes UI/render/scheduling. Inclusive Stage/Prepare/AtomicWrite scopes overlap and are not summed.",
+      "Natural GC and frame allocations are whole-Editor observations. The existing frame recorder has no isolated live-allocation calibration.",
+      "Thread allocation must pass its live calibration; unsupported is not zero. Global managed heap is not an isolated retained-state budget."
+    ]
+  }
+}
