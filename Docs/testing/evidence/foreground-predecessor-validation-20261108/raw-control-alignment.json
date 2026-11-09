@@ -1,0 +1,71 @@
+{
+  "owner": "Codex foreground predecessor task",
+  "project": "C:\\Users\\gdg34\\.codex\\worktrees\\fgpv-main\\Dungeon-Lord",
+  "source": "C:\\Dev\\Dungeon-Lord",
+  "purpose": "Exact raw control-input alignment before matched baseline qualification",
+  "retention": "Preserve all old campaigns, inputs and this archive",
+  "before_archive": "C:\\Dev\\Dungeon-Lord\\TestResults\\foreground-predecessor-comparison-20261108\\raw-control-alignment-before.zip",
+  "paths": [
+    {
+      "path": "Assets/_Project/Data/Production/Save/living_dungeon_qualification_profile.json.meta",
+      "before_sha256": "36abd86a4ca84c17dca1a9060f939066e6d57df6e2390914fb8126454289930c",
+      "after_sha256": "fed34bf9c0d497fd56c58704ab0f65c4e4a3a8b15e0641668ec60fc359bec15b",
+      "change": "exact PR checkout bytes; only CRLF/LF differences, including its preserved terminal CRLF; parsed values unchanged"
+    },
+    {
+      "path": "Assets/_Project/Resources/floor_construction_profiles.json",
+      "before_sha256": "8f585b7f60863fde617cf7a63cdf8f62831792b8da27c3327b823a85754ca960",
+      "after_sha256": "a890300afe306035a43fbbc60e10f94f7ba6b1f8f9b018ce5d513a3a522f0117",
+      "change": "exact PR checkout bytes; only CRLF/LF differences, including its preserved terminal CRLF; parsed values unchanged"
+    },
+    {
+      "path": "Assets/_Project/Resources/floor_construction_profiles.json.meta",
+      "before_sha256": "b21ebed200f4b637752d89e16620c4ea941b4626787724f29127f0f684ab6a89",
+      "after_sha256": "faebdef7ab4c8b0e1989e99263e59120d5a0fe8cfa957288c34ea07cfe8275aa",
+      "change": "exact PR checkout bytes; only CRLF/LF differences, including its preserved terminal CRLF; parsed values unchanged"
+    },
+    {
+      "path": "Assets/_Project/Resources/living_dungeon_foreground.json",
+      "before_sha256": "840001642c9b3d2d53ef7ebfcac7170459f012589a6206d8bb58a9727cfc2331",
+      "after_sha256": "7edc60a6c06d4ce29678b5818a348b8bfc3fb78aff3f6367744eaa3a06c957f6",
+      "change": "exact PR checkout bytes; only CRLF/LF differences, including its preserved terminal CRLF; parsed values unchanged"
+    },
+    {
+      "path": "Assets/_Project/Resources/living_dungeon_foreground.json.meta",
+      "before_sha256": "12dece2855a8b7005b6581727be7b62d2e872637f8eeaf38ef2bf31b1aeaf86b",
+      "after_sha256": "36552e4a66ec6f5fb25cbea277b73dde3dc5b78ce539ab752398ccda2e96738d",
+      "change": "exact PR checkout bytes; only CRLF/LF differences, including its preserved terminal CRLF; parsed values unchanged"
+    },
+    {
+      "path": "Assets/_Project/Resources/living_dungeon_foreground_v2.json",
+      "before_sha256": "2183efa3f7540442c861bd2fe7ab7912007ad725b33ab21546795803c0d331a1",
+      "after_sha256": "696b80459259d590145f9a312e288b003f26d589d5fe53e3d46e9ac73b88ef79",
+      "change": "exact PR checkout bytes; only CRLF/LF differences, including its preserved terminal CRLF; parsed values unchanged"
+    },
+    {
+      "path": "Assets/_Project/Resources/monster_recovery.json",
+      "before_sha256": "1a5e199c55cc28678099dc56bf0ea5a4796038090d6f2f3e7f8e67494ad4595d",
+      "after_sha256": "5d82724b0673c3ef1a2053b47c9282489857b67e5f4767910c8a5d6b9157c892",
+      "change": "exact PR checkout bytes; only CRLF/LF differences, including its preserved terminal CRLF; parsed values unchanged"
+    },
+    {
+      "path": "Assets/_Project/Resources/save_spatial_migration_limits_schema13.json.meta",
+      "before_sha256": "5117aa37c0c9a17c68d51426df77dddb1390d2286d61ee1f50a2551b71ced883",
+      "after_sha256": "20a5046929205fa237cc80b1ba92a8c9bbe25b7a6849df59ade374a31f1db223",
+      "change": "exact PR checkout bytes; only CRLF/LF differences, including its preserved terminal CRLF; parsed values unchanged"
+    },
+    {
+      "path": "Assets/_Project/Resources/structural_economy.json",
+      "before_sha256": "f33799b480d27bd65356c182dee67a8473cfed0db061bba9e8de55eb6c0addaf",
+      "after_sha256": "a285ddafcb4f430472f691fb4c25225a132feadaa6bc13feb74d430df33d2803",
+      "change": "exact PR checkout bytes; only CRLF/LF differences, including its preserved terminal CRLF; parsed values unchanged"
+    },
+    {
+      "path": "Assets/_Project/Resources/structural_economy.json.meta",
+      "before_sha256": "638ca46663c5011b69e1eb9236d163393e491e6040e8c4e120765708432e4d97",
+      "after_sha256": "f4e69161fa0c8624e5741cd5dbb62c65fb084e943643e5e47bf57ede0550f362",
+      "change": "exact PR checkout bytes; only CRLF/LF differences, including its preserved terminal CRLF; parsed values unchanged"
+    }
+  ],
+  "only_changes_are_the_ten_verified_EOL_differences": true
+}

@@ -28,7 +28,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     !session.GetCurrentBytes().SequenceEqual(fs.ReadAllBytes(path))) return Failure(invalid);
                 var profile = context.LivingDungeonProfiles.SingleOrDefault(p => p.Id == (current.livingDungeon?.Scheduler?.ProfileId ?? policy.Id));
                 if (profile == null) return Failure("living.foreground.provenance_required");
-                var working = session; var owned = ValidateSession(working);
+                var working = session;
+                DetachedCanonicalSaveSession.ForegroundPredecessor predecessor = null;
+                var owned = recoveryBindingsValid ? working.ValidateForegroundPredecessor(context, out predecessor) : null;
                 if (owned?.CurrentTargetValidated != true || !CanonicalEqual(current.validatedCanonicalSpatialState, owned.State)) return Failure(invalid);
                 var runtime = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(current));
                 if (current.researchPending == null) runtime.researchPending = null;
@@ -61,13 +63,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     var before = working.GetCurrentBytes();
                     var prepared = working.PrepareForegroundReplacement(DetachedRecognizedSaveStateSnapshot.Capture(runtime, limits),
                         owned, owner, monsters ?? runtime.monsterContinuity,
-                        knowledge ? runtime.sharedBranchKnowledge : null, knowledge ? runtime.sharedFloorKnowledge : null, history, lineage.Permit(before), timeTransition);
+                        knowledge ? runtime.sharedBranchKnowledge : null, knowledge ? runtime.sharedFloorKnowledge : null, history, lineage.Permit(before), timeTransition,
+                        predecessor);
                     prepareMeasurement.Dispose();
                     if (!prepared.IsSuccess) throw new InvalidOperationException(prepared.Reason);
                     timeTransition = null; // One full time cut belongs only to the first detached stage.
                     // Prepare already round-tripped these exact bytes under this
                     // context. Do not parse/replay the same candidate twice more.
                     staged = prepared; working = prepared.Session; owned = prepared.ForegroundValidation;
+                    predecessor = prepared.ForegroundPredecessor;
                     lineage.Advance(before, working.GetCurrentBytes());
                     if (working == null || owned?.CurrentTargetValidated != true) throw new InvalidOperationException(invalid);
                     var projectionMeasurement = ForegroundQualificationMetrics.Measure(ForegroundQualificationMetrics.Area.Projection);

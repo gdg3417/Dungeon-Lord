@@ -650,7 +650,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test] public void ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming()
         { ExportProductionTwoFloorInputs(); }
 
-        internal static string ExportProductionTwoFloorInputs()
+        internal static string ExportProductionTwoFloorInputs(long? authoredUtc = null)
         {
             // This current-schema producer must not write into retained historical
             // inputs. The explicit supervisor stage owns this fresh output root.
@@ -661,7 +661,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That((new DirectoryInfo(parent).Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
             string directory = Path.Combine(parent, Guid.NewGuid().ToString("N").Substring(0, 8));
             Assert.That(Directory.Exists(directory), Is.False); Directory.CreateDirectory(directory);
-            var utc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var utc = authoredUtc ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var f = ProductionDungeon(utc); string second = PhaseSixA4Tests.FloorTwo(f);
             for (int index = 0; index < H1F4RecoveryContractTests.Paths.Length; index++) {
                 var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(H1F4RecoveryContractTests.Paths[index]);

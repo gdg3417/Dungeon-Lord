@@ -139,8 +139,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class DetachedCanonicalSaveSessionResult
     {
         internal DetachedCanonicalSaveSessionResult(DetachedCanonicalSaveSession session,
-            DetachedCanonicalSaveSessionUpdate update, string reason, DetachedCompleteSaveValidationResult foregroundValidation = null)
-        { Session = session; Update = update; Reason = reason; ForegroundValidation = foregroundValidation; }
+            DetachedCanonicalSaveSessionUpdate update, string reason, DetachedCompleteSaveValidationResult foregroundValidation = null,
+            DetachedCanonicalSaveSession.ForegroundPredecessor foregroundPredecessor = null)
+        { Session = session; Update = update; Reason = reason; ForegroundValidation = foregroundValidation;
+          ForegroundPredecessor = foregroundPredecessor; }
         public DetachedCanonicalSaveSession Session { get; }
         public DetachedCanonicalSaveSessionUpdate Update { get; }
         public string Reason { get; }
@@ -148,6 +150,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         // Only a freshly validated foreground stage/readback carries this result.
         // It is consumed synchronously inside the same detached transaction.
         internal DetachedCompleteSaveValidationResult ForegroundValidation { get; }
+        internal DetachedCanonicalSaveSession.ForegroundPredecessor ForegroundPredecessor { get; }
     }
 
     /// <summary>
@@ -165,6 +168,51 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         { currentBytes = (byte[])bytes.Clone(); context = validation; limits = profile; }
 
         public byte[] GetCurrentBytes() => (byte[])currentBytes.Clone();
+
+        // Issued around fresh complete validation, before its mutable graphs reach
+        // the coordinator. This evidence is never stored on a canonical session.
+        internal sealed class ForegroundPredecessor
+        {
+            private readonly DetachedCanonicalSaveSession session;
+            private readonly byte[] bytes;
+            private readonly LivingDungeonProfile[] profiles;
+            private readonly LivingDungeonParty[] parties;
+            private ForegroundPredecessor(DetachedCanonicalSaveSession source, DetachedCompleteSaveValidationResult validated)
+            {
+                session = source; bytes = source.GetCurrentBytes();
+                profiles = source.context.LivingDungeonProfiles?.ToArray();
+                parties = validated.LivingDungeon.Parties.Select(Copy).ToArray();
+            }
+            internal static ForegroundPredecessor Validate(DetachedCanonicalSaveSession source,
+                DetachedCurrentTargetValidationContext validation, out DetachedCompleteSaveValidationResult validated)
+            {
+                validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(source.currentBytes, validation);
+                return ReferenceEquals(source.context, validation) && validated.CurrentTargetValidated
+                    ? new ForegroundPredecessor(source, validated) : null;
+            }
+            private static LivingDungeonParty Copy(LivingDungeonParty p) => new LivingDungeonParty {
+                Sequence = p.Sequence, AdmittedAt = p.AdmittedAt, NextOrdinal = p.NextOrdinal,
+                StartIdentity = p.StartIdentity, CheckpointIdentity = p.CheckpointIdentity,
+                Checkpoint = (byte[])p.Checkpoint.Clone()
+            };
+            internal bool Matches(DetachedCanonicalSaveSession source) =>
+                ReferenceEquals(session, source) && bytes.AsSpan().SequenceEqual(source.currentBytes) &&
+                profiles != null && source.context.LivingDungeonProfiles != null &&
+                profiles.SequenceEqual(source.context.LivingDungeonProfiles) &&
+                source.context.RecoveryInputs?.ConsumedValuesStillBound(source.context.RoomContentOccupancy) == true;
+            internal LivingDungeonParty CopyParty(int sequence)
+            {
+                var p = parties.SingleOrDefault(party => party.Sequence == sequence);
+                return p == null ? null : Copy(p);
+            }
+        }
+
+        internal DetachedCompleteSaveValidationResult ValidateForegroundPredecessor(
+            DetachedCurrentTargetValidationContext validation, out ForegroundPredecessor predecessor)
+        {
+            predecessor = ForegroundPredecessor.Validate(this, validation, out var validated);
+            return validated;
+        }
 
         public static DetachedCanonicalSaveSessionResult Open(byte[] bytes,
             DetachedCurrentTargetValidationContext context, SaveSpatialMigrationLimitsProfile limits)
@@ -217,7 +265,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SharedFloorKnowledgeAuthority floorKnowledge,
             LivingDungeonState livingDungeon = null, bool manualRun = false,
             MonsterContinuityState monsterContinuity = null, DurableSettlementHistory settlement = null, bool foregroundStage = false,
-            LivingDungeonForegroundLineage.ReleasePermit releases = null, CanonicalTimeTransition time = null)
+            LivingDungeonForegroundLineage.ReleasePermit releases = null, CanonicalTimeTransition time = null,
+            ForegroundPredecessor foregroundPredecessor = null)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -363,10 +412,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (livingDungeon != null) LivingDungeonContracts.Write(writer, livingDungeon);
                 else DetachedCompleteSaveContract.WriteCanonicalNode(writer, primary.Fields[canonicalStart + 7].Value);
                 writer.Token(","); writer.String(MonsterContinuity.Owner); writer.Token(":");
-                DetachedCompleteSaveValidationResult prior;
-                using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.PriorValidation))
-                    prior = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, context);
-                if (!prior.IsValid) return Failure(MonsterRecoveryRules.Invalid);
+                // Explicit continuity avoids the general writer's reconciliation.
+                // Only proof of these exact predecessor bytes replaces the repeated
+                // validation; other callers keep fresh complete validation.
+                bool reusePredecessor = foregroundStage && monsterContinuity != null &&
+                    foregroundPredecessor?.Matches(this) == true;
+                DetachedCompleteSaveValidationResult prior = null;
+                if (!reusePredecessor) {
+                    using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.PriorValidation))
+                        prior = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(currentBytes, context);
+                    if (!prior.IsValid) return Failure(MonsterRecoveryRules.Invalid);
+                }
                 var continuity = monsterContinuity ?? MonsterContinuity.Reconcile(prior.MonsterContinuity, prior.State, replacement, context.MonsterRecovery);
                 MonsterContinuity.Write(writer, continuity);
                 // Every writer shares this seam. In legacy mode changing the seconds
@@ -397,20 +453,26 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!RawSavePayloadClassifier.TryValidateWorkload(candidate, limits.Raw, out string rawReason))
                     return Failure(rawReason);
                 DetachedCompleteSaveValidationResult validated;
-                using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.CandidateValidation))
-                    validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
+                // Successful round-trip validation guarantees candidate bytes are
+                // unchanged. This private session cannot escape a failed validation.
+                var next = foregroundStage ? new DetachedCanonicalSaveSession(candidate, context, limits) : null;
+                ForegroundPredecessor nextPredecessor = null;
+                using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.CandidateValidation)) {
+                    if (reusePredecessor) nextPredecessor = ForegroundPredecessor.Validate(next, context, out validated);
+                    else validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(candidate, context);
+                }
                 if (validated.IsValid && livingDungeon?.Scheduler?.ProfileId == LivingDungeonForegroundConfig.TwoFloorProfileId) {
                     using var releaseDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.ReleaseCheck);
-                    // The same immutable currentBytes/context were fully validated above.
-                    // Reconcile and Write only read that detached result; keep the exact
-                    // predecessor proof local to this preparation, never between saves.
-                    var releasePredecessor = prior;
+                    // Fresh validation or the exact local proof supplies immutable
+                    // predecessor party records. Keep the supported release readers
+                    // and transaction-local authorization even when validation repeats less.
                     var profile = LivingDungeonContracts.Profile(livingDungeon, context.LivingDungeonProfiles);
                     foreach (var party in livingDungeon.Parties) {
                         var nextExecution = LivingDungeonContracts.Restore(party, profile);
                         try {
                             if (nextExecution.TransferGate?.ReleaseOrdinal >= 0) {
-                                var old = releasePredecessor.LivingDungeon.Parties.SingleOrDefault(p => p.Sequence == party.Sequence);
+                                var old = reusePredecessor ? foregroundPredecessor.CopyParty(party.Sequence) :
+                                    prior.LivingDungeon.Parties.SingleOrDefault(p => p.Sequence == party.Sequence);
                                 bool alreadyReleased = false;
                                 if (old != null) {
                                     var oldExecution = LivingDungeonContracts.Restore(old, profile);
@@ -428,10 +490,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         } finally { nextExecution.Abandon(); }
                     }
                 }
-                return validated.IsValid && validated.CurrentTargetValidated
-                    ? new DetachedCanonicalSaveSessionResult(foregroundStage ? new DetachedCanonicalSaveSession(validated.GetBytes(), context, limits) : null,
-                        new DetachedCanonicalSaveSessionUpdate(validated.GetBytes(), validated.State), null, foregroundStage ? validated : null)
-                    : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+                if (!validated.IsValid || !validated.CurrentTargetValidated)
+                    return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+                return new DetachedCanonicalSaveSessionResult(next,
+                    new DetachedCanonicalSaveSessionUpdate(validated.GetBytes(), validated.State), null, foregroundStage ? validated : null,
+                    nextPredecessor);
             }
             catch (WorkloadException)
             { return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason); }
@@ -493,9 +556,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             LivingDungeonState livingDungeon, MonsterContinuityState monsters,
             SharedBranchKnowledgeAuthority branch = null, SharedFloorKnowledgeAuthority floor = null,
             DurableSettlementHistory settlement = null, LivingDungeonForegroundLineage.ReleasePermit releases = null,
-            CanonicalTimeTransition time = null) => recognized?.IsSuccess == true
+            CanonicalTimeTransition time = null, ForegroundPredecessor predecessor = null) => recognized?.IsSuccess == true
                 ? PrepareReplacement(recognized.Snapshot, owned.State, null, null, branch, floor,
-                    livingDungeon, monsterContinuity: monsters, settlement: settlement, foregroundStage: true, releases: releases, time: time)
+                    livingDungeon, monsterContinuity: monsters, settlement: settlement, foregroundStage: true, releases: releases, time: time,
+                    foregroundPredecessor: predecessor)
                 : Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
 
         internal DetachedCanonicalSaveSessionResult PrepareRecoveryReplacement(

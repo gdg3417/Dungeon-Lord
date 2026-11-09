@@ -84,3 +84,41 @@ The unchanged wrapper pins source, rejects reused output identities, uses produc
 Targeted before/after hashing reused paths from the existing preservation manifest for owner files, configuration/fixtures and original settings, plus prior admission campaign evidence: **579 files, zero missing files or byte mismatches**. The prior full preservation inventory/result were themselves preserved; no new build scan or full-file inventory was performed. Original ProjectSettings bytes match their backup and Git is clean after the test wrapper. These bounded checks do not claim a fresh full rehash of existing builds.
 
 The two reported combined-coverage gaps are closed by legal engine-generated cases. Stop for independent ChatGPT review; do not merge or begin owner testing.
+
+
+## PR #261 source-specific benchmark oracle (2026-11-09)
+
+The historical measurements and 17/138/138 expectations above remain unchanged as historical evidence. This amendment applies only to `AdmissionStartBenchmark.OneProductionAdmissionRepeatedSamples` with PR #261's reviewed runtime at `346ea8a78116a4b005855fbaa4c01927dc36e1e7` and its test/documentation correction. It changes no production code, instrumentation behavior, fixture input, tuning, schema or persistence contract.
+
+Before committing new expectations, diagnostic campaign `1b48a9452a974293a8d1623f6ad2a4ba` ran the exact fixture with the historical assertions retained and test-only counter/record output. Its raw NUnit result deliberately retains the historical 138-versus-137 failure. The supervisor's report stage verified that exact expected failure and the independently predicted counts; it is a diagnostic observation, **not a passing test qualification gate**. Its original inputs and protected artifacts were restored and verified. Head `346ea8a` plus the exact logged test-input hash is retained in the pinned diagnostic input map; no production input differed.
+
+| Enabled admission action | Historical oracle | PR #261 oracle |
+| --- | ---: | ---: |
+| CompleteValidation | 17 | 10 |
+| SupportedReader | 138 | 137 |
+| PrefixReplay | 138 | 137 |
+| StagePreparation | 7 | 7 |
+| PriorValidation within candidate preparation | 7 | 0 |
+| CandidateValidation | 7 | 7 |
+| FinalPredecessor | 1 | 1 |
+| SemanticReadback | 1 | 1 |
+
+### Exact call-path derivation
+
+The measured action begins after fixture setup/reopen at the closed zero boundary, with two active floors and no party. `Through` advances one pump to the first opportunity at 30,000 logical units. The unchanged 10-second tick produces three `PassiveTick` stages, each followed by a `Closure` stage. The admission at the last boundary adds one `Opportunity` stage: **3 + 3 + 1 = 7**. These origins are present in the recorded StagePreparation and CandidateValidation parent chains.
+
+`LivingDungeonForeground.PrepareAndPersist` calls `ValidateForegroundPredecessor` once at pump entry. Each of seven `Stage` calls invokes `PrepareForegroundReplacement`, whose immutable, exact-session/byte/context evidence replaces only that stage's repeated predecessor validation. Every candidate still executes `ForegroundPredecessor.Validate` inside CandidateValidation, including ParseValidateAndRoundTrip. `DetachedCanonicalWriteAuthority.PrepareAndPersist` separately validates the final original predecessor and validates freshly read durable bytes through `OpenForegroundReadback`. Therefore the remaining complete checks are **1 pump + 7 candidates + 1 final predecessor + 1 durable readback = 10**, exactly seven fewer than 17.
+
+The first six eliminated predecessor checks contain no party. Only the predecessor of the final closure contains the newly admitted party, so removing seven complete checks removes **one** supported reader and its prefix replay: **138 - 1 = 137**, not seven readers/replays. Retained records contain 130 admission/lifetime reads (one admission restoration, 72 normal and 57 alternative-prefix reads), two opportunity-stage reads, one execution reconstruction, two closure-stage reads, one durable readback and one post-publication inspection: **137**. Each has its independent prefix replay. The admission assurance, candidate/release lineage and final readback paths remain intact.
+
+The corrected test keeps exact reader/replay/complete totals and adds exact stage, prior, candidate, final-predecessor and semantic-readback counters. CompleteValidation origin assertions separately require one Pump, one FinalWrite and one Readback check, so a missing mandatory validator cannot be hidden by an unrelated extra check. The original full canonical byte comparisons across every enabled/disabled warmup/sample, zero active/dropped scopes/records check, one warmup plus five samples per mode, and alternating order remain. Counter output occurs after the measured span with recording disabled; instrumentation and timing scopes are unchanged.
+
+### Evidence and next gate
+
+Local evidence is owned by Codex PR261 oracle correction and retained pending independent review:
+
+* `C:/Users/gdg34/.codex/worktrees/fgpv-main/Dungeon-Lord/TestResults/fgpv-oracle-20261109/recovery/`: all four pre-restoration versions/hashes, verified originals, owner authorization, Lease receipt and independent verification of all 1,498 inputs/protected artifacts.
+* `C:/Dev/Dungeon-Lord/TestResults/qualification-supervisor/1b48a9452a974293a8d1623f6ad2a4ba/`: raw expected diagnostic failure, measured counters/parent records, exact input map, process and restoration/preservation receipts.
+* Failed full campaign `3c51de9f68264a60b69b856dbc1c27a9` remains INCOMPLETE, with its 2,838 passed / 1 failed / 1 expected skip raw XML and all original evidence unchanged. The earlier unsuccessful campaigns and PR #260 remain preserved.
+
+The corrected committed source requires the bounded 50-case selection: the benchmark, 18 admission reconstruction tests and the existing 31-case predecessor/default-writer/recovery cohort. The exact committed SHA, selection, results and reservation state are recorded in the resulting checkpoint packet and PR description. Full EditMode, PlayMode and Windows qualification remain gated on independent approval of this focused correction. No broad result, UAT acceptance or merge readiness is inferred here.

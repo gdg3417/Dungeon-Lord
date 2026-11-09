@@ -63,14 +63,17 @@ namespace DungeonBuilder.M0
             public bool Passed, ThreadAllocationCounterAvailable, FrameAllocationCounterAvailable;
             public string Failure, Product, SavePath;
             public int CompletedRuns;
+            public long PriorValidationCalls, CompleteValidationCalls, SemanticReadbackCalls;
             public int ScreenWidth, ScreenHeight;
             public string TextSize;
             public long StopwatchFrequency;
             public string[] Areas;
             public List<ForegroundProfileFrame> Frames = new List<ForegroundProfileFrame>();
         }
-        internal IEnumerator ProfileForeground(ForegroundProfileReport report, Action<double> editorAdvance = null)
+        internal IEnumerator ProfileForeground(ForegroundProfileReport report, Action<double> editorAdvance = null, int completedRunTarget = 68)
         {
+            // Diagnostic workload selection only; production gameplay policy is unchanged.
+            if (completedRunTarget < 1 || completedRunTarget > 68) throw new ArgumentOutOfRangeException(nameof(completedRunTarget));
             if (!Application.productName.Contains("B3B2 Smoke") ||
                 !(System.IO.Path.GetFileName(SaveService.SavePath).StartsWith("living-dungeon-b3b2-qualification-", StringComparison.Ordinal) ||
                   Application.isEditor && System.IO.Path.GetFileName(SaveService.SavePath).StartsWith("phase7a4-scene-", StringComparison.Ordinal)))
@@ -122,6 +125,9 @@ namespace DungeonBuilder.M0
                     long allocated = GC.GetAllocatedBytesForCurrentThread() - bytes;
                     if (foregroundFailure != null || foregroundRetryPending) throw new InvalidOperationException(foregroundFailure ?? "b3b2.profile.retry_pending");
                     yield return null; // include the real controller, map, layout and render frame
+                    report.PriorValidationCalls += ForegroundQualificationMetrics.BoundaryCalls[(int)ForegroundQualificationMetrics.Boundary.PriorValidation];
+                    report.CompleteValidationCalls += ForegroundQualificationMetrics.BoundaryCalls[(int)ForegroundQualificationMetrics.Boundary.CompleteValidation];
+                    report.SemanticReadbackCalls += ForegroundQualificationMetrics.BoundaryCalls[(int)ForegroundQualificationMetrics.Boundary.SemanticReadback];
                     string category = Save.runHistory.LatestOutcome?.RunId != latest ? "settlement" :
                         Save.runHistory.NextRunSequence != sequence ? "admission" :
                         Save.livingDungeon.Parties.Sum(p => p.NextOrdinal) != ordinal ? "event" :
@@ -135,7 +141,7 @@ namespace DungeonBuilder.M0
                         Collections = GC.CollectionCount(0) - originalGc, Calls = (long[])ForegroundQualificationMetrics.Calls.Clone(),
                         Ticks = (long[])ForegroundQualificationMetrics.Ticks.Clone(), Bytes = (long[])ForegroundQualificationMetrics.Allocated.Clone() });
                     int completed = Save.runHistory.NextRunSequence - baselineSequence - Save.livingDungeon.Parties.Count + baselineRetained;
-                    if (completed >= 68) {
+                    if (completed >= completedRunTarget) {
                         report.CompletedRuns = completed; report.Passed = true; break;
                     }
                 }

@@ -63,9 +63,21 @@ namespace DungeonBuilder.M0.Editor.Tests
                     if (output == null) output = bytes; else CollectionAssert.AreEqual(output, bytes);
                     Assert.That(Metrics.ActiveDepth + Metrics.DroppedRecords + Metrics.DroppedScopes, Is.Zero);
                     if (enabled) {
-                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.SupportedReader], Is.EqualTo(138));
-                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.CompleteValidation], Is.EqualTo(17));
-                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.PrefixReplay], Is.EqualTo(138));
+                        TestContext.WriteLine("admission counters: " + string.Join(",", Enum.GetNames(typeof(Metrics.Boundary))
+                            .Select((name, index) => name + "=" + Metrics.BoundaryCalls[index])));
+                        // Seven private stages reuse predecessor evidence; retain every candidate,
+                        // pump-entry, final-predecessor and independent durable validation.
+                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.StagePreparation], Is.EqualTo(7));
+                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.PriorValidation], Is.Zero);
+                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.CandidateValidation], Is.EqualTo(7));
+                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.FinalPredecessor], Is.EqualTo(1));
+                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.SemanticReadback], Is.EqualTo(1));
+                        Assert.That(Metrics.OriginCalls[(int)Metrics.Boundary.CompleteValidation, (int)Metrics.Origin.Pump], Is.EqualTo(1));
+                        Assert.That(Metrics.OriginCalls[(int)Metrics.Boundary.CompleteValidation, (int)Metrics.Origin.FinalWrite], Is.EqualTo(1));
+                        Assert.That(Metrics.OriginCalls[(int)Metrics.Boundary.CompleteValidation, (int)Metrics.Origin.Readback], Is.EqualTo(1));
+                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.SupportedReader], Is.EqualTo(137));
+                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.CompleteValidation], Is.EqualTo(10));
+                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.PrefixReplay], Is.EqualTo(137));
                     }
                     if (pair < 0) continue;
                     var sample = new Sample { Index = pair, Enabled = enabled, Milliseconds = timer.Elapsed.TotalMilliseconds,
