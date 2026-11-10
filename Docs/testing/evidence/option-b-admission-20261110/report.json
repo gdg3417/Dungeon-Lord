@@ -1,0 +1,302 @@
+{
+  "archive": {
+    "members": {
+      "analysis/attribution.json": "10ae98b83350c4faee004ab9e57a8267e6b4f315015548b7737af665b9969bcd",
+      "analysis/eligible-costs.json": "3e0031189d9b6f01bc971f2e34b1d9fa0b754bdbdb1770e760a990f69b7d0611",
+      "analysis/environment.json": "948e8f7c4c3beac68cc5fd0b14bfa22877aecdd7e95695d74efcb11e65143730",
+      "analysis/fixture-shape.json": "404b70bfa2bb47ed839b4c7b7898d9c864bc0862c8d1fba54e3d061dd866e458",
+      "analysis/repository-preflight.json": "c3deb26f546b80d158fe28f2e680c858adad4463d859a43c37938af22b10f1d5",
+      "analysis/static-attribution.md": "8236c32bec304869f1082a6c1aa30aa8806e5cdda6e715bfc36c45a86b222200",
+      "analysis/warning-review.json": "e190c84c2687fb483aebf36fde7a78ee198ee82e8d634bd54be685e6227b153a",
+      "benchmark/admission.json": "d53c236f6da8bb124da8fd4ef3bf8b50adda3c41cda397b01a71a99e5f70b332",
+      "benchmark/ownership.json": "3724e7232fed7fc0ca5631c13832985d4ab1b20f23a9c5dba29381ea2750c223",
+      "fixture/input.json": "32cf5f732778db477bba7bc365abdafd96e257974464e2b809de23e25babb97a",
+      "fixture/output.json": "8c249829b25df2724a5a8182a09401f8405538e133ab5e31489e7a24eef54334",
+      "qualification/artifact-inventory.json": "d513e2305fdcc147eb615a42e2105467707dab6ee9357acf31f841cee8abc377",
+      "qualification/focused-preflight/child.json": "401443b4fb08a14b1e11a0f1f697c635218eb2e157fdf7d38c9e3fac169676da",
+      "qualification/focused-preflight/exit.json": "b2932507a5f7d5dcfcf64c42e4925727d84abdaf29023f7a043f50ccf7957b87",
+      "qualification/focused-preflight/preservation.json": "cc35507f8a385bfd27cb9906e3282a671ae9d28fac9734829b7f366faa4911c4",
+      "qualification/focused-preflight/result.json": "dede02cc61ac97d8c6eb09f1d1b9eb3909304b8882fe16f2315d72bd177b0213",
+      "qualification/focused-preflight/started.json": "c48bc20a324e1447beab167e79899414c700f013bbc0ac04148096e95589152b",
+      "qualification/focused/child.json": "c61cfe674d71f89ee204c38f81bec97d6868084e06d364bbe1f7635c8c9b32b0",
+      "qualification/focused/cli-exit.json": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2",
+      "qualification/focused/exit.json": "7101ff8deabf9069dfd4a0cd66ec622a4df4ec5ef11691e4ff5db08d353f3489",
+      "qualification/focused/result.json": "f6690077d4fb1c741f80f992735b5585ce5b8b46a7ecbbbdc097d42cec7e7637",
+      "qualification/focused/started.json": "c94d562164f6dc520fc2c88541c4c32fe7fc4917edfe05f05b8385387556d988",
+      "qualification/generated-inputs/manifest.json": "08714fec1a43e01e94609ae0156eeaa2ef3b3701b957d84ff6a3c609a0d0ec8b",
+      "qualification/invocation.json": "04b51d20ad24e5b40a6bbfeb44c745f2a67bdb20b50d30ead53b0b84bd3c7cfd",
+      "qualification/original-inputs.json": "ca3032b4af07d3ce3dc3dcb227c5398eb0abd771a7769fe86cdb7ed154781c0d",
+      "qualification/plan.json": "e739902fd8e1bbadf45eec8d16c4c24cf850b18fdbaf999c0fee97bb3e3f056e",
+      "qualification/preservation/child.json": "1c33888c8f3774d97b8a914c257f4d2ab60b1db16548ebe3a339db60d7d5fab4",
+      "qualification/preservation/exit.json": "c5610ccaa424de3c9ca0640648ac8aa4a8afd2ee82d49f9872dfb6a29b070b56",
+      "qualification/preservation/preservation.json": "8ba7ee638622272164cd8427405974662c720bdca4d450863fc3fab0c6dd3daa",
+      "qualification/preservation/result.json": "1aec6968de25802bf433febadd43209b92be643678da7fffb488cde4aefc6de5",
+      "qualification/preservation/started.json": "ec59d1360c4b9febf6a225d03e34a391b185c31e8a95186ef61cdad560ef6690",
+      "qualification/process-disposition.json": "50c666b6168fd3dec2565395d6073a88f34e0a286798cca456978d90b29754f3",
+      "qualification/qualified-inputs.json": "fbc1dc4432ca621f4be7f65158bcfc3e928c1613c736958075af92974ed5be3c",
+      "qualification/restore-preflight/child.json": "f291b52d9bde820ea7012c188ea588b2ec4e9308dbe31856857cc8853ceabe98",
+      "qualification/restore-preflight/exit.json": "1f2ca8c0a7da064a129c8f736044bd8a665553626a1d7cc5e2e1d7e743408810",
+      "qualification/restore-preflight/preservation.json": "cc35507f8a385bfd27cb9906e3282a671ae9d28fac9734829b7f366faa4911c4",
+      "qualification/restore-preflight/result.json": "bc5d06502dba219d630a73fdcbecd6bd27d93c8d37a6cb691a98c5610170b3c7",
+      "qualification/restore-preflight/started.json": "2b4c1150cde51ed9d21a4a66b3f5dad23f8947eba47e711909226f5bc3a195fb",
+      "qualification/restore/child.json": "54dbffeeb8fade2f2940d98096f8ee780ad71269319b88907a07efa0a5fddb2f",
+      "qualification/restore/exit.json": "38ff4fb8bc849f35fb7936de1836a198f5f6d6cb89295618eff5e37317a02c30",
+      "qualification/restore/restoration.json": "5da993712de1f584fb2f999a09df7ecfe45cfd07bd587f8c71af732130823886",
+      "qualification/restore/result.json": "323ffb9da3d35e0d946057e22ee9391564cd3def925ec3745deac9ce64f2f94a",
+      "qualification/restore/started.json": "52cc3682821d8ffcc45a1bfb19923dfd5be4a606cfc1a3a7ebbcf3e90052c426",
+      "qualification/results.xml": "9a9677d1ddd8a2935b8eb93516952ad47967fbd3deb629a1327316c8d1087299",
+      "qualification/source-transition.json": "9a572ecbc81261e6b34f83e23c5f0fa4bf0715b509d4a174e025356cb5072015",
+      "qualification/status.json": "69ab3244283306f537d23f49879d22f5284248e412dd38567dbc9e54049c36aa",
+      "tools/analyze.py": "008c045fb72c0e8f28deb0f088ba7ffeffa22e5da00180dac848da8375d4b822",
+      "tools/campaign.py": "66e4aeb06d0222c7b5165ff75100b860f689bfe53e7e792dc0f793f1a0ef868d",
+      "tools/eligible_costs.py": "146aac344f9b7b4568c80fb97424ffe0eb6cb86c84c91ab5db53ff7424dc0f86",
+      "tools/fixture_shape.py": "c78a7c1cd51c35c4211e5d75a085bd999b7022777634fbc65b142fd57bed09da",
+      "tools/plan-adapter-v1.py": "6e82bd451555cae487532f4b67076b16640a6f5e2207537eacf43a4e2d564d84",
+      "tools/preparation-adapter.py": "fd2ae5a41751dcd70158e1547d3e84b17cdf4f9e4464cef43845c66d98aa3f72",
+      "tools/seal_packet.py": "4675d2d1b9a0d5b07979e93cec7b071c8dee7758a1aedbe514754273e1ae6239"
+    },
+    "path": "diagnostic-records.zip",
+    "sha256": "8ee328dd79c3aa738bb388c824e54708419ea861f5fcd5fd2645b3bfb0488b5a"
+  },
+  "archived_originals_sha256": "6e9f27279331263fdaf7a26c8fb436ead7aad7d0e0861ba653b577664cb8342e",
+  "artifact_root": "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\b-admission-20261110",
+  "branch": "codex/option-b-admission-attribution",
+  "campaign": {
+    "campaign": "90dd31ce31424724bad1eb5949120182",
+    "path": "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\qualification-supervisor\\90dd31ce31424724bad1eb5949120182",
+    "recorded_status": "PASSED",
+    "stages": {
+      "focused": "PASSED",
+      "focused-preflight": "PASSED",
+      "preservation": "PASSED",
+      "restore": "PASSED",
+      "restore-preflight": "PASSED"
+    },
+    "status": "PASSED"
+  },
+  "campaign_root": "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\qualification-supervisor\\90dd31ce31424724bad1eb5949120182",
+  "final_reservation": {
+    "campaign": null,
+    "previous": "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\qualification-supervisor\\90dd31ce31424724bad1eb5949120182"
+  },
+  "governance_sha256": {
+    "AGENTS.md": "0f8ecb418f5fadb1dfbc6379854e889d10aa222a52f8fe5e1d3ff5796217e1d0",
+    "Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md": "a2f34b086559ef2630c90244cb085799d6ae54dc8f1ce6e7223863c2f8b58068",
+    "Docs/planning/h1-f4-recovery-design-gate.md": "19364795c91bf687fe63f6fa5d975758fbd593574db964c0265a1a06bc401663",
+    "Docs/planning/h2-checkpoint-policy-decision-gate.md": "bde6bb16be9cfda22b9f67a262cec54436b0a06a5c556ad9799967b598939503",
+    "Docs/planning/living-dungeon-hybrid-persistence-proposal.md": "5e0cbdc72d442c6b7f96825e86c4ca3e44a1556941ffca495bf9d3740ceb063d",
+    "Docs/planning/living-dungeon-two-floor-foreground-contract.md": "44da4f843a462a1d72be0ae3ba4d29ac165f552a1ac471554cdda457363845e9",
+    "Docs/process/AI_Model_Selection_Policy.md": "acf0030365b33407c4c7bae950e8a9cdcd053df8affaec91648b70f3d6ec0a92",
+    "Docs/testing/admission-start-reconstruction.md": "332529da9f7ebe314a8b2968ce259531bb7b88c1e88c1e8d80af29f2c65e4231",
+    "Docs/testing/foreground-performance-diagnostic-measurement.md": "d9796aab810a9723a979c5d4ce2dc0732a48f2490098e56d1ae010557a458859",
+    "Docs/testing/foreground-predecessor-validation.md": "d3223bca83cb189285a15d3ea71d5a49e49b432175b738bdbf39689b0b2aaf46",
+    "Docs/testing/owner-uat-preparation-and-artifact-lifecycle.md": "d5ad3b95e6a94592080e7a095fc835da20ec624a3390ad9b8aef33b6dc1a5541",
+    "Docs/testing/qualification-supervisor.md": "60f5ac74b80d9aba014c148043329b8195498d5ead31f860e9868adf8b6faf19",
+    "docs/development/codex-development-rules.md": "8fbe95cbca4e57a9d1fb55da5f75206f87dada185efdc25bd1c0f46d8903619e",
+    "docs/planning/build-promotion-policy.md": "63cf1d52dc6e4a8e6cb6793b2d4627726289ccac04c456bedfa189a600b9160c",
+    "docs/planning/test-stage-matrix.md": "72b7142b31a8e601bd0d17530379cfb94311ad68313b4c5f4133daaf02e40e04"
+  },
+  "limitations": [
+    "Diagnostic only; no optimized source or speedup",
+    "Unsupported thread allocation probe",
+    "No retained/native memory, allocation-site or GC-pause attribution",
+    "Remaining selected parent self includes unisolated work",
+    "No full suites, sustained profiles, build, native filesystem, standalone lifecycle or gameplay UAT qualification"
+  ],
+  "main_sha": "1a477ed94b44a3227e00af9c8c16c8600c916400",
+  "model": "GPT-6-based Codex; precise variant/reasoning unobservable",
+  "nunit": {
+    "asserts": "0",
+    "clr-version": "4.0.30319.42000",
+    "duration": "38.3316769",
+    "end-time": "2026-11-10 16:04:41Z",
+    "engine-version": "3.5.0.0",
+    "failed": "0",
+    "id": "2",
+    "inconclusive": "0",
+    "passed": "20",
+    "result": "Passed",
+    "skipped": "0",
+    "start-time": "2026-11-10 16:04:03Z",
+    "testcasecount": "20",
+    "total": "20"
+  },
+  "optimization_implemented": false,
+  "original_input_map_sha256": "ca3032b4af07d3ce3dc3dcb227c5398eb0abd771a7769fe86cdb7ed154781c0d",
+  "original_inputs": 1498,
+  "other_save_files": 1276,
+  "process_disposition": {
+    "focused-preflight/child_process": {
+      "identity": {
+        "created": 134387997706334033,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 50960
+      },
+      "still_matches": false
+    },
+    "focused-preflight/process": {
+      "identity": {
+        "created": 134387997704694550,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 58532
+      },
+      "still_matches": false
+    },
+    "focused/child_process": {
+      "identity": {
+        "created": 134388000897860071,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 13068
+      },
+      "still_matches": false
+    },
+    "focused/process": {
+      "identity": {
+        "created": 134388000896131289,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 55456
+      },
+      "still_matches": false
+    },
+    "preservation/child_process": {
+      "identity": {
+        "created": 134388009616538692,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 27216
+      },
+      "still_matches": false
+    },
+    "preservation/process": {
+      "identity": {
+        "created": 134388009614878851,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 13060
+      },
+      "still_matches": false
+    },
+    "restore-preflight/child_process": {
+      "identity": {
+        "created": 134388002932824526,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 21120
+      },
+      "still_matches": false
+    },
+    "restore-preflight/process": {
+      "identity": {
+        "created": 134388002931150451,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 33392
+      },
+      "still_matches": false
+    },
+    "restore/child_process": {
+      "identity": {
+        "created": 134388006298078554,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 47304
+      },
+      "still_matches": false
+    },
+    "restore/process": {
+      "identity": {
+        "created": 134388006296211328,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 44380
+      },
+      "still_matches": false
+    },
+    "supervisor": {
+      "identity": {
+        "created": 134387997640049980,
+        "executable": "c:\\users\\gdg34\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe",
+        "pid": 49984
+      },
+      "still_matches": false
+    }
+  },
+  "product": "Dungeon Lord B Admission 20261110 01",
+  "protected_entries": {
+    "fgpv_builds": 0,
+    "fgpv_history": 430,
+    "historical_corpus": 53,
+    "historical_scene_screenshots": 0,
+    "historical_two_floor_inputs": 0,
+    "owner_builds": 12540,
+    "owner_inputs": 1498,
+    "owner_testresults": 19138,
+    "qualified_f2_build": 299,
+    "retained_review_evidence": 1127,
+    "stopped_h1f3_original": 17,
+    "stopped_h1f3_replacement": 34
+  },
+  "protected_inventory_sha256": "d6ca5c80675671dbd850b081d7ec081aea680a7eb2cd837ac79f499802fbea45",
+  "raw_benchmark_sha256": "d53c236f6da8bb124da8fd4ef3bf8b50adda3c41cda397b01a71a99e5f70b332",
+  "raw_log_sha256": "79862af297d99ea73f662725840d4c97986604a59c09c5e07dbd07974075015b",
+  "raw_nunit_sha256": "9a9677d1ddd8a2935b8eb93516952ad47967fbd3deb629a1327316c8d1087299",
+  "recommendation": "STOP",
+  "retention": "Preserve all local/raw/public inputs, outputs, processes/receipts and historical artifacts; no cleanup performed",
+  "save_namespaces": 252,
+  "sealed_raw_evidence": {
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\qualification-supervisor\\90dd31ce31424724bad1eb5949120182\\focused-preflight\\result.json": "dede02cc61ac97d8c6eb09f1d1b9eb3909304b8882fe16f2315d72bd177b0213",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\qualification-supervisor\\90dd31ce31424724bad1eb5949120182\\focused\\result.json": "f6690077d4fb1c741f80f992735b5585ce5b8b46a7ecbbbdc097d42cec7e7637",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\qualification-supervisor\\90dd31ce31424724bad1eb5949120182\\preservation\\result.json": "1aec6968de25802bf433febadd43209b92be643678da7fffb488cde4aefc6de5",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\qualification-supervisor\\90dd31ce31424724bad1eb5949120182\\restore-preflight\\result.json": "bc5d06502dba219d630a73fdcbecd6bd27d93c8d37a6cb691a98c5610170b3c7",
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\qualification-supervisor\\90dd31ce31424724bad1eb5949120182\\restore\\result.json": "323ffb9da3d35e0d946057e22ee9391564cd3def925ec3745deac9ce64f2f94a"
+  },
+  "source_tools": {
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\b-admission-20261110\\campaign.py": {
+      "sha256": "66e4aeb06d0222c7b5165ff75100b860f689bfe53e7e792dc0f793f1a0ef868d",
+      "version": "Bounded B pre-execution source transition"
+    },
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\b-admission-20261110\\plan-adapter-v1.py": {
+      "sha256": "6e82bd451555cae487532f4b67076b16640a6f5e2207537eacf43a4e2d564d84",
+      "version": "Bounded B pre-execution source transition"
+    },
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\b-admission-20261110\\preparation-adapter.py": {
+      "sha256": "fd2ae5a41751dcd70158e1547d3e84b17cdf4f9e4464cef43845c66d98aa3f72",
+      "version": "Exact initial preservation preparation adapter"
+    },
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\TestResults\\b-admission-20261110\\preparation\\source-transition.json": {
+      "sha256": "9a572ecbc81261e6b34f83e23c5f0fa4bf0715b509d4a174e025356cb5072015",
+      "version": "Bounded B pre-execution source transition"
+    },
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\Tools\\Presentation\\qualification_inputs.py": {
+      "sha256": "34d3ff45cf7512e21f242bc0e4ede876e5c8b68eddba853ad9b1e69192270c92",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\Tools\\Presentation\\qualification_supervisor.py": {
+      "sha256": "957b83f2b60be9790e4ec952c457372d93516ee9ee34b6c56990c9ed713e996a",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\Tools\\Presentation\\qualification_windows.py": {
+      "sha256": "234bce5f0ca8c7087bb999c603cfbb3d87f0eb4499501a1644dcbbabf3104db7",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Dev\\Dungeon-Lord\\Temp\\option-b-admission-attribution\\Tools\\Presentation\\qualify_h1_f4.py": {
+      "sha256": "cafa31627594654b4bc0d34a88c5a4bc3ad4db813a7451e7aa25a4756f86fbc0",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Program Files\\Git\\cmd\\git.EXE": {
+      "sha256": "81ef35ae005ca9318018d18e3327578ce939fb99feaad6b2d7c8ab15f3de8db5",
+      "version": "git version 2.54.0.windows.1"
+    },
+    "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.2f1\\Editor\\Unity.exe": {
+      "sha256": "c2f3d552a9f9a4639b2e54e9d41f360614d512ba6a9816c8c934568ecc2ad93d",
+      "version": "H1-F4 explicit campaign; CLI beta.14; Unity 6000.3.2f1"
+    },
+    "C:\\Users\\gdg34\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe": {
+      "sha256": "467014615a5255aca450ae88100dd2caf887da87657f00e3c2171ec44a685aec",
+      "version": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]"
+    },
+    "C:\\Users\\gdg34\\AppData\\Local\\Unity\\bin\\unity.exe": {
+      "sha256": "835bcfedb009d766e235dbc9cffdc88432ad21d50c30efb20ed4072b2b0325d9",
+      "version": "Unity CLI 1.0.0-beta.17; current verified 2026-11-10"
+    },
+    "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE": {
+      "sha256": "d8f182560210d43baaf767d482ad1dc1207372522e91413b9d5e515a875e552d",
+      "version": "Windows PowerShell 5.1; process-inspection dependency"
+    }
+  },
+  "tested_source_sha": "4f47c07d596765d6b7e58f50f6f6a5fcf9735f0e"
+}
