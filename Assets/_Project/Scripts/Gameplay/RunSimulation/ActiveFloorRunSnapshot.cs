@@ -145,11 +145,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal static ActiveFloorRunSnapshot ReadCheckpoint(BinaryReader r) => new ActiveFloorRunSnapshot(r);
         // Admission preparation owns its template privately. Share only immutable
         // leaves; no writable snapshot array/monster record crosses executions.
-        internal ActiveFloorRunSnapshot CopyForExecution()
-        {
-            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.ExecutionSnapshotCopy);
-            return new ActiveFloorRunSnapshot(this);
-        }
+        internal ActiveFloorRunSnapshot CopyForExecution() => new ActiveFloorRunSnapshot(this);
         private ActiveFloorRunSnapshot(ActiveFloorRunSnapshot source)
         {
             configuration = source.configuration; loot = source.loot; knowledge = source.knowledge;
