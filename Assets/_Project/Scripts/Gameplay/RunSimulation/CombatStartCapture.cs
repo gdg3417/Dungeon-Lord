@@ -68,7 +68,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             public void Dispose() { prepared = null; disposed = true; }
         }
         internal static byte[] Capture(int sequence, ActiveFloorRunSnapshot snapshot, RunLogicalTiming timing,
-            long? limit, bool persistent) => RunCheckpointCodec.Bytes(w => {
+            long? limit, bool persistent)
+        {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.StartEncoding);
+            return RunCheckpointCodec.Bytes(w => {
                 w.Write(Version); RunCheckpointCodec.Text(w, persistent ? MonsterRecoveryRules.Executable : CombatC0Config.Executable);
                 w.Write(sequence); w.Write(limit.HasValue); if (limit.HasValue) w.Write(limit.Value);
                 w.Write(timing.UnitsPerTileEdge); w.Write(timing.MonsterInteractionUnits); w.Write(timing.TrapInteractionUnits);
@@ -94,6 +97,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     }
                 }
             });
+        }
 
         private static void Profiles(BinaryWriter w, CombatC0AttackProfile[] profiles)
         {
@@ -172,6 +176,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
         internal static void Validate(ActiveFloorRunSnapshot snapshot, bool persistent)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.StartValidation);
             var c = snapshot?.CombatRules;
             if (c == null || !c.IsProduction || snapshot.CombatBounds == null) throw new ArgumentException(CombatC0Kernel.InvalidState);
             for (int i = 0; i < snapshot.Floors.Count; i++) {

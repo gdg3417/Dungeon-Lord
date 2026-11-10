@@ -37,6 +37,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         private RunExecution StartCapturedSnapshot(int sequence, ActiveFloorRunSnapshot snapshot,
             RunLogicalTiming timing, long? eventLimit, bool manual, bool persistent = true)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.MutableExecutionSetup);
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
             var config = snapshot.Configuration;
             var engine = new RunSimulationService(config, snapshot.LootConfiguration, snapshot.LootTableId);

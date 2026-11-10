@@ -37,6 +37,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal CombatC0Geometry(IntraroomSnapshot spatial, CombatC0RoomBounds bounds, CombatC0Kernel kernel,
             TileCoordinate[] confirmedSyntheticSolidCells = null)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.CombatGeometrySetup);
             this.kernel = kernel; this.bounds = bounds;
             if (spatial == null || spatial.TraversableTiles == null || bounds.FloorId != spatial.FloorInstanceId ||
                 bounds.RoomId != spatial.RoomInstanceId || bounds.Width <= 0 || bounds.Height <= 0 ||

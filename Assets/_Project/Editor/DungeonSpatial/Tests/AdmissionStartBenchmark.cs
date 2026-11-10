@@ -24,12 +24,15 @@ namespace DungeonBuilder.M0.Editor.Tests
             public string[] Boundaries;
             public long[] Calls, InclusiveTicks, SelfTicks;
             public Metrics.Record[] Records;
+            public int DroppedRecords, DroppedScopes, ActiveDepth;
         }
         [Serializable] private sealed class Report
         {
             public string Source, Unity, InputBase64, OutputBase64;
             public long Frequency;
             public Sample[] Samples;
+            public long AllocationProbeBytes;
+            public double[] EmptyScopeMilliseconds;
         }
         [Test, Timeout(300000)] public void OneProductionAdmissionRepeatedSamples()
         {
@@ -37,6 +40,23 @@ namespace DungeonBuilder.M0.Editor.Tests
             string source = Environment.GetEnvironmentVariable("DUNGEON_ADMISSION_BENCHMARK_SOURCE");
             bool oldEnabled = Metrics.Enabled, oldDetailed = Metrics.DetailedEnabled;
             try {
+                // Calibrate outside the intact action; zero is unsupported, never zero allocation.
+                Metrics.Enabled = Metrics.DetailedEnabled = false;
+                long allocationProbe = GC.GetAllocatedBytesForCurrentThread();
+                var allocation = new byte[65536];
+                allocationProbe = GC.GetAllocatedBytesForCurrentThread() - allocationProbe;
+                GC.KeepAlive(allocation);
+                var emptyScopes = new double[4];
+                for (int mode = 0; mode < emptyScopes.Length; mode++) {
+                    Metrics.Reset(); Metrics.Enabled = Metrics.DetailedEnabled = (mode & 1) != 0;
+                    using (Metrics.Trace(Metrics.Boundary.IntraroomPlanning)) { } // initialize before timing
+                    Metrics.Reset();
+                    var calibration = Stopwatch.StartNew();
+                    for (int i = 0; i < Metrics.MaximumRecords; i++)
+                        using (Metrics.Trace(Metrics.Boundary.IntraroomPlanning)) { }
+                    calibration.Stop(); emptyScopes[mode] = calibration.Elapsed.TotalMilliseconds;
+                }
+                Metrics.Enabled = Metrics.DetailedEnabled = false;
                 var f = TwoFloor.ProductionDungeon();
                 f.Accept(PhaseSix.Writer(f).CommitFloorLifecycle(f.ActivePath, f.FileSystem, f.Session, f.Runtime,
                     FloorLifecycleAction.Activate, PhaseSix.FloorTwo(f)));
@@ -52,6 +72,7 @@ namespace DungeonBuilder.M0.Editor.Tests
                     bool enabled = ((pair + slot) & 1) == 0;
                     Metrics.Enabled = Metrics.DetailedEnabled = false;
                     f.FileSystem.Seed(f.ActivePath, input); f.Reopen();
+                    CollectionAssert.AreEqual(input, f.Session.GetCurrentBytes());
                     long admission = f.Runtime.livingDungeon.Scheduler.NextOpportunityTime.Value;
                     Metrics.Reset(); Metrics.Enabled = Metrics.DetailedEnabled = enabled;
                     long allocated = GC.GetAllocatedBytesForCurrentThread();
@@ -78,12 +99,24 @@ namespace DungeonBuilder.M0.Editor.Tests
                         Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.SupportedReader], Is.EqualTo(137));
                         Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.CompleteValidation], Is.EqualTo(10));
                         Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.PrefixReplay], Is.EqualTo(137));
+                        Assert.That(Metrics.BoundaryCalls[(int)Metrics.Boundary.LifetimeBranch], Is.EqualTo(1));
+                        Assert.That(Metrics.OriginCalls[(int)Metrics.Boundary.PrefixReplay, (int)Metrics.Origin.LifetimeNormal], Is.GreaterThan(0));
+                        Assert.That(Metrics.OriginCalls[(int)Metrics.Boundary.PrefixReplay, (int)Metrics.Origin.LifetimeAlternative], Is.GreaterThan(0));
+                        for (int i = 0; i < Metrics.RecordCount; i++) {
+                            var record = Metrics.Records[i];
+                            long children = 0;
+                            for (int j = i + 1; j < Metrics.RecordCount; j++)
+                                if (Metrics.Records[j].Parent == i) children += Metrics.Records[j].InclusiveTicks;
+                            Assert.That(record.SelfTicks, Is.GreaterThanOrEqualTo(0));
+                            Assert.That(record.InclusiveTicks, Is.EqualTo(record.SelfTicks + children));
+                        }
                     }
                     if (pair < 0) continue;
                     var sample = new Sample { Index = pair, Enabled = enabled, Milliseconds = timer.Elapsed.TotalMilliseconds,
                         AllocatedBytes = allocated, Boundaries = Enum.GetNames(typeof(Metrics.Boundary)),
                         Calls = (long[])Metrics.BoundaryCalls.Clone(), InclusiveTicks = (long[])Metrics.InclusiveTicks.Clone(),
-                        SelfTicks = (long[])Metrics.SelfTicks.Clone(), Records = Metrics.Records.Take(Metrics.RecordCount).ToArray() };
+                        SelfTicks = (long[])Metrics.SelfTicks.Clone(), Records = Metrics.Records.Take(Metrics.RecordCount).ToArray(),
+                        DroppedRecords = Metrics.DroppedRecords, DroppedScopes = Metrics.DroppedScopes, ActiveDepth = Metrics.ActiveDepth };
                     samples.Add(sample);
                     TestContext.WriteLine("admission sample=" + pair + " enabled=" + enabled + " ms=" + sample.Milliseconds + " allocated=" + allocated);
                 }
@@ -93,7 +126,8 @@ namespace DungeonBuilder.M0.Editor.Tests
                     string path = Path.Combine(root, "admission.json"); Assert.That(File.Exists(path), Is.False);
                     File.WriteAllText(path, JsonUtility.ToJson(new Report { Source = source, Unity = Application.unityVersion,
                         InputBase64 = Convert.ToBase64String(input), OutputBase64 = Convert.ToBase64String(output),
-                        Frequency = Stopwatch.Frequency, Samples = samples.ToArray() }, true));
+                        Frequency = Stopwatch.Frequency, Samples = samples.ToArray(), AllocationProbeBytes = allocationProbe,
+                        EmptyScopeMilliseconds = emptyScopes }, true));
                 }
             } finally { Metrics.Enabled = oldEnabled; Metrics.DetailedEnabled = oldDetailed; }
         }

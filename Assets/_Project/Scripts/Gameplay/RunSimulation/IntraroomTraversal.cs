@@ -48,6 +48,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
 
         internal static IntraroomTraversal Plan(MvpOrderedRouteRoom room, bool includeHistoricalMonsters = true, Action<long> charge = null)
         {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.IntraroomPlanning);
             var spatial = room.Spatial;
             if (spatial == null || spatial.Assignments == null) IntraroomSnapshot.Invalid();
             var paths = new DeterministicRoomPaths(spatial.TraversableTiles, spatial.MaximumMaterializedTiles, charge);

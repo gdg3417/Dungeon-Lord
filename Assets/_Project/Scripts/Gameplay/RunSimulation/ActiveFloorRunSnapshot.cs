@@ -29,7 +29,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             ConnectionWorkBound = movement.Required.Sum(p => (long)p.Path.Length) +
                 movement.BranchApproach.Sum(p => 2L * p.Path.Length);
         }
-        public PhaseFiveBRoutePlan MaterializePlan() => JsonUtility.FromJson<PhaseFiveBRoutePlan>(plan);
+        public PhaseFiveBRoutePlan MaterializePlan()
+        {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.CapturedPlanMaterialization);
+            return JsonUtility.FromJson<PhaseFiveBRoutePlan>(plan);
+        }
         public SavedSpatialFloor InspectSpatialInputs() => JsonUtility.FromJson<SavedSpatialFloor>(spatial);
         internal void WriteCheckpoint(BinaryWriter w)
         {
@@ -141,7 +145,11 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         internal static ActiveFloorRunSnapshot ReadCheckpoint(BinaryReader r) => new ActiveFloorRunSnapshot(r);
         // Admission preparation owns its template privately. Share only immutable
         // leaves; no writable snapshot array/monster record crosses executions.
-        internal ActiveFloorRunSnapshot CopyForExecution() => new ActiveFloorRunSnapshot(this);
+        internal ActiveFloorRunSnapshot CopyForExecution()
+        {
+            using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.ExecutionSnapshotCopy);
+            return new ActiveFloorRunSnapshot(this);
+        }
         private ActiveFloorRunSnapshot(ActiveFloorRunSnapshot source)
         {
             configuration = source.configuration; loot = source.loot; knowledge = source.knowledge;
