@@ -124,7 +124,7 @@ namespace DungeonBuilder.M0.Editor.Tests
 
         [TestCase(false)]
         [TestCase(true)]
-        public void CompleteObservationBeyondTickPublishesOnceWithStorageTimeLeftForNextCut(bool twoFloors)
+        public void CompleteObservationBeyondTickPublishesOnceAndLeavesLaterElapsedTimeForNextCut(bool twoFloors)
         {
             var f = PassiveSeed(twoFloors);
             using var passive = new PassiveTick(f);
@@ -141,7 +141,7 @@ namespace DungeonBuilder.M0.Editor.Tests
             var wall = new PairedForegroundObservationTests.PreciseClock { Now = WallAt(0) };
             double monotonic = 0;
             var service = LivingDungeonB3B2Tests.Service(f, wall, out var time, () => monotonic);
-            // Use an exact binary monotonic value for the capture, then assert its full horizon.
+            // Capture between logical units and verify the resulting full horizon.
             monotonic = 11.0015;
             wall.Now = WallAt(AfterMovement);
             var cut = time.CaptureForegroundObservation(service.CanonicalSession);
@@ -274,7 +274,10 @@ namespace DungeonBuilder.M0.Editor.Tests
             service.CanonicalRuntimePublished += next => { current = next; publications++; };
             var cut = Observe(service, current, terminal, wall.Now);
             using var candidate = Prepare(service, current, cut, inputs.Bootstrap.tickSeconds, (_, __) => Assert.Fail("unexpected tick"));
-            if (uncertain) f.FileSystem.EnableFailureSequence(Op.Flush, 1, Op.Replace, 2);
+            if (uncertain) {
+                int priorReplacements = f.FileSystem.Operations.Count(operation => operation.Type == Op.Replace);
+                f.FileSystem.EnableFailureSequence(Op.Flush, 1, Op.Replace, priorReplacements + 2);
+            }
             else f.FileSystem.EnableFailure(Op.Flush, 1);
             var failed = service.AdoptForegroundSuccessor(candidate);
             f.FileSystem.DisableFailure();
