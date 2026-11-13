@@ -11,6 +11,9 @@ namespace DungeonBuilder.M0
         private bool foregroundFocused = true;
         private UnixTimePoint foregroundWall;
         private bool recoveryAwaitingForegroundHorizon;
+        // Invalidate detached cuts on classification changes without sampling or
+        // accounting any additional elapsed time at adoption.
+        internal long ForegroundContextRevision { get; private set; }
         internal bool HasForegroundClock => foregroundUnitsPerSecond > 0;
         internal long ForegroundThrough => foregroundThrough;
         internal bool ForegroundPresentationActive => HasForegroundClock && foregroundFocused && !_isPaused && _save != null &&

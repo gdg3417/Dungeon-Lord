@@ -13,6 +13,7 @@ namespace DungeonBuilder.M0
         internal bool ForegroundWriting { get; private set; }
         internal bool CanonicalPublicationPending => ForegroundWriting || pendingCandidate != null;
         private bool foregroundRecoveryRequired;
+        private readonly object foregroundAdoptionOwner = new object();
         internal bool RequiresCanonicalRecovery => foregroundRecoveryRequired;
         private bool PrepareForegroundAction(ref SaveData current)
         {
@@ -47,41 +48,92 @@ namespace DungeonBuilder.M0
         internal DetachedCanonicalWriteResult AdvanceForeground(SaveData current, ForegroundObservation observation, int tickSeconds, Action<SaveData, long> passiveTick,
             long? suspendedSaveUtc = null)
         {
-            if (foregroundRecoveryRequired || CanonicalPublicationPending || _canonicalSession == null || ForegroundConfiguration == null)
-                return ForegroundBlocked();
-            if (observation == null || !observation.Authorizes(_canonicalSession, current, observation.CapturedThrough)) return ForegroundBlocked();
-            long through = observation.CapturedThrough;
+            if (!CanPrepareForeground(current, observation)) return ForegroundBlocked();
             ForegroundWriting = true;
             try {
-                // Closing/reinspecting already accepted time while suspended must
-                // retain the existing offline passive-mana boundary. Only newly
-                // observed eligible time advances it; ordinary Save owns pause UTC.
-                long savedBoundary = through > (current.livingDungeon?.Scheduler?.AcceptedThrough ?? -1)
-                    && current.livingDungeon?.IsClosed != false ? Math.Max(current.lastSavedUtcUnix, observation.WallEndpoint.Seconds) : current.lastSavedUtcUnix;
-                // Draining an older accepted horizon may defer admission of the
-                // final pre-pause sample. Preserve the pause UTC boundary even
-                // when that sample is accepted by a later suspended pump.
-                if (suspendedSaveUtc.HasValue)
-                    savedBoundary = Math.Max(current.lastSavedUtcUnix, Math.Min(savedBoundary, suspendedSaveUtc.Value));
-                CanonicalTimeTransition time = null;
-                if (current.timeProvenance?.Mode == TimeProvenance.PreciseMode) {
-                    if (current.timeProvenance.Episode != null || recoveryTime?.RecoveryClockActive == true) return ForegroundBlocked();
-                    savedBoundary = current.lastSavedUtcUnix;
-                    if (current.livingDungeon?.IsClosed != false && observation.Context == ForegroundObservationContext.EligibleForeground) {
-                        time = CanonicalTimeTransition.Foreground(_canonicalSession.GetCurrentBytes(), current.timeProvenance, observation, current.livingDungeon);
-                        savedBoundary = time.Successor.AccountedBoundary.Seconds;
-                    }
-                }
-                var result = CreateWriteAuthority().AdvanceForeground(SavePath, _canonicalFileSystem, _canonicalSession, current,
-                    ForegroundConfiguration, through, tickSeconds, passiveTick, savedBoundary, time);
-                if (result.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason) foregroundRecoveryRequired = true;
-                if (result.IsSuccess) {
-                    _canonicalSession = result.Session; _undo = null;
-                    CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
-                }
-                return result;
+                using var diagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.Pump,
+                    ForegroundQualificationMetrics.Origin.Pump);
+                var writer = CreateWriteAuthority();
+                string reason = PrepareForegroundSuccessor(writer, current, observation, tickSeconds, passiveTick,
+                    suspendedSaveUtc, out var successor);
+                using (successor)
+                    return reason == null ? AdoptForegroundSuccessor(writer, successor) : RejectForegroundSuccessor(reason);
             } finally { ForegroundWriting = false; }
         }
+
+        internal string PrepareForegroundSuccessor(SaveData current, ForegroundObservation observation, int tickSeconds,
+            Action<SaveData, long> passiveTick, out DetachedCanonicalWriteAuthority.ForegroundSuccessor successor,
+            long? suspendedSaveUtc = null)
+        {
+            successor = null;
+            if (!CanPrepareForeground(current, observation)) return ForegroundBlocked().Reason;
+            ForegroundWriting = true;
+            try {
+                return PrepareForegroundSuccessor(CreateWriteAuthority(), current, observation, tickSeconds,
+                    passiveTick, suspendedSaveUtc, out successor);
+            } finally { ForegroundWriting = false; }
+        }
+
+        internal DetachedCanonicalWriteResult AdoptForegroundSuccessor(DetachedCanonicalWriteAuthority.ForegroundSuccessor successor)
+        {
+            using (successor) {
+                if (!CanStartForeground()) return ForegroundBlocked();
+                ForegroundWriting = true;
+                try { return AdoptForegroundSuccessor(CreateWriteAuthority(), successor); }
+                finally { ForegroundWriting = false; }
+            }
+        }
+
+        private bool CanStartForeground() => !foregroundRecoveryRequired && !CanonicalPublicationPending &&
+            recoveryTime?.RecoveryClockActive != true && _canonicalSession != null && ForegroundConfiguration != null;
+
+        private bool CanPrepareForeground(SaveData current, ForegroundObservation observation) => CanStartForeground() &&
+            current != null && current.timeProvenance?.Episode == null && observation?.Matches(_canonicalSession, current) == true &&
+            observation.IsCurrentFor(recoveryTime);
+
+        private string PrepareForegroundSuccessor(DetachedCanonicalWriteAuthority writer, SaveData current,
+            ForegroundObservation observation, int tickSeconds, Action<SaveData, long> passiveTick, long? suspendedSaveUtc,
+            out DetachedCanonicalWriteAuthority.ForegroundSuccessor successor)
+        {
+            successor = null;
+            // Closing already accepted time retains the existing passive-mana
+            // boundary. Only a newly accepted eligible cut can advance it.
+            long savedBoundary = observation.CapturedThrough > observation.AcceptedThrough && current.livingDungeon?.IsClosed != false
+                ? Math.Max(current.lastSavedUtcUnix, observation.WallEndpoint.Seconds) : current.lastSavedUtcUnix;
+            if (suspendedSaveUtc.HasValue)
+                savedBoundary = Math.Max(current.lastSavedUtcUnix, Math.Min(savedBoundary, suspendedSaveUtc.Value));
+            CanonicalTimeTransition time = null;
+            if (current.timeProvenance?.Mode == TimeProvenance.PreciseMode) {
+                savedBoundary = current.lastSavedUtcUnix;
+                if (current.livingDungeon?.IsClosed != false && observation.Context == ForegroundObservationContext.EligibleForeground) {
+                    if (observation.WallEndpoint.CompareTo(current.timeProvenance.AccountedBoundary) < 0) return RecoveryEpisode.Invalid;
+                    time = CanonicalTimeTransition.Foreground(_canonicalSession.GetCurrentBytes(), current.timeProvenance, observation, current.livingDungeon);
+                    savedBoundary = time.Successor.AccountedBoundary.Seconds;
+                }
+            }
+            return DetachedCanonicalWriteAuthority.ForegroundSuccessor.Prepare(writer, SavePath, _canonicalFileSystem, _canonicalSession,
+                current, ForegroundConfiguration, observation, tickSeconds, passiveTick, savedBoundary, time,
+                foregroundAdoptionOwner, recoveryTime?.ForegroundContextRevision ?? 0, out successor);
+        }
+
+        private DetachedCanonicalWriteResult AdoptForegroundSuccessor(DetachedCanonicalWriteAuthority writer,
+            DetachedCanonicalWriteAuthority.ForegroundSuccessor successor)
+        {
+            if (successor == null) return RejectForegroundSuccessor("living.foreground.invalid_state");
+            if (foregroundRecoveryRequired || pendingCandidate != null || recoveryTime?.RecoveryClockActive == true)
+                return ForegroundBlocked();
+            var result = successor.Adopt(writer, SavePath, _canonicalFileSystem, _canonicalSession, ForegroundConfiguration,
+                foregroundAdoptionOwner, recoveryTime?.ForegroundContextRevision ?? 0);
+            if (result.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason) foregroundRecoveryRequired = true;
+            if (result.IsSuccess) {
+                _canonicalSession = result.Session; _undo = null;
+                CanonicalRuntimePublished?.Invoke(result.RuntimeProjection);
+            }
+            return result;
+        }
+
+        private static DetachedCanonicalWriteResult RejectForegroundSuccessor(string reason) =>
+            new DetachedCanonicalWriteResult(false, reason, false, false, null, null, null, null);
 
         internal LivingDungeonForegroundInspection InspectForeground(SaveData current, int tickSeconds)
         {

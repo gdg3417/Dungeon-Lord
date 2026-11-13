@@ -15,8 +15,10 @@ namespace DungeonBuilder.M0
         public long ClosedThrough { get; }
         public UnixTimePoint WallEndpoint { get; }
         public ForegroundObservationContext Context { get; }
+        private readonly TimeService owner;
+        private readonly long contextRevision;
         private ForegroundObservation(byte[] predecessor, long captured, long accepted, long closed,
-            UnixTimePoint wall, ForegroundObservationContext context)
+            UnixTimePoint wall, ForegroundObservationContext context, TimeService owner = null)
         {
             if (predecessor == null || captured < 0 || accepted < -1 || closed < -1 || closed > accepted ||
                 captured < accepted || wall == null || wall.Seconds <= 0 || !Enum.IsDefined(typeof(ForegroundObservationContext), context))
@@ -24,13 +26,14 @@ namespace DungeonBuilder.M0
             PredecessorSha256 = SpatialContractSha256.Compute(predecessor);
             CapturedThrough = captured; AcceptedThrough = accepted; ClosedThrough = closed;
             WallEndpoint = wall; Context = context;
+            this.owner = owner; contextRevision = owner?.ForegroundContextRevision ?? 0;
         }
         internal static ForegroundObservation Capture(TimeService time, DetachedCanonicalSaveSession predecessor)
         {
             if (predecessor == null) throw new ArgumentException("living.foreground.observation_invalid");
             var sample = time.ReadForegroundObservation();
             var cut = new ForegroundObservation(predecessor.GetCurrentBytes(), sample.Through, sample.Accepted,
-                sample.Closed, sample.Wall, sample.Context);
+                sample.Closed, sample.Wall, sample.Context, time);
             time.CommitForegroundObservation(sample.Sample, sample.Through, sample.Wall);
             return cut;
         }
@@ -44,5 +47,7 @@ namespace DungeonBuilder.M0
             ClosedThrough == (current?.livingDungeon?.Scheduler?.ClosedThrough ?? -1);
         internal bool Authorizes(DetachedCanonicalSaveSession session, SaveData current, long requestedThrough) =>
             requestedThrough == CapturedThrough && Matches(session, current);
+        internal bool IsCurrentFor(TimeService time) => owner == null ||
+            ReferenceEquals(owner, time) && contextRevision == time.ForegroundContextRevision;
     }
 }

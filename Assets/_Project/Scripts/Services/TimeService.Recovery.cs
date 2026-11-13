@@ -64,6 +64,7 @@ namespace DungeonBuilder.M0
                 throw new InvalidOperationException(RecoveryEpisode.Invalid);
             var sample = ReadRecoverySample(proven.AccountedBoundary);
             if (proven.RecoveryContextSha256 != null) BindRecoveryContext(proven.RecoveryContextSha256);
+            ForegroundContextRevision++;
             recoveryClockActive = true; recoveryFailureLatched = false;
             recoveryWall = sample.Wall; recoveryMonotonic = sample.Monotonic;
             recoveryCoveredThrough = proven.AccountedBoundary;
@@ -154,6 +155,7 @@ namespace DungeonBuilder.M0
 
         private void RecoveryLifecycleObservation(bool nextFocused, bool nextPaused)
         {
+            if (nextFocused != foregroundFocused || nextPaused != _isPaused) ForegroundContextRevision++;
             if (!recoveryClockActive) {
                 if (HasForegroundClock && _save?.timeProvenance?.Mode == TimeProvenance.PreciseMode &&
                     ObservedForeground && (!nextFocused || nextPaused) &&
@@ -261,6 +263,7 @@ namespace DungeonBuilder.M0
         {
             if (recoveryClockActive || _save?.timeProvenance?.Mode != TimeProvenance.PreciseMode) return;
             if (!HasForegroundClock) throw new InvalidOperationException(RecoveryEpisode.Invalid);
+            ForegroundContextRevision++;
             if (!HasDeferredRecovery || DeferredForegroundCanExtend) {
                 var minimum = _save.timeProvenance.AccountedBoundary;
                 if (foregroundWall != null && foregroundWall.CompareTo(minimum) > 0) minimum = foregroundWall;
@@ -331,6 +334,7 @@ namespace DungeonBuilder.M0
                 throw new InvalidOperationException(RecoveryEpisode.Invalid);
             var sample = ObserveDeferredRecovery();
             var entry = RecoveryEntryObservation.FromCaptured(sample.Wall, proven.timeProvenance, RecoveryEntryContext.KnownBackground);
+            ForegroundContextRevision++;
             recoveryClockActive = true; recoveryFailureLatched = recoveryDeferredStalled;
             recoveryCoveredThrough = proven.timeProvenance.AccountedBoundary; recoveryExpectedPredecessorSha256 = null;
             recoveryWall = sample.Wall; recoveryMonotonic = sample.Monotonic; recoveryEligible100ns = 0;

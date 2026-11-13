@@ -9,8 +9,102 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public sealed partial class DetachedCanonicalWriteAuthority
     {
-        // Only the foreground adapter calls this producer. Every stage is detached;
-        // one final exact predecessor-to-candidate write publishes the whole pump.
+        private const string InvalidForeground = "living.foreground.invalid_state";
+
+        // Only the detached executor can issue this capability, after its last
+        // complete timestamp. Discarding or submitting it releases the payload.
+        internal sealed class ForegroundSuccessor : IDisposable
+        {
+            private PreparedForeground prepared;
+            private readonly DetachedCurrentTargetValidationContext validationContext;
+            private readonly LivingDungeonProfile[] profiles;
+            private readonly SaveSpatialMigrationLimitsProfile saveLimits;
+            private readonly DetachedCanonicalSaveSession predecessor;
+            private readonly LivingDungeonForegroundConfig policy;
+            private readonly ForegroundObservation observation;
+            private readonly ISpatialMigrationFileSystem fileSystem;
+            private readonly string path;
+            private readonly object owner;
+            private readonly long observationRevision;
+
+            private ForegroundSuccessor(DetachedCanonicalWriteAuthority writer, PreparedForeground prepared,
+                DetachedCanonicalSaveSession predecessor, LivingDungeonForegroundConfig policy, ForegroundObservation observation,
+                ISpatialMigrationFileSystem fileSystem, string path, object owner, long observationRevision)
+            {
+                this.prepared = prepared; validationContext = writer.context; saveLimits = writer.limits;
+                profiles = writer.context.LivingDungeonProfiles.ToArray();
+                this.predecessor = predecessor; this.policy = policy; this.observation = observation;
+                this.fileSystem = fileSystem; this.path = path; this.owner = owner; this.observationRevision = observationRevision;
+            }
+
+            internal static string Prepare(DetachedCanonicalWriteAuthority writer, string path, ISpatialMigrationFileSystem fileSystem,
+                DetachedCanonicalSaveSession predecessor, SaveData current, LivingDungeonForegroundConfig policy,
+                ForegroundObservation observation, int tickSeconds, Action<SaveData, long> passiveTick, long savedUtcUnix,
+                CanonicalTimeTransition time, object owner, long observationRevision, out ForegroundSuccessor successor)
+            {
+                successor = null;
+                if (fileSystem == null || owner == null || observation?.Matches(predecessor, current) != true)
+                    return InvalidForeground;
+                string reason = writer.PrepareForeground(predecessor, current, policy, observation.CapturedThrough,
+                    tickSeconds, passiveTick, savedUtcUnix, time, observation, out var prepared);
+                if (reason == null) successor = new ForegroundSuccessor(writer, prepared, predecessor, policy, observation,
+                    fileSystem, path, owner, observationRevision);
+                return reason;
+            }
+
+            internal DetachedCanonicalWriteResult Adopt(DetachedCanonicalWriteAuthority writer, string activePath,
+                ISpatialMigrationFileSystem fs, DetachedCanonicalSaveSession session, LivingDungeonForegroundConfig currentPolicy,
+                object adoptionOwner, long currentObservationRevision)
+            {
+                var candidate = Take();
+                if (candidate == null || !ReferenceEquals(owner, adoptionOwner) || !ReferenceEquals(predecessor, session) ||
+                    !ReferenceEquals(fileSystem, fs) || path != activePath || observationRevision != currentObservationRevision)
+                    return Failure(InvalidForeground);
+                if (!ReferenceEquals(validationContext, writer.context) || !ReferenceEquals(saveLimits, writer.limits) ||
+                    !ReferenceEquals(policy, currentPolicy) || !writer.recoveryBindingsValid ||
+                    !profiles.SequenceEqual(writer.context.LivingDungeonProfiles) ||
+                    writer.context.RecoveryInputs?.ConsumedValuesStillBound(writer.context.RoomContentOccupancy) == false)
+                    return Failure(RecoveryEpisode.ContextMismatch);
+
+                // The executor drains an existing accepted horizon before accepting
+                // more. Its receipt is issued only after all work at ClosedThrough.
+                long accepted = observation.ClosedThrough < observation.AcceptedThrough
+                    ? observation.AcceptedThrough : observation.CapturedThrough;
+                var scheduler = candidate.Stage.ForegroundValidation.LivingDungeon.Scheduler;
+                if (scheduler.AcceptedThrough != accepted || scheduler.ClosedThrough != candidate.CompletedThrough ||
+                    candidate.CompletedThrough < observation.ClosedThrough || candidate.CompletedThrough > accepted)
+                    return Failure(InvalidForeground);
+                try {
+                    // Recheck the active bytes before any publication callbacks or
+                    // persistence evidence can be created, even for a no-op write.
+                    if (!ExactCompleteSaveAtomicPersistence.Same(session.GetCurrentBytes(), fs.ReadAllBytes(activePath)))
+                        return Failure(InvalidForeground);
+                    return writer.PersistForeground(activePath, fs, session, candidate);
+                } catch (Exception error) { return Failure(ForegroundFailureReason(error)); }
+            }
+
+            private PreparedForeground Take() => System.Threading.Interlocked.Exchange(ref prepared, null);
+            public void Dispose() => Take();
+        }
+
+        private sealed class PreparedForeground
+        {
+            internal readonly DetachedCanonicalSaveSessionResult Stage;
+            internal readonly SaveData Presentation;
+            internal readonly long CompletedThrough;
+            internal readonly string AdmissionReason;
+            internal readonly double RecoveryManaSpent;
+
+            internal PreparedForeground(DetachedCanonicalSaveSessionResult stage, SaveData presentation, long completedThrough,
+                string admissionReason, double recoveryManaSpent)
+            {
+                Stage = stage; Presentation = presentation; CompletedThrough = completedThrough;
+                AdmissionReason = admissionReason; RecoveryManaSpent = recoveryManaSpent;
+            }
+        }
+
+        // Recovery drains its own bound cut. Deterministic writer fixtures also
+        // exercise this entry point. Both use the same producer and final writer.
         internal DetachedCanonicalWriteResult AdvanceForeground(string path, ISpatialMigrationFileSystem fs,
             DetachedCanonicalSaveSession session, SaveData current, LivingDungeonForegroundConfig policy,
             long observedThrough, int tickSeconds, Action<SaveData, long> passiveTick, long savedUtcUnix,
@@ -18,20 +112,46 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             using var pumpDiagnostic = ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.Pump,
                 ForegroundQualificationMetrics.Origin.Pump);
-            const string invalid = "living.foreground.invalid_state";
+            try {
+                if (fs == null || session == null || !ExactCompleteSaveAtomicPersistence.Same(session.GetCurrentBytes(), fs.ReadAllBytes(path)))
+                    return Failure(InvalidForeground);
+                string reason = PrepareForeground(session, current, policy, observedThrough, tickSeconds, passiveTick,
+                    savedUtcUnix, timeTransition, null, out var prepared);
+                return reason == null ? PersistForeground(path, fs, session, prepared, candidatePrepared) : Failure(reason);
+            } catch (Exception error) { return Failure(ForegroundFailureReason(error)); }
+        }
+
+        private string PrepareForeground(DetachedCanonicalSaveSession session, SaveData current, LivingDungeonForegroundConfig policy,
+            long observedThrough, int tickSeconds, Action<SaveData, long> passiveTick, long savedUtcUnix,
+            CanonicalTimeTransition timeTransition, ForegroundObservation observation, out PreparedForeground preparation)
+        {
+            preparation = null;
+            const string invalid = InvalidForeground;
             var executions = new Dictionary<int, RunExecution>();
             try {
                 var bound = context?.RecoveryInputs;
                 if (bound != null && ((!ReferenceEquals(policy, bound.OneFloor) && !ReferenceEquals(policy, bound.TwoFloor)) ||
-                    tickSeconds != bound.Bootstrap.tickSeconds)) return Failure(RecoveryEpisode.ContextMismatch);
-                if (policy == null || current == null || session == null || fs == null || observedThrough < 0 || tickSeconds <= 0 || passiveTick == null ||
-                    !session.GetCurrentBytes().SequenceEqual(fs.ReadAllBytes(path))) return Failure(invalid);
+                    tickSeconds != bound.Bootstrap.tickSeconds)) return RecoveryEpisode.ContextMismatch;
+                if (policy == null || current == null || session == null || observedThrough < 0 || tickSeconds <= 0 || passiveTick == null)
+                    return invalid;
                 var profile = context.LivingDungeonProfiles.SingleOrDefault(p => p.Id == (current.livingDungeon?.Scheduler?.ProfileId ?? policy.Id));
-                if (profile == null) return Failure("living.foreground.provenance_required");
+                if (profile == null) return "living.foreground.provenance_required";
                 var working = session;
                 DetachedCanonicalSaveSession.ForegroundPredecessor predecessor = null;
                 var owned = recoveryBindingsValid ? working.ValidateForegroundPredecessor(context, out predecessor) : null;
-                if (owned?.CurrentTargetValidated != true || !CanonicalEqual(current.validatedCanonicalSpatialState, owned.State)) return Failure(invalid);
+                if (owned?.CurrentTargetValidated != true || !CanonicalEqual(current.validatedCanonicalSpatialState, owned.State)) return invalid;
+                var owner = owned.LivingDungeon;
+                if (observation != null && (observation.AcceptedThrough != (owner.Scheduler?.AcceptedThrough ?? -1) ||
+                    observation.ClosedThrough != (owner.Scheduler?.ClosedThrough ?? -1) ||
+                    owned.TimeProvenance?.SameAs(current.timeProvenance) != true || owned.TimeProvenance.Episode != null)) return invalid;
+                if (observation != null) {
+                    bool advancesWall = owned.TimeProvenance.Mode == TimeProvenance.PreciseMode && owner.IsClosed &&
+                        observation.Context == ForegroundObservationContext.EligibleForeground;
+                    if (advancesWall != (timeTransition != null) || timeTransition != null &&
+                        (timeTransition.ForegroundThrough != observedThrough ||
+                         !observation.WallEndpoint.Equals(timeTransition.Successor.AccountedBoundary))) return invalid;
+                }
+                var expectedTime = timeTransition?.Successor ?? owned.TimeProvenance;
                 var runtime = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(current));
                 if (current.researchPending == null) runtime.researchPending = null;
                 if (current.researchProgress == null) runtime.researchProgress = null;
@@ -40,15 +160,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (current.runHistory.RecentOutcomes == null) runtime.runHistory.RecentOutcomes = null;
                 RunTransientEvidence.Retain(current, runtime);
                 runtime.lastSavedUtcUnix = savedUtcUnix;
-                var owner = owned.LivingDungeon;
                 if (owned.TimeProvenance?.Episode != null &&
-                    (owner.IsDormant || observedThrough != owner.Scheduler.AcceptedThrough)) return Failure(RecoveryEpisode.Invalid);
+                    (owner.IsDormant || observedThrough != owner.Scheduler.AcceptedThrough)) return RecoveryEpisode.Invalid;
                 runtime.livingDungeon = owner;
                 DetachedCanonicalSaveSessionResult staged = null;
                 string admissionReason = null;
                 double recoveredManaSpent = 0;
                 if (!LivingDungeonForegroundConfig.IsProduction(profile.Id) || !owner.IsDormant && owner.Scheduler.ProfileId != profile.Id)
-                    return Failure("living.foreground.provenance_required");
+                    return "living.foreground.provenance_required";
                 var lineage = new LivingDungeonForegroundLineage(session.GetCurrentBytes());
                 runtime.monsterContinuity = owned.MonsterContinuity.Copy();
                 runtime.validatedCanonicalSpatialState = owned.State; runtime.canonicalSpatialAuthority = owned.State.Authority; runtime.spatialFloors = owned.State.Floors;
@@ -87,14 +206,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 }
                 bool previousHorizonClosed = owner.IsClosed;
                 if (!LivingDungeonScheduling.AllocatorValid(runtime.runHistory, owner, false) || observedThrough < owner.Scheduler.AcceptedThrough)
-                    return Failure(invalid);
+                    return invalid;
                 if (owner.IsClosed && owner.Scheduler.AcceptedThrough != observedThrough) LivingDungeonScheduling.Accept(owner, observedThrough);
                 // Acceptance changes only the typed scheduler. Validate its checkpoint
                 // envelope now; the complete detached candidate is validated at Stage
                 // before persistence. No accepted state is published in the meantime.
                 using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.Acceptance,
                     ForegroundQualificationMetrics.Origin.Acceptance))
-                    if (!LivingDungeonContracts.Validate(owner, context.LivingDungeonProfiles)) return Failure(invalid);
+                    if (!LivingDungeonContracts.Validate(owner, context.LivingDungeonProfiles)) return invalid;
                 long tickUnits = checked((long)tickSeconds * policy.UnitsPerSecond);
                 int boundaryEvents = 0;
 
@@ -244,6 +363,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     }
                 }
                 bool initial = true;
+                long completedThrough = -1;
                 for (int boundary = 0; boundary < policy.MaximumBoundaries; boundary++) {
                     long closed = owner.Scheduler.ClosedThrough, target = owner.Scheduler.AcceptedThrough;
                     if (!initial && closed == target) break;
@@ -315,22 +435,35 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     // already-injected save boundary before ordinary staging.
                     runtime.lastSavedUtcUnix = savedUtcUnix;
                     Stage();
+                    completedThrough = time;
                 }
                 // A bounded pump may retain an accepted horizon. It resumes that exact
                 // prefix before accepting additional observed time on a later invocation.
-                var result = PrepareAndPersist(path, fs, session, staged, false, candidatePrepared: candidatePrepared);
-                if (result.IsSuccess && recoveredManaSpent != 0) result = new DetachedCanonicalWriteResult(true, result.Reason,
-                    result.IsNoOp, result.ApplyExplicitRoomEffect, result.GetPersistedBytes(), result.Session, result.Validation,
-                    result.RuntimeProjection, result.RecoveryManaSpent + recoveredManaSpent);
-                result.ForegroundAdmissionReason = admissionReason;
-                if (result.IsSuccess) RunTransientEvidence.Retain(runtime, result.RuntimeProjection);
-                return result;
+                if (completedThrough < 0 || staged == null ||
+                    observation != null && expectedTime?.Mode == TimeProvenance.PreciseMode && !expectedTime.SameAs(owned.TimeProvenance))
+                    return invalid;
+                preparation = new PreparedForeground(staged, runtime, completedThrough, admissionReason, recoveredManaSpent);
+                return null;
             }
-            catch (Exception error) {
-                return Failure(error.Message.StartsWith("living.", StringComparison.Ordinal) || error.Message.StartsWith("combat.", StringComparison.Ordinal)
-                    ? error.Message : invalid);
-            }
+            catch (Exception error) { return ForegroundFailureReason(error); }
             finally { foreach (var e in executions.Values) e.Abandon(); }
         }
+
+        private DetachedCanonicalWriteResult PersistForeground(string path, ISpatialMigrationFileSystem fs,
+            DetachedCanonicalSaveSession session, PreparedForeground prepared,
+            Action<DetachedCanonicalSaveSession, TimeProvenance> candidatePrepared = null)
+        {
+            var result = PrepareAndPersist(path, fs, session, prepared.Stage, false, candidatePrepared: candidatePrepared);
+            if (result.IsSuccess && prepared.RecoveryManaSpent != 0) result = new DetachedCanonicalWriteResult(true, result.Reason,
+                result.IsNoOp, result.ApplyExplicitRoomEffect, result.GetPersistedBytes(), result.Session, result.Validation,
+                result.RuntimeProjection, result.RecoveryManaSpent + prepared.RecoveryManaSpent);
+            result.ForegroundAdmissionReason = prepared.AdmissionReason;
+            if (result.IsSuccess) RunTransientEvidence.Retain(prepared.Presentation, result.RuntimeProjection);
+            return result;
+        }
+
+        private static string ForegroundFailureReason(Exception error) =>
+            error.Message.StartsWith("living.", StringComparison.Ordinal) || error.Message.StartsWith("combat.", StringComparison.Ordinal)
+                ? error.Message : InvalidForeground;
     }
 }
