@@ -422,6 +422,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             using (ForegroundQualificationMetrics.Trace(ForegroundQualificationMetrics.Boundary.FinalPredecessor,
                 ForegroundQualificationMetrics.Origin.FinalWrite))
                 predecessor = ValidateSession(session);
+            if (foregroundStage && predecessor?.CurrentTargetValidated != true)
+                return Failure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
             if (validated.IsValid && predecessor?.IsValid == true)
             {
                 try
