@@ -589,6 +589,10 @@ namespace DungeonBuilder.M0
                 return false;
             SaveService.CanonicalRuntimePublished += PublishCanonicalRuntime;
             SaveData loaded = SaveService.LoadOrCreate(contentVersion, out string saveBanner);
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+            if (loaded != null && H2PlayerQualification.UseStationaryClock)
+                H2PlayerQualification.Loaded(SaveService.CanonicalSession?.GetCurrentBytes());
+#endif
             return CompleteLoadedBoot(loaded, saveBanner);
         }
 

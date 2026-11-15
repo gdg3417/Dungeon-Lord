@@ -1,5 +1,7 @@
 # H2-G0: checkpoint policy and next implementation decision
 
+**November 15, 2026 owner amendment.** The [H2 eligibility and transition contract](h2-eligibility-amendment.md) resolves the missed-observation, recovery closure and crash-gap choices below for future H2 sessions. The November 13 disposition of B stands. Numerical limits and activation remain separate approval decisions.
+
 Status: **conditional B-first development sequence owner-approved 2026-11-10; final independent review pending; no H2 activation**. Technical review dated 2026-11-09 (evidence inspection continued into 2026-11-10 UTC).
 
 **Select option B for the next runtime PR: admission-local immutable traversal preparation reuse.** Extend only the existing admission preparation lifetime, after a small attribution check identifies its repeatable preparation cost. Preserve every prefix replay, canonical publication and independent readback. Cross-pump batching remains blocked on numeric limits, oversized-observation semantics and memory evidence. Retained execution from #260 is rejected as the next step. This document claims no runtime improvement or completed H2.
