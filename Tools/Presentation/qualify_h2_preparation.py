@@ -43,12 +43,12 @@ def windows_process(command, *, hidden=False):
     return subprocess.Popen(command, cwd=ROOT, stdin=subprocess.DEVNULL, startupinfo=startup)
 
 
-def plan(prep, editor, v1, v2, transitions):
+def plan(prep, editor, v1, v2, transitions, product=None):
     require(not q.git(ROOT, 'status', '--porcelain'), 'A clean qualification worktree is required')
     win.assert_no_unity()
     prep.mkdir(parents=True)
     source = q.git(ROOT, 'rev-parse', 'HEAD')
-    product = 'DL B3B2 Smoke Two Floor Q' + uuid.uuid4().hex[:8]
+    product = product or 'DL B3B2 Smoke Two Floor Q' + uuid.uuid4().hex[:8]
     for key, seed in [('v1', v1), ('v2', v2)]:
         require(q.digest(seed) == SEEDS[key], 'PR #266 fixture mismatch')
         shutil.copyfile(seed, prep / f'{key}.json')
@@ -150,7 +150,9 @@ def build(stage, prep, settings):
             shutil.copyfile(ROOT / name, target)
     q.atomic(generated / 'observed.json', {'changes': changes, 'editor_exit': code})
     allowed = q.read(prep / 'generated-transitions.json')
-    require(all(allowed.get(name) == delta and name in before for name, delta in changes.items()),
+    require(all((allowed.get(name) == delta or
+                 isinstance(allowed.get(name), list) and delta in allowed[name]) and name in before
+                for name, delta in changes.items()),
             'Unknown generated input transition, preserved for review')
     with zipfile.ZipFile(prep / 'inputs.zip') as archive:
         for name in changes:
@@ -270,12 +272,15 @@ def play(stage, prep, settings, state, nonce=None):
     report_path = stage / ('cut.json' if name == 'interrupt' else 'report.json')
     command = [str(player), '-screen-fullscreen', '0', '-screen-width', '1280', '-screen-height', '720',
                '-logFile', str(stage / 'player.log'), '-b3b2ForegroundSmoke', MODES[name], str(report_path), str(manifest)]
+    stationary = MODES[name] in ('h2-interrupt', 'h2-reopen')
+    if stationary:
+        command.insert(1, '-batchmode')
     q.atomic(stage / 'launch.json', {'arguments': command, 'source': settings['source'], 'input_sha256': initial,
                                    'seed': str(slot), 'product': settings['product'], 'cache': 'OS caches not flushed',
                                    'process': 'fresh', 'disk_free_bytes': shutil.disk_usage(slot.parent).free,
                                    'started_utc': q.utc(), 'stage': name})
     started = time.monotonic()
-    child = windows_process(command)
+    child = windows_process(command, hidden=stationary)
     identity = win.identity(child.pid)
     require(identity is not None, 'No live qualifying player identity')
     q.atomic(stage / 'player.json', {'process': identity, 'nonce': expected, 'save': str(slot),
@@ -314,9 +319,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=('plan', 'preflight', 'build', 'interrupt', 'player', 'finish'))
     parser.add_argument('paths', nargs='+')
+    parser.add_argument('--product')
     args = parser.parse_args()
     if args.mode == 'plan':
-        plan(*(Path(p).absolute() for p in args.paths))
+        plan(*(Path(p).absolute() for p in args.paths), product=args.product)
         return 0
     stage, prep = (Path(p).absolute() for p in args.paths[:2])
     campaign, state = q.load(stage.parent)

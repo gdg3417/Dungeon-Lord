@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 using System;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using DungeonBuilder.M0.EditorTools;
 using UnityEditor;
@@ -39,7 +38,7 @@ public static class H2PlayerQualificationBuild
         DevelopmentBuildUtility.ValidateEditModeTestsEditorGuarded();
         DevelopmentBuildUtility.ValidateBuildSupport(BuildTarget.StandaloneWindows64);
         DevelopmentBuildUtility.EnsureActiveBuildTarget(BuildTarget.StandaloneWindows64);
-        string[] scenes = DevelopmentBuildUtility.GetEnabledScenePathsFromEditorBuildSettings().ToArray();
+        string[] scenes = DevelopmentBuildUtility.GetEnabledScenePathsFromEditorBuildSettings();
         DevelopmentBuildUtility.ValidateBootstrapOnlySceneAllowlist(scenes);
         const string symbol = "DUNGEON_LORD_H2_QUALIFICATION";
         string oldProduct = PlayerSettings.productName;
@@ -63,6 +62,7 @@ public static class H2PlayerQualificationBuild
                 throw new InvalidOperationException("h2.qualification.build_failed");
         } finally {
             PlayerSettings.productName = oldProduct;
+            AssetDatabase.SaveAssets();
         }
     }
 }

@@ -237,7 +237,6 @@ namespace DungeonBuilder.M0
             report.ManagedCalibrated = report.ManagedCalibrationDelta >= bytes && report.AllocationCalibrationDelta >= bytes;
             long nativeBefore = Profiler.GetTotalAllocatedMemoryLong();
             using (var native = new NativeArray<byte>(bytes, Allocator.Persistent)) {
-                native[0] = 1;
                 report.NativeCalibrationDelta = Profiler.GetTotalAllocatedMemoryLong() - nativeBefore;
             }
             report.NativeCalibrated = report.NativeCalibrationDelta >= bytes;
