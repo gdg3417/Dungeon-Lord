@@ -80,7 +80,7 @@ namespace DungeonBuilder.M0
                 !Directory.Exists(Path.GetDirectoryName(output)) || mode == "h2-interrupt" && Path.GetFileName(output) != "cut.json")
                 throw new InvalidOperationException("h2.qualification.isolation");
             string relative = Path.Combine(manifest.Nonce.Substring(0, 12), "living-dungeon-b3b2-qualification-" + manifest.Nonce + ".json");
-            string path = Path.Combine(Application.persistentDataPath, relative);
+            string path = Path.GetFullPath(Path.Combine(Application.persistentDataPath, relative));
             if (!File.Exists(path) || (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0 ||
                 (File.GetAttributes(Path.GetDirectoryName(path)) & FileAttributes.ReparsePoint) != 0)
                 throw new InvalidOperationException("h2.qualification.seed_missing");
@@ -158,9 +158,10 @@ namespace DungeonBuilder.M0
         private static IEnumerator Collect(GameRoot root)
         {
             for (int i = 0; i < 600 && root?.TimeService?.HasForegroundClock != true; i++) yield return null;
-            if (root?.TimeService?.HasForegroundClock != true ||
-                !string.Equals(root.SaveService.SavePath, savePath, StringComparison.OrdinalIgnoreCase))
+            if (root?.TimeService?.HasForegroundClock != true || root.SaveService?.CanonicalSession == null)
                 throw new InvalidOperationException("h2.qualification.bootstrap");
+            if (!string.Equals(root.SaveService.SavePath, savePath, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("h2.qualification.save_path_mismatch");
             report.BootSeconds = (Stopwatch.GetTimestamp() - configuredAt) / (double)Stopwatch.Frequency;
             report.LoadedSha256 = loadedHash;
             report.Profile = root.Save.livingDungeon?.Scheduler?.ProfileId;
