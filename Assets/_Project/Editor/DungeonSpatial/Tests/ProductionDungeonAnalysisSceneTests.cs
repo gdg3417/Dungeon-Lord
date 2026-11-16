@@ -467,6 +467,8 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(details.resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
                     AssertReachable(toggle);
                     AssertReachable(action);
+                    var map = ui.Q("viewport");
+                    float collapsedMapHeight = map.worldBound.height;
                     Click(toggle);
                     for (int i = 0; i < 4; i++) yield return null;
                     Assert.That(details.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
@@ -474,7 +476,11 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(details.verticalScroller.highValue, Is.GreaterThan(0));
                     AssertReachable(toggle);
                     AssertReachable(action);
-                    Assert.That(ui.Q("viewport").worldBound.height, Is.GreaterThan(controller.SafeRoot.worldBound.height * .24f));
+                    TestContext.WriteLine($"Guidance layout {resolution}: details={details.worldBound}, map={map.worldBound}, collapsed map height={collapsedMapHeight}");
+                    Assert.That(map.worldBound.height, Is.GreaterThan(controller.SafeRoot.worldBound.height * .24f));
+                    Assert.That(collapsedMapHeight - map.worldBound.height, Is.LessThanOrEqualTo(113f));
+                    Assert.That(map.worldBound.Overlaps(ui.Q("nextSteps").worldBound), Is.False);
+                    AssertReachable(ui.Q<Button>("edit"));
                     details.ScrollTo(revise);
                     yield return null;
                     AssertReachable(revise);

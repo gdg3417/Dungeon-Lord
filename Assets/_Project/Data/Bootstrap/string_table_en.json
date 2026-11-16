@@ -228,7 +228,7 @@
     {"key": "ui.dungeon.guidance.analysis", "text": "Open Analysis"},
     {"key": "ui.dungeon.guidance.inspect", "text": "Look for patterns in survival, loot, and how parties ended their visits."},
     {"key": "ui.dungeon.guidance.revise", "text": "Revise Dungeon"},
-    {"key": "ui.dungeon.guidance.compare", "text": "Try moving or adding a room and save. After more parties visit, return to Analysis to see how outcomes differ."},
+    {"key": "ui.dungeon.guidance.compare", "text": "Try moving a monster or adding a room, then save. After more parties visit, return to Analysis to see how outcomes differ."},
     {"key": "ui.dungeon.first_room.cancel", "text": "Cancel"},
     {"key": "ui.dungeon.first_room.empty", "text": "Build your first room to open a route through your dungeon."},
     {"key": "ui.dungeon.first_room.review", "text": "Build a Basic Room on the first floor for free. It connects the Entrance Hall to the Completion Terminal and saves immediately. You can customize the dungeon in Edit Mode."},
