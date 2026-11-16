@@ -84,6 +84,18 @@ build outputs. Build/native source identity and semantic pass assertions remain
 the existing build/native report authorities' responsibility; their commands must
 return nonzero on failure and retain those reports as artifacts.
 
+The H2 PR 1 adapter supports one qualification report with `planned_stop`.
+It pins the `canonical-post-replace` rendezvous and a unique 128-bit nonce. The
+supervisor verifies the marker, actual executable and creation identity, live
+membership in its held job, isolated save path and exact active/rollback hashes
+before stopping that job. It records the observed nonzero OS exits and empty job,
+then captures the original save directory before the adapter can reopen a clone.
+The report's terminal evidence is the planned-stop receipt in place of the
+ordinary child exit record. The campaign still requires two ordinary Bootstrap
+reopens and final preservation. A normal exit is a failed interruption, and a
+wrong or missing marker cannot trigger it. Ordinary cancellation/timeout and
+uncertain recovery keep their established meanings.
+
 For example, a selection might explicitly name:
 
 ```json

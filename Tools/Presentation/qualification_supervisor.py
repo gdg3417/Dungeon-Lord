@@ -18,6 +18,7 @@ import uuid
 import xml.etree.ElementTree as ET
 
 import qualification_inputs as inputs
+import qualification_planned_stop as planned_stop
 import qualification_windows as win
 
 _detached_processes = []  # Keep launch handles alive; ownership is in durable records.
@@ -119,6 +120,9 @@ def validate_plan(plan):
     by_id = {s['id']: s for s in stages}
     if not stages or len(by_id) != len(stages):
         raise ValueError('Empty or duplicate stage IDs')
+    stops = [s for s in stages if 'planned_stop' in s]
+    if len(stops) > 1:
+        raise ValueError('Only one planned interruption is supported per campaign')
     seen, commands = set(), set()
     for stage in stages:
         if not re.fullmatch('[a-zA-Z0-9_-]+', stage['id']):
@@ -147,6 +151,8 @@ def validate_plan(plan):
             raise ValueError('Test stage requires XML and explicit positive discovery count')
         if stage['role'] in ('build', 'report') and not stage.get('artifacts'):
             raise ValueError('Build/report stage needs artifacts')
+        if 'planned_stop' in stage:
+            planned_stop.validate(stage, plan)
         for name in [*stage.get('artifacts', []), *([stage['xml']] if 'xml' in stage else [])]:
             if not name or Path(name).is_absolute() or '..' in Path(name).parts or ':' in name:
                 raise ValueError('Artifact must belong to its own fresh stage directory')
@@ -189,6 +195,7 @@ def create(project, plan, selection):
                      status='READY', stages={}, host=dict(python=sys.version, platform=sys.platform),
                      supervisor_tools={str(Path(__file__).resolve()): digest(__file__),
                                        str(Path(win.__file__).resolve()): digest(win.__file__),
+                                       str(Path(planned_stop.__file__).resolve()): digest(planned_stop.__file__),
                                        str(Path(inputs.__file__).resolve()): digest(inputs.__file__)})
     # Validate before claiming project ownership; bad plans cannot strand a lease.
     paths = {s['command'][0] for s in ordered} | set(plan.get('tools', {}))
@@ -288,7 +295,8 @@ def nunit(path, expected, allowed_skips):
 def evidence(campaign, stage, record):
     rows = {}
     missing = []
-    for name in ['stdout.log', 'started.json', 'child.json', 'exit.json',
+    completion_evidence = [] if record.get('completion') == 'PLANNED_STOP' else ['exit.json']
+    for name in ['stdout.log', 'started.json', 'child.json', *completion_evidence,
                  *stage.get('artifacts', []), *([stage['xml']] if 'xml' in stage else [])]:
         path = inside(campaign / stage['id'], name)
         if path.is_dir():
@@ -348,6 +356,7 @@ def execute(campaign, state, stage):
     atomic(campaign / 'campaign.json', state)
     job = win.Job(record['job'])
     process = None
+    stop = None
     try:
         with (directory / 'stdout.log').open('xb') as log:
             process = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), '_host',
@@ -362,7 +371,16 @@ def execute(campaign, state, stage):
             atomic(directory / 'started.json', record)
             atomic(campaign / 'campaign.json', state)
             process.stdin.write(b'GO\n'); process.stdin.flush(); process.stdin.close()
-            outcome = win.wait(process, state['_event'], stage['timeout_seconds'])
+            if 'planned_stop' in stage:
+                outcome, stop, rejection = planned_stop.wait_for_cut(
+                    process, state['_event'], stage['timeout_seconds'], job, directory, state, stage, digest, read)
+                if rejection is not None:
+                    record['marker_rejection'] = rejection
+                if stop:
+                    atomic(directory / 'stop-intent.json', dict(marker=stop[0], player=stop[1],
+                           host=record['process'], job=record['job'], observed_utc=utc()))
+            else:
+                outcome = win.wait(process, state['_event'], stage['timeout_seconds'])
             if outcome != 'exit':
                 # Handle still owns the exact job assigned before GO; descendants only.
                 job.stop()
@@ -371,7 +389,13 @@ def execute(campaign, state, stage):
         record['finished_utc'] = utc()
         if not job.wait_empty():
             raise ValueError('Owned descendants still active; completion uncertain')
-        if outcome != 'exit':
+        if outcome == 'planned-stop':
+            receipt = planned_stop.capture(directory, stop, host_code, digest)
+            receipt.update(job=record['job'], captured_utc=utc())
+            atomic(directory / planned_stop.RECEIPT, receipt)
+            record.update(status='PASSED', failure=None, completion='PLANNED_STOP',
+                          child_process=stop[1], exit_code=receipt['player_exit_code'])
+        elif outcome != 'exit':
             record.update(status='FAILED', failure=outcome.upper())
         elif host_code != 0 or not (directory / 'exit.json').is_file():
             record.update(status='INCOMPLETE', failure='HOST_TERMINATED_WITHOUT_EXIT')
@@ -382,8 +406,11 @@ def execute(campaign, state, stage):
                 raise ValueError('Child completion identity mismatch')
             record.update(child_process=result['process'], exit_code=result['exit_code'],
                           child_started_utc=result['started_utc'], child_finished_utc=result['finished_utc'])
-            record['status'] = 'PASSED' if result['exit_code'] == 0 else 'FAILED'
-            record['failure'] = None if result['exit_code'] == 0 else 'CHILD_NONZERO'
+            if 'planned_stop' in stage:
+                record.update(status='FAILED', failure='PLANNED_STOP_EARLY_EXIT')
+            else:
+                record['status'] = 'PASSED' if result['exit_code'] == 0 else 'FAILED'
+                record['failure'] = None if result['exit_code'] == 0 else 'CHILD_NONZERO'
             # Always retain available raw evidence, even on failure.
         try:
             record['evidence'] = evidence(campaign, stage, record)
@@ -398,6 +425,7 @@ def execute(campaign, state, stage):
         # Do not kill on crash/error. Preserve uncertain work and block replacements.
     finally:
         if process and process.stdin and not process.stdin.closed: process.stdin.close()
+        if stop: win.close(stop[4])
         job.close()
     atomic(directory / 'result.json', record)
     return record
@@ -408,7 +436,7 @@ def recover_completed(campaign, stage, old):
     path = campaign / stage['id'] / 'result.json'
     if old['status'] not in ('RUNNING', 'STARTING') or not path.is_file(): return old
     terminal = read(path)
-    if terminal['status'] != 'PASSED' or terminal.get('exit_code') != 0 or not terminal.get('finished_utc'):
+    if terminal['status'] != 'PASSED' or not planned_stop.completed(stage, terminal) or not terminal.get('finished_utc'):
         return old
     for field in ('campaign', 'stage', 'command', 'source_sha', 'input_identity', 'process', 'job'):
         if terminal.get(field) != old.get(field): raise ValueError('Recovery identity mismatch: ' + field)
@@ -439,7 +467,7 @@ def run(campaign):
                     if old['status'] != 'PASSED':
                         state.update(status='INCOMPLETE', detail='Prior stage has no verified passing terminal result')
                         break
-                    if read(campaign / stage['id'] / 'result.json') != old or old.get('exit_code') != 0:
+                    if read(campaign / stage['id'] / 'result.json') != old or not planned_stop.completed(stage, old):
                         raise ValueError('Cannot reuse a missing/mismatched passing terminal manifest')
                     evidence(campaign, stage, old)
                     continue
@@ -489,7 +517,7 @@ def status(campaign):
             result['stages'][stage['id']] = record['status']
             if record['status'] == 'PASSED':
                 terminal = read(campaign / stage['id'] / 'result.json')
-                if terminal != record or record.get('exit_code') != 0 or not record.get('finished_utc'):
+                if terminal != record or not planned_stop.completed(stage, record) or not record.get('finished_utc'):
                     raise ValueError('Missing/mismatched terminal stage manifest')
                 evidence(campaign, stage, record)
             elif record['status'] in ('RUNNING', 'STARTING', 'INCOMPLETE'):

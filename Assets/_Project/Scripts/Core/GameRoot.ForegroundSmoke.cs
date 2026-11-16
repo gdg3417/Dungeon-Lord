@@ -237,6 +237,10 @@ namespace DungeonBuilder.M0
         internal static Func<double> ReopenClock(string[] args, string product, string savePath)
         {
             int index = Array.IndexOf(args, "-b3b2ForegroundSmoke");
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+            if (index >= 0 && index + 1 < args.Length && H2PlayerQualification.IsPhase(args[index + 1]))
+                return H2PlayerQualification.UseStationaryClock ? new PreboundForegroundQualificationClock(false).Read : null;
+#endif
             if (index < 0 || index + 1 >= args.Length || args[index + 1] != "admit" && args[index + 1] != "settle" && args[index + 1] != "finish" && args[index + 1] != "profile" &&
                 !args[index + 1].StartsWith("two-floor-", StringComparison.Ordinal) && args[index + 1] != "v1-upgrade" ||
                 product == null || !product.Contains("B3B2 Smoke") || string.IsNullOrEmpty(savePath) ||
@@ -255,6 +259,13 @@ namespace DungeonBuilder.M0
             if (index + 3 >= args.Length) { Application.Quit(2); return; }
             var probe = new GameObject("B3B2ForegroundQualification").AddComponent<LivingDungeonForegroundDevelopmentSmoke>();
             DontDestroyOnLoad(probe.gameObject); probe.phase = args[index + 1]; probe.destination = Path.GetFullPath(args[index + 2]); probe.previous = args[index + 3];
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+            if (H2PlayerQualification.IsPhase(probe.phase)) {
+                try { H2PlayerQualification.Configure(GameRoot.Instance, probe.phase, probe.destination, probe.previous); }
+                catch (Exception error) { Debug.LogException(error); Application.Quit(2); }
+                return;
+            }
+#endif
             if (probe.phase.StartsWith("two-floor-", StringComparison.Ordinal) || probe.phase == "v1-upgrade") {
                 var root = GameRoot.Instance;
                 if (root == null || !Application.productName.Contains("B3B2 Smoke Two Floor")) { Application.Quit(2); return; }
@@ -279,6 +290,12 @@ namespace DungeonBuilder.M0
         }
         private IEnumerator Start()
         {
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+            if (H2PlayerQualification.IsPhase(phase)) {
+                yield return H2PlayerQualification.Run(GameRoot.Instance);
+                yield break;
+            }
+#endif
             if (File.Exists(destination) || !Directory.Exists(Path.GetDirectoryName(destination)) ||
                 phase != "admit" && phase != "settle" && phase != "finish" && phase != "profile" &&
                 phase != "two-floor-wait" && phase != "two-floor-release" && phase != "two-floor-finish" && phase != "two-floor-profile" && phase != "v1-upgrade") { Application.Quit(2); yield break; }

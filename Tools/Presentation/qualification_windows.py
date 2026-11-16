@@ -26,6 +26,8 @@ wait_many = api('WaitForMultipleObjects', [W.DWORD, C.POINTER(W.HANDLE), W.BOOL,
 create_job = api('CreateJobObjectW', [W.LPVOID, W.LPCWSTR], W.HANDLE)
 open_job = api('OpenJobObjectW', [W.DWORD, W.BOOL, W.LPCWSTR], W.HANDLE)
 assign_job = api('AssignProcessToJobObject', [W.HANDLE, W.HANDLE])
+is_in_job = api('IsProcessInJob', [W.HANDLE, W.HANDLE, C.POINTER(W.BOOL)])
+get_exit_code = api('GetExitCodeProcess', [W.HANDLE, C.POINTER(W.DWORD)])
 terminate_job = api('TerminateJobObject', [W.HANDLE, W.UINT])
 query_job = api('QueryInformationJobObject', [W.HANDLE, C.c_int, W.LPVOID, W.DWORD, W.LPVOID])
 set_job = api('SetInformationJobObject', [W.HANDLE, C.c_int, W.LPVOID, W.DWORD])
@@ -98,6 +100,19 @@ class Job:
     def assign(self, process):
         checked(assign_job(self.handle, int(process._handle)))
 
+    def hold_member(self, record):
+        """Hold a live, creation-bound process in this exact job for stop evidence."""
+        handle = checked(open_process(0x1000 | 0x100000, False, record['pid']))
+        try:
+            member = W.BOOL()
+            checked(is_in_job(handle, self.handle, C.byref(member)))
+            if not member.value or not matches(record):
+                raise ValueError('Player is no longer the exact owned job member')
+            return handle
+        except BaseException:
+            close(handle)
+            raise
+
     def active(self):
         data = Accounting()
         checked(query_job(self.handle, 1, C.byref(data), C.sizeof(data), None))
@@ -133,6 +148,15 @@ def wait(process, event, seconds):
     if code == 258:
         return 'timeout'
     raise C.WinError(C.get_last_error())
+
+
+def process_exit_code(handle):
+    handles = (W.HANDLE * 1)(handle)
+    if wait_many(1, handles, False, 0) != 0:
+        raise ValueError('Planned-stop player has no verified exit')
+    code = W.DWORD()
+    checked(get_exit_code(handle, C.byref(code)))
+    return code.value
 
 
 def signal(name):

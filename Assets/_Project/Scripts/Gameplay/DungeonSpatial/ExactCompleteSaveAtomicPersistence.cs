@@ -44,6 +44,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (Same(activeBefore, candidate)) return validateReadback == null || validateReadback(activeBefore) ? null : DetachedCanonicalWriteAuthority.AtomicSaveFailedReason;
                 if (!Same(activeBefore, original))
                     return DetachedCanonicalWriteAuthority.RecoveryRequiredReason;
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+                H2PlayerQualification.SamplePersistence("prepare", activePath, original, candidate, activeBefore, null);
+#endif
                 fileSystem.WriteAllBytesDurable(rollback, original);
                 if (!Same(fileSystem.ReadAllBytes(rollback), original))
                     return DetachedCanonicalWriteAuthority.RecoveryRequiredReason;
@@ -53,8 +56,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 try
                 {
                     fileSystem.ReplaceSameDirectoryAtomic(staging, activePath);
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+                    if (fileSystem is WindowsSpatialMigrationFileSystem)
+                        H2PlayerQualification.AfterWindowsReplace(activePath, original, candidate);
+#endif
                     fileSystem.FlushDirectory(directory);
                     byte[] durable = fileSystem.ReadAllBytes(activePath);
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+                    H2PlayerQualification.SamplePersistence("readback", activePath, original, candidate, activeBefore, durable);
+#endif
                     if (!Same(durable, candidate) || (validateReadback != null && !validateReadback(durable))) throw new IOException();
                 }
                 catch
