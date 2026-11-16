@@ -24,6 +24,32 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(ProductionAnalysisPresenter.Capture(null).Runs, Is.Zero);
         }
 
+        [Test] public void RetainedLossStillProvidesAnalysisEvidence()
+        {
+            var loss = Outcome("test.wipe", 0, 3, 0);
+            Assert.That(loss.Success, Is.False);
+            var history = new RunHistoryState { RecentOutcomes = new[] { loss } };
+            var report = ProductionAnalysisPresenter.Capture(history);
+            Assert.That(report.Runs, Is.EqualTo(1));
+            Assert.That(report.Casualties, Is.EqualTo(3));
+            Assert.That(loss.Success, Is.False);
+        }
+
+        [Test] public void GuidanceLocalizationHasUniqueReadableKeys()
+        {
+            var catalog = JsonUtility.FromJson<StringTable>(System.IO.File.ReadAllText("Assets/_Project/Data/Bootstrap/string_table_en.json"));
+            string[] keys =
+            {
+                "expand", "collapse", "build", "construct", "arrival", "watch",
+                "analysis", "inspect", "revise", "compare"
+            };
+            foreach (string key in keys)
+            {
+                var entry = catalog.entries.Single(e => e.key == "ui.dungeon.guidance." + key);
+                Assert.That(entry.text, Is.Not.Null.And.Not.Empty);
+            }
+        }
+
         [TestCase(1)] [TestCase(3)] [TestCase(32)]
         public void RetainedWindowUsesCorrectTotalsWithoutMutation(int retention)
         {

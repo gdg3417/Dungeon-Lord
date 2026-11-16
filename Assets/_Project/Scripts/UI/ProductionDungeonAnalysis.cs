@@ -86,6 +86,7 @@ namespace DungeonBuilder.M0
         {
             top.SetEnabled(value); bottom.SetEnabled(value);
             document.rootVisualElement.Q("mapArea").SetEnabled(value);
+            document.rootVisualElement.Q("nextSteps").SetEnabled(value);
         }
 
         private void PresentAnalysis()

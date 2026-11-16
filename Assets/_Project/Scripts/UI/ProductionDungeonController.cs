@@ -154,6 +154,7 @@ namespace DungeonBuilder.M0
             InitializeReplay();
             InitializeFloorManagement();
             InitializeAnalysis();
+            InitializeGuidance();
             Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
             Button("default", () => SetTextSize(DungeonTextSize.Default));
@@ -171,6 +172,7 @@ namespace DungeonBuilder.M0
                 strip.horizontalScrollerVisibility = ScrollerVisibility.Auto;
             ui.Q<ScrollView>("contextDetails").verticalScrollerVisibility = ScrollerVisibility.Auto;
             ui.Q<ScrollView>("analysisScroll").verticalScrollerVisibility = ScrollerVisibility.Auto;
+            ui.Q<ScrollView>("nextStepsDetails").verticalScrollerVisibility = ScrollerVisibility.Auto;
             ui.Q<Button>("legacy").style.display = DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(
                 DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), root.DevPanelEnabled) ? DisplayStyle.Flex : DisplayStyle.None;
             SetLegacy(false);
@@ -485,6 +487,7 @@ namespace DungeonBuilder.M0
             world.PresentReplay(replay, IsEditing || legacy);
             PresentReplayControls();
             PresentAnalysis();
+            PresentGuidance();
             SetTextSize(textSize);
         }
         private void PresentHud()
@@ -653,6 +656,7 @@ namespace DungeonBuilder.M0
         private void SetLegacy(bool value)
         {
             legacy = value;
+            safe.EnableInClassList("legacy-mode", value);
             document.rootVisualElement.Q("displayPopover").style.display = DisplayStyle.None;
             var legacyButton=document.rootVisualElement.Q<Button>("legacy");
             if(value) safe.Add(legacyButton);

@@ -380,6 +380,8 @@ namespace DungeonBuilder.M0.Tests
         public IEnumerator LivingDungeonB3B2AutomaticSceneLoopSettlesAndAdmitsAgainstCommittedEdit()
         {
             var root = GameRoot.Instance;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var next = ui.Q<Button>("nextStepAction");
             Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
             var floor = root.Save.validatedCanonicalSpatialState.Floors[0];
             var room = floor.Layout.Rooms[0];
@@ -397,8 +399,12 @@ namespace DungeonBuilder.M0.Tests
                 root.TimeService.SetForegroundFocus(true); advance(.25); update(); yield return null;
                 Assert.That(typeof(GameRoot).GetField("foregroundFailure", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root), Is.Null);
                 if (!edited && root.Save.livingDungeon.Parties.Count == 1 && controller.World.ForegroundPartyVisible) {
+                    Assert.That(next.text, Is.EqualTo(root.Content.GetString("ui.dungeon.guidance.watch", null)));
+                    Assert.That(root.Save.runHistory.RecentOutcomes, Is.Empty);
                     var party = root.Save.livingDungeon.Parties.Single();
                     var bytes = root.SaveService.CanonicalSession.GetCurrentBytes();
+                    Click(next);
+                    CollectionAssert.AreEqual(bytes, root.SaveService.CanonicalSession.GetCurrentBytes());
                     var execution = LivingDungeonContracts.Restore(party, profile);
                     try {
                         oldGeometry = execution.Snapshot.Floors[0].KnowledgeFingerprint;
@@ -416,12 +422,16 @@ namespace DungeonBuilder.M0.Tests
                     var monster = root.Save.validatedCanonicalSpatialState.Floors[0].RoomContents.Assignments.Single(a => a.CategoryId == MvpDungeonPlacementIds.MonsterCategoryId);
                     var checkpoint = (byte[])party.Checkpoint.Clone();
                     Assert.That(controller.Draft.Move(floor.FloorInstanceId, monster.RoomInstanceId, monster.AssignmentId, new TileCoordinate(3, 2)), Is.True);
+                    Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Pending));
+                    Assert.That(ui.Q("nextSteps").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                    CollectionAssert.AreEqual(bytes, root.SaveService.CanonicalSession.GetCurrentBytes());
                     while (controller.Draft.Durability == DraftDurability.Pending) { Assert.That(controller.Draft.FlushNext(), Is.True); yield return null; }
                     Assert.That(controller.Commit(), Is.True);
                     CollectionAssert.AreEqual(checkpoint, root.Save.livingDungeon.Parties.Single().Checkpoint);
                     edited = true;
                 }
                 if (edited && root.Save.runHistory.LatestOutcome?.RunId == "run-1" && root.Save.livingDungeon.Parties.Any(p => p.Sequence == 2)) {
+                    Assert.That(next.text, Is.EqualTo(root.Content.GetString("ui.dungeon.guidance.analysis", null)));
                     Assert.That(root.Save.runHistory.RecentOutcomes.Count(o => o.RunId == "run-1"), Is.EqualTo(1));
                     Assert.That(EditMode.LivingDungeonPhaseABaselineTests.Structured(CombatC0Diagnostics.Events(root.Save.runHistory.LatestOutcome)),
                         Is.EqualTo(EditMode.LivingDungeonPhaseABaselineTests.Structured(CombatC0Diagnostics.Events(expected))));

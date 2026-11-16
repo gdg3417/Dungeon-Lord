@@ -18,6 +18,18 @@
             <ui:Label name="manaReserve" class="reserve-information" />
             <ui:Label name="foregroundActivity" class="reserve-information foreground-activity" />
         </ui:ScrollView>
+        <ui:VisualElement name="nextSteps" class="next-steps">
+            <ui:VisualElement class="next-steps-heading">
+                <ui:Button name="toggleNextSteps" class="next-steps-toggle" tooltip="ui.dungeon.guidance.expand" />
+                <ui:Button name="nextStepAction" class="next-step-action" />
+            </ui:VisualElement>
+            <ui:ScrollView name="nextStepsDetails" class="next-steps-details" mode="Vertical">
+                <ui:Label name="nextStepsInstruction" />
+                <ui:Label name="nextStepsArrival" tooltip="ui.dungeon.guidance.arrival" />
+                <ui:Button name="nextStepsRevise" tooltip="ui.dungeon.guidance.revise" />
+                <ui:Label name="nextStepsCompare" tooltip="ui.dungeon.guidance.compare" />
+            </ui:ScrollView>
+        </ui:VisualElement>
         <ui:Label name="capacity" class="capacity-bar" />
         <ui:VisualElement name="workspace" class="workspace" picking-mode="Ignore">
         <ui:VisualElement name="mapArea" class="map-area" picking-mode="Ignore">

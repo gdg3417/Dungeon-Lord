@@ -1210,6 +1210,8 @@ namespace DungeonBuilder.M0.Tests
             var root = GameRoot.Instance;
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             var build = ui.Q<Button>("buildFirstRoom");
+            var next = ui.Q<Button>("nextStepAction");
+            Assert.That(next.text, Is.EqualTo(root.Content.GetString("ui.dungeon.first_room.action", null)));
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720, 1280);
             controller.SetTextSize(DungeonTextSize.Large);
             for (int i = 0; i < 12; i++) yield return null;
@@ -1217,10 +1219,11 @@ namespace DungeonBuilder.M0.Tests
                 new Vector2(Screen.width, Screen.height));
             yield return null;
             AssertReachable(build);
+            AssertReachable(next);
 
             byte[] before = File.ReadAllBytes(root.SaveService.SavePath);
             double mana = root.Save.structureRuntime.ManaReserve;
-            Click(build);
+            Click(next);
             yield return null;
             Assert.That(ui.Q<Label>("modalText").text, Is.EqualTo(root.Content.GetString("ui.dungeon.first_room.review", null)));
             AssertReachable(ui.Q<Button>("cancel"));
@@ -1228,6 +1231,7 @@ namespace DungeonBuilder.M0.Tests
             Click(ui.Q<Button>("cancel"));
             AssertCanonicalUnchanged(before, mana);
             Assert.That(root.Save.validatedCanonicalSpatialState.Floors, Is.Empty);
+            Assert.That(next.text, Is.EqualTo(root.Content.GetString("ui.dungeon.first_room.action", null)));
 
             root.Save.structureRuntime.PlacementLocked = true;
             Click(build);
@@ -1243,8 +1247,9 @@ namespace DungeonBuilder.M0.Tests
             AssertCanonicalUnchanged(before, mana);
             Assert.That(controller.Discard(), Is.True);
 
-            Click(build);
+            Click(next);
             Click(ui.Q<Button>("confirm"));
+            Assert.That(next.text, Is.EqualTo(root.Content.GetString("ui.dungeon.edit", null)));
             var floor = root.Save.validatedCanonicalSpatialState.Floors.Single();
             var room = floor.Layout.Rooms.Single();
             Assert.That(floor.ActivationState, Is.EqualTo(FloorActivationState.Active));
@@ -1274,6 +1279,7 @@ namespace DungeonBuilder.M0.Tests
             for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
             ui = controller.GetComponent<UIDocument>().rootVisualElement;
             Assert.That(ui.Q("buildFirstRoom").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(ui.Q<Button>("nextStepAction").text, Is.EqualTo(root.Content.GetString("ui.dungeon.edit", null)));
             Assert.That(controller.World.TryRoomBounds(room.RoomInstanceId, out _), Is.True);
         }
         private void InvokeController(string method, params object[] args) => typeof(ProductionDungeonController).GetMethod(method,

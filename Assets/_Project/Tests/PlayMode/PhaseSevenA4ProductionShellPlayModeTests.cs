@@ -65,6 +65,8 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         { yield return Invoke("AnalysisFailedDiscardAndFailedSaveNeverNavigateOrLoseDraft"); }
         [UnityTest] public IEnumerator AnalysisInvalidDraftChoices()
         { yield return Invoke("AnalysisInvalidDraftOffersOnlyDiscardAndContinue"); }
+        [UnityTest] public IEnumerator GuidanceLargeTextSafeAreaAndReadOnlyActions()
+        { yield return Invoke("GuidanceLargeTextSafeAreaAndReadOnlyActions"); }
         [UnityTest] public IEnumerator AnalysisPendingAndStaleDrafts()
         { yield return Invoke("AnalysisPendingAndStaleSaveRemainDisabledWithDraftIntact"); }
         [UnityTest] public IEnumerator AnalysisResponsiveLayouts()
