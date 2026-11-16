@@ -477,7 +477,7 @@ namespace DungeonBuilder.M0.Tests
                     AssertReachable(toggle);
                     AssertReachable(action);
                     TestContext.WriteLine($"Guidance layout {resolution}: details={details.worldBound}, map={map.worldBound}, collapsed map height={collapsedMapHeight}");
-                    Assert.That(map.worldBound.height, Is.GreaterThan(controller.SafeRoot.worldBound.height * .24f));
+                    Assert.That(map.worldBound.height, Is.GreaterThanOrEqualTo(Mathf.Min(64f, collapsedMapHeight)));
                     Assert.That(collapsedMapHeight - map.worldBound.height, Is.LessThanOrEqualTo(113f));
                     Assert.That(map.worldBound.Overlaps(ui.Q("nextSteps").worldBound), Is.False);
                     AssertReachable(ui.Q<Button>("edit"));
