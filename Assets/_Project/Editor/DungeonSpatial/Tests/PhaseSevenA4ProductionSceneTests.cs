@@ -1253,7 +1253,8 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
             Assert.That(build.style.display.value, Is.EqualTo(DisplayStyle.None));
             Assert.That(ui.Q("edit").style.display.value, Is.EqualTo(DisplayStyle.Flex));
-            Assert.That(controller.World.ActiveEntityCount, Is.GreaterThan(0));
+            Assert.That(controller.World.TryRoomBounds(room.RoomInstanceId, out var bounds), Is.True);
+            Assert.That(bounds.width * bounds.height, Is.GreaterThan(0));
             byte[] after = File.ReadAllBytes(root.SaveService.SavePath);
             Assert.That(after, Is.Not.EqualTo(before));
             Click(build);
@@ -1273,6 +1274,7 @@ namespace DungeonBuilder.M0.Tests
             for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
             ui = controller.GetComponent<UIDocument>().rootVisualElement;
             Assert.That(ui.Q("buildFirstRoom").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(controller.World.TryRoomBounds(room.RoomInstanceId, out _), Is.True);
         }
         private void InvokeController(string method, params object[] args) => typeof(ProductionDungeonController).GetMethod(method,
             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(controller, args);
