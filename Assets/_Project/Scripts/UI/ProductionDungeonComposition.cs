@@ -110,7 +110,7 @@ namespace DungeonBuilder.M0
             if(floor==null)
             {
                 ui.Q<Label>("floorName").text=Text("ui.dungeon.empty.title");
-                ui.Q<Label>("floorInfo").text=Text("ui.dungeon.construction.starter_required"); return;
+                ui.Q<Label>("floorInfo").text=Text("ui.dungeon.first_room.empty"); return;
             }
             var catalog=draftContext.Production.Catalog;
             var definition=catalog.Floors.Single(f=>f.FloorDefinitionId==floor.FloorDefinitionId);
@@ -118,7 +118,7 @@ namespace DungeonBuilder.M0
                 new SpatialValidationWorkloadLimits(draftContext.Limits.Canonical.Spatial.MaximumMaterializedTiles),
                 floor.FixedStructures,catalog.FixedStructures,FloorLayoutValidationMode.ActivationValid);
             ui.Q<Label>("floorName").text=Format("ui.dungeon.floor",floor.FloorIndex+1);
-            ui.Q<Label>("floorInfo").text=floor.Layout.Rooms.Length==0 ? Lifecycle(floor)+"\n"+Text("ui.dungeon.construction.starter_required") :
+            ui.Q<Label>("floorInfo").text=floor.Layout.Rooms.Length==0 ? Lifecycle(floor)+"\n"+Text("ui.dungeon.construction.empty_floor") :
                 Format(Screen.width > Screen.height ? "ui.dungeon.floor.info_landscape" : "ui.dungeon.floor.info",Lifecycle(floor),floor.Layout.Rooms.Length,Text(result.IsValid ? "ui.dungeon.layout.ready" : "ui.dungeon.layout.blocked"),
                     result.Capacity.UsedFloorSpaceCapacity,result.Capacity.RemainingFloorSpaceCapacity);
             if(!inspecting) return;
