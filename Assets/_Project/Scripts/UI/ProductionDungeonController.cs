@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
@@ -141,6 +142,7 @@ namespace DungeonBuilder.M0
             initialized = true;
             pixelsPerPhysicalUnit = DungeonPhysicalUnits.PixelsPerUnit();
             Button("edit", EnterEdit); Button("save", ReviewSave); Button("discard", ReviewDiscard);
+            Button("buildFirstRoom", ReviewFirstRoom);
             Button("move", BeginMove); Button("closeSheet", () => { CloseSheet(); Present(); }); Button("reset", FitFloor);
             Button("focusRoom", FocusRoom);
             Button("collapseFloors", ToggleFloorRail);
@@ -189,6 +191,28 @@ namespace DungeonBuilder.M0
         private IFormatProvider Culture => PassiveManaPresenter.ResolveFormatProvider(root.Content.Strings?.language);
         private string Format(string key, params object[] args) => ProductionDungeonPresenter.Format(Text, Culture, key, args);
         private void Button(string name, Action action) => document.rootVisualElement.Q<Button>(name).clicked += action;
+        private bool NeedsFirstRoom => root.Save?.validatedCanonicalSpatialState?.Floors.Length == 0;
+
+        private bool CanOpenFirstRoomReview => NeedsFirstRoom && !IsEditing && !IsAnalysis && !legacy &&
+            recoveryBytes == null && recoveryReason == null && modal.style.display != DisplayStyle.Flex;
+
+        private void ReviewFirstRoom()
+        {
+            if (!HasCanonicalRuntime() || !CanOpenFirstRoomReview) return;
+            ShowModal("ui.dungeon.first_room.review", BuildFirstRoom, "ui.dungeon.first_room.action");
+            document.rootVisualElement.Q<Button>("cancel").text = Text("ui.dungeon.first_room.cancel");
+        }
+
+        private void BuildFirstRoom()
+        {
+            if (!HasCanonicalRuntime() || !CanOpenFirstRoomReview) return;
+            bool built = root.TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId, out _, out _, out string reason);
+            feedback = built ? null : reason;
+            Present();
+            document.rootVisualElement.Q<Button>(built ? "edit" : "buildFirstRoom").Focus();
+        }
+
         public void EnterEdit()
         {
             if (!HasCanonicalRuntime()) return;
@@ -383,8 +407,8 @@ namespace DungeonBuilder.M0
                     (selectedRoomId!=null && floor?.Layout.Rooms.Any(r=>r.RoomInstanceId==selectedRoomId)!=true) ||
                     (selectedEdgeId!=null && floor?.Layout.Edges.Any(e=>e.EdgeId==selectedEdgeId)!=true)) CloseSheet();
                 else if(selected!=null) selected=floor.RoomContents.Assignments.Single(a=>a.AssignmentId==selected.AssignmentId);
-                // An overview follows newly published geometry, including Bootstrap starter
-                // construction after an empty boot. Deliberate pan/zoom/focus remains retained.
+                // An overview follows newly published geometry, including the first room.
+                // Deliberate pan/zoom/focus remains retained.
                 RebuildFloor(autoFit);
                 if(selectedRoomId!=null) world.SelectRoomFootprint(selectedRoomId);
                 else if(selected!=null) world.SelectContent(selected);
@@ -429,7 +453,10 @@ namespace DungeonBuilder.M0
             status.text = Text(statusKey);
             if (draft?.StructuralReason != null && draft.StructuralReason != statusKey)
                 status.text += "\n" + Text(draft.StructuralReason);
-            ui.Q<Button>("edit").style.display = IsEditing ? DisplayStyle.None : DisplayStyle.Flex;
+            bool showFirstRoom = NeedsFirstRoom && !IsEditing;
+            ui.Q<Button>("buildFirstRoom").style.display = showFirstRoom ? DisplayStyle.Flex : DisplayStyle.None;
+            ui.Q<Button>("buildFirstRoom").SetEnabled(recoveryBytes == null && recoveryReason == null);
+            ui.Q<Button>("edit").style.display = IsEditing || showFirstRoom ? DisplayStyle.None : DisplayStyle.Flex;
             ui.Q("editActions").style.display = IsEditing ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("edit").SetEnabled(recoveryBytes == null && recoveryReason == null);
             ui.Q<Button>("save").SetEnabled(draft?.CanSave == true && draftContext.Fingerprint(root.Save.validatedCanonicalSpatialState) == draft.BaselineFingerprint);

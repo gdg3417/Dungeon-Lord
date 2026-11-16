@@ -262,6 +262,10 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         { yield return Invoke("ExplicitDeleteQuiescesProductionShellAndFreshBootHasNoDraft"); }
 
         [UnityTest]
+        public IEnumerator FirstRoomConfirmationUsesCanonicalPlacementAndReopens()
+        { yield return Invoke("FirstRoomConfirmationUsesCanonicalPlacementAndReopens"); }
+
+        [UnityTest]
         public IEnumerator ProductionShellFailedExplicitDeleteQuiescence()
         { yield return Invoke("FailedExplicitDeleteStillQuiescesProductionShellWithoutFurtherWrites"); }
 

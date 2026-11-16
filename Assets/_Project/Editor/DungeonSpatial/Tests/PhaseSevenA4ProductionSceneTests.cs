@@ -1191,17 +1191,90 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(GameRoot.Instance.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
                 var ui = controller.GetComponent<UIDocument>().rootVisualElement;
                 Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
-                Assert.That(ui.Q<Button>("edit").enabledSelf, Is.True);
+                Assert.That(ui.Q("edit").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
                 Assert.That(controller.IsEditing, Is.False);
                 Assert.That(controller.World.GridVisible, Is.False);
                 Assert.That(controller.World.ActiveEntityCount, Is.Zero);
                 Assert.That(ui.Q("floorSummary").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
-                Assert.That(ui.Q<Label>("floorInfo").text, Does.Contain(GameRoot.Instance.Content.GetString("ui.dungeon.construction.starter_required", null)));
+                Assert.That(ui.Q<Label>("floorInfo").text, Is.EqualTo(GameRoot.Instance.Content.GetString("ui.dungeon.first_room.empty", null)));
                 controller.EnterEdit(); controller.OpenRooms();
-                Assert.That(ui.Q("roomChoices").childCount, Is.Zero, "Graphical first-room domain work remains deferred");
+                Assert.That(ui.Q("roomChoices").childCount, Is.Zero);
                 Assert.That(controller.World.MoveGuidanceAnchors, Is.Empty);
                 Assert.That(controller.Discard(), Is.True);
             }
+        }
+
+        public IEnumerator FirstRoomConfirmationUsesCanonicalPlacementAndReopens()
+        {
+            yield return ExplicitDeleteShell(false);
+            var root = GameRoot.Instance;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var build = ui.Q<Button>("buildFirstRoom");
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720, 1280);
+            controller.SetTextSize(DungeonTextSize.Large);
+            for (int i = 0; i < 12; i++) yield return null;
+            controller.ApplySafeArea(new Rect(24, 24, Screen.width - 48, Screen.height - 72),
+                new Vector2(Screen.width, Screen.height));
+            yield return null;
+            AssertReachable(build);
+
+            byte[] before = File.ReadAllBytes(root.SaveService.SavePath);
+            double mana = root.Save.structureRuntime.ManaReserve;
+            Click(build);
+            yield return null;
+            Assert.That(ui.Q<Label>("modalText").text, Is.EqualTo(root.Content.GetString("ui.dungeon.first_room.review", null)));
+            AssertReachable(ui.Q<Button>("cancel"));
+            AssertReachable(ui.Q<Button>("confirm"));
+            Click(ui.Q<Button>("cancel"));
+            AssertCanonicalUnchanged(before, mana);
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors, Is.Empty);
+
+            root.Save.structureRuntime.PlacementLocked = true;
+            Click(build);
+            Click(ui.Q<Button>("confirm"));
+            Assert.That(ui.Q<Label>("status").text, Is.EqualTo(root.Content.GetString("ui.banner.place_blocked_heat_crisis", null)));
+            AssertCanonicalUnchanged(before, mana);
+            root.Save.structureRuntime.PlacementLocked = false;
+
+            controller.EnterEdit();
+            Click(build);
+            Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(controller.IsEditing, Is.True);
+            AssertCanonicalUnchanged(before, mana);
+            Assert.That(controller.Discard(), Is.True);
+
+            Click(build);
+            Click(ui.Q<Button>("confirm"));
+            var floor = root.Save.validatedCanonicalSpatialState.Floors.Single();
+            var room = floor.Layout.Rooms.Single();
+            Assert.That(floor.ActivationState, Is.EqualTo(FloorActivationState.Active));
+            Assert.That(room.RoomDefinitionId, Is.EqualTo("spatial.room.basic"));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(mana));
+            Assert.That(root.SaveService.CreateDungeonDraftStore().Read(), Is.Null);
+            Assert.That(build.style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(ui.Q("edit").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(controller.World.TryRoomBounds(room.RoomInstanceId, out var bounds), Is.True);
+            Assert.That(bounds.width * bounds.height, Is.GreaterThan(0));
+            byte[] after = File.ReadAllBytes(root.SaveService.SavePath);
+            Assert.That(after, Is.Not.EqualTo(before));
+            Click(build);
+            Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.None));
+            AssertCanonicalUnchanged(after, mana);
+
+            UnityEngine.Object.Destroy(controller.gameObject);
+            UnityEngine.Object.Destroy(root.gameObject);
+            yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
+            for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
+            root = GameRoot.Instance;
+            Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename));
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors.Single().Layout.Rooms.Single().RoomInstanceId,
+                Is.EqualTo(room.RoomInstanceId));
+            controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+            for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
+            ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            Assert.That(ui.Q("buildFirstRoom").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(controller.World.TryRoomBounds(room.RoomInstanceId, out _), Is.True);
         }
         private void InvokeController(string method, params object[] args) => typeof(ProductionDungeonController).GetMethod(method,
             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(controller, args);
