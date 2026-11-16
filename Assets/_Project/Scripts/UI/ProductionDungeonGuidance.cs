@@ -12,7 +12,7 @@ namespace DungeonBuilder.M0
         // Read the cached Analysis window and committed scheduler. Outcomes include losses.
         private bool HasGuidanceReport => !NeedsFirstRoom && analysisReport.Runs > 0;
         private bool CanWatchArrival => !NeedsFirstRoom && !HasGuidanceReport &&
-            root.Save.livingDungeon is { } living &&
+            root.Save.livingDungeon is { IsDormant: false } living &&
             (living.Scheduler.NextOpportunityTime.HasValue || living.RetainedCount > 0);
 
         private void InitializeGuidance()

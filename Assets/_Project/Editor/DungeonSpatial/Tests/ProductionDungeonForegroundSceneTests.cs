@@ -9,6 +9,7 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 
 namespace DungeonBuilder.M0.Tests
 {
