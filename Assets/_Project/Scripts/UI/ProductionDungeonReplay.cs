@@ -157,7 +157,7 @@ namespace DungeonBuilder.M0
             ui.Q("replayLegend").style.display = !IsEditing && replay != null ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q("replayPanel").style.display = !IsEditing && replay != null ? DisplayStyle.Flex : DisplayStyle.None;
             var start = ui.Q<Button>("replayRun");
-            start.style.display = !IsEditing && replay == null ? DisplayStyle.Flex : DisplayStyle.None;
+            start.EnableInClassList("replay-start-hidden", IsEditing || replay != null);
             start.SetEnabled(replayReason == null && recoveryBytes == null && recoveryReason == null);
             start.tooltip = Text(replayReason ?? "ui.dungeon.replay.start");
             ui.Q<Label>("replayAvailability").text = Text(replayReason ?? "ui.dungeon.replay.ready");

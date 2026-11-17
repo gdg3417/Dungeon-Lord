@@ -25,6 +25,10 @@
 .tutorial-footer { display: none; flex-shrink: 0; flex-direction: row; align-items: center; justify-content: flex-end; background-color: var(--panel); border-top-width: 1px; border-top-color: var(--gold); padding: 2px 6px; }
 #tutorialHint { white-space: normal; min-width: 0; flex-shrink: 1; flex-grow: 1; }
 #skipTutorial { width: 176px; white-space: nowrap; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; }
+.tutorial-scrim { display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+.tutorial-shade { position: absolute; background-color: rgba(0,0,0,0.76); }
+.tutorial-first-room .sheet-top, .tutorial-first-room #contextDetails,
+.replay-start-hidden, .tutorial-before-visit #replayRun { display: none; }
 .tutorial-outline { display: none; position: absolute; border-width: 3px; border-color: var(--gold); border-radius: 5px; }
 .tutorial-pointer { display: none; position: absolute; width: 0; height: 0; border-left-width: 7px; border-right-width: 7px; border-top-width: 12px; border-left-color: rgba(0,0,0,0); border-right-color: rgba(0,0,0,0); border-top-color: var(--gold); }
 .tutorial-pointer-below { border-top-width: 0; border-bottom-width: 12px; border-bottom-color: var(--gold); }

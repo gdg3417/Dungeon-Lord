@@ -146,6 +146,12 @@
                 <ui:VisualElement class="row"><ui:Button name="confirm" tooltip="ui.dungeon.save" /><ui:Button name="navigationDiscard" tooltip="ui.analysis.discard_changes" /><ui:Button name="cancel" tooltip="ui.dungeon.continue" /></ui:VisualElement>
             </ui:ScrollView>
         </ui:VisualElement>
+        <ui:VisualElement name="tutorialScrim" class="tutorial-scrim" picking-mode="Ignore">
+            <ui:VisualElement name="tutorialShadeTop" class="tutorial-shade" picking-mode="Ignore" />
+            <ui:VisualElement name="tutorialShadeBottom" class="tutorial-shade" picking-mode="Ignore" />
+            <ui:VisualElement name="tutorialShadeLeft" class="tutorial-shade" picking-mode="Ignore" />
+            <ui:VisualElement name="tutorialShadeRight" class="tutorial-shade" picking-mode="Ignore" />
+        </ui:VisualElement>
         <ui:VisualElement name="tutorialFooter" class="tutorial-footer" picking-mode="Ignore">
             <ui:Label name="tutorialHint" picking-mode="Ignore" />
             <ui:Button name="skipTutorial" tooltip="ui.dungeon.tutorial.skip" />

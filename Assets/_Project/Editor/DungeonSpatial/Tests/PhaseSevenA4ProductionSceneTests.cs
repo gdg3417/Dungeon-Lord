@@ -1229,6 +1229,18 @@ namespace DungeonBuilder.M0.Tests
                 TestContext.WriteLine($"Spotlight {size}: room={build.worldBound}, skip={skip.worldBound}, safe={controller.SafeRoot.worldBound}");
                 AssertReachable(build);
                 AssertReachable(skip);
+                var scrim = ui.Q("tutorialScrim");
+                Assert.That(scrim.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                Assert.That(scrim.pickingMode, Is.EqualTo(PickingMode.Ignore));
+                foreach (var shade in scrim.Children())
+                {
+                    Assert.That(shade.pickingMode, Is.EqualTo(PickingMode.Ignore));
+                    Assert.That(shade.worldBound.Contains(build.worldBound.center), Is.False);
+                }
+                Assert.That(ui.Q("tutorialShadeTop").worldBound.yMax, Is.EqualTo(build.worldBound.yMin).Within(1f));
+                Assert.That(ui.Q("contextDetails").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                Assert.That(ui.Q("replayRun").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                Assert.That(ui.Q<Label>("tutorialHint").text, Is.Not.Empty);
                 Assert.That(outline.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
                 Assert.That(Vector2.Distance(outline.worldBound.center, build.worldBound.center), Is.LessThan(1f));
                 // The initial batch Game View render may still contain uninitialized UI materials.
@@ -1245,6 +1257,7 @@ namespace DungeonBuilder.M0.Tests
             AssertReachable(ui.Q<Button>("cancel"));
             AssertReachable(ui.Q<Button>("confirm"));
             AssertReachable(skip);
+            Assert.That(ui.Q("tutorialScrim").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
             Click(ui.Q<Button>("cancel"));
             AssertCanonicalUnchanged(before, mana);
             Assert.That(root.Save.validatedCanonicalSpatialState.Floors, Is.Empty);
@@ -1375,6 +1388,9 @@ namespace DungeonBuilder.M0.Tests
             yield return Reopen();
             reopened = controller.GetComponent<UIDocument>().rootVisualElement;
             Assert.That(reopened.Q("tutorialFooter").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(reopened.Q("tutorialScrim").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+            Assert.That(reopened.Q("contextDetails").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(reopened.Q("replayRun").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
             Assert.That(GameRoot.Instance.Save.validatedCanonicalSpatialState.Floors, Is.Empty);
             AssertReachable(reopened.Q<Button>("buildFirstRoom"));
         }

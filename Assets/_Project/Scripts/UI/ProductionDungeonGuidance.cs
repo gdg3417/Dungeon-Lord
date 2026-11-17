@@ -26,11 +26,12 @@ namespace DungeonBuilder.M0
         private Label tutorialHint;
         private Button nextStepsToggle;
         private Button[] objectives;
+        private VisualElement tutorialScrim;
         private string tutorialPreference, tutorialHintKey;
         private Tutorial tutorial;
         private bool guidanceExpanded, firstRoomConfirmed, canWatchArrival, lastGuidanceBlocked;
         private Rect? tutorialRoom;
-        private Rect lastTutorialBounds;
+        private Rect lastTutorialBounds, lastTutorialScreen;
         private IVisualElementScheduledItem dismissActivity;
 
         private bool HasGuidanceReport => analysisReport?.Runs > 0;
@@ -60,6 +61,7 @@ namespace DungeonBuilder.M0
             objectives = objectiveKeys.Select(key => ui.Q<Button>("objective_" + key)).ToArray();
             tutorialFooter = ui.Q("tutorialFooter");
             tutorialHint = ui.Q<Label>("tutorialHint");
+            tutorialScrim = ui.Q("tutorialScrim");
             tutorialOutline = ui.Q("tutorialOutline");
             tutorialPointer = ui.Q("tutorialPointer");
             tutorialFooter.RegisterCallback<GeometryChangedEvent>(_ =>
@@ -174,6 +176,9 @@ namespace DungeonBuilder.M0
 
             bool showTutorial = TutorialActive && !legacy;
             tutorialFooter.style.display = showTutorial ? DisplayStyle.Flex : DisplayStyle.None;
+            safe.EnableInClassList("tutorial-first-room", showTutorial && NeedsFirstRoom &&
+                !IsEditing && !IsAnalysis && !GuidanceBlocked);
+            safe.EnableInClassList("tutorial-before-visit", showTutorial && !visitObserved);
             if (!showTutorial)
             {
                 modal.style.bottom = 0;
@@ -275,7 +280,7 @@ namespace DungeonBuilder.M0
             bounds = Clip(bounds, safe.worldBound);
             if (bounds.width < 4 || bounds.height < 4)
             {
-                tutorialOutline.style.display = tutorialPointer.style.display = DisplayStyle.None;
+                tutorialScrim.style.display = tutorialOutline.style.display = tutorialPointer.style.display = DisplayStyle.None;
                 dismissActivity?.Pause();
                 dismissActivity = null;
                 lastTutorialBounds = default;
@@ -295,9 +300,18 @@ namespace DungeonBuilder.M0
                 dismissActivity.Pause();
                 dismissActivity = null;
             }
-            if (bounds == lastTutorialBounds) return;
+            Rect screen = document.rootVisualElement.worldBound;
+            screen.position = safe.WorldToLocal(screen.position);
+            if (bounds == lastTutorialBounds && screen == lastTutorialScreen) return;
             lastTutorialBounds = bounds;
-            tutorialOutline.style.display = tutorialPointer.style.display = DisplayStyle.Flex;
+            lastTutorialScreen = screen;
+            // These four shades cover the screen up to the same clipped bounds used by the outline.
+            // Draw the footer above the scrim so its instruction and Skip stay fully lit.
+            SetShade(tutorialScrim[0], screen.xMin, screen.yMin, screen.width, bounds.yMin - screen.yMin);
+            SetShade(tutorialScrim[1], screen.xMin, bounds.yMax, screen.width, screen.yMax - bounds.yMax);
+            SetShade(tutorialScrim[2], screen.xMin, bounds.yMin, bounds.xMin - screen.xMin, bounds.height);
+            SetShade(tutorialScrim[3], bounds.xMax, bounds.yMin, screen.xMax - bounds.xMax, bounds.height);
+            tutorialScrim.style.display = tutorialOutline.style.display = tutorialPointer.style.display = DisplayStyle.Flex;
             tutorialOutline.style.left = bounds.xMin;
             tutorialOutline.style.top = bounds.yMin;
             tutorialOutline.style.width = bounds.width;
@@ -306,6 +320,14 @@ namespace DungeonBuilder.M0
             tutorialPointer.EnableInClassList("tutorial-pointer-below", !above);
             tutorialPointer.style.left = Mathf.Clamp(bounds.center.x - 7, 0, Mathf.Max(0, safe.layout.width - 14));
             tutorialPointer.style.top = above ? bounds.yMin - 13 : bounds.yMax;
+        }
+
+        private static void SetShade(VisualElement shade, float x, float y, float width, float height)
+        {
+            shade.style.left = x;
+            shade.style.top = y;
+            shade.style.width = Mathf.Max(0, width);
+            shade.style.height = Mathf.Max(0, height);
         }
 
         private static Rect Clip(Rect a, Rect b)
