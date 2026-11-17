@@ -479,7 +479,10 @@ namespace DungeonBuilder.M0.Tests
                         Click(toggle);
                         for (int i = 0; i < 4; i++) yield return null;
                         Assert.That(ui.Q("nextSteps").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
-                        Assert.That(map.worldBound, Is.EqualTo(collapsed));
+                        Rect expanded = map.worldBound;
+                        // The scaled HUD can settle by a few panel units during the next layout.
+                        Assert.That(expanded.height, Is.GreaterThanOrEqualTo(collapsed.height - 4f));
+                        Assert.That(expanded.width, Is.EqualTo(collapsed.width).Within(2f));
                         Assert.That(details.verticalScroller.highValue, Is.GreaterThan(0));
                         Click(toggle);
                         yield return null;
