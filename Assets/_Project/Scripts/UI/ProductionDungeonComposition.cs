@@ -78,8 +78,9 @@ namespace DungeonBuilder.M0
             var ui=document.rootVisualElement;
             bool inspecting=selected!=null || selectedRoomId!=null || selectedEdgeId!=null;
             safe.EnableInClassList("editing",IsEditing);
-            bool working=Screen.width>Screen.height && IsEditing &&
-                (IsConstructing || contentCategory!=null && ContextRoomId!=null);
+            bool editingContent = IsEditing && contentCategory != null && ContextRoomId != null;
+            bool working = Screen.width > Screen.height && (IsConstructing || editingContent);
+            safe.EnableInClassList("room-content-edit", editingContent);
             safe.EnableInClassList("working-sheet",working);
             var workspace=ui.Q("workspace"); var map=ui.Q("mapArea");
             workspace.style.display=working ? DisplayStyle.Flex : DisplayStyle.None;
@@ -89,11 +90,12 @@ namespace DungeonBuilder.M0
                 int index=safe.IndexOf(workspace);
                 safe.Insert(index,map); safe.Insert(index+1,bottom);
             }
-            bool compactEditing = IsEditing && safe.ClassListContains("compact-portrait");
+            bool compactEditing = IsEditing && !IsConstructing && safe.ClassListContains("compact-portrait");
+            safe.EnableInClassList("compact-edit-panel", compactEditing);
             var capacityBar = ui.Q("capacity");
             var draftSummary = ui.Q("draftSummary");
             var details = ui.Q<ScrollView>("contextDetails").contentContainer;
-            if (compactEditing || working && detailsCollapsed)
+            if (compactEditing || working && editingContent && detailsCollapsed)
             {
                 if (capacityBar.parent != details) details.Insert(0, capacityBar);
                 if (draftSummary.parent != details) details.Insert(1, draftSummary);

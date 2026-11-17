@@ -205,27 +205,27 @@ Button.tutorial-button-target, Button.tutorial-button-target:hover, Button.tutor
 }
 Button.tutorial-button-target Label { color: rgb(30, 22, 12); }
 .compact-content-host { flex-shrink: 0; }
-.compact-portrait.editing .hud { flex-wrap: wrap; }
-.compact-portrait.editing .metric-card { flex-basis: 45%; flex-direction: row; padding: 1px 5px; margin: 1px; }
-.compact-portrait.editing .metric-icon { display: none; }
-.compact-portrait.editing .top-chrome, .compact-portrait.editing .bottom-chrome { padding: 3px 5px; }
-.compact-portrait.editing .top-chrome { max-height: 24%; flex-shrink: 1; }
-.compact-portrait.editing #draftSummary { flex-basis: auto; flex-shrink: 0; }
-.compact-portrait.editing #editActions { flex-wrap: nowrap; }
-.compact-portrait.editing #editActions > Button,
-.compact-portrait.editing #contentPlacementActions > Button { flex-basis: 0; min-width: 0; padding: 0 5px; }
-.compact-portrait.editing .session-actions { padding-top: 1px; }
-.compact-portrait.editing .content-card { flex-direction: row; min-width: 160px; padding: 1px 6px; align-items: center; }
-.compact-portrait.editing .content-card-icon { width: 28px; height: 28px; flex-shrink: 0; margin-right: 5px; }
+.compact-edit-panel .hud { flex-wrap: wrap; }
+.compact-edit-panel .metric-card { flex-basis: 45%; flex-direction: row; padding: 1px 5px; margin: 1px; }
+.compact-edit-panel .metric-icon { display: none; }
+.compact-edit-panel .top-chrome, .compact-edit-panel .bottom-chrome { padding: 3px 5px; }
+.compact-edit-panel .top-chrome { max-height: 24%; flex-shrink: 1; }
+.compact-edit-panel #draftSummary { flex-basis: auto; flex-shrink: 0; }
+.compact-edit-panel #editActions { flex-wrap: nowrap; }
+.compact-edit-panel #editActions > Button,
+.compact-edit-panel #contentPlacementActions > Button { flex-basis: 0; min-width: 0; padding: 0 5px; }
+.compact-edit-panel .session-actions { padding-top: 1px; }
+.compact-edit-panel .content-card { flex-direction: row; min-width: 160px; padding: 1px 6px; align-items: center; }
+.compact-edit-panel .content-card-icon { width: 28px; height: 28px; flex-shrink: 0; margin-right: 5px; }
 .content-card-labels { flex-shrink: 1; min-width: 0; }
-.compact-portrait.editing.details-collapsed .floor-rail,
-.landscape.working-sheet.details-collapsed .floor-rail { left: auto; right: 4px; }
-.landscape.working-sheet.details-collapsed .top-content { flex-direction: column; align-items: stretch; }
-.landscape.working-sheet.details-collapsed .top-chrome { padding-top: 0; padding-bottom: 0; max-height: none; }
-.landscape.working-sheet.details-collapsed .hud, .landscape.working-sheet.details-collapsed #navigation { flex-basis: auto; }
-.landscape.working-sheet.details-collapsed .metric-card { flex-direction: row; padding: 0 4px; margin: 1px; }
-.landscape.working-sheet.details-collapsed .metric-icon { display: none; }
-.landscape.working-sheet.details-collapsed #editActions { flex-wrap: nowrap; }
+.compact-edit-panel.details-collapsed .floor-rail,
+.landscape.working-sheet.room-content-edit.details-collapsed .floor-rail { left: auto; right: 4px; }
+.landscape.working-sheet.room-content-edit.details-collapsed .top-content { flex-direction: column; align-items: stretch; }
+.landscape.working-sheet.room-content-edit.details-collapsed .top-chrome { padding-top: 0; padding-bottom: 0; max-height: none; }
+.landscape.working-sheet.room-content-edit.details-collapsed .hud, .landscape.working-sheet.room-content-edit.details-collapsed #navigation { flex-basis: auto; }
+.landscape.working-sheet.room-content-edit.details-collapsed .metric-card { flex-direction: row; padding: 0 4px; margin: 1px; }
+.landscape.working-sheet.room-content-edit.details-collapsed .metric-icon { display: none; }
+.landscape.working-sheet.room-content-edit.details-collapsed #editActions { flex-wrap: nowrap; }
 
 Button:active { background-color: rgb(54,64,62); }
 Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: rgb(78,84,86); border-color: rgb(61,74,80); }
