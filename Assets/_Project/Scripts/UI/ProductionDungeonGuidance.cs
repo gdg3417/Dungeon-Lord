@@ -176,8 +176,10 @@ namespace DungeonBuilder.M0
 
             bool showTutorial = TutorialActive && !legacy;
             tutorialFooter.style.display = showTutorial ? DisplayStyle.Flex : DisplayStyle.None;
-            safe.EnableInClassList("tutorial-first-room", showTutorial && NeedsFirstRoom &&
-                !IsEditing && !IsAnalysis && !GuidanceBlocked);
+            bool hideStarterDetails = showTutorial && NeedsFirstRoom &&
+                !IsEditing && !IsAnalysis && !GuidanceBlocked;
+            safe.EnableInClassList("tutorial-first-room", hideStarterDetails);
+            ui.Q("contextDetails").style.display = hideStarterDetails || detailsCollapsed ? DisplayStyle.None : DisplayStyle.Flex;
             safe.EnableInClassList("tutorial-before-visit", showTutorial && !HasGuidanceReport);
             if (!showTutorial)
             {

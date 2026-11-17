@@ -236,7 +236,6 @@ namespace DungeonBuilder.M0
             ui.Q("constructionFeedback").style.display = DisplayStyle.None;
             ui.Q("constructionCategories").style.display = IsEditing ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("collapseDetails").text = Text(detailsCollapsed ? "ui.dungeon.details.expand" : "ui.dungeon.details.collapse");
-            ui.Q("contextDetails").style.display = detailsCollapsed ? DisplayStyle.None : DisplayStyle.Flex;
             var panel = ui.Q("constructionSheet"); panel.style.display = IsEditing && selected == null && selectedRoomId == null && selectedEdgeId==null && !moveMode ? DisplayStyle.Flex : DisplayStyle.None;
             var choices = ui.Q("roomChoices"); choices.Clear();
             ui.Q("roomChoicesScroll").style.display = constructionRequest == null ? DisplayStyle.Flex : DisplayStyle.None;
