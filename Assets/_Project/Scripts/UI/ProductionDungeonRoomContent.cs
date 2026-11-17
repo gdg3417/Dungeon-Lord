@@ -65,7 +65,8 @@ namespace DungeonBuilder.M0
             string id = room.RoomInstanceId;
             ClearConstructionSelection(); ClearContentSelection(); selected = null; selectedRoomId = id; selectedEdgeId = null; moveMode = false;
             contentCategory = category; OpenSheet(); world.SelectRoomFootprint(id);
-            detailsCollapsed = safe.ClassListContains("compact-portrait");
+            detailsCollapsed = safe.ClassListContains("compact-portrait") ||
+                TutorialActive && Screen.width > Screen.height;
             feedback = "ui.dungeon.content.choose"; Present(); FocusRoom(); return true;
         }
         public bool SelectNewContent(string option)
@@ -202,9 +203,9 @@ namespace DungeonBuilder.M0
             safe.EnableInClassList("placing-content", IsPlacingContent || reassigning != null);
             bool compact = safe.ClassListContains("compact-portrait");
             var browser = ui.Q("contentBrowser");
-            var browserHost = compact && managing && reassigning == null ? ui.Q("compactContentHost") : ui.Q("roomContentPanel");
+            var browserHost = (compact || detailsCollapsed) && managing && reassigning == null ? ui.Q("compactContentHost") : ui.Q("roomContentPanel");
             if (browser.parent != browserHost) browserHost.Add(browser);
-            browser.style.display = managing && (!compact || contentIntent == null) ? DisplayStyle.Flex : DisplayStyle.None;
+            browser.style.display = managing && (!(compact || detailsCollapsed) || contentIntent == null || reassigning != null) ? DisplayStyle.Flex : DisplayStyle.None;
             if (managing && draft.Durability == DraftDurability.Acknowledged && draft.StructuralReason == null)
                 status.style.display = compact && detailsCollapsed && contentPreview?.IsValid == false ? DisplayStyle.Flex : DisplayStyle.None;
             if (managing) ui.Q<Button>("move").style.display = DisplayStyle.None;

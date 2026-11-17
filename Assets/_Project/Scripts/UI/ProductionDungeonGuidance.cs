@@ -227,6 +227,8 @@ namespace DungeonBuilder.M0
                         (target, hint) = (ui.Q("openAnalysis"), "analysis");
                     else if (canWatchArrival && !Learned(Tutorial.Activity))
                         (target, hint) = (ui.Q("foregroundActivity"), "activity");
+                    else if (!Learned(Tutorial.MonsterPreview) || !Learned(Tutorial.LootPreview))
+                        (target, hint) = (ui.Q("edit"), "resume_edit");
                 }
                 else if (IsEditing && draft.Durability == DraftDurability.Acknowledged)
                 {
@@ -260,6 +262,7 @@ namespace DungeonBuilder.M0
             {
                 tutorialHintKey = hint;
                 tutorialHint.text = hint == null ? string.Empty : Text("ui.dungeon.tutorial." + hint);
+                ui.Q<ScrollView>("tutorialInstructions").scrollOffset = Vector2.zero;
             }
             PositionTutorial();
         }

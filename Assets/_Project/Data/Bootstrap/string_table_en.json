@@ -233,6 +233,7 @@
     {"key": "ui.dungeon.tutorial.dialog", "text": "Follow the current dialog to continue."},
     {"key": "ui.dungeon.tutorial.return", "text": "Return to Dungeon when you’re ready."},
     {"key": "ui.dungeon.tutorial.explore", "text": "Explore the dungeon at your own pace."},
+    {"key": "ui.dungeon.tutorial.resume_edit", "text": "Return to Edit Mode to try placement previews."},
     {"key": "ui.dungeon.tutorial.edit", "text": "Enter Edit Mode."},
     {"key": "ui.dungeon.tutorial.rooms", "text": "Open Rooms to browse layouts."},
     {"key": "ui.dungeon.tutorial.room", "text": "Select a room on the map."},

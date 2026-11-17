@@ -291,8 +291,18 @@ namespace DungeonBuilder.M0
             selected = world.Select(cell); selectedRoomId = selected == null ? world.SelectRoom(cell, IsEditing) : null;
             selectedEdgeId=selected==null && selectedRoomId==null ? world.SelectCorridor(cell) : null;
             world.ClearMoveGuidance();
-            if (selected == null && selectedRoomId == null && selectedEdgeId==null) CloseSheet();
-            else { OpenSheet(); if (selectedRoomId != null) world.SelectRoomFootprint(selectedRoomId); else if(selected!=null) world.SelectContent(selected); else world.SelectCorridorFootprint(selectedEdgeId); }
+            if (selected == null && selectedRoomId == null && selectedEdgeId == null) CloseSheet();
+            else
+            {
+                OpenSheet();
+                if (selectedRoomId != null)
+                {
+                    world.SelectRoomFootprint(selectedRoomId);
+                    if (IsEditing && safe.ClassListContains("compact-portrait")) detailsCollapsed = true;
+                }
+                else if (selected != null) world.SelectContent(selected);
+                else world.SelectCorridorFootprint(selectedEdgeId);
+            }
             Present();
         }
         private void OpenSheet()
@@ -506,7 +516,8 @@ namespace DungeonBuilder.M0
             lastWallet = root.Save.structureRuntime.ManaReserve; lastHeat = root.Save.structureRuntime.Heat; lastTick = root.Save.totalTicks;
             var ui = document.rootVisualElement;
             var hud = ProductionDungeonPresenter.Hud(root.Save, root.RunSimulationConfig, root.PassiveManaPerHourForPresentation, Text, Culture, recoveryPresentationRules);
-            bool compact = IsEditing && safe.ClassListContains("compact-portrait");
+            bool compact = IsEditing && (safe.ClassListContains("compact-portrait") ||
+                Screen.width > Screen.height && detailsCollapsed && contentCategory != null);
             string Metric(string value) => compact ? value.Replace("\n", " ") : value;
             ui.Q<Label>("totalMana").text = Metric(hud.TotalMana); ui.Q<Label>("usableMana").text = Metric(hud.UsableMana);
             ui.Q<Label>("manaReserve").text = hud.Reserve;

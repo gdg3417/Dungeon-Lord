@@ -1303,6 +1303,16 @@ namespace DungeonBuilder.M0.Tests
                 Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial." + key, null)));
             void Capture(string scene) =>
                 DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("p269-edit-" + scene + ".png");
+            void CheckDraftActions()
+            {
+                var chrome = ui.Q("bottomChrome").worldBound;
+                foreach (string action in new[] { "save", "discard" })
+                {
+                    var button = ui.Q<Button>(action);
+                    AssertReachable(button);
+                    Assert.That(chrome.Contains(button.worldBound.max - Vector2.one), Is.True, action);
+                }
+            }
             yield return SettleContentPanel();
             Capture("room-540x960");
             yield return null;
@@ -1315,7 +1325,13 @@ namespace DungeonBuilder.M0.Tests
                 yield return SettleContentPanel();
                 AssertReachable(ui.Q<Button>("newContent"));
                 AssertReachable(ui.Q<Button>("ownedContent"));
+                CheckDraftActions();
                 Assert.That(details.resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                Click(ui.Q<Button>("collapseDetails"));
+                yield return SettleContentPanel();
+                Assert.That(details.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                AssertReachable(ui.Q<Button>("newContent"));
+                Click(ui.Q<Button>("collapseDetails"));
                 Click(ui.Q<Button>("ownedContent"));
                 CheckHint("other_browser");
                 Click(ui.Q<Button>("newContent"));
@@ -1333,6 +1349,10 @@ namespace DungeonBuilder.M0.Tests
                 var cell = ContentCell(room, 1, 1);
                 var point = camera.WorldToScreenPoint(new Vector3(cell.X + .5f, cell.Y + .5f));
                 Assert.That(controller.IsChrome(point), Is.False);
+                controller.TapWorld(new TileCoordinate(cell.X - 50, cell.Y - 50));
+                Assert.That(controller.ContentPreview?.IsValid, Is.Not.True);
+                Assert.That(ui.Q<Button>("confirmContent").enabledInHierarchy, Is.False);
+                CheckHint("preview_cell");
                 controller.TapWorld(cell);
                 Assert.That(controller.ContentPreview.IsValid, Is.True, controller.ContentPreview.Reason);
                 CheckHint("preview");
@@ -1357,8 +1377,9 @@ namespace DungeonBuilder.M0.Tests
                             Assert.That(camera.pixelRect.y, Is.EqualTo(Screen.height - map.yMax * scale).Within(1f));
                             var cellPoint = camera.WorldToScreenPoint(new Vector3(cell.X + .5f, cell.Y + .5f));
                             Assert.That(controller.IsChrome(cellPoint), Is.False);
-                            foreach (string action in new[] { "cancelContent", "confirmContent", "save", "discard" })
+                            foreach (string action in new[] { "cancelContent", "confirmContent" })
                                 AssertReachable(ui.Q<Button>(action));
+                            CheckDraftActions();
                             if (text == DungeonTextSize.Large)
                             {
                                 Capture($"preview-{resolution.x}x{resolution.y}");
@@ -1367,6 +1388,15 @@ namespace DungeonBuilder.M0.Tests
                         }
                     }
                 }
+                var instructions = ui.Q<ScrollView>("tutorialInstructions");
+                var hint = ui.Q<Label>("tutorialHint");
+                string original = hint.text;
+                hint.text = string.Join(" ", Enumerable.Repeat(original, 8));
+                yield return SettleContentPanel();
+                Assert.That(instructions.verticalScroller.highValue, Is.GreaterThan(0), "Expanded translation remains scrollable");
+                AssertReachable(skip);
+                CheckDraftActions();
+                hint.text = original;
                 Click(ui.Q<Button>("cancelContent"));
                 Assert.That(controller.IsPlacingContent, Is.False);
                 Assert.That(option.ClassListContains("tutorial-button-target"), Is.False);

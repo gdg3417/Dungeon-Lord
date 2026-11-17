@@ -230,7 +230,9 @@ namespace DungeonBuilder.M0
             ui.Q("placementContext").style.display = IsConstructing ? DisplayStyle.Flex : DisplayStyle.None;
             bool compactPreview = IsConstructing && constructionPreview?.IsValid == true && draft.Durability == DraftDurability.Acknowledged;
             bool redundantNormalStatus = !IsEditing && (feedback == null || feedback == "ui.dungeon.committed" || feedback == "ui.dungeon.discarded");
-            status.style.display = compactPreview || redundantNormalStatus ? DisplayStyle.None : DisplayStyle.Flex;
+            bool compactCleanDraft = IsEditing && detailsCollapsed && draft.Durability == DraftDurability.Acknowledged &&
+                !draft.HasChanges && feedback == null && safe.ClassListContains("compact-portrait");
+            status.style.display = compactPreview || redundantNormalStatus || compactCleanDraft ? DisplayStyle.None : DisplayStyle.Flex;
             // Reasons remain visible once, above the optional details and local actions.
             ui.Q<Label>("constructionFeedback").text = string.Empty;
             ui.Q("constructionFeedback").style.display = DisplayStyle.None;

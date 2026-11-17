@@ -93,7 +93,7 @@ namespace DungeonBuilder.M0
             var capacityBar = ui.Q("capacity");
             var draftSummary = ui.Q("draftSummary");
             var details = ui.Q<ScrollView>("contextDetails").contentContainer;
-            if (compactEditing)
+            if (compactEditing || working && detailsCollapsed)
             {
                 if (capacityBar.parent != details) details.Insert(0, capacityBar);
                 if (draftSummary.parent != details) details.Insert(1, draftSummary);
@@ -113,7 +113,16 @@ namespace DungeonBuilder.M0
                 IsConstructing ? "ui.dungeon.sheet.placement" : inspecting ? "ui.dungeon.sheet.inspection" :
                 IsEditing ? "ui.dungeon.sheet.edit" : "ui.dungeon.floor_summary");
             ui.Q("floorSummary").style.display=!IsEditing && !inspecting ? DisplayStyle.Flex : DisplayStyle.None;
-            ui.Q("inspectionActions").style.display=inspecting && !moveMode && !IsPlacingContent && reassigning == null ? DisplayStyle.Flex : DisplayStyle.None;
+            var inspectionActions = ui.Q("inspectionActions");
+            bool browsing = IsEditing && contentCategory != null && reassigning == null;
+            if (browsing && (compactEditing || working))
+            {
+                if (inspectionActions.parent != details) details.Add(inspectionActions);
+            }
+            else if (inspectionActions.parent != bottom)
+                bottom.Insert(bottom.IndexOf(ui.Q("sessionActions")), inspectionActions);
+            inspectionActions.style.display = inspecting && !moveMode && !IsPlacingContent && reassigning == null
+                ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("move").style.display=IsEditing && selectedEdgeId==null && contentCategory==null ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("focusRoom").SetEnabled(world.TryRoomBounds(selectedRoomId ?? selected?.RoomInstanceId,out _));
             foreach(string id in new[] {"monstersCategory","trapsCategory","lootCategory"})
