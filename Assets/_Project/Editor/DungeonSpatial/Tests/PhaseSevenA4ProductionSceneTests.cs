@@ -1210,28 +1210,40 @@ namespace DungeonBuilder.M0.Tests
             var root = GameRoot.Instance;
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             var build = ui.Q<Button>("buildFirstRoom");
-            var next = ui.Q<Button>("nextStepAction");
-            Assert.That(next.text, Is.EqualTo(root.Content.GetString("ui.dungeon.first_room.action", null)));
-            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720, 1280);
-            controller.SetTextSize(DungeonTextSize.Large);
-            for (int i = 0; i < 12; i++) yield return null;
-            controller.ApplySafeArea(new Rect(24, 24, Screen.width - 48, Screen.height - 72),
-                new Vector2(Screen.width, Screen.height));
-            yield return null;
-            AssertReachable(build);
-            AssertReachable(next);
+            var skip = ui.Q<Button>("skipTutorial");
+            var outline = ui.Q("tutorialOutline");
+            Assert.That(ui.Q<Label>("tutorialHint").text, Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial.build", null)));
+            Assert.That(ui.Q<Button>("nextStepAction"), Is.Null);
+            foreach (var size in new[] { new Vector2Int(540, 960), new Vector2Int(960, 540),
+                new Vector2Int(720, 1280), new Vector2Int(1280, 720) })
+            {
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
+                controller.SetTextSize(DungeonTextSize.Large);
+                for (int i = 0; i < 12; i++) yield return null;
+                controller.ApplySafeArea(new Rect(24, 24, Screen.width - 48, Screen.height - 72),
+                    new Vector2(Screen.width, Screen.height));
+                yield return null;
+                yield return null;
+                AssertReachable(build);
+                AssertReachable(skip);
+                Assert.That(outline.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                Assert.That(Vector2.Distance(outline.worldBound.center, build.worldBound.center), Is.LessThan(1f));
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture($"p269-spotlight-{size.x}x{size.y}.png");
+                yield return null;
+            }
 
             byte[] before = File.ReadAllBytes(root.SaveService.SavePath);
             double mana = root.Save.structureRuntime.ManaReserve;
-            Click(next);
+            Click(build);
             yield return null;
             Assert.That(ui.Q<Label>("modalText").text, Is.EqualTo(root.Content.GetString("ui.dungeon.first_room.review", null)));
             AssertReachable(ui.Q<Button>("cancel"));
             AssertReachable(ui.Q<Button>("confirm"));
+            AssertReachable(skip);
             Click(ui.Q<Button>("cancel"));
             AssertCanonicalUnchanged(before, mana);
             Assert.That(root.Save.validatedCanonicalSpatialState.Floors, Is.Empty);
-            Assert.That(next.text, Is.EqualTo(root.Content.GetString("ui.dungeon.first_room.action", null)));
+            Assert.That(ui.Q("objective_first_room").ClassListContains("objective-complete"), Is.False);
 
             root.Save.structureRuntime.PlacementLocked = true;
             Click(build);
@@ -1247,9 +1259,10 @@ namespace DungeonBuilder.M0.Tests
             AssertCanonicalUnchanged(before, mana);
             Assert.That(controller.Discard(), Is.True);
 
-            Click(next);
+            Click(build);
             Click(ui.Q<Button>("confirm"));
-            Assert.That(next.text, Is.EqualTo(root.Content.GetString("ui.dungeon.edit", null)));
+            Assert.That(ui.Q("objective_first_room").ClassListContains("objective-complete"), Is.True);
+            Assert.That(ui.Q<Label>("tutorialHint").text, Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial.edit", null)));
             var floor = root.Save.validatedCanonicalSpatialState.Floors.Single();
             var room = floor.Layout.Rooms.Single();
             Assert.That(floor.ActivationState, Is.EqualTo(FloorActivationState.Active));
@@ -1261,6 +1274,25 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.World.TryRoomBounds(room.RoomInstanceId, out var bounds), Is.True);
             Assert.That(bounds.width * bounds.height, Is.GreaterThan(0));
             byte[] after = File.ReadAllBytes(root.SaveService.SavePath);
+            Click(ui.Q<Button>("edit"));
+            Assert.That(controller.IsEditing, Is.True);
+            Click(ui.Q<Button>("roomsCategory"));
+            Assert.That(ui.Q<Label>("tutorialHint").text, Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial.room", null)));
+            controller.TapWorld(room.Anchor);
+            Click(ui.Q<Button>("monstersCategory"));
+            Assert.That(controller.ContentCategory, Is.EqualTo(MvpDungeonPlacementIds.MonsterCategoryId));
+            Click(ui.Q<Button>("lootCategory"));
+            Assert.That(controller.ContentCategory, Is.EqualTo(MvpDungeonPlacementIds.LootNodeCategoryId));
+            Assert.That(controller.SelectNewContent(MvpDungeonPlacementIds.HiddenCacheOptionId), Is.True);
+            Assert.That(ui.Q<Label>("tutorialHint").text, Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial.preview", null)));
+            Click(ui.Q<Button>("cancelContent"));
+            Assert.That(controller.IsPlacingContent, Is.False);
+            Click(skip);
+            Assert.That(ui.Q("tutorialFooter").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(ui.Q<Button>("discard").enabledInHierarchy, Is.True);
+            Assert.That(controller.Draft.HasChanges, Is.False);
+            Assert.That(controller.Discard(), Is.True);
+            AssertCanonicalUnchanged(after, mana);
             Assert.That(after, Is.Not.EqualTo(before));
             Click(build);
             Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.None));
@@ -1279,7 +1311,8 @@ namespace DungeonBuilder.M0.Tests
             for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
             ui = controller.GetComponent<UIDocument>().rootVisualElement;
             Assert.That(ui.Q("buildFirstRoom").style.display.value, Is.EqualTo(DisplayStyle.None));
-            Assert.That(ui.Q<Button>("nextStepAction").text, Is.EqualTo(root.Content.GetString("ui.dungeon.edit", null)));
+            Assert.That(ui.Q("tutorialFooter").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(ui.Q("objective_first_room").ClassListContains("objective-complete"), Is.True);
             Assert.That(controller.World.TryRoomBounds(room.RoomInstanceId, out _), Is.True);
         }
         private void InvokeController(string method, params object[] args) => typeof(ProductionDungeonController).GetMethod(method,

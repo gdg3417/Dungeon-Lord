@@ -68,6 +68,7 @@ namespace DungeonBuilder.M0
             document.rootVisualElement.Q<Button>("analysisDungeon").Focus();
             worldCamera.enabled = false;
             PresentAnalysis();
+            PresentGuidance();
         }
 
         public void ReturnToDungeon()
@@ -86,7 +87,6 @@ namespace DungeonBuilder.M0
         {
             top.SetEnabled(value); bottom.SetEnabled(value);
             document.rootVisualElement.Q("mapArea").SetEnabled(value);
-            document.rootVisualElement.Q("nextSteps").SetEnabled(value);
         }
 
         private void PresentAnalysis()

@@ -13,23 +13,12 @@
                 <ui:Label name="mode" class="mode" />
                 <ui:Button name="reset" tooltip="ui.dungeon.reset" />
                 <ui:Button name="displaySettings" tooltip="ui.dungeon.display" />
+                <ui:Button name="toggleNextSteps" class="next-steps-toggle" tooltip="ui.dungeon.guidance.expand" />
             </ui:VisualElement>
             </ui:VisualElement>
             <ui:Label name="manaReserve" class="reserve-information" />
             <ui:Label name="foregroundActivity" class="reserve-information foreground-activity" />
         </ui:ScrollView>
-        <ui:VisualElement name="nextSteps" class="next-steps">
-            <ui:VisualElement class="next-steps-heading">
-                <ui:Button name="toggleNextSteps" class="next-steps-toggle" tooltip="ui.dungeon.guidance.expand" />
-                <ui:Button name="nextStepAction" class="next-step-action" />
-            </ui:VisualElement>
-            <ui:ScrollView name="nextStepsDetails" class="next-steps-details" mode="Vertical">
-                <ui:Label name="nextStepsInstruction" />
-                <ui:Label name="nextStepsArrival" tooltip="ui.dungeon.guidance.arrival" />
-                <ui:Button name="nextStepsRevise" tooltip="ui.dungeon.guidance.revise" />
-                <ui:Label name="nextStepsCompare" tooltip="ui.dungeon.guidance.compare" />
-            </ui:ScrollView>
-        </ui:VisualElement>
         <ui:Label name="capacity" class="capacity-bar" />
         <ui:VisualElement name="workspace" class="workspace" picking-mode="Ignore">
         <ui:VisualElement name="mapArea" class="map-area" picking-mode="Ignore">
@@ -134,6 +123,15 @@
                 <ui:Label name="analysisEvidence" />
             </ui:ScrollView>
         </ui:VisualElement>
+        <ui:VisualElement name="nextSteps" class="next-steps">
+            <ui:ScrollView name="nextStepsDetails" mode="Vertical" class="next-steps-details">
+                <ui:Button name="objective_first_room" tooltip="ui.dungeon.objective.first_room" />
+                <ui:Button name="objective_prepare" tooltip="ui.dungeon.objective.prepare" />
+                <ui:Button name="objective_visit" tooltip="ui.dungeon.objective.visit" />
+                <ui:Button name="objective_results" tooltip="ui.dungeon.objective.results" />
+                <ui:Button name="objective_revise" tooltip="ui.dungeon.objective.revise" />
+            </ui:ScrollView>
+        </ui:VisualElement>
         <ui:VisualElement name="displayPopover" class="display-popover">
             <ui:Label tooltip="ui.dungeon.text_size" />
             <ui:VisualElement class="row text-controls"><ui:Button name="small" tooltip="ui.dungeon.text_small" /><ui:Button name="default" tooltip="ui.dungeon.text_default" /><ui:Button name="large" tooltip="ui.dungeon.text_large" /></ui:VisualElement>
@@ -146,5 +144,11 @@
                 <ui:VisualElement class="row"><ui:Button name="confirm" tooltip="ui.dungeon.save" /><ui:Button name="navigationDiscard" tooltip="ui.analysis.discard_changes" /><ui:Button name="cancel" tooltip="ui.dungeon.continue" /></ui:VisualElement>
             </ui:ScrollView>
         </ui:VisualElement>
+        <ui:VisualElement name="tutorialFooter" class="tutorial-footer" picking-mode="Ignore">
+            <ui:Label name="tutorialHint" picking-mode="Ignore" />
+            <ui:Button name="skipTutorial" tooltip="ui.dungeon.tutorial.skip" />
+        </ui:VisualElement>
+        <ui:VisualElement name="tutorialOutline" class="tutorial-outline" picking-mode="Ignore" />
+        <ui:VisualElement name="tutorialPointer" class="tutorial-pointer" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

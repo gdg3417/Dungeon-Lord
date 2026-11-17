@@ -84,6 +84,8 @@ namespace DungeonBuilder.M0
             if (!legacy && !IsAnalysis) ReadInput();
             UpdateReplay();
             PresentForegroundActivity();
+            if (lastGuidanceBlocked != GuidanceBlocked) PresentGuidance();
+            else PositionTutorial();
         }
 
         private bool HasCanonicalRuntime()
@@ -146,9 +148,13 @@ namespace DungeonBuilder.M0
             Button("move", BeginMove); Button("closeSheet", () => { CloseSheet(); Present(); }); Button("reset", FitFloor);
             Button("focusRoom", FocusRoom);
             Button("collapseFloors", ToggleFloorRail);
-            Button("displaySettings", () => ui.Q("displayPopover").style.display =
-                ui.Q("displayPopover").resolvedStyle.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None);
-            Button("closeDisplay", () => ui.Q("displayPopover").style.display = DisplayStyle.None);
+            Button("displaySettings", () =>
+            {
+                var display = ui.Q("displayPopover");
+                display.style.display = display.resolvedStyle.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
+                PresentGuidance();
+            });
+            Button("closeDisplay", () => { ui.Q("displayPopover").style.display = DisplayStyle.None; PresentGuidance(); });
             InitializeConstruction();
             InitializeRoomContent();
             InitializeReplay();
@@ -173,6 +179,7 @@ namespace DungeonBuilder.M0
             ui.Q<ScrollView>("contextDetails").verticalScrollerVisibility = ScrollerVisibility.Auto;
             ui.Q<ScrollView>("analysisScroll").verticalScrollerVisibility = ScrollerVisibility.Auto;
             ui.Q<ScrollView>("nextStepsDetails").verticalScrollerVisibility = ScrollerVisibility.Auto;
+            ((ScrollView)top).verticalScrollerVisibility = ScrollerVisibility.Auto;
             ui.Q<Button>("legacy").style.display = DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(
                 DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), root.DevPanelEnabled) ? DisplayStyle.Flex : DisplayStyle.None;
             SetLegacy(false);
@@ -383,12 +390,14 @@ namespace DungeonBuilder.M0
             document.rootVisualElement.Q<Button>("cancel").text = Text("ui.dungeon.continue");
             document.rootVisualElement.Q<Button>("cancel").style.display = DisplayStyle.Flex;
             modal.style.display = DisplayStyle.Flex;
+            PresentGuidance();
         }
         private void CloseModal()
         {
             navigationReview = false;
             document.rootVisualElement.Q<Button>("navigationDiscard").style.display = DisplayStyle.None;
             modal.style.display = DisplayStyle.None; confirm = null;
+            PresentGuidance();
         }
         private void CancelModal()
         {
@@ -668,6 +677,7 @@ namespace DungeonBuilder.M0
             top.style.display = bottom.style.display = value ? DisplayStyle.None : DisplayStyle.Flex;
             document.rootVisualElement.Q("floorRail").style.display = value ? DisplayStyle.None : DisplayStyle.Flex;
             legacyButton.text = Text(value ? "ui.dungeon.return" : "ui.dungeon.legacy");
+            if (renderState != null) PresentGuidance();
         }
         private void OnApplicationPause(bool paused) { if (paused) Flush(); }
         private void OnApplicationQuit() { Flush(); }

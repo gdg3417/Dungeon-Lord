@@ -382,11 +382,18 @@ namespace DungeonBuilder.M0.Tests
             var history = JsonUtility.ToJson(root.Save.runHistory);
             string floor = controller.SelectedFloorInstanceId;
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
-            Click(ui.Q<Button>("nextStepAction")); yield return null;
+            Click(ui.Q<Button>("edit"));
+            Assert.That(controller.IsEditing, Is.True);
+            Assert.That(controller.Discard(), Is.True);
+            Click(ui.Q<Button>("openAnalysis")); yield return null;
             Assert.That(controller.IsAnalysis, Is.True);
             controller.EnterEdit(); Assert.That(controller.IsEditing, Is.False);
             controller.ReturnToDungeon(); yield return null;
-            Assert.That(ui.Q<Button>("nextStepAction").text, Is.EqualTo(root.Content.GetString("ui.dungeon.guidance.analysis", null)));
+            Assert.That(ui.Q("objective_results").ClassListContains("objective-complete"), Is.False);
+            Assert.That(ui.Q<Label>("tutorialHint").text, Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial.revise", null)));
+            Click(ui.Q<Button>("edit"));
+            Assert.That(ui.Q("tutorialFooter").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(controller.Discard(), Is.True);
             Assert.That(controller.SelectedFloorInstanceId, Is.EqualTo(floor));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
             var recoverySource = root.Save;
@@ -402,6 +409,8 @@ namespace DungeonBuilder.M0.Tests
             yield return AwaitAnalysisBootstrap(recoverySource, recoveryRules, before);
             // Boot owns its clock/save metadata; Analysis must preserve the reopened bytes.
             yield return StabilizeReadOnlySceneBaseline(); before = File.ReadAllBytes(root.SaveService.SavePath);
+            Assert.That(controller.GetComponent<UIDocument>().rootVisualElement.Q("tutorialFooter").style.display.value,
+                Is.EqualTo(DisplayStyle.None));
             controller.OpenAnalysis(); yield return null;
             Assert.That(JsonUtility.ToJson(root.Save.runHistory), Is.EqualTo(history));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(root.SaveService.SavePath));
@@ -440,71 +449,50 @@ namespace DungeonBuilder.M0.Tests
             double mana = root.Save.structureRuntime.ManaReserve;
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             var toggle = ui.Q<Button>("toggleNextSteps");
-            var action = ui.Q<Button>("nextStepAction");
+            var action = ui.Q<Button>("objective_results");
             var details = ui.Q<ScrollView>("nextStepsDetails");
-            var revise = ui.Q<Button>("nextStepsRevise");
             var strings = (System.Collections.Generic.Dictionary<string, string>)typeof(ContentService)
                 .GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root.Content);
-            const string actionKey = "ui.dungeon.guidance.analysis";
-            const string detailKey = "ui.dungeon.guidance.inspect";
-            string originalAction = strings[actionKey], originalDetail = strings[detailKey];
-            string longText = string.Join(" ", Enumerable.Repeat("Test-only expanded translation.", 25));
+            const string key = "ui.dungeon.objective.results";
+            string original = strings[key];
             try
             {
-                strings.Remove(actionKey);
+                strings.Remove(key);
                 InvokeController("Present");
                 Assert.That(action.text, Is.EqualTo(root.Content.GetString("ui.dungeon.unavailable", string.Empty)));
-                strings[actionKey] = originalAction;
-                strings[detailKey] = longText;
-                InvokeController("Present");
-                foreach (var resolution in new[] { new Vector2Int(720, 1280), new Vector2Int(1280, 720) })
+                foreach (var resolution in new[] { new Vector2Int(540, 960), new Vector2Int(960, 540),
+                    new Vector2Int(720, 1280), new Vector2Int(1280, 720), new Vector2Int(1080, 1920), new Vector2Int(1920, 1080) })
                 {
                     DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(resolution.x, resolution.y);
                     for (int i = 0; i < 12; i++) yield return null;
-                    controller.SetTextSize(DungeonTextSize.Large);
-                    controller.ApplySafeArea(new Rect(20, 35, resolution.x - 40, resolution.y - 70), resolution);
-                    yield return null;
-                    Assert.That(details.resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
-                    AssertReachable(toggle);
-                    AssertReachable(action);
-                    var map = ui.Q("viewport");
-                    float collapsedMapHeight = map.worldBound.height;
-                    Click(toggle);
-                    for (int i = 0; i < 4; i++) yield return null;
-                    Assert.That(details.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
-                    Assert.That(ui.Q<Label>("nextStepsInstruction").text, Is.EqualTo(longText));
-                    Assert.That(details.verticalScroller.highValue, Is.GreaterThan(0));
-                    AssertReachable(toggle);
-                    AssertReachable(action);
-                    TestContext.WriteLine($"Guidance layout {resolution}: details={details.worldBound}, map={map.worldBound}, collapsed map height={collapsedMapHeight}");
-                    Assert.That(map.worldBound.height, Is.GreaterThanOrEqualTo(Mathf.Min(64f, collapsedMapHeight)));
-                    Assert.That(collapsedMapHeight - map.worldBound.height, Is.LessThanOrEqualTo(113f));
-                    Assert.That(map.worldBound.Overlaps(ui.Q("nextSteps").worldBound), Is.False);
-                    AssertReachable(ui.Q<Button>("edit"));
-                    details.ScrollTo(revise);
-                    yield return null;
-                    AssertReachable(revise);
-                    Click(toggle);
-                    yield return null;
-                    Assert.That(details.resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
-                    AssertReachable(action);
-                    AssertReachable(ui.Q<Button>("edit"));
+                    foreach (var text in new[] { DungeonTextSize.Default, DungeonTextSize.Large })
+                    {
+                        controller.SetTextSize(text);
+                        controller.ApplySafeArea(new Rect(20, 35, resolution.x - 40, resolution.y - 70), resolution);
+                        yield return null;
+                        AssertReachable(toggle);
+                        var map = ui.Q("viewport");
+                        Rect collapsed = map.worldBound;
+                        strings[key] = string.Join(" ", Enumerable.Repeat("Test-only expanded translation.", 12));
+                        Click(toggle);
+                        for (int i = 0; i < 4; i++) yield return null;
+                        Assert.That(ui.Q("nextSteps").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                        Assert.That(map.worldBound, Is.EqualTo(collapsed));
+                        Assert.That(details.verticalScroller.highValue, Is.GreaterThan(0));
+                        Click(toggle);
+                        yield return null;
+                        Assert.That(ui.Q("nextSteps").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                        AssertReachable(ui.Q<Button>("edit"));
+                    }
                 }
             }
-            finally
-            {
-                strings[actionKey] = originalAction;
-                strings[detailKey] = originalDetail;
-            }
+            finally { strings[key] = original; }
+            Click(toggle);
             Click(action);
             Assert.That(controller.IsAnalysis, Is.True);
             controller.ReturnToDungeon();
-            Click(toggle);
-            yield return null;
-            Click(revise);
-            yield return null;
+            Click(ui.Q<Button>("edit"));
             Assert.That(controller.IsEditing, Is.True);
-            Assert.That(ui.Q("nextSteps").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
             Assert.That(controller.Draft.HasChanges, Is.False);
             Click(ui.Q<Button>("displaySettings"));
             Click(ui.Q<Button>("openAnalysis"));

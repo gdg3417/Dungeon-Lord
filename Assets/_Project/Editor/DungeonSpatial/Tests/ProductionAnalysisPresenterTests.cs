@@ -40,14 +40,25 @@ namespace DungeonBuilder.M0.Tests
             var catalog = JsonUtility.FromJson<StringTable>(System.IO.File.ReadAllText("Assets/_Project/Data/Bootstrap/string_table_en.json"));
             string[] keys =
             {
-                "expand", "collapse", "build", "construct", "arrival", "watch",
-                "analysis", "inspect", "revise", "compare"
+                "guidance.expand", "guidance.collapse", "objective.first_room", "objective.prepare", "objective.visit",
+                "objective.results", "objective.revise", "objective.completed", "tutorial.skip", "tutorial.build",
+                "tutorial.edit", "tutorial.rooms", "tutorial.room", "tutorial.monsters", "tutorial.loot",
+                "tutorial.preview", "tutorial.activity", "tutorial.analysis", "tutorial.revise"
             };
             foreach (string key in keys)
             {
-                var entry = catalog.entries.Single(e => e.key == "ui.dungeon.guidance." + key);
+                var entry = catalog.entries.Single(e => e.key == "ui.dungeon." + key);
                 Assert.That(entry.text, Is.Not.Null.And.Not.Empty);
             }
+        }
+
+        [Test] public void TutorialPreferenceSeparatesSavePathsAndGenerations()
+        {
+            string path = System.IO.Path.GetFullPath("tutorial-test-a.json");
+            string same = ProductionDungeonController.TutorialPreferenceKey(path, 123L);
+            Assert.That(ProductionDungeonController.TutorialPreferenceKey("tutorial-test-a.json", 123L), Is.EqualTo(same));
+            Assert.That(ProductionDungeonController.TutorialPreferenceKey(path, 124L), Is.Not.EqualTo(same));
+            Assert.That(ProductionDungeonController.TutorialPreferenceKey("tutorial-test-b.json", 123L), Is.Not.EqualTo(same));
         }
 
         [TestCase(1)] [TestCase(3)] [TestCase(32)]
