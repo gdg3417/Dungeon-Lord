@@ -243,17 +243,11 @@ namespace DungeonBuilder.M0
         private void PositionTutorial()
         {
             if (tutorialOutline == null) return;
-            if (nextStepsToggle.panel != null && nextStepsToggle.style.display == DisplayStyle.Flex)
+            if (guidanceExpanded && nextStepsToggle.panel != null)
             {
-                float top = safe.WorldToLocal(viewportElement.worldBound.min).y + 4;
-                if (!float.IsNaN(top) && nextStepsToggle.style.top.value.value != top)
-                    nextStepsToggle.style.top = top;
-                if (guidanceExpanded)
-                {
-                    float popoverTop = safe.WorldToLocal(nextStepsToggle.worldBound.max).y + 4;
-                    if (!float.IsNaN(popoverTop) && nextSteps.style.top.value.value != popoverTop)
-                        nextSteps.style.top = popoverTop;
-                }
+                float popoverTop = safe.WorldToLocal(nextStepsToggle.worldBound.max).y + 4;
+                if (!float.IsNaN(popoverTop) && nextSteps.style.top.value.value != popoverTop)
+                    nextSteps.style.top = popoverTop;
             }
             Rect bounds = default;
             if (tutorialTarget?.panel != null && tutorialTarget.enabledInHierarchy && tutorialTarget.visible)

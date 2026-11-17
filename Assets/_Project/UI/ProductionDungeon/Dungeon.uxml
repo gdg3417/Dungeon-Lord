@@ -22,6 +22,7 @@
         <ui:VisualElement name="workspace" class="workspace" picking-mode="Ignore">
         <ui:VisualElement name="mapArea" class="map-area" picking-mode="Ignore">
             <ui:VisualElement name="viewport" class="viewport" />
+            <ui:Button name="toggleNextSteps" class="next-steps-toggle" tooltip="ui.dungeon.guidance.expand" picking-mode="Position" />
             <ui:Label name="replayDamage" class="replay-damage" picking-mode="Ignore" />
             <ui:VisualElement name="replayPartyInfo" class="replay-party-info" picking-mode="Ignore" />
             <ui:VisualElement name="floorRail" class="floor-rail" picking-mode="Ignore">
@@ -124,7 +125,6 @@
                 <ui:Label name="analysisEvidence" />
             </ui:ScrollView>
         </ui:VisualElement>
-        <ui:Button name="toggleNextSteps" class="next-steps-toggle" tooltip="ui.dungeon.guidance.expand" />
         <ui:VisualElement name="nextSteps" class="next-steps">
             <ui:ScrollView name="nextStepsDetails" mode="Vertical" class="next-steps-details">
                 <ui:Button name="objective_first_room" tooltip="ui.dungeon.objective.first_room" />
