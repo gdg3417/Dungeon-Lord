@@ -182,7 +182,7 @@ namespace DungeonBuilder.M0
             tutorialRoom = null;
             VisualElement target = null;
             string hint = !showTutorial ? null : GuidanceBlocked || modal.style.display == DisplayStyle.Flex
-                ? "dialog" : IsAnalysis ? "return" : "explore";
+                ? "dialog" : IsAnalysis ? "return" : guidanceExpanded ? tutorialHintKey ?? "explore" : "explore";
             if (showTutorial && !GuidanceBlocked && !guidanceExpanded && !IsAnalysis &&
                 modal.style.display != DisplayStyle.Flex && ui.Q("displayPopover").style.display != DisplayStyle.Flex)
             {
