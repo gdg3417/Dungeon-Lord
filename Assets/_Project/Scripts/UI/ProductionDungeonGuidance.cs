@@ -165,7 +165,7 @@ namespace DungeonBuilder.M0
             nextSteps.style.display = guidanceExpanded ? DisplayStyle.Flex : DisplayStyle.None;
             nextStepsToggle.tooltip = Text(guidanceExpanded ? "ui.dungeon.guidance.collapse" : "ui.dungeon.guidance.expand");
             PresentObjective(0, firstRoomConfirmed, true);
-            PresentObjective(1, canWatchArrival || HasGuidanceReport, firstRoomConfirmed);
+            PresentObjective(1, canWatchArrival, firstRoomConfirmed);
             PresentObjective(2, visitObserved, canWatchArrival || HasGuidanceReport);
             PresentObjective(3, false, HasGuidanceReport);
             PresentObjective(4, false, HasGuidanceReport);

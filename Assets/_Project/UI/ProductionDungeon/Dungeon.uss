@@ -47,7 +47,7 @@
 .landscape .bottom-chrome { max-height: 44%; }
 .landscape .top-content { flex-direction: row; align-items: center; }
 .landscape .hud { flex-grow: 1; flex-basis: 64%; }
-.landscape #navigation { flex-basis: 36%; padding-left: 8px; flex-wrap: nowrap; }
+.landscape #navigation { flex-basis: 36%; padding-left: 8px; flex-wrap: wrap; }
 .landscape #reset, .landscape #displaySettings { flex-shrink: 0; white-space: nowrap; }
 .landscape #mode { flex-grow: 1; min-width: 0; }
 .landscape .top-chrome, .landscape .bottom-chrome { padding: 4px; }
