@@ -1320,6 +1320,65 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(ui.Q("objective_first_room").ClassListContains("objective-complete"), Is.True);
             Assert.That(controller.World.TryRoomBounds(room.RoomInstanceId, out _), Is.True);
         }
+        public IEnumerator FirstRoomCancelResumesAndSkipSurvivesReopen()
+        {
+            yield return ExplicitDeleteShell(false);
+            IEnumerator Reopen()
+            {
+                UnityEngine.Object.Destroy(controller.gameObject);
+                UnityEngine.Object.Destroy(GameRoot.Instance.gameObject);
+                yield return null;
+                yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
+                for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
+                var savedRoot = GameRoot.Instance;
+                Assert.That(Path.GetFileName(savedRoot.SaveService.SavePath), Is.EqualTo(filename));
+                PumpSceneToClosed(establishForeground: true);
+                savedRoot.enabled = false;
+                controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+                for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
+                yield return null;
+            }
+
+            void CheckCancel(bool skip)
+            {
+                var root = GameRoot.Instance;
+                var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+                byte[] bytes = File.ReadAllBytes(root.SaveService.SavePath);
+                double mana = root.Save.structureRuntime.ManaReserve;
+                Click(ui.Q<Button>("buildFirstRoom"));
+                Assert.That(ui.Q<Label>("tutorialHint").text, Is.Not.Empty);
+                Click(ui.Q<Button>("cancel"));
+                Assert.That(ui.Q("tutorialFooter").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+                Assert.That(ui.Q<Label>("tutorialHint").text,
+                    Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial.build_resume", null)));
+                Assert.That(ui.Q<Button>("objective_first_room").text,
+                    Is.EqualTo(root.Content.GetString("ui.dungeon.objective.first_room", null)));
+                if (skip)
+                {
+                    Click(ui.Q<Button>("skipTutorial"));
+                    Assert.That(ui.Q("tutorialFooter").style.display.value, Is.EqualTo(DisplayStyle.None));
+                }
+                Assert.That(root.Save.validatedCanonicalSpatialState.Floors, Is.Empty);
+                AssertCanonicalUnchanged(bytes, mana);
+            }
+
+            CheckCancel(false);
+            yield return Reopen();
+            var reopened = controller.GetComponent<UIDocument>().rootVisualElement;
+            Assert.That(GameRoot.Instance.Save.validatedCanonicalSpatialState.Floors, Is.Empty);
+            Assert.That(reopened.Q<Label>("tutorialHint").text,
+                Is.EqualTo(GameRoot.Instance.Content.GetString("ui.dungeon.tutorial.build_resume", null)));
+            Assert.That(reopened.Q("tutorialOutline").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+            AssertReachable(reopened.Q<Button>("buildFirstRoom"));
+            AssertReachable(reopened.Q<Button>("skipTutorial"));
+            CheckCancel(true);
+            yield return Reopen();
+            reopened = controller.GetComponent<UIDocument>().rootVisualElement;
+            Assert.That(reopened.Q("tutorialFooter").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(GameRoot.Instance.Save.validatedCanonicalSpatialState.Floors, Is.Empty);
+            AssertReachable(reopened.Q<Button>("buildFirstRoom"));
+        }
+
         private void InvokeController(string method, params object[] args) => typeof(ProductionDungeonController).GetMethod(method,
             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(controller, args);
         private sealed class DeleteTrackingFileSystem : ISpatialMigrationFileSystem

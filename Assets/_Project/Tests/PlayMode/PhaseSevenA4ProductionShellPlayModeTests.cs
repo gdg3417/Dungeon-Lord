@@ -268,6 +268,10 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         { yield return Invoke("FirstRoomConfirmationUsesCanonicalPlacementAndReopens"); }
 
         [UnityTest]
+        public IEnumerator FirstRoomCancelResumesAndSkipSurvivesReopen()
+        { yield return Invoke("FirstRoomCancelResumesAndSkipSurvivesReopen"); }
+
+        [UnityTest]
         public IEnumerator ProductionShellFailedExplicitDeleteQuiescence()
         { yield return Invoke("FailedExplicitDeleteStillQuiescesProductionShellWithoutFurtherWrites"); }
 

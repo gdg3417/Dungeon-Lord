@@ -454,11 +454,22 @@ namespace DungeonBuilder.M0.Tests
             var strings = (System.Collections.Generic.Dictionary<string, string>)typeof(ContentService)
                 .GetField("_stringMap", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(root.Content);
             const string key = "ui.dungeon.objective.results";
-            string original = strings[key];
+            const string completion = "ui.dungeon.objective.completed";
+            const string prepare = "ui.dungeon.objective.prepare";
+            string original = strings[key], originalCompletion = strings[completion];
+            var prepared = ui.Q<Button>("objective_prepare");
+            Assert.That(root.Save.livingDungeon.Scheduler.NextOpportunityTime, Is.Null);
+            Assert.That(root.Save.runHistory.RecentOutcomes, Is.Not.Empty);
+            Assert.That(prepared.text, Is.EqualTo(string.Format(originalCompletion, strings[prepare])));
+            Assert.That(ui.Q<Button>("objective_visit").text, Does.Contain("Completed"));
+            Assert.That(ui.Q<Button>("objective_revise").text, Is.EqualTo(strings["ui.dungeon.objective.revise"]));
             try
             {
                 strings.Remove(key);
+                strings.Remove(completion);
                 InvokeController("Present");
+                Assert.That(prepared.text, Is.EqualTo("✓ " + strings[prepare]));
+                strings[completion] = string.Join(" ", Enumerable.Repeat("Test-only expanded completion", 6)) + " {0}";
                 Assert.That(action.text, Is.EqualTo(root.Content.GetString("ui.dungeon.unavailable", string.Empty)));
                 foreach (var resolution in new[] { new Vector2Int(540, 960), new Vector2Int(960, 540),
                     new Vector2Int(720, 1280), new Vector2Int(1280, 720), new Vector2Int(1080, 1920), new Vector2Int(1920, 1080) })
@@ -479,6 +490,8 @@ namespace DungeonBuilder.M0.Tests
                         Click(toggle);
                         for (int i = 0; i < 4; i++) yield return null;
                         Assert.That(ui.Q("nextSteps").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                        Assert.That(prepared.text, Is.EqualTo(string.Format(strings[completion], strings[prepare])));
+                        Assert.That(prepared.resolvedStyle.whiteSpace, Is.EqualTo(WhiteSpace.Normal));
                         Rect expanded = map.worldBound;
                         // The scaled HUD can settle by a few panel units during the next layout.
                         Assert.That(expanded.height, Is.GreaterThanOrEqualTo(collapsed.height - 4f));
@@ -491,7 +504,7 @@ namespace DungeonBuilder.M0.Tests
                     }
                 }
             }
-            finally { strings[key] = original; }
+            finally { strings[key] = original; strings[completion] = originalCompletion; }
             Click(toggle);
             Click(action);
             Assert.That(controller.IsAnalysis, Is.True);

@@ -167,25 +167,27 @@ namespace DungeonBuilder.M0
             nextSteps.style.display = guidanceExpanded ? DisplayStyle.Flex : DisplayStyle.None;
             nextStepsToggle.tooltip = Text(guidanceExpanded ? "ui.dungeon.guidance.collapse" : "ui.dungeon.guidance.expand");
             PresentObjective(0, firstRoomConfirmed, true);
-            PresentObjective(1, canWatchArrival, firstRoomConfirmed);
+            PresentObjective(1, canWatchArrival || visitObserved, firstRoomConfirmed);
             PresentObjective(2, visitObserved, canWatchArrival || HasGuidanceReport);
             PresentObjective(3, false, HasGuidanceReport);
             PresentObjective(4, false, HasGuidanceReport);
 
-            tutorialFooter.style.display = TutorialActive && !legacy ? DisplayStyle.Flex : DisplayStyle.None;
-            if (!TutorialActive || legacy)
+            bool showTutorial = TutorialActive && !legacy;
+            tutorialFooter.style.display = showTutorial ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!showTutorial)
             {
                 modal.style.bottom = 0;
                 ui.Q("analysisScreen").style.bottom = 0;
             }
             tutorialRoom = null;
             VisualElement target = null;
-            string hint = null;
-            if (TutorialActive && !legacy && !GuidanceBlocked && !guidanceExpanded && !IsAnalysis &&
+            string hint = !showTutorial ? null : GuidanceBlocked || modal.style.display == DisplayStyle.Flex
+                ? "dialog" : IsAnalysis ? "return" : "explore";
+            if (showTutorial && !GuidanceBlocked && !guidanceExpanded && !IsAnalysis &&
                 modal.style.display != DisplayStyle.Flex && ui.Q("displayPopover").style.display != DisplayStyle.Flex)
             {
-                if (!firstRoomConfirmed && !Learned(Tutorial.Review))
-                    (target, hint) = (ui.Q("buildFirstRoom"), "build");
+                if (NeedsFirstRoom && !IsEditing)
+                    (target, hint) = (ui.Q("buildFirstRoom"), Learned(Tutorial.Review) ? "build_resume" : "build");
                 else if (firstRoomConfirmed && !IsEditing)
                 {
                     if (Learned(Tutorial.Analysis))
@@ -232,8 +234,10 @@ namespace DungeonBuilder.M0
         private void PresentObjective(int index, bool complete, bool available)
         {
             var button = objectives[index];
-            button.text = Text("ui.dungeon.objective." + objectiveKeys[index]);
-            button.tooltip = complete ? Format("ui.dungeon.objective.completed", button.text) : button.text;
+            string label = Text("ui.dungeon.objective." + objectiveKeys[index]);
+            button.text = complete ? string.Format(Culture,
+                root.Content.GetString("ui.dungeon.objective.completed", "✓ {0}"), label) : label;
+            button.tooltip = button.text;
             button.EnableInClassList("objective-complete", complete);
             button.SetEnabled(available);
         }
