@@ -16,7 +16,7 @@
 #replayAvailability { display: none; }
 .top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/panel.png"); -unity-slice-left: 14; -unity-slice-right: 14; -unity-slice-top: 14; -unity-slice-bottom: 14; }
 .top-chrome { flex-shrink: 0; }
-.next-steps-toggle { color: var(--gold); white-space: normal; flex-shrink: 1; }
+.next-steps-toggle { display: none; position: absolute; top: 8px; right: 8px; color: var(--gold); white-space: normal; max-width: 40%; }
 .next-steps { display: none; position: absolute; right: 8px; top: 48px; width: 300px; max-width: 94%; max-height: 45%; background-color: var(--panel); padding: 6px; border-width: 1px; border-color: var(--cool); }
 .next-steps-details { flex-shrink: 1; min-height: 0; }
 .next-steps-details Button { flex-shrink: 0; white-space: normal; -unity-text-align: middle-left; }
@@ -40,6 +40,7 @@
 .normal-mode.compact-hud.large-text .sheet-header .mode { display: none; }
 .normal-mode.compact-hud.large-text .hud { flex-wrap: wrap; }
 .normal-mode.compact-hud.large-text .metric-card { flex-basis: 45%; }
+.normal-mode.compact-hud.large-text .metric-icon { display: none; }
 .bottom-chrome { flex-shrink: 1; max-height: 42%; border-top-width: 2px; border-top-color: var(--gold); }
 .normal-mode .bottom-chrome { height: auto; }
 .normal-mode.details-collapsed .bottom-chrome { height: auto; }
@@ -47,7 +48,7 @@
 .landscape .bottom-chrome { max-height: 44%; }
 .landscape .top-content { flex-direction: row; align-items: center; }
 .landscape .hud { flex-grow: 1; flex-basis: 64%; }
-.landscape #navigation { flex-basis: 36%; padding-left: 8px; flex-wrap: wrap; }
+.landscape #navigation { flex-basis: 36%; padding-left: 8px; flex-wrap: nowrap; }
 .landscape #reset, .landscape #displaySettings { flex-shrink: 0; white-space: nowrap; }
 .landscape #mode { flex-grow: 1; min-width: 0; }
 .landscape .top-chrome, .landscape .bottom-chrome { padding: 4px; }
@@ -195,7 +196,13 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 #cancelPlacement, #discard { border-color: rgb(171,107,89); color: rgb(247,189,170); }
 .legacy { align-self: center; flex-shrink: 0; }
 .legacy-overlay { position: absolute; right: 0; bottom: 0; }
-.session-actions #edit, .session-actions #buildFirstRoom { flex-grow: 1; }
+.session-actions #edit { flex-grow: 1; }
+.first-room-actions { display: none; flex-direction: row; justify-content: flex-end; flex-shrink: 0; padding: 0 6px; background-color: var(--panel); }
+.first-room-setup .first-room-actions { display: flex; }
+.first-room-setup.legacy-mode .first-room-actions { display: none; }
+.first-room-setup .context-details { max-height: 44px; }
+.normal-mode.compact-hud.large-text.first-room-setup .map-area,
+.normal-mode.compact-hud.foreground-visible.first-room-setup .map-area { min-height: 64px; flex-shrink: 1; }
 #buildFirstRoom { display: none; }
 .modal { display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(6,11,17,0.97); justify-content: center; padding: 24px; }
 .modal-content { background-color: var(--panel); padding: 18px; max-height: 100%; border-width: 2px; border-color: var(--gold); }

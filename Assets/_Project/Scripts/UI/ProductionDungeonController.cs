@@ -465,6 +465,7 @@ namespace DungeonBuilder.M0
             if (draft?.StructuralReason != null && draft.StructuralReason != statusKey)
                 status.text += "\n" + Text(draft.StructuralReason);
             bool showFirstRoom = NeedsFirstRoom && !IsEditing;
+            safe.EnableInClassList("first-room-setup", showFirstRoom);
             ui.Q<Button>("buildFirstRoom").style.display = showFirstRoom ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("buildFirstRoom").SetEnabled(recoveryBytes == null && recoveryReason == null);
             ui.Q<Button>("edit").style.display = IsEditing || showFirstRoom ? DisplayStyle.None : DisplayStyle.Flex;

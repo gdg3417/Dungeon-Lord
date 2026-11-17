@@ -1225,6 +1225,7 @@ namespace DungeonBuilder.M0.Tests
                     new Vector2(Screen.width, Screen.height));
                 yield return null;
                 yield return null;
+                TestContext.WriteLine($"Spotlight {size}: room={build.worldBound}, skip={skip.worldBound}, safe={controller.SafeRoot.worldBound}");
                 AssertReachable(build);
                 AssertReachable(skip);
                 Assert.That(outline.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));

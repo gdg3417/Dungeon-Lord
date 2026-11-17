@@ -13,7 +13,6 @@
                 <ui:Label name="mode" class="mode" />
                 <ui:Button name="reset" tooltip="ui.dungeon.reset" />
                 <ui:Button name="displaySettings" tooltip="ui.dungeon.display" />
-                <ui:Button name="toggleNextSteps" class="next-steps-toggle" tooltip="ui.dungeon.guidance.expand" />
             </ui:VisualElement>
             </ui:VisualElement>
             <ui:Label name="manaReserve" class="reserve-information" />
@@ -99,7 +98,6 @@
             <ui:VisualElement name="contentPlacementActions" class="row"><ui:Button name="cancelContent" tooltip="ui.dungeon.construction.cancel" /><ui:Button name="confirmContent" tooltip="ui.dungeon.construction.confirm" /></ui:VisualElement>
             <ui:VisualElement name="inspectionActions" class="row"><ui:Button name="focusRoom" tooltip="ui.dungeon.focus_room" /><ui:Button name="move" tooltip="ui.dungeon.move" /><ui:Button name="reassignContent" tooltip="ui.dungeon.content.reassign" /><ui:Button name="unassignContent" tooltip="ui.dungeon.content.unassign" /><ui:Button name="closeSheet" tooltip="ui.dungeon.floor_summary" /></ui:VisualElement>
             <ui:VisualElement name="sessionActions" class="row session-actions">
-                <ui:Button name="buildFirstRoom" tooltip="ui.dungeon.first_room.action" />
                 <ui:Button name="edit" tooltip="ui.dungeon.edit" />
                 <ui:Button name="replayRun" tooltip="ui.dungeon.replay.start" />
                 <ui:Label name="draftSummary" />
@@ -112,6 +110,9 @@
             </ui:VisualElement>
         </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="firstRoomActions" class="first-room-actions">
+            <ui:Button name="buildFirstRoom" tooltip="ui.dungeon.first_room.action" />
+        </ui:VisualElement>
         <ui:VisualElement name="analysisScreen" class="analysis-screen">
             <ui:VisualElement class="row analysis-navigation">
                 <ui:Button name="analysisDungeon" tooltip="ui.analysis.dungeon" />
@@ -123,6 +124,7 @@
                 <ui:Label name="analysisEvidence" />
             </ui:ScrollView>
         </ui:VisualElement>
+        <ui:Button name="toggleNextSteps" class="next-steps-toggle" tooltip="ui.dungeon.guidance.expand" />
         <ui:VisualElement name="nextSteps" class="next-steps">
             <ui:ScrollView name="nextStepsDetails" mode="Vertical" class="next-steps-details">
                 <ui:Button name="objective_first_room" tooltip="ui.dungeon.objective.first_room" />

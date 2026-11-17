@@ -470,6 +470,7 @@ namespace DungeonBuilder.M0.Tests
                         controller.SetTextSize(text);
                         controller.ApplySafeArea(new Rect(20, 35, resolution.x - 40, resolution.y - 70), resolution);
                         yield return null;
+                        TestContext.WriteLine($"Objectives {resolution} {text}: toggle={toggle.worldBound}, safe={controller.SafeRoot.worldBound}");
                         AssertReachable(toggle);
                         var map = ui.Q("viewport");
                         Rect collapsed = map.worldBound;
