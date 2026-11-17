@@ -40,12 +40,12 @@ namespace DungeonBuilder.M0
             Button("ownedContent", () => SelectContentBrowser(true));
         }
         private void ClearContentSelection()
-        { contentCategory = null; reassigning = null; contentIntent = null; contentPreview = null; contentBrowserOwned = false; world?.ClearRoomPlacementGrid(); }
+        { contentCategory = null; reassigning = null; contentIntent = null; contentPreview = null; contentBrowserOwned = false; tutorialBrowserChosen = false; world?.ClearRoomPlacementGrid(); }
 
         public bool SelectContentBrowser(bool owned)
         {
             if (!IsEditing || contentCategory == null || ContextRoomId == null) return false;
-            contentBrowserOwned = owned; contentIntent = null; contentPreview = null; reassigning = null;
+            contentBrowserOwned = owned; tutorialBrowserChosen = true; contentIntent = null; contentPreview = null; reassigning = null;
             world.ClearPreview(); world.SelectRoomFootprint(ContextRoomId);
             feedback = null; Present(); return true;
         }
@@ -64,7 +64,8 @@ namespace DungeonBuilder.M0
             if (room == null) return false;
             string id = room.RoomInstanceId;
             ClearConstructionSelection(); ClearContentSelection(); selected = null; selectedRoomId = id; selectedEdgeId = null; moveMode = false;
-            contentCategory = category; detailsCollapsed = false; OpenSheet(); world.SelectRoomFootprint(id);
+            contentCategory = category; OpenSheet(); world.SelectRoomFootprint(id);
+            detailsCollapsed = safe.ClassListContains("compact-portrait");
             feedback = "ui.dungeon.content.choose"; Present(); FocusRoom(); return true;
         }
         public bool SelectNewContent(string option)
@@ -126,7 +127,10 @@ namespace DungeonBuilder.M0
                 if (target != null && target != contentIntent.RoomInstanceId)
                 {
                     selectedRoomId = target; contentIntent.RoomInstanceId = target;
-                    PrepareContentPositioning(); OpenSheet();
+                    PrepareContentPositioning();
+                    bool collapsed = detailsCollapsed;
+                    OpenSheet();
+                    detailsCollapsed = collapsed;
                 }
             }
             if (!world.TryRoomLocal(contentIntent.RoomInstanceId, cell, out var local))
@@ -151,6 +155,7 @@ namespace DungeonBuilder.M0
                 }
                 world.PresentContentPreview(contentIntent.RoomInstanceId, category, option, local, contentPreview.IsValid);
             }
+            if (contentPreview.IsValid && PreviewLesson != Tutorial.None) Learn(PreviewLesson);
             feedback = ContentPreviewMessageKey ?? "ui.dungeon.content.preview"; Present();
         }
         public bool ConfirmContentPlacement()
@@ -195,8 +200,13 @@ namespace DungeonBuilder.M0
             ui.Q("roomContentPanel").style.display = managing ? DisplayStyle.Flex : DisplayStyle.None;
             if (managing) sheet.style.display = DisplayStyle.None;
             safe.EnableInClassList("placing-content", IsPlacingContent || reassigning != null);
+            bool compact = safe.ClassListContains("compact-portrait");
+            var browser = ui.Q("contentBrowser");
+            var browserHost = compact && managing && reassigning == null ? ui.Q("compactContentHost") : ui.Q("roomContentPanel");
+            if (browser.parent != browserHost) browserHost.Add(browser);
+            browser.style.display = managing && (!compact || contentIntent == null) ? DisplayStyle.Flex : DisplayStyle.None;
             if (managing && draft.Durability == DraftDurability.Acknowledged && draft.StructuralReason == null)
-                status.style.display = DisplayStyle.None;
+                status.style.display = compact && detailsCollapsed && contentPreview?.IsValid == false ? DisplayStyle.Flex : DisplayStyle.None;
             if (managing) ui.Q<Button>("move").style.display = DisplayStyle.None;
             if (managing || selected != null && draft?.HasContentIntent == true) ui.Q("economics").style.display = DisplayStyle.None;
             ui.Q("contentPlacementActions").style.display = IsPlacingContent || reassigning != null ? DisplayStyle.Flex : DisplayStyle.None;
@@ -225,7 +235,12 @@ namespace DungeonBuilder.M0
                 var button = new Button(action) { userData = identity }; button.AddToClassList("content-card");
                 var icon = new VisualElement { pickingMode = PickingMode.Ignore }; icon.AddToClassList("content-card-icon");
                 icon.style.backgroundImage = new StyleBackground(presentationPolicy.Visuals.Resolve(category, option)); button.Add(icon);
-                button.Add(new Label(name) { pickingMode = PickingMode.Ignore }); button.Add(new Label(badge) { pickingMode = PickingMode.Ignore }); choices.Add(button);
+                var labels = new VisualElement { pickingMode = PickingMode.Ignore };
+                labels.AddToClassList("content-card-labels");
+                labels.Add(new Label(name) { pickingMode = PickingMode.Ignore });
+                labels.Add(new Label(badge) { pickingMode = PickingMode.Ignore });
+                button.Add(labels);
+                choices.Add(button);
             }
             if (reassigning != null)
             {

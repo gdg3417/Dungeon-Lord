@@ -89,6 +89,23 @@ namespace DungeonBuilder.M0
                 int index=safe.IndexOf(workspace);
                 safe.Insert(index,map); safe.Insert(index+1,bottom);
             }
+            bool compactEditing = IsEditing && safe.ClassListContains("compact-portrait");
+            var capacityBar = ui.Q("capacity");
+            var draftSummary = ui.Q("draftSummary");
+            var details = ui.Q<ScrollView>("contextDetails").contentContainer;
+            if (compactEditing)
+            {
+                if (capacityBar.parent != details) details.Insert(0, capacityBar);
+                if (draftSummary.parent != details) details.Insert(1, draftSummary);
+            }
+            else
+            {
+                var mapHost = map.parent == safe ? map : workspace;
+                if (capacityBar.parent != safe) safe.Insert(safe.IndexOf(mapHost), capacityBar);
+                var sessionActions = ui.Q("sessionActions");
+                if (draftSummary.parent != sessionActions)
+                    sessionActions.Insert(sessionActions.IndexOf(ui.Q("editActions")), draftSummary);
+            }
             safe.EnableInClassList("normal-mode",!IsEditing);
             safe.EnableInClassList("details-collapsed",detailsCollapsed);
             safe.EnableInClassList("blocked-state",IsEditing && (!draft.IsStructurallyValid || draft.Durability!=DraftDurability.Acknowledged));

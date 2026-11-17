@@ -196,6 +196,28 @@ Label { white-space: normal; flex-shrink: 1; }
 .landscape .floor-summary-heading { margin-right: 12px; }
 Button { white-space: normal; flex-shrink: 1; margin: 2px; padding: 7px 12px; color: var(--ink); border-width: 1px; border-color: rgb(115,110,91); border-radius: 5px; background-color: rgb(30,44,54); background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/action.png"); -unity-slice-left: 14; -unity-slice-right: 14; -unity-slice-top: 14; -unity-slice-bottom: 14; }
 Button:hover { border-color: var(--cool); }
+Button.tutorial-button-target, Button.tutorial-button-target:hover, Button.tutorial-button-target:focus {
+    background-image: none;
+    background-color: rgb(245, 195, 91);
+    color: rgb(30, 22, 12);
+    border-color: rgb(255, 229, 165);
+}
+Button.tutorial-button-target Label { color: rgb(30, 22, 12); }
+.compact-content-host { flex-shrink: 0; }
+.compact-portrait.editing .hud { flex-wrap: wrap; }
+.compact-portrait.editing .metric-card { flex-basis: 45%; flex-direction: row; padding: 1px 5px; margin: 1px; }
+.compact-portrait.editing .metric-icon { display: none; }
+.compact-portrait.editing .top-chrome, .compact-portrait.editing .bottom-chrome { padding: 3px 5px; }
+.compact-portrait.editing .top-chrome { max-height: 24%; flex-shrink: 1; }
+.compact-portrait.editing #draftSummary { flex-basis: auto; flex-shrink: 0; }
+.compact-portrait.editing #editActions { flex-wrap: nowrap; }
+.compact-portrait.editing #editActions > Button,
+.compact-portrait.editing #contentPlacementActions > Button { flex-basis: 0; min-width: 0; padding: 0 5px; }
+.compact-portrait.editing .session-actions { padding-top: 1px; }
+.compact-portrait.editing .content-card { flex-direction: row; min-width: 160px; padding: 1px 6px; align-items: center; }
+.compact-portrait.editing .content-card-icon { width: 28px; height: 28px; flex-shrink: 0; margin-right: 5px; }
+.content-card-labels { flex-shrink: 1; min-width: 0; }
+
 Button:active { background-color: rgb(54,64,62); }
 Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: rgb(78,84,86); border-color: rgb(61,74,80); }
 .selected-floor { border-width: 2px; border-color: var(--gold); color: rgb(250,222,155); background-color: rgb(49,48,36); }

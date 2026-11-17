@@ -16,8 +16,8 @@ namespace DungeonBuilder.M0
         [Flags]
         private enum Tutorial
         {
-            None = 0, Active = 1, Review = 2, Edit = 4, Rooms = 8, Monsters = 16, Loot = 32,
-            Analysis = 64, Finished = 128, Activity = 256
+            None = 0, Active = 1, Review = 2, Edit = 4, Rooms = 8,
+            Analysis = 64, Finished = 128, Activity = 256, MonsterPreview = 512, LootPreview = 1024
         }
 
         private static readonly ConditionalWeakTable<SaveService, object> tutorialBoots = new();
@@ -27,6 +27,8 @@ namespace DungeonBuilder.M0
         private Button nextStepsToggle;
         private Button[] objectives;
         private VisualElement tutorialScrim;
+        private Button tutorialStyledButton;
+        private bool tutorialBrowserChosen;
         private string tutorialPreference, tutorialHintKey;
         private Tutorial tutorial;
         private bool guidanceExpanded, firstRoomConfirmed, canWatchArrival, lastGuidanceBlocked;
@@ -102,8 +104,6 @@ namespace DungeonBuilder.M0
                 PresentGuidance();
             });
             Button("roomsCategory", () => { if (IsEditing && !detailsCollapsed) Learn(Tutorial.Rooms); PresentGuidance(); });
-            Button("monstersCategory", () => NoteTutorialCategory(MvpDungeonPlacementIds.MonsterCategoryId, Tutorial.Monsters));
-            Button("lootCategory", () => NoteTutorialCategory(MvpDungeonPlacementIds.LootNodeCategoryId, Tutorial.Loot));
             Button("openAnalysis", () => { if (IsAnalysis && HasGuidanceReport) Learn(Tutorial.Analysis); PresentGuidance(); });
         }
 
@@ -120,10 +120,32 @@ namespace DungeonBuilder.M0
             StoreTutorial();
         }
 
-        private void NoteTutorialCategory(string category, Tutorial action)
+        private Tutorial PreviewLesson => contentCategory switch
         {
-            if (IsEditing && ContentCategory == category) Learn(action);
-            PresentGuidance();
+            MvpDungeonPlacementIds.MonsterCategoryId => Tutorial.MonsterPreview,
+            MvpDungeonPlacementIds.LootNodeCategoryId => Tutorial.LootPreview,
+            _ => Tutorial.None
+        };
+
+        private void FocusTutorialRoom(string roomId)
+        {
+            if (world.TryRoomBounds(roomId, out Rect bounds)) tutorialRoom = bounds;
+        }
+
+        private (VisualElement target, string hint) ContentTutorial(VisualElement ui)
+        {
+            if (IsPlacingContent)
+            {
+                if (contentPreview?.IsValid == true) return (ui.Q("cancelContent"), "preview");
+                FocusTutorialRoom(contentIntent.RoomInstanceId);
+                return (null, "preview_cell");
+            }
+
+            var choice = ui.Q("contentChoices").Children().OfType<Button>().FirstOrDefault(button => button.enabledInHierarchy);
+            if (choice == null) return (ui.Q(contentBrowserOwned ? "newContent" : "ownedContent"), "other_browser");
+            if (!tutorialBrowserChosen)
+                return (ui.Q(contentBrowserOwned ? "ownedContent" : "newContent"), "browser");
+            return (choice, "option");
         }
 
         private void FollowObjective(int index)
@@ -208,27 +230,31 @@ namespace DungeonBuilder.M0
                 }
                 else if (IsEditing && draft.Durability == DraftDurability.Acknowledged)
                 {
-                    if (IsConstructing || IsPlacingContent)
-                        (target, hint) = (ui.Q(IsPlacingContent ? "cancelContent" : "cancelPlacement"), "preview");
+                    if (IsPlacingContent || PreviewLesson != Tutorial.None && !Learned(PreviewLesson) && reassigning == null)
+                        (target, hint) = ContentTutorial(ui);
+                    else if (IsConstructing)
+                        (target, hint) = (ui.Q("cancelPlacement"), "preview");
                     else if (!Learned(Tutorial.Rooms))
                         (target, hint) = (ui.Q("roomsCategory"), "rooms");
-                    else if (!Learned(Tutorial.Monsters) || !Learned(Tutorial.Loot))
+                    else if (!Learned(Tutorial.MonsterPreview) || !Learned(Tutorial.LootPreview))
                     {
                         if (ContextRoomId == null)
                         {
                             var room = renderState.Floors.FirstOrDefault(f => f.FloorInstanceId == selectedFloor)?.Layout.Rooms.FirstOrDefault();
-                            if (room != null && world.TryRoomBounds(room.RoomInstanceId, out Rect bounds))
-                                tutorialRoom = bounds;
+                            if (room != null) FocusTutorialRoom(room.RoomInstanceId);
                             hint = "room";
                         }
-                        else if (!Learned(Tutorial.Monsters))
+                        else if (!Learned(Tutorial.MonsterPreview))
                             (target, hint) = (ui.Q("monstersCategory"), "monsters");
                         else (target, hint) = (ui.Q("lootCategory"), "loot");
                     }
                 }
             }
             if (target != tutorialTarget && target is Button button)
-                button.GetFirstAncestorOfType<ScrollView>()?.ScrollTo(button);
+                button.schedule.Execute(() =>
+                {
+                    if (button == tutorialTarget) button.GetFirstAncestorOfType<ScrollView>()?.ScrollTo(button);
+                });
             tutorialTarget = target;
             if (tutorialHintKey != hint)
             {
@@ -280,7 +306,15 @@ namespace DungeonBuilder.M0
                 bounds = Clip(Rect.MinMaxRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y), viewportElement.worldBound);
             }
             bounds = Clip(bounds, safe.worldBound);
-            if (bounds.width < 4 || bounds.height < 4)
+            bool focusVisible = bounds.width >= 4 && bounds.height >= 4;
+            var styledButton = focusVisible ? tutorialTarget as Button : null;
+            if (styledButton != tutorialStyledButton)
+            {
+                tutorialStyledButton?.RemoveFromClassList("tutorial-button-target");
+                tutorialStyledButton = styledButton;
+                tutorialStyledButton?.AddToClassList("tutorial-button-target");
+            }
+            if (!focusVisible)
             {
                 tutorialScrim.style.display = tutorialOutline.style.display = tutorialPointer.style.display = DisplayStyle.None;
                 dismissActivity?.Pause();

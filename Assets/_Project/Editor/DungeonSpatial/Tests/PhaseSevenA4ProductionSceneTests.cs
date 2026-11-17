@@ -1297,14 +1297,82 @@ namespace DungeonBuilder.M0.Tests
             Click(ui.Q<Button>("roomsCategory"));
             Assert.That(ui.Q<Label>("tutorialHint").text, Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial.room", null)));
             controller.TapWorld(room.Anchor);
-            Click(ui.Q<Button>("monstersCategory"));
-            Assert.That(controller.ContentCategory, Is.EqualTo(MvpDungeonPlacementIds.MonsterCategoryId));
-            Click(ui.Q<Button>("lootCategory"));
-            Assert.That(controller.ContentCategory, Is.EqualTo(MvpDungeonPlacementIds.LootNodeCategoryId));
-            Assert.That(controller.SelectNewContent(MvpDungeonPlacementIds.HiddenCacheOptionId), Is.True);
-            Assert.That(ui.Q<Label>("tutorialHint").text, Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial.preview", null)));
-            Click(ui.Q<Button>("cancelContent"));
-            Assert.That(controller.IsPlacingContent, Is.False);
+            var camera = controller.transform.Find("ProductionDungeonCamera").GetComponent<Camera>();
+            var details = ui.Q<ScrollView>("contextDetails");
+            void CheckHint(string key) => Assert.That(ui.Q<Label>("tutorialHint").text,
+                Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial." + key, null)));
+            void Capture(string scene) =>
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("p269-edit-" + scene + ".png");
+            yield return SettleContentPanel();
+            Capture("room-540x960");
+            yield return null;
+            foreach (var browser in new[] { (name: "monstersCategory", category: MvpDungeonPlacementIds.MonsterCategoryId, shot: "monsters"),
+                (name: "lootCategory", category: MvpDungeonPlacementIds.LootNodeCategoryId, shot: "loot") })
+            {
+                Click(ui.Q<Button>(browser.name));
+                Assert.That(controller.ContentCategory, Is.EqualTo(browser.category));
+                CheckHint("browser");
+                yield return SettleContentPanel();
+                AssertReachable(ui.Q<Button>("newContent"));
+                AssertReachable(ui.Q<Button>("ownedContent"));
+                Assert.That(details.resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                Click(ui.Q<Button>("ownedContent"));
+                CheckHint("other_browser");
+                Click(ui.Q<Button>("newContent"));
+                CheckHint("option");
+                yield return SettleContentPanel();
+                var option = ui.Q("contentChoices").Children().OfType<Button>().First();
+                Assert.That(option.ClassListContains("tutorial-button-target"), Is.True);
+                AssertReachable(option);
+                Capture(browser.shot + "-540x960");
+                yield return null;
+                Click(option);
+                CheckHint("preview_cell");
+                yield return SettleContentPanel();
+                Assert.That(ui.Q("tutorialScrim").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                var cell = ContentCell(room, 1, 1);
+                var point = camera.WorldToScreenPoint(new Vector3(cell.X + .5f, cell.Y + .5f));
+                Assert.That(controller.IsChrome(point), Is.False);
+                controller.TapWorld(cell);
+                Assert.That(controller.ContentPreview.IsValid, Is.True, controller.ContentPreview.Reason);
+                CheckHint("preview");
+                if (browser.shot == "loot")
+                {
+                    foreach (var resolution in new[] { new Vector2Int(540, 960), new Vector2Int(960, 540),
+                        new Vector2Int(720, 1280), new Vector2Int(1280, 720) })
+                    {
+                        DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(resolution.x, resolution.y);
+                        yield return SettleContentPanel();
+                        foreach (var text in new[] { DungeonTextSize.Default, DungeonTextSize.Large })
+                        {
+                            controller.SetTextSize(text);
+                            controller.ApplySafeArea(new Rect(24, 24, Screen.width - 48, Screen.height - 72),
+                                new Vector2(Screen.width, Screen.height));
+                            yield return SettleContentPanel();
+                            var map = ui.Q("viewport").worldBound;
+                            Assert.That(map.height, Is.GreaterThanOrEqualTo(controller.SafeRoot.worldBound.height * .25f));
+                            var scale = controller.GetComponent<UIDocument>().panelSettings.scale;
+                            Assert.That(camera.pixelRect.width, Is.EqualTo(map.width * scale).Within(1f));
+                            Assert.That(camera.pixelRect.height, Is.EqualTo(map.height * scale).Within(1f));
+                            Assert.That(camera.pixelRect.y, Is.EqualTo(Screen.height - map.yMax * scale).Within(1f));
+                            var cellPoint = camera.WorldToScreenPoint(new Vector3(cell.X + .5f, cell.Y + .5f));
+                            Assert.That(controller.IsChrome(cellPoint), Is.False);
+                            foreach (string action in new[] { "cancelContent", "confirmContent", "save", "discard" })
+                                AssertReachable(ui.Q<Button>(action));
+                            if (text == DungeonTextSize.Large)
+                            {
+                                Capture($"preview-{resolution.x}x{resolution.y}");
+                                yield return null;
+                            }
+                        }
+                    }
+                }
+                Click(ui.Q<Button>("cancelContent"));
+                Assert.That(controller.IsPlacingContent, Is.False);
+                Assert.That(option.ClassListContains("tutorial-button-target"), Is.False);
+                Assert.That(controller.Draft.CommandCount, Is.Zero);
+                AssertCanonicalUnchanged(after, mana);
+            }
             Click(skip);
             Assert.That(ui.Q("tutorialFooter").style.display.value, Is.EqualTo(DisplayStyle.None));
             Assert.That(ui.Q<Button>("discard").enabledInHierarchy, Is.True);

@@ -506,9 +506,11 @@ namespace DungeonBuilder.M0
             lastWallet = root.Save.structureRuntime.ManaReserve; lastHeat = root.Save.structureRuntime.Heat; lastTick = root.Save.totalTicks;
             var ui = document.rootVisualElement;
             var hud = ProductionDungeonPresenter.Hud(root.Save, root.RunSimulationConfig, root.PassiveManaPerHourForPresentation, Text, Culture, recoveryPresentationRules);
-            ui.Q<Label>("totalMana").text = hud.TotalMana; ui.Q<Label>("usableMana").text = hud.UsableMana;
+            bool compact = IsEditing && safe.ClassListContains("compact-portrait");
+            string Metric(string value) => compact ? value.Replace("\n", " ") : value;
+            ui.Q<Label>("totalMana").text = Metric(hud.TotalMana); ui.Q<Label>("usableMana").text = Metric(hud.UsableMana);
             ui.Q<Label>("manaReserve").text = hud.Reserve;
-            ui.Q<Label>("manaRate").text = hud.ManaPerHour; ui.Q<Label>("heat").text = hud.Heat;
+            ui.Q<Label>("manaRate").text = Metric(hud.ManaPerHour); ui.Q<Label>("heat").text = Metric(hud.Heat);
         }
         private void RefreshEconomy()
         {
@@ -563,6 +565,12 @@ namespace DungeonBuilder.M0
             float scale = document.panelSettings.scale;
             Rect rect = DungeonPresentationPolicy.SafePanelRect(area, screenSize.y, scale);
             safe.style.left = rect.x; safe.style.top = rect.y; safe.style.width = rect.width; safe.style.height = rect.height;
+            bool compactPortrait = screenSize.y > screenSize.x && rect.width < presentationPolicy.ReferenceShortSide;
+            if (safe.ClassListContains("compact-portrait") != compactPortrait)
+            {
+                safe.EnableInClassList("compact-portrait", compactPortrait);
+                Present();
+            }
         }
         private void Layout()
         {
