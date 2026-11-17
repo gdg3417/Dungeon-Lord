@@ -66,7 +66,7 @@ namespace DungeonBuilder.M0
             ClearConstructionSelection(); ClearContentSelection(); selected = null; selectedRoomId = id; selectedEdgeId = null; moveMode = false;
             contentCategory = category; OpenSheet(); world.SelectRoomFootprint(id);
             detailsCollapsed = safe.ClassListContains("compact-portrait") ||
-                TutorialActive && Screen.width > Screen.height;
+                TutorialActive && Learned(Tutorial.Edit) && Screen.width > Screen.height;
             feedback = "ui.dungeon.content.choose"; Present(); FocusRoom(); return true;
         }
         public bool SelectNewContent(string option)
@@ -207,7 +207,9 @@ namespace DungeonBuilder.M0
             if (browser.parent != browserHost) browserHost.Add(browser);
             browser.style.display = managing && (!(compact || detailsCollapsed) || contentIntent == null || reassigning != null) ? DisplayStyle.Flex : DisplayStyle.None;
             if (managing && draft.Durability == DraftDurability.Acknowledged && draft.StructuralReason == null)
-                status.style.display = compact && detailsCollapsed && contentPreview?.IsValid == false ? DisplayStyle.Flex : DisplayStyle.None;
+                status.style.display = detailsCollapsed && IsPlacingContent &&
+                    (contentPreview?.IsValid == false || !TutorialActive && contentPreview == null)
+                    ? DisplayStyle.Flex : DisplayStyle.None;
             if (managing) ui.Q<Button>("move").style.display = DisplayStyle.None;
             if (managing || selected != null && draft?.HasContentIntent == true) ui.Q("economics").style.display = DisplayStyle.None;
             ui.Q("contentPlacementActions").style.display = IsPlacingContent || reassigning != null ? DisplayStyle.Flex : DisplayStyle.None;

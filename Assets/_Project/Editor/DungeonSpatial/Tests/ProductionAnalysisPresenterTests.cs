@@ -45,7 +45,7 @@ namespace DungeonBuilder.M0.Tests
                 "tutorial.edit", "tutorial.rooms", "tutorial.room", "tutorial.monsters", "tutorial.loot",
                 "tutorial.preview", "tutorial.activity", "tutorial.analysis", "tutorial.revise",
                 "tutorial.build_resume", "tutorial.dialog", "tutorial.return", "tutorial.explore",
-                "tutorial.browser", "tutorial.other_browser", "tutorial.option", "tutorial.preview_cell"
+                "tutorial.browser", "tutorial.other_browser", "tutorial.option", "tutorial.preview_cell", "tutorial.resume_edit"
             };
             foreach (string key in keys)
             {
