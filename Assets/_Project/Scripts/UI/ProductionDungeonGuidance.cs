@@ -178,7 +178,7 @@ namespace DungeonBuilder.M0
             tutorialFooter.style.display = showTutorial ? DisplayStyle.Flex : DisplayStyle.None;
             safe.EnableInClassList("tutorial-first-room", showTutorial && NeedsFirstRoom &&
                 !IsEditing && !IsAnalysis && !GuidanceBlocked);
-            safe.EnableInClassList("tutorial-before-visit", showTutorial && !visitObserved);
+            safe.EnableInClassList("tutorial-before-visit", showTutorial && !HasGuidanceReport);
             if (!showTutorial)
             {
                 modal.style.bottom = 0;
