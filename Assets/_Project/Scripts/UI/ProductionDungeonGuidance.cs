@@ -37,7 +37,7 @@ namespace DungeonBuilder.M0
         private bool GuidanceBlocked => recoveryBytes != null || recoveryReason != null ||
             root.SaveService.RequiresCanonicalRecovery || root.TimeService?.RecoveryClockActive == true;
         private bool CanUseObjectives => !legacy && !IsEditing && !IsAnalysis && !GuidanceBlocked &&
-            modal.style.display != DisplayStyle.Flex;
+            modal.style.display != DisplayStyle.Flex && document.rootVisualElement.Q("displayPopover").style.display != DisplayStyle.Flex;
 
         internal static string TutorialPreferenceKey(string path, long created)
         {
@@ -55,6 +55,8 @@ namespace DungeonBuilder.M0
             var ui = document.rootVisualElement;
             nextSteps = ui.Q("nextSteps");
             nextStepsToggle = ui.Q<Button>("toggleNextSteps");
+            nextStepsToggle.BringToFront();
+            nextSteps.BringToFront();
             objectives = objectiveKeys.Select(key => ui.Q<Button>("objective_" + key)).ToArray();
             tutorialFooter = ui.Q("tutorialFooter");
             tutorialHint = ui.Q<Label>("tutorialHint");

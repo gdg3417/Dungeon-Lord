@@ -571,7 +571,10 @@ namespace DungeonBuilder.M0
             document.panelSettings.scale = Mathf.Max(1, Mathf.Min(Screen.width,Screen.height) / presentationPolicy.ReferenceShortSide);
             ApplySafeArea(lastSafe, lastResolution); SetTextSize(textSize);
             safe.EnableInClassList("compact-hud", lastSafe.width / document.panelSettings.scale < presentationPolicy.ReferenceShortSide);
-            safe.EnableInClassList("landscape", Screen.width > Screen.height);
+            bool landscape = Screen.width > Screen.height;
+            safe.EnableInClassList("landscape", landscape);
+            safe.EnableInClassList("short-landscape", landscape &&
+                lastSafe.height / document.panelSettings.scale < presentationPolicy.ReferenceShortSide);
             PresentPerformanceSummary();
             PlaceDevelopmentAction();
             PresentComposition();

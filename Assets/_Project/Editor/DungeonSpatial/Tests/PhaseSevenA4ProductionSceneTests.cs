@@ -1215,8 +1215,9 @@ namespace DungeonBuilder.M0.Tests
             var outline = ui.Q("tutorialOutline");
             Assert.That(ui.Q<Label>("tutorialHint").text, Is.EqualTo(root.Content.GetString("ui.dungeon.tutorial.build", null)));
             Assert.That(ui.Q<Button>("nextStepAction"), Is.Null);
+            int captureIndex = 0;
             foreach (var size in new[] { new Vector2Int(540, 960), new Vector2Int(960, 540),
-                new Vector2Int(720, 1280), new Vector2Int(1280, 720) })
+                new Vector2Int(720, 1280), new Vector2Int(1280, 720), new Vector2Int(540, 960) })
             {
                 DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
                 controller.SetTextSize(DungeonTextSize.Large);
@@ -1230,7 +1231,9 @@ namespace DungeonBuilder.M0.Tests
                 AssertReachable(skip);
                 Assert.That(outline.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
                 Assert.That(Vector2.Distance(outline.worldBound.center, build.worldBound.center), Is.LessThan(1f));
-                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture($"p269-spotlight-{size.x}x{size.y}.png");
+                // The initial batch Game View render may still contain uninitialized UI materials.
+                if (captureIndex++ != 0)
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture($"p269-spotlight-{size.x}x{size.y}.png");
                 yield return null;
             }
 
@@ -1688,7 +1691,8 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.SafeRoot.worldBound.Contains(button.worldBound.min), Is.True, button.name);
             Assert.That(controller.SafeRoot.worldBound.Contains(button.worldBound.max - Vector2.one), Is.True, button.name);
             var picked = button.panel.Pick(button.worldBound.center);
-            Assert.That(picked == button || button.Contains(picked), Is.True, button.name + " must receive pointer input without scrolling");
+            Assert.That(picked == button || button.Contains(picked), Is.True,
+                $"{button.name} must receive pointer input without scrolling. Hit {picked?.name} ({picked?.GetType().Name}), parent {picked?.parent?.name}.");
         }
         private static void AssertCanonicalUnchanged(byte[] bytes, double mana)
         {
