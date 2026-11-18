@@ -156,9 +156,8 @@
             <ui:VisualElement name="tutorialShadeRight" class="tutorial-shade" picking-mode="Ignore" />
         </ui:VisualElement>
         <ui:VisualElement name="tutorialFooter" class="tutorial-footer" picking-mode="Ignore">
-            <ui:ScrollView name="tutorialInstructions" class="tutorial-instructions" mode="Vertical">
-                <ui:Label name="tutorialHint" picking-mode="Ignore" />
-            </ui:ScrollView>
+            <ui:ScrollView name="tutorialInstructions" class="tutorial-instructions" mode="Vertical" />
+            <ui:Label name="tutorialHint" picking-mode="Ignore" />
             <ui:Button name="skipTutorial" tooltip="ui.dungeon.tutorial.skip" />
         </ui:VisualElement>
         <ui:VisualElement name="tutorialOutline" class="tutorial-outline" picking-mode="Ignore" />

@@ -24,6 +24,7 @@ namespace DungeonBuilder.M0
         private static readonly string[] objectiveKeys = { "first_room", "prepare", "visit", "results", "revise" };
         private VisualElement nextSteps, tutorialFooter, tutorialOutline, tutorialPointer, tutorialTarget;
         private Label tutorialHint;
+        private ScrollView tutorialInstructions;
         private Button nextStepsToggle;
         private Button[] objectives;
         private VisualElement tutorialScrim;
@@ -63,6 +64,7 @@ namespace DungeonBuilder.M0
             objectives = objectiveKeys.Select(key => ui.Q<Button>("objective_" + key)).ToArray();
             tutorialFooter = ui.Q("tutorialFooter");
             tutorialHint = ui.Q<Label>("tutorialHint");
+            tutorialInstructions = ui.Q<ScrollView>("tutorialInstructions");
             tutorialScrim = ui.Q("tutorialScrim");
             tutorialOutline = ui.Q("tutorialOutline");
             tutorialPointer = ui.Q("tutorialPointer");
@@ -198,6 +200,12 @@ namespace DungeonBuilder.M0
 
             bool showTutorial = TutorialActive && !legacy;
             tutorialFooter.style.display = showTutorial ? DisplayStyle.Flex : DisplayStyle.None;
+            bool scrollInstructions = showTutorial && IsEditing && contentCategory != null && ContextRoomId != null;
+            tutorialFooter.EnableInClassList("scrollable-tutorial", scrollInstructions);
+            if (scrollInstructions && tutorialHint.parent != tutorialInstructions.contentContainer)
+                tutorialInstructions.Add(tutorialHint);
+            else if (!scrollInstructions && tutorialHint.parent != tutorialFooter)
+                tutorialFooter.Insert(0, tutorialHint);
             bool hideStarterDetails = showTutorial && NeedsFirstRoom &&
                 !IsEditing && !IsAnalysis && !GuidanceBlocked;
             safe.EnableInClassList("tutorial-first-room", hideStarterDetails);
@@ -262,7 +270,7 @@ namespace DungeonBuilder.M0
             {
                 tutorialHintKey = hint;
                 tutorialHint.text = hint == null ? string.Empty : Text("ui.dungeon.tutorial." + hint);
-                ui.Q<ScrollView>("tutorialInstructions").scrollOffset = Vector2.zero;
+                tutorialInstructions.scrollOffset = Vector2.zero;
             }
             PositionTutorial();
         }

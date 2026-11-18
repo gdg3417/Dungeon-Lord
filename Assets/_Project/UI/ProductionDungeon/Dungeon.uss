@@ -22,9 +22,12 @@
 .next-steps-details Button { flex-shrink: 0; white-space: normal; -unity-text-align: middle-left; }
 .next-steps-details .objective-complete { color: var(--cool); border-left-width: 3px; border-left-color: var(--cool); }
 
-.tutorial-footer { display: none; flex-shrink: 0; max-height: 22%; flex-direction: row; align-items: center; justify-content: flex-end; background-color: var(--panel); border-top-width: 1px; border-top-color: var(--gold); padding: 2px 6px; }
-.tutorial-instructions { flex-grow: 1; flex-shrink: 1; min-width: 0; min-height: 0; max-height: 100%; }
-#tutorialHint { white-space: normal; min-width: 0; flex-shrink: 0; }
+.tutorial-footer { display: none; flex-shrink: 0; flex-direction: row; align-items: center; justify-content: flex-end; background-color: var(--panel); border-top-width: 1px; border-top-color: var(--gold); padding: 2px 6px; }
+.tutorial-footer.scrollable-tutorial { max-height: 22%; }
+.tutorial-instructions { display: none; flex-grow: 1; flex-shrink: 1; min-width: 0; min-height: 0; max-height: 100%; }
+.scrollable-tutorial .tutorial-instructions { display: flex; }
+#tutorialHint { white-space: normal; min-width: 0; flex-shrink: 1; flex-grow: 1; }
+.tutorial-instructions #tutorialHint { flex-shrink: 0; }
 #skipTutorial { width: 176px; white-space: nowrap; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; }
 .tutorial-scrim { display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
 .tutorial-shade { position: absolute; background-color: rgba(0,0,0,0.76); }
@@ -253,7 +256,7 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .placing-content .map-area { min-height: 25%; }
 .placing-content .top-chrome, .constructing .top-chrome { max-height: 22%; }
 .landscape.constructing .top-chrome { max-height: 21%; }
-.landscape.placing-content .bottom-chrome { max-height: 100%; }
+.landscape.placing-content .bottom-chrome { max-height: 100%; padding-top: 2px; padding-bottom: 2px; }
 .landscape.placing-content .top-content { flex-direction: column; align-items: stretch; }
 .landscape.placing-content .hud { flex-basis: auto; min-width: 0; }
 .landscape.placing-content .top-chrome { padding-top: 0; padding-bottom: 0; }
