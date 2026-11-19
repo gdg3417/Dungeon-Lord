@@ -431,7 +431,8 @@ namespace DungeonBuilder.M0
 
         internal ResearchTimingRules ResearchTiming => recoveryInputs?.ResearchTiming;
 
-        internal bool CanStagePaidResearch => recoveryTime?.ForegroundPresentationActive == true &&
+        internal bool CanStagePaidResearch => BeforeForegroundAction != null && ForegroundCurrent != null &&
+            recoveryTime?.ForegroundPresentationActive == true &&
             !recoveryTime.HasDeferredRecovery && !RequiresCanonicalRecovery;
 
         internal long ResearchProtectedReserve(SaveData candidate) =>

@@ -361,7 +361,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (schema == CanonicalSaveSchemaVersions.ResearchTimingIntroduction &&
                         recognizedState != null && (name == "researchPending" || name == "researchProgress") &&
                         TryFind(primary, name, out var priorResearch) && priorResearch.Kind == ContractJsonKind.Object)
+                    {
                         valueBytes = MergeResearchExtensions(name, priorResearch, valueBytes);
+                        if (valueBytes == null) return Failure(ResearchTimingRules.StateInvalid);
+                    }
                     if (CanonicalSaveSchemaVersions.HasPreciseTime(schema) && name == "lastSavedUtcUnix")
                     {
                         var timestampIssues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
@@ -539,20 +542,31 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var issues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
             if (!ContractJson.TryParse(nextBytes, limits.Canonical.Serialized, issues, out var next) ||
                 next.Kind != ContractJsonKind.Object) return nextBytes;
-            if (!TryFind(prior, "ProjectId", out var oldProject) || !TryFind(next, "ProjectId", out var newProject) ||
-                oldProject.Text != newProject.Text || !TryFind(prior, "SlotId", out var oldSlot) ||
-                !TryFind(next, "SlotId", out var newSlot) || oldSlot.Text != newSlot.Text)
-                return nextBytes;
+            bool SameMember(string key) => TryFind(prior, key, out var previous) &&
+                TryFind(next, key, out var replacement) && previous.Kind == replacement.Kind &&
+                previous.Text == replacement.Text;
+            bool sameProject = SameMember("ProjectId") && SameMember("SlotId");
+            if (name == "researchProgress" && TryFind(prior, "RuleSourceIdUsed", out var source) &&
+                ResearchTimingRules.IsPaidReference(source.Text) &&
+                (!sameProject || !SameMember("RuleSourceIdUsed") || !SameMember("StartClosedThrough")))
+                return null;
+            if (!sameProject) return nextBytes;
 
             var known = name == "researchProgress" ? DetachedRecognizedSaveStateSnapshot.ResearchProgressMembers
                 : new[] { "SlotId", "ProjectId" };
-            var extensions = prior.Fields.Where(field => !known.Contains(field.Key, StringComparer.Ordinal)).ToArray();
-            if (extensions.Length == 0) return nextBytes;
+            if (prior.Fields.All(field => known.Contains(field.Key, StringComparer.Ordinal))) return nextBytes;
 
             var writer = new ContractJsonWriter(limits.Canonical.Serialized);
             writer.Node(); writer.Token("{");
             bool first = true;
-            foreach (var field in next.Fields.Concat(extensions)) {
+            foreach (var field in prior.Fields) {
+                var value = field.Value;
+                if (known.Contains(field.Key, StringComparer.Ordinal) && !TryFind(next, field.Key, out value)) continue;
+                WriteField(writer, field.Key, value, first);
+                first = false;
+            }
+            foreach (var field in next.Fields) {
+                if (TryFind(prior, field.Key, out _)) continue;
                 WriteField(writer, field.Key, field.Value, first);
                 first = false;
             }

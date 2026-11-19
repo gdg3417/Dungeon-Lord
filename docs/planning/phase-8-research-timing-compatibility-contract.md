@@ -133,4 +133,25 @@ Expected impact is localized to Research terms/lookup and resolver family, recog
 
 **Qualification checkpoint.** At implementation commit `77c8da68505fb025f1adaf4c142d32c9c482fd9a`, Unity 6000.3.2f1 compiled and produced an inventory containing the eight runnable focused cases. The discovery process exited zero. The supervisor marked campaign `2fac23a2e28d4e2fa7122577c6b5f23e` incomplete because it could not prove the owned job had drained. Final preservation did not run. No tests executed. Keep the reservation and artifacts for reviewed recovery before the focused gate. Current-schema reopen, interruption, affected recovery and applicable PlayMode and Windows gates remain pending.
 
+**Review 1 corrections.** Current save rewrites compare the paid project and slot, rule reference and Start cut to the exact predecessor. Replacing those fields fails even when the proposed progress equation holds. Compatible Research extensions retain positions and value bytes. Paid Start requires the registered foreground barrier and current projection.
+
+Select these methods on the registered EditMode fixture `DungeonBuilder.M0.EditorTools.Tests.H1F4RecoveryContract`. Expected counts come from source declarations and the prior eight-case inventory.
+
+| Method | Expected leaves | Coverage |
+|---|---:|---|
+| `PaidRuleUsesExactClosedTickUnits` | 4 | Aligned and fractional cuts, 120-second threshold, and archive errors. |
+| `PaidStartClosesPartialTickAndReopensUnderOriginalRule` | 1 | Native schema 18, 7-second cut, exactly-once debit and Claim, new default on reopen. |
+| `PaidStartPublicationRequiresExactDebitAndPendingProof` | 2 | Proven rollback and an uncertain surviving candidate after replacement. |
+| `PaidStartRequiresBarrierEnabledSelectionAndProtectedReserve` | 1 | Protected reserve on a configured floor, absent barrier and disabled selection. |
+| `FailedPaidTickLeavesClosureWalletAndProgressUnpublished` | 1 | Failed tick write preserves exact predecessor bytes and live state. |
+| `PaidCreditSurvivesOpportunityAndSettlementStagesWithoutChangingExpeditionResults` | 1 | Aligned production-executor Start, staged projection, same-input expedition and wallet comparison. |
+| `OriginalAndResidualAbsenceDoNotCreditAnUnfinishedPaidProject` | 1 | No paid credit during either H1 settlement phase below saturation. |
+| `PaidWireValidationAndWritesRejectContradictionsAndActiveRebinding` | 1 | Invalid fields and archive references, no default substitution, immutable binding, completion conflict. |
+| `CurrentPaidRecordRetainsFullWidthIntegersAndNestedExtensions` | 1 | Full-width cut, maximum-width rule reference and eligible-unit value, exact extensions and existing workload checks. |
+| `ObsoleteSchemaRefusalPreservesOriginalBytes` | 1 | Refuse old schema without changing bytes. |
+| `AcceptedTicksAndResearchDrainAcrossTwoCrashesWithoutReplayingClosedPrefix` | 2 | Current scaffold and paid accepted work, with later default during paid replay. |
+| **Total** | **16** | Source-verified expectation. Execution and current-head discovery pending. |
+
+Existing `R0ResearchDurability` rollback, readback and reentrancy fixtures cover the shared writer. Existing `LivingDungeonPhaseB2.C2FundingWaitsForProvenCanonicalVacancyAtClosedB2Boundary` and `SameTimeTerminalReleaseAdmissionAndNewbornOrderSurvivesEveryActionRestart` cover vacancy recovery and same-boundary expedition ordering. These complement the paid fixture selection. Native Windows and required affected regression gates remain pending.
+
 **Non-goals.** Offline Research accrual, second slot, tier expansion, catalogs, Monsterology, Architecture, UI redesign, premium/backend features, global scheduling changes, H2 optimization and sub-dungeons are outside this prerequisite. Public-release backend verification and independent review remain separate gates.
