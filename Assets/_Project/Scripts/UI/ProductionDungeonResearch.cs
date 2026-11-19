@@ -54,6 +54,8 @@ namespace DungeonBuilder.M0
             string status = authority?.State == PlayerResearchAuthorityState.InProgress
                 ? Format(PlayerResearchActionHandler.InProgressFormatKey, state.ProgressUnits, state.RequiredProgressUnits)
                 : Text(state.FeedbackLocalizationKey);
+            if (authority?.State == PlayerResearchAuthorityState.ClaimBlocked)
+                status = Text(PlayerResearchActionHandler.ReadyToClaimKey) + "\n" + status;
             ui.Q<Label>("researchStatus").text = status == ui.Q<Label>("researchPrerequisite").text ||
                 status == ui.Q<Label>("researchCost").text ? Text("ui.research.start_blocked") : status;
             ui.Q<Button>("researchStart").style.display = authority?.CanStart == true ? DisplayStyle.Flex : DisplayStyle.None;

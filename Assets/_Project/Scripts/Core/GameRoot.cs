@@ -210,8 +210,11 @@ namespace DungeonBuilder.M0
             return CreatePlayerResearchActionHandler().ResolveState();
         }
 
-        public PlayerResearchActionResult StartConfiguredPlayerResearch()
-            => StartPlayerResearch(CreatePlayerResearchActionHandler());
+        // Retained scaffold action for the historical development fixtures.
+        public PlayerResearchActionResult StartConfiguredPlayerResearch() =>
+            DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment()
+                ? StartPlayerResearch(CreatePlayerResearchActionHandler())
+                : StartProductionResearch();
 
         internal PlayerResearchActionResult ResolveProductionResearchState() =>
             CreatePlayerResearchActionHandler(null, paidStart: true).ResolveState();

@@ -269,12 +269,22 @@ namespace DungeonBuilder.M0
                 }
             }
 
-            if (authority.CanStart && !authority.IsAffordable)
+            if (authority.CanStart)
             {
-                authority.State = PlayerResearchAuthorityState.Blocked;
-                authority.FeedbackLocalizationKey = !authority.ManaCost.HasValue ? StartConfigurationUnavailableKey :
-                    authority.UsableMana.HasValue ? StartUnaffordableKey : BlockedInvalidKey;
-                authority.CanStart = authority.StateMutationPermitted = false;
+                string blocked = null;
+                if (!string.Equals(_claimConfig.claimAuthorityMode, PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode, StringComparison.Ordinal))
+                    blocked = BlockedClaimAuthorityKey;
+                else if (!authority.ManaCost.HasValue)
+                    blocked = StartConfigurationUnavailableKey;
+                else if (!authority.IsAffordable)
+                    blocked = authority.UsableMana.HasValue ? StartUnaffordableKey : BlockedInvalidKey;
+
+                if (blocked != null)
+                {
+                    authority.State = PlayerResearchAuthorityState.Blocked;
+                    authority.FeedbackLocalizationKey = blocked;
+                    authority.CanStart = authority.StateMutationPermitted = false;
+                }
             }
             return authority;
         }
