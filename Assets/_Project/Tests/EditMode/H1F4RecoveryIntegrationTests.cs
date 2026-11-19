@@ -368,6 +368,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var h = PreparePaidStart();
             using var scope = new RootScope(h);
             scope.Pulse(107);
+            var beforeStart = h.Service.CanonicalSession.GetCurrentBytes();
+            string project = h.Inputs.Configuration.MvpFirstSessionObjective.AnalysisResearchProjectId;
+            Assert.That(h.Inputs.ResearchTiming.Select(project, out var paidRule), Is.Null);
+            scope.Root.Save.researchPending = new ResearchPendingState { SlotId = paidRule.SlotId, ProjectId = project };
+            scope.Root.Save.researchProgress = new ResearchProgressState {
+                SlotId = paidRule.SlotId, ProjectId = project, RuleSourceIdUsed = paidRule.Reference, StartClosedThrough = 7000
+            };
+            Assert.That(h.Service.Save(scope.Root.Save, SaveReason.StateChange), Is.False,
+                "A direct save cannot start a project without the debit transaction");
+            CollectionAssert.AreEqual(beforeStart, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+            scope.Root.Save.researchPending = null;
+            scope.Root.Save.researchProgress = null;
             Assert.That(scope.Root.StartConfiguredPaidResearch().Succeeded, Is.True);
             var before = h.Service.CanonicalSession.GetCurrentBytes();
             string json = Encoding.UTF8.GetString(before);
@@ -406,6 +418,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             current.researchProgress.StartClosedThrough = 6000;
             Assert.That(h.Service.Save(current, SaveReason.StateChange), Is.False);
             current.researchProgress.StartClosedThrough = 7000;
+            var pending = current.researchPending;
+            var progress = current.researchProgress;
+            current.researchPending = null;
+            current.researchProgress = null;
+            Assert.That(h.Service.Save(current, SaveReason.StateChange), Is.False,
+                "A direct save cannot clear the active project and allow another charge");
+            current.researchPending = pending;
+            current.researchProgress = progress;
             current.completedResearch = new CompletedResearchState { ProjectIds = new[] { current.researchProgress.ProjectId } };
             Assert.That(h.Service.Save(current, SaveReason.StateChange), Is.False);
             CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));

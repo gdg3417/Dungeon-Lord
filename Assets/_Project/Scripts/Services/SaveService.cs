@@ -477,7 +477,7 @@ namespace DungeonBuilder.M0
             // Do not call Save(candidate): its foreground preparation can replace
             // the staged transition. This writer preserves the session's other owners
             // and extension members, then verifies exact bytes and semantic readback.
-            var write = CreateWriteAuthority().SaveRecognizedState(SavePath, _canonicalFileSystem, _canonicalSession, candidate);
+            var write = CreateWriteAuthority().SaveResearchState(SavePath, _canonicalFileSystem, _canonicalSession, candidate);
             if (!write.IsSuccess)
             {
                 if (write.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason) foregroundRecoveryRequired = true;

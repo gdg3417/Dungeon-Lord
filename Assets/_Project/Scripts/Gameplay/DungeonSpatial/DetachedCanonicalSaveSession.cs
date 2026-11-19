@@ -21,7 +21,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static readonly string[] ResearchProgressMembers =
             { "SlotId", "ProjectId", "ProgressUnits", "CompletionPending", "RuleSourceIdUsed", "StartClosedThrough" };
         private readonly Dictionary<string, byte[]> values;
-        private DetachedRecognizedSaveStateSnapshot(Dictionary<string, byte[]> source) { values = source; }
+        internal bool HasPaidResearch { get; }
+
+        private DetachedRecognizedSaveStateSnapshot(Dictionary<string, byte[]> source, bool hasPaidResearch)
+        {
+            values = source;
+            HasPaidResearch = hasPaidResearch;
+        }
 
         public static DetachedRecognizedSaveStateSnapshotResult Capture(SaveData source,
             SaveSpatialMigrationLimitsProfile limits)
@@ -51,7 +57,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 PreserveNullableState(result, "researchProgress", source.researchProgress);
                 PreserveNullableState(result, "lastOfflineSummary", source.lastOfflineSummary);
                 return new DetachedRecognizedSaveStateSnapshotResult(
-                    new DetachedRecognizedSaveStateSnapshot(result), null);
+                    new DetachedRecognizedSaveStateSnapshot(result,
+                        ResearchTimingRules.IsPaidReference(source.researchProgress?.RuleSourceIdUsed)), null);
             }
             catch (ContractJsonBudgetException)
             { return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason); }
@@ -283,6 +290,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 corridorContent, branchKnowledge, floorKnowledge, monsterContinuity: monsterContinuity);
         }
 
+        internal DetachedCanonicalSaveSessionResult PrepareResearchReplacement(
+            DetachedRecognizedSaveStateSnapshotResult recognizedState, DetachedCanonicalSpatialSaveState replacement) =>
+            recognizedState?.IsSuccess == true
+                ? PrepareReplacement(recognizedState.Snapshot, replacement, null, null, null, null, researchTransition: true)
+                : Failure(recognizedState?.Reason ?? DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+
         private DetachedCanonicalSaveSessionResult PrepareReplacement(
             DetachedRecognizedSaveStateSnapshot recognizedState,
             DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment,
@@ -292,7 +305,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             LivingDungeonState livingDungeon = null, bool manualRun = false,
             MonsterContinuityState monsterContinuity = null, DurableSettlementHistory settlement = null, bool foregroundStage = false,
             LivingDungeonForegroundLineage.ReleasePermit releases = null, CanonicalTimeTransition time = null,
-            ForegroundPredecessor foregroundPredecessor = null)
+            ForegroundPredecessor foregroundPredecessor = null, bool researchTransition = false)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -308,6 +321,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!ContractJson.Int(root.Fields[1].Value, out int schema) ||
                     !TimeProvenance.TryRead(primary, schema, out var priorTime) ||
                     time != null && !time.Matches(currentBytes, priorTime)) return Failure(RecoveryEpisode.Invalid);
+                if (schema == CanonicalSaveSchemaVersions.ResearchTimingIntroduction && recognizedState != null && !researchTransition)
+                {
+                    bool previouslyPaid = TryFind(primary, "researchProgress", out var progress) &&
+                        progress.Kind == ContractJsonKind.Object && TryFind(progress, "RuleSourceIdUsed", out var rule) &&
+                        ResearchTimingRules.IsPaidReference(rule.Text);
+                    if (previouslyPaid != recognizedState.HasPaidResearch) return Failure(ResearchTimingRules.StateInvalid);
+                }
                 var nextTime = time?.Successor ?? priorTime;
                 if (settlement != null && !settlement.Matches(currentBytes, livingDungeon, limits.Canonical.Serialized))
                     return Failure("living.settlement.history_invalid");
