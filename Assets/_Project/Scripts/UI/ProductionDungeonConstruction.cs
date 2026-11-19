@@ -16,6 +16,7 @@ namespace DungeonBuilder.M0
         private bool detailsCollapsed;
         public bool IsConstructing => constructionRequest != null && IsEditing;
         public StructuralEditPreview ConstructionPreview => constructionPreview;
+        private bool GuidedConstruction => IsConstructing && TutorialActive && roomLessonBrowsing;
         private bool NeedsStarterSetup => renderState?.Floors.Length == 0 || renderState?.Floors.Any(f =>
             f.FloorInstanceId == selectedFloor && f.ActivationState == FloorActivationState.Active && f.Layout.Rooms.Length == 0) == true;
 

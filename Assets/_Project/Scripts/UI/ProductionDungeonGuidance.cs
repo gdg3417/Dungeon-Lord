@@ -109,7 +109,7 @@ namespace DungeonBuilder.M0
             {
                 if (!preparingVisit) Learn(Tutorial.Finished);
                 preparingVisit = false;
-                PresentGuidance();
+                Present();
             });
             Button("deferRoomLesson", () =>
             {
@@ -319,6 +319,16 @@ namespace DungeonBuilder.M0
             if (guidanceExpanded)
             {
                 var tip = ui.Q<Label>("objectiveHint");
+                var tipToggle = ui.Q<Button>("toggleObjectiveHint");
+                var list = ui.Q<ScrollView>("nextStepsDetails").contentContainer;
+                var objective = objectives[current >= 0 ? current : 4];
+                if (list.IndexOf(tipToggle) != list.IndexOf(objective) + 1)
+                {
+                    tipToggle.RemoveFromHierarchy();
+                    tip.RemoveFromHierarchy();
+                    list.Insert(list.IndexOf(objective) + 1, tipToggle);
+                    list.Insert(list.IndexOf(tipToggle) + 1, tip);
+                }
                 if (objectiveHintExpanded)
                 {
                     string instruction = !firstRoomConfirmed ? "ui.dungeon.tutorial.build" :
@@ -328,14 +338,15 @@ namespace DungeonBuilder.M0
                     tip.text = Text(instruction);
                 }
                 tip.style.display = objectiveHintExpanded ? DisplayStyle.Flex : DisplayStyle.None;
-                ui.Q<Button>("toggleObjectiveHint").text = Text(objectiveHintExpanded ?
+                tipToggle.text = Text(objectiveHintExpanded ?
                     "ui.dungeon.guidance.hide_hint" : "ui.dungeon.guidance.show_hint");
             }
 
             bool showTutorial = (TutorialActive || preparingVisit) && !legacy;
             tutorialFooter.style.display = showTutorial ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("skipTutorial").text = Text(preparingVisit ? "ui.dungeon.guidance.close" : "ui.dungeon.tutorial.skip");
-            bool scrollInstructions = showTutorial && IsEditing && contentCategory != null && ContextRoomId != null;
+            bool scrollInstructions = showTutorial && IsEditing &&
+                (GuidedConstruction || contentCategory != null && ContextRoomId != null);
             tutorialFooter.EnableInClassList("scrollable-tutorial", scrollInstructions);
             if (scrollInstructions && tutorialHint.parent != tutorialInstructions.contentContainer)
                 tutorialInstructions.Add(tutorialHint);
@@ -355,7 +366,7 @@ namespace DungeonBuilder.M0
             VisualElement target = null;
             bool canDefer = false;
             string hint = !showTutorial ? null : GuidanceBlocked || modal.style.display == DisplayStyle.Flex
-                ? "dialog" : IsAnalysis ? "return" : "next_steps";
+                ? "dialog" : IsAnalysis ? "return" : guidanceExpanded ? tutorialHintKey ?? "next_steps" : "next_steps";
             if (showTutorial && !GuidanceBlocked && !guidanceExpanded && !IsAnalysis &&
                 modal.style.display != DisplayStyle.Flex && ui.Q("displayPopover").style.display != DisplayStyle.Flex)
             {

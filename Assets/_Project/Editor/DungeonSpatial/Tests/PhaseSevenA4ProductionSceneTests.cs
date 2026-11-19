@@ -1313,9 +1313,19 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(ui.Q<Button>("confirmPlacement").enabledInHierarchy, Is.True);
             Assert.That(ui.Q<Button>("save").enabledInHierarchy, Is.False);
             Assert.That(controller.Draft.CommandCount, Is.Zero);
-            yield return SettleContentPanel();
-            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("p269-room-preview-portrait.png");
-            yield return null;
+            foreach (var resolution in new[] { new Vector2Int(540, 960), new Vector2Int(960, 540), new Vector2Int(540, 960) })
+            {
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(resolution.x, resolution.y);
+                yield return SettleContentPanel();
+                controller.ApplySafeArea(new Rect(24, 24, Screen.width - 48, Screen.height - 72),
+                    new Vector2(Screen.width, Screen.height));
+                yield return SettleContentPanel();
+                AssertReachable(ui.Q<Button>("cancelPlacement"));
+                AssertReachable(ui.Q<Button>("confirmPlacement"));
+                AssertReachable(ui.Q<Button>("discard"));
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture($"p269-room-preview-{resolution.x}x{resolution.y}.png");
+                yield return null;
+            }
             Click(ui.Q<Button>("cancelPlacement"));
             Assert.That(controller.IsConstructing, Is.False);
             Assert.That(controller.Draft.CommandCount, Is.Zero);
@@ -1435,6 +1445,16 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.Discard(), Is.True);
             AssertCanonicalUnchanged(after, mana);
             var nextSteps = ui.Q<Button>("toggleNextSteps");
+            foreach (var resolution in new[] { new Vector2Int(960, 540), new Vector2Int(540, 960) })
+            {
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(resolution.x, resolution.y);
+                yield return SettleContentPanel();
+                Click(nextSteps);
+                yield return SettleContentPanel();
+                Capture($"quest-checklist-{resolution.x}x{resolution.y}");
+                yield return null;
+                Click(nextSteps);
+            }
             Click(nextSteps);
             yield return SettleContentPanel();
             Assert.That(ui.Q("objective_prepare").ClassListContains("objective-current"), Is.True);

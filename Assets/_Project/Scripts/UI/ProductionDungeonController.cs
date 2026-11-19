@@ -516,7 +516,7 @@ namespace DungeonBuilder.M0
             lastWallet = root.Save.structureRuntime.ManaReserve; lastHeat = root.Save.structureRuntime.Heat; lastTick = root.Save.totalTicks;
             var ui = document.rootVisualElement;
             var hud = ProductionDungeonPresenter.Hud(root.Save, root.RunSimulationConfig, root.PassiveManaPerHourForPresentation, Text, Culture, recoveryPresentationRules);
-            bool compact = IsEditing && !IsConstructing && (safe.ClassListContains("compact-portrait") ||
+            bool compact = GuidedConstruction || IsEditing && !IsConstructing && (safe.ClassListContains("compact-portrait") ||
                 Screen.width > Screen.height && detailsCollapsed && contentCategory != null);
             string Metric(string value) => compact ? value.Replace("\n", " ") : value;
             ui.Q<Label>("totalMana").text = Metric(hud.TotalMana); ui.Q<Label>("usableMana").text = Metric(hud.UsableMana);

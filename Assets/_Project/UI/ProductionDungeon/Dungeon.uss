@@ -227,6 +227,15 @@ Button.tutorial-button-target Label { color: rgb(30, 22, 12); }
 .compact-edit-panel .session-actions { padding-top: 1px; }
 .compact-edit-panel .content-card { flex-direction: row; min-width: 160px; padding: 1px 6px; align-items: center; }
 .compact-edit-panel .content-card-icon { width: 28px; height: 28px; flex-shrink: 0; margin-right: 5px; }
+.guided-construction .placement-actions, .guided-construction #editActions { flex-wrap: nowrap; }
+.guided-construction .placement-actions > Button, .guided-construction #editActions > Button {
+    flex-grow: 1; flex-basis: 0; padding: 0 4px;
+}
+.landscape.guided-construction .top-content { flex-direction: column; align-items: stretch; }
+.landscape.guided-construction .hud, .landscape.guided-construction #navigation { flex-basis: auto; }
+.landscape.guided-construction .metric-card { flex-direction: row; padding: 0 4px; margin: 1px; }
+.landscape.guided-construction .sheet-top { flex-direction: column; }
+.landscape.guided-construction .sheet-header, .landscape.guided-construction #constructionCategories { flex-basis: auto; }
 .content-card-labels { flex-shrink: 1; min-width: 0; }
 .compact-edit-panel.details-collapsed .floor-rail,
 .landscape.working-sheet.room-content-edit.details-collapsed .floor-rail { left: auto; right: 4px; }

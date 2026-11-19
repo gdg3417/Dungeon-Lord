@@ -55,7 +55,7 @@
             </ui:VisualElement>
             <ui:ScrollView name="blockerScroll" mode="Horizontal"><ui:VisualElement name="constructionBlockers" class="category-row" /></ui:ScrollView>
             <ui:VisualElement name="placementContext" class="placement-context">
-                <ui:VisualElement class="placement-information">
+                <ui:VisualElement name="placementInformation" class="placement-information">
                 <ui:Label name="constructionSummary" />
                 <ui:Label name="constructionAffordability" class="affordability" />
                 </ui:VisualElement>

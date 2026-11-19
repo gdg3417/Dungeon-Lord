@@ -90,12 +90,13 @@ namespace DungeonBuilder.M0
                 int index=safe.IndexOf(workspace);
                 safe.Insert(index,map); safe.Insert(index+1,bottom);
             }
-            bool compactEditing = IsEditing && !IsConstructing && safe.ClassListContains("compact-portrait");
+            bool compactEditing = IsEditing && (!IsConstructing || GuidedConstruction) && safe.ClassListContains("compact-portrait");
+            safe.EnableInClassList("guided-construction", GuidedConstruction);
             safe.EnableInClassList("compact-edit-panel", compactEditing);
             var capacityBar = ui.Q("capacity");
             var draftSummary = ui.Q("draftSummary");
             var details = ui.Q<ScrollView>("contextDetails").contentContainer;
-            if (compactEditing || working && editingContent && detailsCollapsed)
+            if (compactEditing || GuidedConstruction || working && editingContent && detailsCollapsed)
             {
                 if (capacityBar.parent != details) details.Insert(0, capacityBar);
                 if (draftSummary.parent != details) details.Insert(1, draftSummary);
@@ -107,6 +108,16 @@ namespace DungeonBuilder.M0
                 var sessionActions = ui.Q("sessionActions");
                 if (draftSummary.parent != sessionActions)
                     sessionActions.Insert(sessionActions.IndexOf(ui.Q("editActions")), draftSummary);
+            }
+            var placementInformation = ui.Q("placementInformation");
+            if (GuidedConstruction)
+            {
+                if (placementInformation.parent != details) details.Insert(2, placementInformation);
+            }
+            else
+            {
+                var placement = ui.Q("placementContext");
+                if (placementInformation.parent != placement) placement.Insert(0, placementInformation);
             }
             safe.EnableInClassList("normal-mode",!IsEditing);
             safe.EnableInClassList("details-collapsed",detailsCollapsed);
