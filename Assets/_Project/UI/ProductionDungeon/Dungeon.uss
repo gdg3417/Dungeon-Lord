@@ -17,10 +17,15 @@
 .top-chrome, .bottom-chrome { background-color: var(--panel); padding: var(--space); background-image: url("project://database/Assets/_Project/UI/ProductionDungeon/Art/panel.png"); -unity-slice-left: 14; -unity-slice-right: 14; -unity-slice-top: 14; -unity-slice-bottom: 14; }
 .top-chrome { flex-shrink: 0; }
 .next-steps-toggle { display: none; position: absolute; top: 4px; right: 8px; width: 176px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.next-steps { display: none; position: absolute; right: 8px; top: 48px; width: 300px; max-width: 94%; max-height: 45%; background-color: var(--panel); padding: 6px; border-width: 1px; border-color: var(--cool); }
-.next-steps-details { flex-shrink: 1; min-height: 0; }
+.next-steps { display: none; position: absolute; right: 8px; top: 48px; width: 276px; max-width: 60%; height: 263px; max-height: 41%; background-color: rgb(13,23,31); padding: 3px 5px; border-width: 1px; border-color: rgb(91,113,125); }
+.next-steps-details { flex-grow: 1; flex-shrink: 1; min-height: 0; }
 .next-steps-details Button { flex-shrink: 0; white-space: normal; -unity-text-align: middle-left; }
-.next-steps-details .objective-complete { color: var(--cool); border-left-width: 3px; border-left-color: var(--cool); }
+.next-steps-details Button { background-image: none; background-color: transparent; border-width: 0; border-bottom-width: 1px; border-bottom-color: rgb(50,67,77); border-radius: 0; margin: 0; padding: 2px 6px; }
+.next-steps-details Button:hover, .next-steps-details Button:focus { background-color: rgb(35,53,64); }
+.next-steps-details .objective-current { border-left-width: 3px; border-left-color: var(--gold); color: rgb(253,226,164); background-color: rgb(38,40,34); }
+.next-steps-details .objective-complete { color: var(--cool); }
+.next-steps-details Button:disabled { color: rgb(171,186,189); }
+#objectiveHint { padding: 5px 7px; white-space: normal; flex-shrink: 0; }
 
 .tutorial-footer { display: none; flex-shrink: 0; flex-direction: row; align-items: center; justify-content: flex-end; background-color: var(--panel); border-top-width: 1px; border-top-color: var(--gold); padding: 2px 6px; }
 .tutorial-footer.scrollable-tutorial { max-height: 22%; }
@@ -28,6 +33,8 @@
 .scrollable-tutorial .tutorial-instructions { display: flex; }
 #tutorialHint { white-space: normal; min-width: 0; flex-shrink: 1; flex-grow: 1; }
 .tutorial-instructions #tutorialHint { flex-shrink: 0; }
+.tutorial-actions { flex-shrink: 0; }
+#deferRoomLesson { display: none; width: 176px; white-space: normal; }
 #skipTutorial { width: 176px; white-space: nowrap; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; }
 .tutorial-scrim { display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
 .tutorial-shade { position: absolute; background-color: rgba(0,0,0,0.76); }

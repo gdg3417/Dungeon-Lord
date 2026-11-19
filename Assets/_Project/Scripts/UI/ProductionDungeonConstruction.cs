@@ -39,6 +39,7 @@ namespace DungeonBuilder.M0
         public void OpenRooms()
         {
             if (!HasCanonicalRuntime() || !IsEditing) return;
+            roomLessonBrowsing = true;
             CloseSheet(); detailsCollapsed = false; feedback = NeedsStarterSetup ? "ui.dungeon.construction.starter_required" : "ui.dungeon.construction.choose_room"; Present();
         }
 
@@ -118,6 +119,7 @@ namespace DungeonBuilder.M0
             if (constructionPreview.IsValid && !draftContext.Validate(constructionPreview.DetachedCandidate))
                 constructionPreview = StructuralEditService.InvalidPreview(StructuralEditService.LayoutInvalidReason, constructionRequest);
             constructionEconomy = constructionPreview.IsValid ? root.SaveService.PreviewDungeonDraft(root.Save, draft, constructionPreview.DetachedCandidate) : null;
+            if (constructionPreview.IsValid) Learn(Tutorial.RoomPreview);
             world.PresentConstructionPreview(constructionPreview);
             feedback = constructionPreview.ReasonCodes.FirstOrDefault() ?? "ui.dungeon.construction.preview";
             Present();

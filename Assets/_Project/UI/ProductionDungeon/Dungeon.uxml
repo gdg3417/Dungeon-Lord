@@ -133,8 +133,13 @@
                 <ui:Button name="objective_first_room" tooltip="ui.dungeon.objective.first_room" />
                 <ui:Button name="objective_prepare" tooltip="ui.dungeon.objective.prepare" />
                 <ui:Button name="objective_visit" tooltip="ui.dungeon.objective.visit" />
+                <ui:Button name="objective_success" tooltip="ui.dungeon.objective.success" />
                 <ui:Button name="objective_results" tooltip="ui.dungeon.objective.results" />
                 <ui:Button name="objective_revise" tooltip="ui.dungeon.objective.revise" />
+                <ui:Button name="objective_research" tooltip="ui.dungeon.objective.research" />
+                <ui:Button name="objective_offline" tooltip="ui.dungeon.objective.offline" />
+                <ui:Button name="toggleObjectiveHint" tooltip="ui.dungeon.guidance.show_hint" />
+                <ui:Label name="objectiveHint" picking-mode="Ignore" />
             </ui:ScrollView>
         </ui:VisualElement>
         <ui:VisualElement name="displayPopover" class="display-popover">
@@ -158,7 +163,10 @@
         <ui:VisualElement name="tutorialFooter" class="tutorial-footer" picking-mode="Ignore">
             <ui:ScrollView name="tutorialInstructions" class="tutorial-instructions" mode="Vertical" />
             <ui:Label name="tutorialHint" picking-mode="Ignore" />
-            <ui:Button name="skipTutorial" tooltip="ui.dungeon.tutorial.skip" />
+            <ui:VisualElement class="tutorial-actions">
+                <ui:Button name="deferRoomLesson" tooltip="ui.dungeon.tutorial.defer_room" />
+                <ui:Button name="skipTutorial" tooltip="ui.dungeon.tutorial.skip" />
+            </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="tutorialOutline" class="tutorial-outline" picking-mode="Ignore" />
         <ui:VisualElement name="tutorialPointer" class="tutorial-pointer" picking-mode="Ignore" />

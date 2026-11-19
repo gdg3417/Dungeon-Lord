@@ -315,18 +315,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     } while (changed);
                 }
 
-                long DemandInterval()
-                {
-                    var active = owned.State.Floors.Where(f => f.ActivationState == FloorActivationState.Active).ToArray();
-                    if (active.Length < 1 || active.Length > (policy.TwoFloor ? 2 : 1) || active[0].FloorIndex != 0 ||
-                        !active[0].RoomContents.Assignments.Any(a => a.CategoryId == CanonicalSpatialSaveContracts.MonsterCategoryId)) return 0;
-                    var effects = MvpPlacementEffectsResolver.ResolveConfiguredRouteForSave(runtime, configuration, production);
-                    var tier = CurrentHeatTierResolver.Resolve(configuration, runtime.structureRuntime.Heat);
-                    var arrival = AdventurerArrivalPressureResolver.Resolve(configuration, effects, tier, runtime.runHistory.LatestOutcome);
-                    var intent = AdventurerRunIntentResolver.Resolve(configuration, effects, runtime.structureRuntime.Heat, tier, runtime.runHistory.LatestOutcome);
-                    var traffic = AdventurerTrafficPressureResolver.Resolve(configuration, arrival, intent);
-                    return arrival.RuleResolved && traffic.RuleResolved && arrival.PathComplete && arrival.LootSignal > 0 ? policy.Interval(traffic.TrafficBandId) : 0;
-                }
+                long DemandInterval() => AssessOpportunity(runtime, owned.State, configuration, production, policy).Interval;
 
                 void Recover()
                 {
@@ -460,6 +449,32 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             result.ForegroundAdmissionReason = prepared.AdmissionReason;
             if (result.IsSuccess) RunTransientEvidence.Retain(prepared.Presentation, result.RuntimeProjection);
             return result;
+        }
+
+        internal enum OpportunityBlock { None, Configuration, ActiveLayout, Monster, Route, Loot, Traffic }
+
+        internal static (long Interval, OpportunityBlock Block) AssessOpportunity(SaveData runtime,
+            DetachedCanonicalSpatialSaveState state, RunSimulationConfig configuration,
+            ProductionSpatialContentSnapshot production, LivingDungeonForegroundConfig policy)
+        {
+            if (policy == null) return (0, OpportunityBlock.Configuration);
+            var active = state.Floors.Where(f => f.ActivationState == FloorActivationState.Active).ToArray();
+            if (active.Length < 1 || active.Length > (policy.TwoFloor ? 2 : 1) || active[0].FloorIndex != 0)
+                return (0, OpportunityBlock.ActiveLayout);
+            if (!active[0].RoomContents.Assignments.Any(a => a.CategoryId == CanonicalSpatialSaveContracts.MonsterCategoryId))
+                return (0, OpportunityBlock.Monster);
+            var effects = MvpPlacementEffectsResolver.ResolveConfiguredRouteForSave(runtime, configuration, production);
+            var heat = runtime.structureRuntime.Heat;
+            var latest = runtime.runHistory.LatestOutcome;
+            var tier = CurrentHeatTierResolver.Resolve(configuration, heat);
+            var arrival = AdventurerArrivalPressureResolver.Resolve(configuration, effects, tier, latest);
+            var intent = AdventurerRunIntentResolver.Resolve(configuration, effects, heat, tier, latest);
+            var traffic = AdventurerTrafficPressureResolver.Resolve(configuration, arrival, intent);
+            if (!arrival.RuleResolved || !traffic.RuleResolved) return (0, OpportunityBlock.Configuration);
+            if (!arrival.PathComplete) return (0, OpportunityBlock.Route);
+            if (arrival.LootSignal <= 0) return (0, OpportunityBlock.Loot);
+            long interval = policy.Interval(traffic.TrafficBandId);
+            return (interval, interval > 0 ? OpportunityBlock.None : OpportunityBlock.Traffic);
         }
 
         private static string ForegroundFailureReason(Exception error) =>

@@ -489,7 +489,12 @@ namespace DungeonBuilder.M0.Tests
                         strings[key] = string.Join(" ", Enumerable.Repeat("Test-only expanded translation.", 12));
                         Click(toggle);
                         for (int i = 0; i < 4; i++) yield return null;
-                        Assert.That(ui.Q("nextSteps").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                        var checklist = ui.Q("nextSteps");
+                        Assert.That(checklist.resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                        Assert.That(checklist.worldBound.width, Is.LessThanOrEqualTo(controller.SafeRoot.worldBound.width * .61f));
+                        Assert.That(checklist.worldBound.height, Is.LessThanOrEqualTo(controller.SafeRoot.worldBound.height * .42f));
+                        Assert.That(controller.SafeRoot.worldBound.Contains(checklist.worldBound.max - Vector2.one), Is.True);
+                        AssertReachable(toggle);
                         Assert.That(prepared.text, Is.EqualTo(string.Format(strings[completion], strings[prepare])));
                         Assert.That(prepared.resolvedStyle.whiteSpace, Is.EqualTo(WhiteSpace.Normal));
                         Rect expanded = map.worldBound;
