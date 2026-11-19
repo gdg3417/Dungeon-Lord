@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -786,10 +787,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static void LoadTestResearchPrice(GameRoot root, CanonicalSpatialSerializationLimits limits, double price)
         {
             var bootstrap = root.Content.Bootstrap;
-            var asset = new UnityEngine.TextAsset(FormattableString.Invariant(
-                $"{{\"schemaVersion\":1,\"enabled\":true,\"projectId\":\"{bootstrap.researchPendingScaffold.projectId}\",\"progressRuleId\":\"{bootstrap.researchProgressScaffold.ruleSourceId}\",\"completionRuleId\":\"{bootstrap.researchCompletionEligibilityScaffold.ruleSourceId}\",\"manaCost\":{price:R}}}"));
+            var asset = new UnityEngine.TextAsset(
+                "{\"schemaVersion\":1,\"enabled\":true," +
+                $"\"projectId\":\"{bootstrap.researchPendingScaffold.projectId}\"," +
+                $"\"progressRuleId\":\"{bootstrap.researchProgressScaffold.ruleSourceId}\"," +
+                $"\"completionRuleId\":\"{bootstrap.researchCompletionEligibilityScaffold.ruleSourceId}\"," +
+                "\"manaCost\":" + price.ToString("R", CultureInfo.InvariantCulture) + "}");
             try { root.Content.LoadStarterResearchStart(asset, limits); }
             finally { UnityEngine.Object.DestroyImmediate(asset); }
+            Assert.That(root.Content.StarterResearchStart?.ManaCost, Is.EqualTo(price), "Test price must load before checking Research behavior.");
         }
 
         [Test] public void AcceptedTicksAndResearchDrainAcrossTwoCrashesWithoutReplayingClosedPrefix()
