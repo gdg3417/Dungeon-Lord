@@ -300,7 +300,8 @@ namespace DungeonBuilder.M0
             if (!visible) guidanceExpanded = false;
             nextStepsToggle.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
             nextSteps.style.display = guidanceExpanded ? DisplayStyle.Flex : DisplayStyle.None;
-            nextStepsToggle.tooltip = Text(guidanceExpanded ? "ui.dungeon.guidance.collapse" : "ui.dungeon.guidance.expand");
+            nextStepsToggle.text = Text(guidanceExpanded ? "ui.dungeon.guidance.collapse" : "ui.dungeon.guidance.expand");
+            nextStepsToggle.tooltip = nextStepsToggle.text;
             bool prepared = canWatchArrival || visitObserved;
             var history = root.Save.runHistory;
             bool success = history?.LatestOutcome is { Success: true } ||
@@ -443,8 +444,8 @@ namespace DungeonBuilder.M0
             if (guidanceExpanded && nextStepsToggle.panel != null)
             {
                 float below = safe.WorldToLocal(nextStepsToggle.worldBound.max).y + 4;
-                float above = safe.WorldToLocal(nextStepsToggle.worldBound.min).y - nextSteps.layout.height - 4;
-                float top = below + nextSteps.layout.height <= safe.layout.height ? below : Mathf.Max(4, above);
+                float aboveCard = safe.WorldToLocal(nextStepsToggle.worldBound.min).y - nextSteps.layout.height - 4;
+                float top = below + nextSteps.layout.height <= safe.layout.height ? below : Mathf.Max(4, aboveCard);
                 if (!float.IsNaN(top) && nextSteps.style.top.value.value != top)
                     nextSteps.style.top = top;
             }
