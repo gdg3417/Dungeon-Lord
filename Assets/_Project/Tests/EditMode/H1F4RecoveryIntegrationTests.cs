@@ -749,6 +749,45 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(scope.Root.GameplayServicesInitializedForTests, Is.False);
             Assert.That(h.Time.ForegroundThrough, Is.Zero);
         }
+        [Test] public void BootstrapResearchStartRequiresPaymentEvenInEditor()
+        {
+            var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
+            h.Current.runHistory.NextRunSequence = 2;
+            h.Current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1" }, 5);
+            Assert.That(h.Service.Save(h.Current, SaveReason.StateChange), Is.True);
+            using var scope = new RootScope(h);
+            var root = scope.Root;
+            var overlay = root.gameObject.AddComponent<BootstrapOverlay>();
+            overlay.Bind(root);
+            var before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            Assert.That(DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), Is.True);
+            Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.False);
+            Assert.That(overlay.StartPlayerResearch().FeedbackLocalizationKey, Is.EqualTo(PlayerResearchActionHandler.StartConfigurationUnavailableKey));
+            Assert.That(root.StartConfiguredPlayerResearch().FeedbackLocalizationKey, Is.EqualTo(PlayerResearchActionHandler.StartConfigurationUnavailableKey));
+            CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+            Assert.That(root.Save.researchPending, Is.Null);
+
+            const double testCost = 5.25;
+            LoadTestResearchPrice(root, h.F.Profile.Canonical, testCost);
+            Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.True);
+            double wallet = root.Save.structureRuntime.ManaReserve;
+            Assert.That(overlay.StartPlayerResearch().WouldChargeCosts, Is.True);
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(wallet - testCost));
+            Assert.That(root.Save.researchPending, Is.Not.Null);
+            var paid = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            Assert.That(root.StartConfiguredPlayerResearch().Succeeded, Is.False);
+            CollectionAssert.AreEqual(paid, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+        }
+
+        private static void LoadTestResearchPrice(GameRoot root, CanonicalSpatialSerializationLimits limits, double price)
+        {
+            var bootstrap = root.Content.Bootstrap;
+            var asset = new UnityEngine.TextAsset(FormattableString.Invariant(
+                $"{{\"schemaVersion\":1,\"enabled\":true,\"projectId\":\"{bootstrap.researchPendingScaffold.projectId}\",\"progressRuleId\":\"{bootstrap.researchProgressScaffold.ruleSourceId}\",\"completionRuleId\":\"{bootstrap.researchCompletionEligibilityScaffold.ruleSourceId}\",\"manaCost\":{price:R}}}"));
+            try { root.Content.LoadStarterResearchStart(asset, limits); }
+            finally { UnityEngine.Object.DestroyImmediate(asset); }
+        }
+
         [Test] public void AcceptedTicksAndResearchDrainAcrossTwoCrashesWithoutReplayingClosedPrefix()
         {
             var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
@@ -758,7 +797,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             h.Current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1" }, 5);
             Assert.That(h.Service.Save(h.Current, SaveReason.StateChange), Is.True);
             using var scope = new RootScope(h);
-            var started = scope.Root.StartConfiguredPlayerResearch(); Assert.That(started.Succeeded, Is.True, started.FeedbackLocalizationKey);
+            var started = scope.Root.StartUnpaidResearchForTests(); Assert.That(started.Succeeded, Is.True, started.FeedbackLocalizationKey);
             var ticks = new List<long>(); var passive = scope.PassiveTick;
             void Tick(SaveData candidate, long tick) { ticks.Add(tick); passive(candidate, tick); }
             h.Wall.Seconds = 2105;
@@ -770,6 +809,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             long firstTicks = h.Current.totalTicks;
             Assert.That(acceptedHorizon, Is.EqualTo(2000000)); Assert.That(firstClosed, Is.LessThan(acceptedHorizon));
             Assert.That(h.Current.researchProgress.CompletionPending, Is.True);
+            var acceptedBytes = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            var recoveryDigest = h.Current.timeProvenance.RecoveryContextSha256;
+            LoadTestResearchPrice(scope.Root, h.F.Profile.Canonical, 5.25);
+            CollectionAssert.AreEqual(acceptedBytes, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
 
             SaveService Open(Clock clock, out TimeService time, out SaveData current) {
                 time = new TimeService(new SimpleLogger(false), 10, 300, clock, () => 0);
@@ -788,6 +831,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             var one = new Clock { Seconds = 2200 };
             var first = Open(one, out var firstTime, out var firstSave);
+            Assert.That(firstSave.timeProvenance.RecoveryContextSha256, Is.EqualTo(recoveryDigest));
+            Assert.That(scope.Root.StartConfiguredPlayerResearch().Succeeded, Is.False, "The open recovery barrier denies a newly priced start.");
+            CollectionAssert.AreEqual(acceptedBytes, h.F.FileSystem.ReadAllBytes(first.SavePath));
             Assert.That(firstSave.totalTicks, Is.EqualTo(firstTicks)); Assert.That(firstSave.livingDungeon.Scheduler.ClosedThrough, Is.EqualTo(firstClosed));
             Step(first, one, 2200); Assert.That(scope.Root.Save.timeProvenance.Episode.Entry.Seconds, Is.EqualTo(2200));
             Assert.That(scope.Root.Save.totalTicks, Is.EqualTo(firstTicks), "Entry publication precedes any drain.");
@@ -817,8 +863,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Step(second, two, 2311);
             Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(residualWallet));
             Assert.That(scope.Root.Save.timeProvenance.Episode, Is.Null);
+            Assert.That(scope.Root.Save.timeProvenance.RecoveryContextSha256, Is.EqualTo(recoveryDigest));
             Assert.That(secondTime.ForegroundThrough, Is.EqualTo(acceptedHorizon), "UTC recovery never creates new adventurer time.");
             Assert.That(scope.Root.ClaimConfiguredPlayerResearch().Succeeded, Is.True);
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(residualWallet), "The historical pending project remains unpaid at claim.");
             string project = h.Inputs.Configuration.MvpFirstSessionObjective.AnalysisResearchProjectId;
             Assert.That(scope.Root.Save.completedResearch.ProjectIds.Count(p => p == project), Is.EqualTo(1));
             var once = h.F.FileSystem.ReadAllBytes(second.SavePath);

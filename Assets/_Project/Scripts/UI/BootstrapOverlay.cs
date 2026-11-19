@@ -147,6 +147,15 @@ namespace DungeonBuilder.M0
             return result;
         }
 
+#if UNITY_EDITOR
+        internal PlayerResearchActionResult StartUnpaidResearchForTests()
+        {
+            PlayerResearchActionResult result = _root?.StartUnpaidResearchForTests();
+            PresentPlayerResearchFeedback(result);
+            return result;
+        }
+#endif
+
         public PlayerResearchActionResult ClaimPlayerResearch()
         {
             PlayerResearchActionResult result = _root?.ClaimConfiguredPlayerResearch();
@@ -1565,28 +1574,6 @@ namespace DungeonBuilder.M0
                     : _root.Content.GetString("ui.banner.resumed_dev_panel", "ui.banner.resumed_dev_panel"));
             }
 
-            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.set_research_pending", "ui.dev.button.set_research_pending")))
-            {
-                bool didSet = _root.SetResearchPendingScaffold();
-                _root.SetBanner(_root.Content.GetString(
-                    didSet ? "ui.banner.research_pending_set" : "ui.banner.research_pending_set_failed",
-                    didSet ? "ui.banner.research_pending_set" : "ui.banner.research_pending_set_failed"));
-            }
-
-            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.clear_research_pending", "ui.dev.button.clear_research_pending")))
-            {
-                _root.ClearResearchPendingScaffold();
-                _root.SetBanner(_root.Content.GetString("ui.banner.research_pending_cleared", "ui.banner.research_pending_cleared"));
-            }
-
-            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.claim_research_completion", "ui.dev.button.claim_research_completion")))
-            {
-                bool didClaim = _root.ClaimResearchCompletionScaffold();
-                _root.SetBanner(_root.Content.GetString(
-                    didClaim ? "ui.banner.research_completion_claimed" : "ui.banner.research_completion_claim_failed",
-                    didClaim ? "ui.banner.research_completion_claimed" : "ui.banner.research_completion_claim_failed"));
-            }
-
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_mana", "ui.dev.button.sim_mana")))
             {
                 _root.TrackManaGenerated(10);
@@ -1905,13 +1892,12 @@ namespace DungeonBuilder.M0
             {
                 RunOrObserveDungeon();
             }
-            PlayerResearchPanelPresentation research = PlayerResearchPanelPresenter.Present(
-                _root.ResolveProductionResearchState(), (key, fallback) => GetLocalizedString(key, fallback));
+            PlayerResearchPanelPresentation research = ResolvePlayerResearchPanelPresentation();
             GUILayout.Label(research.StatusText, wrappedLabel);
             if (research.ShowAction && GUILayout.Button(research.ActionText, compactButton, buttonHeight))
             {
                 if (research.ActionClaimsResearch) ClaimPlayerResearch();
-                else PresentPlayerResearchFeedback(_root.StartProductionResearch());
+                else StartPlayerResearch();
             }
             if (LegacyRoomPlacementControlsVisible) GUILayout.Label(labels.RoomsGroupHeader, groupHeaderLabel, labelHeight);
             if (LegacyRoomPlacementControlsVisible && GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))

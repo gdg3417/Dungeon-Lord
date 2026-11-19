@@ -196,7 +196,7 @@ namespace DungeonBuilder.M0
                 GetResearchCompletionEligibilityScaffoldConfig(),
                 GetResearchVerificationScaffoldConfig(),
                 GetResearchUnlockBridgeConfig(),
-                CreatePlayerResearchActionHandler().ResolveAuthority(),
+                CreatePaidResearchStartHandler().ResolveAuthority(),
                 Content?.ProductionSpatialContent);
         }
 
@@ -205,22 +205,24 @@ namespace DungeonBuilder.M0
             return GuidedMvpActionPathPresenter.Resolve(Save, summary ?? ResolveMvpPlayerLoopSummary());
         }
 
-        public PlayerResearchActionResult ResolvePlayerResearchState()
-        {
-            return CreatePlayerResearchActionHandler().ResolveState();
-        }
+        public PlayerResearchActionResult ResolvePlayerResearchState() => ResolveProductionResearchState();
 
-        // Retained scaffold action for the historical development fixtures.
-        public PlayerResearchActionResult StartConfiguredPlayerResearch() =>
-            DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment()
-                ? StartPlayerResearch(CreatePlayerResearchActionHandler())
-                : StartProductionResearch();
+        public PlayerResearchActionResult StartConfiguredPlayerResearch() => StartProductionResearch();
+
+#if UNITY_EDITOR
+        // Synthetic free starts are used only by historical Editor fixtures.
+        internal PlayerResearchActionResult ResolveUnpaidResearchStateForTests() =>
+            CreatePlayerResearchActionHandler().ResolveState();
+
+        internal PlayerResearchActionResult StartUnpaidResearchForTests() =>
+            StartPlayerResearch(CreatePlayerResearchActionHandler());
+#endif
 
         internal PlayerResearchActionResult ResolveProductionResearchState() =>
-            CreatePlayerResearchActionHandler(null, paidStart: true).ResolveState();
+            CreatePaidResearchStartHandler().ResolveState();
 
         internal PlayerResearchActionResult StartProductionResearch() =>
-            StartPlayerResearch(CreatePlayerResearchActionHandler(null, paidStart: true));
+            StartPlayerResearch(CreatePaidResearchStartHandler());
 
         private PlayerResearchActionResult StartPlayerResearch(PlayerResearchActionHandler handler)
         {
@@ -2131,7 +2133,8 @@ namespace DungeonBuilder.M0
             Save.lastOfflineSummary = ResolveOfflineSummary();
         }
 
-        public bool SetResearchPendingScaffold()
+#if UNITY_EDITOR
+        internal bool SetResearchPendingScaffold()
         {
             if (Save == null)
             {
@@ -2162,7 +2165,7 @@ namespace DungeonBuilder.M0
             return true;
         }
 
-        public bool ClearResearchPendingScaffold()
+        internal bool ClearResearchPendingScaffold()
         {
             if (Save == null)
             {
@@ -2176,7 +2179,7 @@ namespace DungeonBuilder.M0
             return true;
         }
 
-        public bool ClaimResearchCompletionScaffold()
+        internal bool ClaimResearchCompletionScaffold()
         {
             if (Save == null)
             {
@@ -2230,6 +2233,8 @@ namespace DungeonBuilder.M0
             RefreshOfflineSummaryLines();
             return true;
         }
+
+#endif
 
         public void RefreshOfflineSummaryLines()
         {
@@ -2575,8 +2580,15 @@ namespace DungeonBuilder.M0
         private PlayerResearchActionHandler CreatePlayerResearchActionHandler() =>
             CreatePlayerResearchActionHandler(SavePlayerResearchTransition);
 
-        private PlayerResearchActionHandler CreatePlayerResearchActionHandler(
-            Action saveTransition, bool paidStart = false)
+        private PlayerResearchActionHandler CreatePaidResearchStartHandler()
+        {
+            var handler = CreatePlayerResearchActionHandler(null);
+            handler.StartConfiguration = Content?.StarterResearchStart;
+            handler.ProtectedReserve = save => SaveService?.ResearchProtectedReserve(save);
+            return handler;
+        }
+
+        private PlayerResearchActionHandler CreatePlayerResearchActionHandler(Action saveTransition)
         {
             return new PlayerResearchActionHandler(
                 Save,
@@ -2593,11 +2605,7 @@ namespace DungeonBuilder.M0
                 saveTransition,
                 CommitPlayerResearchTransition,
                 () => Save,
-                () => SaveService?.RequiresCanonicalRecovery == true)
-            {
-                StartConfiguration = Content?.StarterResearchStart,
-                ProtectedReserve = paidStart ? save => SaveService?.ResearchProtectedReserve(save) : null
-            };
+                () => SaveService?.RequiresCanonicalRecovery == true);
         }
 
         private PlayerResearchActionResult CommitPlayerResearchTransition(Func<SaveData, PlayerResearchActionResult> stage)

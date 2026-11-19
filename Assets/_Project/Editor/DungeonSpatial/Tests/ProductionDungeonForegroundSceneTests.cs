@@ -100,9 +100,9 @@ namespace DungeonBuilder.M0.Tests
             advance((finish - root.TimeService.SampleForeground()) / 1000d + .001); update();
             Assert.That(service.BeforeForegroundAction(), Is.True);
             Assert.That(root.Save.runHistory.RecentOutcomes.Any(o => o.RunId == "run-1"), Is.True);
-            Assert.That(root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.Available));
-            Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.True);
-            Assert.That(overlay.StartPlayerResearch().Succeeded, Is.True);
+            Assert.That(root.ResolveUnpaidResearchStateForTests().State, Is.EqualTo(PlayerResearchState.Available));
+            Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.False);
+            Assert.That(overlay.StartUnpaidResearchForTests().Succeeded, Is.True);
             Assert.That(overlay.StartPlayerResearch().Succeeded, Is.False);
             advance(root.Content.Bootstrap.tickSeconds); update();
             Assert.That(service.BeforeForegroundAction(), Is.True);
@@ -123,6 +123,17 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(ui.Q<Label>("researchCost").text, Is.EqualTo(root.Content.GetString("ui.player_research.cost_unavailable", null)));
             controller.ReturnToDungeon();
 
+            Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+            Assert.That(root.SimulateRunOnce(RunPostureResolver.BalancedId), Is.True);
+            var advance = InstallForegroundBoundaryTestClock();
+            Click(ui.Q<Button>("openResearch"));
+            Assert.That(start.style.display.value, Is.EqualTo(DisplayStyle.None));
+            var beforeMissingPrice = root.SaveService.CanonicalSession.GetCurrentBytes();
+            Click(start); // Exercise stale input through the real production callback.
+            CollectionAssert.AreEqual(beforeMissingPrice, root.SaveService.CanonicalSession.GetCurrentBytes());
+            Assert.That(root.Save.researchPending, Is.Null);
+            controller.ReturnToDungeon();
+
             var bootstrap = root.Content.Bootstrap;
             const double testCost = 5.25; // Test-only production content injection.
             var config = new TextAsset(
@@ -132,9 +143,6 @@ namespace DungeonBuilder.M0.Tests
                 "\",\"manaCost\":5.25}");
             try { root.Content.LoadStarterResearchStart(config, root.SaveSpatialMigrationLimits.Canonical); }
             finally { UnityEngine.Object.DestroyImmediate(config); }
-            Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
-            Assert.That(root.SimulateRunOnce(RunPostureResolver.BalancedId), Is.True);
-            var advance = InstallForegroundBoundaryTestClock();
             Click(ui.Q<Button>("openResearch"));
             Assert.That(start.style.display.value, Is.EqualTo(DisplayStyle.Flex));
             Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));
@@ -172,7 +180,7 @@ namespace DungeonBuilder.M0.Tests
             var advance = InstallForegroundBoundaryTestClock();
             var overlay = ResearchOverlay();
             var before = root.Save;
-            var start = overlay.StartPlayerResearch();
+            var start = overlay.StartUnpaidResearchForTests();
             Assert.That(start.Succeeded, Is.True, start.PersistenceReason ?? start.FeedbackLocalizationKey);
             Assert.That(root.Save, Is.Not.SameAs(before)); Assert.That(before.researchPending, Is.Null);
             Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(PlayerResearchActionHandler.StartSucceededKey, null)));
@@ -215,7 +223,7 @@ namespace DungeonBuilder.M0.Tests
             var advance = InstallForegroundBoundaryTestClock();
             if (claim)
             {
-                var start = root.StartConfiguredPlayerResearch();
+                var start = root.StartUnpaidResearchForTests();
                 Assert.That(start.Succeeded, Is.True, UnityEngine.JsonUtility.ToJson(start));
                 var bootstrap = root.Content.Bootstrap;
                 root.ApplyConfiguredPlayerResearchActiveTick((long)Math.Ceiling(
@@ -236,7 +244,7 @@ namespace DungeonBuilder.M0.Tests
             try
             {
                 var overlay = ResearchOverlay();
-                var result = claim ? overlay.ClaimPlayerResearch() : overlay.StartPlayerResearch();
+                var result = claim ? overlay.ClaimPlayerResearch() : overlay.StartUnpaidResearchForTests();
                 Assert.That(result.Succeeded || result.StateChanged, Is.False);
                 Assert.That(result.RecoveryRequired, Is.EqualTo(uncertain));
                 Assert.That(result.PersistenceReason, Is.EqualTo(uncertain ? DetachedCanonicalWriteAuthority.RecoveryRequiredReason :
@@ -259,7 +267,7 @@ namespace DungeonBuilder.M0.Tests
                 else
                 {
                     CollectionAssert.AreEqual(bytes, fs.ReadAllBytes(service.SavePath));
-                    Assert.That(claim ? root.ClaimConfiguredPlayerResearch().Succeeded : root.StartConfiguredPlayerResearch().Succeeded, Is.True);
+                    Assert.That(claim ? root.ClaimConfiguredPlayerResearch().Succeeded : root.StartUnpaidResearchForTests().Succeeded, Is.True);
                     Assert.That(claim ? root.ClaimConfiguredPlayerResearch().Succeeded : root.StartConfiguredPlayerResearch().Succeeded, Is.False);
                 }
             }
