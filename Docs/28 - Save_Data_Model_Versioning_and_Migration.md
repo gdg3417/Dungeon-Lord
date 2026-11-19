@@ -1,5 +1,7 @@
 **System Spec 28: Save Data Model, Versioning, and Migration**
 
+**Owner amendment (2026-11-19).** Before public release, obsolete development-save versions may be refused without gameplay migration. Preserve original files and evidence. Current-save validation and recovery remain mandatory. Establish supported player-save versions and explicit migration requirements before the first public release. [Pre-release save policy](../docs/planning/decisions/pre-release-development-save-policy-2026-11-19.md).
+
 **H1-F2 candidate amendment (2026-10-25; independent review required):** Proposed schema 16 appends `primary.timeProvenance` after nine owners: format 1, `legacyWholeSeconds`, integer `AccountedFraction100ns:0`. `lastSavedUtcUnix` is the sole seconds component. Contextual frozen-15→16 migration preserves values/extensions, refuses collisions and missing/invalid boundaries, and uses exact rollback/readback authority. Historical 7→15 transforms and pinned 14→15 bytes remain frozen. The [contract](planning/h1-f2-time-provenance-paired-cuts.md) records the eight approved directions, writer synchronization, activation fence and remaining dependencies. Schema/field choices require this PR's review. Fractional settlement and full recovery are deferred.
 
 *Dungeon Builder, locked design specification*
