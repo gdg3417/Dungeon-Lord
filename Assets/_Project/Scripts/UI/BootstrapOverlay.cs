@@ -1905,12 +1905,13 @@ namespace DungeonBuilder.M0
             {
                 RunOrObserveDungeon();
             }
-            PlayerResearchPanelPresentation research = ResolvePlayerResearchPanelPresentation();
+            PlayerResearchPanelPresentation research = PlayerResearchPanelPresenter.Present(
+                _root.ResolveProductionResearchState(), (key, fallback) => GetLocalizedString(key, fallback));
             GUILayout.Label(research.StatusText, wrappedLabel);
             if (research.ShowAction && GUILayout.Button(research.ActionText, compactButton, buttonHeight))
             {
                 if (research.ActionClaimsResearch) ClaimPlayerResearch();
-                else StartPlayerResearch();
+                else PresentPlayerResearchFeedback(_root.StartProductionResearch());
             }
             if (LegacyRoomPlacementControlsVisible) GUILayout.Label(labels.RoomsGroupHeader, groupHeaderLabel, labelHeight);
             if (LegacyRoomPlacementControlsVisible && GUILayout.Button(labels.BasicRoomSelection, compactButton, buttonHeight))

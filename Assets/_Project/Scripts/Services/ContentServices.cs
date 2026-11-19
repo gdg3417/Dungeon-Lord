@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using UnityEngine;
 
@@ -14,6 +15,10 @@ namespace DungeonBuilder.M0
         public DevCommands DevCommands { get; private set; }
         public StringTable Strings { get; private set; }
         public HeatRuntimeConfig HeatRuntime { get; private set; }
+        internal StarterResearchStartConfiguration StarterResearchStart { get; private set; }
+
+        internal void LoadStarterResearchStart(TextAsset asset, CanonicalSpatialSerializationLimits limits) =>
+            StarterResearchStart = StarterResearchStartConfiguration.Parse(asset?.bytes, limits);
         public ProductionSpatialContentSnapshot ProductionSpatialContent { get; private set; }
         public SpatialLayoutCompatibilitySnapshot SpatialLayoutCompatibilityProfiles { get; private set; }
 

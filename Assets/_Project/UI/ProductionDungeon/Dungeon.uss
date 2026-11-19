@@ -215,6 +215,7 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .selected-destination { color: var(--gold); -unity-font-style: bold; }
 .analysis-scroll { flex-grow: 1; flex-shrink: 1; min-height: 0; }
 .analysis-scroll Label { white-space: normal; margin-bottom: 16px; }
+.research-action { align-self: flex-start; max-width: 100%; white-space: normal; }
 .performance-summary { color: var(--cool); white-space: normal; }
 #navigationDiscard { display: none; }
 .normal-mode #sheetTitle { display: none; }

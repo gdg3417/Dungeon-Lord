@@ -249,7 +249,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         public DetachedCanonicalWriteResult SaveRecognizedState(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
-            SaveData currentRuntime)
+            SaveData currentRuntime) => SaveRecognizedState(activePath, fileSystem, session, currentRuntime, ordinarySpend: false);
+
+        internal DetachedCanonicalWriteResult SaveRecognizedState(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
+            SaveData currentRuntime, bool ordinarySpend)
         {
             if (fileSystem == null || session == null || currentRuntime == null || context == null ||
                 limits == null || production == null || compatibility == null || configuration == null)
@@ -262,7 +266,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             DetachedCanonicalSaveSessionResult prepared =
                 session.PrepareLiveReplacement(snapshot, owned.State);
-            return PrepareAndPersist(activePath, fileSystem, session, prepared, false);
+            return PrepareAndPersist(activePath, fileSystem, session, prepared, false, ordinarySpend);
         }
 
         public DetachedCanonicalWriteResult CommitPhaseFiveBRun(string activePath,

@@ -429,6 +429,11 @@ namespace DungeonBuilder.M0
             { banner = "Save load failed. Created a new save."; ArchiveCorruptSave(); return CreateNew(contentVersion); }
         }
 
+        internal long? ResearchProtectedReserve(SaveData save) =>
+            save?.validatedCanonicalSpatialState == null || _validationContext?.MonsterRecovery == null
+                ? (long?)null
+                : MonsterContinuity.RequiredReserve(save.validatedCanonicalSpatialState, _validationContext.MonsterRecovery);
+
         internal PlayerResearchActionResult CommitPlayerResearchTransition(SaveData current,
             Func<SaveData, PlayerResearchActionResult> stage)
         {
@@ -468,7 +473,8 @@ namespace DungeonBuilder.M0
             // Do not call Save(candidate): its foreground preparation can replace
             // the staged transition. This writer preserves the session's other owners
             // and extension members, then verifies exact bytes and semantic readback.
-            var write = CreateWriteAuthority().SaveRecognizedState(SavePath, _canonicalFileSystem, _canonicalSession, candidate);
+            var write = CreateWriteAuthority().SaveRecognizedState(SavePath, _canonicalFileSystem, _canonicalSession, candidate,
+                ordinarySpend: action.WouldChargeCosts);
             if (!write.IsSuccess)
             {
                 if (write.Reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason) foregroundRecoveryRequired = true;

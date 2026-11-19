@@ -211,8 +211,17 @@ namespace DungeonBuilder.M0
         }
 
         public PlayerResearchActionResult StartConfiguredPlayerResearch()
+            => StartPlayerResearch(CreatePlayerResearchActionHandler());
+
+        internal PlayerResearchActionResult ResolveProductionResearchState() =>
+            CreatePlayerResearchActionHandler(null, paidStart: true).ResolveState();
+
+        internal PlayerResearchActionResult StartProductionResearch() =>
+            StartPlayerResearch(CreatePlayerResearchActionHandler(null, paidStart: true));
+
+        private PlayerResearchActionResult StartPlayerResearch(PlayerResearchActionHandler handler)
         {
-            PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Start();
+            PlayerResearchActionResult result = handler.Start();
             if (result.RecoveryRequired) ForegroundFault(result.PersistenceReason);
             RefreshOfflineSummaryLines();
             return result;
@@ -491,6 +500,7 @@ namespace DungeonBuilder.M0
                 SetBanner(Content.GetString(key, key));
                 return false;
             }
+            Content.LoadStarterResearchStart(Resources.Load<TextAsset>(StarterResearchStartConfiguration.ResourcePath), saveLimits.Profile.Canonical);
 
             if (!string.IsNullOrEmpty(contentBanner))
             {
@@ -2563,7 +2573,7 @@ namespace DungeonBuilder.M0
             CreatePlayerResearchActionHandler(SavePlayerResearchTransition);
 
         private PlayerResearchActionHandler CreatePlayerResearchActionHandler(
-            Action saveTransition)
+            Action saveTransition, bool paidStart = false)
         {
             return new PlayerResearchActionHandler(
                 Save,
@@ -2580,7 +2590,11 @@ namespace DungeonBuilder.M0
                 saveTransition,
                 CommitPlayerResearchTransition,
                 () => Save,
-                () => SaveService?.RequiresCanonicalRecovery == true);
+                () => SaveService?.RequiresCanonicalRecovery == true)
+            {
+                StartConfiguration = Content?.StarterResearchStart,
+                ProtectedReserve = paidStart ? save => SaveService?.ResearchProtectedReserve(save) : null
+            };
         }
 
         private PlayerResearchActionResult CommitPlayerResearchTransition(Func<SaveData, PlayerResearchActionResult> stage)

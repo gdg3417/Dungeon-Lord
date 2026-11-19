@@ -1,4 +1,5 @@
 using System;
+using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 
 namespace DungeonBuilder.M0
@@ -54,6 +55,8 @@ namespace DungeonBuilder.M0
         public const string StartSucceededKey = "ui.player_research.start_succeeded";
         public const string ClaimSucceededKey = "ui.player_research.claim_succeeded";
         public const string PersistenceFailedKey = "ui.player_research.save_failed";
+        internal const string StartConfigurationUnavailableKey = "ui.player_research.cost_unavailable";
+        internal const string StartUnaffordableKey = "ui.player_research.insufficient_usable_mana";
 
         private readonly SaveData _initialSave;
         private readonly Func<SaveData> _currentSave;
@@ -71,6 +74,8 @@ namespace DungeonBuilder.M0
         private readonly Func<bool> _verificationPending;
         private readonly Action _saveTransition;
         private readonly Func<Func<SaveData, PlayerResearchActionResult>, PlayerResearchActionResult> _commitTransition;
+        internal StarterResearchStartConfiguration StartConfiguration { private get; set; }
+        internal Func<SaveData, long?> ProtectedReserve { private get; set; }
 
         public PlayerResearchActionHandler(
             SaveData save,
@@ -125,7 +130,12 @@ namespace DungeonBuilder.M0
 
         private PlayerResearchActionHandler ForCandidate(SaveData candidate) => new PlayerResearchActionHandler(
             candidate, _pendingConfig, _progressConfig, _eligibilityConfig, _claimConfig, _verificationConfig,
-            _configuredProjectId, _restrictedActionGate, _hasValidRun, _isOnline, _verificationPending, null);
+            _configuredProjectId, _restrictedActionGate, ProtectedReserve == null ? _hasValidRun :
+                () => RunHistoryState.HasCompletedAdventurerRun(candidate.runHistory), _isOnline, _verificationPending, null)
+            {
+                StartConfiguration = StartConfiguration,
+                ProtectedReserve = ProtectedReserve
+            };
 
         internal static PlayerResearchActionResult PersistenceFailure(string reason) => new PlayerResearchActionResult
         {
@@ -148,6 +158,8 @@ namespace DungeonBuilder.M0
             if (!pending.RuleResolved || !string.Equals(pending.ProjectId, _configuredProjectId, StringComparison.Ordinal))
                 return Result(false, false, PlayerResearchState.Blocked, BlockedInvalidKey, state.ProgressUnits, state.RequiredProgressUnits);
 
+            if (state.Authority.ManaCost.HasValue)
+                _save.structureRuntime.ManaReserve -= state.Authority.ManaCost.Value;
             _save.researchPending = new ResearchPendingState { SlotId = pending.SlotId, ProjectId = pending.ProjectId };
             _save.researchProgress = new ResearchProgressState
             {
@@ -156,6 +168,7 @@ namespace DungeonBuilder.M0
                 RuleSourceIdUsed = _progressConfig.ruleSourceId
             };
             PlayerResearchActionResult started = FromAuthority(ResolveAuthority(), true, true);
+            started.WouldChargeCosts = state.Authority.ManaCost.HasValue;
             started.FeedbackLocalizationKey = StartSucceededKey;
             return started;
         }
@@ -235,9 +248,35 @@ namespace DungeonBuilder.M0
                     FeedbackLocalizationKey = DetachedCanonicalWriteAuthority.RecoveryRequiredReason };
             GateEvaluationResult startGate = EvaluateGate(RestrictedActionType.ResearchStart);
             GateEvaluationResult claimGate = EvaluateGate(RestrictedActionType.ResearchComplete);
-            return PlayerResearchClaimAuthorityResolver.Resolve(
-                _configuredProjectId, HasValidRun(), _save?.researchPending, _save?.researchProgress, _save?.completedResearch,
+            bool hasValidRun = HasValidRun();
+            var authority = PlayerResearchClaimAuthorityResolver.Resolve(
+                _configuredProjectId, hasValidRun, _save?.researchPending, _save?.researchProgress, _save?.completedResearch,
                 _pendingConfig, _progressConfig, _eligibilityConfig, _claimConfig, _verificationConfig, startGate, claimGate);
+            authority.HasCompletedRun = hasValidRun;
+            if (ProtectedReserve == null) return authority;
+
+            if (StartConfiguration?.AppliesTo(_configuredProjectId, _progressConfig, _eligibilityConfig) == true)
+            {
+                double cost = StartConfiguration.ManaCost;
+                authority.ManaCost = cost;
+                double wallet = _save?.structureRuntime?.ManaReserve ?? double.NaN;
+                long? reserve = ProtectedReserve(_save);
+                if (double.IsFinite(wallet) && wallet >= 0 && reserve.HasValue)
+                {
+                    authority.UsableMana = Math.Max(0d, wallet - reserve.Value);
+                    double remaining = wallet - cost;
+                    authority.IsAffordable = cost <= authority.UsableMana.Value && remaining < wallet && remaining >= reserve.Value;
+                }
+            }
+
+            if (authority.CanStart && !authority.IsAffordable)
+            {
+                authority.State = PlayerResearchAuthorityState.Blocked;
+                authority.FeedbackLocalizationKey = !authority.ManaCost.HasValue ? StartConfigurationUnavailableKey :
+                    authority.UsableMana.HasValue ? StartUnaffordableKey : BlockedInvalidKey;
+                authority.CanStart = authority.StateMutationPermitted = false;
+            }
+            return authority;
         }
 
         private bool HasValidRun() => _hasValidRun != null && _hasValidRun();
