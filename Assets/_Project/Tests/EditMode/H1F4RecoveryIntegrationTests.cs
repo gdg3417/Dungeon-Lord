@@ -32,11 +32,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             internal readonly SaveService Service;
             internal readonly CanonicalOfflinePassiveManaService Mana;
             internal SaveData Current;
-            internal Harness()
+            internal Harness(bool paidResearch = false, bool native = false)
             {
                 var profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
                 F = Fixture.Create("\"researchPending\":null,\"researchProgress\":null", workloadProfile: profile);
-                Inputs = Bundle(F);
+                if (native) F.FileSystem.DeleteFile(F.ActivePath);
+                Inputs = paidResearch ? PaidBundle(F) : Bundle(F);
                 Time = new TimeService(new SimpleLogger(false), Inputs.Bootstrap.tickSeconds, Inputs.Bootstrap.timeRules.detectClockSkewSeconds,
                     Wall, () => Wall.Seconds - 100d + Wall.Fraction / 10000000d);
                 Time.BeginRecoveryForeground(Inputs.TwoFloor.UnitsPerSecond);
@@ -72,6 +73,97 @@ namespace DungeonBuilder.M0.Tests.EditMode
             service.ConfigureRecovery(inputs, time); return service;
         }
         static void Expected(Harness h, double wallet) => Assert.That(h.Current.structureRuntime.ManaReserve, Is.EqualTo(wallet));
+
+        private const string ResearchRulePath = "Assets/_Project/Resources/ResearchTiming/adventurer_analysis_v1.json";
+        private const string ReleaseKey = "research.timing.adventurer_analysis.v1";
+
+        private static RecoveryRuntimeInputs PaidBundle(Fixture fixture, bool updatedDefault = false)
+        {
+            byte[] original = File.ReadAllBytes(ResearchRulePath);
+            var later = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(original)
+                .Replace(".v1", ".v2").Replace(":120", ":240"));
+            string selected = updatedDefault ? ReleaseKey.Replace(".v1", ".v2") + "." + SpatialContractSha256.Compute(later)
+                : ReleaseKey + "." + SpatialContractSha256.Compute(original);
+            return new RecoveryRuntimeInputs(Inputs(), fixture.Production,
+                ProductionSpatialContentWorkloadLimitParser.Parse(UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.TextAsset>(
+                    "Assets/_Project/Data/Production/DungeonSpatial/validation_limits.json")).Limits,
+                fixture.Profile.Canonical, new[] { original, later }, new[] { selected });
+        }
+
+        [TestCase(0L, 10000L)]
+        [TestCase(7000L, 3000L)]
+        [TestCase(10000L, 10000L)]
+        [TestCase(7125L, 2875L)]
+        public void PaidRuleUsesExactClosedTickUnits(long start, long firstCredit)
+        {
+            byte[] bytes = File.ReadAllBytes(ResearchRulePath);
+            string reference = ReleaseKey + "." + SpatialContractSha256.Compute(bytes);
+            var rules = new ResearchTimingRules(new[] { bytes }, new[] { reference }, 1000, Fixture.Create(null).Profile.Canonical.Serialized);
+            Assert.That(rules.Resolve(reference, out var rule), Is.Null);
+            Assert.That(rules.Resolve(ReleaseKey + "." + new string('0', 64), out _), Is.EqualTo(ResearchTimingRules.Mismatch));
+            Assert.That(rules.Resolve(reference.Replace(".v1", ".v2"), out _), Is.EqualTo(ResearchTimingRules.Missing));
+            Assert.That(rules.Resolve(reference.Replace(".v1", ".v01"), out _), Is.EqualTo(ResearchTimingRules.Invalid));
+            Assert.That(rule.EarnedThrough(start, start == 10000 ? 20000 : 10000, 10000), Is.EqualTo(firstCredit));
+            Assert.That(rule.EarnedThrough(start, start + 119999, 10000), Is.LessThan(120000));
+            long ready = ((start + 120000 + 9999) / 10000) * 10000;
+            Assert.That(rule.EarnedThrough(start, ready, 10000), Is.EqualTo(120000));
+            Assert.That(rule.EarnedThrough(start, ready + 10000, 10000), Is.EqualTo(120000));
+        }
+
+        [Test]
+        public void PaidStartClosesPartialTickAndReopensUnderOriginalRule()
+        {
+            var h = new Harness(paidResearch: true, native: true);
+            Assert.That(h.Service.LastLoadCreatedNative, Is.True);
+            h.Start(); h.Accept(100); h.Accept(100); h.Accept(100);
+            // An explicit synthetic completed defeat supplies the test prerequisite.
+            h.Current.runHistory.NextRunSequence = 2;
+            h.Current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1", Success = false }, 5);
+            h.Current.structureRuntime.ManaReserve = 1000;
+            Assert.That(h.Service.Save(h.Current, SaveReason.StateChange), Is.True);
+            using var scope = new RootScope(h);
+            scope.Pulse(107);
+            double before = scope.Root.Save.structureRuntime.ManaReserve;
+            var start = scope.Root.StartConfiguredPaidResearch();
+            Assert.That(start.Succeeded, Is.True, start.FeedbackLocalizationKey);
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(before - 10));
+            string reference = scope.Root.Save.researchProgress.RuleSourceIdUsed;
+            Assert.That(scope.Root.Save.researchProgress.StartClosedThrough, Is.EqualTo(7000));
+            Assert.That(scope.Root.StartConfiguredPaidResearch().Succeeded, Is.False);
+            scope.Pulse(110);
+            Assert.That(scope.Root.Save.researchProgress.ProgressUnits, Is.EqualTo(3000));
+
+            var changed = PaidBundle(h.F, updatedDefault: true);
+            Assert.That(changed.Identity.Digest, Is.EqualTo(h.Inputs.Identity.Digest));
+            var reopened = CreateService(h.F, changed, h.Time);
+            var current = reopened.LoadOrCreate("paid-reopen", out string banner);
+            Assert.That(current, Is.Not.Null, banner);
+            Assert.That(current.researchProgress.RuleSourceIdUsed, Is.EqualTo(reference));
+            Assert.That(current.researchProgress.ProgressUnits, Is.EqualTo(3000));
+            scope.Rebind(reopened, h.Time, current);
+            scope.Pulse(220);
+            Assert.That(scope.Root.Save.researchProgress.ProgressUnits, Is.EqualTo(113000));
+            Assert.That(scope.Root.Save.researchProgress.CompletionPending, Is.False);
+            scope.Pulse(227);
+            Assert.That(scope.Root.Save.researchProgress.CompletionPending, Is.False);
+            scope.Pulse(230);
+            Assert.That(scope.Root.Save.researchProgress.ProgressUnits, Is.EqualTo(120000));
+            Assert.That(scope.Root.ClaimConfiguredPlayerResearch().Succeeded, Is.True);
+            Assert.That(scope.Root.ClaimConfiguredPlayerResearch().Succeeded, Is.False);
+        }
+
+        [Test]
+        public void ObsoleteSchemaRefusalPreservesOriginalBytes()
+        {
+            var h = new Harness();
+            var obsolete = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(h.Service.CanonicalSession.GetCurrentBytes())
+                .Replace("\"schemaVersion\":18,", "\"schemaVersion\":17,"));
+            h.F.FileSystem.Seed(h.Service.SavePath, obsolete);
+            var service = CreateService(h.F, h.Inputs, h.Time);
+            Assert.That(service.LoadOrCreate("obsolete", out var banner), Is.Null);
+            Assert.That(banner, Is.EqualTo("ui.save.obsolete_development_version"));
+            CollectionAssert.AreEqual(obsolete, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+        }
 
         [Test] public void ReportingCombinesOnlyProvenFractionalSettlementsWithoutWritingDisplayState()
         {
@@ -749,16 +841,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(scope.Root.GameplayServicesInitializedForTests, Is.False);
             Assert.That(h.Time.ForegroundThrough, Is.Zero);
         }
-        [Test] public void AcceptedTicksAndResearchDrainAcrossTwoCrashesWithoutReplayingClosedPrefix()
+        [TestCase(false)]
+        [TestCase(true)]
+        public void AcceptedTicksAndResearchDrainAcrossTwoCrashesWithoutReplayingClosedPrefix(bool paid)
         {
-            var h = new Harness(); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
+            var h = new Harness(paidResearch: paid); h.Start(); h.Accept(100); h.Accept(102); h.Accept(105);
             // A declared synthetic prior confirmed record supplies this fixture's
             // Research prerequisite. It is never historical producer evidence.
             h.Current.runHistory.NextRunSequence = 2;
             h.Current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1" }, 5);
             Assert.That(h.Service.Save(h.Current, SaveReason.StateChange), Is.True);
             using var scope = new RootScope(h);
-            var started = scope.Root.StartConfiguredPlayerResearch(); Assert.That(started.Succeeded, Is.True, started.FeedbackLocalizationKey);
+            if (paid) {
+                h.Current.structureRuntime.ManaReserve = 1000;
+                Assert.That(h.Service.Save(h.Current, SaveReason.StateChange), Is.True);
+            }
+            var started = paid ? scope.Root.StartConfiguredPaidResearch() : scope.Root.StartConfiguredPlayerResearch();
+            Assert.That(started.Succeeded, Is.True, started.FeedbackLocalizationKey);
             var ticks = new List<long>(); var passive = scope.PassiveTick;
             void Tick(SaveData candidate, long tick) { ticks.Add(tick); passive(candidate, tick); }
             h.Wall.Seconds = 2105;
@@ -818,6 +917,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(residualWallet));
             Assert.That(scope.Root.Save.timeProvenance.Episode, Is.Null);
             Assert.That(secondTime.ForegroundThrough, Is.EqualTo(acceptedHorizon), "UTC recovery never creates new adventurer time.");
+            if (paid) Assert.That(scope.Root.Save.researchProgress.ProgressUnits, Is.EqualTo(120000));
             Assert.That(scope.Root.ClaimConfiguredPlayerResearch().Succeeded, Is.True);
             string project = h.Inputs.Configuration.MvpFirstSessionObjective.AnalysisResearchProjectId;
             Assert.That(scope.Root.Save.completedResearch.ProjectIds.Count(p => p == project), Is.EqualTo(1));

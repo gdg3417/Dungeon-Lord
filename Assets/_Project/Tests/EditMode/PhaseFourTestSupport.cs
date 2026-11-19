@@ -107,7 +107,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var w = new ContractJsonWriter(limits.Serialized); w.Node(); w.Token("{");
             for (int i = 0; i < root.Fields.Count; i++) {
                 if (i != 0) w.Token(","); var f = root.Fields[i]; w.String(f.Key); w.Token(":");
-                if (f.Key == "schemaVersion") w.Token("17");
+                if (f.Key == "schemaVersion") w.Token(CanonicalSaveSchemaVersions.CurrentWritableTarget.ToString(System.Globalization.CultureInfo.InvariantCulture));
                 else if (f.Key != "primary") DetachedCompleteSaveContract.WriteCanonicalNode(w, f.Value);
                 else {
                     w.Node(); w.Token("{"); bool first = true;

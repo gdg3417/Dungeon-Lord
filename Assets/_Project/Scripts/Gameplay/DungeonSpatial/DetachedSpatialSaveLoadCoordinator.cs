@@ -64,7 +64,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private RecoveryRuntimeInputs recoveryInputs;
         private IHistoricalRecoveryEvidence historicalRecoveryEvidence;
         private TimeService recoveryTime;
-        private static bool UsesAtomicRecovery => CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
+        private static bool UsesAtomicRecovery => CanonicalSaveSchemaVersions.HasPreciseTime(CanonicalSaveSchemaVersions.CurrentWritableTarget);
 
         internal void ConfigureRecovery(RecoveryRuntimeInputs inputs, TimeService observationOwner,
             IHistoricalRecoveryEvidence evidence = null)
@@ -153,16 +153,39 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             catch { return Failure("gd66.profile.invalid"); }
 
-            var migration = new DetachedSpatialMigrationTransaction(preflight.FileSystem, recoveryContext);
-            DetachedSpatialMigrationOutcome recovered = migration.Recover(activePath);
-            if (!recovered.IsSuccess)
-                return Failure(recovered.Reason, recovered.TrustedPayload, recovered, null,
-                    recovered.Diagnostics);
+            bool currentOnly = CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.ResearchTimingIntroduction;
+            byte[] trusted = null;
+            DetachedSpatialMigrationOutcome recovered = null;
+            if (currentOnly) {
+                // The development support boundary runs before any historical recovery
+                // writer can replace a file or consume migration evidence.
+                try {
+                    if (!preflight.FileSystem.Exists(activePath))
+                        return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
+                    trusted = preflight.FileSystem.ReadAllBytes(activePath);
+                    var versionCheck = RawSavePayloadClassifier.Classify(trusted,
+                        limits.Raw, new RawSaveEnvelopeVersionContract(1, CanonicalSaveSchemaVersions.CurrentWritableTarget), blankFloor);
+                    if (!versionCheck.IsSuccess) return Failure(versionCheck.FailureReason);
+                    if (versionCheck.SchemaVersion != CanonicalSaveSchemaVersions.CurrentWritableTarget)
+                        return Failure(RecoveryEpisode.ObsoleteDevelopmentSave);
+                    if (SpatialMigrationRecoveryEvidenceProbe.HasRecoveryRelevantEvidence(activePath, preflight.FileSystem,
+                        limits.Canonical.Serialized.MaximumCollectionRecords))
+                        return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
+                } catch {
+                    return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
+                }
+            }
 
-            byte[] trusted;
-            try { trusted = preflight.FileSystem.ReadAllBytes(activePath); }
-            catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
-                recovered.TrustedPayload, recovered); }
+            var migration = new DetachedSpatialMigrationTransaction(preflight.FileSystem, recoveryContext);
+            if (!currentOnly) {
+                recovered = migration.Recover(activePath);
+                if (!recovered.IsSuccess)
+                    return Failure(recovered.Reason, recovered.TrustedPayload, recovered, null,
+                        recovered.Diagnostics);
+                try { trusted = preflight.FileSystem.ReadAllBytes(activePath); }
+                catch { return Failure(DetachedSpatialMigrationTransaction.NoTrustedPayloadReason,
+                    recovered.TrustedPayload, recovered); }
+            }
 
             // Same-process entry acknowledgement can be lost without losing the
             // retained cut/classifications. Resolve its exact candidate before
@@ -188,6 +211,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (pending != null && pending.CandidateSha256 != null &&
                 SpatialContractSha256.Compute(trusted) != pending.PredecessorSha256)
                 return Failure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason, recovery: recovered);
+
+            if (currentOnly)
+                return PublishValidated(trusted, currentContext, DetachedSpatialSaveLoadDisposition.CurrentTarget, null, null);
 
             if (UsesAtomicRecovery) {
                 var frozen16 = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(trusted, currentContext);
@@ -503,7 +529,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCompleteSaveValidationResult validation =
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, currentContext);
             if (!validation.IsValid || !validation.CurrentTargetValidated)
-                return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason,
+                return Failure(validation.Reason ?? DetachedWholeSaveCandidateSerializer.CandidateInvalidReason,
                     transaction?.TrustedPayload ?? recovery?.TrustedPayload ?? SpatialTrustedPayload.None,
                     recovery, transaction);
             DetachedCanonicalSaveSessionResult opened =

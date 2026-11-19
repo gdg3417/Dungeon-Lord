@@ -32,7 +32,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             if (schema == CanonicalSaveSchemaVersions.FrozenSchemaSixteen) return TryRead(primary, out result);
             result = null;
-            if (schema != CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction) return false;
+            if (!CanonicalSaveSchemaVersions.HasPreciseTime(schema)) return false;
             try {
                 var owner = primary.Fields.Single(f => f.Key == Owner).Value;
                 var issues = new SpatialIssueCollector(8);

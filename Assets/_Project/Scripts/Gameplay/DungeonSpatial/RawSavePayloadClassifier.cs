@@ -500,7 +500,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             if (ReferenceEquals(f.Node, Find(root, "primary")) && Find(root, "schemaVersion")?.Text == "16")
                                 memberLimit = checked(memberLimit + (f.Names.Contains("livingDungeon") ? 1 : 0) +
                                     (f.Names.Contains(MonsterContinuity.Owner) ? 1 : 0) + (f.Names.Contains(TimeProvenance.Owner) ? 1 : 0));
-                            if (ReferenceEquals(f.Node, Find(root, "primary")) && Find(root, "schemaVersion")?.Text == "17")
+                            if (ReferenceEquals(f.Node, Find(root, "primary")) &&
+                                (Find(root, "schemaVersion")?.Text == "17" || Find(root, "schemaVersion")?.Text == "18"))
                                 memberLimit = checked(memberLimit + (f.Names.Contains("livingDungeon") ? 1 : 0) +
                                     (f.Names.Contains(MonsterContinuity.Owner) ? 1 : 0) + (f.Names.Contains(TimeProvenance.Owner) ? 1 : 0));
                             if (f.Names.Count > memberLimit) { reason = WorkloadExceededReason; errorOffset = p; return false; }
@@ -538,7 +539,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         Node child; if (!Value(bytes, ref p, limits, budget, out child)) return Failure(budget, p, out reason, out errorOffset);
                         f.Node.Elements.Add(child); f.CanClose = true;
                         int arrayLimit = limits.MaximumArrayElements;
-                        if (limits.MaximumMonsterRecords > arrayLimit && (Find(root, "schemaVersion")?.Text == "15" || Find(root, "schemaVersion")?.Text == "16" || Find(root, "schemaVersion")?.Text == "17"))
+                        if (limits.MaximumMonsterRecords > arrayLimit && (Find(root, "schemaVersion")?.Text == "15" ||
+                            Find(root, "schemaVersion")?.Text == "16" || Find(root, "schemaVersion")?.Text == "17" ||
+                            Find(root, "schemaVersion")?.Text == "18"))
                         {
                             var primaryOwner = Find(root, "primary");
                             var monsters = primaryOwner == null ? null : Find(primaryOwner, MonsterContinuity.Owner);

@@ -218,6 +218,16 @@ namespace DungeonBuilder.M0
             return result;
         }
 
+        // Integration seam for the paid destination. The existing scaffold Start
+        // stays in place until its caller is replaced by that destination.
+        internal PlayerResearchActionResult StartConfiguredPaidResearch()
+        {
+            var result = CreatePlayerResearchActionHandler().StartPaid();
+            if (result.RecoveryRequired) ForegroundFault(result.PersistenceReason);
+            RefreshOfflineSummaryLines();
+            return result;
+        }
+
         public PlayerResearchActionResult ClaimConfiguredPlayerResearch()
         {
             PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Claim();
@@ -2126,6 +2136,10 @@ namespace DungeonBuilder.M0
             }
 
             ResearchPendingValidationResult result = ResearchPendingResolver.ResolveScaffold(GetResearchPendingScaffoldConfig());
+            if (CanonicalMvpRouteProjection.HasCanonicalLookingState(Save) &&
+                (ResearchTimingRules.IsPaidReference(Save.researchProgress?.RuleSourceIdUsed) ||
+                 CompletedResearchStateResolver.HasCompletedProject(Save.completedResearch, result.ProjectId)))
+                return false;
             if (!result.RuleResolved)
             {
                 RefreshOfflineSummaryLines();
@@ -2151,7 +2165,7 @@ namespace DungeonBuilder.M0
 
         public bool ClearResearchPendingScaffold()
         {
-            if (Save == null)
+            if (Save == null || ResearchTimingRules.IsPaidReference(Save.researchProgress?.RuleSourceIdUsed))
             {
                 return false;
             }
@@ -2165,7 +2179,7 @@ namespace DungeonBuilder.M0
 
         public bool ClaimResearchCompletionScaffold()
         {
-            if (Save == null)
+            if (Save == null || ResearchTimingRules.IsPaidReference(Save.researchProgress?.RuleSourceIdUsed))
             {
                 return false;
             }
@@ -2580,7 +2594,12 @@ namespace DungeonBuilder.M0
                 saveTransition,
                 CommitPlayerResearchTransition,
                 () => Save,
-                () => SaveService?.RequiresCanonicalRecovery == true);
+                () => SaveService?.RequiresCanonicalRecovery == true)
+            {
+                TimingRules = SaveService?.ResearchTiming,
+                PaidStartAllowed = () => SaveService?.CanStagePaidResearch == true,
+                ProtectedResearchReserve = candidate => SaveService.ResearchProtectedReserve(candidate)
+            };
         }
 
         private PlayerResearchActionResult CommitPlayerResearchTransition(Func<SaveData, PlayerResearchActionResult> stage)

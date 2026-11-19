@@ -429,6 +429,14 @@ namespace DungeonBuilder.M0
             { banner = "Save load failed. Created a new save."; ArchiveCorruptSave(); return CreateNew(contentVersion); }
         }
 
+        internal ResearchTimingRules ResearchTiming => recoveryInputs?.ResearchTiming;
+
+        internal bool CanStagePaidResearch => recoveryTime?.ForegroundPresentationActive == true &&
+            !recoveryTime.HasDeferredRecovery && !RequiresCanonicalRecovery;
+
+        internal long ResearchProtectedReserve(SaveData candidate) =>
+            MonsterContinuity.RequiredReserve(candidate.validatedCanonicalSpatialState, _validationContext.MonsterRecovery);
+
         internal PlayerResearchActionResult CommitPlayerResearchTransition(SaveData current,
             Func<SaveData, PlayerResearchActionResult> stage)
         {

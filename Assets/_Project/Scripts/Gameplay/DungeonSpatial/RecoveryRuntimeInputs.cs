@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using System.Text;
 using DungeonBuilder.M0.Economy;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     internal sealed class RecoveryRuntimeInputs
     {
         internal RecoveryContextIdentity Identity { get; }
+        internal ResearchTimingRules ResearchTiming { get; }
         internal RunSimulationConfig Configuration { get; }
         internal LootConfig Loot { get; }
         internal ContentBootstrap Bootstrap { get; }
@@ -24,7 +26,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private readonly string configurationValues, combatValues, bootstrapValues, lootValues, occupancyValues;
 
         internal RecoveryRuntimeInputs(byte[][] bytes, ProductionSpatialContentSnapshot production,
-            SpatialContentValidationWorkloadLimits structuralLimits, CanonicalSpatialSerializationLimits limits)
+            SpatialContentValidationWorkloadLimits structuralLimits, CanonicalSpatialSerializationLimits limits,
+            IEnumerable<byte[]> researchRules = null, IEnumerable<string> researchSelections = null)
         {
             Identity = new RecoveryContextIdentity(bytes);
             string Text(int index) => new UTF8Encoding(false, true).GetString(Identity.GetInput(index));
@@ -44,6 +47,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (OneFloor.TwoFloor || !TwoFloor.TwoFloor || OneFloor.UnitsPerSecond != TwoFloor.UnitsPerSecond ||
                 !RoomContentSpatialOccupancyAuthority.TryParse(Identity.GetInput(8), structuralLimits, config, out var occupancy))
                 throw new ArgumentException(RecoveryEpisode.ContextMismatch);
+            ResearchTiming = new ResearchTimingRules(researchRules ?? Array.Empty<byte[]>(),
+                researchSelections ?? Array.Empty<string>(), OneFloor.UnitsPerSecond, limits.Serialized);
             Occupancy = occupancy;
             var compatibility = SpatialLayoutCompatibilityProfiles.ParseAndValidate(Identity.GetInput(9), production, structuralLimits,
                 enforceProductionReleasePolicy: true);
@@ -95,6 +100,50 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (save?.researchPending == null) return save?.researchProgress == null;
             return ResearchCompletionEligibilityResolver.Resolve(save.researchPending, save.researchProgress,
                 Bootstrap.researchCompletionEligibilityScaffold).RuleResolved;
+        }
+
+        internal string ValidateCurrentResearch(SaveData save, ContractJsonNode wire, LivingDungeonState living)
+        {
+            const string invalid = ResearchTimingRules.StateInvalid;
+            var progress = save.researchProgress;
+            var pending = save.researchPending;
+            if (pending == null || progress == null)
+                return pending == null && progress == null && ResearchValid(save) ? null : invalid;
+            if (pending.SlotId != Bootstrap.researchPendingScaffold.slotId ||
+                pending.ProjectId != Configuration.MvpFirstSessionObjective?.AnalysisResearchProjectId ||
+                progress.SlotId != pending.SlotId || progress.ProjectId != pending.ProjectId ||
+                save.completedResearch?.ProjectIds?.Contains(pending.ProjectId, StringComparer.Ordinal) == true ||
+                wire?.Kind != ContractJsonKind.Object)
+                return invalid;
+
+            var cut = wire.Fields.SingleOrDefault(field =>
+                string.Equals(field.Key, "StartClosedThrough", StringComparison.OrdinalIgnoreCase));
+            if (cut.Value == null && progress.RuleSourceIdUsed == Bootstrap.researchProgressScaffold.ruleSourceId)
+                return ResearchValid(save) && (!progress.CompletionPending ||
+                    progress.ProgressUnits >= Bootstrap.researchCompletionEligibilityScaffold.requiredProgressUnits)
+                    ? null : invalid;
+
+            string reason = ResearchTiming.Resolve(progress.RuleSourceIdUsed, out var rule);
+            if (reason != null) return reason;
+            if (rule.ProjectId != progress.ProjectId || rule.SlotId != progress.SlotId) return ResearchTimingRules.Mismatch;
+            if (cut.Key != "StartClosedThrough" ||
+                !RecoveryEpisode.TryInteger(cut.Value, out long start) || start != progress.StartClosedThrough ||
+                living?.Scheduler == null || start > living.Scheduler.ClosedThrough)
+                return invalid;
+            var known = wire.Fields.Where(field => DetachedRecognizedSaveStateSnapshot.ResearchProgressMembers
+                .Any(member => string.Equals(field.Key, member, StringComparison.OrdinalIgnoreCase))).ToArray();
+            if (!known.Select(field => field.Key).SequenceEqual(DetachedRecognizedSaveStateSnapshot.ResearchProgressMembers) ||
+                !RecoveryEpisode.TryInteger(known[2].Value, out long earned) ||
+                earned > ResearchTimingRule.MaximumExactUnits || progress.ProgressUnits != earned ||
+                !ContractJson.String(known[0].Value, out string slot) || slot != progress.SlotId ||
+                !ContractJson.String(known[1].Value, out string project) || project != progress.ProjectId ||
+                known[3].Value.Kind != ContractJsonKind.Boolean || (known[3].Value.Text == "true") != progress.CompletionPending ||
+                !ContractJson.String(known[4].Value, out string reference) || reference != rule.Reference)
+                return invalid;
+
+            long tickWidth = (long)Bootstrap.tickSeconds * OneFloor.UnitsPerSecond;
+            return earned == rule.EarnedThrough(start, living.Scheduler.ClosedThrough, tickWidth) &&
+                progress.CompletionPending == (earned == rule.RequiredUnits) ? null : invalid;
         }
 
         internal bool SupportsProfile(LivingDungeonProfile profile)

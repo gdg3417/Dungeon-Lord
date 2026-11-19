@@ -374,7 +374,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     var due = NextEvent(); if (due.HasValue) time = Math.Min(time, due.Value);
                     if (owner.Scheduler.NextOpportunityTime.HasValue) time = Math.Min(time, owner.Scheduler.NextOpportunityTime.Value);
                     if (time < closed || time < 0) throw new InvalidOperationException(invalid);
+                    ResearchTimingRule paidRule = null;
+                    long paidEarned = 0;
                     if (time == nextTick) {
+                        var progress = runtime.researchProgress;
+                        if (ResearchTimingRules.IsPaidReference(progress?.RuleSourceIdUsed)) {
+                            if (bound == null) return ResearchTimingRules.Missing;
+                            string reason = bound.ResearchTiming.Resolve(progress.RuleSourceIdUsed, out paidRule);
+                            if (reason != null) return reason;
+                            paidEarned = paidRule.EarnedThrough(progress.StartClosedThrough, time, tickUnits);
+                        }
                         runtime.totalTicks = checked(runtime.totalTicks + 1);
                         passiveTick(runtime, runtime.totalTicks);
                         Stage(origin: ForegroundQualificationMetrics.Origin.PassiveTick);
@@ -426,6 +435,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         if (interval > 0) { owner.Scheduler.NextOpportunityTime = checked(time + interval); LivingDungeonScheduling.Change(owner); }
                     }
                     if (owner.Scheduler.ClosedThrough != time) { owner.Scheduler.ClosedThrough = time; LivingDungeonScheduling.Change(owner); }
+                    // The passive and party substages retain the previous paid
+                    // state with the old C. Credit is materialized with closure.
+                    if (paidRule != null) {
+                        if (runtime.researchProgress?.RuleSourceIdUsed != paidRule.Reference)
+                            return ResearchTimingRules.StateInvalid;
+                        runtime.researchProgress.ProgressUnits = paidEarned;
+                        runtime.researchProgress.CompletionPending = paidEarned == paidRule.RequiredUnits;
+                    }
                     if (policy.TwoFloor && profile.Id == LivingDungeonForegroundConfig.ProfileId && owner.IsClosed && owner.Parties.Count == 0) {
                         var nextProfile = context.LivingDungeonProfiles.Single(p => p.Id == policy.Id);
                         LivingDungeonScheduling.UpgradeProfile(owner, profile, nextProfile); profile = nextProfile;

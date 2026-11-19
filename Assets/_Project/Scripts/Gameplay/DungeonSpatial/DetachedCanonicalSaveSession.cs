@@ -18,6 +18,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
     public sealed class DetachedRecognizedSaveStateSnapshot
     {
+        internal static readonly string[] ResearchProgressMembers =
+            { "SlotId", "ProjectId", "ProgressUnits", "CompletionPending", "RuleSourceIdUsed", "StartClosedThrough" };
         private readonly Dictionary<string, byte[]> values;
         private DetachedRecognizedSaveStateSnapshot(Dictionary<string, byte[]> source) { values = source; }
 
@@ -40,7 +42,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     if (!DetachedCanonicalSaveSession.IsLiveRecognizedMember(field.Key)) continue;
                     var writer = new ContractJsonWriter(limits.Canonical.Serialized);
-                    DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
+                    if (field.Key == "researchProgress" && source.researchProgress != null)
+                        WriteResearchProgress(writer, field.Value, source.researchProgress);
+                    else DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
                     result.Add(field.Key, writer.Finish());
                 }
                 PreserveNullableState(result, "researchPending", source.researchPending);
@@ -53,6 +57,28 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason); }
             catch
             { return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason); }
+        }
+
+        private static void WriteResearchProgress(ContractJsonWriter writer, ContractJsonNode node, ResearchProgressState progress)
+        {
+            bool paid = ResearchTimingRules.IsPaidReference(progress.RuleSourceIdUsed);
+            if (paid && (!double.IsFinite(progress.ProgressUnits) || progress.ProgressUnits < 0 ||
+                progress.ProgressUnits > ResearchTimingRule.MaximumExactUnits ||
+                Math.Truncate(progress.ProgressUnits) != progress.ProgressUnits))
+                throw new ArgumentException(ResearchTimingRules.StateInvalid);
+
+            writer.Node(); writer.Token("{");
+            for (int index = 0; index < ResearchProgressMembers.Length - (paid ? 0 : 1); index++) {
+                string name = ResearchProgressMembers[index];
+                if (index != 0) writer.Token(",");
+                writer.String(name); writer.Token(":");
+                if (paid && name == "ProgressUnits") {
+                    writer.Node(); writer.Token(((long)progress.ProgressUnits).ToString(System.Globalization.CultureInfo.InvariantCulture));
+                } else if (name == "StartClosedThrough") {
+                    writer.Node(); writer.Token(progress.StartClosedThrough.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                } else DetachedCompleteSaveContract.WriteCanonicalNode(writer, node.Fields.Single(field => field.Key == name).Value);
+            }
+            writer.Token("}");
         }
 
         internal bool TryGet(string name, out byte[] value)
@@ -332,7 +358,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         valueBytes = SerializeNode(retained);
                     }
                     else if (!recognizedState.TryGet(name, out valueBytes)) continue;
-                    if (schema == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction && name == "lastSavedUtcUnix")
+                    if (schema == CanonicalSaveSchemaVersions.ResearchTimingIntroduction &&
+                        recognizedState != null && (name == "researchPending" || name == "researchProgress") &&
+                        TryFind(primary, name, out var priorResearch) && priorResearch.Kind == ContractJsonKind.Object)
+                        valueBytes = MergeResearchExtensions(name, priorResearch, valueBytes);
+                    if (CanonicalSaveSchemaVersions.HasPreciseTime(schema) && name == "lastSavedUtcUnix")
                     {
                         var timestampIssues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
                         if (!ContractJson.TryParse(valueBytes, limits.Canonical.Serialized, timestampIssues, out var timestamp) ||
@@ -502,6 +532,32 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason); }
             catch
             { return Failure(DetachedWholeSaveCandidateSerializer.UnknownMemberUnpreservableReason); }
+        }
+
+        private byte[] MergeResearchExtensions(string name, ContractJsonNode prior, byte[] nextBytes)
+        {
+            var issues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
+            if (!ContractJson.TryParse(nextBytes, limits.Canonical.Serialized, issues, out var next) ||
+                next.Kind != ContractJsonKind.Object) return nextBytes;
+            if (!TryFind(prior, "ProjectId", out var oldProject) || !TryFind(next, "ProjectId", out var newProject) ||
+                oldProject.Text != newProject.Text || !TryFind(prior, "SlotId", out var oldSlot) ||
+                !TryFind(next, "SlotId", out var newSlot) || oldSlot.Text != newSlot.Text)
+                return nextBytes;
+
+            var known = name == "researchProgress" ? DetachedRecognizedSaveStateSnapshot.ResearchProgressMembers
+                : new[] { "SlotId", "ProjectId" };
+            var extensions = prior.Fields.Where(field => !known.Contains(field.Key, StringComparer.Ordinal)).ToArray();
+            if (extensions.Length == 0) return nextBytes;
+
+            var writer = new ContractJsonWriter(limits.Canonical.Serialized);
+            writer.Node(); writer.Token("{");
+            bool first = true;
+            foreach (var field in next.Fields.Concat(extensions)) {
+                WriteField(writer, field.Key, field.Value, first);
+                first = false;
+            }
+            writer.Token("}");
+            return writer.Finish();
         }
 
         private byte[] SerializeNode(ContractJsonNode node)

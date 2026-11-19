@@ -55,7 +55,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (roomContentOccupancy == null)
                 return Failure(RoomContentSpatialOccupancyAuthority.InvalidReason);
             if (acquisition == null) return Failure(ContentAcquisitionEconomySnapshot.InvalidReason);
-            bool precise = CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
+            bool precise = CanonicalSaveSchemaVersions.HasPreciseTime(CanonicalSaveSchemaVersions.CurrentWritableTarget);
             if (precise && (recoveryInputs == null || creation == null || creation.Seconds <= 0) ||
                 !precise && recoveryInputs != null) return Failure(RecoveryEpisode.Invalid);
             try
@@ -74,7 +74,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (recognizedState.structureRuntime == null) recognizedState.structureRuntime = new StructureRuntimeState();
                 recognizedState.structureRuntime.ManaReserve = acquisition.StartingMana;
                 CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
-                    compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
+                    compatibility.SelectContract(CanonicalSaveSchemaVersions.SpatialRegistration(CanonicalSaveSchemaVersions.CurrentWritableTarget));
                 if (!selected.Success) return Failure(selected.Code);
                 var state = new DetachedCanonicalSpatialSaveState
                 {

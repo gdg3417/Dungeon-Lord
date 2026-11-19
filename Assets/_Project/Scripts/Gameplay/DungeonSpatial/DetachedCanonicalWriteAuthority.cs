@@ -77,7 +77,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             this.floorConstructionProfiles = floorConstructionProfiles;
             this.floorConstructionResearch = floorConstructionResearch;
             this.economyModifiers = economyModifiers?.ToArray() ?? Array.Empty<FormulaModifier>();
-            if (CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction) {
+            if (CanonicalSaveSchemaVersions.HasPreciseTime(CanonicalSaveSchemaVersions.CurrentWritableTarget)) {
                 var bound = context?.RecoveryInputs;
                 recoveryBindingsValid = bound != null && ReferenceEquals(production, context.Production) &&
                     compatibility != null && compatibility.CanonicalBytes.AsSpan().SequenceEqual(context.Compatibility.CanonicalBytes) &&
