@@ -759,6 +759,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var root = scope.Root;
             var overlay = root.gameObject.AddComponent<BootstrapOverlay>();
             overlay.Bind(root);
+            // Drain any already-due foreground work before observing Research writes.
+            Assert.That(h.Service.BeforeForegroundAction(), Is.True);
             var before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
             Assert.That(DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), Is.True);
             Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.False);

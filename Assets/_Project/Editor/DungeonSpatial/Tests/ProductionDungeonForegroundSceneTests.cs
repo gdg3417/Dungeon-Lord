@@ -128,6 +128,7 @@ namespace DungeonBuilder.M0.Tests
             var advance = InstallForegroundBoundaryTestClock();
             Click(ui.Q<Button>("openResearch"));
             Assert.That(start.style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(root.SaveService.BeforeForegroundAction(), Is.True);
             var beforeMissingPrice = root.SaveService.CanonicalSession.GetCurrentBytes();
             Click(start); // Exercise stale input through the real production callback.
             CollectionAssert.AreEqual(beforeMissingPrice, root.SaveService.CanonicalSession.GetCurrentBytes());
