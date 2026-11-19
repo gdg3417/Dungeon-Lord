@@ -759,6 +759,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var root = scope.Root;
             var overlay = root.gameObject.AddComponent<BootstrapOverlay>();
             overlay.Bind(root);
+            Assert.That(h.Service.SetQaMana(root.Save, fillToCapacity: true).IsSuccess, Is.True);
             // Drain any already-due foreground work before observing Research writes.
             Assert.That(h.Service.BeforeForegroundAction(), Is.True);
             var before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
@@ -771,7 +772,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             const double testCost = 5.25;
             LoadTestResearchPrice(root, h.F.Profile.Canonical, testCost);
-            Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.True);
+            Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.True,
+                root.ResolvePlayerResearchState().FeedbackLocalizationKey);
             double wallet = root.Save.structureRuntime.ManaReserve;
             Assert.That(overlay.StartPlayerResearch().WouldChargeCosts, Is.True);
             Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(wallet - testCost));
