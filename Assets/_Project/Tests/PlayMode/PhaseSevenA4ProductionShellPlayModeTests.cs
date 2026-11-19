@@ -47,6 +47,9 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         [UnityTest] public IEnumerator R0ResearchStartUncertainRecovery() { yield return Invoke("R0ResearchStartUncertainRecovery"); }
         [UnityTest] public IEnumerator R0ResearchClaimUncertainRecovery() { yield return Invoke("R0ResearchClaimUncertainRecovery"); }
         [UnityTest] public IEnumerator R0ResearchForegroundRollbackBlocksAction() { yield return Invoke("R0ResearchForegroundRollbackBlocksAction"); }
+        [UnityTest] public IEnumerator R1ResearchProductionLifecycle() { yield return Invoke("R1ResearchProductionEntryReflectsPaidForegroundLifecycle"); }
+        [UnityTest] public IEnumerator R1ResearchDraftExit() { yield return Invoke("R1ResearchNavigationUsesDraftExitAuthority"); }
+        [UnityTest] public IEnumerator R1ResearchPhoneTextSizes() { yield return Invoke("R1ResearchExpandedProjectTitleFitsSupportedPhoneTextSizes"); }
 
         [UnityTest] public IEnumerator AnalysisPhoneNavigationAndCoveredInput()
         { yield return Invoke("AnalysisPhoneNavigationSafeAreaAndCoveredInput"); }

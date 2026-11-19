@@ -33,6 +33,7 @@ namespace DungeonBuilder.Tests.EditMode
             service = OpenService(f, out current);
             current.researchPending = null; current.researchProgress = null;
             current.completedResearch = new CompletedResearchState(); current.completedObjectives = new CompletedObjectiveState();
+            current.structureRuntime.ManaReserve = 1000; // Test-only funding for payment and reserve cases.
             current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1",
                 LootExtractionSummary = new RunLootExtractionSummary { TotalExtractedWorldValue = 1 } }, 5);
             current.runHistory.NextRunSequence = 2; // This synthetic confirmed run already owns run-1.
@@ -184,7 +185,7 @@ namespace DungeonBuilder.Tests.EditMode
         private const double TestManaCost = 25.5;
         private static byte[] PriceJson(string price, string project = Project, int version = 1, bool enabled = true) =>
             Encoding.UTF8.GetBytes("{\"schemaVersion\":" + version + ",\"enabled\":" + (enabled ? "true" : "false") +
-                ",\"projectId\":\"" + project + "\",\"progressRuleId\":\"test.progress"," +
+                ",\"projectId\":\"" + project + "\",\"progressRuleId\":\"test.progress\"," +
                 "\"completionRuleId\":\"test.eligibility\",\"manaCost\":" + price + "}");
 
         private PlayerResearchActionHandler PaidHandler(StarterResearchStartConfiguration configuration, Action progressSave = null)
