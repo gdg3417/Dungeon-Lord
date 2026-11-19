@@ -1,6 +1,6 @@
 # Phase 8 Research timing and H1 compatibility
 
-**Approved timing design with 2026-11-19 owner revision.** Native schema 18 is the planned development write target. The [pre-release save policy](decisions/pre-release-development-save-policy-2026-11-19.md) supersedes the schema 17 migration proposal. Production activation belongs to [draft PR #271](https://github.com/gdg3417/Dungeon-Lord/pull/271).
+**Stage 2 implementation checkpoint with 2026-11-19 owner revision.** Native schema 18 is the development write target in this branch. The [pre-release save policy](decisions/pre-release-development-save-policy-2026-11-19.md) supersedes the schema 17 migration proposal. Production activation belongs to [draft PR #271](https://github.com/gdg3417/Dungeon-Lord/pull/271).
 
 ## 1. Purpose and owner decisions
 
@@ -131,4 +131,6 @@ Expected impact is localized to Research terms/lookup and resolver family, recog
 
 **Independent review gates.** Approve the discriminated wire format and outer schema-to-spatial mapping. Require executable evidence for exact numeric round-trip, tick intermediate staging, unknown nested member retention and worst-case byte/token budgets at both profiles. First try existing limits; if a legal boundary-sized state cannot start solely due to growth, submit measured successor-only limits before activation. A v4 context is an alternative only if a genuine new global replay dependency is demonstrated. Missing historical bytes require recovery of authenticated inputs or a separately reviewed explicit migration. They cannot be resolved by choosing current tuning.
 
-**Non-goals.** No implementation in Stage 1. Offline Research accrual, second slot, tier expansion, catalogs, Monsterology, Architecture, UI redesign, premium/backend features, global scheduling changes, H2 optimization and sub-dungeons are outside this prerequisite. Public-release backend verification remains a separate gate. Independent review is pending.
+**Qualification checkpoint.** At implementation commit `77c8da68505fb025f1adaf4c142d32c9c482fd9a`, Unity 6000.3.2f1 compiled and produced an inventory containing the eight runnable focused cases. The discovery process exited zero. The supervisor marked campaign `2fac23a2e28d4e2fa7122577c6b5f23e` incomplete because it could not prove the owned job had drained. Final preservation did not run. No tests executed. Keep the reservation and artifacts for reviewed recovery before the focused gate. Current-schema reopen, interruption, affected recovery and applicable PlayMode and Windows gates remain pending.
+
+**Non-goals.** Offline Research accrual, second slot, tier expansion, catalogs, Monsterology, Architecture, UI redesign, premium/backend features, global scheduling changes, H2 optimization and sub-dungeons are outside this prerequisite. Public-release backend verification and independent review remain separate gates.
