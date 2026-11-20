@@ -96,6 +96,8 @@ namespace DungeonBuilder.M0
                 _selectedRoomLocalContentPosition = new TileCoordinate(0, 0);
                 Check(TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.LootNodeCategoryId,
                     MvpDungeonPlacementIds.BasicLootNodeOptionId, out _, out _, out _), "research.qualification.loot");
+                ApplyHeatDelta(60); // Existing QA control, on the isolated save only.
+                Check(TrySetQaManaFromDevPanel(false), "research.qualification.defeat_fixture");
                 CaptureScenario(".waiting-for-run");
                 for (int i = 0; i < 80 && !HasValidAdventurerRun(); i++)
                     Reach(TimeService.SampleForeground() + tick);
@@ -453,25 +455,34 @@ namespace DungeonBuilder.M0
             }
             config.save.fileName = file;
             root.buildConfigJson = new TextAsset(JsonUtility.ToJson(config));
-            if (scenario == "edit-pending") root.StartCoroutine(PrepareResearchOwnerDraft());
+            if (scenario == "edit-pending" || scenario == "unaffordable")
+                root.StartCoroutine(PrepareResearchOwnerScenario(root, scenario));
             return true;
         }
 
-        private static IEnumerator PrepareResearchOwnerDraft()
+        private static IEnumerator PrepareResearchOwnerScenario(GameRoot root, string scenario)
         {
             var controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
-            for (int frame = 0; controller?.SafeRoot == null && frame < 600; frame++) yield return null;
-            if (controller?.SafeRoot != null)
+            bool ShellReady() => controller?.SafeRoot != null && root.SaveService?.CanStagePaidResearch == true;
+            for (int frame = 0; !ShellReady() && frame < 600; frame++) yield return null;
+            if (ShellReady())
             {
-                controller.EnterEdit();
-                controller.OpenRooms();
-                if (controller.SelectConstructionRoom("spatial.room.basic") && controller.World.MoveGuidanceAnchors.Any())
+                if (scenario == "unaffordable")
                 {
-                    controller.TapWorld(controller.World.MoveGuidanceAnchors.First());
-                    if (controller.ConfirmConstructionPlacement()) yield break;
+                    if (root.TrySetQaManaFromDevPanel(false)) yield break;
+                }
+                else
+                {
+                    controller.EnterEdit();
+                    controller.OpenRooms();
+                    if (controller.SelectConstructionRoom("spatial.room.basic") && controller.World.MoveGuidanceAnchors.Any())
+                    {
+                        controller.TapWorld(controller.World.MoveGuidanceAnchors.First());
+                        if (controller.ConfirmConstructionPlacement()) yield break;
+                    }
                 }
             }
-            Debug.LogError("research.qualification.owner_draft_setup");
+            Debug.LogError("research.qualification.owner_scenario_setup." + scenario);
             Application.Quit(2);
         }
 #endif
