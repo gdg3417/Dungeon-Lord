@@ -91,7 +91,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private string BindStarterSelection(byte[] bytes, string project, string slot, SpatialSerializedInputLimits limits)
         {
             var issues = new SpatialIssueCollector(limits.MaximumDiagnostics);
-            if (!ContractJson.TryParse(bytes, limits, issues, out var node) ||
+            if (!ContractJson.TryParse(bytes, limits, issues, out var node, allowWhitespace: true) ||
                 !ContractJson.ValidateShape(node, SelectionFields, issues) ||
                 !RecoveryEpisode.TryInteger(node.Fields[0].Value, out long format) || format != 1 ||
                 node.Fields[1].Value.Kind != ContractJsonKind.Boolean ||

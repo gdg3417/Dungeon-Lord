@@ -233,7 +233,7 @@ namespace DungeonBuilder.M0
 
         internal PlayerResearchActionResult StartConfiguredPaidResearch()
         {
-            var result = CreatePlayerResearchActionHandler().StartPaid();
+            var result = CreatePlayerResearchActionHandler(SavePlayerResearchTransition, paidStart: true).StartPaid();
             if (result.RecoveryRequired) ForegroundFault(result.PersistenceReason);
             RefreshOfflineSummaryLines();
             return result;
@@ -2590,7 +2590,7 @@ namespace DungeonBuilder.M0
         private PlayerResearchActionHandler CreatePlayerResearchActionHandler() =>
             CreatePlayerResearchActionHandler(SavePlayerResearchTransition);
 
-        private PlayerResearchActionHandler CreatePlayerResearchActionHandler(Action saveTransition)
+        private PlayerResearchActionHandler CreatePlayerResearchActionHandler(Action saveTransition, bool paidStart = false)
         {
             return new PlayerResearchActionHandler(
                 Save,
@@ -2605,7 +2605,7 @@ namespace DungeonBuilder.M0
                 () => IsOnline,
                 () => VerificationPending,
                 saveTransition,
-                CommitPlayerResearchTransition,
+                stage => CommitPlayerResearchTransition(stage, paidStart),
                 () => Save,
                 () => SaveService?.RequiresCanonicalRecovery == true)
             {
@@ -2616,7 +2616,7 @@ namespace DungeonBuilder.M0
             };
         }
 
-        private PlayerResearchActionResult CommitPlayerResearchTransition(Func<SaveData, PlayerResearchActionResult> stage)
+        private PlayerResearchActionResult CommitPlayerResearchTransition(Func<SaveData, PlayerResearchActionResult> stage, bool paidStart)
         {
             if (_explicitSaveDeleteQuiesced || SaveService == null)
                 return PlayerResearchActionHandler.PersistenceFailure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
@@ -2626,7 +2626,7 @@ namespace DungeonBuilder.M0
                 if (action.Succeeded && action.StateChanged)
                     MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(candidate, RunSimulationConfig, Content?.ProductionSpatialContent);
                 return action;
-            });
+            }, paidStart);
         }
 
         private bool HasValidAdventurerRun()
