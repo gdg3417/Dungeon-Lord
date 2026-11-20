@@ -27,11 +27,10 @@ namespace DungeonBuilder.M0
             public long BlockerAdmittedAt, WaiterAdmittedAt, BlockedAt, ReleasedAt, BlockerTerminalAt, BlockerTerminalOrdinal;
             public bool WaitingResumed;
             public double Mana, Heat;
-#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+            // Unity requires the same serialized report fields in the Editor and development player.
             public string ResearchRule, ResearchUnlock, ResearchProject, ResearchSlot, RecoveryContext;
             public long ResearchStartCut, ResearchEarned;
             public double ResearchWalletBefore, ResearchWalletAfterAction;
-#endif
         }
 #if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
         internal IEnumerator QualifyStarterResearch(string phase, ForegroundSmokeReport report, string destination, string previous)
@@ -101,6 +100,8 @@ namespace DungeonBuilder.M0
                 for (int i = 0; i < 80 && !HasValidAdventurerRun(); i++)
                     Reach(TimeService.SampleForeground() + tick);
                 Check(HasValidAdventurerRun(), "research.qualification.genuine_settlement");
+                Check(Save.runHistory.RecentOutcomes.All(run => !run.Success),
+                    "research.qualification.defeat_prerequisite");
                 report.RunId = Save.runHistory.LatestOutcome.RunId;
                 Check(TrySetQaManaFromDevPanel(false), "research.qualification.clear_wallet");
                 CaptureScenario(".unaffordable");
@@ -118,12 +119,16 @@ namespace DungeonBuilder.M0
                 SetOnline(false);
                 Click("openResearch");
                 Check(ActionShown("researchStart"), "research.qualification.available");
+                long protectedMana = SaveService.ResearchProtectedReserve(Save);
+                Check(protectedMana > 0, "research.qualification.protected_reserve_fixture");
                 report.ResearchWalletBefore = Save.structureRuntime.ManaReserve;
                 Click("researchStart");
                 Click("researchStart");
                 report.ResearchWalletAfterAction = Save.structureRuntime.ManaReserve;
                 Check(report.ResearchWalletAfterAction == report.ResearchWalletBefore - 10 && Save.researchProgress != null,
                     "research.qualification.single_debit");
+                Check(report.ResearchWalletAfterAction >= protectedMana &&
+                    SaveService.ResearchProtectedReserve(Save) == protectedMana, "research.qualification.protected_reserve");
                 report.ResearchRule = Save.researchProgress.RuleSourceIdUsed;
                 report.ResearchProject = Save.researchProgress.ProjectId;
                 report.ResearchSlot = Save.researchProgress.SlotId;
@@ -155,6 +160,12 @@ namespace DungeonBuilder.M0
                         Save.researchProgress.StartClosedThrough == prior.ResearchStartCut &&
                         Save.researchProgress.ProgressUnits == prior.ResearchEarned && !ActionShown("researchClaim"),
                         "research.qualification.reopen_progress");
+                    ApplyPauseState(true);
+                    yield return new WaitForSecondsRealtime(1.1f);
+                    var resume = PrepareForegroundQualification();
+                    while (resume.MoveNext()) yield return resume.Current;
+                    Check(Save.researchProgress.ProgressUnits == prior.ResearchEarned,
+                        "research.qualification.paused_wall_time");
                     long start = Save.researchProgress.StartClosedThrough;
                     Reach(start + 113L * unitsPerSecond);
                     Check(Save.researchProgress.ProgressUnits == 113L * unitsPerSecond && !ActionShown("researchClaim") &&
@@ -162,6 +173,7 @@ namespace DungeonBuilder.M0
                     Reach(start + 123L * unitsPerSecond);
                     Check(ActionShown("researchClaim") && Save.researchProgress.ProgressUnits == 120L * unitsPerSecond,
                         "research.qualification.ready");
+                    CaptureScenario(".ready");
                     report.ResearchEarned = (long)Save.researchProgress.ProgressUnits;
                     report.ResearchWalletBefore = Save.structureRuntime.ManaReserve;
                     Click("researchClaim");
@@ -419,7 +431,8 @@ namespace DungeonBuilder.M0
             var root = GameRoot.Instance;
             string scenario = index + 1 < args.Length ? args[index + 1] : null;
             if (root == null || !IsResearchProduct(Application.productName) ||
-                (scenario != "waiting-for-run" && scenario != "unaffordable" && scenario != "available"))
+                (scenario != "waiting-for-run" && scenario != "unaffordable" && scenario != "available" &&
+                 scenario != "in-progress" && scenario != "ready" && scenario != "completed" && scenario != "edit-pending"))
             {
                 Application.Quit(2);
                 return true;
@@ -440,7 +453,26 @@ namespace DungeonBuilder.M0
             }
             config.save.fileName = file;
             root.buildConfigJson = new TextAsset(JsonUtility.ToJson(config));
+            if (scenario == "edit-pending") root.StartCoroutine(PrepareResearchOwnerDraft());
             return true;
+        }
+
+        private static IEnumerator PrepareResearchOwnerDraft()
+        {
+            var controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+            for (int frame = 0; controller?.SafeRoot == null && frame < 600; frame++) yield return null;
+            if (controller?.SafeRoot != null)
+            {
+                controller.EnterEdit();
+                controller.OpenRooms();
+                if (controller.SelectConstructionRoom("spatial.room.basic") && controller.World.MoveGuidanceAnchors.Any())
+                {
+                    controller.TapWorld(controller.World.MoveGuidanceAnchors.First());
+                    if (controller.ConfirmConstructionPlacement()) yield break;
+                }
+            }
+            Debug.LogError("research.qualification.owner_draft_setup");
+            Application.Quit(2);
         }
 #endif
         internal static Func<double> ReopenClock(string[] args, string product, string savePath)
