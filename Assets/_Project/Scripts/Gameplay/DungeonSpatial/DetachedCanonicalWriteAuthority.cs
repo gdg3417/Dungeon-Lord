@@ -77,7 +77,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             this.floorConstructionProfiles = floorConstructionProfiles;
             this.floorConstructionResearch = floorConstructionResearch;
             this.economyModifiers = economyModifiers?.ToArray() ?? Array.Empty<FormulaModifier>();
-            if (CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction) {
+            if (CanonicalSaveSchemaVersions.HasPreciseTime(CanonicalSaveSchemaVersions.CurrentWritableTarget)) {
                 var bound = context?.RecoveryInputs;
                 recoveryBindingsValid = bound != null && ReferenceEquals(production, context.Production) &&
                     compatibility != null && compatibility.CanonicalBytes.AsSpan().SequenceEqual(context.Compatibility.CanonicalBytes) &&
@@ -249,7 +249,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         public DetachedCanonicalWriteResult SaveRecognizedState(string activePath,
             ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
-            SaveData currentRuntime)
+            SaveData currentRuntime) => SaveRecognizedStateCore(activePath, fileSystem, session, currentRuntime, false);
+
+        internal DetachedCanonicalWriteResult SaveResearchState(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session, SaveData currentRuntime) =>
+            SaveRecognizedStateCore(activePath, fileSystem, session, currentRuntime, true);
+
+        private DetachedCanonicalWriteResult SaveRecognizedStateCore(string activePath,
+            ISpatialMigrationFileSystem fileSystem, DetachedCanonicalSaveSession session,
+            SaveData currentRuntime, bool researchTransition)
         {
             if (fileSystem == null || session == null || currentRuntime == null || context == null ||
                 limits == null || production == null || compatibility == null || configuration == null)
@@ -260,8 +268,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedRecognizedSaveStateSnapshotResult snapshot =
                 DetachedRecognizedSaveStateSnapshot.Capture(currentRuntime, limits);
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
-            DetachedCanonicalSaveSessionResult prepared =
-                session.PrepareLiveReplacement(snapshot, owned.State);
+            var prepared = researchTransition
+                ? session.PrepareResearchReplacement(snapshot, owned.State)
+                : session.PrepareLiveReplacement(snapshot, owned.State);
             return PrepareAndPersist(activePath, fileSystem, session, prepared, false);
         }
 

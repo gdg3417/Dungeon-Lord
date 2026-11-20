@@ -15,7 +15,7 @@ namespace DungeonBuilder.M0
         private bool recoveryPublicationUncertain;
         private RecoveryGrantReceipt pendingRecoveryReceipt;
         internal RecoveryEpisodeReport RecoveryReport { get; private set; }
-        private static bool UsesAtomicRecovery => CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
+        private static bool UsesAtomicRecovery => CanonicalSaveSchemaVersions.HasPreciseTime(CanonicalSaveSchemaVersions.CurrentWritableTarget);
         internal bool LastLoadCreatedNative { get; private set; }
 
         private void RetainPublication(DetachedCanonicalSaveSession predecessor, DetachedCanonicalSaveSession candidate, TimeProvenance time)

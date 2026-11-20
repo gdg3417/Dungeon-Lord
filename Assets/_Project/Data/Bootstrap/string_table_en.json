@@ -3908,6 +3908,8 @@
     {"key": "ui.branch.content.next", "text": "Next Assigned Corridor Content"},
     {"key": "ui.branch.content.unassign", "text": "Unassign Selected Corridor Content"},
     {"key": "ui.branch.content.unassign.success", "text": "The corridor content was returned to custody at no mana cost."},
+    {"key": "ui.save.obsolete_development_version", "text": "This development save uses an older format. Start a fresh save using a clean save path or the explicit reset action."},
+    {"key": "ui.player_research.insufficient_usable_mana", "text": "Not enough usable mana to start Research."},
     {"key": "ui.branch.qa.research.set", "text": "QA: Complete Basic Branching"},
     {"key": "ui.branch.qa.research.clear", "text": "QA: Clear Basic Branching"},
     {"key": "ui.branch.qa.research.set.success", "text": "Basic Branching completion was established and saved for QA."},

@@ -5,7 +5,7 @@
 Follow `docs/development/codex-development-rules.md`, the applicable approved specifications, `Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md`, and current dated amendments. Historical sprint gates apply only to work that remains in their scope.
 
 1. Preserve deterministic simulation, stable content IDs, and canonical ordering.
-2. Keep state changes atomic with one writable authority per state domain; preserve versioned saves, explicit migrations, historical compatibility, and fail-closed recovery.
+2. Keep state changes atomic with one writable authority per state domain. Preserve versioned saves, explicit migrations for supported saves, and fail-closed recovery. See the [pre-release development save policy](docs/planning/decisions/pre-release-development-save-policy-2026-11-19.md).
 3. Keep validation side-effect-free, use stable reason codes, and test invalid states.
 4. Keep gameplay tuning in content/config tables or typed assets; runtime consumes injected or loaded config. Inline fake values are test-only and clearly scoped.
 5. Use stable localization keys for all player-facing text; follow Spec 27 fallback behavior and support future language packs without code changes. Developer-only diagnostics may use English as allowed by the canonical rules.

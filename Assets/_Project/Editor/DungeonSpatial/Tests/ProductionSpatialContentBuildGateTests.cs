@@ -270,13 +270,11 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 ["migration contract"] = data => SetFrozenContractVersion(data, 2),
                 ["migration id"] = data => data.MigrationProfiles[0].ProfileId = "compat.profile.migration.unauthorized",
                 ["migration version"] = data => data.MigrationProfiles[0].ProfileVersion = 2,
-                ["starter target"] = data => SetCurrentTarget(data,
-                    CanonicalSaveSchemaVersions.CurrentWritableTarget + 1),
+                ["replaced current spatial registration"] = data => SetCurrentRegistrationTarget(data,
+                    CanonicalSaveSchemaVersions.ResearchTimingIntroduction),
                 ["starter contract"] = data => SetFrozenContractVersion(data, 2),
                 ["starter id"] = data => data.StarterProfiles[0].ProfileId = "compat.profile.starter.unauthorized",
                 ["starter version"] = data => data.StarterProfiles[0].ProfileVersion = 2,
-                ["contract target"] = data => SetCurrentTarget(data,
-                    CanonicalSaveSchemaVersions.CurrentWritableTarget + 1),
                 ["contract version"] = data => SetFrozenContractVersion(data, 2),
                 ["geometry id"] = data => PointStarterAtAdditionalGeometry(data,
                     "compat.geometry.alternate", 1),
@@ -706,13 +704,12 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial.Tests
                 .CanonicalLayoutContractVersion = version;
         }
 
-        private static void SetCurrentTarget(SpatialLayoutCompatibilityProfilesData data, int target)
+        private static void SetCurrentRegistrationTarget(SpatialLayoutCompatibilityProfilesData data, int target)
         {
-            data.StarterProfiles.Single(value =>
-                    value.TargetSchemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget)
+            int registered = CanonicalSaveSchemaVersions.SpatialRegistration(CanonicalSaveSchemaVersions.CurrentWritableTarget);
+            data.StarterProfiles.Single(value => value.TargetSchemaVersion == registered)
                 .TargetSchemaVersion = target;
-            data.ContractSelections.Single(value =>
-                    value.TargetSchemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget)
+            data.ContractSelections.Single(value => value.TargetSchemaVersion == registered)
                 .TargetSchemaVersion = target;
         }
 

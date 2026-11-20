@@ -55,6 +55,10 @@ namespace DungeonBuilder.M0
         public const string ClaimSucceededKey = "ui.player_research.claim_succeeded";
         public const string PersistenceFailedKey = "ui.player_research.save_failed";
 
+        internal ResearchTimingRules TimingRules { get; set; }
+        internal Func<bool> PaidStartAllowed { get; set; }
+        internal Func<SaveData, long> ProtectedResearchReserve { get; set; }
+
         private readonly SaveData _initialSave;
         private readonly Func<SaveData> _currentSave;
         private readonly Func<bool> _recoveryRequired;
@@ -116,7 +120,9 @@ namespace DungeonBuilder.M0
 
         // The transaction owner prepares foreground authority before invoking the
         // staging callback. Only its durable result may acknowledge a player action.
-        public PlayerResearchActionResult Start() => Commit(candidate => ForCandidate(candidate).StageStart());
+        public PlayerResearchActionResult Start() => Commit(candidate => ForCandidate(candidate).StageStart(false));
+
+        internal PlayerResearchActionResult StartPaid() => Commit(candidate => ForCandidate(candidate).StageStart(true));
 
         public PlayerResearchActionResult Claim() => Commit(candidate => ForCandidate(candidate).StageClaim());
 
@@ -125,7 +131,12 @@ namespace DungeonBuilder.M0
 
         private PlayerResearchActionHandler ForCandidate(SaveData candidate) => new PlayerResearchActionHandler(
             candidate, _pendingConfig, _progressConfig, _eligibilityConfig, _claimConfig, _verificationConfig,
-            _configuredProjectId, _restrictedActionGate, _hasValidRun, _isOnline, _verificationPending, null);
+            _configuredProjectId, _restrictedActionGate, _hasValidRun, _isOnline, _verificationPending, null)
+        {
+            TimingRules = TimingRules,
+            PaidStartAllowed = PaidStartAllowed,
+            ProtectedResearchReserve = ProtectedResearchReserve
+        };
 
         internal static PlayerResearchActionResult PersistenceFailure(string reason) => new PlayerResearchActionResult
         {
@@ -134,9 +145,10 @@ namespace DungeonBuilder.M0
                 ? DetachedCanonicalWriteAuthority.RecoveryRequiredReason : PersistenceFailedKey
         };
 
-        private PlayerResearchActionResult StageStart()
+        private PlayerResearchActionResult StageStart(bool paid)
         {
-            PlayerResearchActionResult state = ResolveState();
+            var state = paid ? FromAuthority(ResolveAuthority(RunHistoryState.HasCompletedAdventurerRun(_save.runHistory)),
+                true, false) : ResolveState();
             if (state.State == PlayerResearchState.InProgress || state.State == PlayerResearchState.ReadyToClaim)
                 return Result(false, false, state.State, AlreadyActiveKey, state.ProgressUnits, state.RequiredProgressUnits);
             if (state.State != PlayerResearchState.Available || state.Authority == null || !state.Authority.CanStart)
@@ -148,20 +160,44 @@ namespace DungeonBuilder.M0
             if (!pending.RuleResolved || !string.Equals(pending.ProjectId, _configuredProjectId, StringComparison.Ordinal))
                 return Result(false, false, PlayerResearchState.Blocked, BlockedInvalidKey, state.ProgressUnits, state.RequiredProgressUnits);
 
+            ResearchTimingRule rule = null;
+            long start = 0;
+            if (paid) {
+                var scheduler = _save.livingDungeon?.Scheduler;
+                if (PaidStartAllowed?.Invoke() != true || scheduler == null ||
+                    scheduler.ClosedThrough < 0 || scheduler.AcceptedThrough != scheduler.ClosedThrough ||
+                    _save.timeProvenance?.Episode != null)
+                    return PersistenceFailure("living.foreground.boundary_pending");
+                if (TimingRules == null || TimingRules.Select(pending.ProjectId, out rule) != null)
+                    return PersistenceFailure(ResearchTimingRules.Disabled);
+                if (rule.SlotId != pending.SlotId || ProtectedResearchReserve == null || _save.structureRuntime == null)
+                    return PersistenceFailure(ResearchTimingRules.Mismatch);
+                long reserve = ProtectedResearchReserve(_save);
+                double wallet = _save.structureRuntime.ManaReserve;
+                double remaining = wallet - rule.ManaCost;
+                if (!double.IsFinite(wallet) || wallet - remaining != rule.ManaCost || remaining < reserve)
+                    return Result(false, false, PlayerResearchState.Blocked, "ui.player_research.insufficient_usable_mana", 0, rule.RequiredUnits);
+                start = scheduler.ClosedThrough;
+                _save.structureRuntime.ManaReserve = remaining;
+            }
+
             _save.researchPending = new ResearchPendingState { SlotId = pending.SlotId, ProjectId = pending.ProjectId };
             _save.researchProgress = new ResearchProgressState
             {
                 SlotId = pending.SlotId,
                 ProjectId = pending.ProjectId,
-                RuleSourceIdUsed = _progressConfig.ruleSourceId
+                RuleSourceIdUsed = rule?.Reference ?? _progressConfig.ruleSourceId,
+                StartClosedThrough = start
             };
             PlayerResearchActionResult started = FromAuthority(ResolveAuthority(), true, true);
             started.FeedbackLocalizationKey = StartSucceededKey;
+            started.WouldChargeCosts = paid;
             return started;
         }
 
         public PlayerResearchActionResult ApplyCompletionPendingIfEligible()
         {
+            if (ResearchTimingRules.IsPaidReference(_save?.researchProgress?.RuleSourceIdUsed)) return ResolveState();
             PlayerResearchActionResult state = ResolveState();
             if (state.State != PlayerResearchState.InProgress && state.State != PlayerResearchState.ReadyToClaim) return state;
             ResearchCompletionPendingApplySummary apply = ResearchCompletionPendingApplyResolver.Resolve(
@@ -178,6 +214,7 @@ namespace DungeonBuilder.M0
 
         public PlayerResearchActionResult ApplyActiveTick(long elapsedSeconds)
         {
+            if (ResearchTimingRules.IsPaidReference(_save?.researchProgress?.RuleSourceIdUsed)) return ResolveState();
             PlayerResearchActionResult state = ResolveState();
             if (state.State != PlayerResearchState.InProgress) return state;
             ResearchProgressApplySummary progress = ResearchProgressApplyResolver.Resolve(
@@ -207,7 +244,7 @@ namespace DungeonBuilder.M0
             }
 
             ResearchCompletionClaimApplySummary claim = ResearchCompletionClaimApplyResolver.Resolve(
-                _save.researchPending, _save.researchProgress, _save.completedResearch, _eligibilityConfig, _claimConfig);
+                _save.researchPending, _save.researchProgress, _save.completedResearch, EligibilityForSave(), _claimConfig);
             if (!claim.WouldRecordCompletedResearch)
                 return Result(false, false, PlayerResearchState.Blocked, NotReadyKey, state.ProgressUnits, state.RequiredProgressUnits);
 
@@ -227,7 +264,9 @@ namespace DungeonBuilder.M0
             return claimed;
         }
 
-        public PlayerResearchAuthoritySummary ResolveAuthority()
+        public PlayerResearchAuthoritySummary ResolveAuthority() => ResolveAuthority(HasValidRun());
+
+        private PlayerResearchAuthoritySummary ResolveAuthority(bool hasValidRun)
         {
             if (_recoveryRequired?.Invoke() == true)
                 return new PlayerResearchAuthoritySummary { RuleResolved = true,
@@ -236,8 +275,21 @@ namespace DungeonBuilder.M0
             GateEvaluationResult startGate = EvaluateGate(RestrictedActionType.ResearchStart);
             GateEvaluationResult claimGate = EvaluateGate(RestrictedActionType.ResearchComplete);
             return PlayerResearchClaimAuthorityResolver.Resolve(
-                _configuredProjectId, HasValidRun(), _save?.researchPending, _save?.researchProgress, _save?.completedResearch,
-                _pendingConfig, _progressConfig, _eligibilityConfig, _claimConfig, _verificationConfig, startGate, claimGate);
+                _configuredProjectId, hasValidRun, _save?.researchPending, _save?.researchProgress, _save?.completedResearch,
+                _pendingConfig, _progressConfig, EligibilityForSave(), _claimConfig, _verificationConfig, startGate, claimGate);
+        }
+
+        private ResearchCompletionEligibilityScaffoldConfig EligibilityForSave()
+        {
+            var progress = _save?.researchProgress;
+            if (!ResearchTimingRules.IsPaidReference(progress?.RuleSourceIdUsed)) return _eligibilityConfig;
+            if (TimingRules == null || TimingRules.Resolve(progress.RuleSourceIdUsed, out var rule) != null ||
+                rule.ProjectId != progress.ProjectId || rule.SlotId != progress.SlotId || _eligibilityConfig == null)
+                return null;
+            return new ResearchCompletionEligibilityScaffoldConfig {
+                enabled = _eligibilityConfig.enabled, projectId = rule.ProjectId,
+                ruleSourceId = _eligibilityConfig.ruleSourceId, requiredProgressUnits = rule.RequiredUnits
+            };
         }
 
         private bool HasValidRun() => _hasValidRun != null && _hasValidRun();

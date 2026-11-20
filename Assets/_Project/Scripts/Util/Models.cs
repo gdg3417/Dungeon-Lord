@@ -958,6 +958,7 @@ namespace DungeonBuilder.M0
         public double ProgressUnits = 0d;
         public bool CompletionPending = false;
         public string RuleSourceIdUsed;
+        public long StartClosedThrough;
     }
 
     [Serializable]

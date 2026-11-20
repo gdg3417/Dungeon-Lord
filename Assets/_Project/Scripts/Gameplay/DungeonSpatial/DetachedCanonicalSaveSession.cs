@@ -18,8 +18,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
     public sealed class DetachedRecognizedSaveStateSnapshot
     {
+        internal static readonly string[] ResearchProgressMembers =
+            { "SlotId", "ProjectId", "ProgressUnits", "CompletionPending", "RuleSourceIdUsed", "StartClosedThrough" };
         private readonly Dictionary<string, byte[]> values;
-        private DetachedRecognizedSaveStateSnapshot(Dictionary<string, byte[]> source) { values = source; }
+        internal bool HasPaidResearch { get; }
+
+        private DetachedRecognizedSaveStateSnapshot(Dictionary<string, byte[]> source, bool hasPaidResearch)
+        {
+            values = source;
+            HasPaidResearch = hasPaidResearch;
+        }
 
         public static DetachedRecognizedSaveStateSnapshotResult Capture(SaveData source,
             SaveSpatialMigrationLimitsProfile limits)
@@ -40,19 +48,44 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     if (!DetachedCanonicalSaveSession.IsLiveRecognizedMember(field.Key)) continue;
                     var writer = new ContractJsonWriter(limits.Canonical.Serialized);
-                    DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
+                    if (field.Key == "researchProgress" && source.researchProgress != null)
+                        WriteResearchProgress(writer, field.Value, source.researchProgress);
+                    else DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
                     result.Add(field.Key, writer.Finish());
                 }
                 PreserveNullableState(result, "researchPending", source.researchPending);
                 PreserveNullableState(result, "researchProgress", source.researchProgress);
                 PreserveNullableState(result, "lastOfflineSummary", source.lastOfflineSummary);
                 return new DetachedRecognizedSaveStateSnapshotResult(
-                    new DetachedRecognizedSaveStateSnapshot(result), null);
+                    new DetachedRecognizedSaveStateSnapshot(result,
+                        ResearchTimingRules.IsPaidReference(source.researchProgress?.RuleSourceIdUsed)), null);
             }
             catch (ContractJsonBudgetException)
             { return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason); }
             catch
             { return Failure(DetachedWholeSaveCandidateSerializer.CandidateInvalidReason); }
+        }
+
+        private static void WriteResearchProgress(ContractJsonWriter writer, ContractJsonNode node, ResearchProgressState progress)
+        {
+            bool paid = ResearchTimingRules.IsPaidReference(progress.RuleSourceIdUsed);
+            if (paid && (!double.IsFinite(progress.ProgressUnits) || progress.ProgressUnits < 0 ||
+                progress.ProgressUnits > ResearchTimingRule.MaximumExactUnits ||
+                Math.Truncate(progress.ProgressUnits) != progress.ProgressUnits))
+                throw new ArgumentException(ResearchTimingRules.StateInvalid);
+
+            writer.Node(); writer.Token("{");
+            for (int index = 0; index < ResearchProgressMembers.Length - (paid ? 0 : 1); index++) {
+                string name = ResearchProgressMembers[index];
+                if (index != 0) writer.Token(",");
+                writer.String(name); writer.Token(":");
+                if (paid && name == "ProgressUnits") {
+                    writer.Node(); writer.Token(((long)progress.ProgressUnits).ToString(System.Globalization.CultureInfo.InvariantCulture));
+                } else if (name == "StartClosedThrough") {
+                    writer.Node(); writer.Token(progress.StartClosedThrough.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                } else DetachedCompleteSaveContract.WriteCanonicalNode(writer, node.Fields.Single(field => field.Key == name).Value);
+            }
+            writer.Token("}");
         }
 
         internal bool TryGet(string name, out byte[] value)
@@ -257,6 +290,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 corridorContent, branchKnowledge, floorKnowledge, monsterContinuity: monsterContinuity);
         }
 
+        internal DetachedCanonicalSaveSessionResult PrepareResearchReplacement(
+            DetachedRecognizedSaveStateSnapshotResult recognizedState, DetachedCanonicalSpatialSaveState replacement) =>
+            recognizedState?.IsSuccess == true
+                ? PrepareReplacement(recognizedState.Snapshot, replacement, null, null, null, null, researchTransition: true)
+                : Failure(recognizedState?.Reason ?? DetachedWholeSaveCandidateSerializer.CandidateInvalidReason);
+
         private DetachedCanonicalSaveSessionResult PrepareReplacement(
             DetachedRecognizedSaveStateSnapshot recognizedState,
             DetachedCanonicalSpatialSaveState replacement, StructuralInvestmentRecord[] investment,
@@ -266,7 +305,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             LivingDungeonState livingDungeon = null, bool manualRun = false,
             MonsterContinuityState monsterContinuity = null, DurableSettlementHistory settlement = null, bool foregroundStage = false,
             LivingDungeonForegroundLineage.ReleasePermit releases = null, CanonicalTimeTransition time = null,
-            ForegroundPredecessor foregroundPredecessor = null)
+            ForegroundPredecessor foregroundPredecessor = null, bool researchTransition = false)
         {
             SpatialContractResult<CanonicalSpatialSaveSerializer.SerializedMembers> spatial =
                 CanonicalSpatialSaveSerializer.SerializeMembers(replacement, limits.Canonical);
@@ -282,6 +321,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!ContractJson.Int(root.Fields[1].Value, out int schema) ||
                     !TimeProvenance.TryRead(primary, schema, out var priorTime) ||
                     time != null && !time.Matches(currentBytes, priorTime)) return Failure(RecoveryEpisode.Invalid);
+                if (schema == CanonicalSaveSchemaVersions.ResearchTimingIntroduction && recognizedState != null && !researchTransition)
+                {
+                    bool previouslyPaid = TryFind(primary, "researchProgress", out var progress) &&
+                        progress.Kind == ContractJsonKind.Object && TryFind(progress, "RuleSourceIdUsed", out var rule) &&
+                        ResearchTimingRules.IsPaidReference(rule.Text);
+                    if (previouslyPaid != recognizedState.HasPaidResearch) return Failure(ResearchTimingRules.StateInvalid);
+                }
                 var nextTime = time?.Successor ?? priorTime;
                 if (settlement != null && !settlement.Matches(currentBytes, livingDungeon, limits.Canonical.Serialized))
                     return Failure("living.settlement.history_invalid");
@@ -332,7 +378,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         valueBytes = SerializeNode(retained);
                     }
                     else if (!recognizedState.TryGet(name, out valueBytes)) continue;
-                    if (schema == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction && name == "lastSavedUtcUnix")
+                    if (schema == CanonicalSaveSchemaVersions.ResearchTimingIntroduction &&
+                        recognizedState != null && (name == "researchPending" || name == "researchProgress") &&
+                        TryFind(primary, name, out var priorResearch) && priorResearch.Kind == ContractJsonKind.Object)
+                    {
+                        valueBytes = MergeResearchExtensions(name, priorResearch, valueBytes);
+                        if (valueBytes == null) return Failure(ResearchTimingRules.StateInvalid);
+                    }
+                    if (CanonicalSaveSchemaVersions.HasPreciseTime(schema) && name == "lastSavedUtcUnix")
                     {
                         var timestampIssues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
                         if (!ContractJson.TryParse(valueBytes, limits.Canonical.Serialized, timestampIssues, out var timestamp) ||
@@ -502,6 +555,43 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { return Failure(DetachedWholeSaveCandidateSerializer.WorkloadExceededReason); }
             catch
             { return Failure(DetachedWholeSaveCandidateSerializer.UnknownMemberUnpreservableReason); }
+        }
+
+        private byte[] MergeResearchExtensions(string name, ContractJsonNode prior, byte[] nextBytes)
+        {
+            var issues = new SpatialIssueCollector(limits.Canonical.Serialized.MaximumDiagnostics);
+            if (!ContractJson.TryParse(nextBytes, limits.Canonical.Serialized, issues, out var next) ||
+                next.Kind != ContractJsonKind.Object) return nextBytes;
+            bool SameMember(string key) => TryFind(prior, key, out var previous) &&
+                TryFind(next, key, out var replacement) && previous.Kind == replacement.Kind &&
+                previous.Text == replacement.Text;
+            bool sameProject = SameMember("ProjectId") && SameMember("SlotId");
+            if (name == "researchProgress" && TryFind(prior, "RuleSourceIdUsed", out var source) &&
+                ResearchTimingRules.IsPaidReference(source.Text) &&
+                (!sameProject || !SameMember("RuleSourceIdUsed") || !SameMember("StartClosedThrough")))
+                return null;
+            if (!sameProject) return nextBytes;
+
+            var known = name == "researchProgress" ? DetachedRecognizedSaveStateSnapshot.ResearchProgressMembers
+                : new[] { "SlotId", "ProjectId" };
+            if (prior.Fields.All(field => known.Contains(field.Key, StringComparer.Ordinal))) return nextBytes;
+
+            var writer = new ContractJsonWriter(limits.Canonical.Serialized);
+            writer.Node(); writer.Token("{");
+            bool first = true;
+            foreach (var field in prior.Fields) {
+                var value = field.Value;
+                if (known.Contains(field.Key, StringComparer.Ordinal) && !TryFind(next, field.Key, out value)) continue;
+                WriteField(writer, field.Key, value, first);
+                first = false;
+            }
+            foreach (var field in next.Fields) {
+                if (TryFind(prior, field.Key, out _)) continue;
+                WriteField(writer, field.Key, field.Value, first);
+                first = false;
+            }
+            writer.Token("}");
+            return writer.Finish();
         }
 
         private byte[] SerializeNode(ContractJsonNode node)

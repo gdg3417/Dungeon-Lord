@@ -241,7 +241,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public static bool IsAuthorized(SpatialLayoutCompatibilityProfilesData data)
         {
             int legacyMaximum = SaveMigration.LegacyCompatibilitySchemaVersion;
-            int targetSchemaVersion = SaveMigration.LatestSchemaVersion;
+            int targetSchemaVersion = CanonicalSaveSchemaVersions.SpatialRegistration(SaveMigration.LatestSchemaVersion);
             int migrationTarget = CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget;
             if (data == null || legacyMaximum < MinimumLegacySchemaVersion ||
                 targetSchemaVersion <= legacyMaximum) return false;
