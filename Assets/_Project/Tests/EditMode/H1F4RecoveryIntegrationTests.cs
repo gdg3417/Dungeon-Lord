@@ -390,7 +390,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 (reference, reference.Replace(".v1", ".v01"), ResearchTimingRules.Invalid),
                 (reference, ReleaseKey + "." + new string('0', 64), ResearchTimingRules.Mismatch),
                 ("\"StartClosedThrough\":7000", "\"StartClosedThrough\":7001", ResearchTimingRules.StateInvalid),
-                ("\"StartClosedThrough\":7000", "\"StartClosedThrough\":-1", ResearchTimingRules.StateInvalid),
                 ("\"StartClosedThrough\":7000", "\"StartClosedThrough\":7000.0", ResearchTimingRules.StateInvalid),
                 (",\"StartClosedThrough\":7000", "", ResearchTimingRules.StateInvalid),
                 ("\"ProgressUnits\":0", "\"ProgressUnits\":0.5", ResearchTimingRules.StateInvalid),
@@ -404,6 +403,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(Encoding.UTF8.GetBytes(invalid), context).Reason,
                     Is.EqualTo(expected), newValue);
             }
+            // A matching accumulator cannot legitimize a negative Start boundary.
+            long closed = scope.Root.Save.livingDungeon.Scheduler.ClosedThrough;
+            Assert.That(closed, Is.EqualTo(7000));
+            Assert.That(paidRule.EarnedThrough(-1, closed, 10000), Is.EqualTo(1));
+            var negativeStart = json.Replace("\"StartClosedThrough\":7000", "\"StartClosedThrough\":-1")
+                .Replace("\"ProgressUnits\":0", "\"ProgressUnits\":1");
+            Assert.That(negativeStart, Does.Contain("\"StartClosedThrough\":-1").And.Contain("\"ProgressUnits\":1"));
+            Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(Encoding.UTF8.GetBytes(negativeStart), context).Reason,
+                Is.EqualTo(ResearchTimingRules.StateInvalid));
             Assert.That(DetachedCompleteSaveContract.ParseValidateAndRoundTrip(before, ResearchContext(h.F, Bundle(h.F))).Reason,
                 Is.EqualTo(ResearchTimingRules.Missing));
 

@@ -128,7 +128,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (rule.ProjectId != progress.ProjectId || rule.SlotId != progress.SlotId) return ResearchTimingRules.Mismatch;
             if (cut.Key != "StartClosedThrough" ||
                 !RecoveryEpisode.TryInteger(cut.Value, out long start) || start != progress.StartClosedThrough ||
-                living?.Scheduler == null || start > living.Scheduler.ClosedThrough)
+                living?.Scheduler == null || start < 0 || start > living.Scheduler.ClosedThrough)
                 return invalid;
             var known = wire.Fields.Where(field => DetachedRecognizedSaveStateSnapshot.ResearchProgressMembers
                 .Any(member => string.Equals(field.Key, member, StringComparison.OrdinalIgnoreCase))).ToArray();
