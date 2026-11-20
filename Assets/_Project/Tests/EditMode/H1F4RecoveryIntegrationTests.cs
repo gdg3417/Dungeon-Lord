@@ -148,6 +148,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var h = PreparePaidStart(native: true);
             Assert.That(h.Service.LastLoadCreatedNative, Is.True);
+            byte[] productionProfiles = File.ReadAllBytes(SpatialLayoutCompatibilityProfiles.ProductionPath);
+            CollectionAssert.AreEqual(productionProfiles, h.Inputs.Identity.GetInput(9));
+            CollectionAssert.AreEqual(productionProfiles, h.Inputs.Compatibility.CanonicalBytes);
+            var invalidRegistration = h.Inputs.Compatibility.Value;
+            invalidRegistration.ContractSelections.Single(item =>
+                item.TargetSchemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction)
+                .TargetSchemaVersion = CanonicalSaveSchemaVersions.ResearchTimingIntroduction;
+            Assert.That(CompatibilityReleasePolicy.IsAuthorized(invalidRegistration), Is.False);
             using var scope = new RootScope(h);
             scope.Pulse(107);
             double before = scope.Root.Save.structureRuntime.ManaReserve;
