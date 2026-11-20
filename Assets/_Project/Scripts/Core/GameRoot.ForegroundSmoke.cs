@@ -30,7 +30,7 @@ namespace DungeonBuilder.M0
 #if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
             public string ResearchRule, ResearchUnlock, ResearchProject, ResearchSlot, RecoveryContext;
             public long ResearchStartCut, ResearchEarned;
-            public double ResearchWalletBefore;
+            public double ResearchWalletBefore, ResearchWalletAfterAction;
 #endif
         }
 #if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
@@ -41,6 +41,8 @@ namespace DungeonBuilder.M0
             var prepare = PrepareForegroundQualification();
             while (prepare.MoveNext()) yield return prepare.Current;
             var controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+            for (int frame = 0; controller?.SafeRoot == null && frame < 120; frame++) yield return null;
+            if (controller?.SafeRoot == null) throw new InvalidOperationException("research.qualification.production_shell");
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             var advance = QualificationAdvance();
             int unitsPerSecond = SaveService.ForegroundConfiguration.UnitsPerSecond;
@@ -85,7 +87,8 @@ namespace DungeonBuilder.M0
                     ui.Q<Label>("researchDuration").text.Contains("120"), "research.qualification.authored_terms");
                 Click("researchDungeon");
                 Check(TrySetQaManaFromDevPanel(true), "research.qualification.funding");
-                if (Save.validatedCanonicalSpatialState.Floors.Length == 0)
+                if (Save.validatedCanonicalSpatialState.Floors.Length == 0 ||
+                    Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length == 0)
                     Check(TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.RoomCategoryId,
                         MvpDungeonPlacementIds.BasicRoomOptionId, out _, out _, out _), "research.qualification.room");
                 _selectedRoomLocalContentPosition = new TileCoordinate(1, 1);
@@ -118,7 +121,8 @@ namespace DungeonBuilder.M0
                 report.ResearchWalletBefore = Save.structureRuntime.ManaReserve;
                 Click("researchStart");
                 Click("researchStart");
-                Check(Save.structureRuntime.ManaReserve == report.ResearchWalletBefore - 10 && Save.researchProgress != null,
+                report.ResearchWalletAfterAction = Save.structureRuntime.ManaReserve;
+                Check(report.ResearchWalletAfterAction == report.ResearchWalletBefore - 10 && Save.researchProgress != null,
                     "research.qualification.single_debit");
                 report.ResearchRule = Save.researchProgress.RuleSourceIdUsed;
                 report.ResearchProject = Save.researchProgress.ProjectId;
@@ -162,14 +166,16 @@ namespace DungeonBuilder.M0
                     report.ResearchWalletBefore = Save.structureRuntime.ManaReserve;
                     Click("researchClaim");
                     Click("researchClaim");
-                    Check(Save.structureRuntime.ManaReserve == report.ResearchWalletBefore, "research.qualification.claim_wallet");
+                    report.ResearchWalletAfterAction = Save.structureRuntime.ManaReserve;
+                    Check(report.ResearchWalletAfterAction == report.ResearchWalletBefore, "research.qualification.claim_wallet");
                 }
                 if (phase == "research-finished")
                 {
                     report.ResearchWalletBefore = Save.structureRuntime.ManaReserve;
                     Click("researchClaim");
                     Click("researchStart");
-                    Check(Save.structureRuntime.ManaReserve == report.ResearchWalletBefore, "research.qualification.no_repeat_debit");
+                    report.ResearchWalletAfterAction = Save.structureRuntime.ManaReserve;
+                    Check(report.ResearchWalletAfterAction == report.ResearchWalletBefore, "research.qualification.no_repeat_debit");
                 }
                 var loop = ResolveMvpPlayerLoopSummary();
                 Check(Save.researchPending == null && Save.researchProgress == null &&
