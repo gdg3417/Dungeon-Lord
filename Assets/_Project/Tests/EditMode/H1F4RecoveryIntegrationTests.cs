@@ -90,6 +90,53 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private const string ReleaseKey = "research.timing.adventurer_analysis.v1";
 
         [Test]
+        public void RecoveryBootstrapAllowsMissingStarterSelection()
+        {
+            const string scenePath = "Assets/_Project/Scenes/Bootstrap.unity";
+            const string resourceName = "research_starter_selection";
+            var profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            var fixture = Fixture.Create(null, workloadProfile: profile);
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.OpenPreviewScene(scenePath);
+            string relocated = UnityEditor.AssetDatabase.GenerateUniqueAssetPath("Assets/_Project/ResearchSelectionBootstrapTest.json");
+            try
+            {
+                var root = scene.GetRootGameObjects().Select(go => go.GetComponent<GameRoot>()).Single(go => go != null);
+                typeof(GameRoot).GetProperty(nameof(GameRoot.Content)).SetValue(root, new ContentService());
+                typeof(GameRoot).GetProperty(nameof(GameRoot.SaveSpatialMigrationLimits)).SetValue(root, profile);
+                root.Content.LoadProductionSpatialContent(root.productionSpatialManifest, root.productionSpatialCatalog,
+                    root.productionSpatialLanguageTables, root.productionSpatialValidationLimits);
+                var service = new SaveService(new SimpleLogger(false),
+                    new SaveConfig { fileName = "research-bootstrap-" + Guid.NewGuid().ToString("N") + ".json" }, Path.GetTempPath());
+                service.ConfigureCanonical(profile, fixture.Production, fixture.Compatibility, fixture.Configuration,
+                    LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), fixture.PositionProfiles, fixture.Occupancy);
+                root.AttachSaveServiceForTests(service);
+                var limits = ProductionSpatialContentWorkloadLimitParser.Parse(root.productionSpatialValidationLimits).Limits;
+                var selection = UnityEngine.Resources.Load<UnityEngine.TextAsset>(resourceName);
+                Assert.That(selection, Is.Not.Null);
+                UnityEngine.Resources.UnloadAsset(selection);
+                Assert.That(UnityEditor.AssetDatabase.MoveAsset(StarterSelectionPath, relocated), Is.Empty);
+                Assert.That(UnityEngine.Resources.Load<UnityEngine.TextAsset>(resourceName), Is.Null);
+
+                var configure = typeof(GameRoot).GetMethod("TryConfigureRecoveryRuntime", BindingFlags.Instance | BindingFlags.NonPublic);
+                Assert.That(configure.Invoke(root, new object[] { limits }), Is.True);
+                Assert.That(root.TimeService, Is.Not.Null);
+                Assert.That(service.ResearchTiming.Select("research.project.m7_a2_scaffold", out _), Is.EqualTo(ResearchTimingRules.Disabled));
+                string reference = ReleaseKey + "." + SpatialContractSha256.Compute(File.ReadAllBytes(ResearchRulePath));
+                Assert.That(service.ResearchTiming.Resolve(reference, out _), Is.Null);
+            }
+            finally
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(UnityEditor.AssetDatabase.AssetPathToGUID(relocated,
+                        UnityEditor.AssetPathToGUIDOptions.OnlyExistingAssets)))
+                        Assert.That(UnityEditor.AssetDatabase.MoveAsset(relocated, StarterSelectionPath), Is.Empty);
+                }
+                finally { UnityEditor.SceneManagement.EditorSceneManager.ClosePreviewScene(scene); }
+            }
+        }
+
+        [Test]
         public void StarterResourceSelectionBindsOnlyTheExactArchivedProjectAndSlot()
         {
             var fixture = Fixture.Create(null);

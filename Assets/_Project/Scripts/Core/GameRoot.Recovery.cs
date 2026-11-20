@@ -74,7 +74,7 @@ namespace DungeonBuilder.M0
                 var researchRules = System.Array.ConvertAll(Resources.LoadAll<TextAsset>("ResearchTiming"), asset => asset.bytes);
                 var inputs = new RecoveryRuntimeInputs(bytes, Content.ProductionSpatialContent, structuralLimits,
                     SaveSpatialMigrationLimits.Canonical, researchRules,
-                    starterResearchSelection: Resource("research_starter_selection"));
+                    starterResearchSelection: Resources.Load<TextAsset>("research_starter_selection")?.bytes);
                 Content.BindRecoveryBootstrap(inputs);
                 ConfigureCanonicalPassiveMana(inputs.Passive, inputs.Economy, SaveSpatialMigrationLimits.Canonical.Spatial,
                     inputs.Bootstrap.tickSeconds, inputs.Bootstrap.timeRules.activeSaveIntervalSeconds);
