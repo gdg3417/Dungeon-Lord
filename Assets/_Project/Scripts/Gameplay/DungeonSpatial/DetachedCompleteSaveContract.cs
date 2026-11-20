@@ -184,6 +184,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal LivingDungeonState LivingDungeon { get; set; }
         internal MonsterContinuityState MonsterContinuity { get; set; }
         internal TimeProvenance TimeProvenance { get; set; }
+        internal ContractJsonNode ResearchProgressWire { get; set; }
     }
 
     public static class DetachedCompleteSaveContract
@@ -212,11 +213,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 limits, schemaVersion, true,
                 null, null, context.LivingDungeonProfiles);
             if (!result.IsValid || !result.LayoutContractVersion.HasValue) return Failure();
-            if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction &&
+            if (CanonicalSaveSchemaVersions.HasPreciseTime(schemaVersion) &&
                 (context.RecoveryInputs == null || !context.RecoveryInputs.ConsumedValuesStillBound(context.RoomContentOccupancy) ||
                  context.RecoveryContext?.Matches(result.TimeProvenance) != true ||
                  result.TimeProvenance.Episode?.Phase == RecoveryEpisode.ResidualPending && !result.LivingDungeon.IsClosed)) return Failure();
-            if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction &&
+            if (schemaVersion == CanonicalSaveSchemaVersions.ResearchTimingIntroduction) {
+                string researchReason = CurrentResearchReason(result, context.RecoveryInputs);
+                if (researchReason != null) return new DetachedCompleteSaveValidationResult(null, researchReason);
+            } else if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction &&
                 !ResearchStateValid(result, context.RecoveryInputs)) return Failure();
             if (!MonsterContinuity.Valid(result.MonsterContinuity, result.State, context.MonsterRecovery, limits.Spatial.MaximumRecords)) return Failure();
             if (!DetachedCanonicalProductionSemanticValidation.Validate(result.State, context.Production,
@@ -228,7 +232,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!PhaseSixFloorKnowledge.Validate(result.FloorKnowledge, result.State,
                     DungeonBuilder.M0.Gameplay.RunSimulation.PhaseSixRunConfigValidation.MaximumSupportedActiveFloors)) return Failure();
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
-                context.Compatibility.SelectContract(schemaVersion);
+                context.Compatibility.SelectContract(CanonicalSaveSchemaVersions.SpatialRegistration(schemaVersion));
             return selected.Success && selected.Value.CanonicalLayoutContractVersion ==
                 result.LayoutContractVersion.Value
                 ? new DetachedCompleteSaveValidationResult(result.GetBytes(), null,
@@ -240,6 +244,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         RoomContentOccupancy = context.RoomContentOccupancy, LivingDungeon = result.LivingDungeon, MonsterContinuity = result.MonsterContinuity,
                         TimeProvenance = result.TimeProvenance }
                 : Failure();
+        }
+
+        private static string CurrentResearchReason(DetachedCompleteSaveValidationResult result, RecoveryRuntimeInputs inputs)
+        {
+            try {
+                var save = UnityEngine.JsonUtility.FromJson<SaveRoot>(System.Text.Encoding.UTF8.GetString(result.GetBytes())).primary;
+                if (result.ResearchPendingExplicitNull) save.researchPending = null;
+                if (result.ResearchProgressExplicitNull) save.researchProgress = null;
+                return inputs.ValidateCurrentResearch(save, result.ResearchProgressWire, result.LivingDungeon);
+            } catch { return ResearchTimingRules.StateInvalid; }
         }
 
         internal static bool ResearchStateValid(DetachedCompleteSaveValidationResult result, RecoveryRuntimeInputs inputs)
@@ -495,7 +509,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     ExplicitNull(primary, "researchProgress"),
                     ExplicitNull(primary, "lastOfflineSummary"), corridorContent,
                         branchKnowledge, floorKnowledge) { Investment = investment, LivingDungeon = livingDungeon, MonsterContinuity = monsters,
-                            TimeProvenance = timeProvenance };
+                            TimeProvenance = timeProvenance, ResearchProgressWire = schemaVersion == CanonicalSaveSchemaVersions.ResearchTimingIntroduction
+                                ? primary.Fields.SingleOrDefault(field => field.Key == "researchProgress").Value : null };
             }
             catch { return Failure(); }
         }

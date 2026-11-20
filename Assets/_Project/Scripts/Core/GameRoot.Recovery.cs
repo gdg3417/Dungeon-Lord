@@ -6,7 +6,7 @@ namespace DungeonBuilder.M0
 {
     public partial class GameRoot
     {
-        private static bool UsesAtomicRecoveryRuntime => CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
+        private static bool UsesAtomicRecoveryRuntime => CanonicalSaveSchemaVersions.HasPreciseTime(CanonicalSaveSchemaVersions.CurrentWritableTarget);
         private RecoveryRuntimeInputs recoveryRuntimeInputs;
         private bool bootRecoveryPending;
         private string bootRecoveryBanner;
@@ -71,7 +71,9 @@ namespace DungeonBuilder.M0
                     Resource("monster_recovery"), productionSpatialManifest?.bytes, productionSpatialCatalog?.bytes,
                     Resource("living_dungeon_foreground"), Resource("living_dungeon_foreground_v2"), roomContentSpatialOccupancyJson?.bytes,
                     spatialLayoutCompatibilityProfilesJson?.bytes, contentBootstrapJson?.bytes, lootConfigJson?.bytes };
-                var inputs = new RecoveryRuntimeInputs(bytes, Content.ProductionSpatialContent, structuralLimits, SaveSpatialMigrationLimits.Canonical);
+                var researchRules = System.Array.ConvertAll(Resources.LoadAll<TextAsset>("ResearchTiming"), asset => asset.bytes);
+                var inputs = new RecoveryRuntimeInputs(bytes, Content.ProductionSpatialContent, structuralLimits,
+                    SaveSpatialMigrationLimits.Canonical, researchRules);
                 Content.BindRecoveryBootstrap(inputs);
                 ConfigureCanonicalPassiveMana(inputs.Passive, inputs.Economy, SaveSpatialMigrationLimits.Canonical.Spatial,
                     inputs.Bootstrap.tickSeconds, inputs.Bootstrap.timeRules.activeSaveIntervalSeconds);

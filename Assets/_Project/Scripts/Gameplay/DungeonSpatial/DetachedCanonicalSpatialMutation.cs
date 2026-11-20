@@ -579,7 +579,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             saved = null; reason = ValidationFailedReason;
             CompatibilitySelectionResult<CanonicalStarterLayoutProfile> selected =
-                compatibility.SelectStarter(CanonicalSaveSchemaVersions.CurrentWritableTarget,
+                compatibility.SelectStarter(CanonicalSaveSchemaVersions.SpatialRegistration(CanonicalSaveSchemaVersions.CurrentWritableTarget),
                     state.Authority.CanonicalLayoutContractVersion);
             if (!selected.Success) { reason = selected.Code; return false; }
             CanonicalStarterLayoutProfile profile = selected.Value;
@@ -685,7 +685,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             reason = ValidationFailedReason;
             CompatibilitySelectionResult<CanonicalStarterLayoutProfile> selected = compatibility.SelectStarter(
-                CanonicalSaveSchemaVersions.CurrentWritableTarget,
+                CanonicalSaveSchemaVersions.SpatialRegistration(CanonicalSaveSchemaVersions.CurrentWritableTarget),
                 state.Authority.CanonicalLayoutContractVersion);
             if (!selected.Success) { reason = selected.Code; return null; }
             CompatibilityLayoutGeometryRecord geometry = (compatibility.Value.GeometryRecords ??

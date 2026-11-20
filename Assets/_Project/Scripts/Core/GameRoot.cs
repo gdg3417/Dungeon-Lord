@@ -196,7 +196,7 @@ namespace DungeonBuilder.M0
                 GetResearchCompletionEligibilityScaffoldConfig(),
                 GetResearchVerificationScaffoldConfig(),
                 GetResearchUnlockBridgeConfig(),
-                CreatePaidResearchStartHandler().ResolveAuthority(),
+                CreatePlayerResearchActionHandler().ResolvePaidAuthority(),
                 Content?.ProductionSpatialContent);
         }
 
@@ -216,17 +216,24 @@ namespace DungeonBuilder.M0
 
         internal PlayerResearchActionResult StartUnpaidResearchForTests() =>
             StartPlayerResearch(CreatePlayerResearchActionHandler());
-#endif
-
-        internal PlayerResearchActionResult ResolveProductionResearchState() =>
-            CreatePaidResearchStartHandler().ResolveState();
-
-        internal PlayerResearchActionResult StartProductionResearch() =>
-            StartPlayerResearch(CreatePaidResearchStartHandler());
 
         private PlayerResearchActionResult StartPlayerResearch(PlayerResearchActionHandler handler)
         {
             PlayerResearchActionResult result = handler.Start();
+            if (result.RecoveryRequired) ForegroundFault(result.PersistenceReason);
+            RefreshOfflineSummaryLines();
+            return result;
+        }
+#endif
+
+        internal PlayerResearchActionResult ResolveProductionResearchState() =>
+            CreatePlayerResearchActionHandler().ResolvePaidState();
+
+        internal PlayerResearchActionResult StartProductionResearch() => StartConfiguredPaidResearch();
+
+        internal PlayerResearchActionResult StartConfiguredPaidResearch()
+        {
+            var result = CreatePlayerResearchActionHandler().StartPaid();
             if (result.RecoveryRequired) ForegroundFault(result.PersistenceReason);
             RefreshOfflineSummaryLines();
             return result;
@@ -505,7 +512,6 @@ namespace DungeonBuilder.M0
                 SetBanner(Content.GetString(key, key));
                 return false;
             }
-            Content.LoadStarterResearchStart(Resources.Load<TextAsset>(StarterResearchStartConfiguration.ResourcePath), saveLimits.Profile.Canonical);
 
             if (!string.IsNullOrEmpty(contentBanner))
             {
@@ -2142,6 +2148,10 @@ namespace DungeonBuilder.M0
             }
 
             ResearchPendingValidationResult result = ResearchPendingResolver.ResolveScaffold(GetResearchPendingScaffoldConfig());
+            if (CanonicalMvpRouteProjection.HasCanonicalLookingState(Save) &&
+                (ResearchTimingRules.IsPaidReference(Save.researchProgress?.RuleSourceIdUsed) ||
+                 CompletedResearchStateResolver.HasCompletedProject(Save.completedResearch, result.ProjectId)))
+                return false;
             if (!result.RuleResolved)
             {
                 RefreshOfflineSummaryLines();
@@ -2167,7 +2177,7 @@ namespace DungeonBuilder.M0
 
         internal bool ClearResearchPendingScaffold()
         {
-            if (Save == null)
+            if (Save == null || ResearchTimingRules.IsPaidReference(Save.researchProgress?.RuleSourceIdUsed))
             {
                 return false;
             }
@@ -2181,7 +2191,7 @@ namespace DungeonBuilder.M0
 
         internal bool ClaimResearchCompletionScaffold()
         {
-            if (Save == null)
+            if (Save == null || ResearchTimingRules.IsPaidReference(Save.researchProgress?.RuleSourceIdUsed))
             {
                 return false;
             }
@@ -2580,14 +2590,6 @@ namespace DungeonBuilder.M0
         private PlayerResearchActionHandler CreatePlayerResearchActionHandler() =>
             CreatePlayerResearchActionHandler(SavePlayerResearchTransition);
 
-        private PlayerResearchActionHandler CreatePaidResearchStartHandler()
-        {
-            var handler = CreatePlayerResearchActionHandler(null);
-            handler.StartConfiguration = Content?.StarterResearchStart;
-            handler.ProtectedReserve = save => SaveService?.ResearchProtectedReserve(save);
-            return handler;
-        }
-
         private PlayerResearchActionHandler CreatePlayerResearchActionHandler(Action saveTransition)
         {
             return new PlayerResearchActionHandler(
@@ -2605,7 +2607,12 @@ namespace DungeonBuilder.M0
                 saveTransition,
                 CommitPlayerResearchTransition,
                 () => Save,
-                () => SaveService?.RequiresCanonicalRecovery == true);
+                () => SaveService?.RequiresCanonicalRecovery == true)
+            {
+                TimingRules = SaveService?.ResearchTiming,
+                PaidStartAllowed = () => SaveService?.CanStagePaidResearch == true,
+                ProtectedResearchReserve = candidate => SaveService.ResearchProtectedReserve(candidate)
+            };
         }
 
         private PlayerResearchActionResult CommitPlayerResearchTransition(Func<SaveData, PlayerResearchActionResult> stage)

@@ -136,14 +136,7 @@ namespace DungeonBuilder.M0.Tests
             controller.ReturnToDungeon();
 
             var bootstrap = root.Content.Bootstrap;
-            const double testCost = 5.25; // Test-only production content injection.
-            var config = new TextAsset(
-                "{\"schemaVersion\":1,\"enabled\":true,\"projectId\":\"" + bootstrap.researchPendingScaffold.projectId +
-                "\",\"progressRuleId\":\"" + bootstrap.researchProgressScaffold.ruleSourceId +
-                "\",\"completionRuleId\":\"" + bootstrap.researchCompletionEligibilityScaffold.ruleSourceId +
-                "\",\"manaCost\":5.25}");
-            try { root.Content.LoadStarterResearchStart(config, root.SaveSpatialMigrationLimits.Canonical); }
-            finally { UnityEngine.Object.DestroyImmediate(config); }
+            const double testCost = 10;
             Click(ui.Q<Button>("openResearch"));
             Assert.That(start.style.display.value, Is.EqualTo(DisplayStyle.Flex));
             Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));

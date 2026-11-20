@@ -86,7 +86,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(firstOutcome.ReasonKey, Is.Not.Empty);
             Assert.That(_root.Save.runHistory.RecentOutcomes, Does.Contain(firstOutcome));
             AssertPrimary(MvpPrimaryNextActionPresenter.SourceFirstContract, MvpPrimaryNextActionPresenter.RuleFirstContractIncomplete);
-            Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(PlayerResearchActionHandler.StartConfigurationUnavailableKey));
+            Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(PlayerResearchActionHandler.CostUnavailableKey));
 
             CompleteResearchThroughRootBoundary();
             RunUntilFirstContractRequirementsComplete();

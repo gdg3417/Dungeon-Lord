@@ -32,6 +32,8 @@ namespace DungeonBuilder.M0
         public bool WouldProcessOfflineProgress;
         internal bool HasCompletedRun;
         internal double? ManaCost;
+        internal double? DurationSeconds;
+        internal double? RemainingSeconds;
         internal double? UsableMana;
         internal bool IsAffordable;
     }

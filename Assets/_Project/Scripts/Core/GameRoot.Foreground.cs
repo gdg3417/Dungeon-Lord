@@ -172,7 +172,8 @@ namespace DungeonBuilder.M0
                 RunSimulationConfig?.MvpFirstSessionObjective?.AnalysisResearchProjectId, _restrictedActionGate,
                 () => RunHistoryState.HasCompletedAdventurerRun(candidate.runHistory),
                 () => IsOnline, () => VerificationPending, null);
-            research.ApplyActiveTick(_configuredSimulationTickSeconds);
+            if (!ResearchTimingRules.IsPaidReference(candidate.researchProgress?.RuleSourceIdUsed))
+                research.ApplyActiveTick(_configuredSimulationTickSeconds);
             _passiveManaService?.ApplyTick(candidate, RunSimulationConfig, tick);
         }
     }

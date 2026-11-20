@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using DungeonBuilder.M0;
-using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
@@ -33,7 +32,6 @@ namespace DungeonBuilder.Tests.EditMode
             service = OpenService(f, out current);
             current.researchPending = null; current.researchProgress = null;
             current.completedResearch = new CompletedResearchState(); current.completedObjectives = new CompletedObjectiveState();
-            current.structureRuntime.ManaReserve = 1000; // Test-only funding for payment and reserve cases.
             current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1",
                 LootExtractionSummary = new RunLootExtractionSummary { TotalExtractedWorldValue = 1 } }, 5);
             current.runHistory.NextRunSequence = 2; // This synthetic confirmed run already owns run-1.
@@ -182,108 +180,6 @@ namespace DungeonBuilder.Tests.EditMode
                 return result;
             }), progressSave);
 
-        private const double TestManaCost = 25.5;
-        private static byte[] PriceJson(string price, string project = Project, int version = 1, bool enabled = true) =>
-            Encoding.UTF8.GetBytes("{\"schemaVersion\":" + version + ",\"enabled\":" + (enabled ? "true" : "false") +
-                ",\"projectId\":\"" + project + "\",\"progressRuleId\":\"test.progress\"," +
-                "\"completionRuleId\":\"test.eligibility\",\"manaCost\":" + price + "}");
-
-        private PlayerResearchActionHandler PaidHandler(StarterResearchStartConfiguration configuration, Action progressSave = null)
-        {
-            var handler = Handler(progressSave);
-            handler.StartConfiguration = configuration;
-            handler.ProtectedReserve = service.ResearchProtectedReserve;
-            return handler;
-        }
-
-        private PlayerResearchActionHandler PaidHandler() =>
-            PaidHandler(StarterResearchStartConfiguration.Parse(PriceJson("25.5"), f.Profile.Canonical));
-
-        [TestCase("0")]
-        [TestCase("-1")]
-        [TestCase("NaN")]
-        [TestCase("1e999")]
-        [TestCase("\"25.5\"")]
-        [TestCase("null")]
-        public void StartPriceRejectsInvalidNumericContent(string value)
-        {
-            Assert.That(StarterResearchStartConfiguration.Parse(PriceJson(value), f.Profile.Canonical), Is.Null);
-        }
-
-        [Test] public void MissingDisabledUnsupportedAndWrongProjectPriceCannotStart()
-        {
-            var limits = f.Profile.Canonical;
-            byte[] before = Bytes;
-            foreach (var input in new[] { null, PriceJson("25.5", enabled: false), PriceJson("25.5", version: 2),
-                PriceJson("25.5", project: "test.wrong.project"), Encoding.UTF8.GetBytes("{}") })
-            {
-                var handler = PaidHandler(StarterResearchStartConfiguration.Parse(input, limits));
-                Assert.That(handler.ResolveState().State, Is.EqualTo(PlayerResearchState.Blocked));
-                Assert.That(handler.Start().FeedbackLocalizationKey, Is.EqualTo(PlayerResearchActionHandler.StartConfigurationUnavailableKey));
-            }
-            CollectionAssert.AreEqual(before, Bytes);
-            Assert.That(publications, Is.Zero);
-        }
-
-        [Test] public void PaidStartRechecksCompletedRunInTransaction()
-        {
-            var handler = PaidHandler();
-            Assert.That(handler.ResolveState().Authority.CanStart, Is.True);
-            service.BeforeForegroundAction = () => true;
-            var successor = service.LoadOrCreate("r1-test", out _);
-            successor.runHistory = new RunHistoryState();
-            service.ForegroundCurrent = () => successor;
-            string state = Json(current);
-            int writes = Writes;
-            var result = handler.Start();
-            Assert.That(result.FeedbackLocalizationKey, Is.EqualTo(PlayerResearchActionHandler.BlockedPrerequisiteKey));
-            Assert.That(Json(current), Is.EqualTo(state));
-            Assert.That(Writes, Is.EqualTo(writes));
-        }
-
-        [Test] public void PaidStartLeavesProtectedReserveAtExactAffordabilityBoundary()
-        {
-            var placed = service.ExecuteCanonicalMutation(current, DetachedCanonicalMutationRequest.Place(
-                MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId));
-            Assert.That(placed.IsSuccess, Is.True, placed.Reason);
-            placed = service.ExecuteCanonicalMutation(current, DetachedCanonicalMutationRequest.Place(
-                MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.SkeletonOptionId));
-            Assert.That(placed.IsSuccess, Is.True, placed.Reason);
-            long reserve = service.ResearchProtectedReserve(current).Value;
-            Assert.That(reserve, Is.Positive);
-            current.structureRuntime.ManaReserve = reserve + TestManaCost - 0.25d;
-            Assert.That(service.Save(current, SaveReason.StateChange), Is.True);
-            var before = Bytes;
-            var handler = PaidHandler();
-            Assert.That(handler.Start().FeedbackLocalizationKey, Is.EqualTo(PlayerResearchActionHandler.StartUnaffordableKey));
-            CollectionAssert.AreEqual(before, Bytes);
-            current.structureRuntime.ManaReserve = reserve + TestManaCost;
-            Assert.That(service.Save(current, SaveReason.StateChange), Is.True);
-            Assert.That(handler.ResolveState().Authority.IsAffordable, Is.True);
-            Assert.That(handler.Start().Succeeded, Is.True);
-            Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(reserve));
-            Reopen();
-            Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(reserve));
-            Assert.That(PaidHandler().Start().Succeeded, Is.False);
-        }
-
-        [Test] public void UnpaidHistoricalPendingRemainsUnchargedWithPriceAvailable()
-        {
-            double wallet = current.structureRuntime.ManaReserve;
-            Assert.That(Handler().Start().Succeeded, Is.True);
-            Assert.That(Handler().ApplyActiveTick(4).StateChanged, Is.True);
-            Assert.That(service.Save(current, SaveReason.StateChange), Is.True);
-            Reopen();
-            var handler = PaidHandler();
-            Assert.That(handler.ResolveState().ProgressUnits, Is.EqualTo(.4));
-            Assert.That(handler.Start().Succeeded, Is.False);
-            Assert.That(handler.ApplyActiveTick(6).State, Is.EqualTo(PlayerResearchState.ReadyToClaim));
-            Assert.That(handler.Claim().Succeeded, Is.True);
-            Reopen();
-            Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(wallet));
-            Assert.That(PaidHandler().ResolveState().State, Is.EqualTo(PlayerResearchState.Completed));
-        }
-
         internal static PlayerResearchActionHandler CreateHandler(Func<SaveData> read,
             Func<Func<SaveData, PlayerResearchActionResult>, PlayerResearchActionResult> commit, Action progressSave = null)
             => new PlayerResearchActionHandler(read(),
@@ -339,25 +235,18 @@ namespace DungeonBuilder.Tests.EditMode
 
         [Test] public void StartProgressClaimReopen_PublishesOnlyDurableStateAndAtomicObjectiveUnlock()
         {
-            var handler = PaidHandler(); var prior = current;
-            double wallet = prior.structureRuntime.ManaReserve;
+            var handler = Handler(); var prior = current;
             var started = handler.Start();
             Assert.That(started.Succeeded && started.StateChanged, Is.True);
             Assert.That(started.FeedbackLocalizationKey, Is.EqualTo(PlayerResearchActionHandler.StartSucceededKey));
             Assert.That(prior.researchPending, Is.Null, "Staging must not change the prior publication");
-            Assert.That(prior.structureRuntime.ManaReserve, Is.EqualTo(wallet));
-            Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(wallet - TestManaCost));
             Assert.That(current, Is.Not.SameAs(prior));
             Assert.That(handler.ResolveState().State, Is.EqualTo(PlayerResearchState.InProgress), "Retained handlers follow publication");
             int writes = Writes;
             Assert.That(handler.Start().Succeeded, Is.False); Assert.That(Writes, Is.EqualTo(writes));
             Reopen(); Assert.That(current.researchPending.ProjectId, Is.EqualTo(Project));
-            handler = PaidHandler(); handler.ApplyActiveTick(4);
+            handler = Handler(); handler.ApplyActiveTick(4);
             Assert.That(current.researchProgress.ProgressUnits, Is.EqualTo(.4));
-            Assert.That(service.Save(current, SaveReason.StateChange), Is.True);
-            Reopen();
-            handler = PaidHandler();
-            Assert.That(handler.ResolveState().ProgressUnits, Is.EqualTo(.4));
             handler.ApplyActiveTick(6);
             prior = current;
             var claimed = handler.Claim();
@@ -371,13 +260,12 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(handler.Claim().Succeeded, Is.False); Assert.That(handler.Start().Succeeded, Is.False);
             Assert.That(Writes, Is.EqualTo(writes));
             Reopen(); Assert.That(current.researchPending, Is.Null); Assert.That(current.researchProgress, Is.Null);
-            Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(wallet - TestManaCost));
             Assert.That(current.completedResearch.ProjectIds, Is.EqualTo(new[] { Project }));
             Assert.That(current.completedObjectives.ObjectiveIds, Is.EqualTo(new[] { "test.objective" }));
             string durable = Encoding.UTF8.GetString(Bytes);
             Assert.That(durable, Does.Contain("\"unrelatedResearchEvidence\":{\"n\":1.00}"));
             Assert.That(durable, Does.Contain("\"unrelatedRoot\":[true,null]"));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
+            Assert.That(durable, Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.ResearchTimingIntroduction));
         }
 
         [TestCase(false, Faults.OperationType.Write, 1)]
@@ -393,7 +281,7 @@ namespace DungeonBuilder.Tests.EditMode
             var prior = current; var session = service.CanonicalSession;
             string before = Json(current); byte[] durable = Bytes;
             f.FileSystem.EnableTargetedFailure(operation, paths => true, occurrence, false);
-            var result = claim ? Handler().Claim() : PaidHandler().Start();
+            var result = claim ? Handler().Claim() : Handler().Start();
             Assert.That(result.Succeeded || result.StateChanged, Is.False);
             Assert.That(result.PersistenceReason, Is.EqualTo(DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
             Assert.That(result.RecoveryRequired, Is.False);
@@ -402,8 +290,8 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(service.CanonicalSession, Is.SameAs(session)); Assert.That(Json(current), Is.EqualTo(before));
             CollectionAssert.AreEqual(durable, Bytes);
             f.FileSystem.DisableFailure(); Reopen();
-            Assert.That(claim ? Handler().Claim().Succeeded : PaidHandler().Start().Succeeded, Is.True);
-            Assert.That(claim ? Handler().Claim().Succeeded : PaidHandler().Start().Succeeded, Is.False);
+            Assert.That(claim ? Handler().Claim().Succeeded : Handler().Start().Succeeded, Is.True);
+            Assert.That(claim ? Handler().Claim().Succeeded : Handler().Start().Succeeded, Is.False);
         }
 
         [TestCase(false)] [TestCase(true)]
@@ -414,7 +302,7 @@ namespace DungeonBuilder.Tests.EditMode
             // Active reads: initial predecessor, settled evidence check, post-replace readback.
             f.FileSystem.EnableTargetedFailure(Faults.OperationType.Read,
                 paths => paths[0] == service.SavePath, 3, false);
-            var result = claim ? Handler().Claim() : PaidHandler().Start();
+            var result = claim ? Handler().Claim() : Handler().Start();
             Assert.That(result.PersistenceReason, Is.EqualTo(DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
             Assert.That(result.Succeeded, Is.False); Assert.That(publications, Is.Zero);
             Assert.That(Json(current), Is.EqualTo(live)); CollectionAssert.AreEqual(before, Bytes);
@@ -429,22 +317,20 @@ namespace DungeonBuilder.Tests.EditMode
             var original = current; string before = Json(current);
             int replaces = f.FileSystem.Operations.Count(o => o.Type == Faults.OperationType.Replace);
             f.FileSystem.EnableFailureSequence(Faults.OperationType.Flush, 1, Faults.OperationType.Replace, replaces + 2);
-            double wallet = current.structureRuntime.ManaReserve;
-            var result = claim ? Handler().Claim() : PaidHandler().Start();
+            var result = claim ? Handler().Claim() : Handler().Start();
             Assert.That(result.Succeeded || result.StateChanged, Is.False);
             Assert.That(result.RecoveryRequired, Is.True);
             Assert.That(result.FeedbackLocalizationKey, Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
             Assert.That(current, Is.SameAs(original)); Assert.That(Json(current), Is.EqualTo(before));
             Assert.That(publications, Is.Zero);
             f.FileSystem.DisableFailure(); int operations = f.FileSystem.Operations.Count();
-            Assert.That(PaidHandler().Start().RecoveryRequired, Is.True); Assert.That(Handler().Claim().RecoveryRequired, Is.True);
+            Assert.That(Handler().Start().RecoveryRequired, Is.True); Assert.That(Handler().Claim().RecoveryRequired, Is.True);
             Assert.That(service.Save(current, SaveReason.StateChange), Is.False);
             Assert.That(f.FileSystem.Operations.Count(), Is.EqualTo(operations), "Uncertain authority cannot retry storage");
             Reopen(); // A fresh coordinator validates the surviving active candidate and settles its evidence.
             Assert.That(claim ? current.completedResearch.ProjectIds.Contains(Project) : current.researchPending?.ProjectId == Project, Is.True);
-            Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(claim ? wallet : wallet - TestManaCost));
             int writes = Writes;
-            Assert.That(claim ? Handler().Claim().Succeeded : PaidHandler().Start().Succeeded, Is.False);
+            Assert.That(claim ? Handler().Claim().Succeeded : Handler().Start().Succeeded, Is.False);
             Assert.That(Writes, Is.EqualTo(writes));
         }
 

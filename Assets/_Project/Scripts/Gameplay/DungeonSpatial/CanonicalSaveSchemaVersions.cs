@@ -13,6 +13,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const int TimeProvenanceIntroduction = 16;
         public const int FrozenSchemaSixteen = TimeProvenanceIntroduction;
         public const int AtomicRecoveryIntroduction = 17;
-        public const int CurrentWritableTarget = AtomicRecoveryIntroduction;
+        public const int ResearchTimingIntroduction = 18;
+        public const int CurrentWritableTarget = ResearchTimingIntroduction;
+
+        internal static bool HasPreciseTime(int schema) =>
+            schema == AtomicRecoveryIntroduction || schema == ResearchTimingIntroduction;
+
+        internal static int SpatialRegistration(int schema) =>
+            schema == ResearchTimingIntroduction ? AtomicRecoveryIntroduction : schema;
     }
 }
