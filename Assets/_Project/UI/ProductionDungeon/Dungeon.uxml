@@ -133,6 +133,7 @@
                 <ui:Label name="researchProject" class="mode" />
                 <ui:Label name="researchPrerequisite" />
                 <ui:Label name="researchCost" />
+                <ui:Label name="researchDuration" />
                 <ui:Label name="researchAffordability" />
                 <ui:Label name="researchStatus" />
                 <ui:Button name="researchStart" class="research-action" tooltip="ui.player_research.action.start" />

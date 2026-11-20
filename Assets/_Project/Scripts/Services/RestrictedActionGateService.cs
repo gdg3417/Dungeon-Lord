@@ -13,12 +13,20 @@ namespace DungeonBuilder.M0
         public RestrictedActionType ActionType { get; }
         public bool IsOnline { get; }
         public bool VerificationPending { get; }
+        internal bool AllowLocalMvpResearch { get; }
 
         public GateEvaluationInput(RestrictedActionType actionType, bool isOnline, bool verificationPending)
+            : this(actionType, isOnline, verificationPending, false)
+        {
+        }
+
+        internal GateEvaluationInput(RestrictedActionType actionType, bool isOnline, bool verificationPending,
+            bool allowLocalMvpResearch)
         {
             ActionType = actionType;
             IsOnline = isOnline;
             VerificationPending = verificationPending;
+            AllowLocalMvpResearch = allowLocalMvpResearch;
         }
     }
 
@@ -43,7 +51,9 @@ namespace DungeonBuilder.M0
     {
         public GateEvaluationResult Evaluate(GateEvaluationInput input)
         {
-            if (!input.IsOnline)
+            bool localMvpResearch = input.AllowLocalMvpResearch &&
+                (input.ActionType == RestrictedActionType.ResearchStart || input.ActionType == RestrictedActionType.ResearchComplete);
+            if (!input.IsOnline && !localMvpResearch)
             {
                 return new GateEvaluationResult(false, "gate.error.offline_required");
             }

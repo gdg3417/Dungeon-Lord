@@ -86,7 +86,64 @@ namespace DungeonBuilder.M0.Tests.EditMode
         static void Expected(Harness h, double wallet) => Assert.That(h.Current.structureRuntime.ManaReserve, Is.EqualTo(wallet));
 
         private const string ResearchRulePath = "Assets/_Project/Resources/ResearchTiming/adventurer_analysis_v1.json";
+        private const string StarterSelectionPath = "Assets/_Project/Resources/research_starter_selection.json";
         private const string ReleaseKey = "research.timing.adventurer_analysis.v1";
+
+        [Test]
+        public void StarterResourceSelectionBindsOnlyTheExactArchivedProjectAndSlot()
+        {
+            var fixture = Fixture.Create(null);
+            var limits = fixture.Profile.Canonical.Serialized;
+            const string project = "research.project.m7_a2_scaffold", slot = "research.slot.primary";
+            byte[] archive = File.ReadAllBytes(ResearchRulePath);
+            byte[] selection = File.ReadAllBytes(StarterSelectionPath);
+            string text = Encoding.UTF8.GetString(selection);
+            var variations = new[] {
+                (text, project, slot, (string)null),
+                (null, project, slot, ResearchTimingRules.Disabled),
+                (text.Replace("true", "false"), project, slot, ResearchTimingRules.Disabled),
+                (text.Replace("true", "\"true\""), project, slot, ResearchTimingRules.Invalid),
+                (text.Replace("true", "true,\"enabled\":true"), project, slot, ResearchTimingRules.Invalid),
+                (text.Replace(":1,", ":2,"), project, slot, ResearchTimingRules.Invalid),
+                (text.Replace(".v1.", ".v9."), project, slot, ResearchTimingRules.Missing),
+                (text.Replace(SpatialContractSha256.Compute(archive), new string('0', 64)), project, slot, ResearchTimingRules.Mismatch),
+                (text, "research.project.other", slot, ResearchTimingRules.Mismatch),
+                (text, project, "research.slot.other", ResearchTimingRules.Mismatch)
+            };
+            foreach (var (content, projectBinding, slotBinding, expected) in variations)
+            {
+                var rules = new ResearchTimingRules(new[] { archive }, Array.Empty<string>(), 1000, limits,
+                    content == null ? null : Encoding.UTF8.GetBytes(content), projectBinding, slotBinding);
+                Assert.That(rules.Select(projectBinding, out var selected), Is.EqualTo(expected));
+                if (selected != null)
+                {
+                    Assert.That(selected.ManaCost, Is.EqualTo(10));
+                    Assert.That(selected.RequiredUnits / rules.UnitsPerSecond, Is.EqualTo(120));
+                }
+                Assert.That(rules.Resolve(ReleaseKey + "." + SpatialContractSha256.Compute(archive), out _), Is.Null);
+            }
+        }
+
+        [Test]
+        public void PaidStartRejectsPlausibleRunEvidenceAbsentFromTheDurablePredecessor()
+        {
+            var h = new Harness(paidResearch: true);
+            h.Start(); h.Accept(100); h.Accept(100); h.Accept(100);
+            h.Current.structureRuntime.ManaReserve = 1000;
+            Assert.That(h.Service.Save(h.Current, SaveReason.StateChange), Is.True);
+            using var scope = new RootScope(h);
+            scope.Pulse(100);
+            var current = scope.Root.Save;
+            current.runHistory.NextRunSequence = 2;
+            current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1", Success = false }, 5);
+            var before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            var result = scope.Root.StartConfiguredPlayerResearch();
+            Assert.That(result.Succeeded, Is.False);
+            Assert.That(result.FeedbackLocalizationKey, Is.EqualTo(PlayerResearchActionHandler.BlockedPrerequisiteKey));
+            CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+            Assert.That(scope.Root.Save.researchProgress, Is.Null);
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(1000));
+        }
 
         private static RecoveryRuntimeInputs PaidBundle(Fixture fixture, bool updatedDefault = false, bool enabled = true)
         {

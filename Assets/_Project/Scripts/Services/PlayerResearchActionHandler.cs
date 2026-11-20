@@ -62,6 +62,7 @@ namespace DungeonBuilder.M0
         internal ResearchTimingRules TimingRules { get; set; }
         internal Func<bool> PaidStartAllowed { get; set; }
         internal Func<SaveData, long> ProtectedResearchReserve { get; set; }
+        internal bool AllowLocalMvpActions { get; set; }
 
         private readonly SaveData _initialSave;
         private readonly Func<SaveData> _currentSave;
@@ -147,7 +148,8 @@ namespace DungeonBuilder.M0
         {
             TimingRules = TimingRules,
             PaidStartAllowed = PaidStartAllowed,
-            ProtectedResearchReserve = ProtectedResearchReserve
+            ProtectedResearchReserve = ProtectedResearchReserve,
+            AllowLocalMvpActions = AllowLocalMvpActions
         };
 
         internal static PlayerResearchActionResult PersistenceFailure(string reason) => new PlayerResearchActionResult
@@ -292,6 +294,12 @@ namespace DungeonBuilder.M0
                     authority.DurationSeconds = (double)activeRule.RequiredUnits / TimingRules.UnitsPerSecond;
                     authority.RemainingSeconds = (activeRule.RequiredUnits - progress.ProgressUnits) / TimingRules.UnitsPerSecond;
                 }
+                if (authority.CanClaimLocalMvp && PaidStartAllowed?.Invoke() != true)
+                {
+                    authority.CanClaimLocalMvp = false;
+                    authority.State = PlayerResearchAuthorityState.ClaimBlocked;
+                    authority.FeedbackLocalizationKey = ForegroundPendingKey;
+                }
                 return authority;
             }
 
@@ -370,7 +378,9 @@ namespace DungeonBuilder.M0
         private bool HasValidRun() => _hasValidRun != null && _hasValidRun();
         private GateEvaluationResult EvaluateGate(RestrictedActionType action) => _restrictedActionGate == null
             ? new GateEvaluationResult(false, BlockedInvalidKey)
-            : _restrictedActionGate.Evaluate(new GateEvaluationInput(action, _isOnline != null && _isOnline(), _verificationPending != null && _verificationPending()));
+            : _restrictedActionGate.Evaluate(new GateEvaluationInput(action, _isOnline?.Invoke() == true,
+                _verificationPending?.Invoke() == true, AllowLocalMvpActions &&
+                _claimConfig?.claimAuthorityMode == PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode));
 
         private static PlayerResearchActionResult Result(bool succeeded, bool changed, PlayerResearchState state, string key, double progress, double required)
         {

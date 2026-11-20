@@ -132,17 +132,19 @@ namespace DungeonBuilder.M0
             DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), _root?.DevPanelEnabled == true);
         public bool OptionalBranchControlsAvailable => ResolveBranchOriginNodeIds().Length != 0;
         public string SelectedRenovationRoomInstanceId => _selectedRenovationRoomInstanceId;
+        internal System.Func<bool> ResearchInteractionBlocked { get; set; }
 
         public PlayerResearchPanelPresentation ResolvePlayerResearchPanelPresentation()
         {
             return PlayerResearchPanelPresenter.Present(
-                _root?.ResolvePlayerResearchState(),
+                ResearchInteractionBlocked?.Invoke() == true ? ResearchInteractionBlockedResult() : _root?.ResolvePlayerResearchState(),
                 (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public PlayerResearchActionResult StartPlayerResearch()
         {
-            PlayerResearchActionResult result = _root?.StartConfiguredPlayerResearch();
+            PlayerResearchActionResult result = ResearchInteractionBlocked?.Invoke() == true
+                ? ResearchInteractionBlockedResult() : _root?.StartConfiguredPlayerResearch();
             PresentPlayerResearchFeedback(result);
             return result;
         }
@@ -158,10 +160,17 @@ namespace DungeonBuilder.M0
 
         public PlayerResearchActionResult ClaimPlayerResearch()
         {
-            PlayerResearchActionResult result = _root?.ClaimConfiguredPlayerResearch();
+            PlayerResearchActionResult result = ResearchInteractionBlocked?.Invoke() == true
+                ? ResearchInteractionBlockedResult() : _root?.ClaimConfiguredPlayerResearch();
             PresentPlayerResearchFeedback(result);
             return result;
         }
+
+        private static PlayerResearchActionResult ResearchInteractionBlockedResult() => new PlayerResearchActionResult
+        {
+            State = PlayerResearchState.Blocked,
+            FeedbackLocalizationKey = "ui.research.dungeon_interaction_pending"
+        };
 
         private void PresentPlayerResearchFeedback(PlayerResearchActionResult result)
         {

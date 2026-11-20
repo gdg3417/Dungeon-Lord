@@ -2611,7 +2611,8 @@ namespace DungeonBuilder.M0
             {
                 TimingRules = SaveService?.ResearchTiming,
                 PaidStartAllowed = () => SaveService?.CanStagePaidResearch == true,
-                ProtectedResearchReserve = candidate => SaveService.ResearchProtectedReserve(candidate)
+                ProtectedResearchReserve = candidate => SaveService.ResearchProtectedReserve(candidate),
+                AllowLocalMvpActions = true
             };
         }
 

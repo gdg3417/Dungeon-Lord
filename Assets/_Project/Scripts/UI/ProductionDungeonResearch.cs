@@ -28,7 +28,8 @@ namespace DungeonBuilder.M0
 
         private void ApplyResearchAction(bool claim)
         {
-            if (!IsResearch || !HasCanonicalRuntime() || IsEditing) return;
+            if (!IsResearch || !HasCanonicalRuntime() || ResearchInteractionBlocked ||
+                document.rootVisualElement.Q("displayPopover").style.display == DisplayStyle.Flex) return;
             var result = claim ? root.ClaimConfiguredPlayerResearch() : root.StartProductionResearch();
             PresentResearch();
             document.rootVisualElement.Q<Label>("researchFeedback").text =
@@ -46,20 +47,32 @@ namespace DungeonBuilder.M0
             bool completedRun = authority?.HasCompletedRun ?? RunHistoryState.HasCompletedAdventurerRun(root.Save.runHistory);
             ui.Q<Label>("researchPrerequisite").text = Text(completedRun ?
                 "ui.research.prerequisite_met" : "ui.player_research.blocked.prerequisite");
-            ui.Q<Label>("researchCost").text = authority?.ManaCost is double cost ?
-                Format("ui.research.start_cost", cost) : Text("ui.player_research.cost_unavailable");
-            ui.Q<Label>("researchAffordability").text = authority?.UsableMana is double usable
+            bool started = state.State == PlayerResearchState.InProgress || state.State == PlayerResearchState.ReadyToClaim ||
+                authority?.State == PlayerResearchAuthorityState.ClaimBlocked;
+            bool completed = state.State == PlayerResearchState.Completed;
+            ui.Q<Label>("researchCost").text = authority?.ManaCost is double cost && !completed
+                ? Format(started ? "ui.research.paid_cost" : "ui.research.start_cost", cost)
+                : started || completed ? string.Empty : Text(PlayerResearchActionHandler.CostUnavailableKey);
+            ui.Q<Label>("researchDuration").text = authority?.DurationSeconds is double duration && !completed
+                ? Format("ui.research.duration", duration) : string.Empty;
+            ui.Q<Label>("researchAffordability").text = !completed && authority?.UsableMana is double usable
                 ? Format(authority.IsAffordable ? "ui.research.affordable" : "ui.research.unaffordable", usable)
                 : string.Empty;
-            string status = authority?.State == PlayerResearchAuthorityState.InProgress
-                ? Format(PlayerResearchActionHandler.InProgressFormatKey, state.ProgressUnits, state.RequiredProgressUnits)
-                : Text(state.FeedbackLocalizationKey);
+            string status = PlayerResearchStatusTextPresenter.Present(state.FeedbackLocalizationKey, authority,
+                (key, _) => Text(key), Culture);
             if (authority?.State == PlayerResearchAuthorityState.ClaimBlocked)
                 status = Text(PlayerResearchActionHandler.ReadyToClaimKey) + "\n" + status;
+            if (completed)
+            {
+                var unlock = root.ResolveMvpPlayerLoopSummary();
+                if (unlock.HasResearchUnlock) status += "\n" + Text(unlock.ResearchUnlockSummaryKey);
+            }
             ui.Q<Label>("researchStatus").text = status == ui.Q<Label>("researchPrerequisite").text ||
                 status == ui.Q<Label>("researchCost").text ? Text("ui.research.start_blocked") : status;
             ui.Q<Button>("researchStart").style.display = authority?.CanStart == true ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("researchClaim").style.display = state.CanClaimLocalMvp ? DisplayStyle.Flex : DisplayStyle.None;
         }
+
+        private bool ResearchInteractionBlocked => IsEditing || modal.style.display == DisplayStyle.Flex;
     }
 }

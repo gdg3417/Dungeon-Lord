@@ -157,6 +157,7 @@ namespace DungeonBuilder.M0
             InitializeFloorManagement();
             InitializeAnalysis();
             InitializeResearch();
+            if (root.overlay != null) root.overlay.ResearchInteractionBlocked = () => this != null && ResearchInteractionBlocked;
             Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
             Button("default", () => SetTextSize(DungeonTextSize.Default));

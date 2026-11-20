@@ -466,6 +466,15 @@ namespace DungeonBuilder.M0
                 if (action == null)
                     return PlayerResearchActionHandler.PersistenceFailure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
                 if (!action.Succeeded || !action.StateChanged) return action;
+                if (action.WouldChargeCosts)
+                {
+                    var committedHistory = JsonUtility.FromJson<SaveRoot>(
+                        System.Text.Encoding.UTF8.GetString(owned.GetBytes())).primary.runHistory;
+                    if (!RunHistoryState.HasCompletedAdventurerRun(committedHistory) ||
+                        JsonUtility.ToJson(committedHistory) != JsonUtility.ToJson(candidate.runHistory))
+                        return new PlayerResearchActionResult { State = PlayerResearchState.Blocked,
+                            FeedbackLocalizationKey = PlayerResearchActionHandler.BlockedPrerequisiteKey };
+                }
                 if (candidate.timeProvenance?.Mode != TimeProvenance.PreciseMode)
                     candidate.lastSavedUtcUnix = CaptureMonotonicSaveBoundary(candidate.lastSavedUtcUnix);
             }
