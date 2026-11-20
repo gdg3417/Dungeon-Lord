@@ -96,9 +96,16 @@ namespace DungeonBuilder.M0
                 _selectedRoomLocalContentPosition = new TileCoordinate(0, 0);
                 Check(TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.LootNodeCategoryId,
                     MvpDungeonPlacementIds.BasicLootNodeOptionId, out _, out _, out _), "research.qualification.loot");
-                ApplyHeatDelta(60); // Existing QA control, on the isolated save only.
-                Check(TrySetQaManaFromDevPanel(false), "research.qualification.defeat_fixture");
+                // The owner opens this fixture on the real clock, which must settle offline mana first.
+                var ownerFixtureRate = _passiveManaService.ResolveRate(Save, RunSimulationConfig);
+                Check(ownerFixtureRate.RuleResolved && !HasValidAdventurerRun() &&
+                    ResolvePlayerResearchState().Authority?.IsAffordable == true,
+                    "research.qualification.waiting_fixture");
                 CaptureScenario(".waiting-for-run");
+
+                // Only the accelerated defeat exercise uses the out-of-range QA heat and empty wallet.
+                ApplyHeatDelta(60);
+                Check(TrySetQaManaFromDevPanel(false), "research.qualification.defeat_fixture");
                 for (int i = 0; i < 80 && !HasValidAdventurerRun(); i++)
                     Reach(TimeService.SampleForeground() + tick);
                 Check(HasValidAdventurerRun(), "research.qualification.genuine_settlement");
