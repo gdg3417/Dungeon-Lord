@@ -99,6 +99,10 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         public IEnumerator OwnerUsabilityConstructionAndContentReachability()
         { yield return Invoke("OwnerUsabilityConstructionAndContentReachability"); }
         [UnityTest]
+        public IEnumerator NativeConstructionReachesUninvestedMiddleDoorway()
+        { yield return Invoke("NativeConstructionReachesUninvestedMiddleDoorway"); }
+
+        [UnityTest]
         public IEnumerator TransactionalRoomConstructionProductionParity()
         { yield return Invoke("TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery"); }
         [UnityTest]

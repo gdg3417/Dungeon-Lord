@@ -107,6 +107,13 @@ namespace DungeonBuilder.M0.Tests
             var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null);
             Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename), "Disposable scene save isolation");
             PumpSceneToClosed(establishForeground: true);
+            if (TestContext.CurrentContext.Test.Name == nameof(NativeConstructionReachesUninvestedMiddleDoorway))
+            {
+                controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+                for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
+                Assert.That(controller.World, Is.Not.Null);
+                yield break;
+            }
             var placed = root.SaveService.ExecuteCanonicalMutation(root.Save,
                 DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic", null, null, null));
             Assert.That(placed.IsSuccess, Is.True, placed.Reason);
@@ -353,6 +360,74 @@ namespace DungeonBuilder.M0.Tests
             if (filename != null && !failed)
                 foreach (string path in Directory.GetFiles(Application.persistentDataPath, filename + "*")) File.Delete(path);
         }
+        [Serializable]
+        private sealed class ConstructionLedger
+        {
+            public StructuralInvestmentRecord[] structuralInvestment;
+        }
+
+        [UnityTest]
+        public IEnumerator NativeConstructionReachesUninvestedMiddleDoorway()
+        {
+            var root = GameRoot.Instance;
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors, Is.Empty, "Use native creation without seeding a room");
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var initialMana = root.Save.structureRuntime.ManaReserve;
+            Click(ui.Q<Button>("buildFirstRoom"));
+            Click(ui.Q<Button>("confirm"));
+            var starter = root.Save.validatedCanonicalSpatialState.Floors.Single();
+            var first = starter.Layout.Rooms.Single();
+            Assert.That(first.Anchor, Is.EqualTo(new TileCoordinate(0, 2)));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(initialMana));
+
+            Assert.That(root.SaveService.TryRoomConstructionBaseCost("spatial.room.basic", out var roomCost), Is.True);
+            Assert.That(initialMana, Is.LessThan(roomCost));
+            // Supply elapsed time only. The production foreground executor earns and publishes all mana.
+            for (int interval = 0; interval < 60 && root.Save.structureRuntime.ManaReserve < roomCost; interval++)
+            {
+                sceneClock.Advance(30);
+                PumpSceneToClosed(establishForeground: true);
+                yield return null;
+            }
+            double earnedBalance = root.Save.structureRuntime.ManaReserve;
+            Assert.That(earnedBalance, Is.GreaterThanOrEqualTo(roomCost));
+
+            controller.EnterEdit();
+            Click(ui.Q<Button>("roomsCategory"));
+            Assert.That(controller.SelectConstructionRoom("spatial.room.basic"), Is.True);
+            Assert.That(controller.SelectTerminalConnection("north"), Is.True);
+            var anchor = new TileCoordinate(0, 6);
+            Assert.That(controller.World.MoveGuidanceAnchors, Does.Contain(anchor));
+            controller.TapWorld(anchor);
+            Assert.That(controller.ConstructionPreview.IsValid, Is.True);
+            var quote = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft, controller.ConstructionPreview.DetachedCandidate);
+            Assert.That(quote.IsAffordable, Is.True, quote.Reason);
+            Assert.That(quote.Cost, Is.EqualTo(roomCost));
+            Click(ui.Q<Button>("confirmPlacement"));
+            Click(ui.Q<Button>("save"));
+            Click(ui.Q<Button>("confirm"));
+            yield return null;
+
+            Assert.That(controller.IsEditing, Is.False);
+            var floor = root.Save.validatedCanonicalSpatialState.Floors.Single();
+            var second = floor.Layout.Rooms.Single(room => room.Anchor.Equals(anchor));
+            Assert.That(second.RoomInstanceId, Is.Not.EqualTo(first.RoomInstanceId));
+            Assert.That(floor.FixedStructures.Single(value => value.Kind == FixedSpatialStructureKind.CompletionTerminal).Anchor,
+                Is.EqualTo(new TileCoordinate(1, 10)));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(earnedBalance - quote.Cost));
+            var firstNode = floor.Layout.Nodes.Single(node => node.RoomInstanceId == first.RoomInstanceId);
+            var secondNode = floor.Layout.Nodes.Single(node => node.RoomInstanceId == second.RoomInstanceId);
+            var middle = floor.Layout.Edges.Single(edge => edge.SourceNodeId == firstNode.NodeId && edge.DestinationNodeId == secondNode.NodeId);
+            Assert.That(middle.Classification, Is.EqualTo(RouteClassification.Required));
+            Assert.That(middle.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
+            Assert.That(middle.OptionalBranchId, Is.Null.Or.Empty);
+            var ledger = JsonUtility.FromJson<ConstructionLedger>(File.ReadAllText(root.SaveService.SavePath));
+            var record = ledger.structuralInvestment.Single(value => value.StructureId == middle.EdgeId);
+            Assert.That(record.ConstructionMana, Is.Zero);
+            Assert.That(record.RenovationMana, Is.Zero);
+            TestContext.WriteLine($"Native construction earned {earnedBalance - initialMana} mana in {sceneClock.Monotonic()} seconds, spent {quote.Cost}, and created {middle.EdgeId} at zero investment.");
+        }
+
         [UnityTest]
         public IEnumerator TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery()
         {
