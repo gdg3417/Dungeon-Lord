@@ -294,9 +294,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (command.Kind == DungeonDraftCommandKind.IndependentRoomPlacement)
             {
                 var placement = command.IndependentRoomPlacement;
-                var preview = PreviewIndependentPlacement(placement.Request);
-                if (!preview.IsValid || preview.TargetRoomInstanceId != placement.ExpectedRoomInstanceId) return false;
-                presented = preview.DetachedCandidate;
+                var placementPreview = PreviewIndependentPlacement(placement.Request);
+                if (!placementPreview.IsValid || placementPreview.TargetRoomInstanceId != placement.ExpectedRoomInstanceId) return false;
+                presented = placementPreview.DetachedCandidate;
                 return true;
             }
             if (command.Kind == DungeonDraftCommandKind.RoomConstruction) return ApplyConstruction(command.RoomConstruction);
