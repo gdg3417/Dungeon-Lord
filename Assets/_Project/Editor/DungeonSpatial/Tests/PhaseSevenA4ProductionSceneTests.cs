@@ -404,7 +404,11 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(quote.IsAffordable, Is.True, quote.Reason);
             Assert.That(quote.Cost, Is.EqualTo(roomCost));
             Click(ui.Q<Button>("confirmPlacement"));
+            yield return null;
+            Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged), controller.Draft.Reason);
+            Assert.That(ui.Q<Button>("save").enabledSelf, Is.True, ui.Q<Label>("status").text);
             Click(ui.Q<Button>("save"));
+            Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex));
             Click(ui.Q<Button>("confirm"));
             yield return null;
 
