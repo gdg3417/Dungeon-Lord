@@ -91,6 +91,7 @@
                 <ui:Label name="constructionInfo" />
                 <ui:Label name="constructionFeedback" />
             </ui:VisualElement>
+            <ui:VisualElement name="routeAuthoring" class="summary-card" />
             <ui:VisualElement name="contextSheet" class="sheet">
                 <ui:Label name="selectedName" class="mode" />
                 <ui:Label name="inspectionInfo" />

@@ -103,6 +103,10 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         { yield return Invoke("NativeConstructionReachesUninvestedMiddleDoorway"); }
 
         [UnityTest]
+        public IEnumerator NativeConstructionAuthorsMiddleInsertionAndReopens()
+        { yield return Invoke("NativeConstructionAuthorsMiddleInsertionAndReopens"); }
+
+        [UnityTest]
         public IEnumerator TransactionalRoomConstructionProductionParity()
         { yield return Invoke("TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery"); }
         [UnityTest]

@@ -521,6 +521,14 @@ namespace DungeonBuilder.M0
             highlight.transform.localPosition = new Vector3(cell.X + 0.5f, cell.Y + 0.5f);
             highlight.transform.localScale = new Vector3(policy.PreviewSize, policy.PreviewSize, 1);
         }
+        internal void PresentRoutePreview(IEnumerable<TileCoordinate> tiles, bool valid)
+        {
+            constructionPreview.ClearAllTiles();
+            var tile = valid ? roomSelectionTile : invalidIntentTile;
+            foreach (var cell in tiles.Distinct())
+                constructionPreview.SetTile(new Vector3Int(cell.X, cell.Y, 0), tile);
+        }
+
         public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); selectedRoom?.ClearAllTiles(); constructionPreview?.ClearAllTiles(); ConstructionPreviewTileCount = 0; ClearRoomPlacementGrid(); }
 
         public void ClearRoomPlacementGrid()

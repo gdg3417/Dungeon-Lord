@@ -3506,6 +3506,126 @@
       "text": "The Completion Terminal cannot be placed at the derived position."
     },
     {
+      "key": "ui.dungeon.route.place_room",
+      "text": "Place {0} independently"
+    },
+    {
+      "key": "ui.dungeon.route.append_card",
+      "text": "Append to route"
+    },
+    {
+      "key": "ui.dungeon.route.reposition_room",
+      "text": "Reposition disconnected room"
+    },
+    {
+      "key": "ui.dungeon.route.resulting_usable",
+      "text": "Usable mana after saving: {0}"
+    },
+    {
+      "key": "ui.dungeon.route.append_room",
+      "text": "Append {0} to the required route"
+    },
+    {
+      "key": "ui.dungeon.route.place_hint",
+      "text": "Tap a floor tile to preview the room. Drag the preview to move it."
+    },
+    {
+      "key": "ui.dungeon.route.place_preview",
+      "text": "Confirm this room in the draft, then connect it to the route."
+    },
+    {
+      "key": "ui.dungeon.route.room_confirmed",
+      "text": "Room added to the draft. Connect it before saving."
+    },
+    {
+      "key": "ui.dungeon.route.connection_accepted",
+      "text": "Connection accepted into the draft. Save Changes to build it."
+    },
+    {
+      "key": "ui.dungeon.route.edit_for_room",
+      "text": "Edit route for {0}"
+    },
+    {
+      "key": "ui.dungeon.route.choose_edge",
+      "text": "Choose the required edge to replace with a visit to {0}."
+    },
+    {
+      "key": "ui.dungeon.route.edge",
+      "text": "{0} → {1}"
+    },
+    {
+      "key": "ui.dungeon.route.suggest",
+      "text": "Suggest both connections"
+    },
+    {
+      "key": "ui.dungeon.route.no_suggestion",
+      "text": "No suggestion found. Choose doorways and draw the passages."
+    },
+    {
+      "key": "ui.dungeon.route.predecessor_opening",
+      "text": "Earlier exit · {0} ({1}, {2})"
+    },
+    {
+      "key": "ui.dungeon.route.new_room_entry",
+      "text": "New room entrance · {0} ({1}, {2})"
+    },
+    {
+      "key": "ui.dungeon.route.new_room_exit",
+      "text": "New room exit · {0} ({1}, {2})"
+    },
+    {
+      "key": "ui.dungeon.route.successor_opening",
+      "text": "Later entrance · {0} ({1}, {2})"
+    },
+    {
+      "key": "ui.dungeon.route.draw_incoming",
+      "text": "Edit incoming passage ({0} tiles)"
+    },
+    {
+      "key": "ui.dungeon.route.draw_outgoing",
+      "text": "Edit outgoing passage ({0} tiles)"
+    },
+    {
+      "key": "ui.dungeon.route.drawing_incoming",
+      "text": "Tap tiles in order from the earlier room to the new room."
+    },
+    {
+      "key": "ui.dungeon.route.drawing_outgoing",
+      "text": "Tap tiles in order from the new room to the next room."
+    },
+    {
+      "key": "ui.dungeon.route.clear_passage",
+      "text": "Clear passage tiles"
+    },
+    {
+      "key": "ui.dungeon.route.undo_tile",
+      "text": "Undo last tile"
+    },
+    {
+      "key": "ui.dungeon.route.order",
+      "text": "Required route: {0}"
+    },
+    {
+      "key": "ui.dungeon.route.separator",
+      "text": " → "
+    },
+    {
+      "key": "ui.dungeon.route.floor_space",
+      "text": "Floor space: {0} of {1} tiles"
+    },
+    {
+      "key": "ui.dungeon.route.accept",
+      "text": "Accept route into draft"
+    },
+    {
+      "key": "ui.dungeon.route.room_location",
+      "text": "{0} ({1}, {2})"
+    },
+    {
+      "key": "structural.edit.insertion_retirement_unavailable",
+      "text": "Select a required doorway with no historical construction or renovation cost."
+    },
+    {
       "key": "structural.edit.required_route_disconnected",
       "text": "This placement would disconnect the required route. Choose a highlighted diamond anchor."
     },

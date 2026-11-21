@@ -59,12 +59,15 @@ namespace DungeonBuilder.M0
             return language.entries.FirstOrDefault(e => e.key == localizationKey)?.text ?? Text("ui.dungeon.unavailable");
         }
 
-        public bool SelectConstructionRoom(string definitionId)
+        public bool SelectConstructionRoom(string definitionId) => SelectConstructionRoom(definitionId, false);
+
+        private bool SelectConstructionRoom(string definitionId, bool independent)
         {
             if (!HasCanonicalRuntime() || !IsEditing || draft.Durability == DraftDurability.Unknown) return false;
             var definition = ConstructionRooms().SingleOrDefault(r => r.RoomDefinitionId == definitionId);
             if (definition == null) return false;
             CloseSheet(); detailsCollapsed = true;
+            independentRoomPlacement = independent;
             constructionIntentId = Guid.NewGuid().ToString("N");
             constructionRequest = new StructuralConstructionRequest { FloorInstanceId = selectedFloor, RoomDefinitionId = definitionId,
                 Orientation = definition.AllowedOrientations.First(), TerminalConnectionPointId = definition.ConnectionPoints.First().ConnectionPointId };
@@ -105,6 +108,12 @@ namespace DungeonBuilder.M0
         {
             constructionEconomy = null;
             world.ClearPreview();
+            if (independentRoomPlacement)
+            {
+                world.ClearMoveGuidance();
+                feedback = "ui.dungeon.route.place_hint";
+                return;
+            }
             var guidance = StructuralEditService.GetConstructionGuidance(draft.ReadModel, constructionRequest, draftContext, floorPresentationLimits);
             world.PresentMoveGuidance(guidance.ValidAnchors);
             feedback = guidance.Reason ?? (guidance.ValidAnchors.Length == 0 ? NeedsStarterSetup ? "ui.dungeon.construction.starter_required" : "ui.dungeon.construction.none" : "ui.dungeon.construction.hint");
@@ -112,7 +121,16 @@ namespace DungeonBuilder.M0
 
         private void PreviewConstruction(TileCoordinate cell)
         {
+            if (constructionPreview != null && constructionRequest.Anchor.Equals(cell)) return;
             constructionRequest.Anchor = cell;
+            if (independentRoomPlacement)
+            {
+                constructionPreview = draft.PreviewIndependentPlacement(IndependentPlacementRequest());
+                world.PresentConstructionPreview(constructionPreview);
+                feedback = constructionPreview.ReasonCodes.FirstOrDefault() ?? "ui.dungeon.route.place_preview";
+                Present();
+                return;
+            }
             constructionPreview = StructuralEditService.Preview(draft.ReadModel, constructionRequest, draftContext.Production,
                 draftContext.Compatibility, draftContext.Configuration, draftContext.Limits.Canonical);
             if (constructionPreview.IsValid && !draftContext.Validate(constructionPreview.DetachedCandidate))
@@ -126,6 +144,7 @@ namespace DungeonBuilder.M0
         public bool ConfirmConstructionPlacement()
         {
             if (!HasCanonicalRuntime() || !IsConstructing || constructionPreview == null || draft.Durability == DraftDurability.Unknown) return false;
+            if (independentRoomPlacement) return ConfirmIndependentRoomPlacement();
             if (!draft.ConstructRoom(constructionIntentId, constructionRequest)) { feedback = draft.Reason; Present(); return false; }
             string intentId = constructionIntentId;
             bool invalid = draft.InvalidConstructions.Any(value => value.IntentId == intentId);
@@ -145,6 +164,7 @@ namespace DungeonBuilder.M0
         private void ClearConstructionSelection()
         {
             constructionRequest = null; constructionPreview = null; constructionEconomy = null; constructionIntentId = null;
+            independentRoomPlacement = false; draggingIndependentPlacement = false; relocatingDraftRoom = null;
             world?.ClearPreview(); world?.ClearMoveGuidance();
         }
 
@@ -192,6 +212,12 @@ namespace DungeonBuilder.M0
             information.text = Format("ui.dungeon.construction.properties", RoomName(definition), definition.GrossFootprint.Width,
                 definition.GrossFootprint.Height, definition.MonsterCapacity, definition.TrapCapacity, definition.LootCapacity);
             if (constructionPreview?.IsValid != true) return;
+            if (independentRoomPlacement)
+            {
+                summary.text += "\n" + Format("ui.dungeon.route.floor_space", constructionPreview.ResultingUsedFloorSpace,
+                    constructionPreview.ResultingUsedFloorSpace + constructionPreview.ResultingRemainingFloorSpace);
+                return;
+            }
             var price = constructionEconomy;
             if (price != null) root.SaveService.RefreshDraftPreviewBalance(price, root.Save.structureRuntime.ManaReserve);
             var floor = constructionPreview.DetachedCandidate.Floors.Single(f => f.FloorInstanceId == selectedFloor);
@@ -239,7 +265,8 @@ namespace DungeonBuilder.M0
             ui.Q("contextDetails").style.display = detailsCollapsed ? DisplayStyle.None : DisplayStyle.Flex;
             var panel = ui.Q("constructionSheet"); panel.style.display = IsEditing && selected == null && selectedRoomId == null && selectedEdgeId==null && !moveMode ? DisplayStyle.Flex : DisplayStyle.None;
             var choices = ui.Q("roomChoices"); choices.Clear();
-            ui.Q("roomChoicesScroll").style.display = constructionRequest == null ? DisplayStyle.Flex : DisplayStyle.None;
+            ui.Q("roomChoicesScroll").style.display = constructionRequest == null && !IsAuthoringRoute
+                ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q("roomChoicesHint").style.display = DisplayStyle.None;
             var availableRooms = ConstructionRooms();
             var previewLimits = new SpatialValidationWorkloadLimits(root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles);
@@ -271,10 +298,20 @@ namespace DungeonBuilder.M0
                     button.tooltip = Format("ui.dungeon.construction.card", RoomName(room), room.GrossFootprint.Width, room.GrossFootprint.Height,
                         root.SaveService.TryRoomConstructionBaseCost(id, out double tooltipCost) ? PlayerManaPresentationFormatter.FormatDiscreteAmount(tooltipCost, Culture) : Text("ui.dungeon.unavailable"));
                     button.AddToClassList("room-card"); choices.Add(button);
+                    if (CanAuthorRoutes)
+                    {
+                        button.tooltip = Format("ui.dungeon.route.append_room", RoomName(room));
+                        stats.Add(new Label(Text("ui.dungeon.route.append_card")) { pickingMode = PickingMode.Ignore });
+                        var place = ButtonFor(choices, Format("ui.dungeon.route.place_room", RoomName(room)),
+                            () => SelectConstructionRoom(id, true));
+                        place.name = "placeIndependentRoom";
+                        place.userData = id;
+                    }
                 }
             var options = ui.Q("constructionOptions"); options.Clear();
             ui.Q<Button>("confirmPlacement").style.display = constructionPreview == null ? DisplayStyle.None : DisplayStyle.Flex;
-            ui.Q<Button>("confirmPlacement").SetEnabled(IsConstructing && draft.Durability != DraftDurability.Unknown);
+            ui.Q<Button>("confirmPlacement").SetEnabled(IsConstructing && draft.Durability != DraftDurability.Unknown &&
+                (!independentRoomPlacement || constructionPreview?.IsValid == true));
             ui.Q<Button>("confirmPlacement").text = Text(constructionPreview?.IsValid == false ? "ui.dungeon.construction.keep_invalid" : "ui.dungeon.construction.confirm");
             ui.Q<Button>("cancelPlacement").style.display = IsConstructing ? DisplayStyle.Flex : DisplayStyle.None;
             PresentConstructionInformation();
@@ -288,7 +325,7 @@ namespace DungeonBuilder.M0
                     var button = new Button(() => SelectConstructionOrientation(orientation)) { text = OrientationName(orientation) };
                     if (orientation == constructionRequest.Orientation) button.AddToClassList("selected-floor"); orientations.Add(button);
                 }
-                foreach (var point in definition.ConnectionPoints)
+                foreach (var point in independentRoomPlacement ? Array.Empty<SpatialConnectionPointDefinition>() : definition.ConnectionPoints)
                 {
                     string id = point.ConnectionPointId;
                     var button = new Button(() => SelectTerminalConnection(id)) { text = Format("ui.dungeon.construction.connection", DirectionName(StructuralEditService.Rotate(point.Facing, constructionRequest.Orientation))) };
@@ -304,6 +341,7 @@ namespace DungeonBuilder.M0
                     blockers.Add(button);
                 }
             ui.Q("blockerScroll").style.display = blockers.childCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            PresentRouteAuthoring(ui.Q("routeAuthoring"));
             SetTextSize(textSize);
             PresentRoomBrowseHint();
         }

@@ -107,7 +107,8 @@ namespace DungeonBuilder.M0.Tests
             var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null);
             Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename), "Disposable scene save isolation");
             PumpSceneToClosed(establishForeground: true);
-            if (TestContext.CurrentContext.Test.Name == nameof(NativeConstructionReachesUninvestedMiddleDoorway))
+            if (TestContext.CurrentContext.Test.Name == nameof(NativeConstructionReachesUninvestedMiddleDoorway) ||
+                TestContext.CurrentContext.Test.Name == nameof(NativeConstructionAuthorsMiddleInsertionAndReopens))
             {
                 controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
                 for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
@@ -438,6 +439,136 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(record.ConstructionMana, Is.Zero);
             Assert.That(record.RenovationMana, Is.Zero);
             TestContext.WriteLine($"Native construction earned {earnedBalance - initialMana} mana in {sceneClock.Monotonic()} seconds, spent {quote.Cost}, and created {middle.EdgeId} at zero investment.");
+        }
+
+        [UnityTest]
+        public IEnumerator NativeConstructionAuthorsMiddleInsertionAndReopens()
+        {
+            yield return NativeConstructionReachesUninvestedMiddleDoorway();
+            var root = GameRoot.Instance;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var starter = root.Save.validatedCanonicalSpatialState.Floors.Single();
+            var first = starter.Layout.Rooms.Single(r => r.Anchor.Equals(new TileCoordinate(0, 2)));
+            var second = starter.Layout.Rooms.Single(r => r.Anchor.Equals(new TileCoordinate(0, 6)));
+            var middle = starter.Layout.Edges.Single(e => e.SourceNodeId ==
+                starter.Layout.Nodes.Single(n => n.RoomInstanceId == first.RoomInstanceId).NodeId);
+            const double expectedCost = 110d;
+            for (int interval = 0; interval < 60 && root.Save.structureRuntime.ManaReserve < expectedCost; interval++)
+            {
+                sceneClock.Advance(30);
+                PumpSceneToClosed(establishForeground: true);
+                yield return null;
+            }
+            for (int interval = 0; interval < 180 && root.Save.livingDungeon.Parties.Count == 0; interval++)
+            {
+                sceneClock.Advance(1);
+                PumpSceneToClosed(establishForeground: true);
+                yield return null;
+            }
+            var oldParty = root.Save.livingDungeon.Parties.Single();
+            byte[] oldCheckpoint = (byte[])oldParty.Checkpoint.Clone();
+            double balance = root.Save.structureRuntime.ManaReserve;
+            Assert.That(balance, Is.GreaterThanOrEqualTo(expectedCost));
+            byte[] before = root.SaveService.CanonicalSession.GetCurrentBytes();
+
+            Click(ui.Q<Button>("edit"));
+            Click(ui.Q<Button>("roomsCategory"));
+            var place = ui.Query<Button>("placeIndependentRoom").ToList().Single(button =>
+                (string)button.userData == "spatial.room.basic");
+            Click(place);
+            controller.TapWorld(new TileCoordinate(0, 2));
+            Assert.That(controller.ConstructionPreview.ReasonCodes, Does.Contain(StructuralEditService.RoomOverlapReason));
+            Assert.That(ui.Q<Button>("confirmPlacement").enabledSelf, Is.False);
+            controller.TapWorld(new TileCoordinate(4, 3));
+            Assert.That(controller.ConstructionPreview.IsValid, Is.True, string.Join(",", controller.ConstructionPreview.ReasonCodes));
+            Click(ui.Q<Button>("confirmPlacement"));
+            yield return null;
+            Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+            Assert.That(controller.Draft.DisconnectedRoomIds, Has.Length.EqualTo(1));
+            Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+            CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
+
+            var choice = ui.Query<Button>("replaceRouteEdge").ToList().Single(button => (string)button.userData == middle.EdgeId);
+            Click(choice);
+            Click(ui.Q<Button>("suggestRoute"));
+            Assert.That(controller.Draft.CommandCount, Is.EqualTo(1), "Suggestion remains transient");
+            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q("routeAuthoring").Query<Label>().ToList()
+                .Select(label => label.text).Aggregate(string.Empty, (left, right) => left + "\n" + right));
+            Click(ui.Q<Button>("drawOutgoingPassage"));
+            Click(ui.Q<Button>("clearPassage"));
+            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False);
+            controller.TapWorld(new TileCoordinate(5, 7));
+            controller.TapWorld(new TileCoordinate(4, 7));
+            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+            Click(ui.Q<Button>("acceptRoute"));
+            yield return null;
+            Assert.That(controller.Draft.CommandCount, Is.EqualTo(2));
+            string added = controller.Draft.RouteAuthoringRoomIds.Single();
+            var recoveredStore = root.SaveService.CreateDungeonDraftStore();
+            var recovered = TransactionalDungeonDraft.Recover(recoveredStore.Read(),
+                root.Save.validatedCanonicalSpatialState, root.SaveService.DungeonDraftContext, recoveredStore, out var reason);
+            Assert.That(recovered, Is.Not.Null, reason);
+            var proposal = recovered.AcceptedRouteInsertion(added);
+            Assert.That(proposal.Incoming.SourcePointId, Is.EqualTo("east.2"));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(5, 7), new TileCoordinate(4, 7) }, proposal.Outgoing.Passage);
+            CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
+            Assert.That(root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft).Cost, Is.EqualTo(expectedCost));
+
+            Click(ui.Q<Button>("save"));
+            Click(ui.Q<Button>("confirm"));
+            yield return null;
+            Assert.That(controller.IsEditing, Is.False, ui.Q<Label>("status").text);
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(balance - expectedCost));
+            var committed = root.Save.validatedCanonicalSpatialState.Floors.Single();
+            Assert.That(RequiredFloorTraversal.TryResolve(committed.Layout, out var route), Is.True);
+            CollectionAssert.AreEqual(new[] { first.RoomInstanceId, added, second.RoomInstanceId },
+                route.Where(n => n.Kind == FloorRouteNodeKind.Room).Select(n => n.RoomInstanceId));
+            Assert.That(committed.Layout.Edges.Any(e => e.EdgeId == middle.EdgeId), Is.False);
+            var catalog = root.ProductionSpatialContent.Catalog;
+            var capacity = FloorLayoutValidator.Validate(committed.Layout, catalog.Floors.Single(f => f.FloorIndex == 0),
+                catalog.Rooms, catalog.Corridors, new SpatialValidationWorkloadLimits(root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles),
+                committed.FixedStructures, catalog.FixedStructures);
+            Assert.That(capacity.IsValid, Is.True);
+            Assert.That(capacity.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(60));
+            CollectionAssert.AreEqual(oldCheckpoint, root.Save.livingDungeon.Parties.Single().Checkpoint);
+
+            string fingerprint = root.SaveService.DungeonDraftContext.Fingerprint(root.Save.validatedCanonicalSpatialState);
+            UnityEngine.Object.Destroy(controller.gameObject);
+            UnityEngine.Object.Destroy(root.gameObject);
+            yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
+            for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
+            root = GameRoot.Instance;
+            Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename));
+            Assert.That(root.SaveService.DungeonDraftContext.Fingerprint(root.Save.validatedCanonicalSpatialState), Is.EqualTo(fingerprint));
+            CollectionAssert.AreEqual(oldCheckpoint, root.Save.livingDungeon.Parties.Single().Checkpoint);
+            controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+
+            var profile = root.SaveService.ForegroundConfiguration.CreateProfile(
+                root.SaveSpatialMigrationLimits.Canonical.ForSchema(CanonicalSaveSchemaVersions.RoomContentPositionIntroduction).Serialized);
+            for (int interval = 0; interval < 180; interval++)
+            {
+                sceneClock.Advance(1);
+                PumpSceneToClosed(establishForeground: true);
+                var nextParty = root.Save.livingDungeon.Parties.SingleOrDefault(party => party.Sequence > oldParty.Sequence);
+                if (nextParty != null)
+                {
+                    var execution = LivingDungeonContracts.Restore(nextParty, profile);
+                    try
+                    {
+                        var captured = execution.Snapshot.Floors.Single();
+                        CollectionAssert.AreEqual(new[] { first.RoomInstanceId, added, second.RoomInstanceId },
+                            captured.MaterializePlan().RequiredRooms.Select(entry => entry.Room.RoomInstanceId));
+                        var passage = captured.InspectSpatialInputs().Layout.Edges.Single(edge =>
+                            edge.AuthoredGeometry?.Passage.Length > 0).AuthoredGeometry.Passage;
+                        CollectionAssert.AreEqual(proposal.Outgoing.Passage, passage);
+                    }
+                    finally { execution.Abandon(); }
+                    yield break;
+                }
+                yield return null;
+            }
+            Assert.Fail("The production scheduler did not admit a subsequent party within the test horizon");
         }
 
         [UnityTest]
