@@ -29,6 +29,72 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string id = Guid.NewGuid().ToString("N"); Assert.That(draft.ConstructRoom(id, request ?? Request(f)), Is.True); Flush(draft); return id;
         }
 
+        [Test]
+        public void IndependentPlacementRecoversDisconnectedRoomAndBlocksCanonicalCommit()
+        {
+            var f = Room();
+            var context = Context(f);
+            string path = f.ActivePath + ".editor-draft";
+            var store = new FileDungeonDraftStore(path, f.FileSystem, f.Profile);
+            var draft = TransactionalDungeonDraft.Create(f.State, context, store);
+            var request = new IndependentRoomPlacementRequest
+            {
+                FloorInstanceId = f.State.Floors[0].FloorInstanceId,
+                RoomDefinitionId = "spatial.room.basic",
+                Anchor = new TileCoordinate(4, 3),
+                Orientation = CardinalOrientation.Zero
+            };
+            byte[] before = f.FileSystem.ReadAllBytes(f.ActivePath);
+            var preview = draft.PreviewIndependentPlacement(request);
+            Assert.That(preview.IsValid, Is.True, string.Join(", ", preview.ReasonCodes));
+            Assert.That(draft.CommandCount, Is.Zero);
+            Assert.That(draft.PlaceIndependentRoom(request), Is.True, draft.Reason);
+            Assert.That(draft.Durability, Is.EqualTo(DraftDurability.Pending));
+            Assert.That(draft.CanSave, Is.False);
+            Flush(draft);
+
+            var recovered = TransactionalDungeonDraft.Recover(store.Read(), f.State, context, store, out var reason);
+            Assert.That(recovered, Is.Not.Null, reason);
+            Assert.That(context.Fingerprint(recovered.ReadModel), Is.EqualTo(context.Fingerprint(draft.ReadModel)));
+            var floor = recovered.ReadModel.Floors.Single();
+            var room = floor.Layout.Rooms.Single(r => r.RoomInstanceId == preview.TargetRoomInstanceId);
+            Assert.That(room.Anchor, Is.EqualTo(request.Anchor));
+            Assert.That(room.Orientation, Is.EqualTo(request.Orientation));
+            CollectionAssert.AreEqual(f.State.Floors[0].Layout.Edges.Select(JsonUtility.ToJson),
+                floor.Layout.Edges.Select(JsonUtility.ToJson));
+            CollectionAssert.AreEqual(f.State.Floors[0].FixedStructures.Select(JsonUtility.ToJson),
+                floor.FixedStructures.Select(JsonUtility.ToJson));
+            var node = floor.Layout.Nodes.Single(n => n.RoomInstanceId == room.RoomInstanceId);
+            Assert.That(floor.Layout.Edges.Any(e => e.SourceNodeId == node.NodeId || e.DestinationNodeId == node.NodeId), Is.False);
+            Assert.That(recovered.StructuralReason, Is.EqualTo(StructuralEditService.RequiredRouteReason));
+            var result = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, recovered);
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.Reason, Is.EqualTo(StructuralEditService.RequiredRouteReason));
+            Assert.That(recovered.Discard(), Is.True);
+            Assert.That(store.Read(), Is.Null);
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+        }
+
+        [TestCase(0, 2, StructuralEditService.RoomOverlapReason)]
+        [TestCase(1, 6, StructuralEditService.FixedOverlapReason)]
+        [TestCase(9, 9, StructuralEditService.OutOfBoundsReason)]
+        public void InvalidIndependentPlacementDoesNotAppendOrAllocate(int x, int y, string expected)
+        {
+            var f = Room();
+            var context = Context(f);
+            var draft = TransactionalDungeonDraft.Create(f.State, context, new Store());
+            var request = new IndependentRoomPlacementRequest
+            {
+                FloorInstanceId = f.State.Floors[0].FloorInstanceId, RoomDefinitionId = "spatial.room.basic",
+                Anchor = new TileCoordinate(x, y), Orientation = CardinalOrientation.Zero
+            };
+
+            Assert.That(draft.PlaceIndependentRoom(request), Is.False);
+            Assert.That(draft.Reason, Is.EqualTo(expected));
+            Assert.That(draft.CommandCount, Is.Zero);
+            Assert.That(context.Fingerprint(draft.ReadModel), Is.EqualTo(context.Fingerprint(f.State)));
+        }
+
         [TestCase("spatial.room.basic", CardinalOrientation.Zero)]
         [TestCase("spatial.room.rectangle", CardinalOrientation.Zero)]
         [TestCase("spatial.room.rectangle", CardinalOrientation.Ninety)]

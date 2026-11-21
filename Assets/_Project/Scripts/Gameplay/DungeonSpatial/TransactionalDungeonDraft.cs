@@ -8,7 +8,7 @@ using UnityEngine;
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public enum DraftDurability { Acknowledged, Pending, Failed, Unknown }
-    public enum DungeonDraftCommandKind { ContentReposition = 1, RoomMovement = 2, RoomConstruction = 3, RoomContent = 4 }
+    public enum DungeonDraftCommandKind { ContentReposition = 1, RoomMovement = 2, RoomConstruction = 3, RoomContent = 4, IndependentRoomPlacement = 5 }
 
     [Serializable]
     public sealed class DungeonDraftConstruction
@@ -22,6 +22,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !string.IsNullOrWhiteSpace(Placement.FloorInstanceId) &&
                 !string.IsNullOrWhiteSpace(Placement.RoomDefinitionId) &&
                 !string.IsNullOrWhiteSpace(Placement.TerminalConnectionPointId));
+    }
+
+    [Serializable]
+    public sealed class DungeonDraftIndependentRoomPlacement
+    {
+        public IndependentRoomPlacementRequest Request;
+        public string ExpectedRoomInstanceId;
     }
 
     [Serializable]
@@ -42,18 +49,34 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public StructuralMovementRequest[] RoomMovements = Array.Empty<StructuralMovementRequest>();
         public DungeonDraftConstruction[] RoomConstructions = Array.Empty<DungeonDraftConstruction>();
         public DungeonDraftRoomContent[] RoomContentChanges = Array.Empty<DungeonDraftRoomContent>();
+        public DungeonDraftIndependentRoomPlacement[] IndependentRoomPlacements = Array.Empty<DungeonDraftIndependentRoomPlacement>();
+        internal DungeonDraftIndependentRoomPlacement IndependentRoomPlacement =>
+            IndependentRoomPlacements?.Length == 1 ? IndependentRoomPlacements[0] : null;
         internal DungeonDraftContentReposition ContentReposition => ContentRepositions?.Length == 1 ? ContentRepositions[0] : null;
         internal StructuralMovementRequest RoomMovement => RoomMovements?.Length == 1 ? RoomMovements[0] : null;
         internal DungeonDraftConstruction RoomConstruction => RoomConstructions?.Length == 1 ? RoomConstructions[0] : null;
         internal DungeonDraftCommand Copy() => JsonUtility.FromJson<DungeonDraftCommand>(JsonUtility.ToJson(this));
-        internal bool HasExactPayload => Kind == DungeonDraftCommandKind.ContentReposition
-            ? ContentReposition != null && RoomMovements?.Length == 0 && RoomConstructions?.Length == 0 && RoomContentChanges?.Length == 0
-            : Kind == DungeonDraftCommandKind.RoomMovement
-                ? RoomMovement != null && ContentRepositions?.Length == 0 && RoomConstructions?.Length == 0 && RoomContentChanges?.Length == 0
-                : Kind == DungeonDraftCommandKind.RoomConstruction ? RoomConstruction?.HasExactPayload == true &&
-                    ContentRepositions?.Length == 0 && RoomMovements?.Length == 0 && RoomContentChanges?.Length == 0
-                : Kind == DungeonDraftCommandKind.RoomContent && RoomContentChanges?.Length == 1 &&
-                    RoomContentChanges[0]?.HasExactPayload == true && ContentRepositions?.Length == 0 && RoomMovements?.Length == 0 && RoomConstructions?.Length == 0;
+        internal bool HasExactPayload
+        {
+            get
+            {
+                if (ContentRepositions == null || RoomMovements == null || RoomConstructions == null ||
+                    RoomContentChanges == null || IndependentRoomPlacements == null ||
+                    ContentRepositions.Length + RoomMovements.Length + RoomConstructions.Length +
+                    RoomContentChanges.Length + IndependentRoomPlacements.Length != 1) return false;
+                switch (Kind)
+                {
+                    case DungeonDraftCommandKind.ContentReposition: return ContentReposition != null;
+                    case DungeonDraftCommandKind.RoomMovement: return RoomMovement != null;
+                    case DungeonDraftCommandKind.RoomConstruction: return RoomConstruction?.HasExactPayload == true;
+                    case DungeonDraftCommandKind.RoomContent: return RoomContentChanges.SingleOrDefault()?.HasExactPayload == true;
+                    case DungeonDraftCommandKind.IndependentRoomPlacement:
+                        return IndependentRoomPlacement?.Request != null &&
+                            !string.IsNullOrWhiteSpace(IndependentRoomPlacement.ExpectedRoomInstanceId);
+                    default: return false;
+                }
+            }
+        }
     }
 
     [Serializable]
@@ -124,7 +147,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     /// <summary>Whole-dungeon, non-authoritative command journal. Payloads describe a prefix; only the store can establish committed recovery evidence.</summary>
     public sealed partial class TransactionalDungeonDraft
     {
-        public const int CurrentFormatVersion = 5;
+        internal const int RoomContentFormatVersion = 5;
+        public const int CurrentFormatVersion = 6;
         public const string InvalidReason = "ui.dungeon.draft.invalid";
         public const string StaleReason = "ui.dungeon.draft.stale";
         public const string PendingReason = "ui.dungeon.draft.pending";
@@ -153,12 +177,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string Reason { get; private set; }
         public bool IsClosed { get; private set; }
         public bool HasChanges => !IsStructurallyValid || context.Fingerprint(presented) != BaselineFingerprint;
-        public bool IsStructurallyValid => invalid.Count == 0 && invalidConstruction.Count == 0;
-        public bool HasStructuralIntent => commands.Any(c => c.Kind == DungeonDraftCommandKind.RoomMovement || c.Kind == DungeonDraftCommandKind.RoomConstruction);
+        public bool IsStructurallyValid => invalid.Count == 0 && invalidConstruction.Count == 0 && !HasDisconnectedRoom;
+        public bool HasStructuralIntent => commands.Any(c => c.Kind == DungeonDraftCommandKind.RoomMovement ||
+            c.Kind == DungeonDraftCommandKind.RoomConstruction || c.Kind == DungeonDraftCommandKind.IndependentRoomPlacement);
+        private bool HasDisconnectedRoom => commands.Where(c => c.Kind == DungeonDraftCommandKind.IndependentRoomPlacement)
+            .Any(command =>
+            {
+                var placement = command.IndependentRoomPlacement;
+                var floor = presented.Floors.Single(f => f.FloorInstanceId == placement.Request.FloorInstanceId);
+                var node = floor.Layout.Nodes.Single(n => n.RoomInstanceId == placement.ExpectedRoomInstanceId);
+                return !floor.Layout.Edges.Any(e => e.SourceNodeId == node.NodeId || e.DestinationNodeId == node.NodeId);
+            });
         public bool HasContentIntent => commands.Any(c => c.Kind == DungeonDraftCommandKind.RoomContent);
         public DungeonDraftInvalidMovement[] InvalidMovements => invalid.Select(value => value.Copy()).ToArray();
         public DungeonDraftInvalidConstruction[] InvalidConstructions => invalidConstruction.Select(value => value.Copy()).ToArray();
-        public string StructuralReason => invalid.FirstOrDefault()?.Reason ?? invalidConstruction.FirstOrDefault()?.Reason;
+        public string StructuralReason => invalid.FirstOrDefault()?.Reason ?? invalidConstruction.FirstOrDefault()?.Reason ??
+            (HasDisconnectedRoom ? StructuralEditService.RequiredRouteReason : null);
         public bool CanSave => !IsClosed && HasChanges && Durability == DraftDurability.Acknowledged &&
             AcknowledgedSequence == commands.Count && IsStructurallyValid && context.Validate(presented);
         public DetachedCanonicalSpatialSaveState ReadModel => context.Copy(presented);
@@ -257,6 +291,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!context.Move(presented, command, out var candidate)) return false;
                 presented = candidate; return true;
             }
+            if (command.Kind == DungeonDraftCommandKind.IndependentRoomPlacement)
+            {
+                var placement = command.IndependentRoomPlacement;
+                var preview = PreviewIndependentPlacement(placement.Request);
+                if (!preview.IsValid || preview.TargetRoomInstanceId != placement.ExpectedRoomInstanceId) return false;
+                presented = preview.DetachedCandidate;
+                return true;
+            }
             if (command.Kind == DungeonDraftCommandKind.RoomConstruction) return ApplyConstruction(command.RoomConstruction);
             if (command.Kind == DungeonDraftCommandKind.RoomContent)
             {
@@ -278,6 +320,31 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 Reason = preview.ReasonCodes.FirstOrDefault() ?? StructuralEditService.LayoutInvalidReason });
             invalid.Sort((a, b) => { int floorOrder = string.CompareOrdinal(a.FloorInstanceId, b.FloorInstanceId);
                 return floorOrder != 0 ? floorOrder : string.CompareOrdinal(a.RoomInstanceId, b.RoomInstanceId); });
+            return true;
+        }
+
+        public StructuralEditPreview PreviewIndependentPlacement(IndependentRoomPlacementRequest request) =>
+            StructuralEditService.PreviewIndependentPlacement(presented, request, context);
+
+        public bool PlaceIndependentRoom(IndependentRoomPlacementRequest request)
+        {
+            if (IsClosed || Durability == DraftDurability.Unknown) return false;
+            if (commands.Count >= context.Limits.Raw.MaximumArrayElements) { Reason = LimitReason; return false; }
+            var preview = PreviewIndependentPlacement(request);
+            if (!preview.IsValid) { Reason = preview.ReasonCodes.First(); return false; }
+            var command = new DungeonDraftCommand
+            {
+                Sequence = commands.Count + 1L,
+                Kind = DungeonDraftCommandKind.IndependentRoomPlacement,
+                IndependentRoomPlacements = new[] { new DungeonDraftIndependentRoomPlacement
+                    { Request = request, ExpectedRoomInstanceId = preview.TargetRoomInstanceId } }
+            }.Copy();
+            presented = preview.DetachedCandidate;
+            commands.Add(command);
+            formatVersion = CurrentFormatVersion;
+            ruleIdentity = context.RuleIdentity(formatVersion);
+            if (Durability != DraftDurability.Failed) Durability = DraftDurability.Pending;
+            Reason = Durability == DraftDurability.Failed ? FailedReason : PendingReason;
             return true;
         }
 

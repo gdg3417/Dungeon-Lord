@@ -361,6 +361,12 @@ namespace DungeonBuilder.M0.Tests
                 foreach (string path in Directory.GetFiles(Application.persistentDataPath, filename + "*")) File.Delete(path);
         }
         [Serializable]
+        private sealed class ConstructionSave
+        {
+            public ConstructionLedger primary;
+        }
+
+        [Serializable]
         private sealed class ConstructionLedger
         {
             public StructuralInvestmentRecord[] structuralInvestment;
@@ -425,8 +431,10 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(middle.Classification, Is.EqualTo(RouteClassification.Required));
             Assert.That(middle.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
             Assert.That(middle.OptionalBranchId, Is.Null.Or.Empty);
-            var ledger = JsonUtility.FromJson<ConstructionLedger>(File.ReadAllText(root.SaveService.SavePath));
-            var record = ledger.structuralInvestment.Single(value => value.StructureId == middle.EdgeId);
+            byte[] disk = File.ReadAllBytes(root.SaveService.SavePath);
+            CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(), disk);
+            var saved = JsonUtility.FromJson<ConstructionSave>(System.Text.Encoding.UTF8.GetString(disk));
+            var record = saved.primary.structuralInvestment.Single(value => value.StructureId == middle.EdgeId);
             Assert.That(record.ConstructionMana, Is.Zero);
             Assert.That(record.RenovationMana, Is.Zero);
             TestContext.WriteLine($"Native construction earned {earnedBalance - initialMana} mana in {sceneClock.Monotonic()} seconds, spent {quote.Cost}, and created {middle.EdgeId} at zero investment.");
