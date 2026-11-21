@@ -1,5 +1,9 @@
 # Phase 8 — Dependency Roadmap After Merged PR #245
 
+## After starter Research (2026-11-21)
+
+At `9a0629c51e1ebb5eb0a39e5326c694e92c9afcff`, #272 and #271 are merged. The paid starter General project is playable. Independent General and Blueprint slots, broader catalogs, eligible offline Research and the public verification gate remain open. Construction comes next under the [active execution plan](post-gd60-mvp-execution-plan.md) and [Gameplay Decision Log v0.6](decisions/gameplay-decision-log.md). The dated November 19 sequencing and older workstream statements below retain their original baseline.
+
 ## Current sequencing addendum (2026-11-19)
 
 The dated P8-00 planning and baseline statements below record their original historical packet; they do not describe the present next step. At verified `main` baseline `5ab46461fe1bec40108f58e9944ddb17e8bbe52d`, PR #268 is merged and the recommended next gameplay PR is a bounded Phase 8 Research slice selected after reviewing the latest main and its save/domain dependencies. Do not gate that slice on a major visual redesign or finished artwork. Production UI must support actual Research interaction and verification while remaining functional, understandable, localization-backed, and accessible.
