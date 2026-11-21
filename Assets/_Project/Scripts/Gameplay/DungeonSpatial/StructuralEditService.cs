@@ -18,6 +18,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed class IndependentRoomPlacementRequest
     {
         public string FloorInstanceId;
+        public string ExistingDraftRoomId;
         public string RoomDefinitionId;
         public TileCoordinate Anchor;
         public CardinalOrientation Orientation;
@@ -162,6 +163,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Fail(result, InvalidContextReason);
             if (!CanonicalEditFloorTarget.TryResolve(current, request.FloorInstanceId, out SavedSpatialFloor sourceFloor))
                 return Fail(result, CanonicalEditFloorTarget.InvalidReason);
+            if (sourceFloor.Layout.Edges.Any(edge => edge.AuthoredGeometry != null))
+                return Fail(result, ConnectionUnavailableReason);
             if (!TryFingerprint(current, limits, out string baseline)) return Fail(result, InvalidContextReason);
             result.BaselineFingerprint = baseline;
             result.Intent = new StructuralConstructionRequest { FloorInstanceId = sourceFloor.FloorInstanceId,
@@ -246,7 +249,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 CorridorSpatialDefinition[] corridors = (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>())
                     .Where(value => value != null && (floorDefinition.AllowedCorridorDefinitionIds ?? Array.Empty<string>())
-                        .Contains(value.CorridorDefinitionId) && value.Category == CorridorSpatialCategory.Straight).ToArray();
+                        .Contains(value.CorridorDefinitionId) && (value.Category == CorridorSpatialCategory.Straight ||
+                            value.Category == CorridorSpatialCategory.Orthogonal)).ToArray();
                 if (corridors.Length != 1) return Fail(result, CorridorDefinitionReason);
                 corridor = corridors[0];
                 CorridorAnalysis analysis = AnalyzeCorridors(previousRoom, previousDefinition, newRoom,
@@ -354,6 +358,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !CanonicalEditFloorTarget.TryResolve(current, request.FloorInstanceId, out var source))
                 return Fail(result, CanonicalEditFloorTarget.InvalidReason);
 
+            var existing = string.IsNullOrEmpty(request.ExistingDraftRoomId) ? null :
+                source.Layout.Rooms.SingleOrDefault(room => room.RoomInstanceId == request.ExistingDraftRoomId);
+            if (!string.IsNullOrEmpty(request.ExistingDraftRoomId) &&
+                (existing == null || existing.RoomDefinitionId != request.RoomDefinitionId ||
+                    source.Layout.Nodes.Where(node => node.RoomInstanceId == existing.RoomInstanceId).Any(node =>
+                        source.Layout.Edges.Any(edge => edge.SourceNodeId == node.NodeId || edge.DestinationNodeId == node.NodeId))))
+                return Fail(result, TargetRoomNotBuildableReason);
             var catalog = context.Production.Catalog;
             var floorDefinition = catalog.Floors.SingleOrDefault(f =>
                 f.FloorDefinitionId == source.FloorDefinitionId && f.FloorIndex == source.FloorIndex);
@@ -370,7 +381,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             result.OccupiedTiles = footprint.OccupiedTiles;
             result.ProspectiveFloorSpace = footprint.OccupiedTiles.Length;
             if (footprint.OccupiedTiles.Any(tile => !floorDefinition.Bounds.Contains(tile))) return Fail(result, OutOfBoundsReason);
-            if (OverlapsRooms(footprint.OccupiedTiles, source.Layout.Rooms, catalog.Rooms, workload))
+            if (OverlapsRooms(footprint.OccupiedTiles, source.Layout.Rooms.Where(room => room != existing), catalog.Rooms, workload))
                 return Fail(result, RoomOverlapReason);
             if (OverlapsFixed(footprint.OccupiedTiles, source.FixedStructures, catalog.FixedStructures, workload,
                     includeCompletion: true))
@@ -380,27 +391,30 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             var candidate = context.Copy(current);
             if (candidate == null) return Fail(result, WorkloadReason);
-            if (!NativeStructuralIdentity.TryAllocateConstructionIdentity(candidate, source.FloorInstanceId,
-                    out var identity, out var reason)) return Fail(result, reason);
             var floor = candidate.Floors.Single(f => f.FloorInstanceId == source.FloorInstanceId);
-            var lifecycle = candidate.LifecycleAndOwnership.Floors.Single(f => f.FloorInstanceId == source.FloorInstanceId);
-            lifecycle.NextNativeRoomOrdinal++;
-            var room = new RoomSpatialInstance
+            RoomSpatialInstance room;
+            if (existing == null)
             {
-                RoomInstanceId = identity.RoomInstanceId, RoomDefinitionId = request.RoomDefinitionId,
-                FloorId = floor.FloorInstanceId, Anchor = request.Anchor, Orientation = request.Orientation
-            };
-            var node = new FloorRouteNode
-            {
-                NodeId = identity.RoomNodeId, FloorId = floor.FloorInstanceId,
-                Kind = FloorRouteNodeKind.Room, RoomInstanceId = room.RoomInstanceId
-            };
-            floor.Layout.Rooms = floor.Layout.Rooms.Append(room).ToArray();
-            floor.Layout.Nodes = floor.Layout.Nodes.Append(node).ToArray();
-            floor.RoomContents.RoomSemantics = floor.RoomContents.RoomSemantics.Append(new CanonicalRoomSemantics
-            {
-                RoomInstanceId = room.RoomInstanceId, LegacyRoomOriginKind = LegacyRoomOriginKind.CanonicalPlayerPlaced
-            }).ToArray();
+                if (!NativeStructuralIdentity.TryAllocateConstructionIdentity(candidate, source.FloorInstanceId,
+                        out var identity, out var reason)) return Fail(result, reason);
+                var lifecycle = candidate.LifecycleAndOwnership.Floors.Single(f => f.FloorInstanceId == source.FloorInstanceId);
+                lifecycle.NextNativeRoomOrdinal++;
+                room = new RoomSpatialInstance { RoomInstanceId = identity.RoomInstanceId,
+                    RoomDefinitionId = request.RoomDefinitionId, FloorId = floor.FloorInstanceId };
+                floor.Layout.Rooms = floor.Layout.Rooms.Append(room).ToArray();
+                floor.Layout.Nodes = floor.Layout.Nodes.Append(new FloorRouteNode
+                {
+                    NodeId = identity.RoomNodeId, FloorId = floor.FloorInstanceId,
+                    Kind = FloorRouteNodeKind.Room, RoomInstanceId = room.RoomInstanceId
+                }).ToArray();
+                floor.RoomContents.RoomSemantics = floor.RoomContents.RoomSemantics.Append(new CanonicalRoomSemantics
+                {
+                    RoomInstanceId = room.RoomInstanceId, LegacyRoomOriginKind = LegacyRoomOriginKind.CanonicalPlayerPlaced
+                }).ToArray();
+            }
+            else room = floor.Layout.Rooms.Single(value => value.RoomInstanceId == existing.RoomInstanceId);
+            room.Anchor = request.Anchor;
+            room.Orientation = request.Orientation;
             var validation = FloorLayoutValidator.Validate(floor.Layout, floorDefinition, catalog.Rooms, catalog.Corridors,
                 workload, floor.FixedStructures, catalog.FixedStructures, CanonicalEditFloorTarget.Mode(floor));
             // Detached drafts can add isolated rooms. Every other topology or geometry failure still blocks placement.
@@ -414,7 +428,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             result.ResultingRemainingFloorSpace = validation.Capacity.RemainingFloorSpaceCapacity;
             result.Consequences = new[] { new StructuralChange
             {
-                Kind = StructuralChangeKind.RoomAdded, StableId = room.RoomInstanceId, To = request.Anchor
+                Kind = existing == null ? StructuralChangeKind.RoomAdded : StructuralChangeKind.RoomMoved,
+                StableId = room.RoomInstanceId, From = existing?.Anchor ?? default, To = request.Anchor
             } };
             return result;
         }

@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
 
 namespace DungeonBuilder.M0.Tests.EditMode
@@ -71,6 +72,76 @@ namespace DungeonBuilder.M0.Tests.EditMode
             definition.Category = CorridorSpatialCategory.Orthogonal;
             var passage = new AuthoredRouteGeometry { Passage = new[] { default(TileCoordinate), new TileCoordinate(x, y) } };
             Assert.That(passage.HasValidPassage(definition), Is.False);
+        }
+
+        [TestCase(false, 80)]
+        [TestCase(true, 76)]
+        public void ProductionFloorTwoCapturesEveryAuthoredPassageStepWithoutSideContactShortcuts(bool shorter, int used)
+        {
+            var fixture = TransactionalRoomConstructionTests.Room();
+            var catalog = fixture.Production.Catalog;
+            var configuration = catalog.Floors.Single(f => f.FloorIndex == 1);
+            var floor = new SavedSpatialFloor
+            {
+                FloorInstanceId = FloorId, FloorDefinitionId = configuration.FloorDefinitionId, FloorIndex = 1,
+                ActivationState = FloorActivationState.Active,
+                Layout = new FloorSpatialLayout { FloorId = FloorId },
+                FixedStructures = new[]
+                {
+                    new SavedFixedSpatialStructure { FixedStructureInstanceId = "fixed.entrance", FloorInstanceId = FloorId,
+                        FixedStructureDefinitionId = configuration.EntranceStructureDefinitionId,
+                        Anchor = new TileCoordinate(1, 0), Kind = FixedSpatialStructureKind.Entrance },
+                    new SavedFixedSpatialStructure { FixedStructureInstanceId = "fixed.completion", FloorInstanceId = FloorId,
+                        FixedStructureDefinitionId = configuration.CompletionStructureDefinitionId,
+                        Anchor = new TileCoordinate(11, 12), Kind = FixedSpatialStructureKind.CompletionTerminal }
+                }
+            };
+            floor.Layout.Rooms = new[] { Basic("room.a", 2, 5), Basic("room.b", 6, 5), Basic("room.new", 0, 9) };
+            floor.Layout.Nodes = new[]
+            {
+                Node("entrance", FloorRouteNodeKind.Entrance), Node("node.a", FloorRouteNodeKind.Room, "room.a"),
+                Node("node.b", FloorRouteNodeKind.Room, "room.b"), Node("node.new", FloorRouteNodeKind.Room, "room.new"),
+                Node("completion", FloorRouteNodeKind.Completion)
+            };
+            TileCoordinate[] first = shorter
+                ? new[] { Cell(4, 9), Cell(4, 10) }
+                : new[] { Cell(4, 9), Cell(5, 9), Cell(6, 9), Cell(6, 10), Cell(5, 10), Cell(4, 10) };
+            TileCoordinate[] second = { Cell(4, 11), Cell(5, 11), Cell(6, 11), Cell(7, 11), Cell(7, 10), Cell(7, 9) };
+            floor.Layout.Edges = new[]
+            {
+                Authored("edge.entrance", "entrance", "node.a", "route", "south",
+                    Cell(2, 2), Cell(3, 2), Cell(3, 3), Cell(3, 4)),
+                Authored("edge.incoming", "node.a", "node.new", "north.2", "east", first),
+                Authored("edge.outgoing", "node.new", "node.b", "east.2", "north", second),
+                Authored("edge.completion", "node.b", "completion", "north.2", "route",
+                    Cell(8, 9), Cell(9, 9), Cell(10, 9), Cell(11, 9), Cell(11, 10), Cell(11, 11))
+            };
+
+            var validation = FloorLayoutValidator.Validate(floor.Layout, configuration, catalog.Rooms, catalog.Corridors,
+                Limits(200), floor.FixedStructures, catalog.FixedStructures);
+            Assert.That(validation.IsValid, Is.True, string.Join(", ", validation.Issues.Select(issue => issue.Reason)));
+            Assert.That(validation.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(used));
+            var snapshot = RunConnectionSnapshot.Capture(floor, new PhaseFiveBRoutePlan { Forks = Array.Empty<PhaseFiveBFork>() },
+                catalog, 200);
+            var incoming = snapshot.Required.Single(link => link.Id == "edge.incoming").Path;
+            var outgoing = snapshot.Required.Single(link => link.Id == "edge.outgoing").Path;
+            CollectionAssert.AreEqual(new[] { Cell(4, 8) }.Concat(first).Append(Cell(3, 10)), incoming);
+            CollectionAssert.AreEqual(new[] { Cell(3, 11) }.Concat(second).Append(Cell(7, 8)), outgoing);
+            Assert.That(outgoing.Contains(Cell(8, 9)), Is.False, "Touching completion passage stays separate");
+            Assert.That(incoming.Contains(Cell(5, 8)), Is.False, "Touching room wall does not open a shortcut");
+
+            TileCoordinate Cell(int x, int y) => new TileCoordinate(x, y);
+            RoomSpatialInstance Basic(string id, int x, int y) => new RoomSpatialInstance
+            { RoomInstanceId = id, FloorId = FloorId, RoomDefinitionId = "spatial.room.basic", Anchor = Cell(x, y) };
+            FloorRouteEdge Authored(string id, string from, string to, string opening, string arrival, params TileCoordinate[] passage) =>
+                new FloorRouteEdge
+                {
+                    EdgeId = id, FloorId = FloorId, SourceNodeId = from, DestinationNodeId = to,
+                    Classification = RouteClassification.Required, OptionalBranchId = string.Empty,
+                    ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor,
+                    CorridorDefinitionId = OptionalBranchStructuralEditService.CorridorDefinitionId,
+                    AuthoredGeometry = new AuthoredRouteGeometry { SourcePointId = opening, DestinationPointId = arrival, Passage = passage }
+                };
         }
 
         [Test]

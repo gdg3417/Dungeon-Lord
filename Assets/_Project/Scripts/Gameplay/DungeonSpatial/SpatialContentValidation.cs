@@ -274,15 +274,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (corridor.MinimumLength <= 0 || corridor.MaximumLength <= 0 ||
                     corridor.MinimumLength > corridor.MaximumLength)
                     issues.Add(SpatialContentValidationReason.CorridorLengthInvalid, path + ".length");
-                if (corridor.Width <= 0)
+                if (corridor.Width <= 0 || corridor.Category == CorridorSpatialCategory.Orthogonal && corridor.Width != 1)
                     issues.Add(SpatialContentValidationReason.CorridorWidthInvalid, path + ".width");
-                if (corridor.Category == CorridorSpatialCategory.Straight && corridor.MonsterCapacity > 0)
+                if ((corridor.Category == CorridorSpatialCategory.Straight || corridor.Category == CorridorSpatialCategory.Orthogonal) &&
+                    corridor.MonsterCapacity > 0)
                     issues.Add(SpatialContentValidationReason.CorridorMonsterCapacityInvalid,
                         path + ".monsterCapacity");
 
                 ValidateCapacities(corridor.MonsterCapacity, corridor.TrapCapacity,
                     corridor.LootCapacity, path, issues);
                 ValidateOrientations(corridor.AllowedOrientations, path, issues);
+                if (corridor.Category == CorridorSpatialCategory.Orthogonal && corridor.AllowedOrientations?.Any(axis =>
+                    axis != CardinalOrientation.Zero && axis != CardinalOrientation.Ninety) == true)
+                    issues.Add(SpatialContentValidationReason.OrientationInvalid, path + ".orientations");
                 ValidateReferences(corridor.CompatibleSocketTypeIds, sockets,
                     path + ".compatibleSockets", issues);
             });

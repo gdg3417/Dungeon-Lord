@@ -82,7 +82,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static DungeonDraftV5Command From(DungeonDraftCommand value)
         {
             if (value == null || (int)value.Kind > (int)DungeonDraftCommandKind.RoomContent ||
-                value.IndependentRoomPlacements?.Length != 0) throw new ArgumentException();
+                value.IndependentRoomPlacements?.Length != 0 || value.RouteInsertions?.Length != 0) throw new ArgumentException();
             return new DungeonDraftV5Command
             {
                 Sequence = value.Sequence, Kind = value.Kind, ContentRepositions = value.ContentRepositions,

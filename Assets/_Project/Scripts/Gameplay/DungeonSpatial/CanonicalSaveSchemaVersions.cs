@@ -15,7 +15,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public const int AtomicRecoveryIntroduction = 17;
         public const int ResearchTimingIntroduction = 18;
         public const int AuthoredRouteIntroduction = 19;
-        public const int CurrentWritableTarget = ResearchTimingIntroduction;
+        public const int CurrentWritableTarget = AuthoredRouteIntroduction;
 
         internal static bool HasAuthoredRoutes(int schema) => schema == AuthoredRouteIntroduction;
 

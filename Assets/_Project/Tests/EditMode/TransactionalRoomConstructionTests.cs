@@ -95,6 +95,27 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(context.Fingerprint(draft.ReadModel), Is.EqualTo(context.Fingerprint(f.State)));
         }
 
+        [TestCase(0d, 0d, true)]
+        [TestCase(1d, 0d, false)]
+        [TestCase(0d, 1d, false)]
+        public void RouteInsertionRetirementRequiresVerifiedZeroHistoricalInvestment(
+            double construction, double renovation, bool eligible)
+        {
+            var f = Room();
+            var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context);
+            Assert.That(owned.IsValid, Is.True, owned.Reason);
+            var floor = owned.State.Floors.Single();
+            var edge = floor.Layout.Edges.First(e => e.ConnectionKind == FloorRouteConnectionKind.DirectDoorway);
+            var investment = owned.Investment.Single(record => record.StructureId == edge.EdgeId);
+            investment.ConstructionMana = construction;
+            investment.RenovationMana = renovation;
+            Assert.That(StructuralRouteInsertionService.RetirementEligible(owned, floor.FloorInstanceId, edge.EdgeId),
+                Is.EqualTo(eligible));
+            owned.Investment = owned.Investment.Where(record => record != investment).ToArray();
+            Assert.That(StructuralRouteInsertionService.RetirementEligible(owned, floor.FloorInstanceId, edge.EdgeId),
+                Is.False, "A missing ledger record does not attest zero investment");
+        }
+
         [TestCase("spatial.room.basic", CardinalOrientation.Zero)]
         [TestCase("spatial.room.rectangle", CardinalOrientation.Zero)]
         [TestCase("spatial.room.rectangle", CardinalOrientation.Ninety)]

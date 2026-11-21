@@ -15,7 +15,8 @@
       "TwoSeventy"
     ],
     "CorridorSpatialCategory": [
-      "Straight"
+      "Straight",
+      "Orthogonal"
     ],
     "FixedSpatialStructureKind": [
       "Entrance",

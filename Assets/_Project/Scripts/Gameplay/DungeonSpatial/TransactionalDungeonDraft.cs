@@ -8,7 +8,7 @@ using UnityEngine;
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public enum DraftDurability { Acknowledged, Pending, Failed, Unknown }
-    public enum DungeonDraftCommandKind { ContentReposition = 1, RoomMovement = 2, RoomConstruction = 3, RoomContent = 4, IndependentRoomPlacement = 5 }
+    public enum DungeonDraftCommandKind { ContentReposition = 1, RoomMovement = 2, RoomConstruction = 3, RoomContent = 4, IndependentRoomPlacement = 5, RouteInsertion = 6 }
 
     [Serializable]
     public sealed class DungeonDraftConstruction
@@ -22,6 +22,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !string.IsNullOrWhiteSpace(Placement.FloorInstanceId) &&
                 !string.IsNullOrWhiteSpace(Placement.RoomDefinitionId) &&
                 !string.IsNullOrWhiteSpace(Placement.TerminalConnectionPointId));
+    }
+
+    [Serializable]
+    public sealed class DungeonDraftRouteInsertion
+    {
+        public StructuralRouteInsertionRequest Request;
+        public string ExpectedIncomingEdgeId;
+        public string ExpectedOutgoingEdgeId;
     }
 
     [Serializable]
@@ -50,6 +58,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DungeonDraftConstruction[] RoomConstructions = Array.Empty<DungeonDraftConstruction>();
         public DungeonDraftRoomContent[] RoomContentChanges = Array.Empty<DungeonDraftRoomContent>();
         public DungeonDraftIndependentRoomPlacement[] IndependentRoomPlacements = Array.Empty<DungeonDraftIndependentRoomPlacement>();
+        public DungeonDraftRouteInsertion[] RouteInsertions = Array.Empty<DungeonDraftRouteInsertion>();
+        internal DungeonDraftRouteInsertion RouteInsertion => RouteInsertions?.Length == 1 ? RouteInsertions[0] : null;
         internal DungeonDraftIndependentRoomPlacement IndependentRoomPlacement =>
             IndependentRoomPlacements?.Length == 1 ? IndependentRoomPlacements[0] : null;
         internal DungeonDraftContentReposition ContentReposition => ContentRepositions?.Length == 1 ? ContentRepositions[0] : null;
@@ -61,9 +71,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             get
             {
                 if (ContentRepositions == null || RoomMovements == null || RoomConstructions == null ||
-                    RoomContentChanges == null || IndependentRoomPlacements == null ||
+                    RoomContentChanges == null || IndependentRoomPlacements == null || RouteInsertions == null ||
                     ContentRepositions.Length + RoomMovements.Length + RoomConstructions.Length +
-                    RoomContentChanges.Length + IndependentRoomPlacements.Length != 1) return false;
+                    RoomContentChanges.Length + IndependentRoomPlacements.Length + RouteInsertions.Length != 1) return false;
                 switch (Kind)
                 {
                     case DungeonDraftCommandKind.ContentReposition: return ContentReposition != null;
@@ -73,6 +83,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     case DungeonDraftCommandKind.IndependentRoomPlacement:
                         return IndependentRoomPlacement?.Request != null &&
                             !string.IsNullOrWhiteSpace(IndependentRoomPlacement.ExpectedRoomInstanceId);
+                    case DungeonDraftCommandKind.RouteInsertion:
+                        return RouteInsertion?.Request?.Incoming?.Passage != null &&
+                            RouteInsertion.Request.Outgoing?.Passage != null &&
+                            !string.IsNullOrWhiteSpace(RouteInsertion.ExpectedIncomingEdgeId) &&
+                            !string.IsNullOrWhiteSpace(RouteInsertion.ExpectedOutgoingEdgeId);
                     default: return false;
                 }
             }
@@ -105,10 +120,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             StructuralContentRemovalPolicySnapshot removalPolicy = null)
         { Production = production; Configuration = configuration; Occupancy = occupancy; Limits = limits; Compatibility = compatibility; RemovalPolicy = removalPolicy; }
 
-        internal bool Validate(DetachedCanonicalSpatialSaveState state) => Limits != null &&
+        internal bool Validate(DetachedCanonicalSpatialSaveState state, string[] disconnectedRooms = null) => Limits != null &&
             CanonicalSpatialSaveContracts.Validate(state, Limits.Canonical.Spatial).IsValid &&
             DetachedCanonicalProductionSemanticValidation.Validate(state, Production, Configuration,
-                Limits.Canonical.Spatial, Occupancy, true).IsValid;
+                Limits.Canonical.Spatial, Occupancy, true, disconnectedRooms).IsValid;
 
         public string Fingerprint(DetachedCanonicalSpatialSaveState state) => Limits != null &&
             StructuralEditService.TryFingerprint(state, Limits.Canonical, out string fingerprint)
@@ -180,14 +195,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public bool IsStructurallyValid => invalid.Count == 0 && invalidConstruction.Count == 0 && !HasDisconnectedRoom;
         public bool HasStructuralIntent => commands.Any(c => c.Kind == DungeonDraftCommandKind.RoomMovement ||
             c.Kind == DungeonDraftCommandKind.RoomConstruction || c.Kind == DungeonDraftCommandKind.IndependentRoomPlacement);
-        private bool HasDisconnectedRoom => commands.Where(c => c.Kind == DungeonDraftCommandKind.IndependentRoomPlacement)
-            .Any(command =>
+        public string[] DisconnectedRoomIds => commands.Where(c => c.Kind == DungeonDraftCommandKind.IndependentRoomPlacement)
+            .Select(command => command.IndependentRoomPlacement)
+            .Where(placement =>
             {
-                var placement = command.IndependentRoomPlacement;
                 var floor = presented.Floors.Single(f => f.FloorInstanceId == placement.Request.FloorInstanceId);
                 var node = floor.Layout.Nodes.Single(n => n.RoomInstanceId == placement.ExpectedRoomInstanceId);
                 return !floor.Layout.Edges.Any(e => e.SourceNodeId == node.NodeId || e.DestinationNodeId == node.NodeId);
-            });
+            }).Select(placement => placement.ExpectedRoomInstanceId).Distinct(StringComparer.Ordinal).ToArray();
+        private bool HasDisconnectedRoom => DisconnectedRoomIds.Length != 0;
         public bool HasContentIntent => commands.Any(c => c.Kind == DungeonDraftCommandKind.RoomContent);
         public DungeonDraftInvalidMovement[] InvalidMovements => invalid.Select(value => value.Copy()).ToArray();
         public DungeonDraftInvalidConstruction[] InvalidConstructions => invalidConstruction.Select(value => value.Copy()).ToArray();
@@ -299,6 +315,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 presented = placementPreview.DetachedCandidate;
                 return true;
             }
+            if (command.Kind == DungeonDraftCommandKind.RouteInsertion)
+            {
+                var insertion = command.RouteInsertion;
+                var routePreview = PreviewRouteGeometry(insertion.Request);
+                if (!routePreview.IsValid || routePreview.IncomingEdgeId != insertion.ExpectedIncomingEdgeId ||
+                    routePreview.OutgoingEdgeId != insertion.ExpectedOutgoingEdgeId) return false;
+                presented = routePreview.Candidate;
+                return true;
+            }
             if (command.Kind == DungeonDraftCommandKind.RoomConstruction) return ApplyConstruction(command.RoomConstruction);
             if (command.Kind == DungeonDraftCommandKind.RoomContent)
             {
@@ -323,8 +348,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return true;
         }
 
-        public StructuralEditPreview PreviewIndependentPlacement(IndependentRoomPlacementRequest request) =>
-            StructuralEditService.PreviewIndependentPlacement(presented, request, context);
+        public StructuralEditPreview PreviewIndependentPlacement(IndependentRoomPlacementRequest request)
+        {
+            if (!string.IsNullOrEmpty(request?.ExistingDraftRoomId) &&
+                !DisconnectedRoomIds.Contains(request.ExistingDraftRoomId))
+                return StructuralEditService.InvalidPreview(StructuralEditService.TargetRoomNotBuildableReason, null);
+            return StructuralEditService.PreviewIndependentPlacement(presented, request, context);
+        }
 
         public bool PlaceIndependentRoom(IndependentRoomPlacementRequest request)
         {
@@ -347,6 +377,74 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             Reason = Durability == DraftDurability.Failed ? FailedReason : PendingReason;
             return true;
         }
+
+        internal StructuralRouteInsertionPreview PreviewRouteGeometry(StructuralRouteInsertionRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request?.RoomInstanceId) ||
+                !commands.Any(command => command.IndependentRoomPlacement?.ExpectedRoomInstanceId ==
+                request.RoomInstanceId && command.IndependentRoomPlacement.Request.FloorInstanceId == request.FloorInstanceId))
+                return StructuralRouteInsertionService.Fail(StructuralEditService.TargetRoomNotFoundReason);
+            var previous = CurrentInsertions.LastOrDefault(edit => edit.Request.RoomInstanceId == request.RoomInstanceId);
+            return StructuralRouteInsertionService.Preview(context, baseline, presented, request, previous, DisconnectedRoomIds);
+        }
+
+        internal bool AcceptRouteInsertion(StructuralRouteInsertionRequest request, DetachedCompleteSaveValidationResult owner)
+        {
+            if (IsClosed || Durability != DraftDurability.Acknowledged) return false;
+            if (commands.Count >= context.Limits.Raw.MaximumArrayElements) { Reason = LimitReason; return false; }
+            if (request == null || !StructuralRouteInsertionService.RetirementEligible(owner, request.FloorInstanceId,
+                    request.ReplacedEdgeId))
+            { Reason = StructuralRouteInsertionService.RetirementUnavailable; return false; }
+            var preview = PreviewRouteGeometry(request);
+            if (!preview.IsValid) { Reason = preview.Reason; return false; }
+            var command = new DungeonDraftCommand
+            {
+                Sequence = commands.Count + 1L, Kind = DungeonDraftCommandKind.RouteInsertion,
+                RouteInsertions = new[] { new DungeonDraftRouteInsertion
+                {
+                    Request = request, ExpectedIncomingEdgeId = preview.IncomingEdgeId,
+                    ExpectedOutgoingEdgeId = preview.OutgoingEdgeId
+                } }
+            }.Copy();
+            presented = preview.Candidate;
+            commands.Add(command);
+            formatVersion = CurrentFormatVersion;
+            ruleIdentity = context.RuleIdentity(formatVersion);
+            Durability = DraftDurability.Pending;
+            Reason = PendingReason;
+            return true;
+        }
+
+        internal StructuralRouteInsertionRequest SuggestRouteInsertion(string floorId, string edgeId, string roomId,
+            Func<DetachedCanonicalSpatialSaveState, double?> grossCost)
+        {
+            var floor = baseline.Floors.SingleOrDefault(f => f.FloorInstanceId == floorId);
+            var edge = floor?.Layout.Edges.SingleOrDefault(e => e.EdgeId == edgeId);
+            return edge == null ? null : StructuralRouteInsertionService.Suggest(context, presented, edge,
+                roomId, request =>
+                {
+                    var preview = PreviewRouteGeometry(request);
+                    return (preview.IsValid, preview.IsValid ? grossCost(preview.Candidate) : null);
+                });
+        }
+
+        internal string[] RouteAuthoringRoomIds => commands.Where(c => c.Kind == DungeonDraftCommandKind.IndependentRoomPlacement)
+            .Select(c => c.IndependentRoomPlacement.ExpectedRoomInstanceId).Distinct(StringComparer.Ordinal).ToArray();
+
+        internal StructuralRouteInsertionRequest AcceptedRouteInsertion(string roomId)
+        {
+            var insertion = CurrentInsertions.SingleOrDefault(edit => edit.Request.RoomInstanceId == roomId);
+            return insertion == null ? null : JsonUtility.FromJson<StructuralRouteInsertionRequest>(
+                JsonUtility.ToJson(insertion.Request));
+        }
+
+        private IEnumerable<DungeonDraftRouteInsertion> CurrentInsertions => commands
+            .Where(command => command.Kind == DungeonDraftCommandKind.RouteInsertion).Select(command => command.RouteInsertion)
+            .GroupBy(edit => edit.Request.RoomInstanceId, StringComparer.Ordinal).Select(group => group.Last());
+
+        internal bool VerifyInsertionRetirements(DetachedCompleteSaveValidationResult owner) =>
+            CurrentInsertions.All(edit => StructuralRouteInsertionService.RetirementEligible(owner,
+                edit.Request.FloorInstanceId, edit.Request.ReplacedEdgeId));
 
         public bool ConstructRoom(string intentId, StructuralConstructionRequest request) => AppendConstruction(
             new DungeonDraftConstruction { IntentId = intentId, Placements = new[] { request } });

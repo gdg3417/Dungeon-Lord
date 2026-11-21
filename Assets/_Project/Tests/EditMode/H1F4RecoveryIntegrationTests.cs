@@ -613,12 +613,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(RawSavePayloadClassifier.TryValidateWorkload(roundTrip, h.F.Profile.Raw, out var reason), Is.True, reason);
         }
 
-        [Test]
-        public void ObsoleteSchemaRefusalPreservesOriginalBytes()
+        [TestCase(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction)]
+        [TestCase(CanonicalSaveSchemaVersions.ResearchTimingIntroduction)]
+        public void ObsoleteSchemaRefusalPreservesOriginalBytes(int earlierSchema)
         {
             var h = new Harness();
             var obsolete = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(h.Service.CanonicalSession.GetCurrentBytes())
-                .Replace("\"schemaVersion\":18,", "\"schemaVersion\":17,"));
+                .Replace("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget + ",",
+                    "\"schemaVersion\":" + earlierSchema + ","));
             h.F.FileSystem.Seed(h.Service.SavePath, obsolete);
             var service = CreateService(h.F, h.Inputs, h.Time);
             Assert.That(service.LoadOrCreate("obsolete", out var banner), Is.Null);

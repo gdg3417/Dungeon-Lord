@@ -67,6 +67,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     preview, out DetachedCanonicalSpatialSaveState candidate, out SavedSpatialFloor floor,
                     out FloorSpatialConfiguration floorDefinition, out SpatialValidationWorkloadLimits workload,
                     out Path path, out int targetIndex)) return preview;
+            if (floor.Layout.Edges.Any(edge => edge.AuthoredGeometry != null))
+                return Fail(preview, StructuralEditService.ConnectionUnavailableReason);
 
             RoomSpatialInstance target = Room(floor, path.Nodes[targetIndex]);
             preview.RoomDefinitionId = preview.PreviousRoomDefinitionId = target.RoomDefinitionId;
@@ -125,6 +127,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     preview, out DetachedCanonicalSpatialSaveState candidate, out SavedSpatialFloor floor,
                     out FloorSpatialConfiguration floorDefinition, out SpatialValidationWorkloadLimits workload,
                     out Path path, out int targetIndex)) return preview;
+            if (floor.Layout.Edges.Any(edge => edge.AuthoredGeometry != null))
+                return Fail(preview, StructuralEditService.ConnectionUnavailableReason);
             RoomSpatialInstance target = Room(floor, path.Nodes[targetIndex]);
             RoomSpatialDefinition oldDefinition = Definition(production.Catalog, target.RoomDefinitionId);
             RoomSpatialDefinition replacement = UniqueDefinition(production.Catalog, request.RoomDefinitionId);
@@ -357,7 +361,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { Kind = FloorRouteConnectionKind.DirectDoorway, CorridorDefinitionId = string.Empty }; reason = null; return true; }
             if (direct.Length > 1) { reason = StructuralEditService.ConnectionAmbiguousReason; return false; }
             CorridorSpatialDefinition[] definitions = (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>())
-                .Where(value => value != null && value.Category == CorridorSpatialCategory.Straight &&
+                .Where(value => value != null && (value.Category == CorridorSpatialCategory.Straight ||
+                    value.Category == CorridorSpatialCategory.Orthogonal) &&
                     (floorDefinition.AllowedCorridorDefinitionIds ?? Array.Empty<string>()).Contains(value.CorridorDefinitionId))
                 .OrderBy(value => value.CorridorDefinitionId, StringComparer.Ordinal).ToArray();
             if (definitions.Length != 1) { reason = StructuralEditService.CorridorDefinitionReason; return false; }

@@ -440,7 +440,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
             RequireExactSignature(foreignKeys, V1ForeignKeySignatures, "foreignKeys", issues);
             RequireExactSignature(relationships, V1RelationshipSignatures, "childRelationships", issues);
             RequireEnum(schema, "CardinalOrientation", new[] { "Zero", "Ninety", "OneEighty", "TwoSeventy" }, issues);
-            RequireEnum(schema, "CorridorSpatialCategory", new[] { "Straight" }, issues);
+            RequireEnum(schema, "CorridorSpatialCategory", new[] { "Straight", "Orthogonal" }, issues);
             RequireEnum(schema, "FixedSpatialStructureKind", new[] { "Entrance", "CompletionTerminal" }, issues);
         }
 

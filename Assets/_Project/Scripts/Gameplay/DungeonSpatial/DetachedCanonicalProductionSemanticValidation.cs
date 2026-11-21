@@ -25,7 +25,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static DetachedCanonicalProductionSemanticValidationResult Validate(
             DetachedCanonicalSpatialSaveState state, ProductionSpatialContentSnapshot production,
             RunSimulationConfig configuration, CanonicalSpatialSaveWorkloadLimits limits,
-            RoomContentSpatialOccupancySnapshot occupancy = null, bool requirePositions = false)
+            RoomContentSpatialOccupancySnapshot occupancy = null, bool requirePositions = false,
+            string[] disconnectedRoomIds = null)
         {
             var issues = new List<DetachedCanonicalProductionSemanticIssue>();
             if (state == null || production == null || configuration == null || !limits.IsValid ||
@@ -73,8 +74,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!AuthoredOpeningsValid(floor, catalog))
                     issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
                 ValidateFixed(floor, floorDefinition, catalog, limits, issues);
-                if (!layoutValidation.IsValid && !ContainsOnlyIndividuallyClassifiedFixedIssues(
-                        layoutValidation, floor.FixedStructures))
+                var layoutIssues = layoutValidation.Issues.Where(issue =>
+                    !StructuralRouteInsertionService.AllowedIncomplete(issue, floor, disconnectedRoomIds)).ToArray();
+                if (layoutIssues.Length != 0 && !ContainsOnlyIndividuallyClassifiedFixedIssues(
+                        layoutIssues, floor.FixedStructures))
                     issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
                 ValidateAssignments(floor, roomByInstance, configured, limits, occupancy,
                     requirePositions, issues);
@@ -114,13 +117,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static bool ContainsOnlyIndividuallyClassifiedFixedIssues(
-            FloorLayoutValidationResult validation, IEnumerable<SavedFixedSpatialStructure> fixedStructures)
+            FloorLayoutValidationIssue[] issues, IEnumerable<SavedFixedSpatialStructure> fixedStructures)
         {
-            if (validation?.Issues == null || validation.Issues.Length == 0) return false;
             var instanceIds = new HashSet<string>((fixedStructures ??
                 Enumerable.Empty<SavedFixedSpatialStructure>()).Where(value => value != null)
                 .Select(value => value.FixedStructureInstanceId), StringComparer.Ordinal);
-            return validation.Issues.All(issue => issue != null &&
+            return issues.All(issue => issue != null &&
                 (issue.Reason == FloorLayoutValidationReason.StructureTileOutsideFloorBounds &&
                     issue.SubjectId != null && issue.SubjectId.StartsWith("fixed:", StringComparison.Ordinal) ||
                  issue.Reason == FloorLayoutValidationReason.InvalidRoomFootprint &&
