@@ -237,6 +237,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 : new CanonicalSpatialSaveValidationResult(new[]
                     { CanonicalSpatialSaveValidationIssue.InvalidSource });
 
+        internal static CanonicalSpatialSaveValidationResult ValidateForSchema(DetachedCanonicalSpatialSaveState state,
+            CanonicalSpatialSaveWorkloadLimits limits, int schemaVersion, bool ordered) =>
+            schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction ||
+            schemaVersion == CanonicalSaveSchemaVersions.ResearchTimingIntroduction ||
+            CanonicalSaveSchemaVersions.HasAuthoredRoutes(schemaVersion)
+                ? ValidateCore(state, limits, ordered, true, schemaVersion)
+                : ValidateFrozenWithLifecycle(state, limits, schemaVersion, ordered);
+
         private static CanonicalSpatialSaveValidationResult ValidateCore(DetachedCanonicalSpatialSaveState state,
             CanonicalSpatialSaveWorkloadLimits limits, bool requireCanonicalOrdering, bool includeLifecycle,
             int schemaVersion)
@@ -321,7 +329,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     return CanonicalizationFailure.RecordLimit;
                 foreach (FloorRouteEdge edge in layout?.Edges ?? Array.Empty<FloorRouteEdge>())
                     if (!TryAdd(ref tiles, edge?.Footprint?.OccupiedTiles?.LongLength ?? 0L,
-                        limits.MaximumMaterializedTiles)) return CanonicalizationFailure.TileLimit;
+                            limits.MaximumMaterializedTiles) ||
+                        !TryAdd(ref tiles, edge?.AuthoredGeometry?.Passage?.LongLength ?? 0L,
+                            limits.MaximumMaterializedTiles)) return CanonicalizationFailure.TileLimit;
             }
 
             SavedSpatialFloor[] copies = new SavedSpatialFloor[floors.Length];
@@ -471,7 +481,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 FloorId = edge.FloorId,
                 SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId, Footprint = footprint,
                 Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty,
-                ConnectionKind = edge.ConnectionKind
+                ConnectionKind = edge.ConnectionKind, AuthoredGeometry = edge.AuthoredGeometry?.Copy()
             };
         }
 
@@ -574,8 +584,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor && string.IsNullOrEmpty(edge.CorridorDefinitionId))
                     Add(issues, CanonicalSpatialSaveValidationIssue.MalformedPersistentId);
                 if (edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor &&
-                    (edge.Footprint == null || edge.Footprint.OccupiedTiles == null || edge.Footprint.OccupiedTiles.Length == 0))
+                    (edge.CorridorTiles == null || edge.CorridorTiles.Length == 0))
                     Add(issues, CanonicalSpatialSaveValidationIssue.InvalidPhysicalCorridorShape);
+                if (edge.AuthoredGeometry != null)
+                {
+                    var geometry = edge.AuthoredGeometry;
+                    if (!CanonicalSaveSchemaVersions.HasAuthoredRoutes(schemaVersion) || edge.Footprint != null ||
+                        !IsPersistentId(geometry.SourcePointId) || geometry.DestinationPointId == null ||
+                        (edge.Classification == RouteClassification.Required
+                            ? !IsPersistentId(geometry.DestinationPointId) : geometry.DestinationPointId.Length != 0) ||
+                        geometry.Passage == null ||
+                        (edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway
+                            ? geometry.Passage.Length != 0 : !AuthoredRouteGeometry.IsContinuous(geometry.Passage)))
+                        Add(issues, edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway
+                            ? CanonicalSpatialSaveValidationIssue.InvalidDirectDoorwayShape
+                            : CanonicalSpatialSaveValidationIssue.InvalidPhysicalCorridorShape);
+                }
                 if (classificationValid && ((edge.Classification == RouteClassification.Required && !string.IsNullOrEmpty(edge.OptionalBranchId)) ||
                     (edge.Classification == RouteClassification.Optional && !IsPersistentId(edge.OptionalBranchId))))
                     Add(issues, CanonicalSpatialSaveValidationIssue.InvalidEdgeBranchShape);

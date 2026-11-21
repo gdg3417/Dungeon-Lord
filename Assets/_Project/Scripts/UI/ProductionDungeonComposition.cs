@@ -125,7 +125,7 @@ namespace DungeonBuilder.M0
             if(selectedEdgeId!=null)
             {
                 var edge=floor.Layout.Edges.Single(e=>e.EdgeId==selectedEdgeId);
-                ui.Q<Label>("inspectionInfo").text=Format("ui.dungeon.corridor.info",edge.Footprint.OccupiedTiles.Length,
+                ui.Q<Label>("inspectionInfo").text=Format("ui.dungeon.corridor.info",edge.CorridorTiles.Length,
                     Text(edge.Classification==RouteClassification.Required ? "ui.dungeon.route.required" : "ui.dungeon.route.optional"));
                 return;
             }

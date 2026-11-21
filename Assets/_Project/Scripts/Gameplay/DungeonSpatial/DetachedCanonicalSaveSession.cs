@@ -321,7 +321,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!ContractJson.Int(root.Fields[1].Value, out int schema) ||
                     !TimeProvenance.TryRead(primary, schema, out var priorTime) ||
                     time != null && !time.Matches(currentBytes, priorTime)) return Failure(RecoveryEpisode.Invalid);
-                if (schema == CanonicalSaveSchemaVersions.ResearchTimingIntroduction && recognizedState != null && !researchTransition)
+                if (CanonicalSaveSchemaVersions.HasResearchTiming(schema) && recognizedState != null && !researchTransition)
                 {
                     bool previouslyPaid = TryFind(primary, "researchProgress", out var progress) &&
                         progress.Kind == ContractJsonKind.Object && TryFind(progress, "RuleSourceIdUsed", out var rule) &&
@@ -378,7 +378,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         valueBytes = SerializeNode(retained);
                     }
                     else if (!recognizedState.TryGet(name, out valueBytes)) continue;
-                    if (schema == CanonicalSaveSchemaVersions.ResearchTimingIntroduction &&
+                    if (CanonicalSaveSchemaVersions.HasResearchTiming(schema) &&
                         recognizedState != null && (name == "researchPending" || name == "researchProgress") &&
                         TryFind(primary, name, out var priorResearch) && priorResearch.Kind == ContractJsonKind.Object)
                     {

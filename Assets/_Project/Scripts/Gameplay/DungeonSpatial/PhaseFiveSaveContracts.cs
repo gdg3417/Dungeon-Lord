@@ -67,13 +67,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     value => value != null && value.NodeId == edge?.DestinationNodeId);
                 if (edge == null || destination?.Kind != FloorRouteNodeKind.DeadEnd ||
                     edge.ConnectionKind != FloorRouteConnectionKind.PhysicalCorridor) return false;
-                string tiles = string.Join(";", (edge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>())
-                    .OrderBy(value => value).Select(value => value.X.ToString(CultureInfo.InvariantCulture) +
+                IEnumerable<TileCoordinate> ordered = edge.AuthoredGeometry != null
+                    ? edge.AuthoredGeometry.Passage
+                    : (edge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>()).OrderBy(value => value);
+                string tiles = string.Join(";", ordered.Select(value => value.X.ToString(CultureInfo.InvariantCulture) +
                     "," + value.Y.ToString(CultureInfo.InvariantCulture)));
                 string evidence = floor.FloorInstanceId + "\n" + edge.OptionalBranchId + "\n" + edge.EdgeId +
                     "\n" + edge.SourceNodeId + "\n" + edge.DestinationNodeId + "\n" +
                     edge.CorridorDefinitionId + "\n" + ((int)edge.Classification).ToString(CultureInfo.InvariantCulture) +
                     "\n" + ((int)edge.ConnectionKind).ToString(CultureInfo.InvariantCulture) + "\n" + tiles;
+                if (edge.AuthoredGeometry != null)
+                    evidence += "\n" + edge.AuthoredGeometry.SourcePointId + "\n" + edge.AuthoredGeometry.DestinationPointId;
                 fingerprint = SpatialContractSha256.Compute(System.Text.Encoding.UTF8.GetBytes(evidence));
                 return true;
             }
@@ -204,7 +208,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     value.OptionalBranchId == item.OptionalBranchId);
                 if (edge == null || edge.Classification != RouteClassification.Optional ||
                     edge.ConnectionKind != FloorRouteConnectionKind.PhysicalCorridor ||
-                    !(edge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>()).Contains(item.Tile))
+                    !(edge.CorridorTiles ?? Array.Empty<TileCoordinate>()).Contains(item.Tile))
                     return false;
                 CorridorSpatialDefinition definition = (production.Catalog.Corridors ??
                     Array.Empty<CorridorSpatialDefinition>()).SingleOrDefault(value => value != null &&
@@ -337,6 +341,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         private static TileCoordinate TerminalTile(FloorRouteEdge edge, TileCoordinate sourceTile) =>
+            edge.AuthoredGeometry?.Passage.Last() ??
             (edge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>()).OrderBy(value =>
                 Manhattan(value, sourceTile)).Last();
 

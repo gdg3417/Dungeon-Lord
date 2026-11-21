@@ -250,7 +250,7 @@ namespace DungeonBuilder.M0.Economy
                         {
                             if (!config.TryCorridor(edge.CorridorDefinitionId, out double perTile)) return result;
                             var newlyMaterialized = new HashSet<TileCoordinate>(
-                                edge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>());
+                                edge.CorridorTiles ?? Array.Empty<TileCoordinate>());
                             if (carriedPhysicalTiles.TryGetValue(edge.EdgeId, out var carried))
                                 newlyMaterialized.ExceptWith(carried);
                             corridorBases.Add(edge.EdgeId, perTile * newlyMaterialized.Count);

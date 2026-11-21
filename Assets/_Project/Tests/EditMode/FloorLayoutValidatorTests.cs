@@ -37,6 +37,42 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsValid, Is.True); Assert.That(result.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(FinalCapacity)); Assert.That(result.Capacity.RemainingFloorSpaceCapacity, Is.Zero);
         }
 
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        [TestCase(6)]
+        [TestCase(7)]
+        public void OrthogonalPassageValidatesItsStepsAndDistinctTileLimit(int length)
+        {
+            var definition = CorridorDefinitions().Single();
+            definition.Category = CorridorSpatialCategory.Orthogonal;
+            definition.MaximumLength = 6;
+            var tiles = new[]
+            {
+                new TileCoordinate(4, 9), new TileCoordinate(5, 9), new TileCoordinate(6, 9),
+                new TileCoordinate(6, 10), new TileCoordinate(5, 10), new TileCoordinate(4, 10),
+                new TileCoordinate(3, 10)
+            };
+            var passage = new AuthoredRouteGeometry { Passage = tiles.Take(length).ToArray() };
+            Assert.That(passage.HasValidPassage(definition), Is.EqualTo(length <= definition.MaximumLength));
+            if (length == 6)
+                Assert.That(AuthoredRouteGeometry.TryFacing(tiles[0], tiles[5], out _), Is.True,
+                    "An authorized path may have closed side contact between its first and last tiles");
+        }
+
+        [TestCase(1, 1)]
+        [TestCase(0, 2)]
+        [TestCase(0, 0)]
+        public void OrthogonalPassageRejectsDiagonalBrokenAndRepeatedSteps(int x, int y)
+        {
+            var definition = CorridorDefinitions().Single();
+            definition.Category = CorridorSpatialCategory.Orthogonal;
+            var passage = new AuthoredRouteGeometry { Passage = new[] { default(TileCoordinate), new TileCoordinate(x, y) } };
+            Assert.That(passage.HasValidPassage(definition), Is.False);
+        }
+
         [Test]
         public void PhysicalCorridor_LengthMustMatchReferencedDefinition()
         {

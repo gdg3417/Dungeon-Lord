@@ -201,8 +201,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             FloorRouteEdge[] suppliedEdges = Edges ?? Array.Empty<FloorRouteEdge>();
             foreach (FloorRouteEdge edge in suppliedEdges)
             {
-                if (edge?.Footprint?.OccupiedTiles != null && !limits.Allows(edge.Footprint.OccupiedTiles.LongLength))
-                    return false;
+                if (!limits.Allows(edge?.Footprint?.OccupiedTiles?.LongLength ?? 0L) ||
+                    !limits.Allows(edge?.AuthoredGeometry?.Passage?.LongLength ?? 0L)) return false;
             }
 
             FloorRouteEdge[] copiedEdges = new FloorRouteEdge[suppliedEdges.Length];
@@ -260,7 +260,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 SourceNodeId = edge.SourceNodeId, DestinationNodeId = edge.DestinationNodeId,
                 Footprint = footprint,
                 Classification = edge.Classification, OptionalBranchId = edge.OptionalBranchId ?? string.Empty,
-                ConnectionKind = edge.ConnectionKind
+                ConnectionKind = edge.ConnectionKind, AuthoredGeometry = edge.AuthoredGeometry?.Copy()
             };
             return true;
         }

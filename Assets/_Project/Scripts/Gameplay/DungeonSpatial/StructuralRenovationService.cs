@@ -375,6 +375,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SpatialContentCatalog catalog, out TileCoordinate sourceLocal, out TileCoordinate destinationLocal)
         {
             sourceLocal = destinationLocal = default;
+            if (edge.AuthoredGeometry != null)
+            {
+                if (!edge.AuthoredGeometry.TryResolve(floor, edge, catalog, out var from, out var to, out _))
+                    return false;
+                sourceLocal = from.Local;
+                destinationLocal = to.Local;
+                return true;
+            }
             var sourceNode = floor.Layout.Nodes.SingleOrDefault(n => n.NodeId == edge.SourceNodeId);
             var destinationNode = floor.Layout.Nodes.SingleOrDefault(n => n.NodeId == edge.DestinationNodeId);
             if (sourceNode == null || destinationNode == null ||
@@ -433,14 +441,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return result.OrderBy(value => value, StringComparer.Ordinal).ToArray();
         }
 
-        private sealed class TileEndpoint
+        internal sealed class TileEndpoint
         {
             internal TileCoordinate Anchor; internal CardinalOrientation Orientation;
             internal RectangularFootprintDefinition Footprint;
             internal SpatialConnectionPointDefinition[] Points;
         }
 
-        private static bool TryEndpoint(SavedSpatialFloor floor, FloorRouteNode node, SpatialContentCatalog catalog,
+        internal static bool TryEndpoint(SavedSpatialFloor floor, FloorRouteNode node, SpatialContentCatalog catalog,
             out TileEndpoint endpoint)
         {
             endpoint = null;
@@ -452,6 +460,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 endpoint = new TileEndpoint { Anchor = room.Anchor, Orientation = room.Orientation,
                     Footprint = definition.GrossFootprint, Points = definition.ConnectionPoints }; return true;
             }
+            if (node.Kind != FloorRouteNodeKind.Entrance && node.Kind != FloorRouteNodeKind.Completion &&
+                node.Kind != FloorRouteNodeKind.Exit && node.Kind != FloorRouteNodeKind.Descent) return false;
             FixedSpatialStructureKind kind = node.Kind == FloorRouteNodeKind.Entrance
                 ? FixedSpatialStructureKind.Entrance : FixedSpatialStructureKind.CompletionTerminal;
             SavedFixedSpatialStructure fixedValue = floor.FixedStructures.SingleOrDefault(value => value?.Kind == kind);
@@ -624,7 +634,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static bool Compatible(string a, string b, SpatialContentCatalog catalog) =>
             (catalog.SocketTypes ?? Array.Empty<SpatialSocketTypeDefinition>()).Any(value => value?.SocketTypeId == a &&
                 (value.CompatibleSocketTypeIds ?? Array.Empty<string>()).Contains(b));
-        private static TileCoordinate World(SpatialConnectionPointDefinition point, TileEndpoint endpoint)
+        internal static TileCoordinate World(SpatialConnectionPointDefinition point, TileEndpoint endpoint)
         { TileCoordinate offset = StructuralEditService.TransformConnectionPointOffset(point.Offset,
             endpoint.Orientation, endpoint.Footprint); return Add(endpoint.Anchor, offset); }
         private static CardinalOrientation Opposite(CardinalOrientation value) => (CardinalOrientation)(((int)value + 2) % 4);

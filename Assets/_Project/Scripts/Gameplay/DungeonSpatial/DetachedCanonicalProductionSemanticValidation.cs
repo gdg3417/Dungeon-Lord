@@ -70,6 +70,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         !OptionalBranchGeometry.IsPersistedBranchGeometryValid(floor, edge, catalog))
                         issues.Add(DetachedCanonicalProductionSemanticIssue.BranchGeometry);
                 }
+                if (!AuthoredOpeningsValid(floor, catalog))
+                    issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
                 ValidateFixed(floor, floorDefinition, catalog, limits, issues);
                 if (!layoutValidation.IsValid && !ContainsOnlyIndividuallyClassifiedFixedIssues(
                         layoutValidation, floor.FixedStructures))
@@ -78,6 +80,37 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     requirePositions, issues);
             }
             return new DetachedCanonicalProductionSemanticValidationResult(issues);
+        }
+
+        private static bool AuthoredOpeningsValid(SavedSpatialFloor floor, SpatialContentCatalog catalog)
+        {
+            var edges = floor.Layout?.Edges;
+            if (edges == null || !edges.Any(edge => edge?.AuthoredGeometry != null)) return true;
+            var occupied = new HashSet<(string NodeId, TileCoordinate Local)>();
+            foreach (var edge in edges.Where(edge => edge?.AuthoredGeometry != null))
+            {
+                if (!edge.AuthoredGeometry.TryResolve(floor, edge, catalog, out var source, out var destination, out _) ||
+                    !occupied.Add((edge.SourceNodeId, source.Local)) ||
+                    (destination.Id != null && !occupied.Add((edge.DestinationNodeId, destination.Local))))
+                    return false;
+            }
+
+            // Legacy edges can coexist with authored edges in a current floor. They keep their
+            // resolved openings and cannot share one with an authored link.
+            foreach (var edge in edges.Where(edge => edge != null && edge.AuthoredGeometry == null))
+            {
+                if (edge.Classification == RouteClassification.Optional)
+                {
+                    if (!OptionalBranchGeometry.TryResolveSourceTile(floor, edge, catalog, out var sourceTile))
+                        return false;
+                    if (AuthoredRouteGeometry.Openings(floor, edge.SourceNodeId, catalog).Any(p =>
+                        p.OpensToward(sourceTile) && occupied.Contains((edge.SourceNodeId, p.Local)))) return false;
+                }
+                else if (!StructuralRenovationService.TryResolveSavedConnection(floor, edge, catalog, out var from, out var to) ||
+                    occupied.Contains((edge.SourceNodeId, from)) || occupied.Contains((edge.DestinationNodeId, to)))
+                    return false;
+            }
+            return true;
         }
 
         private static bool ContainsOnlyIndividuallyClassifiedFixedIssues(

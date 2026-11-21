@@ -112,7 +112,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 value != null && value.OptionalBranchId == optionalBranchId &&
                 value.Classification == RouteClassification.Optional &&
                 value.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor);
-            TileCoordinate[] tiles = edge?.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>();
+            TileCoordinate[] tiles = edge?.CorridorTiles ?? Array.Empty<TileCoordinate>();
             if (edge == null) return false;
             FloorRouteEdge targetEdge = edge;
             if (!tiles.Contains(tile)) { reason = TileReason; return false; }

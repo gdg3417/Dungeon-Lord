@@ -526,7 +526,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     out ResolvedTileFootprint f) ? f.OccupiedTiles : Array.Empty<TileCoordinate>(); }));
         private static bool OverlapsCorridors(IEnumerable<TileCoordinate> tiles, IEnumerable<FloorRouteEdge> edges) =>
             Overlaps(tiles, (edges ?? Enumerable.Empty<FloorRouteEdge>()).Where(value => value?.ConnectionKind ==
-                FloorRouteConnectionKind.PhysicalCorridor).SelectMany(value => value.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>()));
+                FloorRouteConnectionKind.PhysicalCorridor).SelectMany(value => value.CorridorTiles ?? Array.Empty<TileCoordinate>()));
         private static bool Overlaps(IEnumerable<TileCoordinate> a, IEnumerable<TileCoordinate> b) =>
             new HashSet<TileCoordinate>(a).Overlaps(b);
         private static string Map(IEnumerable<FloorLayoutValidationIssue> issues)
