@@ -54,10 +54,15 @@ namespace DungeonBuilder.M0
         public const string StartSucceededKey = "ui.player_research.start_succeeded";
         public const string ClaimSucceededKey = "ui.player_research.claim_succeeded";
         public const string PersistenceFailedKey = "ui.player_research.save_failed";
+        internal const string CostUnavailableKey = "ui.player_research.cost_unavailable";
+        private const string InsufficientUsableManaKey = "ui.player_research.insufficient_usable_mana";
+        private const string ForegroundPendingKey = "ui.research.foreground_pending";
+        private const string ForegroundPendingReason = "living.foreground.boundary_pending";
 
         internal ResearchTimingRules TimingRules { get; set; }
         internal Func<bool> PaidStartAllowed { get; set; }
         internal Func<SaveData, long> ProtectedResearchReserve { get; set; }
+        internal bool AllowLocalMvpActions { get; set; }
 
         private readonly SaveData _initialSave;
         private readonly Func<SaveData> _currentSave;
@@ -118,6 +123,14 @@ namespace DungeonBuilder.M0
             return FromAuthority(authority, authority.RuleResolved, false);
         }
 
+        internal PlayerResearchActionResult ResolvePaidState()
+        {
+            if (_recoveryRequired?.Invoke() == true)
+                return PersistenceFailure(DetachedCanonicalWriteAuthority.RecoveryRequiredReason);
+            var authority = ResolvePaidAuthority();
+            return FromAuthority(authority, authority.RuleResolved, false);
+        }
+
         // The transaction owner prepares foreground authority before invoking the
         // staging callback. Only its durable result may acknowledge a player action.
         public PlayerResearchActionResult Start() => Commit(candidate => ForCandidate(candidate).StageStart(false));
@@ -135,14 +148,20 @@ namespace DungeonBuilder.M0
         {
             TimingRules = TimingRules,
             PaidStartAllowed = PaidStartAllowed,
-            ProtectedResearchReserve = ProtectedResearchReserve
+            ProtectedResearchReserve = ProtectedResearchReserve,
+            AllowLocalMvpActions = AllowLocalMvpActions
         };
 
         internal static PlayerResearchActionResult PersistenceFailure(string reason) => new PlayerResearchActionResult
         {
             PersistenceReason = reason,
-            FeedbackLocalizationKey = reason == DetachedCanonicalWriteAuthority.RecoveryRequiredReason
-                ? DetachedCanonicalWriteAuthority.RecoveryRequiredReason : PersistenceFailedKey
+            FeedbackLocalizationKey = reason switch
+            {
+                DetachedCanonicalWriteAuthority.RecoveryRequiredReason => reason,
+                ForegroundPendingReason => ForegroundPendingKey,
+                ResearchTimingRules.Disabled or ResearchTimingRules.Invalid or ResearchTimingRules.Missing or ResearchTimingRules.Mismatch => CostUnavailableKey,
+                _ => PersistenceFailedKey
+            }
         };
 
         private PlayerResearchActionResult StageStart(bool paid)
@@ -167,16 +186,12 @@ namespace DungeonBuilder.M0
                 if (PaidStartAllowed?.Invoke() != true || scheduler == null ||
                     scheduler.ClosedThrough < 0 || scheduler.AcceptedThrough != scheduler.ClosedThrough ||
                     _save.timeProvenance?.Episode != null)
-                    return PersistenceFailure("living.foreground.boundary_pending");
-                if (TimingRules == null || TimingRules.Select(pending.ProjectId, out rule) != null)
-                    return PersistenceFailure(ResearchTimingRules.Disabled);
-                if (rule.SlotId != pending.SlotId || ProtectedResearchReserve == null || _save.structureRuntime == null)
-                    return PersistenceFailure(ResearchTimingRules.Mismatch);
-                long reserve = ProtectedResearchReserve(_save);
-                double wallet = _save.structureRuntime.ManaReserve;
-                double remaining = wallet - rule.ManaCost;
-                if (!double.IsFinite(wallet) || wallet - remaining != rule.ManaCost || remaining < reserve)
-                    return Result(false, false, PlayerResearchState.Blocked, "ui.player_research.insufficient_usable_mana", 0, rule.RequiredUnits);
+                    return PersistenceFailure(ForegroundPendingReason);
+                string reason = QuotePaidStart(pending.ProjectId, pending.SlotId, out rule, out _,
+                    out double remaining, out bool affordable);
+                if (reason != null) return PersistenceFailure(reason);
+                if (!affordable)
+                    return Result(false, false, PlayerResearchState.Blocked, InsufficientUsableManaKey, 0, rule.RequiredUnits);
                 start = scheduler.ClosedThrough;
                 _save.structureRuntime.ManaReserve = remaining;
             }
@@ -266,6 +281,72 @@ namespace DungeonBuilder.M0
 
         public PlayerResearchAuthoritySummary ResolveAuthority() => ResolveAuthority(HasValidRun());
 
+        internal PlayerResearchAuthoritySummary ResolvePaidAuthority()
+        {
+            var authority = ResolveAuthority();
+            var progress = _save?.researchProgress;
+            if (ResearchTimingRules.IsPaidReference(progress?.RuleSourceIdUsed))
+            {
+                if (TimingRules != null && TimingRules.Resolve(progress.RuleSourceIdUsed, out var activeRule) == null &&
+                    activeRule.ProjectId == _configuredProjectId && activeRule.SlotId == progress.SlotId)
+                {
+                    authority.ManaCost = activeRule.ManaCost;
+                    authority.DurationSeconds = (double)activeRule.RequiredUnits / TimingRules.UnitsPerSecond;
+                    authority.RemainingSeconds = (activeRule.RequiredUnits - progress.ProgressUnits) / TimingRules.UnitsPerSecond;
+                }
+                if (authority.CanClaimLocalMvp && PaidStartAllowed?.Invoke() != true)
+                {
+                    authority.CanClaimLocalMvp = false;
+                    authority.State = PlayerResearchAuthorityState.ClaimBlocked;
+                    authority.FeedbackLocalizationKey = ForegroundPendingKey;
+                }
+                return authority;
+            }
+
+            if (progress != null) return authority;
+            string reason = QuotePaidStart(_configuredProjectId, _pendingConfig?.slotId,
+                out var rule, out double usable, out _, out bool affordable);
+            if (reason == null)
+            {
+                authority.ManaCost = rule.ManaCost;
+                authority.DurationSeconds = (double)rule.RequiredUnits / TimingRules.UnitsPerSecond;
+                authority.UsableMana = usable;
+                authority.IsAffordable = affordable;
+            }
+
+            if (!authority.CanStart) return authority;
+            string blocked = reason != null ? CostUnavailableKey :
+                PaidStartAllowed?.Invoke() != true ? ForegroundPendingKey :
+                !affordable ? InsufficientUsableManaKey : null;
+            if (blocked != null)
+            {
+                authority.CanStart = false;
+                authority.State = PlayerResearchAuthorityState.Blocked;
+                authority.FeedbackLocalizationKey = blocked;
+            }
+            return authority;
+        }
+
+        private string QuotePaidStart(string project, string slot, out ResearchTimingRule rule, out double usable,
+            out double remaining, out bool affordable)
+        {
+            rule = null;
+            usable = remaining = 0;
+            affordable = false;
+            if (TimingRules == null) return ResearchTimingRules.Disabled;
+            string reason = TimingRules.Select(project, out rule);
+            if (reason != null) return reason;
+            if (rule.SlotId != slot || ProtectedResearchReserve == null || _save?.structureRuntime == null)
+                return ResearchTimingRules.Mismatch;
+            long reserve = ProtectedResearchReserve(_save);
+            double wallet = _save.structureRuntime.ManaReserve;
+            if (!double.IsFinite(wallet)) return ResearchTimingRules.StateInvalid;
+            usable = Math.Max(0, wallet - reserve);
+            remaining = wallet - rule.ManaCost;
+            affordable = wallet - remaining == rule.ManaCost && remaining >= reserve;
+            return null;
+        }
+
         private PlayerResearchAuthoritySummary ResolveAuthority(bool hasValidRun)
         {
             if (_recoveryRequired?.Invoke() == true)
@@ -274,9 +355,11 @@ namespace DungeonBuilder.M0
                     FeedbackLocalizationKey = DetachedCanonicalWriteAuthority.RecoveryRequiredReason };
             GateEvaluationResult startGate = EvaluateGate(RestrictedActionType.ResearchStart);
             GateEvaluationResult claimGate = EvaluateGate(RestrictedActionType.ResearchComplete);
-            return PlayerResearchClaimAuthorityResolver.Resolve(
+            var authority = PlayerResearchClaimAuthorityResolver.Resolve(
                 _configuredProjectId, hasValidRun, _save?.researchPending, _save?.researchProgress, _save?.completedResearch,
                 _pendingConfig, _progressConfig, EligibilityForSave(), _claimConfig, _verificationConfig, startGate, claimGate);
+            authority.HasCompletedRun = hasValidRun;
+            return authority;
         }
 
         private ResearchCompletionEligibilityScaffoldConfig EligibilityForSave()
@@ -295,7 +378,9 @@ namespace DungeonBuilder.M0
         private bool HasValidRun() => _hasValidRun != null && _hasValidRun();
         private GateEvaluationResult EvaluateGate(RestrictedActionType action) => _restrictedActionGate == null
             ? new GateEvaluationResult(false, BlockedInvalidKey)
-            : _restrictedActionGate.Evaluate(new GateEvaluationInput(action, _isOnline != null && _isOnline(), _verificationPending != null && _verificationPending()));
+            : _restrictedActionGate.Evaluate(new GateEvaluationInput(action, _isOnline?.Invoke() == true,
+                _verificationPending?.Invoke() == true, AllowLocalMvpActions &&
+                _claimConfig?.claimAuthorityMode == PlayerResearchClaimAuthorityResolver.LocalMvpAuthorityMode));
 
         private static PlayerResearchActionResult Result(bool succeeded, bool changed, PlayerResearchState state, string key, double progress, double required)
         {

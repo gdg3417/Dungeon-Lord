@@ -39,18 +39,23 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static readonly string[] RuleFields =
             { "formatVersion", "releaseKey", "projectId", "slotId", "manaCost", "requiredEligibleSeconds" };
+        private static readonly string[] SelectionFields = { "formatVersion", "enabled", "ruleReference" };
         private static readonly Regex ReleaseKey = new Regex(
             @"\Aresearch\.timing\.[a-z][a-z0-9_]{0,31}\.v[1-9][0-9]{0,9}\z", RegexOptions.CultureInvariant);
         private readonly Dictionary<string, ResearchTimingRule> archive = new Dictionary<string, ResearchTimingRule>(StringComparer.Ordinal);
         private readonly Dictionary<string, ResearchTimingRule> selections = new Dictionary<string, ResearchTimingRule>(StringComparer.Ordinal);
+        private readonly string selectionFailure = Disabled;
+        internal int UnitsPerSecond { get; }
 
         internal static bool IsPaidReference(string reference) =>
             reference?.StartsWith("research.timing.", StringComparison.Ordinal) == true;
 
         internal ResearchTimingRules(IEnumerable<byte[]> releasedRules, IEnumerable<string> enabledReferences,
-            int unitsPerSecond, SpatialSerializedInputLimits limits)
+            int unitsPerSecond, SpatialSerializedInputLimits limits, byte[] selection = null,
+            string starterProject = null, string starterSlot = null)
         {
             if (unitsPerSecond <= 0) throw new ArgumentException(Invalid);
+            UnitsPerSecond = unitsPerSecond;
             foreach (var source in releasedRules) {
                 byte[] bytes = source == null ? null : (byte[])source.Clone();
                 var issues = new SpatialIssueCollector(limits.MaximumDiagnostics);
@@ -78,6 +83,27 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (selections.ContainsKey(rule.ProjectId)) throw new ArgumentException(Invalid);
                 selections.Add(rule.ProjectId, rule);
             }
+            if (selection != null)
+                selectionFailure = BindStarterSelection(selection, starterProject, starterSlot, limits);
+        }
+
+        // The mutable default is consulted only by Select. Resolve always uses the immutable archive.
+        private string BindStarterSelection(byte[] bytes, string project, string slot, SpatialSerializedInputLimits limits)
+        {
+            var issues = new SpatialIssueCollector(limits.MaximumDiagnostics);
+            if (!ContractJson.TryParse(bytes, limits, issues, out var node, allowWhitespace: true) ||
+                !ContractJson.ValidateShape(node, SelectionFields, issues) ||
+                !RecoveryEpisode.TryInteger(node.Fields[0].Value, out long format) || format != 1 ||
+                node.Fields[1].Value.Kind != ContractJsonKind.Boolean ||
+                !ContractJson.String(node.Fields[2].Value, out string reference))
+                return Invalid;
+            string reason = Resolve(reference, out var rule);
+            if (reason != null) return reason;
+            if (rule.ProjectId != project || rule.SlotId != slot) return Mismatch;
+            if (node.Fields[1].Value.Text != "true") return Disabled;
+            if (selections.ContainsKey(project)) return Invalid;
+            selections.Add(project, rule);
+            return null;
         }
 
         private static bool ValidKey(string key) => key != null && key.Length <= 60 &&
@@ -100,7 +126,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal string Select(string project, out ResearchTimingRule rule)
         {
             rule = null;
-            return project != null && selections.TryGetValue(project, out rule) ? null : Disabled;
+            return project != null && selections.TryGetValue(project, out rule) ? null : selectionFailure ?? Disabled;
         }
     }
 }

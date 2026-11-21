@@ -443,6 +443,71 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.Discard(), Is.True);
         }
 
+        [UnityTest] public IEnumerator R1ResearchNavigationUsesDraftExitAuthority()
+        {
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var entry = ui.Q<Button>("openResearch");
+            controller.EnterEdit();
+            Click(entry);
+            Assert.That(controller.IsResearch && !controller.IsEditing, Is.True);
+            Click(ui.Q<Button>("researchDungeon"));
+
+            yield return AnalysisModifiedDraft();
+            var draft = controller.Draft;
+            Click(entry);
+            Assert.That(controller.IsResearch, Is.False);
+            Assert.That(ui.Q<Button>("navigationDiscard").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            Click(ui.Q<Button>("cancel"));
+            Assert.That(controller.Draft, Is.SameAs(draft));
+            Click(entry); Click(ui.Q<Button>("navigationDiscard"));
+            Assert.That(controller.IsResearch && !controller.IsEditing, Is.True);
+            controller.ReturnToDungeon();
+            yield return AnalysisModifiedDraft();
+            Click(entry); Click(ui.Q<Button>("confirm"));
+            Assert.That(controller.IsResearch && !controller.IsEditing, Is.True);
+            controller.ReturnToDungeon();
+
+            controller.EnterEdit();
+            var room = GameRoot.Instance.Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms[0];
+            controller.TapWorld(new TileCoordinate(room.Anchor.X + 2, room.Anchor.Y + 2));
+            controller.BeginMove(); controller.TapWorld(new TileCoordinate(-1, -1)); yield return null;
+            Assert.That(controller.Draft.IsStructurallyValid, Is.False);
+            draft = controller.Draft;
+            Click(entry);
+            Assert.That(ui.Q<Button>("confirm").text, Is.EqualTo(GameRoot.Instance.Content.GetString("ui.analysis.discard_changes", null)));
+            Assert.That(ui.Q<Button>("navigationDiscard").style.display.value, Is.EqualTo(DisplayStyle.None));
+            Click(ui.Q<Button>("cancel"));
+            Assert.That(controller.Draft, Is.SameAs(draft));
+            Click(entry); Click(ui.Q<Button>("confirm"));
+            Assert.That(controller.IsResearch && !controller.IsEditing, Is.True);
+        }
+
+        [UnityTest] public IEnumerator R1ResearchExpandedProjectTitleFitsSupportedPhoneTextSizes()
+        {
+            const string key = "ui.research.starter.name";
+            var strings = AnalysisPhoneStrings;
+            string original = strings[key];
+            string expanded = "Test-only localization: " + string.Join(" ", Enumerable.Repeat(original, 5));
+            strings[key] = expanded;
+            try
+            {
+                var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+                foreach (var size in new[] { DungeonTextSize.Small, DungeonTextSize.Default, DungeonTextSize.Large })
+                {
+                    yield return AnalysisPhoneConfigure(size);
+                    Click(ui.Q<Button>("openResearch"));
+                    yield return AnalysisPhoneSettle();
+                    var project = ui.Q<Label>("researchProject");
+                    Assert.That(project.text, Is.EqualTo(expanded));
+                    Assert.That(project.worldBound.xMax, Is.LessThanOrEqualTo(controller.SafeRoot.worldBound.xMax));
+                    AssertReachable(ui.Q<Button>("researchDungeon"));
+                    Click(ui.Q<Button>("researchDungeon"));
+                    Assert.That(controller.IsResearch, Is.False);
+                }
+            }
+            finally { strings[key] = original; }
+        }
+
         [UnityTest] public IEnumerator AnalysisInvalidDraftOffersOnlyDiscardAndContinue()
         {
             controller.EnterEdit();

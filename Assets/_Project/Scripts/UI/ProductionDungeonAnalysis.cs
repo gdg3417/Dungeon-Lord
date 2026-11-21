@@ -1,3 +1,4 @@
+using System;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using UnityEngine.UIElements;
 
@@ -7,6 +8,7 @@ namespace DungeonBuilder.M0
     {
         public bool IsAnalysis { get; private set; }
         private bool navigationReview;
+        private Action discardForNavigation;
         private RunOutcomeRecord[] analysisSource;
         private ProductionAnalysisReport analysisReport;
 
@@ -15,20 +17,23 @@ namespace DungeonBuilder.M0
             Button("openAnalysis", OpenAnalysis);
             Button("analysisDungeon", ReturnToDungeon);
             Button("analysisDisplay", () => document.rootVisualElement.Q("displayPopover").style.display = DisplayStyle.Flex);
-            Button("navigationDiscard", () => { CloseModal(); if (Discard()) ShowAnalysis(); });
+            Button("navigationDiscard", () => { var navigate = discardForNavigation; CloseModal(); navigate?.Invoke(); });
             document.rootVisualElement.Q<ScrollView>("analysisScroll").verticalScrollerVisibility = ScrollerVisibility.Auto;
         }
 
         private bool CanSaveForNavigation => draft?.CanSave == true &&
             draftContext.Fingerprint(root.Save.validatedCanonicalSpatialState) == draft.BaselineFingerprint;
 
-        public void OpenAnalysis()
+        public void OpenAnalysis() => OpenDungeonDestination(ShowAnalysis, "ui.analysis.leave_edit", "ui.analysis.leave_invalid");
+
+        private void OpenDungeonDestination(Action navigate, string leaveKey, string invalidKey)
         {
-            if (!initialized || !HasCanonicalRuntime() || IsAnalysis || legacy) return;
+            if (!initialized || !HasCanonicalRuntime() || IsAnalysis || IsResearch || legacy) return;
             if (recoveryBytes != null || recoveryReason != null) { OfferRecovery(); return; }
             if (modal.style.display == DisplayStyle.Flex) return;
-            if (!IsEditing) { ShowAnalysis(); return; }
-            if (!draft.HasChanges) { if (Discard()) ShowAnalysis(); return; }
+            if (!IsEditing) { navigate(); return; }
+            Action discard = () => { if (Discard()) navigate(); };
+            if (!draft.HasChanges) { discard(); return; }
 
             // The existing authority decides save eligibility (including durability and staleness).
             // Keep Save visible but disabled for temporarily unavailable saves; invalid drafts omit it.
@@ -36,13 +41,14 @@ namespace DungeonBuilder.M0
             {
                 ReviewSave();
                 if (modal.style.display != DisplayStyle.Flex)
-                    ShowModal("ui.analysis.leave_edit", null, "ui.dungeon.save");
-                else document.rootVisualElement.Q<Label>("modalText").text = Text("ui.analysis.leave_edit") + "\n" +
+                    ShowModal(leaveKey, null, "ui.dungeon.save");
+                else document.rootVisualElement.Q<Label>("modalText").text = Text(leaveKey) + "\n" +
                     document.rootVisualElement.Q<Label>("modalText").text;
-                confirm = () => { if (CanSaveForNavigation && Commit()) ShowAnalysis(); };
+                confirm = () => { if (CanSaveForNavigation && Commit()) navigate(); };
+                discardForNavigation = discard;
                 document.rootVisualElement.Q<Button>("navigationDiscard").style.display = DisplayStyle.Flex;
             }
-            else ShowModal("ui.analysis.leave_invalid", () => { if (Discard()) ShowAnalysis(); }, "ui.analysis.discard_changes");
+            else ShowModal(invalidKey, discard, "ui.analysis.discard_changes");
             navigationReview = true;
             document.rootVisualElement.Q<Button>("cancel").text = Text("ui.analysis.continue_editing");
             PresentNavigationReview();
@@ -59,27 +65,35 @@ namespace DungeonBuilder.M0
 
         private void ShowAnalysis()
         {
+            IsAnalysis = true;
+            ShowDungeonDestination("analysisScreen", "analysisDungeon");
+            PresentAnalysis();
+        }
+
+        private void ShowDungeonDestination(string screen, string back)
+        {
             gesture.Cancel(); pointerDown = false;
             CloseReplay();
-            IsAnalysis = true;
             document.rootVisualElement.Q("displayPopover").style.display = DisplayStyle.None;
-            document.rootVisualElement.Q("analysisScreen").style.display = DisplayStyle.Flex;
+            document.rootVisualElement.Q(screen).style.display = DisplayStyle.Flex;
             SetDungeonNavigationEnabled(false);
-            document.rootVisualElement.Q<Button>("analysisDungeon").Focus();
+            document.rootVisualElement.Q<Button>(back).Focus();
             worldCamera.enabled = false;
-            PresentAnalysis();
         }
 
         public void ReturnToDungeon()
         {
-            if (!initialized || !HasCanonicalRuntime() || !IsAnalysis) return;
+            if (!initialized || !HasCanonicalRuntime() || (!IsAnalysis && !IsResearch)) return;
+            string screen = IsResearch ? "researchScreen" : "analysisScreen";
+            string entry = IsResearch ? "openResearch" : "openAnalysis";
             IsAnalysis = false;
-            document.rootVisualElement.Q("analysisScreen").style.display = DisplayStyle.None;
+            IsResearch = false;
+            document.rootVisualElement.Q(screen).style.display = DisplayStyle.None;
             document.rootVisualElement.Q("displayPopover").style.display = DisplayStyle.None;
             SetDungeonNavigationEnabled(true);
             worldCamera.enabled = true;
             Present(); Layout();
-            document.rootVisualElement.Q<Button>("openAnalysis").Focus();
+            document.rootVisualElement.Q<Button>(entry).Focus();
         }
 
         private void SetDungeonNavigationEnabled(bool value)
