@@ -4,6 +4,23 @@ namespace DungeonBuilder.M0
 {
     public static class PlayerResearchStatusTextPresenter
     {
+        internal const string AwaitingTickKey = "ui.research.awaiting_completion_tick";
+        private const string TimedProgressKey = "ui.research.timed_progress";
+
+        internal static long DisplayElapsedSeconds(ResearchProgressState progress, int unitsPerSecond,
+            long durationSeconds, long? observedThrough)
+        {
+            long committed = (long)progress.ProgressUnits;
+            long elapsed = observedThrough is long through && progress.StartClosedThrough >= 0 &&
+                through >= progress.StartClosedThrough
+                ? Math.Max(committed, through - progress.StartClosedThrough) : committed;
+            return Math.Min(durationSeconds, elapsed / unitsPerSecond);
+        }
+
+        internal static string PresentCountdown(long elapsed, long duration, Func<string, string> localize,
+            IFormatProvider culture) => elapsed == duration ? localize(AwaitingTickKey) :
+            string.Format(culture, localize(TimedProgressKey), elapsed, duration, duration - elapsed);
+
         public static string Present(
             string statusLocalizationKey,
             PlayerResearchAuthoritySummary authority,
@@ -21,8 +38,7 @@ namespace DungeonBuilder.M0
 
             if (authority.DurationSeconds is double duration && authority.RemainingSeconds is double remaining)
             {
-                const string timedKey = "ui.research.timed_progress";
-                return string.Format(culture, localize?.Invoke(timedKey, timedKey) ?? timedKey,
+                return string.Format(culture, localize?.Invoke(TimedProgressKey, TimedProgressKey) ?? TimedProgressKey,
                     Math.Floor(duration - remaining), duration, Math.Ceiling(remaining));
             }
             return string.Format(culture, localized, authority.ProgressUnits, authority.RequiredProgressUnits);

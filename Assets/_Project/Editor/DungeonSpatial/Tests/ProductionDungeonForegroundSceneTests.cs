@@ -160,7 +160,17 @@ namespace DungeonBuilder.M0.Tests
             Click(start);
             Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(before - cost));
             Assert.That(start.style.display.value, Is.EqualTo(DisplayStyle.None));
-            advance(3);
+            var status = ui.Q<Label>("researchStatus");
+            Assert.That(status.text, Does.Contain("0 of 120").And.Contain("120 seconds remaining"));
+            for (int elapsed = 1; elapsed <= 2; elapsed++)
+            {
+                advance(1);
+                yield return new WaitForSecondsRealtime(0.2f);
+                Assert.That(status.text, Does.Contain($"{elapsed} of 120").And.Contain($"{120 - elapsed} seconds remaining"));
+                Assert.That(root.Save.researchProgress.ProgressUnits, Is.Zero);
+                Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));
+            }
+            advance(1);
             PumpSceneToClosed();
             Assert.That(root.Save.researchProgress.ProgressUnits, Is.EqualTo(3000));
             Assert.That(ui.Q<Label>("researchStatus").text, Does.Contain("3 of 120").And.Contain("117"));
@@ -179,7 +189,12 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(root.Save.researchProgress.ProgressUnits, Is.EqualTo(113000));
             Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));
             Assert.That(root.ResolveMvpPlayerLoopSummary().HasResearchUnlock, Is.False);
-            advance(10);
+            advance(7);
+            yield return new WaitForSecondsRealtime(0.2f);
+            Assert.That(status.text, Is.EqualTo(root.Content.GetString(PlayerResearchStatusTextPresenter.AwaitingTickKey, null)));
+            Assert.That(root.Save.researchProgress.ProgressUnits, Is.EqualTo(113000));
+            Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));
+            advance(3);
             PumpSceneToClosed();
             Assert.That(root.Save.researchProgress.ProgressUnits, Is.EqualTo(120000));
             Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.Flex));

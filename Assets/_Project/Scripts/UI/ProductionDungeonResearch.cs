@@ -6,9 +6,14 @@ namespace DungeonBuilder.M0
     {
         public bool IsResearch { get; private set; }
         private bool researchRecoveryRequired;
+        private Label researchStatus;
+        private ResearchProgressState presentedResearchProgress;
+        private long researchDurationSeconds, lastResearchElapsed = -1;
 
         private void InitializeResearch()
         {
+            researchStatus = document.rootVisualElement.Q<Label>("researchStatus");
+            researchStatus.schedule.Execute(RefreshResearchCountdown).Every(100);
             Button("openResearch", OpenResearch);
             Button("researchDungeon", ReturnToDungeon);
             Button("researchDisplay", () => document.rootVisualElement.Q("displayPopover").style.display = DisplayStyle.Flex);
@@ -67,10 +72,37 @@ namespace DungeonBuilder.M0
                 var unlock = root.ResolveMvpPlayerLoopSummary();
                 if (unlock.HasResearchUnlock) status += "\n" + Text(unlock.ResearchUnlockSummaryKey);
             }
-            ui.Q<Label>("researchStatus").text = status == ui.Q<Label>("researchPrerequisite").text ||
+            presentedResearchProgress = root.Save.researchProgress;
+            researchDurationSeconds = authority?.State == PlayerResearchAuthorityState.InProgress &&
+                authority.DurationSeconds is double activeDuration && authority.RemainingSeconds.HasValue
+                ? (long)activeDuration : 0;
+            lastResearchElapsed = -1;
+            researchStatus.text = status == ui.Q<Label>("researchPrerequisite").text ||
                 status == ui.Q<Label>("researchCost").text ? Text("ui.research.start_blocked") : status;
             ui.Q<Button>("researchStart").style.display = authority?.CanStart == true ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("researchClaim").style.display = state.CanClaimLocalMvp ? DisplayStyle.Flex : DisplayStyle.None;
+            PresentResearchCountdown();
+        }
+
+        private void RefreshResearchCountdown()
+        {
+            if (!IsResearch || !HasCanonicalRuntime()) return;
+            if (presentedResearchProgress != root.Save.researchProgress)
+                PresentResearch();
+            else
+                PresentResearchCountdown();
+        }
+
+        private void PresentResearchCountdown()
+        {
+            int unitsPerSecond = root.SaveService.ForegroundConfiguration?.UnitsPerSecond ?? 0;
+            if (researchDurationSeconds <= 0 || presentedResearchProgress == null || unitsPerSecond <= 0) return;
+            long elapsed = PlayerResearchStatusTextPresenter.DisplayElapsedSeconds(presentedResearchProgress,
+                unitsPerSecond, researchDurationSeconds, root.ReadResearchPresentationHorizon());
+            if (elapsed == lastResearchElapsed) return;
+            lastResearchElapsed = elapsed;
+            researchStatus.text = PlayerResearchStatusTextPresenter.PresentCountdown(elapsed,
+                researchDurationSeconds, Text, Culture);
         }
 
         private bool ResearchInteractionBlocked => IsEditing || modal.style.display == DisplayStyle.Flex;

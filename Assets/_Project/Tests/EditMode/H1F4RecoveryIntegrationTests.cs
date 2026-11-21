@@ -276,6 +276,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var startedBytes = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
             Assert.That(scope.Root.StartConfiguredPaidResearch().Succeeded, Is.False);
             CollectionAssert.AreEqual(startedBytes, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+
+            long DisplaySeconds() => PlayerResearchStatusTextPresenter.DisplayElapsedSeconds(
+                scope.Root.Save.researchProgress, 1000, 120, scope.Root.ReadResearchPresentationHorizon());
+            Assert.That(DisplaySeconds(), Is.Zero);
+            h.Wall.Seconds = 108;
+            Assert.That(DisplaySeconds(), Is.EqualTo(1));
+            h.Wall.Seconds = 109;
+            Assert.That(DisplaySeconds(), Is.EqualTo(2));
+            h.Wall.Seconds = 106;
+            Assert.That(scope.Root.ReadResearchPresentationHorizon(), Is.Null);
+            Assert.That(DisplaySeconds(), Is.Zero);
+            CollectionAssert.AreEqual(startedBytes, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+
             scope.Pulse(110);
             Assert.That(scope.Root.Save.researchProgress.ProgressUnits, Is.EqualTo(3000));
 
@@ -291,6 +304,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(scope.Root.Save.researchProgress.ProgressUnits, Is.EqualTo(113000));
             Assert.That(scope.Root.Save.researchProgress.CompletionPending, Is.False);
             scope.Pulse(227);
+            Assert.That(DisplaySeconds(), Is.EqualTo(120));
+            Assert.That(PlayerResearchStatusTextPresenter.PresentCountdown(120, 120, key => key, null),
+                Is.EqualTo(PlayerResearchStatusTextPresenter.AwaitingTickKey));
+            Assert.That(scope.Root.ResolveProductionResearchState().CanClaimLocalMvp, Is.False);
             Assert.That(scope.Root.Save.researchProgress.CompletionPending, Is.False);
             scope.Pulse(230);
             Assert.That(scope.Root.Save.researchProgress.ProgressUnits, Is.EqualTo(120000));
