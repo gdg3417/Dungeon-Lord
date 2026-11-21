@@ -6,6 +6,16 @@ namespace DungeonBuilder.Tests.EditMode
 {
     public class PlayerResearchClaimAuthorityResolverTests
     {
+        [Test] public void ContradictoryCompletedOrEarlyReadyStateCannotBeActedOn()
+        {
+            var pending = Pending();
+            var progress = Progress(0.5d, true);
+            Assert.That(Resolve(true, pending, progress).RuleResolved, Is.False);
+            progress.CompletionPending = false;
+            var completed = new CompletedResearchState { ProjectIds = new[] { Project } };
+            Assert.That(Resolve(true, pending, progress, completed).RuleResolved, Is.False);
+        }
+
         private const string Project = "test.project";
 
         [Test]

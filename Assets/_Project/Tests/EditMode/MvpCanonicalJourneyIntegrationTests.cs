@@ -86,7 +86,7 @@ namespace DungeonBuilder.Tests.EditMode
             Assert.That(firstOutcome.ReasonKey, Is.Not.Empty);
             Assert.That(_root.Save.runHistory.RecentOutcomes, Does.Contain(firstOutcome));
             AssertPrimary(MvpPrimaryNextActionPresenter.SourceFirstContract, MvpPrimaryNextActionPresenter.RuleFirstContractIncomplete);
-            Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.StartResearchActionKey));
+            Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(PlayerResearchActionHandler.CostUnavailableKey));
 
             CompleteResearchThroughRootBoundary();
             RunUntilFirstContractRequirementsComplete();
@@ -207,9 +207,9 @@ namespace DungeonBuilder.Tests.EditMode
         {
             using var canonicalResearch = new ResearchDurableAcknowledgementTests.CanonicalRootScope(_root, starterDungeon: true);
             Assert.That(_root.DevPanelEnabled, Is.False);
-            PlayerResearchActionResult available = _root.ResolvePlayerResearchState();
+            PlayerResearchActionResult available = _root.ResolveUnpaidResearchStateForTests();
             Assert.That(available.State, Is.EqualTo(PlayerResearchState.Available));
-            PlayerResearchActionResult started = _root.StartConfiguredPlayerResearch();
+            PlayerResearchActionResult started = _root.StartUnpaidResearchForTests();
             Assert.That(started.Succeeded, Is.True);
             Assert.That(started.StateChanged, Is.True);
             Assert.That(ResolvePrimary().PrimaryActionKey, Is.EqualTo(MvpPrimaryNextActionPresenter.ContinueResearchActionKey));

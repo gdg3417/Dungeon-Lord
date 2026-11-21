@@ -11,6 +11,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="navigation" class="row">
                 <ui:Label name="mode" class="mode" />
+                <ui:Button name="openResearch" tooltip="ui.research.title" />
                 <ui:Button name="reset" tooltip="ui.dungeon.reset" />
                 <ui:Button name="displaySettings" tooltip="ui.dungeon.display" />
             </ui:VisualElement>
@@ -120,6 +121,24 @@
             <ui:ScrollView name="analysisScroll" mode="Vertical" class="analysis-scroll">
                 <ui:Label name="analysisReport" />
                 <ui:Label name="analysisEvidence" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:VisualElement name="researchScreen" class="analysis-screen">
+            <ui:VisualElement class="row analysis-navigation">
+                <ui:Button name="researchDungeon" tooltip="ui.analysis.dungeon" />
+                <ui:Label class="mode selected-destination" tooltip="ui.research.title" />
+                <ui:Button name="researchDisplay" tooltip="ui.dungeon.display" />
+            </ui:VisualElement>
+            <ui:ScrollView name="researchScroll" mode="Vertical" class="analysis-scroll">
+                <ui:Label name="researchProject" class="mode" />
+                <ui:Label name="researchPrerequisite" />
+                <ui:Label name="researchCost" />
+                <ui:Label name="researchDuration" />
+                <ui:Label name="researchAffordability" />
+                <ui:Label name="researchStatus" />
+                <ui:Button name="researchStart" class="research-action" tooltip="ui.player_research.action.start" />
+                <ui:Button name="researchClaim" class="research-action" tooltip="ui.player_research.action.claim" />
+                <ui:Label name="researchFeedback" />
             </ui:ScrollView>
         </ui:VisualElement>
         <ui:VisualElement name="displayPopover" class="display-popover">

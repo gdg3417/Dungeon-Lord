@@ -439,7 +439,7 @@ namespace DungeonBuilder.M0
             MonsterContinuity.RequiredReserve(candidate.validatedCanonicalSpatialState, _validationContext.MonsterRecovery);
 
         internal PlayerResearchActionResult CommitPlayerResearchTransition(SaveData current,
-            Func<SaveData, PlayerResearchActionResult> stage)
+            Func<SaveData, PlayerResearchActionResult> stage, bool paidStart = false)
         {
             if (!PrepareForegroundAction(ref current))
                 return PlayerResearchActionHandler.PersistenceFailure(ForegroundBlocked().Reason);
@@ -455,6 +455,14 @@ namespace DungeonBuilder.M0
                 var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(_canonicalSession.GetCurrentBytes(), _validationContext);
                 if (owned?.CurrentTargetValidated != true || !owned.IsValid)
                     return PlayerResearchActionHandler.PersistenceFailure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
+                if (paidStart)
+                {
+                    var committedHistory = JsonUtility.FromJson<SaveRoot>(Encoding.UTF8.GetString(owned.GetBytes())).primary.runHistory;
+                    if (!RunHistoryState.HasCompletedAdventurerRun(committedHistory) ||
+                        JsonUtility.ToJson(committedHistory) != JsonUtility.ToJson(current.runHistory))
+                        return new PlayerResearchActionResult { State = PlayerResearchState.Blocked,
+                            FeedbackLocalizationKey = PlayerResearchActionHandler.BlockedPrerequisiteKey };
+                }
                 var snapshot = DetachedRecognizedSaveStateSnapshot.Capture(current, _limits);
                 var prepared = _canonicalSession.PrepareLiveReplacement(snapshot, owned.State);
                 if (!prepared.IsSuccess)

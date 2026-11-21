@@ -8,7 +8,9 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 
 namespace DungeonBuilder.M0.Tests
 {
@@ -98,15 +100,115 @@ namespace DungeonBuilder.M0.Tests
             advance((finish - root.TimeService.SampleForeground()) / 1000d + .001); update();
             Assert.That(service.BeforeForegroundAction(), Is.True);
             Assert.That(root.Save.runHistory.RecentOutcomes.Any(o => o.RunId == "run-1"), Is.True);
-            Assert.That(root.ResolvePlayerResearchState().State, Is.EqualTo(PlayerResearchState.Available));
+            Assert.That(root.ResolveUnpaidResearchStateForTests().State, Is.EqualTo(PlayerResearchState.Available));
             Assert.That(overlay.ResolvePlayerResearchPanelPresentation().ShowAction, Is.True);
-            Assert.That(overlay.StartPlayerResearch().Succeeded, Is.True);
+            Assert.That(overlay.StartUnpaidResearchForTests().Succeeded, Is.True);
             Assert.That(overlay.StartPlayerResearch().Succeeded, Is.False);
             advance(root.Content.Bootstrap.tickSeconds); update();
             Assert.That(service.BeforeForegroundAction(), Is.True);
             Assert.That(root.Save.researchProgress.ProgressUnits, Is.GreaterThan(0), "Detached foreground callback still progresses research");
             yield return null;
         }
+
+        [UnityTest] public IEnumerator R1ResearchProductionEntryReflectsPaidForegroundLifecycle()
+        {
+            var root = GameRoot.Instance;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var start = ui.Q<Button>("researchStart");
+            var claim = ui.Q<Button>("researchClaim");
+            Assert.That(root.ClearResearchPendingScaffold(), Is.True);
+            Click(ui.Q<Button>("openResearch"));
+            Assert.That(controller.IsResearch, Is.True);
+            Assert.That(start.style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(ui.Q<Label>("researchCost").text, Does.Contain("10"));
+            Assert.That(ui.Q<Label>("researchDuration").text, Does.Contain("120"));
+            controller.ReturnToDungeon();
+
+            Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+            Assert.That(root.SimulateRunOnce(RunPostureResolver.BalancedId), Is.True);
+            Assert.That(root.TrySetQaManaFromDevPanel(false), Is.True);
+            var advance = InstallForegroundBoundaryTestClock();
+            Click(ui.Q<Button>("openResearch"));
+            Assert.That(start.style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(ui.Q<Label>("researchAffordability").text, Does.Contain("Unaffordable"));
+            Assert.That(root.SaveService.BeforeForegroundAction(), Is.True);
+            var beforeUnaffordable = root.SaveService.CanonicalSession.GetCurrentBytes();
+            Click(start); // Exercise stale input through the real production callback.
+            CollectionAssert.AreEqual(beforeUnaffordable, root.SaveService.CanonicalSession.GetCurrentBytes());
+            Assert.That(root.Save.researchPending, Is.Null);
+            controller.ReturnToDungeon();
+
+            Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+            Assert.That(root.Content.Bootstrap.tickSeconds, Is.EqualTo(10));
+            double cost = 10;
+            root.SetOnline(false);
+            Click(ui.Q<Button>("openResearch"));
+            Assert.That(start.style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));
+            double before = root.Save.structureRuntime.ManaReserve;
+            Click(ui.Q<Button>("researchDisplay"));
+            Click(start);
+            Assert.That(root.Save.researchPending, Is.Null, "The display panel owns interaction");
+            Click(ui.Q<Button>("closeDisplay"));
+            long now = root.TimeService.SampleForeground();
+            long startCut = now / 10000 * 10000 + 7000;
+            if (startCut < now) startCut += 10000;
+            advance((startCut - now) / 1000d);
+            Click(start);
+            Assert.That(root.Save.researchProgress.StartClosedThrough, Is.EqualTo(startCut));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(before - cost));
+            Click(start);
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(before - cost));
+            Assert.That(start.style.display.value, Is.EqualTo(DisplayStyle.None));
+            var status = ui.Q<Label>("researchStatus");
+            Assert.That(status.text, Does.Contain("0 of 120").And.Contain("120 seconds remaining"));
+            for (int elapsed = 1; elapsed <= 2; elapsed++)
+            {
+                advance(1);
+                yield return new WaitForSecondsRealtime(0.2f);
+                Assert.That(status.text, Does.Contain($"{elapsed} of 120").And.Contain($"{120 - elapsed} seconds remaining"));
+                Assert.That(root.Save.researchProgress.ProgressUnits, Is.Zero);
+                Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));
+            }
+            advance(1);
+            PumpSceneToClosed();
+            Assert.That(root.Save.researchProgress.ProgressUnits, Is.EqualTo(3000));
+            Assert.That(ui.Q<Label>("researchStatus").text, Does.Contain("3 of 120").And.Contain("117"));
+            Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));
+            string reference = root.Save.researchProgress.RuleSourceIdUsed;
+            before = root.Save.structureRuntime.ManaReserve;
+            var reopened = root.SaveService.LoadOrCreate("r1-scene", out string banner);
+            Assert.That(reopened, Is.Not.Null, banner);
+            typeof(GameRoot).GetMethod("PublishCanonicalRuntime", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(root, new object[] { reopened });
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(before));
+            Assert.That(root.Save.researchProgress.RuleSourceIdUsed, Is.EqualTo(reference));
+            Assert.That(root.Save.researchProgress.ProgressUnits, Is.EqualTo(3000));
+            advance(110);
+            PumpSceneToClosed();
+            Assert.That(root.Save.researchProgress.ProgressUnits, Is.EqualTo(113000));
+            Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(root.ResolveMvpPlayerLoopSummary().HasResearchUnlock, Is.False);
+            advance(7);
+            yield return new WaitForSecondsRealtime(0.2f);
+            Assert.That(status.text, Is.EqualTo(root.Content.GetString(PlayerResearchStatusTextPresenter.AwaitingTickKey, null)));
+            Assert.That(root.Save.researchProgress.ProgressUnits, Is.EqualTo(113000));
+            Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));
+            advance(3);
+            PumpSceneToClosed();
+            Assert.That(root.Save.researchProgress.ProgressUnits, Is.EqualTo(120000));
+            Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            before = root.Save.structureRuntime.ManaReserve;
+            Click(claim); Click(claim);
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(before));
+            Assert.That(root.Save.researchPending, Is.Null);
+            Assert.That(claim.style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(root.ResolveProductionResearchState().State, Is.EqualTo(PlayerResearchState.Completed));
+            Assert.That(root.ResolveMvpPlayerLoopSummary().HasResearchUnlock, Is.True);
+            Assert.That(root.SaveService.LoadOrCreate("r1-scene", out banner).completedResearch.ProjectIds, Has.Length.EqualTo(1));
+            yield return null;
+        }
+
 
         [UnityTest] public IEnumerator R0ResearchStartProgressClaimAndReopenUseCommittedPublication()
         {
@@ -116,7 +218,7 @@ namespace DungeonBuilder.M0.Tests
             var advance = InstallForegroundBoundaryTestClock();
             var overlay = ResearchOverlay();
             var before = root.Save;
-            var start = overlay.StartPlayerResearch();
+            var start = overlay.StartUnpaidResearchForTests();
             Assert.That(start.Succeeded, Is.True, start.PersistenceReason ?? start.FeedbackLocalizationKey);
             Assert.That(root.Save, Is.Not.SameAs(before)); Assert.That(before.researchPending, Is.Null);
             Assert.That(root.BannerMessage, Is.EqualTo(root.Content.GetString(PlayerResearchActionHandler.StartSucceededKey, null)));
@@ -159,7 +261,7 @@ namespace DungeonBuilder.M0.Tests
             var advance = InstallForegroundBoundaryTestClock();
             if (claim)
             {
-                var start = root.StartConfiguredPlayerResearch();
+                var start = root.StartUnpaidResearchForTests();
                 Assert.That(start.Succeeded, Is.True, UnityEngine.JsonUtility.ToJson(start));
                 var bootstrap = root.Content.Bootstrap;
                 root.ApplyConfiguredPlayerResearchActiveTick((long)Math.Ceiling(
@@ -180,7 +282,7 @@ namespace DungeonBuilder.M0.Tests
             try
             {
                 var overlay = ResearchOverlay();
-                var result = claim ? overlay.ClaimPlayerResearch() : overlay.StartPlayerResearch();
+                var result = claim ? overlay.ClaimPlayerResearch() : overlay.StartUnpaidResearchForTests();
                 Assert.That(result.Succeeded || result.StateChanged, Is.False);
                 Assert.That(result.RecoveryRequired, Is.EqualTo(uncertain));
                 Assert.That(result.PersistenceReason, Is.EqualTo(uncertain ? DetachedCanonicalWriteAuthority.RecoveryRequiredReason :
@@ -203,7 +305,7 @@ namespace DungeonBuilder.M0.Tests
                 else
                 {
                     CollectionAssert.AreEqual(bytes, fs.ReadAllBytes(service.SavePath));
-                    Assert.That(claim ? root.ClaimConfiguredPlayerResearch().Succeeded : root.StartConfiguredPlayerResearch().Succeeded, Is.True);
+                    Assert.That(claim ? root.ClaimConfiguredPlayerResearch().Succeeded : root.StartUnpaidResearchForTests().Succeeded, Is.True);
                     Assert.That(claim ? root.ClaimConfiguredPlayerResearch().Succeeded : root.StartConfiguredPlayerResearch().Succeeded, Is.False);
                 }
             }

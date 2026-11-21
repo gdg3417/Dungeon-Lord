@@ -73,7 +73,8 @@ namespace DungeonBuilder.M0
                     spatialLayoutCompatibilityProfilesJson?.bytes, contentBootstrapJson?.bytes, lootConfigJson?.bytes };
                 var researchRules = System.Array.ConvertAll(Resources.LoadAll<TextAsset>("ResearchTiming"), asset => asset.bytes);
                 var inputs = new RecoveryRuntimeInputs(bytes, Content.ProductionSpatialContent, structuralLimits,
-                    SaveSpatialMigrationLimits.Canonical, researchRules);
+                    SaveSpatialMigrationLimits.Canonical, researchRules,
+                    starterResearchSelection: Resources.Load<TextAsset>("research_starter_selection")?.bytes);
                 Content.BindRecoveryBootstrap(inputs);
                 ConfigureCanonicalPassiveMana(inputs.Passive, inputs.Economy, SaveSpatialMigrationLimits.Canonical.Spatial,
                     inputs.Bootstrap.tickSeconds, inputs.Bootstrap.timeRules.activeSaveIntervalSeconds);

@@ -15,6 +15,29 @@ namespace DungeonBuilder.M0
         internal bool ForegroundPresentationActive => !_explicitSaveDeleteQuiesced && foregroundFailure == null && !foregroundRetryPending &&
             TimeService?.ForegroundPresentationActive == true;
 
+        // A read-only view for Research. Never capture a writer token or advance the scheduler here.
+        internal long? ReadResearchPresentationHorizon()
+        {
+            var scheduler = Save?.livingDungeon?.Scheduler;
+            if (_explicitSaveDeleteQuiesced || bootRecoveryPending || foregroundFailure != null || foregroundRetryPending ||
+                TimeService?.HasForegroundClock != true || TimeService.RecoveryClockActive || TimeService.HasDeferredRecovery ||
+                SaveService == null || SaveService.CanonicalPublicationPending || SaveService.RequiresCanonicalRecovery ||
+                Save.timeProvenance?.Episode != null || scheduler == null || scheduler.ClosedThrough < 0 ||
+                scheduler.ClosedThrough != scheduler.AcceptedThrough)
+                return null;
+
+            try
+            {
+                // A suspended observation carries the frozen foreground horizon.
+                var observation = TimeService.ReadForegroundObservation();
+                return observation.Closed == scheduler.ClosedThrough &&
+                    observation.Accepted == scheduler.AcceptedThrough && observation.Through >= observation.Accepted
+                    ? observation.Through : (long?)null;
+            }
+            catch (InvalidOperationException) { return null; }
+            catch (OverflowException) { return null; }
+        }
+
         private void OnDisable()
         {
             if (TimeService?.HasForegroundClock != true) return;

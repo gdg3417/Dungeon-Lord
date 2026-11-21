@@ -76,12 +76,14 @@ namespace DungeonBuilder.M0
                 // Wallet ticks update informative balances without replaying geometry or
                 // normalization. Edit/recovery/review boundaries recalculate configured cost.
                 PresentHud(); PresentEconomy();
+                PresentResearch();
                 if (IsConstructing) PresentConstructionInformation();
                 if (IsPlacingContent) PresentAcquisitionInformation();
             }
             RefreshFloorManagementIfNeeded();
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
-            if (!legacy && !IsAnalysis) ReadInput();
+            if (IsResearch && researchRecoveryRequired != root.SaveService.RequiresCanonicalRecovery) PresentResearch();
+            if (!legacy && !IsAnalysis && !IsResearch) ReadInput();
             UpdateReplay();
             PresentForegroundActivity();
         }
@@ -154,6 +156,8 @@ namespace DungeonBuilder.M0
             InitializeReplay();
             InitializeFloorManagement();
             InitializeAnalysis();
+            InitializeResearch();
+            if (root.overlay != null) root.overlay.ResearchInteractionBlocked = () => this != null && ResearchInteractionBlocked;
             Button("retry", () => { if (!HasCanonicalRuntime()) return; draft?.FlushNext(); Present(); });
             Button("small", () => SetTextSize(DungeonTextSize.Small));
             Button("default", () => SetTextSize(DungeonTextSize.Default));
@@ -193,7 +197,7 @@ namespace DungeonBuilder.M0
         private void Button(string name, Action action) => document.rootVisualElement.Q<Button>(name).clicked += action;
         private bool NeedsFirstRoom => root.Save?.validatedCanonicalSpatialState?.Floors.Length == 0;
 
-        private bool CanOpenFirstRoomReview => NeedsFirstRoom && !IsEditing && !IsAnalysis && !legacy &&
+        private bool CanOpenFirstRoomReview => NeedsFirstRoom && !IsEditing && !IsAnalysis && !IsResearch && !legacy &&
             recoveryBytes == null && recoveryReason == null && modal.style.display != DisplayStyle.Flex;
 
         private void ReviewFirstRoom()
@@ -216,7 +220,7 @@ namespace DungeonBuilder.M0
         public void EnterEdit()
         {
             if (!HasCanonicalRuntime()) return;
-            if (IsAnalysis || IsEditing || recoveryBytes != null || recoveryReason != null) return;
+            if (IsAnalysis || IsResearch || IsEditing || recoveryBytes != null || recoveryReason != null) return;
             string roomToRetain = ContextRoomId;
             draft = TransactionalDungeonDraft.Create(root.Save.validatedCanonicalSpatialState, draftContext, store);
             feedback = null; selected = null; moveMode = false; CloseSheet();
@@ -244,7 +248,7 @@ namespace DungeonBuilder.M0
         private void CloseSheet() { ClearContentSelection(); ClearConstructionSelection(); selected = null; selectedRoomId = null; selectedEdgeId=null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
         public void TapWorld(TileCoordinate cell)
         {
-            if (!initialized || !HasCanonicalRuntime() || legacy || IsAnalysis || modal.style.display == DisplayStyle.Flex) return;
+            if (!initialized || !HasCanonicalRuntime() || legacy || IsAnalysis || IsResearch || modal.style.display == DisplayStyle.Flex) return;
             if (IsEditing && reassigning != null) { SelectContentDestinationAt(cell); return; }
             if (IsPlacingContent) { PreviewRoomContent(cell); return; }
             if (constructionRequest != null && IsEditing) { PreviewConstruction(cell); return; }
@@ -385,6 +389,7 @@ namespace DungeonBuilder.M0
         private void CloseModal()
         {
             navigationReview = false;
+            discardForNavigation = null;
             document.rootVisualElement.Q<Button>("navigationDiscard").style.display = DisplayStyle.None;
             modal.style.display = DisplayStyle.None; confirm = null;
         }
@@ -485,6 +490,7 @@ namespace DungeonBuilder.M0
             world.PresentReplay(replay, IsEditing || legacy);
             PresentReplayControls();
             PresentAnalysis();
+            PresentResearch();
             SetTextSize(textSize);
         }
         private void PresentHud()

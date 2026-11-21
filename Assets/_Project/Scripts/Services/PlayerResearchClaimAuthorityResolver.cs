@@ -30,6 +30,12 @@ namespace DungeonBuilder.M0
         public bool WouldGrantRewards;
         public bool WouldChargeCosts;
         public bool WouldProcessOfflineProgress;
+        internal bool HasCompletedRun;
+        internal double? ManaCost;
+        internal double? DurationSeconds;
+        internal double? RemainingSeconds;
+        internal double? UsableMana;
+        internal bool IsAffordable;
     }
 
     public static class PlayerResearchClaimAuthorityResolver
@@ -52,15 +58,15 @@ namespace DungeonBuilder.M0
         {
             double current = progress?.ProgressUnits ?? 0d;
             double required = eligibilityConfig?.requiredProgressUnits ?? 0d;
+            if (Contains(completed?.ProjectIds, pending?.ProjectId) || Contains(completed?.ProjectIds, progress?.ProjectId) ||
+                (pending == null) != (progress == null))
+                return Create(PlayerResearchAuthorityState.Blocked, PlayerResearchActionHandler.BlockedInvalidStateKey, current, required);
             if (!string.IsNullOrWhiteSpace(configuredProjectId) && Contains(completed?.ProjectIds, configuredProjectId))
                 return Create(PlayerResearchAuthorityState.Completed, PlayerResearchActionHandler.CompletedKey, required, required, resolved: true);
             if (!ValidConfig(configuredProjectId, pendingConfig, progressConfig, eligibilityConfig, claimConfig, verificationConfig))
                 return Create(PlayerResearchAuthorityState.Blocked, PlayerResearchActionHandler.BlockedInvalidKey, current, required);
 
             bool hasPending = pending != null;
-            bool hasProgress = progress != null;
-            if (hasPending != hasProgress)
-                return Create(PlayerResearchAuthorityState.Blocked, PlayerResearchActionHandler.BlockedInvalidStateKey, current, required);
 
             if (!hasPending)
             {
@@ -73,14 +79,14 @@ namespace DungeonBuilder.M0
 
             if (!string.Equals(pending.ProjectId, configuredProjectId, StringComparison.Ordinal))
                 return Create(PlayerResearchAuthorityState.Blocked, PlayerResearchActionHandler.BlockedOccupiedKey, current, required, resolved: true);
-            if (string.IsNullOrWhiteSpace(pending.SlotId) || string.IsNullOrWhiteSpace(progress.SlotId) ||
+            if (!string.Equals(pending.SlotId, pendingConfig.slotId, StringComparison.Ordinal) ||
                 !string.Equals(pending.SlotId, progress.SlotId, StringComparison.Ordinal) ||
                 !string.Equals(pending.ProjectId, progress.ProjectId, StringComparison.Ordinal) ||
                 double.IsNaN(current) || double.IsInfinity(current) || current < 0d)
                 return Create(PlayerResearchAuthorityState.Blocked, PlayerResearchActionHandler.BlockedInvalidStateKey, current, required);
 
             ResearchCompletionClaimReadinessSummary readiness = ResearchCompletionClaimReadinessResolver.Resolve(pending, progress, eligibilityConfig);
-            if (!readiness.RuleResolved)
+            if (!readiness.RuleResolved || (readiness.CompletionPending && !readiness.EligibleForCompletion))
                 return Create(PlayerResearchAuthorityState.Blocked, PlayerResearchActionHandler.BlockedInvalidStateKey, current, required);
             if (!readiness.ReadyForClaim)
                 return Create(PlayerResearchAuthorityState.InProgress, PlayerResearchActionHandler.InProgressFormatKey, current, required, resolved: true, mutation: true);
@@ -113,7 +119,7 @@ namespace DungeonBuilder.M0
 
         private static bool Contains(string[] values, string value)
         {
-            if (values == null) return false;
+            if (values == null || string.IsNullOrWhiteSpace(value)) return false;
             for (int i = 0; i < values.Length; i++) if (string.Equals(values[i], value, StringComparison.Ordinal)) return true;
             return false;
         }

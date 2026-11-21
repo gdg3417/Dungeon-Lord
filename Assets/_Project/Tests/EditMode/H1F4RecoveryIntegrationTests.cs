@@ -86,7 +86,111 @@ namespace DungeonBuilder.M0.Tests.EditMode
         static void Expected(Harness h, double wallet) => Assert.That(h.Current.structureRuntime.ManaReserve, Is.EqualTo(wallet));
 
         private const string ResearchRulePath = "Assets/_Project/Resources/ResearchTiming/adventurer_analysis_v1.json";
+        private const string StarterSelectionPath = "Assets/_Project/Resources/research_starter_selection.json";
         private const string ReleaseKey = "research.timing.adventurer_analysis.v1";
+
+        [Test]
+        public void RecoveryBootstrapAllowsMissingStarterSelection()
+        {
+            const string scenePath = "Assets/_Project/Scenes/Bootstrap.unity";
+            const string resourceName = "research_starter_selection";
+            var profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            var fixture = Fixture.Create(null, workloadProfile: profile);
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.OpenPreviewScene(scenePath);
+            string relocated = UnityEditor.AssetDatabase.GenerateUniqueAssetPath("Assets/_Project/ResearchSelectionBootstrapTest.json");
+            try
+            {
+                var root = scene.GetRootGameObjects().Select(go => go.GetComponent<GameRoot>()).Single(go => go != null);
+                typeof(GameRoot).GetProperty(nameof(GameRoot.Content)).SetValue(root, new ContentService());
+                typeof(GameRoot).GetProperty(nameof(GameRoot.SaveSpatialMigrationLimits)).SetValue(root, profile);
+                root.Content.LoadProductionSpatialContent(root.productionSpatialManifest, root.productionSpatialCatalog,
+                    root.productionSpatialLanguageTables, root.productionSpatialValidationLimits);
+                var service = new SaveService(new SimpleLogger(false),
+                    new SaveConfig { fileName = "research-bootstrap-" + Guid.NewGuid().ToString("N") + ".json" }, Path.GetTempPath());
+                service.ConfigureCanonical(profile, fixture.Production, fixture.Compatibility, fixture.Configuration,
+                    LegacyGameplayConfigurationContract.SerializeCanonical(fixture.Configuration), fixture.PositionProfiles, fixture.Occupancy);
+                root.AttachSaveServiceForTests(service);
+                var limits = ProductionSpatialContentWorkloadLimitParser.Parse(root.productionSpatialValidationLimits).Limits;
+                var selection = UnityEngine.Resources.Load<UnityEngine.TextAsset>(resourceName);
+                Assert.That(selection, Is.Not.Null);
+                UnityEngine.Resources.UnloadAsset(selection);
+                Assert.That(UnityEditor.AssetDatabase.MoveAsset(StarterSelectionPath, relocated), Is.Empty);
+                Assert.That(UnityEngine.Resources.Load<UnityEngine.TextAsset>(resourceName), Is.Null);
+
+                var configure = typeof(GameRoot).GetMethod("TryConfigureRecoveryRuntime", BindingFlags.Instance | BindingFlags.NonPublic);
+                Assert.That(configure.Invoke(root, new object[] { limits }), Is.True);
+                Assert.That(root.TimeService, Is.Not.Null);
+                Assert.That(service.ResearchTiming.Select("research.project.m7_a2_scaffold", out _), Is.EqualTo(ResearchTimingRules.Disabled));
+                string reference = ReleaseKey + "." + SpatialContractSha256.Compute(File.ReadAllBytes(ResearchRulePath));
+                Assert.That(service.ResearchTiming.Resolve(reference, out _), Is.Null);
+            }
+            finally
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(UnityEditor.AssetDatabase.AssetPathToGUID(relocated,
+                        UnityEditor.AssetPathToGUIDOptions.OnlyExistingAssets)))
+                        Assert.That(UnityEditor.AssetDatabase.MoveAsset(relocated, StarterSelectionPath), Is.Empty);
+                }
+                finally { UnityEditor.SceneManagement.EditorSceneManager.ClosePreviewScene(scene); }
+            }
+        }
+
+        [Test]
+        public void StarterResourceSelectionBindsOnlyTheExactArchivedProjectAndSlot()
+        {
+            var fixture = Fixture.Create(null);
+            var limits = fixture.Profile.Canonical.Serialized;
+            const string project = "research.project.m7_a2_scaffold", slot = "research.slot.primary";
+            byte[] archive = File.ReadAllBytes(ResearchRulePath);
+            byte[] selection = File.ReadAllBytes(StarterSelectionPath);
+            string text = Encoding.UTF8.GetString(selection);
+            var variations = new[] {
+                (text, project, slot, (string)null),
+                (null, project, slot, ResearchTimingRules.Disabled),
+                (text.Replace("true", "false"), project, slot, ResearchTimingRules.Disabled),
+                (text.Replace("true", "\"true\""), project, slot, ResearchTimingRules.Invalid),
+                (text.Replace("true", "true,\"enabled\":true"), project, slot, ResearchTimingRules.Invalid),
+                (text.Replace(":1,", ":2,"), project, slot, ResearchTimingRules.Invalid),
+                (text.Replace(".v1.", ".v9."), project, slot, ResearchTimingRules.Missing),
+                (text.Replace(SpatialContractSha256.Compute(archive), new string('0', 64)), project, slot, ResearchTimingRules.Mismatch),
+                (text, "research.project.other", slot, ResearchTimingRules.Mismatch),
+                (text, project, "research.slot.other", ResearchTimingRules.Mismatch)
+            };
+            foreach (var (content, projectBinding, slotBinding, expected) in variations)
+            {
+                var rules = new ResearchTimingRules(new[] { archive }, Array.Empty<string>(), 1000, limits,
+                    content == null ? null : Encoding.UTF8.GetBytes(content), projectBinding, slotBinding);
+                Assert.That(rules.Select(projectBinding, out var selected), Is.EqualTo(expected));
+                if (selected != null)
+                {
+                    Assert.That(selected.ManaCost, Is.EqualTo(10));
+                    Assert.That(selected.RequiredUnits / rules.UnitsPerSecond, Is.EqualTo(120));
+                }
+                Assert.That(rules.Resolve(ReleaseKey + "." + SpatialContractSha256.Compute(archive), out _), Is.Null);
+            }
+        }
+
+        [Test]
+        public void PaidStartRejectsPlausibleRunEvidenceAbsentFromTheDurablePredecessor()
+        {
+            var h = new Harness(paidResearch: true);
+            h.Start(); h.Accept(100); h.Accept(100); h.Accept(100);
+            h.Current.structureRuntime.ManaReserve = 1000;
+            Assert.That(h.Service.Save(h.Current, SaveReason.StateChange), Is.True);
+            using var scope = new RootScope(h);
+            scope.Pulse(100);
+            var current = scope.Root.Save;
+            current.runHistory.NextRunSequence = 2;
+            current.runHistory.AppendOutcome(new RunOutcomeRecord { RunId = "run-1", Success = false }, 5);
+            var before = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
+            var result = scope.Root.StartConfiguredPlayerResearch();
+            Assert.That(result.Succeeded, Is.False);
+            Assert.That(result.FeedbackLocalizationKey, Is.EqualTo(PlayerResearchActionHandler.BlockedPrerequisiteKey));
+            CollectionAssert.AreEqual(before, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+            Assert.That(scope.Root.Save.researchProgress, Is.Null);
+            Assert.That(scope.Root.Save.structureRuntime.ManaReserve, Is.EqualTo(1000));
+        }
 
         private static RecoveryRuntimeInputs PaidBundle(Fixture fixture, bool updatedDefault = false, bool enabled = true)
         {
@@ -172,6 +276,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var startedBytes = h.F.FileSystem.ReadAllBytes(h.Service.SavePath);
             Assert.That(scope.Root.StartConfiguredPaidResearch().Succeeded, Is.False);
             CollectionAssert.AreEqual(startedBytes, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+
+            long DisplaySeconds() => PlayerResearchStatusTextPresenter.DisplayElapsedSeconds(
+                scope.Root.Save.researchProgress, 1000, 120, scope.Root.ReadResearchPresentationHorizon());
+            Assert.That(DisplaySeconds(), Is.Zero);
+            h.Wall.Seconds = 108;
+            Assert.That(DisplaySeconds(), Is.EqualTo(1));
+            h.Wall.Seconds = 109;
+            Assert.That(DisplaySeconds(), Is.EqualTo(2));
+            h.Wall.Seconds = 106;
+            Assert.That(scope.Root.ReadResearchPresentationHorizon(), Is.Null);
+            Assert.That(DisplaySeconds(), Is.Zero);
+            CollectionAssert.AreEqual(startedBytes, h.F.FileSystem.ReadAllBytes(h.Service.SavePath));
+
             scope.Pulse(110);
             Assert.That(scope.Root.Save.researchProgress.ProgressUnits, Is.EqualTo(3000));
 
@@ -187,6 +304,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(scope.Root.Save.researchProgress.ProgressUnits, Is.EqualTo(113000));
             Assert.That(scope.Root.Save.researchProgress.CompletionPending, Is.False);
             scope.Pulse(227);
+            Assert.That(DisplaySeconds(), Is.EqualTo(120));
+            Assert.That(PlayerResearchStatusTextPresenter.PresentCountdown(120, 120, key => key, null),
+                Is.EqualTo(PlayerResearchStatusTextPresenter.AwaitingTickKey));
+            Assert.That(scope.Root.ResolveProductionResearchState().CanClaimLocalMvp, Is.False);
             Assert.That(scope.Root.Save.researchProgress.CompletionPending, Is.False);
             scope.Pulse(230);
             Assert.That(scope.Root.Save.researchProgress.ProgressUnits, Is.EqualTo(120000));
@@ -1196,7 +1317,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 h.Current.structureRuntime.ManaReserve = 1000;
                 Assert.That(h.Service.Save(h.Current, SaveReason.StateChange), Is.True);
             }
-            var started = paid ? scope.Root.StartConfiguredPaidResearch() : scope.Root.StartConfiguredPlayerResearch();
+            var started = paid ? scope.Root.StartConfiguredPaidResearch() : scope.Root.StartUnpaidResearchForTests();
             Assert.That(started.Succeeded, Is.True, started.FeedbackLocalizationKey);
             string startedRule = scope.Root.Save.researchProgress.RuleSourceIdUsed;
             var ticks = new List<long>(); var passive = scope.PassiveTick;

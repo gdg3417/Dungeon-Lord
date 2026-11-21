@@ -196,7 +196,7 @@ namespace DungeonBuilder.M0
                 GetResearchCompletionEligibilityScaffoldConfig(),
                 GetResearchVerificationScaffoldConfig(),
                 GetResearchUnlockBridgeConfig(),
-                CreatePlayerResearchActionHandler().ResolveAuthority(),
+                CreatePlayerResearchActionHandler().ResolvePaidAuthority(),
                 Content?.ProductionSpatialContent);
         }
 
@@ -205,24 +205,35 @@ namespace DungeonBuilder.M0
             return GuidedMvpActionPathPresenter.Resolve(Save, summary ?? ResolveMvpPlayerLoopSummary());
         }
 
-        public PlayerResearchActionResult ResolvePlayerResearchState()
-        {
-            return CreatePlayerResearchActionHandler().ResolveState();
-        }
+        public PlayerResearchActionResult ResolvePlayerResearchState() => ResolveProductionResearchState();
 
-        public PlayerResearchActionResult StartConfiguredPlayerResearch()
+        public PlayerResearchActionResult StartConfiguredPlayerResearch() => StartProductionResearch();
+
+#if UNITY_EDITOR
+        // Synthetic free starts are used only by historical Editor fixtures.
+        internal PlayerResearchActionResult ResolveUnpaidResearchStateForTests() =>
+            CreatePlayerResearchActionHandler().ResolveState();
+
+        internal PlayerResearchActionResult StartUnpaidResearchForTests() =>
+            StartPlayerResearch(CreatePlayerResearchActionHandler());
+
+        private PlayerResearchActionResult StartPlayerResearch(PlayerResearchActionHandler handler)
         {
-            PlayerResearchActionResult result = CreatePlayerResearchActionHandler().Start();
+            PlayerResearchActionResult result = handler.Start();
             if (result.RecoveryRequired) ForegroundFault(result.PersistenceReason);
             RefreshOfflineSummaryLines();
             return result;
         }
+#endif
 
-        // Integration seam for the paid destination. The existing scaffold Start
-        // stays in place until its caller is replaced by that destination.
+        internal PlayerResearchActionResult ResolveProductionResearchState() =>
+            CreatePlayerResearchActionHandler().ResolvePaidState();
+
+        internal PlayerResearchActionResult StartProductionResearch() => StartConfiguredPaidResearch();
+
         internal PlayerResearchActionResult StartConfiguredPaidResearch()
         {
-            var result = CreatePlayerResearchActionHandler().StartPaid();
+            var result = CreatePlayerResearchActionHandler(SavePlayerResearchTransition, paidStart: true).StartPaid();
             if (result.RecoveryRequired) ForegroundFault(result.PersistenceReason);
             RefreshOfflineSummaryLines();
             return result;
@@ -2128,7 +2139,8 @@ namespace DungeonBuilder.M0
             Save.lastOfflineSummary = ResolveOfflineSummary();
         }
 
-        public bool SetResearchPendingScaffold()
+#if UNITY_EDITOR
+        internal bool SetResearchPendingScaffold()
         {
             if (Save == null)
             {
@@ -2163,7 +2175,7 @@ namespace DungeonBuilder.M0
             return true;
         }
 
-        public bool ClearResearchPendingScaffold()
+        internal bool ClearResearchPendingScaffold()
         {
             if (Save == null || ResearchTimingRules.IsPaidReference(Save.researchProgress?.RuleSourceIdUsed))
             {
@@ -2177,7 +2189,7 @@ namespace DungeonBuilder.M0
             return true;
         }
 
-        public bool ClaimResearchCompletionScaffold()
+        internal bool ClaimResearchCompletionScaffold()
         {
             if (Save == null || ResearchTimingRules.IsPaidReference(Save.researchProgress?.RuleSourceIdUsed))
             {
@@ -2231,6 +2243,8 @@ namespace DungeonBuilder.M0
             RefreshOfflineSummaryLines();
             return true;
         }
+
+#endif
 
         public void RefreshOfflineSummaryLines()
         {
@@ -2576,8 +2590,7 @@ namespace DungeonBuilder.M0
         private PlayerResearchActionHandler CreatePlayerResearchActionHandler() =>
             CreatePlayerResearchActionHandler(SavePlayerResearchTransition);
 
-        private PlayerResearchActionHandler CreatePlayerResearchActionHandler(
-            Action saveTransition)
+        private PlayerResearchActionHandler CreatePlayerResearchActionHandler(Action saveTransition, bool paidStart = false)
         {
             return new PlayerResearchActionHandler(
                 Save,
@@ -2592,17 +2605,18 @@ namespace DungeonBuilder.M0
                 () => IsOnline,
                 () => VerificationPending,
                 saveTransition,
-                CommitPlayerResearchTransition,
+                stage => CommitPlayerResearchTransition(stage, paidStart),
                 () => Save,
                 () => SaveService?.RequiresCanonicalRecovery == true)
             {
                 TimingRules = SaveService?.ResearchTiming,
                 PaidStartAllowed = () => SaveService?.CanStagePaidResearch == true,
-                ProtectedResearchReserve = candidate => SaveService.ResearchProtectedReserve(candidate)
+                ProtectedResearchReserve = candidate => SaveService.ResearchProtectedReserve(candidate),
+                AllowLocalMvpActions = true
             };
         }
 
-        private PlayerResearchActionResult CommitPlayerResearchTransition(Func<SaveData, PlayerResearchActionResult> stage)
+        private PlayerResearchActionResult CommitPlayerResearchTransition(Func<SaveData, PlayerResearchActionResult> stage, bool paidStart)
         {
             if (_explicitSaveDeleteQuiesced || SaveService == null)
                 return PlayerResearchActionHandler.PersistenceFailure(DetachedCanonicalSpatialMutation.ValidationFailedReason);
@@ -2612,7 +2626,7 @@ namespace DungeonBuilder.M0
                 if (action.Succeeded && action.StateChanged)
                     MvpFirstSessionObjectiveCompletionApplier.ApplyIfComplete(candidate, RunSimulationConfig, Content?.ProductionSpatialContent);
                 return action;
-            });
+            }, paidStart);
         }
 
         private bool HasValidAdventurerRun()

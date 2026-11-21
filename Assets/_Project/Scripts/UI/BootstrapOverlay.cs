@@ -132,27 +132,45 @@ namespace DungeonBuilder.M0
             DevelopmentDiagnosticsPolicy.AreDiagnosticsEnabled(DevelopmentDiagnosticsPolicy.IsCurrentBuildDevelopment(), _root?.DevPanelEnabled == true);
         public bool OptionalBranchControlsAvailable => ResolveBranchOriginNodeIds().Length != 0;
         public string SelectedRenovationRoomInstanceId => _selectedRenovationRoomInstanceId;
+        internal System.Func<bool> ResearchInteractionBlocked { get; set; }
 
         public PlayerResearchPanelPresentation ResolvePlayerResearchPanelPresentation()
         {
             return PlayerResearchPanelPresenter.Present(
-                _root?.ResolvePlayerResearchState(),
+                ResearchInteractionBlocked?.Invoke() == true ? ResearchInteractionBlockedResult() : _root?.ResolvePlayerResearchState(),
                 (key, fallback) => GetLocalizedString(key, fallback));
         }
 
         public PlayerResearchActionResult StartPlayerResearch()
         {
-            PlayerResearchActionResult result = _root?.StartConfiguredPlayerResearch();
+            PlayerResearchActionResult result = ResearchInteractionBlocked?.Invoke() == true
+                ? ResearchInteractionBlockedResult() : _root?.StartConfiguredPlayerResearch();
             PresentPlayerResearchFeedback(result);
             return result;
         }
 
-        public PlayerResearchActionResult ClaimPlayerResearch()
+#if UNITY_EDITOR
+        internal PlayerResearchActionResult StartUnpaidResearchForTests()
         {
-            PlayerResearchActionResult result = _root?.ClaimConfiguredPlayerResearch();
+            PlayerResearchActionResult result = _root?.StartUnpaidResearchForTests();
             PresentPlayerResearchFeedback(result);
             return result;
         }
+#endif
+
+        public PlayerResearchActionResult ClaimPlayerResearch()
+        {
+            PlayerResearchActionResult result = ResearchInteractionBlocked?.Invoke() == true
+                ? ResearchInteractionBlockedResult() : _root?.ClaimConfiguredPlayerResearch();
+            PresentPlayerResearchFeedback(result);
+            return result;
+        }
+
+        private static PlayerResearchActionResult ResearchInteractionBlockedResult() => new PlayerResearchActionResult
+        {
+            State = PlayerResearchState.Blocked,
+            FeedbackLocalizationKey = "ui.research.dungeon_interaction_pending"
+        };
 
         private void PresentPlayerResearchFeedback(PlayerResearchActionResult result)
         {
@@ -1563,28 +1581,6 @@ namespace DungeonBuilder.M0
                 _root.SetBanner(pause
                     ? _root.Content.GetString("ui.banner.paused_dev_panel", "ui.banner.paused_dev_panel")
                     : _root.Content.GetString("ui.banner.resumed_dev_panel", "ui.banner.resumed_dev_panel"));
-            }
-
-            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.set_research_pending", "ui.dev.button.set_research_pending")))
-            {
-                bool didSet = _root.SetResearchPendingScaffold();
-                _root.SetBanner(_root.Content.GetString(
-                    didSet ? "ui.banner.research_pending_set" : "ui.banner.research_pending_set_failed",
-                    didSet ? "ui.banner.research_pending_set" : "ui.banner.research_pending_set_failed"));
-            }
-
-            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.clear_research_pending", "ui.dev.button.clear_research_pending")))
-            {
-                _root.ClearResearchPendingScaffold();
-                _root.SetBanner(_root.Content.GetString("ui.banner.research_pending_cleared", "ui.banner.research_pending_cleared"));
-            }
-
-            if (GUILayout.Button(_root.Content.GetString("ui.dev.button.claim_research_completion", "ui.dev.button.claim_research_completion")))
-            {
-                bool didClaim = _root.ClaimResearchCompletionScaffold();
-                _root.SetBanner(_root.Content.GetString(
-                    didClaim ? "ui.banner.research_completion_claimed" : "ui.banner.research_completion_claim_failed",
-                    didClaim ? "ui.banner.research_completion_claimed" : "ui.banner.research_completion_claim_failed"));
             }
 
             if (GUILayout.Button(_root.Content.GetString("ui.dev.button.sim_mana", "ui.dev.button.sim_mana")))

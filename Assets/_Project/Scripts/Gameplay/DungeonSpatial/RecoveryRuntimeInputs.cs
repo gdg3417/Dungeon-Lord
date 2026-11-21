@@ -27,7 +27,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         internal RecoveryRuntimeInputs(byte[][] bytes, ProductionSpatialContentSnapshot production,
             SpatialContentValidationWorkloadLimits structuralLimits, CanonicalSpatialSerializationLimits limits,
-            IEnumerable<byte[]> researchRules = null, IEnumerable<string> researchSelections = null)
+            IEnumerable<byte[]> researchRules = null, IEnumerable<string> researchSelections = null,
+            byte[] starterResearchSelection = null)
         {
             Identity = new RecoveryContextIdentity(bytes);
             string Text(int index) => new UTF8Encoding(false, true).GetString(Identity.GetInput(index));
@@ -47,8 +48,6 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (OneFloor.TwoFloor || !TwoFloor.TwoFloor || OneFloor.UnitsPerSecond != TwoFloor.UnitsPerSecond ||
                 !RoomContentSpatialOccupancyAuthority.TryParse(Identity.GetInput(8), structuralLimits, config, out var occupancy))
                 throw new ArgumentException(RecoveryEpisode.ContextMismatch);
-            ResearchTiming = new ResearchTimingRules(researchRules ?? Array.Empty<byte[]>(),
-                researchSelections ?? Array.Empty<string>(), OneFloor.UnitsPerSecond, limits.Serialized);
             Occupancy = occupancy;
             var compatibility = SpatialLayoutCompatibilityProfiles.ParseAndValidate(Identity.GetInput(9), production, structuralLimits,
                 enforceProductionReleasePolicy: true);
@@ -62,6 +61,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !LootRollResolver.Resolve(Loot, config.LootTableId, 0).success ||
                 Loot.tables?.Any(t => t.id == config.LootTableId) != true || !ResearchValid(null))
                 throw new ArgumentException(RecoveryEpisode.ContextMismatch);
+            ResearchTiming = new ResearchTimingRules(researchRules ?? Array.Empty<byte[]>(),
+                researchSelections ?? Array.Empty<string>(), OneFloor.UnitsPerSecond, limits.Serialized,
+                starterResearchSelection, config.MvpFirstSessionObjective?.AnalysisResearchProjectId,
+                Bootstrap.researchPendingScaffold?.slotId);
             // Derived process-local mutation guards, never digest inputs or save
             // authority. Identity continues to bind the exact validated bytes.
             configurationValues = JsonUtility.ToJson(Configuration);

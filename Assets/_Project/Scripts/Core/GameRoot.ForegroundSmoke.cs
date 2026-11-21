@@ -27,7 +27,192 @@ namespace DungeonBuilder.M0
             public long BlockerAdmittedAt, WaiterAdmittedAt, BlockedAt, ReleasedAt, BlockerTerminalAt, BlockerTerminalOrdinal;
             public bool WaitingResumed;
             public double Mana, Heat;
+            // Unity requires the same serialized report fields in the Editor and development player.
+            public string ResearchRule, ResearchUnlock, ResearchProject, ResearchSlot, RecoveryContext;
+            public long ResearchStartCut, ResearchEarned;
+            public double ResearchWalletBefore, ResearchWalletAfterAction;
         }
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+        internal IEnumerator QualifyStarterResearch(string phase, ForegroundSmokeReport report, string destination, string previous)
+        {
+            if (!LivingDungeonForegroundDevelopmentSmoke.IsResearchQualification(phase, Application.productName, SaveService.SavePath))
+                throw new InvalidOperationException("research.qualification.isolation_required");
+            var prepare = PrepareForegroundQualification();
+            while (prepare.MoveNext()) yield return prepare.Current;
+            var controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+            for (int frame = 0; controller?.SafeRoot == null && frame < 120; frame++) yield return null;
+            if (controller?.SafeRoot == null) throw new InvalidOperationException("research.qualification.production_shell");
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var advance = QualificationAdvance();
+            int unitsPerSecond = SaveService.ForegroundConfiguration.UnitsPerSecond;
+            long tick = Content.Bootstrap.tickSeconds * (long)unitsPerSecond;
+            var click = typeof(Clickable).GetMethod("SimulateSingleClick", System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+            void Click(string name) => click.Invoke(ui.Q<Button>(name).clickable, new object[] { null, 0 });
+            void Check(bool condition, string reason) { if (!condition) throw new InvalidOperationException(reason); }
+            void Reach(long horizon)
+            {
+                var elapsed = horizon - TimeService.SampleForeground();
+                Check(elapsed >= 0, "research.qualification.non_monotonic");
+                advance((double)elapsed / unitsPerSecond);
+                for (int attempt = 0; attempt < 256; attempt++)
+                {
+                    UpdateForeground();
+                    if (foregroundFailure != null) throw new InvalidOperationException(foregroundFailure);
+                    if (Save.livingDungeon.IsClosed && Save.livingDungeon.Scheduler.ClosedThrough >= horizon) return;
+                    FlushForeground();
+                }
+                throw new InvalidOperationException("research.qualification.horizon");
+            }
+            bool ActionShown(string name) => ui.Q<Button>(name).style.display.value == DisplayStyle.Flex;
+            void CaptureScenario(string suffix)
+            {
+                var candidate = SaveService.CanonicalSession.GetCurrentBytes();
+                Check(candidate.SequenceEqual(File.ReadAllBytes(report.SavePath)), "research.qualification.scenario_readback");
+                using var file = new FileStream(destination + suffix + ".save.json", FileMode.CreateNew, FileAccess.Write);
+                file.Write(candidate, 0, candidate.Length);
+            }
+
+            report.Product = Application.productName;
+            report.SavePath = SaveService.SavePath;
+            report.RecoveryContext = Save.timeProvenance.RecoveryContextSha256;
+            Check(tick == 10L * unitsPerSecond, "research.qualification.tick");
+            if (phase == "research-start")
+            {
+                Click("openResearch");
+                Check(controller.IsResearch && !ActionShown("researchStart") && !HasValidAdventurerRun(),
+                    "research.qualification.initial_prerequisite");
+                Check(ui.Q<Label>("researchCost").text.Contains("10") &&
+                    ui.Q<Label>("researchDuration").text.Contains("120"), "research.qualification.authored_terms");
+                Click("researchDungeon");
+                Check(TrySetQaManaFromDevPanel(true), "research.qualification.funding");
+                if (Save.validatedCanonicalSpatialState.Floors.Length == 0 ||
+                    Save.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length == 0)
+                    Check(TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.RoomCategoryId,
+                        MvpDungeonPlacementIds.BasicRoomOptionId, out _, out _, out _), "research.qualification.room");
+                _selectedRoomLocalContentPosition = new TileCoordinate(1, 1);
+                Check(TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.MonsterCategoryId,
+                    MvpDungeonPlacementIds.SkeletonOptionId, out _, out _, out _), "research.qualification.skeleton");
+                _selectedRoomLocalContentPosition = new TileCoordinate(0, 0);
+                Check(TryMvpPlaceOrModifySelectedPlacement(MvpDungeonPlacementIds.LootNodeCategoryId,
+                    MvpDungeonPlacementIds.BasicLootNodeOptionId, out _, out _, out _), "research.qualification.loot");
+                // The owner opens this fixture on the real clock, which must settle offline mana first.
+                var ownerFixtureRate = _passiveManaService.ResolveRate(Save, RunSimulationConfig);
+                Check(ownerFixtureRate.RuleResolved && !HasValidAdventurerRun() &&
+                    ResolvePlayerResearchState().Authority?.IsAffordable == true,
+                    "research.qualification.waiting_fixture");
+                CaptureScenario(".waiting-for-run");
+
+                // Only the accelerated defeat exercise uses the out-of-range QA heat and empty wallet.
+                ApplyHeatDelta(60);
+                Check(TrySetQaManaFromDevPanel(false), "research.qualification.defeat_fixture");
+                for (int i = 0; i < 80 && !HasValidAdventurerRun(); i++)
+                    Reach(TimeService.SampleForeground() + tick);
+                Check(HasValidAdventurerRun(), "research.qualification.genuine_settlement");
+                Check(Save.runHistory.RecentOutcomes.All(run => !run.Success),
+                    "research.qualification.defeat_prerequisite");
+                report.RunId = Save.runHistory.LatestOutcome.RunId;
+                Check(TrySetQaManaFromDevPanel(false), "research.qualification.clear_wallet");
+                CaptureScenario(".unaffordable");
+                Click("openResearch");
+                Click("researchStart");
+                Check(!ActionShown("researchStart") && Save.researchPending == null &&
+                    ResolvePlayerResearchState().Authority?.IsAffordable == false, "research.qualification.unaffordable");
+                Click("researchDungeon");
+                long now = TimeService.SampleForeground();
+                long nextCut = now / tick * tick + 7L * unitsPerSecond;
+                if (nextCut < now) nextCut += tick;
+                Reach(nextCut);
+                Check(TrySetQaManaFromDevPanel(true), "research.qualification.funding_after_run");
+                CaptureScenario(".available");
+                SetOnline(false);
+                Click("openResearch");
+                Check(ActionShown("researchStart"), "research.qualification.available");
+                long protectedMana = SaveService.ResearchProtectedReserve(Save);
+                Check(protectedMana > 0, "research.qualification.protected_reserve_fixture");
+                report.ResearchWalletBefore = Save.structureRuntime.ManaReserve;
+                Click("researchStart");
+                Click("researchStart");
+                report.ResearchWalletAfterAction = Save.structureRuntime.ManaReserve;
+                Check(report.ResearchWalletAfterAction == report.ResearchWalletBefore - 10 && Save.researchProgress != null,
+                    "research.qualification.single_debit");
+                Check(report.ResearchWalletAfterAction >= protectedMana &&
+                    SaveService.ResearchProtectedReserve(Save) == protectedMana, "research.qualification.protected_reserve");
+                report.ResearchRule = Save.researchProgress.RuleSourceIdUsed;
+                report.ResearchProject = Save.researchProgress.ProjectId;
+                report.ResearchSlot = Save.researchProgress.SlotId;
+                report.ResearchStartCut = Save.researchProgress.StartClosedThrough;
+                Check(report.ResearchStartCut == nextCut, "research.qualification.start_cut");
+                Reach(report.ResearchStartCut + 3L * unitsPerSecond);
+                report.ResearchEarned = (long)Save.researchProgress.ProgressUnits;
+                Check(report.ResearchEarned == 3L * unitsPerSecond && !ActionShown("researchClaim"),
+                    "research.qualification.partial");
+            }
+            else
+            {
+                var prior = JsonUtility.FromJson<ForegroundSmokeReport>(File.ReadAllText(previous));
+                Check(prior.Passed && prior.Product == report.Product && prior.SavePath == report.SavePath &&
+                    prior.RecoveryContext == report.RecoveryContext &&
+                    Save.runHistory.RecentOutcomes.Any(run => run.RunId == prior.RunId), "research.qualification.reopen_identity");
+                report.RunId = prior.RunId;
+                report.ResearchRule = prior.ResearchRule;
+                report.ResearchProject = prior.ResearchProject;
+                report.ResearchSlot = prior.ResearchSlot;
+                report.ResearchStartCut = prior.ResearchStartCut;
+                Check(Save.structureRuntime.ManaReserve >= prior.Mana, "research.qualification.no_reopen_debit");
+                SetOnline(false);
+                Click("openResearch");
+                Check(controller.IsResearch, "research.qualification.reopen_destination");
+                if (phase == "research-claim")
+                {
+                    Check(Save.researchProgress?.RuleSourceIdUsed == prior.ResearchRule &&
+                        Save.researchProgress.StartClosedThrough == prior.ResearchStartCut &&
+                        Save.researchProgress.ProgressUnits == prior.ResearchEarned && !ActionShown("researchClaim"),
+                        "research.qualification.reopen_progress");
+                    ApplyPauseState(true);
+                    yield return new WaitForSecondsRealtime(1.1f);
+                    var resume = PrepareForegroundQualification();
+                    while (resume.MoveNext()) yield return resume.Current;
+                    Check(Save.researchProgress.ProgressUnits == prior.ResearchEarned,
+                        "research.qualification.paused_wall_time");
+                    long start = Save.researchProgress.StartClosedThrough;
+                    Reach(start + 113L * unitsPerSecond);
+                    Check(Save.researchProgress.ProgressUnits == 113L * unitsPerSecond && !ActionShown("researchClaim") &&
+                        !ResolveMvpPlayerLoopSummary().HasResearchUnlock, "research.qualification.before_ready");
+                    Reach(start + 123L * unitsPerSecond);
+                    Check(ActionShown("researchClaim") && Save.researchProgress.ProgressUnits == 120L * unitsPerSecond,
+                        "research.qualification.ready");
+                    CaptureScenario(".ready");
+                    report.ResearchEarned = (long)Save.researchProgress.ProgressUnits;
+                    report.ResearchWalletBefore = Save.structureRuntime.ManaReserve;
+                    Click("researchClaim");
+                    Click("researchClaim");
+                    report.ResearchWalletAfterAction = Save.structureRuntime.ManaReserve;
+                    Check(report.ResearchWalletAfterAction == report.ResearchWalletBefore, "research.qualification.claim_wallet");
+                }
+                if (phase == "research-finished")
+                {
+                    report.ResearchWalletBefore = Save.structureRuntime.ManaReserve;
+                    Click("researchClaim");
+                    Click("researchStart");
+                    report.ResearchWalletAfterAction = Save.structureRuntime.ManaReserve;
+                    Check(report.ResearchWalletAfterAction == report.ResearchWalletBefore, "research.qualification.no_repeat_debit");
+                }
+                var loop = ResolveMvpPlayerLoopSummary();
+                Check(Save.researchPending == null && Save.researchProgress == null &&
+                    Save.completedResearch.ProjectIds.Count(id => id == report.ResearchProject) == 1 &&
+                    loop.HasResearchUnlock && !ActionShown("researchStart") && !ActionShown("researchClaim"),
+                    "research.qualification.durable_unlock");
+                report.ResearchUnlock = loop.ResearchUnlockId;
+            }
+            report.Mana = Save.structureRuntime.ManaReserve;
+            report.Accepted = Save.livingDungeon.Scheduler.AcceptedThrough;
+            report.Closed = Save.livingDungeon.Scheduler.ClosedThrough;
+            Check(SaveService.CanonicalSession.GetCurrentBytes().SequenceEqual(File.ReadAllBytes(report.SavePath)),
+                "research.qualification.disk_readback");
+            report.Passed = true;
+        }
+#endif
         // Opt-in development qualification only. Real Bootstrap/UI/native writer;
         // an injected technical clock accelerates the configured gameplay timings.
         internal IEnumerator QualifyForeground(string phase, ForegroundSmokeReport report, string previousReport)
@@ -234,12 +419,88 @@ namespace DungeonBuilder.M0
     }
     internal sealed class LivingDungeonForegroundDevelopmentSmoke : MonoBehaviour
     {
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+        private static bool IsResearchPhase(string phase) =>
+            phase == "research-start" || phase == "research-claim" || phase == "research-finished";
+
+        private static bool IsResearchProduct(string product) => product != null &&
+            System.Text.RegularExpressions.Regex.IsMatch(product, @"\ADL B3B2 Smoke Two Floor Q[0-9a-f]{8}\z");
+
+        internal static bool IsResearchQualification(string phase, string product, string savePath) =>
+            IsResearchPhase(phase) && IsResearchProduct(product) && savePath != null &&
+            System.Text.RegularExpressions.Regex.IsMatch(Path.GetFileName(savePath),
+                @"\Aliving-dungeon-b3b2-qualification-research-q[1-9][0-9]*\.json\z") &&
+            string.Equals(Path.GetDirectoryName(Path.GetFullPath(savePath)), Path.GetFullPath(Application.persistentDataPath),
+                StringComparison.OrdinalIgnoreCase);
+
+        private static bool ConfigureResearchOwnerScenario(string[] args)
+        {
+            int index = Array.IndexOf(args, "-researchR1OwnerScenario");
+            if (index < 0) return false;
+            var root = GameRoot.Instance;
+            string scenario = index + 1 < args.Length ? args[index + 1] : null;
+            if (root == null || !IsResearchProduct(Application.productName) ||
+                (scenario != "waiting-for-run" && scenario != "unaffordable" && scenario != "available" &&
+                 scenario != "in-progress" && scenario != "ready" && scenario != "completed" && scenario != "edit-pending"))
+            {
+                Application.Quit(2);
+                return true;
+            }
+            var config = JsonUtility.FromJson<BuildConfig>(root.buildConfigJson.text);
+            if (!IsResearchQualification("research-start", Application.productName,
+                Path.Combine(Application.persistentDataPath, config.save.fileName)))
+            {
+                Application.Quit(2);
+                return true;
+            }
+            string file = "research-r1-owner-" + scenario + ".json";
+            string path = Path.Combine(Application.persistentDataPath, file);
+            if (!File.Exists(path) || (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+            {
+                Application.Quit(2);
+                return true;
+            }
+            config.save.fileName = file;
+            root.buildConfigJson = new TextAsset(JsonUtility.ToJson(config));
+            if (scenario == "edit-pending" || scenario == "unaffordable")
+                root.StartCoroutine(PrepareResearchOwnerScenario(root, scenario));
+            return true;
+        }
+
+        private static IEnumerator PrepareResearchOwnerScenario(GameRoot root, string scenario)
+        {
+            var controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+            bool ShellReady() => controller?.SafeRoot != null && root.SaveService?.CanStagePaidResearch == true;
+            for (int frame = 0; !ShellReady() && frame < 600; frame++) yield return null;
+            if (ShellReady())
+            {
+                if (scenario == "unaffordable")
+                {
+                    if (root.TrySetQaManaFromDevPanel(false)) yield break;
+                }
+                else
+                {
+                    controller.EnterEdit();
+                    controller.OpenRooms();
+                    if (controller.SelectConstructionRoom("spatial.room.basic") && controller.World.MoveGuidanceAnchors.Any())
+                    {
+                        controller.TapWorld(controller.World.MoveGuidanceAnchors.First());
+                        if (controller.ConfirmConstructionPlacement()) yield break;
+                    }
+                }
+            }
+            Debug.LogError("research.qualification.owner_scenario_setup." + scenario);
+            Application.Quit(2);
+        }
+#endif
         internal static Func<double> ReopenClock(string[] args, string product, string savePath)
         {
             int index = Array.IndexOf(args, "-b3b2ForegroundSmoke");
 #if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
             if (index >= 0 && index + 1 < args.Length && H2PlayerQualification.IsPhase(args[index + 1]))
                 return H2PlayerQualification.UseStationaryClock ? new PreboundForegroundQualificationClock(false).Read : null;
+            if (index >= 0 && index + 3 < args.Length && IsResearchQualification(args[index + 1], product, savePath))
+                return new PreboundForegroundQualificationClock(false).Read;
 #endif
             if (index < 0 || index + 1 >= args.Length || args[index + 1] != "admit" && args[index + 1] != "settle" && args[index + 1] != "finish" && args[index + 1] != "profile" &&
                 !args[index + 1].StartsWith("two-floor-", StringComparison.Ordinal) && args[index + 1] != "v1-upgrade" ||
@@ -254,7 +515,11 @@ namespace DungeonBuilder.M0
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Begin()
         {
-            var args = Environment.GetCommandLineArgs(); int index = Array.IndexOf(args, "-b3b2ForegroundSmoke");
+            var args = Environment.GetCommandLineArgs();
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+            if (ConfigureResearchOwnerScenario(args)) return;
+#endif
+            int index = Array.IndexOf(args, "-b3b2ForegroundSmoke");
             if (index < 0) return;
             if (index + 3 >= args.Length) { Application.Quit(2); return; }
             var probe = new GameObject("B3B2ForegroundQualification").AddComponent<LivingDungeonForegroundDevelopmentSmoke>();
@@ -296,7 +561,11 @@ namespace DungeonBuilder.M0
                 yield break;
             }
 #endif
-            if (File.Exists(destination) || !Directory.Exists(Path.GetDirectoryName(destination)) ||
+            bool research = false;
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+            research = IsResearchPhase(phase);
+#endif
+            if (File.Exists(destination) || !Directory.Exists(Path.GetDirectoryName(destination)) || !research &&
                 phase != "admit" && phase != "settle" && phase != "finish" && phase != "profile" &&
                 phase != "two-floor-wait" && phase != "two-floor-release" && phase != "two-floor-finish" && phase != "two-floor-profile" && phase != "v1-upgrade") { Application.Quit(2); yield break; }
             for (int frame = 0; frame < 600 && GameRoot.Instance?.TimeService?.HasForegroundClock != true; frame++) yield return null;
@@ -305,6 +574,9 @@ namespace DungeonBuilder.M0
             IEnumerator test = profile != null ? GameRoot.Instance?.ProfileForeground(profile) :
                 phase.StartsWith("two-floor-", StringComparison.Ordinal) || phase == "v1-upgrade"
                     ? GameRoot.Instance?.QualifyTwoFloor(phase, report, previous) : GameRoot.Instance?.QualifyForeground(phase, report, previous);
+#if DUNGEON_LORD_H2_QUALIFICATION && DEVELOPMENT_BUILD
+            if (research) test = GameRoot.Instance?.QualifyStarterResearch(phase, report, destination, previous);
+#endif
             while (test != null) {
                 object next = null; bool more = false;
                 try { more = test.MoveNext(); if (more) next = test.Current; }
