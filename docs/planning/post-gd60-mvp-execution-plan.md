@@ -1,5 +1,9 @@
 # Post-GD60 MVP Execution Plan
 
+## Current construction handoff (2026-11-21)
+
+At verified `main` baseline `9a0629c51e1ebb5eb0a39e5326c694e92c9afcff`, #272 delivered native schema 18 and versioned Research timing, and #271 delivered the playable paid starter General project. Broader Phase 8 Research remains open. The next recommended gameplay work is bounded room placement and player-controlled route authoring. See the [Gameplay Decision Log v0.6](decisions/gameplay-decision-log.md) for the 27 owner decisions, current implementation gaps and proposed dated amendments. The November 19 entry below records its original baseline.
+
 ## Owner-approved gameplay-first sequencing addendum (2026-11-19)
 
 At verified `main` baseline `5ab46461fe1bec40108f58e9944ddb17e8bbe52d` (PR #268 merged), core playable gameplay takes priority over another major UI/UX design phase. The next recommended gameplay slice, after reviewing the latest main and save/domain dependencies, is Phase 8 Research. Its production UI may be provisional but must be functional, understandable, localization-backed, accessible, and suitable for real gameplay verification. Research is not represented as complete: the approved target remains independent General and Blueprint slots, manual starts, configured upfront usable-mana payment, eligible elapsed/offline progression, durable ready/claim/completed state, and exactly-once claims. A prerequisite save/domain change may be split into a separate PR if current architecture and migration risk justify it.
