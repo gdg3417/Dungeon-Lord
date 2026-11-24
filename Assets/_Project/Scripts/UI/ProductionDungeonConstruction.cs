@@ -301,7 +301,7 @@ namespace DungeonBuilder.M0
                     if (CanAuthorRoutes)
                     {
                         button.tooltip = Format("ui.dungeon.route.append_room", RoomName(room));
-                        stats.Add(new Label(Text("ui.dungeon.route.append_card")) { pickingMode = PickingMode.Ignore });
+                        button.Add(new Label(Text("ui.dungeon.route.append_card")) { pickingMode = PickingMode.Ignore });
                         var place = ButtonFor(choices, Format("ui.dungeon.route.place_room", RoomName(room)),
                             () => SelectConstructionRoom(id, true));
                         place.name = "placeIndependentRoom";
