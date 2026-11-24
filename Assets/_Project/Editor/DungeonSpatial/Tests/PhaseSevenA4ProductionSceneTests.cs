@@ -445,18 +445,50 @@ namespace DungeonBuilder.M0.Tests
             var middle = starter.Layout.Edges.Single(e => e.SourceNodeId ==
                 starter.Layout.Nodes.Single(n => n.RoomInstanceId == first.RoomInstanceId).NodeId);
             const double expectedCost = 110d;
-            for (int interval = 0; interval < 60 && root.Save.structureRuntime.ManaReserve < expectedCost; interval++)
+            const string monster = "placement.option.monster.skeleton";
+            const string loot = "placement.option.loot_node.basic";
+            Assert.That(root.SaveService.TryContentAcquisitionCost(CanonicalSpatialSaveContracts.MonsterCategoryId, monster, out double monsterCost), Is.True);
+            Assert.That(root.SaveService.TryContentAcquisitionCost(CanonicalSpatialSaveContracts.LootNodeCategoryId, loot, out double lootCost), Is.True);
+            double budget = expectedCost + monsterCost + lootCost;
+            for (int interval = 0; interval < 120 && root.Save.structureRuntime.ManaReserve < budget; interval++)
             {
                 sceneClock.Advance(30);
                 PumpSceneToClosed(establishForeground: true);
                 yield return null;
             }
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.GreaterThanOrEqualTo(budget));
+
+            // Production traffic needs a monster and a loot signal. Keep both beyond
+            // the authored passage so any combat or loot is attributable to that room.
+            controller.EnterEdit();
+            PlaceContent(CanonicalSpatialSaveContracts.MonsterCategoryId, monster, new TileCoordinate(2, 7));
+            yield return null;
+            PlaceContent(CanonicalSpatialSaveContracts.LootNodeCategoryId, loot, new TileCoordinate(1, 7));
+            yield return null;
+            Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged), controller.Draft.Reason);
+            Assert.That(ui.Q<Button>("save").enabledSelf, Is.True, ui.Q<Label>("status").text);
+            Click(ui.Q<Button>("save"));
+            Click(ui.Q<Button>("confirm"));
+            yield return null;
+            Assert.That(controller.IsEditing, Is.False, ui.Q<Label>("status").text);
+
+            void PlaceContent(string category, string option, TileCoordinate cell)
+            {
+                controller.TapWorld(new TileCoordinate(3, 9));
+                Assert.That(controller.OpenContentCategory(category), Is.True);
+                Assert.That(controller.SelectNewContent(option), Is.True);
+                controller.TapWorld(cell);
+                Assert.That(controller.ContentPreview.IsValid, Is.True, controller.ContentPreview.Reason);
+                Assert.That(controller.ConfirmContentPlacement(), Is.True);
+            }
+
             for (int interval = 0; interval < 180 && root.Save.livingDungeon.Parties.Count == 0; interval++)
             {
                 sceneClock.Advance(1);
                 PumpSceneToClosed(establishForeground: true);
                 yield return null;
             }
+            Assert.That(root.Save.livingDungeon.Parties, Has.Count.EqualTo(1), "Production traffic must admit a party before construction");
             var oldParty = root.Save.livingDungeon.Parties.Single();
             byte[] oldCheckpoint = (byte[])oldParty.Checkpoint.Clone();
             double balance = root.Save.structureRuntime.ManaReserve;
@@ -590,12 +622,17 @@ namespace DungeonBuilder.M0.Tests
                         step.PositionSpace == RunPositionSpace.Floor && step.AssignmentId == outgoingId).ToArray();
                     CollectionAssert.AreEqual(proposal.Outgoing.Passage.Append(new TileCoordinate(3, 7)),
                         traversed.Select(step => step.Position));
-                    Assert.That(traversed.All(step => step.Distance == 1 && step.Encounter == null && step.CarriedLootValueAfter == 0), Is.True);
-                    Assert.That(steps.Any(step => step.Kind == RunStepKind.MonsterEngagement ||
-                        step.Kind == RunStepKind.TrapTrigger || step.Kind == RunStepKind.LootInteraction), Is.False);
-                    Assert.That(outcome.RunHeatDeltaSummary.DeathHeatDelta, Is.Zero);
-                    Assert.That(outcome.RunHeatDeltaSummary.EliteDeathHeatDelta, Is.Zero);
-                    Assert.That(outcome.RunHeatDeltaSummary.LootCoolingDelta, Is.Zero);
+                    Assert.That(traversed.All(step => step.Distance == 1 && step.Encounter == null &&
+                        step.CombatEvents?.Count is null or 0 && step.CarriedLootValueAfter == 0), Is.True);
+                    Assert.That(steps.Any(step => step.Kind == RunStepKind.TrapTrigger), Is.False);
+                    var interactions = steps.Where(step => step.Kind == RunStepKind.MonsterEngagement || step.Kind == RunStepKind.LootInteraction).ToArray();
+                    Assert.That(interactions.Any(step => step.Kind == RunStepKind.MonsterEngagement), Is.True);
+                    Assert.That(interactions.All(step => step.RoomId == second.RoomInstanceId &&
+                        step.PositionSpace == RunPositionSpace.RoomLocal), Is.True);
+                    TestContext.WriteLine($"Committed {expectedCost} mana and {capacity.Capacity.UsedFloorSpaceCapacity} tiles. " +
+                        $"Captured old checkpoint survived reopen. Subsequent run {nextRunId} visited {first.RoomInstanceId}, {added}, " +
+                        $"{second.RoomInstanceId} and traversed {outgoingId} through " +
+                        string.Join(" → ", traversed.Select(step => $"({step.Position.X},{step.Position.Y})")) + ".");
                     yield break;
                 }
                 yield return null;
