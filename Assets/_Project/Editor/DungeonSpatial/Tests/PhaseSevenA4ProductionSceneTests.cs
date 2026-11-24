@@ -423,8 +423,10 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(middle.OptionalBranchId, Is.Null.Or.Empty);
             byte[] disk = File.ReadAllBytes(root.SaveService.SavePath);
             CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(), disk);
-            var saved = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(disk, root.SaveSpatialMigrationLimits.Canonical);
-            Assert.That(saved.IsValid, Is.True, saved.Reason);
+            var context = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(root.SaveService);
+            var saved = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(disk, context);
+            Assert.That(saved.CurrentTargetValidated, Is.True, saved.Reason);
             var record = saved.Investment.Single(value => value.StructureId == middle.EdgeId);
             Assert.That(record.ConstructionMana, Is.Zero);
             Assert.That(record.RenovationMana, Is.Zero);
