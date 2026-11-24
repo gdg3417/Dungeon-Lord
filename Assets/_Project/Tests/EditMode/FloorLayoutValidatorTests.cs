@@ -143,6 +143,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(new[] { Cell(3, 11) }.Concat(second).Append(Cell(7, 8)), outgoing);
             Assert.That(outgoing.Contains(Cell(8, 9)), Is.False, "Touching completion passage stays separate");
             Assert.That(incoming.Contains(Cell(5, 8)), Is.False, "Touching room wall does not open a shortcut");
+            var runnable = new RunnableFloorSnapshot(floor,
+                new PhaseFiveBRoutePlan { Forks = Array.Empty<PhaseFiveBFork>() }, null, snapshot);
+            AssertMovement("edge.incoming", first.Append(Cell(3, 10)).ToArray());
+            AssertMovement("edge.outgoing", second.Append(Cell(7, 8)).ToArray());
+
+            void AssertMovement(string edgeId, TileCoordinate[] expected)
+            {
+                int index = Array.FindIndex(snapshot.Required, link => link.Id == edgeId);
+                var steps = runnable.TraverseConnection(index).Where(step => !step.IsAnnouncement).ToArray();
+                CollectionAssert.AreEqual(expected, steps.Select(step => step.Position));
+                Assert.That(steps.All(step => step.Kind == RunStepKind.Movement &&
+                    step.PositionSpace == RunPositionSpace.Floor && step.Distance == 1 &&
+                    step.AssignmentId == edgeId && step.FloorIndex == 1 && step.Encounter == null), Is.True);
+            }
 
             TileCoordinate Cell(int x, int y) => new TileCoordinate(x, y);
             RoomSpatialInstance Basic(string id, int x, int y) => new RoomSpatialInstance
