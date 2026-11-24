@@ -101,10 +101,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CompleteLoadUsesOneExactNestedRecordBoundary()
         {
             TextAsset additional = Language("test-language", null);
-            Assert.That(LoadWithLimits(new[] { english }, Limits(45, 32768)).Success, Is.True);
-            AssertWorkloadFailure(new[] { english, additional }, Limits(45, 32768));
-            Assert.That(LoadWithLimits(new[] { english, additional }, Limits(51, 32768)).Success, Is.True);
-            AssertWorkloadFailure(new[] { english, additional }, Limits(50, 32768));
+            Assert.That(LoadWithLimits(new[] { english }, Limits(47, 32768)).Success, Is.True);
+            AssertWorkloadFailure(new[] { english, additional }, Limits(47, 32768));
+            Assert.That(LoadWithLimits(new[] { english, additional }, Limits(53, 32768)).Success, Is.True);
+            AssertWorkloadFailure(new[] { english, additional }, Limits(52, 32768));
         }
 
         [Test]
@@ -112,13 +112,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             TextAsset additional = Language("test-language", null);
             TextAsset[] languages = { english, additional };
-            int exact = FindMinimumStringLimit(languages, 51);
+            int exact = FindMinimumStringLimit(languages, 53);
 
-            Assert.That(LoadWithLimits(languages, Limits(51, exact)).Success, Is.True);
-            AssertWorkloadFailure(languages, Limits(51, exact - 1));
+            Assert.That(LoadWithLimits(languages, Limits(53, exact)).Success, Is.True);
+            AssertWorkloadFailure(languages, Limits(53, exact - 1));
 
             TextAsset oneMoreCharacter = Language("test-language", table => table.entries[0].text += "x");
-            AssertWorkloadFailure(new[] { english, oneMoreCharacter }, Limits(51, exact));
+            AssertWorkloadFailure(new[] { english, oneMoreCharacter }, Limits(53, exact));
         }
 
         [Test]
@@ -127,7 +127,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TextAsset first = Language("test-a", null);
             TextAsset second = Language("test-b", null);
             TextAsset third = Language("test-c", null);
-            TextAsset constrained = Limits(51, 32768);
+            TextAsset constrained = Limits(53, 32768);
 
             ProductionSpatialContentLoadResult forward = LoadWithLimits(
                 new[] { english, first, second, third }, constrained);
@@ -137,7 +137,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 forward.Diagnostics);
             CollectionAssert.AreEqual(forward.Diagnostics, reverse.Diagnostics);
 
-            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 45);
+            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 47);
             TextAsset oversized = Language("test-large", table => table.entries[0].text +=
                 new string('x', exactEnglishCharacters));
             TextAsset malformed = new TextAsset("{\n");
@@ -152,7 +152,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void MixedLanguageFailuresReturnIdenticalDiagnosticsForEveryPermutation()
         {
-            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 45);
+            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 47);
             TextAsset constrained = Limits(128, exactEnglishCharacters);
             TextAsset oversized = Language("test-oversized", table => table.entries[0].text +=
                 new string('x', exactEnglishCharacters));
@@ -360,7 +360,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void EveryFailedPermutationPreservesPriorPublicationAndSources()
         {
-            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 45);
+            int exactEnglishCharacters = FindMinimumStringLimit(new[] { english }, 47);
             TextAsset oversized = Language("test-oversized", table => table.entries[0].text +=
                 new string('x', exactEnglishCharacters));
             TextAsset malformed = new TextAsset("{\n");
@@ -395,7 +395,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             TextAsset additional = Language("test-language", null);
 
             ProductionSpatialContentLoadResult failure = service.LoadProductionSpatialContent(
-                manifest, catalog, new[] { english, additional }, Limits(45, 32768));
+                manifest, catalog, new[] { english, additional }, Limits(47, 32768));
 
             CollectionAssert.AreEqual(new[] { ProductionSpatialContentLoadingDiagnostic.WorkloadExceeded },
                 failure.Diagnostics);
@@ -528,7 +528,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(snapshot.Catalog.Rooms[0].ConnectionPoints[0].ConnectionPointId,
                 Is.Not.EqualTo("mutated"));
             Assert.That(snapshot.Languages[0].entries[0].key, Is.Not.EqualTo("mutated"));
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AuthoredRouteIntroduction));
             Assert.That(typeof(SaveData).GetFields(BindingFlags.Instance | BindingFlags.Public)
                 .Any(field => field.FieldType == typeof(ProductionSpatialContentSnapshot)), Is.False);
 
@@ -557,16 +557,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             const string overlayPath = "Assets/_Project/Scripts/UI/BootstrapOverlay.cs";
             const string productionUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonController.cs";
             const string constructionUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonConstruction.cs";
+            const string routesUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonRouteAuthoring.cs";
             const string replayUiPath = "Assets/_Project/Scripts/UI/ProductionDungeonReplay.cs";
             string[] consumers = Directory.GetFiles("Assets/_Project/Scripts", "*.cs", SearchOption.AllDirectories)
                 .Where(path => Regex.IsMatch(File.ReadAllText(path), @"\.ProductionSpatialContent\b"))
                 .Select(path => path.Replace('\\', '/'))
                 .ToArray();
-            // Construction and replay are partials of the already approved production controller,
+            // Construction, route authoring and replay are partials of the production controller,
             // not another runtime publisher or composition root.
             Assert.That(File.ReadAllText(recoveryCompositionPath), Does.Contain("partial class GameRoot"));
-            CollectionAssert.AreEquivalent(new[] { compositionPath, recoveryCompositionPath, overlayPath, productionUiPath, constructionUiPath, replayUiPath }, consumers);
-            foreach (string path in new[] { productionUiPath, constructionUiPath, replayUiPath })
+            CollectionAssert.AreEquivalent(new[] { compositionPath, recoveryCompositionPath, overlayPath, productionUiPath, constructionUiPath, routesUiPath, replayUiPath }, consumers);
+            foreach (string path in new[] { productionUiPath, constructionUiPath, routesUiPath, replayUiPath })
             {
                 string productionUi = File.ReadAllText(path);
                 Assert.That(productionUi, Does.Contain("sealed partial class ProductionDungeonController"));

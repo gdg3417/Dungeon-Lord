@@ -115,7 +115,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         if (!first) w.Token(","); first = false; w.String(name); w.Token(":");
                         if (name == TimeProvenance.Owner) time.Write(w);
                         else if (node == null) w.Token("null");
-                        else DetachedCompleteSaveContract.WriteCanonicalNode(w, node);
+                        else
+                        {
+                            if (name == "spatialFloors") ProjectLegacyEdgeShape(node, includeAuthoredGeometry: true);
+                            DetachedCompleteSaveContract.WriteCanonicalNode(w, node);
+                        }
                     }
                     foreach (string name in RawSavePayloadClassifier.RecognizedSaveDataMemberNames) {
                         if (name == PhaseFiveSaveContracts.CorridorOwnerName || name == PhaseFiveSaveContracts.KnowledgeOwnerName || name == PhaseSixFloorKnowledge.OwnerName) continue;
@@ -266,6 +270,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     foreach (var p in f.Value.Fields)
                     {
                         if (p.Key == MonsterContinuity.Owner || p.Key == TimeProvenance.Owner) continue;
+                        // Synthetic frozen fixtures project only legacy edges. Schema 19 writes an
+                        // explicit null field for these edges which the frozen reader never accepted.
+                        if (p.Key == "spatialFloors") ProjectLegacyEdgeShape(p.Value, includeAuthoredGeometry: false);
                         if (!first) writer.Token(","); first = false; writer.String(p.Key); writer.Token(":");
                         DetachedCompleteSaveContract.WriteCanonicalNode(writer, p.Value);
                     }
@@ -275,6 +282,21 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             writer.Token("}"); return writer.Finish();
         }
+        private static void ProjectLegacyEdgeShape(ContractJsonNode floors, bool includeAuthoredGeometry)
+        {
+            const string geometry = nameof(FloorRouteEdge.AuthoredGeometry);
+            foreach (var floor in floors.Items)
+            foreach (var edge in floor.Fields.Single(field => field.Key == "Layout").Value.Fields
+                .Single(field => field.Key == "Edges").Value.Items)
+            {
+                if (!includeAuthoredGeometry)
+                    edge.Fields.RemoveAll(field => field.Key == geometry && field.Value.Kind == ContractJsonKind.Null);
+                else if (!edge.Fields.Any(field => field.Key == geometry))
+                    edge.Fields.Add(new System.Collections.Generic.KeyValuePair<string, ContractJsonNode>(
+                        geometry, new ContractJsonNode { Kind = ContractJsonKind.Null }));
+            }
+        }
+
         internal static StructuralEconomySnapshot Economy(ProductionSpatialContentSnapshot production,
             CanonicalSpatialSerializationLimits limits)
         {

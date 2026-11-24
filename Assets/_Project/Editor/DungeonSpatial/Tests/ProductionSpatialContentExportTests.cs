@@ -180,7 +180,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             });
             AssertExactFailure(overTop, exactTop, ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
 
-            var exactNested = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords, 45,
+            // Amendment A adds two room opening records to this generated catalog.
+            var exactNested = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords, 47,
                 production.MaximumMaterializedTiles, production.MaximumIssues,
                 production.MaximumStringCharacters);
             Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(valid, exactNested).Success, Is.True);
@@ -475,7 +476,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 json => json.Replace("\"schemaVersion\": 1", "\"schemaVersion\": 2147483648"),
                 ProductionSpatialGeneratedSetDiagnostic.IntegerOverflow);
             AssertExactReplacement(ProductionSpatialGeneratedSetParser.CatalogPath,
-                json => json.Replace("\"Category\": 1", "\"Category\": 99"),
+                json => ReplaceFirst(json, "\"Category\": 2", "\"Category\": 99"),
                 ProductionSpatialGeneratedSetDiagnostic.UnknownEnum);
         }
 
@@ -605,7 +606,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static string ReplaceFirst(string source, string oldValue, string newValue)
         {
             int index = source.IndexOf(oldValue, StringComparison.Ordinal);
-            return index < 0 ? source : source.Substring(0, index) + newValue + source.Substring(index + oldValue.Length);
+            Assert.That(index, Is.GreaterThanOrEqualTo(0), $"Fixture mutation did not find {oldValue}");
+            return source.Substring(0, index) + newValue + source.Substring(index + oldValue.Length);
         }
 
         private static void AssertExactFailure(ProductionSpatialGeneratedSet files,
