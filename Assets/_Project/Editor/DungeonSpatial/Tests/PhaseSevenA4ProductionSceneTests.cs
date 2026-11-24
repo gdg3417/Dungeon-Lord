@@ -466,6 +466,18 @@ namespace DungeonBuilder.M0.Tests
             PlaceContent(CanonicalSpatialSaveContracts.LootNodeCategoryId, loot, new TileCoordinate(1, 7));
             yield return null;
             Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged), controller.Draft.Reason);
+            var contentQuote = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft);
+            Assert.That(contentQuote, Is.Not.Null);
+            double fundedBudget = contentQuote.Cost + contentQuote.RequiredReserveAfter + expectedCost;
+            // Leave the protected recovery reserve funded when paying for the insertion.
+            // Traffic starts after the content commit, so fund this while the route is quiet.
+            for (int interval = 0; interval < 120 && root.Save.structureRuntime.ManaReserve < fundedBudget; interval++)
+            {
+                sceneClock.Advance(30);
+                PumpSceneToClosed(establishForeground: true);
+                yield return null;
+            }
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.GreaterThanOrEqualTo(fundedBudget));
             Assert.That(ui.Q<Button>("save").enabledSelf, Is.True, ui.Q<Label>("status").text);
             Click(ui.Q<Button>("save"));
             Click(ui.Q<Button>("confirm"));
@@ -529,6 +541,7 @@ namespace DungeonBuilder.M0.Tests
             var documentedPreview = root.SaveService.PreviewRouteInsertion(root.Save, controller.Draft, documented, out var documentedQuote);
             Assert.That(documentedPreview.IsValid, Is.True, $"Documented native insertion rejected: {documentedPreview.Reason}");
             Assert.That(documentedQuote.Cost, Is.EqualTo(expectedCost));
+            Assert.That(documentedQuote.IsAffordable, Is.True, documentedQuote.Reason);
             Assert.That(root.SaveService.SuggestRouteInsertion(root.Save, controller.Draft, starter.FloorInstanceId,
                 middle.EdgeId, placedId), Is.Not.Null, "The documented geometry must be discoverable by the production suggestion authority");
             Click(ui.Q<Button>("suggestRoute"));
