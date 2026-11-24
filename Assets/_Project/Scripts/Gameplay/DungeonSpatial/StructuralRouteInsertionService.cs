@@ -137,7 +137,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 OptionalBranchStructuralEditService.CorridorDefinitionId);
             var limits = new SpatialValidationWorkloadLimits(context.Limits.Canonical.Spatial.MaximumMaterializedTiles);
             if (corridor?.Category != CorridorSpatialCategory.Orthogonal || !configured.Bounds.IsValid ||
-                !limits.Allows(configured.Bounds.TileCount) || !configured.AllowedCorridorDefinitionIds.Contains(corridor.CorridorDefinitionId))
+                !limits.Allows(corridor.MaximumLength) || !configured.AllowedCorridorDefinitionIds.Contains(corridor.CorridorDefinitionId))
                 return null;
 
             var occupied = new HashSet<TileCoordinate>();
@@ -164,14 +164,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             foreach (var start in from)
             foreach (var roomEntry in roomOpenings)
             {
-                var incoming = SuggestLink(start, roomEntry, catalog, corridor, configured.Bounds, occupied);
+                var incoming = SuggestLink(start, roomEntry, catalog, corridor, configured.Bounds, limits, occupied);
                 if (incoming == null) continue;
                 var withIncoming = new HashSet<TileCoordinate>(occupied);
                 withIncoming.UnionWith(incoming.Passage);
                 foreach (var roomExit in roomOpenings.Where(p => p.Id != roomEntry.Id))
                 foreach (var end in to)
                 {
-                    var outgoing = SuggestLink(roomExit, end, catalog, corridor, configured.Bounds, withIncoming);
+                    var outgoing = SuggestLink(roomExit, end, catalog, corridor, configured.Bounds, limits, withIncoming);
                     if (outgoing == null) continue;
                     candidates.Add(new StructuralRouteInsertionRequest
                     {
@@ -194,7 +194,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static AuthoredRouteGeometry SuggestLink(RouteOpening from, RouteOpening to,
             SpatialContentCatalog catalog, CorridorSpatialDefinition corridor, RectangularFloorBounds bounds,
-            HashSet<TileCoordinate> occupied)
+            SpatialValidationWorkloadLimits limits, HashSet<TileCoordinate> occupied)
         {
             string firstSocket = from.SocketTypeId, secondSocket = to.SocketTypeId;
             if (!catalog.SocketTypes.Any(socket => socket.SocketTypeId == firstSocket &&
@@ -232,6 +232,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     if (!corridor.AllowedOrientations.Contains(step.X == 0 ? CardinalOrientation.Zero : CardinalOrientation.Ninety) ||
                         !TryOffset(current.Cell, step, out var next) || !bounds.Contains(next) ||
                         occupied.Contains(next) || parents.ContainsKey(next)) continue;
+                    if (!limits.Allows((long)parents.Count + 1)) return null;
                     parents.Add(next, current.Cell);
                     pending.Enqueue((next, current.Length + 1));
                 }

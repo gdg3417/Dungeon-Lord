@@ -147,6 +147,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             request.Outgoing.SourcePointId = "west";
             Assert.That(draft.PreviewRouteGeometry(request).IsValid, Is.False, "The incoming doorway is already used");
             request.Outgoing.SourcePointId = "north";
+            var suggestion = draft.SuggestRouteInsertion(floor.FloorInstanceId, middle.EdgeId, request.RoomInstanceId, _ => null);
+            Assert.That(suggestion, Is.Not.Null, "The search is bounded by visited cells, not the production floor's full area");
+            Assert.That(draft.PreviewRouteGeometry(suggestion).IsValid, Is.True);
+            Assert.That(draft.CommandCount, Is.EqualTo(1));
             Assert.That(draft.AcceptRouteInsertion(request, owned), Is.True, draft.Reason);
             Flush(draft);
             var firstIds = draft.ReadModel.Floors.Single().Layout.Edges.Where(e => e.AuthoredGeometry != null)
