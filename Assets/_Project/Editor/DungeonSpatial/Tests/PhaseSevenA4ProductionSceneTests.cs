@@ -519,6 +519,18 @@ namespace DungeonBuilder.M0.Tests
                 .Single(button => (string)button.userData == alternateId).ClassListContains("selected-floor"), Is.True);
             var choice = ui.Query<Button>("replaceRouteEdge").ToList().Single(button => (string)button.userData == middle.EdgeId);
             Click(choice);
+            string placedId = controller.Draft.DisconnectedRoomIds.Single();
+            var documented = new StructuralRouteInsertionRequest {
+                FloorInstanceId = starter.FloorInstanceId, ReplacedEdgeId = middle.EdgeId, RoomInstanceId = placedId,
+                Incoming = new AuthoredRouteGeometry { SourcePointId = "east.2", DestinationPointId = "west" },
+                Outgoing = new AuthoredRouteGeometry { SourcePointId = "north", DestinationPointId = "east",
+                    Passage = new[] { new TileCoordinate(5, 7), new TileCoordinate(4, 7) } }
+            };
+            var documentedPreview = root.SaveService.PreviewRouteInsertion(root.Save, controller.Draft, documented, out var documentedQuote);
+            Assert.That(documentedPreview.IsValid, Is.True, $"Documented native insertion rejected: {documentedPreview.Reason}");
+            Assert.That(documentedQuote.Cost, Is.EqualTo(expectedCost));
+            Assert.That(root.SaveService.SuggestRouteInsertion(root.Save, controller.Draft, starter.FloorInstanceId,
+                middle.EdgeId, placedId), Is.Not.Null, "The documented geometry must be discoverable by the production suggestion authority");
             Click(ui.Q<Button>("suggestRoute"));
             Assert.That(controller.Draft.CommandCount, Is.EqualTo(1), "Suggestion remains transient");
             Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q("routeAuthoring").Query<Label>().ToList()
