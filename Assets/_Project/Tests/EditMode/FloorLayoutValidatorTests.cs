@@ -74,6 +74,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(passage.HasValidPassage(definition), Is.False);
         }
 
+        [Test]
+        public void SlidingMiddleSegmentMovesBothBendsWithDoorwayCellsPinned()
+        {
+            var passage = new[] { new TileCoordinate(4, 9), new TileCoordinate(5, 9), new TileCoordinate(6, 9),
+                new TileCoordinate(6, 10), new TileCoordinate(5, 10), new TileCoordinate(4, 10) };
+            CollectionAssert.AreEqual(new[] { (0, 2), (2, 3), (3, 5) }, AuthoredRouteGeometry.Segments(passage));
+            Assert.That(AuthoredRouteGeometry.TrySlideSegment(passage, 2, 3, new TileCoordinate(7, 9), 6, out _), Is.False);
+            Assert.That(AuthoredRouteGeometry.TrySlideSegment(passage, 2, 3, new TileCoordinate(5, 9), 6, out var moved), Is.True);
+            CollectionAssert.AreEqual(new[] { passage[0], new TileCoordinate(5, 9), new TileCoordinate(5, 10),
+                passage[5] }, moved);
+            Assert.That(AuthoredRouteGeometry.TrySlideSegment(passage, 2, 3, new TileCoordinate(4, 9), 6, out var shortPath), Is.True);
+            CollectionAssert.AreEqual(new[] { passage[0], passage[5] }, shortPath);
+        }
+
         [TestCase(false, 80)]
         [TestCase(true, 76)]
         public void ProductionFloorTwoCapturesEveryAuthoredPassageStepWithoutSideContactShortcuts(bool shorter, int used)

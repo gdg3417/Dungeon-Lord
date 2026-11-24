@@ -3578,6 +3578,26 @@
       "text": "Later entrance · {0} ({1}, {2})"
     },
     {
+      "key": "ui.dungeon.route.incoming_segment",
+      "text": "Move incoming segment {0} ({1}, {2} to {3}, {4})"
+    },
+    {
+      "key": "ui.dungeon.route.outgoing_segment",
+      "text": "Move outgoing segment {0} ({1}, {2} to {3}, {4})"
+    },
+    {
+      "key": "ui.dungeon.route.slide_row",
+      "text": "Tap a row to move the highlighted segment and adjust its bends."
+    },
+    {
+      "key": "ui.dungeon.route.slide_column",
+      "text": "Tap a column to move the highlighted segment and adjust its bends."
+    },
+    {
+      "key": "ui.dungeon.route.revert_segment",
+      "text": "Revert segment edit"
+    },
+    {
       "key": "ui.dungeon.route.draw_incoming",
       "text": "Edit incoming passage ({0} tiles)"
     },

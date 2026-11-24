@@ -4,6 +4,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -488,17 +489,36 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
             CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
 
+            var alternate = ui.Query<Button>("replaceRouteEdge").ToList().First(button => (string)button.userData != middle.EdgeId);
+            string alternateId = (string)alternate.userData;
+            Click(alternate);
+            Assert.That(ui.Query<Button>("replaceRouteEdge").ToList()
+                .Single(button => (string)button.userData == alternateId).ClassListContains("selected-floor"), Is.True);
             var choice = ui.Query<Button>("replaceRouteEdge").ToList().Single(button => (string)button.userData == middle.EdgeId);
             Click(choice);
             Click(ui.Q<Button>("suggestRoute"));
             Assert.That(controller.Draft.CommandCount, Is.EqualTo(1), "Suggestion remains transient");
             Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q("routeAuthoring").Query<Label>().ToList()
                 .Select(label => label.text).Aggregate(string.Empty, (left, right) => left + "\n" + right));
+            Click(ui.Q<Button>("slideOutgoingSegment"));
+            controller.TapWorld(new TileCoordinate(5, 6));
+            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False, "The moved segment intersects the new room");
+            controller.TapWorld(new TileCoordinate(5, 7));
+            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+            controller.TapWorld(new TileCoordinate(5, 6));
+            Click(ui.Q<Button>("revertRouteSegment"));
+            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+            Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
             Click(ui.Q<Button>("drawOutgoingPassage"));
             Click(ui.Q<Button>("clearPassage"));
             Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False);
             controller.TapWorld(new TileCoordinate(5, 7));
+            controller.TapWorld(new TileCoordinate(5, 8));
+            controller.TapWorld(new TileCoordinate(4, 8));
             controller.TapWorld(new TileCoordinate(4, 7));
+            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False, "The detour exceeds the floor capacity");
+            Click(ui.Query<Button>("slideOutgoingSegment").ToList()[1]);
+            controller.TapWorld(new TileCoordinate(5, 7));
             Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
             Click(ui.Q<Button>("acceptRoute"));
             yield return null;
@@ -546,12 +566,14 @@ namespace DungeonBuilder.M0.Tests
 
             var profile = root.SaveService.ForegroundConfiguration.CreateProfile(
                 root.SaveSpatialMigrationLimits.Canonical.ForSchema(CanonicalSaveSchemaVersions.RoomContentPositionIntroduction).Serialized);
-            for (int interval = 0; interval < 180; interval++)
+            string nextRunId = null;
+            string outgoingId = committed.Layout.Edges.Single(edge => edge.AuthoredGeometry?.Passage.Length > 0).EdgeId;
+            for (int interval = 0; interval < 360; interval++)
             {
                 sceneClock.Advance(1);
                 PumpSceneToClosed(establishForeground: true);
                 var nextParty = root.Save.livingDungeon.Parties.SingleOrDefault(party => party.Sequence > oldParty.Sequence);
-                if (nextParty != null)
+                if (nextParty != null && nextRunId == null)
                 {
                     var execution = LivingDungeonContracts.Restore(nextParty, profile);
                     try
@@ -562,13 +584,32 @@ namespace DungeonBuilder.M0.Tests
                         var passage = captured.InspectSpatialInputs().Layout.Edges.Single(edge =>
                             edge.AuthoredGeometry?.Passage.Length > 0).AuthoredGeometry.Passage;
                         CollectionAssert.AreEqual(proposal.Outgoing.Passage, passage);
+                        nextRunId = execution.Inspect().RunId;
                     }
                     finally { execution.Abandon(); }
+                }
+                var outcome = root.Save.runHistory.LatestOutcome;
+                if (nextRunId != null && outcome?.RunId == nextRunId)
+                {
+                    var steps = outcome.PresentationSteps;
+                    Assert.That(steps, Is.Not.Null.And.Not.Empty);
+                    CollectionAssert.AreEqual(new[] { first.RoomInstanceId, added, second.RoomInstanceId },
+                        steps.Where(step => step.Kind == RunStepKind.RoomEntry).Select(step => step.RoomId));
+                    var traversed = steps.Where(step => step.Kind == RunStepKind.Movement &&
+                        step.PositionSpace == RunPositionSpace.Floor && step.AssignmentId == outgoingId).ToArray();
+                    CollectionAssert.AreEqual(proposal.Outgoing.Passage.Append(new TileCoordinate(3, 7)),
+                        traversed.Select(step => step.Position));
+                    Assert.That(traversed.All(step => step.Distance == 1 && step.Encounter == null && step.CarriedLootValueAfter == 0), Is.True);
+                    Assert.That(steps.Any(step => step.Kind == RunStepKind.MonsterEngagement ||
+                        step.Kind == RunStepKind.TrapTrigger || step.Kind == RunStepKind.LootInteraction), Is.False);
+                    Assert.That(outcome.RunHeatDeltaSummary.DeathHeatDelta, Is.Zero);
+                    Assert.That(outcome.RunHeatDeltaSummary.EliteDeathHeatDelta, Is.Zero);
+                    Assert.That(outcome.RunHeatDeltaSummary.LootCoolingDelta, Is.Zero);
                     yield break;
                 }
                 yield return null;
             }
-            Assert.Fail("The production scheduler did not admit a subsequent party within the test horizon");
+            Assert.Fail("The production scheduler did not settle the subsequent party within the test horizon");
         }
 
         [UnityTest]

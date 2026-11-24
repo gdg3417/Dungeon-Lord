@@ -64,6 +64,52 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     [Serializable]
     public sealed class AuthoredRouteGeometry
     {
+        internal static IEnumerable<(int Start, int End)> Segments(TileCoordinate[] passage)
+        {
+            if (passage == null || passage.Length < 2 || !IsContinuous(passage)) yield break;
+            int start = 0;
+            TryFacing(passage[0], passage[1], out var direction);
+            for (int i = 2; i < passage.Length; i++)
+            {
+                TryFacing(passage[i - 1], passage[i], out var next);
+                if (direction == next) continue;
+                yield return (start, i - 1);
+                start = i - 1;
+                direction = next;
+            }
+            yield return (start, passage.Length - 1);
+        }
+
+        // Keep the two exterior doorway cells pinned. Interior turns follow the translated
+        // line. Rebuild in source order and stop before allocating an over-length passage.
+        internal static bool TrySlideSegment(TileCoordinate[] passage, int start, int end,
+            TileCoordinate target, int maximumLength, out TileCoordinate[] moved)
+        {
+            moved = null;
+            if (maximumLength < 1 || passage == null || passage.Length > maximumLength ||
+                !Segments(passage).Contains((start, end))) return false;
+            var first = passage[start];
+            var last = passage[end];
+            bool horizontal = first.Y == last.Y;
+            var knots = passage.Take(Math.Max(1, start)).Concat(new[]
+            {
+                horizontal ? new TileCoordinate(first.X, target.Y) : new TileCoordinate(target.X, first.Y),
+                horizontal ? new TileCoordinate(last.X, target.Y) : new TileCoordinate(target.X, last.Y)
+            }).Concat(passage.Skip(Math.Min(passage.Length - 1, end + 1)));
+            var result = new List<TileCoordinate> { passage[0] };
+            foreach (var knot in knots)
+            {
+                var previous = result[result.Count - 1];
+                long dx = (long)knot.X - previous.X, dy = (long)knot.Y - previous.Y;
+                long distance = Math.Abs(dx) + Math.Abs(dy);
+                if ((dx != 0 && dy != 0) || distance > maximumLength - result.Count) return false;
+                for (int step = 1; step <= distance; step++)
+                    result.Add(new TileCoordinate(previous.X + step * Math.Sign(dx), previous.Y + step * Math.Sign(dy)));
+            }
+            moved = result.ToArray();
+            return true;
+        }
+
         public string SourcePointId;
         public string DestinationPointId;
         public TileCoordinate[] Passage = Array.Empty<TileCoordinate>();

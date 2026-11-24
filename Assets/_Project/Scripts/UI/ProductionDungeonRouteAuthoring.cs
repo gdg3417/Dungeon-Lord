@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
@@ -17,6 +18,10 @@ namespace DungeonBuilder.M0
         private StructuralRouteInsertionPreview routePreview;
         private StructuralEconomyPreview routeQuote;
         private bool? drawIncomingPassage;
+        private TileCoordinate[] segmentOrigin;
+        private (int Start, int End) selectedSegment;
+        private TileCoordinate segmentTarget;
+        private bool segmentExceedsLimit;
         private bool draggingIndependentPlacement;
         private TileCoordinate dragAnchorOffset;
         private Vector2 placementDragPoint;
@@ -80,6 +85,7 @@ namespace DungeonBuilder.M0
             routePreview = null;
             routeQuote = null;
             drawIncomingPassage = null;
+            ClearSegmentSelection();
         }
 
         private SavedSpatialFloor DraftSelectedFloor() => draft?.ReadModel.Floors.SingleOrDefault(f => f.FloorInstanceId == selectedFloor);
@@ -108,6 +114,7 @@ namespace DungeonBuilder.M0
                 Outgoing = new AuthoredRouteGeometry { SourcePointId = placed[1].Id, DestinationPointId = to[0].Id }
             };
             drawIncomingPassage = null;
+            ClearSegmentSelection();
             UpdateRouteProposal();
         }
 
@@ -122,6 +129,7 @@ namespace DungeonBuilder.M0
             }
             routeRequest = suggested;
             drawIncomingPassage = null;
+            ClearSegmentSelection();
             UpdateRouteProposal();
         }
 
@@ -130,6 +138,7 @@ namespace DungeonBuilder.M0
 
         private void EditPassage(bool incoming, bool clear)
         {
+            ClearSegmentSelection();
             drawIncomingPassage = incoming;
             if (clear) (incoming ? routeRequest.Incoming : routeRequest.Outgoing).Passage = Array.Empty<TileCoordinate>();
             UpdateRouteProposal();
@@ -141,10 +150,50 @@ namespace DungeonBuilder.M0
             var link = drawIncomingPassage.Value ? routeRequest.Incoming : routeRequest.Outgoing;
             var definition = root.ProductionSpatialContent.Catalog.Corridors.Single(c => c.CorridorDefinitionId ==
                 OptionalBranchStructuralEditService.CorridorDefinitionId);
+            if (segmentOrigin != null)
+            {
+                segmentExceedsLimit = !AuthoredRouteGeometry.TrySlideSegment(segmentOrigin, selectedSegment.Start,
+                    selectedSegment.End, cell, definition.MaximumLength, out var moved);
+                if (!segmentExceedsLimit)
+                {
+                    segmentTarget = cell;
+                    link.Passage = moved;
+                }
+                UpdateRouteProposal();
+                return true;
+            }
             if (link.Passage.Length < definition.MaximumLength) link.Passage = link.Passage.Append(cell).ToArray();
             else feedback = StructuralEditService.CorridorLengthReason;
             UpdateRouteProposal();
             return true;
+        }
+
+        private void ClearSegmentSelection()
+        {
+            segmentOrigin = null;
+            segmentExceedsLimit = false;
+        }
+
+        private void PresentSegments(VisualElement panel, bool incoming, AuthoredRouteGeometry link)
+        {
+            if (segmentOrigin != null && drawIncomingPassage == incoming) return;
+            int number = 0;
+            foreach (var segment in AuthoredRouteGeometry.Segments(link.Passage))
+            {
+                var from = link.Passage[segment.Start];
+                var to = link.Passage[segment.End];
+                var label = Format(incoming ? "ui.dungeon.route.incoming_segment" : "ui.dungeon.route.outgoing_segment",
+                    ++number, from.X, from.Y, to.X, to.Y);
+                ButtonFor(panel, label, () =>
+                {
+                    drawIncomingPassage = incoming;
+                    segmentOrigin = (TileCoordinate[])link.Passage.Clone();
+                    selectedSegment = segment;
+                    segmentTarget = from;
+                    segmentExceedsLimit = false;
+                    UpdateRouteProposal();
+                }).name = incoming ? "slideIncomingSegment" : "slideOutgoingSegment";
+            }
         }
 
         private void UpdateRouteProposal()
@@ -157,7 +206,9 @@ namespace DungeonBuilder.M0
         {
             routePreview = null; routeQuote = null;
             if (routeRequest == null) return;
-            routePreview = root.SaveService.PreviewRouteInsertion(root.Save, draft, routeRequest, out routeQuote);
+            routePreview = segmentExceedsLimit
+                ? StructuralRouteInsertionService.Fail(StructuralEditService.CorridorLengthReason)
+                : root.SaveService.PreviewRouteInsertion(root.Save, draft, routeRequest, out routeQuote);
             var edge = CommittedSelectedFloor().Layout.Edges.Single(e => e.EdgeId == routeRequest.ReplacedEdgeId);
             var node = DraftSelectedFloor().Layout.Nodes.Single(n => n.RoomInstanceId == routeRoom);
             var selectedOpenings = new[] {
@@ -165,8 +216,16 @@ namespace DungeonBuilder.M0
                 (node.NodeId, routeRequest.Outgoing.SourcePointId), (edge.DestinationNodeId, routeRequest.Outgoing.DestinationPointId) };
             var doorTiles = selectedOpenings.SelectMany(value => RouteOpenings(value.Item1).Where(p => p.Id == value.Item2)
                 .Select(p => p.World));
+            IEnumerable<TileCoordinate> selected = null;
+            if (segmentOrigin != null)
+            {
+                bool horizontal = segmentOrigin[selectedSegment.Start].Y == segmentOrigin[selectedSegment.End].Y;
+                selected = segmentOrigin.Skip(selectedSegment.Start).Take(selectedSegment.End - selectedSegment.Start + 1)
+                    .Select(cell => horizontal ? new TileCoordinate(cell.X, segmentTarget.Y) :
+                        new TileCoordinate(segmentTarget.X, cell.Y));
+            }
             world.PresentRoutePreview(doorTiles.Concat(routeRequest.Incoming.Passage).Concat(routeRequest.Outgoing.Passage),
-                routePreview.IsValid);
+                routePreview.IsValid, selected);
         }
 
         private void AcceptRoute()
@@ -226,10 +285,25 @@ namespace DungeonBuilder.M0
                 routeRequest.Outgoing.SourcePointId, point => routeRequest.Outgoing.SourcePointId = point);
             AddOpeningChoice(panel, "ui.dungeon.route.successor_opening", chosen.DestinationNodeId,
                 routeRequest.Outgoing.DestinationPointId, point => routeRequest.Outgoing.DestinationPointId = point);
+            PresentSegments(panel, true, routeRequest.Incoming);
+            PresentSegments(panel, false, routeRequest.Outgoing);
+            if (segmentOrigin != null)
+            {
+                bool horizontal = segmentOrigin[selectedSegment.Start].Y == segmentOrigin[selectedSegment.End].Y;
+                panel.Add(new Label(Text(horizontal ? "ui.dungeon.route.slide_row" : "ui.dungeon.route.slide_column")));
+                ButtonFor(panel, Text("ui.dungeon.route.revert_segment"), () =>
+                {
+                    var link = drawIncomingPassage.Value ? routeRequest.Incoming : routeRequest.Outgoing;
+                    link.Passage = segmentOrigin;
+                    ClearSegmentSelection();
+                    drawIncomingPassage = null;
+                    UpdateRouteProposal();
+                }).name = "revertRouteSegment";
+            }
             ButtonFor(panel, Format("ui.dungeon.route.draw_incoming", routeRequest.Incoming.Passage.Length), () => EditPassage(true, false));
             ButtonFor(panel, Format("ui.dungeon.route.draw_outgoing", routeRequest.Outgoing.Passage.Length), () => EditPassage(false, false))
                 .name = "drawOutgoingPassage";
-            if (drawIncomingPassage.HasValue)
+            if (drawIncomingPassage.HasValue && segmentOrigin == null)
             {
                 panel.Add(new Label(Text(drawIncomingPassage.Value ? "ui.dungeon.route.drawing_incoming" : "ui.dungeon.route.drawing_outgoing")));
                 ButtonFor(panel, Text("ui.dungeon.route.clear_passage"), () => EditPassage(drawIncomingPassage.Value, true)).name = "clearPassage";

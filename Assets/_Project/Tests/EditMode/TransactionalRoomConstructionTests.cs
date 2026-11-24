@@ -116,6 +116,75 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.False, "A missing ledger record does not attest zero investment");
         }
 
+        [Test]
+        public void AuthoredInsertionRevisionRecoversAndFailedPublicationChargesOnlyOnRetry()
+        {
+            var f = Room();
+            f.Runtime.structureRuntime.ManaReserve = 500;
+            var context = Context(f);
+            var tail = TransactionalDungeonDraft.Create(f.State, context, new Store());
+            Build(f, tail, Request(f, 0, 6));
+            f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, tail));
+            var floor = f.State.Floors.Single();
+            var nodes = floor.Layout.Nodes.Where(n => n.Kind == FloorRouteNodeKind.Room).Select(n => n.NodeId).ToArray();
+            var middle = floor.Layout.Edges.Single(e => nodes.Contains(e.SourceNodeId) && nodes.Contains(e.DestinationNodeId));
+            var store = new FileDungeonDraftStore(f.ActivePath + ".editor-draft", f.FileSystem, f.Profile);
+            var draft = TransactionalDungeonDraft.Create(f.State, context, store);
+            Assert.That(draft.PlaceIndependentRoom(new IndependentRoomPlacementRequest {
+                FloorInstanceId = floor.FloorInstanceId, RoomDefinitionId = "spatial.room.basic",
+                Anchor = new TileCoordinate(4, 3) }), Is.True, draft.Reason);
+            Flush(draft);
+            var request = new StructuralRouteInsertionRequest {
+                FloorInstanceId = floor.FloorInstanceId, ReplacedEdgeId = middle.EdgeId,
+                RoomInstanceId = draft.DisconnectedRoomIds.Single(),
+                Incoming = new AuthoredRouteGeometry { SourcePointId = "east.2", DestinationPointId = "west" },
+                Outgoing = new AuthoredRouteGeometry { SourcePointId = "north", DestinationPointId = "east",
+                    Passage = new[] { new TileCoordinate(5, 7), new TileCoordinate(4, 7) } }
+            };
+            var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context);
+            request.Outgoing.SourcePointId = "missing";
+            Assert.That(draft.PreviewRouteGeometry(request).IsValid, Is.False);
+            request.Outgoing.SourcePointId = "west";
+            Assert.That(draft.PreviewRouteGeometry(request).IsValid, Is.False, "The incoming doorway is already used");
+            request.Outgoing.SourcePointId = "north";
+            Assert.That(draft.AcceptRouteInsertion(request, owned), Is.True, draft.Reason);
+            Flush(draft);
+            var firstIds = draft.ReadModel.Floors.Single().Layout.Edges.Where(e => e.AuthoredGeometry != null)
+                .Select(e => e.EdgeId).ToArray();
+            // Re-accept the corrected proposal through the revision path. Even identical geometry
+            // receives fresh edge IDs while the previous acknowledged command stays immutable.
+            byte[] prefix = store.Read();
+            Assert.That(draft.AcceptRouteInsertion(request, owned), Is.True, draft.Reason);
+            Flush(draft);
+            var journal = DungeonDraftFormat.Parse(store.Read());
+            CollectionAssert.AreEqual(DungeonDraftFormat.Bytes(DungeonDraftFormat.Parse(prefix).Commands[1]),
+                DungeonDraftFormat.Bytes(journal.Commands[1]));
+            draft = TransactionalDungeonDraft.Recover(store.Read(), f.State, context, store, out var reason);
+            Assert.That(draft, Is.Not.Null, reason);
+            Assert.That(draft.ReadModel.Floors.Single().Layout.Edges.Any(e => firstIds.Contains(e.EdgeId)), Is.False);
+            var before = f.FileSystem.ReadAllBytes(f.ActivePath);
+            double balance = f.Runtime.structureRuntime.ManaReserve;
+            f.FileSystem.EnableFailure(Operation.Replace, 1);
+            var failed = f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, draft);
+            f.FileSystem.DisableFailure();
+            Assert.That(failed.IsSuccess, Is.False);
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(balance));
+            f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, draft));
+            f.Reopen();
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(balance - 110));
+            var outgoing = f.State.Floors.Single().Layout.Edges.Single(e => e.AuthoredGeometry?.Passage.Length > 0);
+            Assert.That(outgoing.AuthoredGeometry.SourcePointId, Is.EqualTo("north"));
+            Assert.That(outgoing.AuthoredGeometry.DestinationPointId, Is.EqualTo("east"));
+            CollectionAssert.AreEqual(request.Outgoing.Passage, outgoing.AuthoredGeometry.Passage);
+            var committed = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context);
+            Assert.That(committed.IsValid, Is.True, committed.Reason);
+            Assert.That(committed.Investment.Single(record => record.StructureId == outgoing.EdgeId).ConstructionMana,
+                Is.GreaterThan(0d));
+            Assert.That(StructuralRouteInsertionService.RetirementEligible(committed, floor.FloorInstanceId, outgoing.EdgeId),
+                Is.False, "A paid physical passage cannot be retired by insertion");
+        }
+
         [TestCase("spatial.room.basic", CardinalOrientation.Zero)]
         [TestCase("spatial.room.rectangle", CardinalOrientation.Zero)]
         [TestCase("spatial.room.rectangle", CardinalOrientation.Ninety)]
