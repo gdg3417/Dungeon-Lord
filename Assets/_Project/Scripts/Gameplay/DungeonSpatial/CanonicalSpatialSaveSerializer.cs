@@ -153,6 +153,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
         }
 
+        // Floor knowledge hashes preserve the frozen edge representation when a
+        // route has no authored geometry. An authored passage remains in the hash.
+        internal static void OmitUnspecifiedRouteGeometry(ContractJsonNode floor)
+        {
+            var layout = floor.Fields.Single(field => field.Key == nameof(SavedSpatialFloor.Layout)).Value;
+            var edges = layout.Fields.Single(field => field.Key == nameof(FloorSpatialLayout.Edges)).Value;
+            foreach (var edge in edges.Items)
+                edge.Fields.RemoveAll(field => field.Key == nameof(FloorRouteEdge.AuthoredGeometry) &&
+                    field.Value.Kind == ContractJsonKind.Null);
+        }
+
         internal static SpatialContractResult<SerializedMembers> SerializeFrozenSchemaSevenMembers(
             DetachedCanonicalSpatialSaveState source, CanonicalSpatialSerializationLimits limits)
         {

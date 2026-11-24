@@ -108,13 +108,13 @@ namespace DungeonBuilder.M0.Tests
                     Click(ui.Q<Button>("closeSheet")); controller.EnterEdit(); controller.OpenRooms();
                     for(int i=0;i<8;i++) yield return null;
                     UatMeasureLayout("edit",size,text,ui);
-                    foreach(var card in ui.Q("roomChoices").Children().OfType<Button>())
+                    foreach(var card in ui.Q("roomChoices").Query<Button>(className: "room-card").ToList())
                     {
                         var name=card.Q<Label>("roomCardName");
                         name.text="A considerably longer localized authored chamber name for layout qualification";
                     }
                     for(int i=0;i<8;i++) yield return null;
-                    foreach(var card in ui.Q("roomChoices").Children().OfType<Button>())
+                    foreach(var card in ui.Q("roomChoices").Query<Button>(className: "room-card").ToList())
                     {
                         var labels=card.Query<Label>().ToList();
                         Assert.That(labels[1].worldBound.yMin,Is.GreaterThanOrEqualTo(labels[0].worldBound.yMax-.1f),"Name remains above size/cost");

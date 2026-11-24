@@ -284,14 +284,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
         private static void ProjectLegacyEdgeShape(ContractJsonNode floors, bool includeAuthoredGeometry)
         {
+            if (!includeAuthoredGeometry)
+            {
+                foreach (var floor in floors.Items)
+                    CanonicalSpatialSaveSerializer.OmitUnspecifiedRouteGeometry(floor);
+                return;
+            }
             const string geometry = nameof(FloorRouteEdge.AuthoredGeometry);
             foreach (var floor in floors.Items)
             foreach (var edge in floor.Fields.Single(field => field.Key == "Layout").Value.Fields
                 .Single(field => field.Key == "Edges").Value.Items)
             {
-                if (!includeAuthoredGeometry)
-                    edge.Fields.RemoveAll(field => field.Key == geometry && field.Value.Kind == ContractJsonKind.Null);
-                else if (!edge.Fields.Any(field => field.Key == geometry))
+                if (!edge.Fields.Any(field => field.Key == geometry))
                     edge.Fields.Add(new System.Collections.Generic.KeyValuePair<string, ContractJsonNode>(
                         geometry, new ContractJsonNode { Kind = ContractJsonKind.Null }));
             }

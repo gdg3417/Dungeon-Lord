@@ -202,8 +202,12 @@ namespace DungeonBuilder.M0.Tests
                 foreach(var text in new[] {DungeonTextSize.Small,DungeonTextSize.Default,DungeonTextSize.Large})
                 {
                     controller.SetTextSize(text); for(int i=0;i<10;i++) yield return null;
-                    var cards=ui.Q("roomChoices").Children().OfType<Button>().ToArray();
-                    Assert.That(cards.Length,Is.EqualTo(root.ProductionSpatialContent.Catalog.Rooms.Length));
+                    var cards=ui.Q("roomChoices").Query<Button>(className: "room-card").ToList();
+                    Assert.That(cards.Count,Is.EqualTo(root.ProductionSpatialContent.Catalog.Rooms.Length));
+                    var placementActions=ui.Q("roomChoices").Query<Button>("placeIndependentRoom").ToList();
+                    CollectionAssert.AreEquivalent(cards.Select(card=>card.userData), placementActions.Select(button=>button.userData));
+                    foreach(var action in placementActions)
+                        Assert.That(action.worldBound.height*controller.GetComponent<UIDocument>().panelSettings.scale,Is.GreaterThanOrEqualTo(48));
                     foreach(var card in cards)
                     {
                         var definition=root.ProductionSpatialContent.Catalog.Rooms.Single(r=>r.RoomDefinitionId==(string)card.userData);
@@ -220,7 +224,7 @@ namespace DungeonBuilder.M0.Tests
                         Assert.That(card.worldBound.height,Is.LessThan(text==DungeonTextSize.Large ? 150 : 125),"Actual authored labels use compact cards, not smaller hit regions");
                         TestContext.WriteLine("Compact card "+resolution+" "+text+" "+card.userData+": "+card.worldBound+" footprint="+drawn+" cells="+preview.Cells.Count);
                     }
-                    Assert.That(cards.Select(c=>c.Q<DungeonRoomFootprintPreview>().RenderedFootprintRect.size).Distinct().Count(),Is.EqualTo(cards.Length));
+                    Assert.That(cards.Select(c=>c.Q<DungeonRoomFootprintPreview>().RenderedFootprintRect.size).Distinct().Count(),Is.EqualTo(cards.Count));
                     foreach(var card in cards) Assert.That(card.worldBound.height*controller.GetComponent<UIDocument>().panelSettings.scale,Is.GreaterThanOrEqualTo(48));
                     var scroll=ui.Q<ScrollView>("roomChoicesScroll"); scroll.ScrollTo(cards.Last()); for(int i=0;i<8;i++) yield return null;
                     Assert.That(scroll.contentViewport.worldBound.Overlaps(cards.Last().worldBound),Is.True,"Last option remains reachable");

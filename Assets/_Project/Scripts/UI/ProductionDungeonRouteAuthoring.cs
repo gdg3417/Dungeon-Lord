@@ -246,8 +246,8 @@ namespace DungeonBuilder.M0
         private void PresentRouteAuthoring(VisualElement panel)
         {
             panel.Clear();
-            panel.style.display = CanAuthorRoutes && IsEditing && !IsConstructing ? DisplayStyle.Flex : DisplayStyle.None;
-            if (panel.style.display.value == DisplayStyle.None) return;
+            panel.style.display = DisplayStyle.None;
+            if (!CanAuthorRoutes || !IsEditing || IsConstructing) return;
             var floor = DraftSelectedFloor();
             if (floor == null) return;
             var browse = new VisualElement();
@@ -255,6 +255,8 @@ namespace DungeonBuilder.M0
             foreach (var roomId in draft.RouteAuthoringRoomIds.Where(id => floor.Layout.Rooms.Any(r => r.RoomInstanceId == id)))
                 ButtonFor(browse, Format("ui.dungeon.route.edit_for_room", RouteRoomName(floor, roomId)),
                     () => OpenRouteAuthoring(roomId));
+            if (browse.childCount == 0 && !IsAuthoringRoute) return;
+            panel.style.display = DisplayStyle.Flex;
             if (browse.childCount > 0) panel.Add(browse);
             if (!IsAuthoringRoute) return;
 

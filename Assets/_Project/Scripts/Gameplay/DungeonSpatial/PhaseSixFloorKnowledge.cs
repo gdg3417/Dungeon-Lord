@@ -44,6 +44,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 ContractJsonNode floor = floors.Items.SingleOrDefault(item => item.Kind == ContractJsonKind.Object &&
                     item.Fields[0].Key == "FloorInstanceId" && item.Fields[0].Value.Text == floorInstanceId);
                 if (floor == null) return false;
+                CanonicalSpatialSaveSerializer.OmitUnspecifiedRouteGeometry(floor);
                 var writer = new ContractJsonWriter(limits.Serialized);
                 writer.Node(); writer.Token("{"); bool first = true;
                 foreach (var field in floor.Fields)
