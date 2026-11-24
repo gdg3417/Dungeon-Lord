@@ -86,16 +86,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             TileCoordinate target, int maximumLength, out TileCoordinate[] moved)
         {
             moved = null;
-            if (maximumLength < 1 || passage == null || passage.Length > maximumLength ||
-                !Segments(passage).Contains((start, end))) return false;
+            if (maximumLength < 1 || passage == null || passage.Length > maximumLength) return false;
+            var segments = Segments(passage).ToArray();
+            int selected = Array.IndexOf(segments, (start, end));
+            if (selected < 0) return false;
             var first = passage[start];
             var last = passage[end];
             bool horizontal = first.Y == last.Y;
-            var knots = passage.Take(Math.Max(1, start)).Concat(new[]
+            // Rebuild both adjacent lines from their far bends, including when a line
+            // shrinks to zero. Retaining their old tiles would create a backtrack.
+            int prefixEnd = selected == 0 ? 0 : segments[selected - 1].Start;
+            int suffixStart = selected == segments.Length - 1 ? passage.Length - 1 : segments[selected + 1].End;
+            var knots = passage.Take(prefixEnd + 1).Concat(new[]
             {
                 horizontal ? new TileCoordinate(first.X, target.Y) : new TileCoordinate(target.X, first.Y),
                 horizontal ? new TileCoordinate(last.X, target.Y) : new TileCoordinate(target.X, last.Y)
-            }).Concat(passage.Skip(Math.Min(passage.Length - 1, end + 1)));
+            }).Concat(passage.Skip(suffixStart));
             var result = new List<TileCoordinate> { passage[0] };
             foreach (var knot in knots)
             {
