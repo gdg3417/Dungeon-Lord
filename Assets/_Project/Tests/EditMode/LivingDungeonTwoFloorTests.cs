@@ -690,10 +690,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var ordered = floor.Layout.Rooms.OrderBy(room => room.Anchor.Y).ToArray();
             ordered[0].Anchor = new TileCoordinate(2, 5);
             ordered[1].Anchor = new TileCoordinate(6, 5);
-            floor.FixedStructures.Single(fixedStructure => fixedStructure.Kind == FixedSpatialStructureKind.Entrance).Anchor =
-                new TileCoordinate(1, 0);
-            floor.FixedStructures.Single(fixedStructure => fixedStructure.Kind == FixedSpatialStructureKind.CompletionTerminal).Anchor =
-                new TileCoordinate(11, 12);
+            var entranceFixed = floor.FixedStructures.Single(structure => structure.Kind == FixedSpatialStructureKind.Entrance);
+            entranceFixed.Anchor = new TileCoordinate(1, 0);
+            entranceFixed.Orientation = CardinalOrientation.Zero;
+            var completionFixed = floor.FixedStructures.Single(structure => structure.Kind == FixedSpatialStructureKind.CompletionTerminal);
+            completionFixed.Anchor = new TileCoordinate(11, 12);
+            completionFixed.Orientation = CardinalOrientation.Zero;
             var entrance = floor.Layout.Nodes.Single(node => node.Kind == FloorRouteNodeKind.Entrance);
             var completion = floor.Layout.Nodes.Single(node => node.Kind == FloorRouteNodeKind.Completion);
             var a = floor.Layout.Nodes.Single(node => node.RoomInstanceId == ordered[0].RoomInstanceId);
@@ -708,11 +710,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
             middle.ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
             middle.CorridorDefinitionId = string.Empty;
             middle.Footprint = null;
-            middle.AuthoredGeometry = null;
+            middle.AuthoredGeometry = new AuthoredRouteGeometry { SourcePointId = "east", DestinationPointId = "west" };
             SetOwnerPassage(outgoing, "north.2", "route", new TileCoordinate(8, 9), new TileCoordinate(9, 9),
                 new TileCoordinate(10, 9), new TileCoordinate(11, 9), new TileCoordinate(11, 10), new TileCoordinate(11, 11));
             var structural = CanonicalSpatialSaveContracts.Validate(spatial, floorTwo.Profile.Canonical.Spatial, false);
             Assert.That(structural.IsValid, Is.True, string.Join(",", structural.Issues));
+            var catalog = floorTwo.Production.Catalog;
+            var layout = FloorLayoutValidator.Validate(floor.Layout,
+                catalog.Floors.Single(definition => definition.FloorDefinitionId == floor.FloorDefinitionId),
+                catalog.Rooms, catalog.Corridors,
+                new SpatialValidationWorkloadLimits(floorTwo.Profile.Canonical.Spatial.MaximumMaterializedTiles),
+                floor.FixedStructures, catalog.FixedStructures);
+            Assert.That(layout.IsValid, Is.True, string.Join(", ", layout.Issues.Select(issue => $"{issue.SubjectId}: {issue.Reason}")));
+            Assert.That(layout.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(52));
             var semantic = DetachedCanonicalProductionSemanticValidation.Validate(spatial, floorTwo.Production,
                 floorTwo.Configuration, floorTwo.Profile.Canonical.Spatial, floorTwo.Occupancy, requirePositions: true);
             Assert.That(semantic.IsValid, Is.True, string.Join(",", semantic.Issues));
