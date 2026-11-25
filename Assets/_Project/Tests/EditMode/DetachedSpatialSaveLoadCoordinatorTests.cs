@@ -9,6 +9,7 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Economy;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 using FrozenMigration = DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests;
 
 namespace DungeonBuilder.M0.Tests.EditMode
@@ -28,11 +29,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var historical = FrozenMigration.PrepareEmptyFixture(schema, unwrapped, original);
             Assert.That(historical.Classification.IsSuccess, Is.True, historical.Classification.FailureReason);
 
-            // Frozen schema 7 retains unknown extensions. Schema 8 owns this
-            // member and must reject both exact and case-alias collisions.
+            // Living Dungeon becomes a canonical owner in schema 14. The
+            // earlier producers must retain the historical extension verbatim.
+            Assert.That(historical.Classification.UnknownPrimaryMembers.Select(member => member.Name),
+                Does.Contain(ownerName));
             Assert.That(historical.Result.IsSuccess, Is.True, historical.Result.Reason);
             byte[] seven = historical.Result.Attempt.Candidate.GetBytes();
-            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(seven, historical.Limits, out _), Is.False);
+            Assert.That(PhaseFourTestSupport.UpgradeFrozenThirteen(seven, historical.Limits, out byte[] thirteen), Is.True);
+            const char quote = '"';
+            Assert.That(Encoding.UTF8.GetString(thirteen), Does.Contain($"{quote}{ownerName}{quote}:null"));
+            Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, historical.Limits, out byte[] fourteen), Is.False);
+            Assert.That(fourteen, Is.Null);
             var current = new FrozenMigration.DeterministicFileSystem();
             string active = FrozenMigration.ActivePath("legacy-owner-collision");
             current.Seed(active, original);
@@ -300,6 +307,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor,
                 fileSystem, qualified));
 
+            ExpectObsoleteLog();
             SaveData loaded = service.LoadOrCreate("gd66-live", out string banner);
 
             Assert.That(loaded, Is.Null);
@@ -949,6 +957,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static void AssertObsolete(FrozenMigration.PreparedFixture fixture,
             FrozenMigration.DeterministicFileSystem fs, string path, byte[] original)
         {
+            int operationCount = fs.Operations.Count();
             var result = Coordinator(fixture).Load(path, Supported(fs, path));
             Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Reason, Is.EqualTo(RecoveryEpisode.ObsoleteDevelopmentSave));
@@ -957,12 +966,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Transaction, Is.Null);
             Assert.That(result.Recovery, Is.Null);
             CollectionAssert.AreEqual(original, fs.ReadAllBytes(path));
-            Assert.That(fs.Operations.Any(IsMutation), Is.False);
+            Assert.That(fs.Operations.Skip(operationCount).Any(IsMutation), Is.False);
         }
+
+        private static void ExpectObsoleteLog() =>
+            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave);
 
         private static void AssertSaveServiceObsolete(SaveService service,
             FrozenMigration.DeterministicFileSystem fs, byte[] original)
         {
+            ExpectObsoleteLog();
             Assert.That(service.LoadOrCreate("gd66-live", out string banner), Is.Null);
             Assert.That(banner, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
             Assert.That(service.CanonicalSession, Is.Null);

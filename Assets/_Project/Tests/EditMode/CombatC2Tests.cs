@@ -410,8 +410,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             if(UnityEngine.Application.platform!=UnityEngine.RuntimePlatform.WindowsEditor) Assert.Ignore("Windows qualification only");
             var f = Deployed();
-            string directory = Path.Combine(UnityEngine.Application.persistentDataPath,
-                "c2-" + Guid.NewGuid().ToString("N").Substring(0, 12));
+            string directory = Path.GetFullPath(Path.Combine(UnityEngine.Application.persistentDataPath,
+                "c2-" + Guid.NewGuid().ToString("N").Substring(0, 12)));
             Directory.CreateDirectory(directory);
             string path = Path.Combine(directory, "historical.json");
             byte[] source = PhaseFourTestSupport.FrozenFourteen(f.Session.GetCurrentBytes());

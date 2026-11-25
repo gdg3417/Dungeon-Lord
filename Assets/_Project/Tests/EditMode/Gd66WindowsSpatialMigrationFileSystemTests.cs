@@ -10,6 +10,7 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -210,16 +211,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original,
                     workload.Raw, workload.Whole, workload.Canonical);
-            string filename = "gd66-unity-save-service-" + Guid.NewGuid().ToString("N") + ".json";
-            string unityShapedPath = Path.Combine(Application.persistentDataPath, filename);
-            string schemaTwelveFilename = "gd66-unity-schema12-service-" +
-                Guid.NewGuid().ToString("N") + ".json";
-            string schemaTwelvePath = Path.Combine(Application.persistentDataPath, schemaTwelveFilename);
+            string fixtureId = Guid.NewGuid().ToString("N").Substring(0, 12);
+            string filename = "gd66-" + fixtureId + ".json";
+            string unityShapedPath = Path.GetFullPath(Path.Combine(Application.persistentDataPath, filename));
+            string schemaTwelveFilename = "s12-" + fixtureId + ".json";
+            string schemaTwelvePath = Path.GetFullPath(Path.Combine(Application.persistentDataPath, schemaTwelveFilename));
             try
             {
                 File.WriteAllBytes(unityShapedPath, original);
 
                 var refused = WindowsService(fixture, filename, out _, out _);
+                LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave);
                 Assert.That(refused.LoadOrCreate("gd66-live", out string refusal), Is.Null);
                 Assert.That(refusal, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
                 Assert.That(refused.CanonicalSession, Is.Null);
@@ -291,6 +293,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 File.WriteAllBytes(schemaTwelvePath, frozenSchemaTwelve);
 
                 var twelveService = WindowsService(fixture, schemaTwelveFilename, out _, out _);
+                LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave);
                 Assert.That(twelveService.LoadOrCreate("gd66-live", out string twelveBanner), Is.Null);
                 Assert.That(twelveBanner, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
                 Assert.That(twelveService.CanonicalSession, Is.Null);
