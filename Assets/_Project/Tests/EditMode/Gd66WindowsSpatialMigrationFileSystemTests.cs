@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
@@ -190,7 +191,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void WindowsUnityPersistentDataPathRunsLegacyMigrationReopenDeleteAndNativeCreate()
+        public void WindowsUnityPersistentDataPathPreservesObsoleteSavesAndReopensNativeSave()
         {
             if (Application.platform != RuntimePlatform.WindowsEditor)
                 Assert.Ignore("gd66.test.windows_only");
@@ -210,26 +211,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original,
                     workload.Raw, workload.Whole, workload.Canonical);
-            string filename = "gd66-unity-save-service-" + Guid.NewGuid().ToString("N") + ".json";
-            string unityShapedPath = Path.Combine(Application.persistentDataPath, filename);
-            string schemaTwelveFilename = "gd66-unity-schema12-service-" +
-                Guid.NewGuid().ToString("N") + ".json";
-            string schemaTwelvePath = Path.Combine(Application.persistentDataPath, schemaTwelveFilename);
+            string fixtureId = Guid.NewGuid().ToString("N").Substring(0, 12);
+            string filename = "gd66-" + fixtureId + ".json";
+            string unityShapedPath = Path.GetFullPath(Path.Combine(Application.persistentDataPath, filename));
+            string schemaTwelveFilename = "s12-" + fixtureId + ".json";
+            string schemaTwelvePath = Path.GetFullPath(Path.Combine(Application.persistentDataPath, schemaTwelveFilename));
             try
             {
                 File.WriteAllBytes(unityShapedPath, original);
 
-                SaveData migrated = LoadWindowsService(fixture, filename, out var migratedService, out string migrationBanner);
+                var refusalErrors = new List<string>();
+                var refused = WindowsService(fixture, filename, out _, out _, refusalErrors);
+                Assert.That(refused.LoadOrCreate("gd66-live", out string refusal), Is.Null);
+                CollectionAssert.AreEqual(new[] { "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave },
+                    refusalErrors);
+                Assert.That(refusal, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
+                Assert.That(refused.CanonicalSession, Is.Null);
+                Assert.That(refused.SavePath, Is.EqualTo(Path.GetFullPath(unityShapedPath)));
+                CollectionAssert.AreEqual(original, File.ReadAllBytes(unityShapedPath));
+                Assert.That(Directory.GetFiles(Application.persistentDataPath,
+                    Path.GetFileNameWithoutExtension(filename) + ".gd66-*"), Is.Empty);
+                Assert.That(Directory.GetFiles(Application.persistentDataPath, filename + ".canonical-write-*"), Is.Empty);
 
-                Assert.That(migrated, Is.Not.Null, migrationBanner);
-                Assert.That(migrated.validatedCanonicalSpatialState, Is.Not.Null);
-                Assert.That(migratedService.SavePath, Is.EqualTo(Path.GetFullPath(unityShapedPath)));
-                Assert.That(File.ReadAllText(migratedService.SavePath), Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget));
-                Assert.That(File.ReadAllText(migratedService.SavePath), Does.Contain("\"RoomLocalPosition\""));
-                Assert.That(migrated.validatedCanonicalSpatialState.Floors.Single().RoomContents.Assignments,
-                    Has.Length.EqualTo(1));
+                // Execute the historical transaction directly on the isolated file.
+                var preflight = SpatialMigrationFileSystemSelector.Evaluate(unityShapedPath);
+                Assert.That(preflight.IsSupported, Is.True, preflight.Reason);
+                var historicalMigration = new DetachedSpatialMigrationTransaction(preflight.FileSystem,
+                    Gd66DetachedSpatialMigrationTransactionTests.Recovery(fixture));
+                var migrated = historicalMigration.Execute(unityShapedPath, fixture.Result.Attempt);
+                Assert.That(migrated.IsSuccess, Is.True, migrated.Reason);
+                Assert.That(migrated.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
+                byte[] seven = preflight.FileSystem.ReadAllBytes(unityShapedPath);
+                CollectionAssert.AreEqual(fixture.Result.Attempt.Candidate.GetBytes(), seven);
+                var frozen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(seven, fixture.Limits);
+                Assert.That(frozen.IsValid, Is.True, frozen.Reason);
+                Assert.That(frozen.State.Floors.Single().RoomContents.Assignments, Has.Length.EqualTo(1));
+                Assert.That(historicalMigration.Recover(unityShapedPath).Reason,
+                    Is.EqualTo(DetachedSpatialMigrationTransaction.AlreadyCommittedReason));
+
                 var actualContext = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
-                    BindingFlags.Instance | BindingFlags.NonPublic).GetValue(migratedService);
+                    BindingFlags.Instance | BindingFlags.NonPublic).GetValue(refused);
                 var omitted = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, omittedResearchSource,
                     workload.Raw, workload.Whole, workload.Canonical);
                 Assert.That(PhaseFourTestSupport.UpgradeFrozenSixteen(omitted.Result.Attempt.Candidate.GetBytes(),
@@ -239,8 +260,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(DetachedCompleteSaveContract.ResearchStateValid(historicalOmitted, actualContext.RecoveryInputs), Is.False,
                     "The old ambiguous Research fixture must not acquire current activation authority");
 
-                migratedService.DeleteSave(out string originalDeleteBanner);
-                Assert.That(File.Exists(migratedService.SavePath), Is.False, originalDeleteBanner);
+                refused.DeleteSave(out string originalDeleteBanner);
+                Assert.That(File.Exists(unityShapedPath), Is.False, originalDeleteBanner);
 
                 SaveData created = LoadWindowsService(fixture, filename, out var nativeService, out string nativeBanner);
                 Assert.That(created, Is.Not.Null, nativeBanner);
@@ -273,37 +294,39 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Is.False, "The current reader must continue rejecting a frozen source as current write authority");
                 File.WriteAllBytes(schemaTwelvePath, frozenSchemaTwelve);
 
-                SaveData schemaTwelveMigrated = LoadWindowsService(fixture, schemaTwelveFilename,
-                    out var schemaTwelveService, out string schemaTwelveBanner);
-                Assert.That(schemaTwelveMigrated, Is.Not.Null, schemaTwelveBanner);
-                RoomContentAssignment remigratedAssignment = schemaTwelveMigrated
-                    .validatedCanonicalSpatialState.Floors.Single().RoomContents.Assignments.Single();
-                Assert.That(remigratedAssignment.AssignmentId, Is.EqualTo(firstAssignment.AssignmentId));
-                Assert.That(remigratedAssignment.RoomInstanceId, Is.EqualTo(firstAssignment.RoomInstanceId));
-                Assert.That(remigratedAssignment.CategoryId, Is.EqualTo(firstAssignment.CategoryId));
-                Assert.That(remigratedAssignment.OptionId, Is.EqualTo(firstAssignment.OptionId));
-                Assert.That(remigratedAssignment.Sequence, Is.EqualTo(firstAssignment.Sequence));
-                Assert.That(remigratedAssignment.RoomLocalPosition.X,
-                    Is.EqualTo(firstAssignment.RoomLocalPosition.X));
-                Assert.That(remigratedAssignment.RoomLocalPosition.Y,
-                    Is.EqualTo(firstAssignment.RoomLocalPosition.Y));
-                byte[] migratedBytes = File.ReadAllBytes(schemaTwelveService.SavePath);
-                // Frozen migration/activation is not native creation: its legacy
-                // interval contract is preserved, not stamped with native proof.
-                CollectionAssert.AreEqual(frozenSchemaTwelve, PhaseFourTestSupport.FrozenTwelve(migratedBytes));
-                Assert.That(schemaTwelveMigrated.timeProvenance.Mode, Is.EqualTo(TimeProvenance.PreciseMode));
-                Assert.That(schemaTwelveMigrated.timeProvenance.AccountedBoundary.Seconds, Is.EqualTo(1000));
-                Assert.That(schemaTwelveMigrated.timeProvenance.RecoveryContextSha256,
-                    Is.EqualTo(created.timeProvenance.RecoveryContextSha256));
+                var twelveErrors = new List<string>();
+                var twelveService = WindowsService(fixture, schemaTwelveFilename, out _, out _, twelveErrors);
+                Assert.That(twelveService.LoadOrCreate("gd66-live", out string twelveBanner), Is.Null);
+                CollectionAssert.AreEqual(new[] { "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave },
+                    twelveErrors);
+                Assert.That(twelveBanner, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
+                Assert.That(twelveService.CanonicalSession, Is.Null);
+                CollectionAssert.AreEqual(frozenSchemaTwelve, File.ReadAllBytes(schemaTwelvePath));
 
-                SaveData reopened = LoadWindowsService(fixture, schemaTwelveFilename, out var reopenedService, out string reopenBanner);
+                Assert.That(SchemaTwelveToThirteenUpgrade.TryPrepare(frozenSchemaTwelve, fixture.Limits,
+                    PhaseFourTestSupport.PositionProfiles(fixture.Limits), out var thirteen), Is.True);
+                var converted = DetachedCompleteSaveContract.ParseValidateFrozenSchemaThirteenAndRoundTrip(thirteen, fixture.Limits);
+                Assert.That(converted.IsValid, Is.True, converted.Reason);
+                Assert.That(converted.CurrentTargetValidated, Is.False);
+                CollectionAssert.AreEqual(thirteen, converted.GetBytes());
+                var assignment = converted.State.Floors.Single().RoomContents.Assignments.Single();
+                Assert.That(assignment.AssignmentId, Is.EqualTo(firstAssignment.AssignmentId));
+                Assert.That(assignment.RoomInstanceId, Is.EqualTo(firstAssignment.RoomInstanceId));
+                Assert.That(assignment.CategoryId, Is.EqualTo(firstAssignment.CategoryId));
+                Assert.That(assignment.OptionId, Is.EqualTo(firstAssignment.OptionId));
+                Assert.That(assignment.Sequence, Is.EqualTo(firstAssignment.Sequence));
+                Assert.That(assignment.RoomLocalPosition.X, Is.EqualTo(firstAssignment.RoomLocalPosition.X));
+                Assert.That(assignment.RoomLocalPosition.Y, Is.EqualTo(firstAssignment.RoomLocalPosition.Y));
+
+                SaveData reopened = LoadWindowsService(fixture, filename, out var reopenedService, out var reopenBanner);
                 Assert.That(reopened, Is.Not.Null, reopenBanner);
-                Assert.That(reopened.validatedCanonicalSpatialState, Is.Not.Null);
-                Assert.That(reopenedService.CanonicalSession, Is.Not.Null);
-                CollectionAssert.AreEqual(migratedBytes, File.ReadAllBytes(reopenedService.SavePath));
-
-                reopenedService.DeleteSave(out string deleteBanner);
-                Assert.That(File.Exists(reopenedService.SavePath), Is.False, deleteBanner);
+                Assert.That(reopened.timeProvenance.Mode, Is.EqualTo(TimeProvenance.PreciseMode));
+                Assert.That(reopened.timeProvenance.RecoveryContextSha256,
+                    Is.EqualTo(created.timeProvenance.RecoveryContextSha256));
+                CollectionAssert.AreEqual(firstCurrentBytes, reopenedService.CanonicalSession.GetCurrentBytes());
+                CollectionAssert.AreEqual(firstCurrentBytes, File.ReadAllBytes(unityShapedPath));
+                twelveService.DeleteSave(out string deleteBanner);
+                Assert.That(File.Exists(schemaTwelvePath), Is.False, deleteBanner);
                 nativeService.DeleteSave(out string cleanupBanner);
                 Assert.That(File.Exists(nativeService.SavePath), Is.False, cleanupBanner);
             }
@@ -705,8 +728,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6);
             Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
-            string directory = Path.Combine(ownedTemporaryRoot, includeBackup
-                ? "gd66-winfs-replaced-backup" : "gd66-winfs-replaced-no-backup");
+            // Reserved sidecar suffixes must fit the Windows path envelope too.
+            string directory = Path.Combine(ownedTemporaryRoot, includeBackup ? "rb" : "r");
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
             Directory.CreateDirectory(directory);
             try
@@ -716,6 +739,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Assert.That(preflight.IsSupported, Is.True, preflight.Reason);
                 var persisted = Gd66DetachedSpatialMigrationTransactionTests.BuildPersistedJournalFixture(
                     fixture, active, SpatialMigrationJournalStage.Replaced);
+                Assert.That(Path.Combine(directory, persisted.Names.OriginalBackup + ".restore.intent").Length,
+                    Is.LessThanOrEqualTo(SpatialMigrationSidecarPaths.WindowsMaximumAbsolutePathCharacters));
                 byte[] candidate = fixture.Result.Attempt.Candidate.GetBytes();
                 File.WriteAllBytes(active, candidate);
                 preflight.FileSystem.WriteAllBytesDurable(Path.Combine(directory, persisted.Names.Journal),
@@ -822,9 +847,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static SaveService WindowsService(
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture, string filename,
-            out TimeService time, out RecoveryRuntimeInputs inputs)
+            out TimeService time, out RecoveryRuntimeInputs inputs, ICollection<string> errors = null)
         {
-            var service = new SaveService(new SimpleLogger(false),
+            var logger = errors == null ? new SimpleLogger(false) : new SimpleLogger(false, (level, formatted) =>
+            {
+                if (level == "ERROR") errors.Add(formatted);
+            });
+            var service = new SaveService(logger,
                 new SaveConfig { fileName = filename, useAtomicWrites = true },
                 Application.persistentDataPath);
             service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(

@@ -614,8 +614,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(profile.Raw.ForPayload(f.Session.GetCurrentBytes()).MaximumInputBytes, Is.EqualTo(2752512 + 2 * 590));
             Assert.That(RawSavePayloadClassifier.Classify(old, profile.Raw, new RawSaveEnvelopeVersionContract(1, 14),
                 Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator).UnknownPrimaryMembers.Any(v => v.Name == "livingDungeon"), Is.False);
-            var classified = RawSavePayloadClassifier.Classify(f.Session.GetCurrentBytes(), profile.Raw, new RawSaveEnvelopeVersionContract(1, 17),
+            var classified = RawSavePayloadClassifier.Classify(f.Session.GetCurrentBytes(), profile.Raw,
+                new RawSaveEnvelopeVersionContract(1, CanonicalSaveSchemaVersions.CurrentWritableTarget),
                 Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator);
+            Assert.That(classified.IsSuccess, Is.True, classified.FailureReason);
             Assert.That(classified.Members.Single(m => m.Name == "livingDungeon").State, Is.EqualTo(RawSaveMemberState.NonNull));
         }
         [Test]

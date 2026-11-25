@@ -1208,6 +1208,10 @@ namespace DungeonBuilder.M0.Tests
         {
             yield return ExplicitDeleteShell(false);
             var root = GameRoot.Instance;
+            // The deletion fixture stops the replacement root for its inert-shell
+            // assertions. The starter action requires the normal foreground owner.
+            root.enabled = true;
+            PumpSceneToClosed(establishForeground: true);
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             var build = ui.Q<Button>("buildFirstRoom");
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720, 1280);
@@ -1244,7 +1248,9 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.Discard(), Is.True);
 
             Click(build);
+            Assert.That(ui.Q<Label>("modalText").text, Is.EqualTo(root.Content.GetString("ui.dungeon.first_room.review", null)));
             Click(ui.Q<Button>("confirm"));
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors, Has.Length.EqualTo(1), ui.Q<Label>("status").text);
             var floor = root.Save.validatedCanonicalSpatialState.Floors.Single();
             var room = floor.Layout.Rooms.Single();
             Assert.That(floor.ActivationState, Is.EqualTo(FloorActivationState.Active));
@@ -1643,9 +1649,12 @@ namespace DungeonBuilder.M0.Tests
         }
         private void AssertReachable(Button button)
         {
-            Assert.That(button.worldBound.width, Is.GreaterThan(0), button.name);
-            Assert.That(controller.SafeRoot.worldBound.Contains(button.worldBound.min), Is.True, button.name);
-            Assert.That(controller.SafeRoot.worldBound.Contains(button.worldBound.max - Vector2.one), Is.True, button.name);
+            Rect bounds = button.worldBound;
+            Rect safeBounds = controller.SafeRoot.worldBound;
+            string diagnostic = $"{button.name} bounds {bounds}, safe area {safeBounds}";
+            Assert.That(bounds.width, Is.GreaterThan(0), diagnostic);
+            Assert.That(safeBounds.Contains(bounds.min), Is.True, diagnostic);
+            Assert.That(safeBounds.Contains(bounds.max - Vector2.one), Is.True, diagnostic);
             var picked = button.panel.Pick(button.worldBound.center);
             Assert.That(picked == button || button.Contains(picked), Is.True, button.name + " must receive pointer input without scrolling");
         }

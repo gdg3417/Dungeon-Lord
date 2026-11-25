@@ -19,8 +19,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CurrentConstantsAndNativeEmptyCreationUseThirteen()
         {
             Fixture f = Fixture.Create(null);
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.ResearchTimingIntroduction));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.ResearchTimingIntroduction));
             var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.CreatePrecise(f.ActivePath, fs,
                 f.Runtime, f.Production, f.Profile, f.Acquisition,

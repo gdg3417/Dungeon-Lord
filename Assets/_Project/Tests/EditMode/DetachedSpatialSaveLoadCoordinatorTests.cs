@@ -9,6 +9,7 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Economy;
 using NUnit.Framework;
 using UnityEngine;
+using FrozenMigration = DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -20,22 +21,28 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(6, "LivingDungeon", false)] [TestCase(1, "livingDungeon", true)] [TestCase(1, "LivingDungeon", true)]
         public void NewOwnerCollisionInLegacySourceRejectsBeforeAnyMigrationWrite(int schema, string ownerName, bool unwrapped)
         {
-            var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(schema, unwrapped);
+            var fixture = FrozenMigration.PrepareEmptyFixture(schema, unwrapped);
             string json = Encoding.UTF8.GetString(fixture.Original);
-            byte[] source = Encoding.UTF8.GetBytes(unwrapped ? "{\"" + ownerName + "\":null," + json.Substring(1) :
+            byte[] original = Encoding.UTF8.GetBytes(unwrapped ? "{\"" + ownerName + "\":null," + json.Substring(1) :
                 json.Replace("\"primary\":{}", "\"primary\":{\"lastSavedUtcUnix\":1,\"" + ownerName + "\":null}"));
-            Assert.That(RawSavePayloadClassifier.Classify(source,
-                Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator, new RawSaveEnvelopeVersionContract(1, 6),
-                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator).IsSuccess, Is.True);
-            var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            string active = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "b2-legacy-collision-" + Guid.NewGuid().ToString("N") + ".json"));
-            fs.Seed(active, source);
-            var result = Coordinator(fixture).Load(active, Supported(fs, active));
-            Assert.That(result.IsSuccess, Is.False); Assert.That(result.Session, Is.Null);
-            Assert.That(result.Reason, Is.EqualTo(SchemaSevenToEightUpgrade.InvalidReason));
-            CollectionAssert.AreEqual(source, fs.ReadAllBytes(active));
-            Assert.That(fs.Operations.Any(o => o.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write ||
-                o.Type == Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace), Is.False);
+            var historical = FrozenMigration.PrepareEmptyFixture(schema, unwrapped, original);
+            Assert.That(historical.Classification.IsSuccess, Is.True, historical.Classification.FailureReason);
+
+            // Living Dungeon becomes a canonical owner in schema 14. The
+            // earlier producers must retain the historical extension verbatim.
+            Assert.That(historical.Classification.UnknownPrimaryMembers.Select(member => member.Name),
+                Does.Contain(ownerName));
+            Assert.That(historical.Result.IsSuccess, Is.True, historical.Result.Reason);
+            byte[] seven = historical.Result.Attempt.Candidate.GetBytes();
+            Assert.That(PhaseFourTestSupport.UpgradeFrozenThirteen(seven, historical.Limits, out byte[] thirteen), Is.True);
+            const char quote = '"';
+            Assert.That(Encoding.UTF8.GetString(thirteen), Does.Contain($"{quote}{ownerName}{quote}:null"));
+            Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, historical.Limits, out byte[] fourteen), Is.False);
+            Assert.That(fourteen, Is.Null);
+            var current = new FrozenMigration.DeterministicFileSystem();
+            string active = FrozenMigration.ActivePath("legacy-owner-collision");
+            current.Seed(active, original);
+            AssertObsolete(historical, current, active, original);
         }
 
         [Test]
@@ -237,58 +244,48 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void SchemaEightLoadUpgradesAtomicallyAndRecoversFailedWrite(bool failPersistence)
         {
             var fixture = TimedFixture(6);
-            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            var first = ConfiguredService(fixture, fileSystem, "service-eight.json");
-            Assert.That(first.LoadOrCreate("phase-four", out _), Is.Not.Null);
-            string current = Encoding.UTF8.GetString(first.CanonicalSession.GetCurrentBytes());
-            string frozen = PhaseFourTestSupport.FrozenTen(first.CanonicalSession.GetCurrentBytes());
-            int schemaTenOwners = frozen.IndexOf(",\"structuralInvestment\":", StringComparison.Ordinal);
-            byte[] eight = Encoding.UTF8.GetBytes(frozen.Remove(schemaTenOwners, frozen.Length - 2 - schemaTenOwners)
-                .Replace("\"schemaVersion\":10", "\"schemaVersion\":8"));
-            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaEightAndRoundTrip(eight, fixture.Limits).IsValid, Is.True);
-            fileSystem.Seed(first.SavePath, eight);
+            byte[] seven = fixture.Result.Attempt.Candidate.GetBytes();
+            Assert.That(SchemaSevenToEightUpgrade.TryPrepare(seven, fixture.Limits, out byte[] eight), Is.True);
+            Assert.That(SchemaEightToNineUpgrade.TryPrepare(eight, fixture.Limits, out byte[] nine), Is.True);
+            var fs = new FrozenMigration.DeterministicFileSystem();
+            string path = FrozenMigration.ActivePath("frozen-eight-nine");
+            fs.Seed(path, eight);
+            bool ReadNine(byte[] bytes) =>
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(bytes, fixture.Limits).IsValid;
             if (failPersistence)
             {
-                fileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, 1);
-                var failed = ConfiguredService(fixture, fileSystem, "service-eight.json", new List<string>());
-                Assert.That(failed.LoadOrCreate("phase-four", out _), Is.Null);
-                Assert.That(failed.CanonicalSession, Is.Null);
-                CollectionAssert.AreEqual(eight, fileSystem.ReadAllBytes(first.SavePath));
-                fileSystem.DisableFailure();
+                fs.EnableTargetedFailure(FrozenMigration.OperationType.Replace, _ => true, 1, false);
+                string failed = ExactCompleteSaveAtomicPersistence.Persist(path, fs, eight, nine, 64, ReadNine);
+                Assert.That(failed, Is.EqualTo(DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
+                fs.DisableFailure();
+                CollectionAssert.AreEqual(eight, fs.ReadAllBytes(path));
             }
-            var reopened = ConfiguredService(fixture, fileSystem, "service-eight.json");
-            Assert.That(reopened.LoadOrCreate("phase-four", out string reason), Is.Not.Null, reason);
-            CloseZeroDurationRecovery(reopened);
-            // Recovery intentionally writes the canonical R-format wallet
-            // number even for a zero award (40.0 -> 40). No other native byte
-            // may change after the zero-duration episode closes.
-            Assert.That(Encoding.UTF8.GetString(reopened.CanonicalSession.GetCurrentBytes()),
-                Is.EqualTo(ZeroRecoveryWalletBytes(current)));
-            var again = ConfiguredService(fixture, fileSystem, "service-eight.json");
-            Assert.That(again.LoadOrCreate("phase-four", out _), Is.Not.Null);
-            CollectionAssert.AreEqual(reopened.CanonicalSession.GetCurrentBytes(), again.CanonicalSession.GetCurrentBytes());
+            Assert.That(ExactCompleteSaveAtomicPersistence.Persist(path, fs, eight, nine, 64, ReadNine), Is.Null);
+            byte[] persisted = fs.ReadAllBytes(path);
+            var frozen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaNineAndRoundTrip(persisted, fixture.Limits);
+            Assert.That(frozen.IsValid, Is.True, frozen.Reason);
+            Assert.That(frozen.CurrentTargetValidated, Is.False);
+            CollectionAssert.AreEqual(nine, frozen.GetBytes());
+            AssertObsolete(fixture, fs, path, persisted);
         }
 
         [Test]
-        public void SaveServiceSchemaSixUsesGd66MigrationAndRetainsCanonicalSession()
+        public void SaveServiceRefusesSchemaSixWithoutPublishingCanonicalSession()
         {
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                TimedFixture(6);
-            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            SaveService service = ConfiguredService(fixture, fileSystem, "service-legacy.json");
-            fileSystem.Seed(service.SavePath, fixture.Original);
+            var fixture = TimedFixture(6);
+            var fs = new FrozenMigration.DeterministicFileSystem();
+            var errors = new List<string>();
+            var service = ConfiguredService(fixture, fs, "service-legacy.json", errors);
+            fs.Seed(service.SavePath, fixture.Original);
 
-            SaveData loaded = service.LoadOrCreate("gd66-live", out string banner);
+            AssertSaveServiceObsolete(service, fs, fixture.Original, errors);
 
-            Assert.That(loaded, Is.Not.Null, banner);
-            Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
-            Assert.That(service.CanonicalSession, Is.Not.Null);
-            Assert.That(Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes()),
-                Does.Contain("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget));
+            var historical = MigrateFrozenSeven(fixture, "service-legacy-historical");
+            Assert.That(historical.IsValid, Is.True, historical.Reason);
         }
 
         [Test]
-        public void SaveServiceAdoptsQualifiedPreflightPathBeforeLegacyRecoveryAndMigration()
+        public void SaveServiceAdoptsQualifiedPreflightPathBeforeRefusingObsoleteSave()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 TimedFixture(6);
@@ -297,7 +294,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "gd66-qualified-adoption"));
             char alternate = Path.DirectorySeparatorChar == '\\' ? '/' : '\\';
             string suppliedDirectory = canonicalDirectory.Replace(Path.DirectorySeparatorChar, alternate);
-            var service = new SaveService(new SimpleLogger(false),
+            var errors = new List<string>();
+            var service = new SaveService(CapturingLogger(errors),
                 new SaveConfig { fileName = "save.json", useAtomicWrites = true }, suppliedDirectory);
             service.ConfigureCanonical(PhaseFourTestSupport.ProductionProfile(), fixture.Production, fixture.Compatibility,
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
@@ -312,11 +310,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
             SaveData loaded = service.LoadOrCreate("gd66-live", out string banner);
 
-            Assert.That(loaded, Is.Not.Null, banner);
-            Assert.That(loaded.validatedCanonicalSpatialState, Is.Not.Null);
+            Assert.That(loaded, Is.Null);
+            CollectionAssert.AreEqual(new[] { ObsoleteLoadError }, errors);
+            Assert.That(banner, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
             Assert.That(service.SavePath, Is.EqualTo(qualified));
-            Assert.That(service.CanonicalSession.GetCurrentBytes(),
-                Is.EqualTo(fileSystem.ReadAllBytes(qualified)));
+            Assert.That(service.CanonicalSession, Is.Null);
+            CollectionAssert.AreEqual(fixture.Original, fileSystem.ReadAllBytes(qualified));
+            Assert.That(fileSystem.Operations.Any(IsMutation), Is.False);
         }
 
         [Test]
@@ -328,13 +328,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var errors = new List<string>();
             SaveService blocked = ConfiguredService(fixture, blockedFileSystem,
                 "service-evidence.json", errors);
-            blockedFileSystem.Seed(Path.Combine(Path.GetDirectoryName(blocked.SavePath),
-                "service-evidence.gd66-invalid-id.journal.json"), Encoding.UTF8.GetBytes("malformed"));
+            string evidence = Path.Combine(Path.GetDirectoryName(blocked.SavePath),
+                "service-evidence.gd66-invalid-id.journal.json");
+            byte[] malformed = Encoding.UTF8.GetBytes("malformed");
+            blockedFileSystem.Seed(evidence, malformed);
 
             Assert.That(blocked.LoadOrCreate("gd66-live", out _), Is.Null);
             CollectionAssert.AreEqual(new[] { "[ERROR] GD66 load failed: " +
-                DetachedSpatialMigrationTransaction.PathInvalidReason }, errors);
+                DetachedSpatialMigrationTransaction.RecoveryFailedReason }, errors);
+            Assert.That(blocked.CanonicalSession, Is.Null);
             Assert.That(blockedFileSystem.Exists(blocked.SavePath), Is.False);
+            CollectionAssert.AreEqual(malformed, blockedFileSystem.ReadAllBytes(evidence));
+            Assert.That(blockedFileSystem.Operations.Any(IsMutation), Is.False);
 
             var cleanFileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             SaveService clean = ConfiguredService(fixture, cleanFileSystem, "service-lookalike.json");
@@ -497,7 +502,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void SaveServiceNarrowHallRepairRerunsGd66AndPreservesUnknownEvidence()
+        public void HistoricalNarrowHallRepairRerunsGd66AndPreservesUnknownEvidence()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
                 "\"primary\":{\"lastSavedUtcUnix\":1,\"contentVersion\":\"repair\",\"unknownPrimary\":{\"n\":1.00}," +
@@ -509,24 +514,19 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             var errors = new List<string>();
-            SaveService service = ConfiguredService(fixture, fileSystem, "service-repair-r1.json", errors);
+            var service = ConfiguredService(fixture, fileSystem, "service-repair-r1.json", errors);
             fileSystem.Seed(service.SavePath, original);
-
-            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
-            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
-            Assert.That(service.NarrowHallRepairAvailable, Is.True);
-            Assert.That(service.NarrowHallRepairTargets, Is.EqualTo(new[] { 0 }));
-            SaveData repaired = service.RepairNarrowHallToBasicAndRetry("gd66-live", out string banner);
-
-            Assert.That(repaired, Is.Not.Null, banner);
-            Assert.That(service.CanonicalSession, Is.Not.Null);
-            string persisted = Encoding.UTF8.GetString(service.CanonicalSession.GetCurrentBytes());
+            AssertSaveServiceObsolete(service, fileSystem, original, errors);
+            Assert.That(fixture.Result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.NarrowHallReason));
+            var repaired = PrepareHistoricalNarrowHallRepair(original, 0);
+            var migrated = MigrateFrozenSeven(repaired, "repair-r1-historical");
+            string persisted = Encoding.UTF8.GetString(migrated.GetBytes());
             Assert.That(persisted, Does.Contain("\"unknownPrimary\":{\"n\":1.00}"));
             Assert.That(persisted, Does.Contain("\"unknownRoot\":[true,null]"));
         }
 
         [Test]
-        public void SaveServiceTwoNarrowR2RepairsOneTargetAtATime()
+        public void HistoricalTwoNarrowR2RepairsOneTargetAtATime()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
                 "\"primary\":{\"lastSavedUtcUnix\":1,\"mvpSelectedRoomSlotIndex\":1,\"mvpRoomSlotAssignments\":{\"Rooms\":[" +
@@ -537,27 +537,23 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             var errors = new List<string>();
-            SaveService service = ConfiguredService(fixture, fileSystem, "service-repair-r2.json", errors);
+            var service = ConfiguredService(fixture, fileSystem, "service-repair-r2.json", errors);
             fileSystem.Seed(service.SavePath, original);
+            AssertSaveServiceObsolete(service, fileSystem, original, errors);
+            Assert.That(fixture.Result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.NarrowHallReason));
 
-            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
-            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
-            Assert.That(service.NarrowHallRepairTargets, Is.EqualTo(new[] { 0, 1 }));
-            service.SelectNarrowHallRepairTarget(0);
-            Assert.That(service.RepairNarrowHallToBasicAndRetry("gd66-live", out _), Is.Null);
-            CollectionAssert.AreEqual(new[] { NarrowHallLoadError, NarrowHallLoadError }, errors);
-            Assert.That(service.NarrowHallRepairAvailable, Is.True);
-            Assert.That(service.NarrowHallRepairTargets, Is.EqualTo(new[] { 1 }));
-            SaveData repaired = service.RepairNarrowHallToBasicAndRetry("gd66-live", out string banner);
+            var first = PrepareHistoricalNarrowHallRepair(original, 0);
+            Assert.That(first.Result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.NarrowHallReason));
+            Assert.That(Encoding.UTF8.GetString(first.Original),
+                Does.Contain(Assignment(0, "basic")).And.Contain(Assignment(1, "narrow_hall")));
 
-            Assert.That(repaired, Is.Not.Null, banner);
-            Assert.That(service.CanonicalSession, Is.Not.Null);
-            Assert.That(repaired.validatedCanonicalSpatialState.Floors[0].Layout.Rooms.Length,
-                Is.EqualTo(2));
+            var second = PrepareHistoricalNarrowHallRepair(first.Original, 1);
+            var migrated = MigrateFrozenSeven(second, "repair-r2-historical");
+            Assert.That(migrated.State.Floors[0].Layout.Rooms, Has.Length.EqualTo(2));
         }
 
         [Test]
-        public void SaveServiceChangedTrustedOriginalInvalidatesRepairAndReevaluatesAuthority()
+        public void ChangedTrustedOriginalInvalidatesHistoricalRepairAndCurrentStillRefuses()
         {
             byte[] narrow = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
                 "\"primary\":{\"lastSavedUtcUnix\":1,\"mvpDungeonPlacements\":{\"Entries\":[{" +
@@ -570,18 +566,22 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, narrow);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             var errors = new List<string>();
-            SaveService service = ConfiguredService(fixture, fileSystem, "service-repair-auth.json", errors);
+            var service = ConfiguredService(fixture, fileSystem, "service-repair-auth.json", errors);
             fileSystem.Seed(service.SavePath, narrow);
-            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
-            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
-            fileSystem.RemoveSeededEvidence(service.SavePath);
+            AssertSaveServiceObsolete(service, fileSystem, narrow, errors);
+            var historical = PrepareHistoricalNarrowHallRepair(narrow, 0);
             fileSystem.Seed(service.SavePath, changed);
+            Assert.That(service.RepairNarrowHallToBasicAndRetry("gd66-live", out _), Is.Null);
+            AssertSaveServiceObsolete(service, fileSystem, changed, errors);
 
-            SaveData result = service.RepairNarrowHallToBasicAndRetry("gd66-live", out string banner);
-
-            Assert.That(result, Is.Not.Null, banner);
-            Assert.That(service.NarrowHallRepairAvailable, Is.False);
-            Assert.That(service.CanonicalSession, Is.Not.Null);
+            // Use a distinct changed original to invalidate the historical proof.
+            var third = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(changed).Replace(
+                "\"lastSavedUtcUnix\":1", "\"lastSavedUtcUnix\":2"));
+            fileSystem.Seed(service.SavePath, third);
+            string result = ExactCompleteSaveAtomicPersistence.Persist(service.SavePath, fileSystem,
+                narrow, historical.Original, fixture.Limits.Serialized.MaximumCollectionRecords);
+            Assert.That(result, Is.EqualTo(DetachedCanonicalWriteAuthority.RecoveryRequiredReason));
+            CollectionAssert.AreEqual(third, fileSystem.ReadAllBytes(service.SavePath));
         }
 
         private static string Assignment(int room, string option) =>
@@ -594,46 +594,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase(4)]
         [TestCase(5)]
         [TestCase(6)]
-        public void Load_WrappedLegacySchemas_MigrateBeforeRuntimeProjection(int schema)
+        public void WrappedLegacySchemasMigrateThroughFrozenAuthorityAndCurrentRefuses(int schema)
         {
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                TimedFixture(schema);
-            Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
-            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(),
-                "gd66-coordinator-" + schema + ".json"));
-            fileSystem.Seed(activePath, fixture.Original);
-
-            DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem, activePath));
-
-            Assert.That(result.IsSuccess, Is.True, result.Reason);
-            Assert.That(result.Disposition, Is.EqualTo(DetachedSpatialSaveLoadDisposition.Migrated));
-            Assert.That(result.Transaction, Is.Not.Null);
-            Assert.That(result.RuntimeProjection, Is.Not.Null);
-            Assert.That(result.RuntimeProjection.validatedCanonicalSpatialState, Is.Not.Null);
-            Assert.That(result.Session.GetCurrentBytes(), Is.EqualTo(fileSystem.ReadAllBytes(activePath)));
-            Assert.That(result.GetValidatedBytes(), Is.EqualTo(fileSystem.ReadAllBytes(activePath)));
+            var fixture = TimedFixture(schema);
+            var fs = new FrozenMigration.DeterministicFileSystem();
+            string active = FrozenMigration.ActivePath("wrapped-legacy-" + schema);
+            fs.Seed(active, fixture.Original);
+            AssertObsolete(fixture, fs, active, fixture.Original);
+            MigrateFrozenSeven(fixture, "wrapped-legacy-" + schema);
         }
 
         [Test]
-        public void Load_UnwrappedLegacy_Migrates()
+        public void UnwrappedLegacyMigratesThroughFrozenAuthorityAndCurrentRefuses()
         {
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                TimedFixture(1, true);
-            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-unwrapped.json"));
-            fileSystem.Seed(activePath, fixture.Original);
-
-            DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem, activePath));
-
-            Assert.That(result.IsSuccess, Is.True, result.Reason);
-            Assert.That(result.Disposition, Is.EqualTo(DetachedSpatialSaveLoadDisposition.Migrated));
+            var fixture = TimedFixture(1, true);
+            var fs = new FrozenMigration.DeterministicFileSystem();
+            string active = FrozenMigration.ActivePath("unwrapped-legacy");
+            fs.Seed(active, fixture.Original);
+            AssertObsolete(fixture, fs, active, fixture.Original);
+            MigrateFrozenSeven(fixture, "unwrapped-legacy");
         }
 
         [Test]
-        public void Load_AlreadyCommittedCandidate_DoesNotRunAnotherMigration()
+        public void Load_CurrentTargetDoesNotRunHistoricalMigration()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 TimedFixture(6);
@@ -647,35 +630,45 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Supported(fileSystem, activePath));
 
             Assert.That(result.IsSuccess, Is.True, result.Reason);
-            Assert.That(result.Disposition, Is.EqualTo(DetachedSpatialSaveLoadDisposition.AlreadyCommitted));
+            Assert.That(result.Disposition, Is.EqualTo(DetachedSpatialSaveLoadDisposition.CurrentTarget));
             Assert.That(result.Transaction, Is.Null);
+            Assert.That(result.Recovery, Is.Null);
             Assert.That(result.RuntimeProjection, Is.Not.Null);
             Assert.That(result.Session, Is.Not.Null);
+            CollectionAssert.AreEqual(currentBytes, result.Session.GetCurrentBytes());
+            CollectionAssert.AreEqual(currentBytes, fileSystem.ReadAllBytes(activePath));
+            Assert.That(fileSystem.Operations.Any(IsMutation), Is.False);
         }
 
         [Test]
-        public void Load_UnfinishedVerifiedCandidateRecoversBeforePublication()
+        public void FrozenVerifiedCandidateRecoversOnlyThroughHistoricalAuthority()
         {
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 TimedFixture(6);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-recover-candidate.json"));
-            Gd66DetachedSpatialMigrationTransactionTests.MaterializeJournal(fileSystem, fixture, activePath,
+            var names = FrozenMigration.MaterializeJournal(fileSystem, fixture, activePath,
                 SpatialMigrationJournalStage.CandidateVerified, includeBackup: true,
                 includeStaging: true, activeCandidate: false);
+            string directory = Path.GetDirectoryName(activePath);
+            string[] paths = { names.Journal, names.OriginalBackup, names.CandidateStaging };
+            byte[][] evidence = paths.Select(name => fileSystem.ReadAllBytes(Path.Combine(directory, name))).ToArray();
 
-            DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem, activePath));
+            AssertObsolete(fixture, fileSystem, activePath, fixture.Original);
+            for (int i = 0; i < paths.Length; i++)
+                CollectionAssert.AreEqual(evidence[i], fileSystem.ReadAllBytes(Path.Combine(directory, paths[i])));
 
-            Assert.That(result.IsSuccess, Is.True, result.Reason);
-            Assert.That(result.Recovery.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
-            Assert.That(result.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
-            Assert.That(result.RuntimeProjection, Is.Not.Null);
-            Assert.That(result.Session.GetCurrentBytes(), Is.EqualTo(fileSystem.ReadAllBytes(activePath)));
+            var historical = new DetachedSpatialMigrationTransaction(fileSystem, FrozenMigration.Recovery(fixture));
+            var recovered = historical.Recover(activePath);
+            Assert.That(recovered.IsSuccess, Is.True, recovered.Reason);
+            Assert.That(recovered.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
+            Assert.That(recovered.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            CollectionAssert.AreEqual(fixture.Result.Attempt.Candidate.GetBytes(), fileSystem.ReadAllBytes(activePath));
+            Assert.That(historical.Recover(activePath).Reason, Is.EqualTo(DetachedSpatialMigrationTransaction.AlreadyCommittedReason));
         }
 
         [Test]
-        public void Load_LegacyUnknownEvidence_RemainsInValidatedSessionBytes()
+        public void LegacyUnknownEvidenceRemainsInFrozenMigrationBytes()
         {
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
                 "\"primary\":{\"lastSavedUtcUnix\":1,\"unknownPrimary\":[1,{\"n\":1.00}]}," +
@@ -687,11 +680,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-unknown.json"));
             fileSystem.Seed(activePath, original);
 
-            DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem, activePath));
-
-            Assert.That(result.IsSuccess, Is.True, result.Reason);
-            string sessionJson = Encoding.UTF8.GetString(result.Session.GetCurrentBytes());
+            AssertObsolete(fixture, fileSystem, activePath, original);
+            var historical = MigrateFrozenSeven(fixture, "unknown-evidence");
+            string sessionJson = Encoding.UTF8.GetString(historical.GetBytes());
             Assert.That(sessionJson, Does.Contain("\"unknownPrimary\":[1,{\"n\":1.00}]"));
             Assert.That(sessionJson, Does.Contain("\"unknownRoot\":{\"nested\":[true,null]}"));
         }
@@ -773,24 +764,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] original = Encoding.UTF8.GetBytes(
                 "{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{" +
                 "\"mvpDungeonPlacements\":{\"Entries\":{},\"NextRevision\":0}}}");
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                TimedFixture(6);
-            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(),
-                "gd66-semantic-mismatch.json"));
-            fileSystem.Seed(activePath, original);
-
-            DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem, activePath));
-
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.OutcomeMismatchReason));
-            Assert.That(result.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
-            Assert.That(result.RuntimeProjection, Is.Null);
-            Assert.That(result.Session, Is.Null);
-            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(original));
-            Assert.That(Encoding.UTF8.GetString(fileSystem.ReadAllBytes(activePath)),
-                Does.Not.Contain("\"schemaVersion\":7"));
+            var fixture = FrozenMigration.PrepareEmptyFixture(6, false, original);
+            Assert.That(fixture.Result.IsSuccess, Is.False);
+            Assert.That(fixture.Result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.OutcomeMismatchReason));
+            var fs = new FrozenMigration.DeterministicFileSystem();
+            string active = FrozenMigration.ActivePath("semantic-mismatch");
+            fs.Seed(active, original);
+            Assert.That(new DetachedSpatialMigrationTransaction(fs, FrozenMigration.Recovery(fixture))
+                .Recover(active).TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            AssertObsolete(fixture, fs, active, original);
         }
 
         [Test]
@@ -810,16 +792,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-narrow.json"));
             fileSystem.Seed(activePath, original);
 
-            DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem, activePath));
-
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.NarrowHallReason));
-            Assert.That(result.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
-            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(original));
-            Assert.That(result.Transaction, Is.Null);
-            Assert.That(result.RuntimeProjection, Is.Null);
-            Assert.That(result.Session, Is.Null);
+            Assert.That(new DetachedSpatialMigrationTransaction(fileSystem, FrozenMigration.Recovery(fixture))
+                .Recover(activePath).TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            AssertObsolete(fixture, fileSystem, activePath, original);
         }
 
         [Test]
@@ -845,42 +820,41 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void Load_MissingMigrationProfilePreservesExactSelectionReason()
         {
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                TimedFixture(6);
-            SpatialLayoutCompatibilityProfilesData data = fixture.Compatibility.Value;
+            var fixture = TimedFixture(6);
+            var data = fixture.Compatibility.Value;
             data.MigrationProfiles = Array.Empty<SpatialMigrationCompatibilityProfile>();
             var compatibility = new SpatialLayoutCompatibilitySnapshot(data);
-            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-profile.json"));
-            fileSystem.Seed(activePath, fixture.Original);
-            DetachedSpatialSaveLoadCoordinator coordinator = Coordinator(fixture,
-                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator, compatibility);
+            int frozenSchema = CanonicalSaveSchemaVersions.FrozenLegacyCanonicalMigrationTarget;
+            var layout = compatibility.SelectContract(frozenSchema);
+            Assert.That(layout.Success, Is.True, layout.Code);
+            var selected = compatibility.SelectMigration(6, frozenSchema, layout.Value.CanonicalLayoutContractVersion);
+            Assert.That(selected.Success, Is.False);
+            Assert.That(selected.Code, Is.EqualTo("gd66.profile.missing"));
 
-            DetachedSpatialSaveLoadResult result = coordinator.Load(activePath, Supported(fileSystem, activePath));
-
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Reason, Is.EqualTo("gd66.profile.missing"));
-            Assert.That(result.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
-            Assert.That(fileSystem.ReadAllBytes(activePath), Is.EqualTo(fixture.Original));
+            var fs = new FrozenMigration.DeterministicFileSystem();
+            string active = FrozenMigration.ActivePath("missing-migration-profile");
+            fs.Seed(active, fixture.Original);
+            AssertObsolete(fixture, fs, active, fixture.Original);
         }
 
         [Test]
         public void Load_RepresentativeTransactionFailureReturnsNoRuntimeAuthority()
         {
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                TimedFixture(6);
-            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-write-failure.json"));
-            fileSystem.Seed(activePath, fixture.Original);
-            fileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 1);
+            var fixture = TimedFixture(6);
+            var current = new FrozenMigration.DeterministicFileSystem();
+            string path = FrozenMigration.ActivePath("migration-write-failure");
+            current.Seed(path, fixture.Original);
+            AssertObsolete(fixture, current, path, fixture.Original);
 
-            DetachedSpatialSaveLoadResult result = Coordinator(fixture).Load(activePath,
-                Supported(fileSystem, activePath));
-
-            Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
-            Assert.That(result.RuntimeProjection, Is.Null);
-            Assert.That(result.Session, Is.Null);
+            var fs = new FrozenMigration.DeterministicFileSystem();
+            fs.Seed(path, fixture.Original);
+            fs.EnableFailure(FrozenMigration.OperationType.Write, 1);
+            var failed = new DetachedSpatialMigrationTransaction(fs, FrozenMigration.Recovery(fixture))
+                .Execute(path, fixture.Result.Attempt);
+            Assert.That(failed.IsSuccess, Is.False);
+            Assert.That(failed.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Original));
+            fs.DisableFailure();
+            CollectionAssert.AreEqual(fixture.Original, fs.ReadAllBytes(path));
         }
 
         [TestCase("\"mvpRoomSlotAssignments\":{\"Rooms\":[{\"FloorIndex\":0,\"RoomIndex\":0," +
@@ -897,11 +871,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":4," +
                 "\"primary\":{" + primaryMember + "}}");
 
-            DetachedSpatialSaveLoadResult result = LoadOriginal(4, original, "authority");
-
-            Assert.That(result.IsSuccess, Is.True, result.Reason);
-            Assert.That(result.Validation.State.Floors.Length, Is.EqualTo(1));
-            Assert.That(result.Validation.State.Floors[0].Layout.Rooms.Length, Is.EqualTo(1));
+            var result = MigrateFrozenSeven(FrozenMigration.PrepareEmptyFixture(4, false, original), "authority");
+            Assert.That(result.State.Floors, Has.Length.EqualTo(1));
+            Assert.That(result.State.Floors[0].Layout.Rooms, Has.Length.EqualTo(1));
         }
 
         [Test]
@@ -915,21 +887,16 @@ namespace DungeonBuilder.M0.Tests.EditMode
             byte[] pretty = Encoding.UTF8.GetBytes("{\n  \"schema\": \"save_root\",\n" +
                 "  \"schemaVersion\": 4,\n  \"primary\": {\n    " + member + "\n  }\n}");
 
-            DetachedSpatialSaveLoadResult compactResult = LoadOriginal(4, compact, "compact");
-            DetachedSpatialSaveLoadResult prettyResult = LoadOriginal(4, pretty, "pretty");
-
-            Assert.That(compactResult.IsSuccess, Is.True, compactResult.Reason);
-            Assert.That(prettyResult.IsSuccess, Is.True, prettyResult.Reason);
-            Assert.That(SemanticSpatialJson(prettyResult.Validation.State.Floors),
-                Is.EqualTo(SemanticSpatialJson(compactResult.Validation.State.Floors)));
-            Assert.That(SemanticSpatialJson(prettyResult.RuntimeProjection.spatialFloors),
-                Is.EqualTo(SemanticSpatialJson(compactResult.RuntimeProjection.spatialFloors)));
-            Assert.That(prettyResult.Validation.State.Authority.MigrationTransactionId,
-                Is.Not.EqualTo(compactResult.Validation.State.Authority.MigrationTransactionId));
-            Assert.That(prettyResult.Validation.State.Authority.MigrationDescriptorFingerprint,
-                Is.Not.EqualTo(compactResult.Validation.State.Authority.MigrationDescriptorFingerprint));
-            DetachedSpatialSaveLoadResult compactAgain = LoadOriginal(4, compact, "compact-again");
-            Assert.That(compactAgain.GetValidatedBytes(), Is.EqualTo(compactResult.GetValidatedBytes()));
+            var compactResult = MigrateFrozenSeven(FrozenMigration.PrepareEmptyFixture(4, false, compact), "compact");
+            var prettyResult = MigrateFrozenSeven(FrozenMigration.PrepareEmptyFixture(4, false, pretty), "pretty");
+            Assert.That(SemanticSpatialJson(prettyResult.State.Floors),
+                Is.EqualTo(SemanticSpatialJson(compactResult.State.Floors)));
+            Assert.That(prettyResult.State.Authority.MigrationTransactionId,
+                Is.Not.EqualTo(compactResult.State.Authority.MigrationTransactionId));
+            Assert.That(prettyResult.State.Authority.MigrationDescriptorFingerprint,
+                Is.Not.EqualTo(compactResult.State.Authority.MigrationDescriptorFingerprint));
+            var compactAgain = MigrateFrozenSeven(FrozenMigration.PrepareEmptyFixture(4, false, compact), "compact-again");
+            CollectionAssert.AreEqual(compactResult.GetBytes(), compactAgain.GetBytes());
         }
 
         private static string SemanticSpatialJson(SavedSpatialFloor[] floors) => JsonUtility.ToJson(
@@ -952,41 +919,78 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var root = new SaveRoot { schema = "save_root", schemaVersion = 6,
                 primary = new SaveData { saveVersion = 6, lastSavedUtcUnix = 1 } };
             byte[] pretty = Encoding.UTF8.GetBytes(JsonUtility.ToJson(root, true));
-
-            // JsonUtility expands null classes into default shells. Keep proof
-            // that the original historical producer output is readable, then
-            // explicitly author absent Research in this fresh positive fixture.
-            var historical = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, pretty);
-            Assert.That(historical.Result.IsSuccess, Is.True, historical.Result.Reason);
-            string authored = Encoding.UTF8.GetString(pretty);
-            foreach (string member in new[] { "researchPending", "researchProgress" }) {
-                string pattern = "(\"" + member + "\"\\s*:\\s*)\\{[^{}]*\\}";
-                Assert.That(System.Text.RegularExpressions.Regex.Matches(authored, pattern).Count, Is.EqualTo(1));
-                authored = System.Text.RegularExpressions.Regex.Replace(authored, pattern, "$1null");
-            }
-            pretty = Encoding.UTF8.GetBytes(authored);
-
-            DetachedSpatialSaveLoadResult result = LoadOriginal(6, pretty, "json-utility-pretty");
-
-            Assert.That(result.IsSuccess, Is.True, result.Reason);
-            Assert.That(result.RuntimeProjection, Is.Not.Null);
+            var historical = FrozenMigration.PrepareEmptyFixture(6, false, pretty);
+            var migrated = MigrateFrozenSeven(historical, "json-utility-pretty");
+            Assert.That(migrated.State.Authority.CreationKind, Is.EqualTo(CanonicalSpatialCreationKind.Migrated));
+            var fs = new FrozenMigration.DeterministicFileSystem();
+            string active = FrozenMigration.ActivePath("json-utility-pretty");
+            fs.Seed(active, pretty);
+            AssertObsolete(historical, fs, active, pretty);
         }
 
-        private static DetachedSpatialSaveLoadResult LoadOriginal(int schema, byte[] original, string identity)
+        private static DetachedCompleteSaveValidationResult MigrateFrozenSeven(
+            FrozenMigration.PreparedFixture fixture, string identity)
         {
-            // Explicit fake time for current-target integration, without changing
-            // any frozen migration fixture or manufacturing production history.
-            string json = Encoding.UTF8.GetString(original);
-            if (!json.Contains("\"lastSavedUtcUnix\"")) original = Encoding.UTF8.GetBytes(
-                System.Text.RegularExpressions.Regex.Replace(json, "(\"primary\"\\s*:\\s*\\{)", "$1\"lastSavedUtcUnix\":1,"));
-            original = AuthorAbsentResearch(original);
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
-                Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(schema, false, original);
-            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            string activePath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gd66-" + identity + ".json"));
-            fileSystem.Seed(activePath, original);
-            return Coordinator(fixture).Load(activePath, Supported(fileSystem, activePath));
+            Assert.That(fixture.Result.IsSuccess, Is.True, fixture.Result.Reason);
+            var fs = new FrozenMigration.DeterministicFileSystem();
+            string path = FrozenMigration.ActivePath("frozen-gd66-" + identity);
+            fs.Seed(path, fixture.Original);
+            var transaction = new DetachedSpatialMigrationTransaction(fs, FrozenMigration.Recovery(fixture));
+            var executed = transaction.Execute(path, fixture.Result.Attempt);
+            Assert.That(executed.IsSuccess, Is.True, executed.Reason);
+            Assert.That(executed.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
+            byte[] published = fs.ReadAllBytes(path);
+            CollectionAssert.AreEqual(fixture.Result.Attempt.Candidate.GetBytes(), published);
+            var validated = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(
+                published, fixture.Limits);
+            Assert.That(validated.IsValid, Is.True, validated.Reason);
+            Assert.That(validated.CurrentTargetValidated, Is.False);
+            CollectionAssert.AreEqual(published, validated.GetBytes());
+            return validated;
         }
+
+        private static FrozenMigration.PreparedFixture PrepareHistoricalNarrowHallRepair(byte[] original, int target)
+        {
+            var repaired = LegacyNarrowHallRepair.Prepare(original, ClassifyRepair(original),
+                FrozenMigration.RawLimitsForCoordinator, new RawSaveEnvelopeVersionContract(1, 6),
+                FrozenMigration.BlankFloorForCoordinator, target);
+            Assert.That(repaired.IsSuccess, Is.True, repaired.Reason);
+            return FrozenMigration.PrepareEmptyFixture(6, false, repaired.GetBytes());
+        }
+
+        private static void AssertObsolete(FrozenMigration.PreparedFixture fixture,
+            FrozenMigration.DeterministicFileSystem fs, string path, byte[] original)
+        {
+            int operationCount = fs.Operations.Count();
+            var result = Coordinator(fixture).Load(path, Supported(fs, path));
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.Reason, Is.EqualTo(RecoveryEpisode.ObsoleteDevelopmentSave));
+            Assert.That(result.Session, Is.Null);
+            Assert.That(result.RuntimeProjection, Is.Null);
+            Assert.That(result.Transaction, Is.Null);
+            Assert.That(result.Recovery, Is.Null);
+            CollectionAssert.AreEqual(original, fs.ReadAllBytes(path));
+            Assert.That(fs.Operations.Skip(operationCount).Any(IsMutation), Is.False);
+        }
+
+        private const string ObsoleteLoadError = "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave;
+
+        private static void AssertSaveServiceObsolete(SaveService service,
+            FrozenMigration.DeterministicFileSystem fs, byte[] original, ICollection<string> errors)
+        {
+            int errorCount = errors.Count;
+            Assert.That(service.LoadOrCreate("gd66-live", out string banner), Is.Null);
+            CollectionAssert.AreEqual(new[] { ObsoleteLoadError }, errors.Skip(errorCount));
+            Assert.That(banner, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
+            Assert.That(service.CanonicalSession, Is.Null);
+            Assert.That(service.NarrowHallRepairAvailable, Is.False);
+            CollectionAssert.AreEqual(original, fs.ReadAllBytes(service.SavePath));
+            Assert.That(fs.Operations.Any(IsMutation), Is.False);
+        }
+
+        private static bool IsMutation(FrozenMigration.FileOperation op) =>
+            op.Type == FrozenMigration.OperationType.Write || op.Type == FrozenMigration.OperationType.Replace ||
+            op.Type == FrozenMigration.OperationType.Move || op.Type == FrozenMigration.OperationType.Delete;
 
         private static SaveService ConfiguredService(
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture,
@@ -1009,9 +1013,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return service;
         }
 
-        private const string NarrowHallLoadError =
-            "[ERROR] GD66 load failed: gd66.content.migration_blocked_narrow_hall";
-
         private static SimpleLogger CapturingLogger(ICollection<string> errors) =>
             new SimpleLogger(false, (level, formatted) =>
             {
@@ -1022,49 +1023,54 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [TestCase("write")]
         [TestCase("replace")]
         [TestCase("readback")]
-        public void SchemaTenLoadUpgradesOnceAndFailuresPublishNoActivationOrRuntime(string failure)
+        public void FrozenSchemaTenUpgradeReopensExactlyAndRollsBackFailures(string failure)
         {
-            var source = TimedFixture(6);
+            var fixture = TimedFixture(6);
             var f = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
             f.Accept(f.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
+            // Synthetic schema 10 representation from the established fixture helper.
             byte[] ten = Encoding.UTF8.GetBytes(PhaseFourTestSupport.FrozenTen(f.Session.GetCurrentBytes()));
-            byte[] expected = ExpectedActivation(ten, source);
-            var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            Assert.That(SchemaTenToElevenUpgrade.TryPrepare(ten, f.Profile.Canonical, out byte[] eleven), Is.True);
+            var fs = new FrozenMigration.DeterministicFileSystem();
             fs.Seed(f.ActivePath, ten);
+            AssertObsolete(fixture, fs, f.ActivePath, ten);
+            bool ReadEleven(byte[] bytes) =>
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaElevenAndRoundTrip(bytes, f.Profile.Canonical).IsValid;
+            string Persist(FrozenMigration.DeterministicFileSystem target) =>
+                ExactCompleteSaveAtomicPersistence.Persist(f.ActivePath, target, ten, eleven, 64, ReadEleven);
             if (failure == "readback")
             {
-                var baseline = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+                var baseline = new FrozenMigration.DeterministicFileSystem();
                 baseline.Seed(f.ActivePath, ten);
-                Assert.That(Coordinator(source).Load(f.ActivePath, Supported(baseline, f.ActivePath)).IsSuccess, Is.True);
+                Assert.That(Persist(baseline), Is.Null);
                 var operations = baseline.Operations.ToArray();
-                int replacement = Array.FindIndex(operations, op => op.Type ==
-                    Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace);
-                int readNumber = operations.Take(replacement).Count(op => op.Type ==
-                    Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read && op.Paths[0] == f.ActivePath) + 1;
-                fs.EnableTargetedFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Read,
+                int replacement = Array.FindIndex(operations, op => op.Type == FrozenMigration.OperationType.Replace);
+                Assert.That(replacement, Is.GreaterThanOrEqualTo(0));
+                int readNumber = operations.Take(replacement).Count(op =>
+                    op.Type == FrozenMigration.OperationType.Read && op.Paths[0] == f.ActivePath) + 1;
+                fs.EnableTargetedFailure(FrozenMigration.OperationType.Read,
                     paths => paths[0] == f.ActivePath, readNumber, false);
             }
             else if (failure != "success")
-                fs.EnableTargetedFailure(failure == "write" ? Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write :
-                    Gd66DetachedSpatialMigrationTransactionTests.OperationType.Replace, paths => true, 1, false);
-            var result = Coordinator(source).Load(f.ActivePath, Supported(fs, f.ActivePath));
-            fs.DisableFailure();
+                fs.EnableTargetedFailure(failure == "write" ? FrozenMigration.OperationType.Write :
+                    FrozenMigration.OperationType.Replace, _ => true, 1, false);
             if (failure != "success")
             {
-                Assert.That(result.IsSuccess, Is.False);
-                Assert.That(result.Session, Is.Null); Assert.That(result.RuntimeProjection, Is.Null);
+                Assert.That(Persist(fs), Is.EqualTo(DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
+                fs.DisableFailure();
                 CollectionAssert.AreEqual(ten, fs.ReadAllBytes(f.ActivePath));
             }
-            var reopened = Coordinator(source).Load(f.ActivePath, Supported(fs, f.ActivePath));
-            Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
-            Assert.That(reopened.Validation.CurrentTargetValidated, Is.True);
-            Assert.That(reopened.Validation.State.Floors.Single().ActivationState, Is.EqualTo(FloorActivationState.Active));
-            CollectionAssert.AreEqual(expected, reopened.GetValidatedBytes());
-            CollectionAssert.AreEqual(expected, fs.ReadAllBytes(f.ActivePath));
-            var again = Coordinator(source).Load(f.ActivePath, Supported(fs, f.ActivePath));
-            Assert.That(again.IsSuccess, Is.True, again.Reason);
-            CollectionAssert.AreEqual(expected, again.Session.GetCurrentBytes());
+            Assert.That(Persist(fs), Is.Null);
+            byte[] persisted = fs.ReadAllBytes(f.ActivePath);
+            var reopened = DetachedCompleteSaveContract.ParseValidateFrozenSchemaElevenAndRoundTrip(
+                persisted, f.Profile.Canonical);
+            Assert.That(reopened.IsValid, Is.True, reopened.Reason);
+            Assert.That(reopened.CurrentTargetValidated, Is.False);
+            Assert.That(reopened.State.Floors.Single().ActivationState, Is.EqualTo(FloorActivationState.Active));
+            CollectionAssert.AreEqual(eleven, reopened.GetBytes());
+            Assert.That(Persist(fs), Is.Null);
+            CollectionAssert.AreEqual(eleven, fs.ReadAllBytes(f.ActivePath));
         }
 
         private static Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture TimedFixture(int schema, bool unwrapped = false) =>
@@ -1127,73 +1133,6 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var pattern = new System.Text.RegularExpressions.Regex("(\"primary\"\\s*:\\s*\\{)");
             Assert.That(pattern.Matches(json).Count, Is.EqualTo(1));
             return Encoding.UTF8.GetBytes(pattern.Replace(json, "$1" + absence, 1));
-        }
-
-        private static byte[] ExpectedActivation(byte[] historical,
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture)
-        {
-            var inputs = RecoveryInputs(fixture);
-            var limits = PhaseFourTestSupport.ProductionProfile().Canonical;
-            // This source is schema ten, not the schema-seven starting point of
-            // UpgradeFrozenSixteen. Keep each frozen migration independently
-            // asserted rather than using a tolerant fixture conversion.
-            Assert.That(SchemaTenToElevenUpgrade.TryPrepare(historical, limits, out var eleven), Is.True);
-            Assert.That(SchemaElevenToTwelveUpgrade.TryPrepare(eleven, limits, out var twelve), Is.True);
-            Assert.That(SchemaTwelveToThirteenUpgrade.TryPrepare(twelve, limits,
-                PhaseFourTestSupport.PositionProfiles(limits), out var thirteen), Is.True);
-            Assert.That(SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out var fourteen), Is.True);
-            Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(fourteen, limits, inputs.Monsters, out var fifteen), Is.True);
-            Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepareStructure(fifteen, limits, null, out var sixteen), Is.True);
-            var context = PhaseFourTestSupport.CurrentContext(inputs.Compatibility, fixture.Production,
-                fixture.LegacyBytes, limits);
-            var frozen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(sixteen, context);
-            Assert.That(frozen.IsValid, Is.True, frozen.Reason);
-            var entry = RecoveryEntryObservation.FromCaptured(new UnixTimePoint(1, 0), frozen.TimeProvenance,
-                RecoveryEntryContext.UnknownPostCrash);
-            Assert.That(SchemaSixteenRecoveryActivation.Prepare(historical, sixteen, context, entry,
-                entry.WallEndpoint, 0, out var expected), Is.Null);
-            return expected;
-        }
-
-        private static string ZeroRecoveryWalletBytes(string native)
-        {
-            var limits = PhaseFourTestSupport.ProductionProfile().Canonical.Serialized;
-            Assert.That(ContractJson.TryParse(Encoding.UTF8.GetBytes(native), limits,
-                new SpatialIssueCollector(64), out var root), Is.True);
-            var wallet = root.Fields[2].Value.Fields.Single(p => p.Key == "structureRuntime").Value
-                .Fields.Single(p => p.Key == "ManaReserve").Value;
-            double amount = double.Parse(wallet.Text, System.Globalization.CultureInfo.InvariantCulture);
-            string token = "\"ManaReserve\":" + wallet.Text;
-            Assert.That(native.Split(new[] { token }, StringSplitOptions.None).Length, Is.EqualTo(2));
-            // CaptureWithMana's established writable-wallet number contract.
-            return native.Replace(token, "\"ManaReserve\":" + amount.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
-        }
-
-        private static void CloseZeroDurationRecovery(SaveService service)
-        {
-            var time = (TimeService)typeof(SaveService).GetField("recoveryTime",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(service);
-            var inputs = (RecoveryRuntimeInputs)typeof(SaveService).GetField("recoveryInputs",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(service);
-            var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(service.CanonicalSession.GetCurrentBytes(),
-                (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
-                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(service));
-            Assert.That(CanonicalMvpRouteProjection.TryPublishValidated(owned, inputs == null ? null :
-                (ProductionSpatialContentSnapshot)typeof(SaveService).GetField("_production",
-                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(service),
-                out var current, out var reason), Is.True, reason);
-            time.BindLoadedForegroundHorizon(current.livingDungeon.Scheduler?.AcceptedThrough ?? -1);
-            time.AttachSave(current);
-            service.CanonicalRuntimePublished += value => { current = value; time.AttachSave(value); };
-            var mana = new CanonicalOfflinePassiveManaService(inputs.Passive,
-                new CanonicalPassiveManaService(inputs.Passive, inputs.Economy, new FormulaEngine(),
-                    PhaseFourTestSupport.ProductionProfile().Canonical.Spatial, inputs.Bootstrap.tickSeconds));
-            for (int i = 0; i < 2; i++) {
-                var step = service.AdvanceCanonicalRecovery(current, mana, (_, __) => Assert.Fail());
-                Assert.That(step.IsSuccess, Is.True, step.Reason);
-            }
-            Assert.That(current.timeProvenance.Episode, Is.Null);
-            Assert.That(time.RecoveryClockActive, Is.False);
         }
 
         private static SpatialMigrationActivationPreflight Supported(

@@ -221,7 +221,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 DetachedCompleteSaveContract.ParseValidateAndRoundTrip(syntheticCurrent, fixture.CurrentContext);
             Assert.That(contextual.IsValid, Is.True, contextual.Reason);
             CompatibilitySelectionResult<CanonicalLayoutContractSelection> selected =
-                fixture.Compatibility.SelectContract(CanonicalSaveSchemaVersions.CurrentWritableTarget);
+                fixture.Compatibility.SelectContract(CanonicalSaveSchemaVersions.SpatialRegistration(
+                    CanonicalSaveSchemaVersions.CurrentWritableTarget));
             Assert.That(selected.Success, Is.True, selected.Code);
             var profile = new SaveSpatialMigrationLimitsProfile(
                 Gd66DetachedSpatialMigrationTransactionTests.RawLimitsForCoordinator,
