@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
@@ -10,7 +11,6 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -220,9 +220,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             {
                 File.WriteAllBytes(unityShapedPath, original);
 
-                var refused = WindowsService(fixture, filename, out _, out _);
-                LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave);
+                var refusalErrors = new List<string>();
+                var refused = WindowsService(fixture, filename, out _, out _, refusalErrors);
                 Assert.That(refused.LoadOrCreate("gd66-live", out string refusal), Is.Null);
+                CollectionAssert.AreEqual(new[] { "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave },
+                    refusalErrors);
                 Assert.That(refusal, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
                 Assert.That(refused.CanonicalSession, Is.Null);
                 Assert.That(refused.SavePath, Is.EqualTo(Path.GetFullPath(unityShapedPath)));
@@ -292,9 +294,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                     Is.False, "The current reader must continue rejecting a frozen source as current write authority");
                 File.WriteAllBytes(schemaTwelvePath, frozenSchemaTwelve);
 
-                var twelveService = WindowsService(fixture, schemaTwelveFilename, out _, out _);
-                LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave);
+                var twelveErrors = new List<string>();
+                var twelveService = WindowsService(fixture, schemaTwelveFilename, out _, out _, twelveErrors);
                 Assert.That(twelveService.LoadOrCreate("gd66-live", out string twelveBanner), Is.Null);
+                CollectionAssert.AreEqual(new[] { "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave },
+                    twelveErrors);
                 Assert.That(twelveBanner, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
                 Assert.That(twelveService.CanonicalSession, Is.Null);
                 CollectionAssert.AreEqual(frozenSchemaTwelve, File.ReadAllBytes(schemaTwelvePath));
@@ -843,9 +847,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
 
         private static SaveService WindowsService(
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture, string filename,
-            out TimeService time, out RecoveryRuntimeInputs inputs)
+            out TimeService time, out RecoveryRuntimeInputs inputs, ICollection<string> errors = null)
         {
-            var service = new SaveService(new SimpleLogger(false),
+            var logger = errors == null ? new SimpleLogger(false) : new SimpleLogger(false, (level, formatted) =>
+            {
+                if (level == "ERROR") errors.Add(formatted);
+            });
+            var service = new SaveService(logger,
                 new SaveConfig { fileName = filename, useAtomicWrites = true },
                 Application.persistentDataPath);
             service.ConfigureCanonical(new SaveSpatialMigrationLimitsProfile(

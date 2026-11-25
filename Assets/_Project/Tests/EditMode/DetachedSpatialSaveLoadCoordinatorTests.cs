@@ -9,7 +9,6 @@ using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Economy;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using FrozenMigration = DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests;
 
 namespace DungeonBuilder.M0.Tests.EditMode
@@ -275,10 +274,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
         {
             var fixture = TimedFixture(6);
             var fs = new FrozenMigration.DeterministicFileSystem();
-            var service = ConfiguredService(fixture, fs, "service-legacy.json");
+            var errors = new List<string>();
+            var service = ConfiguredService(fixture, fs, "service-legacy.json", errors);
             fs.Seed(service.SavePath, fixture.Original);
 
-            AssertSaveServiceObsolete(service, fs, fixture.Original);
+            AssertSaveServiceObsolete(service, fs, fixture.Original, errors);
 
             var historical = MigrateFrozenSeven(fixture, "service-legacy-historical");
             Assert.That(historical.IsValid, Is.True, historical.Reason);
@@ -294,7 +294,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 "gd66-qualified-adoption"));
             char alternate = Path.DirectorySeparatorChar == '\\' ? '/' : '\\';
             string suppliedDirectory = canonicalDirectory.Replace(Path.DirectorySeparatorChar, alternate);
-            var service = new SaveService(new SimpleLogger(false),
+            var errors = new List<string>();
+            var service = new SaveService(CapturingLogger(errors),
                 new SaveConfig { fileName = "save.json", useAtomicWrites = true }, suppliedDirectory);
             service.ConfigureCanonical(PhaseFourTestSupport.ProductionProfile(), fixture.Production, fixture.Compatibility,
                 LegacyGameplayConfigurationContract.Parse(fixture.LegacyBytes), fixture.LegacyBytes,
@@ -307,10 +308,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor,
                 fileSystem, qualified));
 
-            ExpectObsoleteLog();
             SaveData loaded = service.LoadOrCreate("gd66-live", out string banner);
 
             Assert.That(loaded, Is.Null);
+            CollectionAssert.AreEqual(new[] { ObsoleteLoadError }, errors);
             Assert.That(banner, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
             Assert.That(service.SavePath, Is.EqualTo(qualified));
             Assert.That(service.CanonicalSession, Is.Null);
@@ -512,9 +513,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            var service = ConfiguredService(fixture, fileSystem, "service-repair-r1.json");
+            var errors = new List<string>();
+            var service = ConfiguredService(fixture, fileSystem, "service-repair-r1.json", errors);
             fileSystem.Seed(service.SavePath, original);
-            AssertSaveServiceObsolete(service, fileSystem, original);
+            AssertSaveServiceObsolete(service, fileSystem, original, errors);
             Assert.That(fixture.Result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.NarrowHallReason));
             var repaired = PrepareHistoricalNarrowHallRepair(original, 0);
             var migrated = MigrateFrozenSeven(repaired, "repair-r1-historical");
@@ -534,9 +536,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            var service = ConfiguredService(fixture, fileSystem, "service-repair-r2.json");
+            var errors = new List<string>();
+            var service = ConfiguredService(fixture, fileSystem, "service-repair-r2.json", errors);
             fileSystem.Seed(service.SavePath, original);
-            AssertSaveServiceObsolete(service, fileSystem, original);
+            AssertSaveServiceObsolete(service, fileSystem, original, errors);
             Assert.That(fixture.Result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.NarrowHallReason));
 
             var first = PrepareHistoricalNarrowHallRepair(original, 0);
@@ -562,13 +565,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture =
                 Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, narrow);
             var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            var service = ConfiguredService(fixture, fileSystem, "service-repair-auth.json");
+            var errors = new List<string>();
+            var service = ConfiguredService(fixture, fileSystem, "service-repair-auth.json", errors);
             fileSystem.Seed(service.SavePath, narrow);
-            AssertSaveServiceObsolete(service, fileSystem, narrow);
+            AssertSaveServiceObsolete(service, fileSystem, narrow, errors);
             var historical = PrepareHistoricalNarrowHallRepair(narrow, 0);
             fileSystem.Seed(service.SavePath, changed);
             Assert.That(service.RepairNarrowHallToBasicAndRetry("gd66-live", out _), Is.Null);
-            AssertSaveServiceObsolete(service, fileSystem, changed);
+            AssertSaveServiceObsolete(service, fileSystem, changed, errors);
 
             // Use a distinct changed original to invalidate the historical proof.
             var third = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(changed).Replace(
@@ -969,14 +973,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fs.Operations.Skip(operationCount).Any(IsMutation), Is.False);
         }
 
-        private static void ExpectObsoleteLog() =>
-            LogAssert.Expect(LogType.Error, "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave);
+        private const string ObsoleteLoadError = "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave;
 
         private static void AssertSaveServiceObsolete(SaveService service,
-            FrozenMigration.DeterministicFileSystem fs, byte[] original)
+            FrozenMigration.DeterministicFileSystem fs, byte[] original, ICollection<string> errors)
         {
-            ExpectObsoleteLog();
+            int errorCount = errors.Count;
             Assert.That(service.LoadOrCreate("gd66-live", out string banner), Is.Null);
+            CollectionAssert.AreEqual(new[] { ObsoleteLoadError }, errors.Skip(errorCount));
             Assert.That(banner, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
             Assert.That(service.CanonicalSession, Is.Null);
             Assert.That(service.NarrowHallRepairAvailable, Is.False);
