@@ -996,6 +996,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return service;
         }
 
+        private static SimpleLogger CapturingLogger(ICollection<string> errors) =>
+            new SimpleLogger(false, (level, formatted) =>
+            {
+                if (level == "ERROR") errors.Add(formatted);
+            });
+
         [TestCase("success")]
         [TestCase("write")]
         [TestCase("replace")]
