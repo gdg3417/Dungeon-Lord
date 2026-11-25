@@ -915,8 +915,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(root.GameplayServicesInitializedForTests, Is.True);
             Assert.That(root.TimeService, Is.SameAs(observationOwner));
             Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(root.Save));
+            SaveData initialized = root.Save;
             byte[] completed = fs.ReadAllBytes(service.SavePath);
-            update.Invoke(root, null);
+            typeof(GameRoot).GetMethod("FinishRecoveryBoot", flags).Invoke(root, null);
+            Assert.That(root.Save, Is.SameAs(initialized));
+            Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(initialized));
             CollectionAssert.AreEqual(completed, fs.ReadAllBytes(service.SavePath));
         }
 
