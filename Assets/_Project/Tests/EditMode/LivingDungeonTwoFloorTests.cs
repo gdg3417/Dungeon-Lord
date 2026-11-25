@@ -707,10 +707,15 @@ namespace DungeonBuilder.M0.Tests.EditMode
             middle.DestinationNodeId = b.NodeId;
             middle.ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
             middle.CorridorDefinitionId = string.Empty;
-            middle.Footprint = new ResolvedTileFootprint { OccupiedTiles = Array.Empty<TileCoordinate>() };
+            middle.Footprint = null;
             middle.AuthoredGeometry = null;
             SetOwnerPassage(outgoing, "north.2", "route", new TileCoordinate(8, 9), new TileCoordinate(9, 9),
                 new TileCoordinate(10, 9), new TileCoordinate(11, 9), new TileCoordinate(11, 10), new TileCoordinate(11, 11));
+            var structural = CanonicalSpatialSaveContracts.Validate(spatial, floorTwo.Profile.Canonical.Spatial, false);
+            Assert.That(structural.IsValid, Is.True, string.Join(",", structural.Issues));
+            var semantic = DetachedCanonicalProductionSemanticValidation.Validate(spatial, floorTwo.Production,
+                floorTwo.Configuration, floorTwo.Profile.Canonical.Spatial, floorTwo.Occupancy, requirePositions: true);
+            Assert.That(semantic.IsValid, Is.True, string.Join(",", semantic.Issues));
             floorTwo = floorTwo.Rebase(spatial);
             PhaseSixA4Tests.AddContent(floorTwo, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
             PhaseSixA4Tests.AddContent(floorTwo, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
