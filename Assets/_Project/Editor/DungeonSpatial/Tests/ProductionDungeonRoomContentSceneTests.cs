@@ -446,6 +446,8 @@ namespace DungeonBuilder.M0.Tests
                         // An empty draft has nothing to publish. After the first
                         // acknowledged edit the same control must receive input.
                         Assert.That(saveButton.enabledInHierarchy, Is.EqualTo(controller.Draft.HasChanges));
+                        if (!accumulated && identity == identities[0] && text == DungeonTextSize.Large && size.x == 1024)
+                            yield return RoomContentCapture("placement-compact-narrow-after-cancel.png");
                         if (controller.Draft.HasChanges) AssertReachable(saveButton);
                         AssertReachable(ui.Q<Button>("discard"));
                         controller.TapWorld(ContentCell(room,current.RoomLocalPosition.X,current.RoomLocalPosition.Y)); controller.BeginMove();
