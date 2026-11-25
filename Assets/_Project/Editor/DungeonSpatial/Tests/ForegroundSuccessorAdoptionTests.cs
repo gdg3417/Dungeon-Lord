@@ -132,7 +132,18 @@ namespace DungeonBuilder.M0.Editor.Tests
             Assert.That(validated.CurrentTargetValidated, Is.True, validated.Reason);
             CollectionAssert.AreEqual(current, validated.GetBytes());
 
-            // Project only the outer schema and the verified legacy spatial wire.
+            // The deterministic fixture rebuilds migrated spatial state. Its
+            // migration descriptor includes the exact production package identity.
+            var authority = validated.State.Authority;
+            Assert.That(authority.CreationKind, Is.EqualTo(CanonicalSpatialCreationKind.Migrated));
+            Assert.That(authority.MigrationTransactionId,
+                Is.EqualTo("gd66-392edc8eaaf51de04709bd3bacdffd547d79052dd9a96b77089a4e6c59d2be1b"));
+            Assert.That(authority.MigrationDescriptorFingerprint,
+                Is.EqualTo("2a6930acd0236e76377f2109b137a4bca3e21ff12785927fe484447d18aac9f2"));
+            const string historicalTransaction = "gd66-6e016749a5c97b3b88a6791148d93126a36c36625dfc72c77e7b05624c92bd0c";
+            const string historicalDescriptor = "33ef7de6b8babab6b28840102b16bfd068be66c8eb479db863fdb9b04e433a32";
+
+            // Compare known schema, spatial wire and production-input identities.
             // The complete-save golden still covers every other byte, including
             // the captured runs, their checkpoint identities, and Research timing.
             const int frozenSchema = CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
@@ -169,6 +180,16 @@ namespace DungeonBuilder.M0.Editor.Tests
                         var member = field.Value.Fields[memberIndex];
                         writer.String(member.Key); writer.Token(":");
                         if (member.Key == "spatialFloors") writer.Token(Encoding.UTF8.GetString(frozen.Value.Floors));
+                        else if (member.Key == "canonicalSpatialAuthority")
+                        {
+                            // Preserve version, kind and member order from the
+                            // validated authority. Substitute only the two proven IDs.
+                            member.Value.Fields.Single(f => f.Key == nameof(CanonicalSpatialAuthorityMarker.MigrationTransactionId))
+                                .Value.Text = historicalTransaction;
+                            member.Value.Fields.Single(f => f.Key == nameof(CanonicalSpatialAuthorityMarker.MigrationDescriptorFingerprint))
+                                .Value.Text = historicalDescriptor;
+                            DetachedCompleteSaveContract.WriteCanonicalNode(writer, member.Value);
+                        }
                         else if (member.Key == TimeProvenance.Owner)
                             new TimeProvenance(validated.TimeProvenance.AccountedBoundary, historicalContext, null).Write(writer);
                         else DetachedCompleteSaveContract.WriteCanonicalNode(writer, member.Value);
