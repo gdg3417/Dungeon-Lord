@@ -9,6 +9,7 @@ using DungeonBuilder.M0.Gameplay.MvpDungeonPlacements;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using FrozenMigration = DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -55,25 +56,18 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void MissingRecoveryBindingKeepsRepairedLegacyWithoutCanonicalAuthority()
+        public void UnboundCurrentLoaderRefusesExactHistoricalRepairBytes()
         {
-            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[{" +
-                "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\"," +
-                "\"Revision\":1}],\"NextRevision\":2}}}");
-            var fixture = Gd66DetachedSpatialMigrationTransactionTests.PrepareEmptyFixture(6, false, original);
-            var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var fixture = NarrowHallLegacyFixture();
+            byte[] candidate = PrepareFrozenNarrowHallRepair(fixture);
+            var fs = new FrozenMigration.DeterministicFileSystem();
             var errors = new List<string>();
             var service = UnboundService(fixture, fs, "root-unbound-repair.json", errors);
-            fs.Seed(service.SavePath, original);
-            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
-            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
-            Assert.That(service.NarrowHallRepairAvailable, Is.True);
-            Assert.That(service.RepairNarrowHallToBasicAndRetry("gd66-live", out string banner), Is.Null);
-            Assert.That(service.CanonicalSession, Is.Null);
-            Assert.That(errors.Count, Is.EqualTo(2));
-            Assert.That(errors[1], Does.StartWith("[ERROR] GD66 load failed: "));
-            TestContext.WriteLine("Unbound repaired legacy first load: " + errors[1] + "; banner=" + banner);
+            fs.Seed(service.SavePath, fixture.Original);
+
+            Assert.That(PersistFrozenNarrowHallRepair(fs, service.SavePath, fixture, candidate), Is.Null);
+            CollectionAssert.AreEqual(candidate, fs.ReadAllBytes(service.SavePath));
+            AssertObsoleteBootLoad(service, fs, errors, candidate);
         }
 
         [TearDown]
@@ -854,118 +848,101 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         [Test]
-        public void NarrowHallBlockedRootRepairsThroughRealBootCompletionOnce()
+        public void FrozenNarrowHallRepairMigratesOnceAndCurrentRootRemainsBlocked()
         {
-            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[{" +
-                "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\"," +
-                "\"Revision\":1}],\"NextRevision\":2}}}");
-            original = ExplicitLegacyBootState(original);
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture(original);
-            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var fixture = NarrowHallLegacyFixture();
+            var fileSystem = new FrozenMigration.DeterministicFileSystem();
             var errors = new List<string>();
             SaveService service = Service(fixture, fileSystem, "root-repair.json", errors);
-            fileSystem.Seed(service.SavePath, original);
-            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
-            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
-            GameRoot root = Root(service);
-            Assert.That(root.Save, Is.Null);
-            Assert.That(root.TimeService, Is.SameAs(bootOwners[service].Time));
-            Assert.That(root.TimeService.AttachedSaveForTests, Is.Null);
-            Assert.That(root.GameplayServicesInitializedForTests, Is.False);
-            Assert.That(service.NarrowHallRepairAvailable, Is.True);
-            DetachedCanonicalSaveSession blockedSession = service.CanonicalSession;
-            const string blockedBanner = "Replace Narrow Hall to continue safely.";
-            root.SetBanner(blockedBanner);
-            Assert.That(root.BannerMessage, Is.EqualTo(blockedBanner));
+            fileSystem.Seed(service.SavePath, fixture.Original);
+            string refusal = AssertObsoleteBootLoad(service, fileSystem, errors, fixture.Original);
+            AssertBlockedRootCannotRepair(service, fileSystem, fixture.Original, refusal);
 
-            bool repaired = root.TryRepairMigrationBlockedNarrowHall();
+            byte[] candidate = PrepareFrozenNarrowHallRepair(fixture);
+            var historical = new FrozenMigration.DeterministicFileSystem();
+            string path = FrozenMigration.ActivePath("frozen-root-repair");
+            historical.Seed(path, fixture.Original);
+            Assert.That(PersistFrozenNarrowHallRepair(historical, path, fixture, candidate), Is.Null);
+            CollectionAssert.AreEqual(candidate, historical.ReadAllBytes(path));
 
-            Assert.That(repaired, Is.True);
-            ObserveForegroundReturn(root);
-            Assert.That(root.Save, Is.Not.Null);
-            Assert.That(root.Save.validatedCanonicalSpatialState, Is.Not.Null);
-            Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(root.Save));
-            Assert.That(service.NarrowHallRepairAvailable, Is.False);
-            Assert.That(service.CanonicalSession, Is.Not.Null);
-            Assert.That(service.CanonicalSession, Is.Not.SameAs(blockedSession));
-            Assert.That(service.CanonicalSession.GetCurrentBytes(),
-                Is.EqualTo(fileSystem.ReadAllBytes(service.SavePath)));
-            Assert.That(root.GameplayServicesInitializedForTests, Is.True);
-            Assert.That(root.StateLine, Does.Contain("Home"));
-            Assert.That(root.BannerMessage, Is.Not.EqualTo(blockedBanner));
-            Assert.That(root.BannerMessage, Does.Not.Contain("Narrow Hall"));
-            TimeService initializedTimeService = root.TimeService;
-            SaveData initializedSave = root.Save;
-            Assert.That(root.TryRepairMigrationBlockedNarrowHall(), Is.False);
-            Assert.That(root.TimeService, Is.SameAs(initializedTimeService));
-            Assert.That(root.Save, Is.SameAs(initializedSave));
-            Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(root.Save));
+            var repaired = Fixture(candidate);
+            Assert.That(repaired.Result.IsSuccess, Is.True, repaired.Result.Reason);
+            var recovery = FrozenMigration.Recovery(repaired);
+            var migrated = new DetachedSpatialMigrationTransaction(historical, recovery).Execute(path, repaired.Result.Attempt);
+            Assert.That(migrated.IsSuccess, Is.True, migrated.Reason);
+            Assert.That(migrated.Stage, Is.EqualTo(SpatialMigrationJournalStage.Finalized));
+            byte[] canonical = historical.ReadAllBytes(path);
+            var frozen = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSevenAndRoundTrip(canonical, repaired.Limits);
+            Assert.That(frozen.IsValid, Is.True, frozen.Reason);
+            Assert.That(frozen.CurrentTargetValidated, Is.False);
+            Assert.That(frozen.State.Floors.Single().Layout.Rooms.Single().RoomDefinitionId, Is.EqualTo("spatial.room.basic"));
+            CollectionAssert.AreEqual(repaired.Result.Attempt.Candidate.GetBytes(), frozen.GetBytes());
+            var reopened = new DetachedSpatialMigrationTransaction(historical, recovery).Recover(path);
+            Assert.That(reopened.IsSuccess, Is.True, reopened.Reason);
+            Assert.That(reopened.TrustedPayload, Is.EqualTo(SpatialTrustedPayload.Candidate));
+            CollectionAssert.AreEqual(canonical, historical.ReadAllBytes(path));
         }
 
         [Test]
-        public void NarrowHallRepairDefersHomeUntilCanonicalRecoveryCloses()
+        public void NativeReopenDefersHomeUntilCanonicalRecoveryCloses()
         {
-            byte[] original = ExplicitLegacyBootState(Encoding.UTF8.GetBytes(
-                "{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[{" +
-                "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\"," +
-                "\"Revision\":1}],\"NextRevision\":2}}}"));
-            var fixture = Fixture(original);
-            var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
-            var errors = new List<string>();
-            var service = Service(fixture, fs, "root-repair-recovery-barrier.json", errors);
-            fs.Seed(service.SavePath, original);
-            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
-            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
+            var fixture = Fixture();
+            var fs = new FrozenMigration.DeterministicFileSystem();
+            const string fileName = "root-native-recovery-barrier.json";
+            var initial = Service(fixture, fs, fileName);
+            Assert.That(initial.LoadOrCreate("gd66-live", out string createdBanner), Is.Not.Null, createdBanner);
+            byte[] original = fs.ReadAllBytes(initial.SavePath);
+            var service = Service(fixture, fs, fileName);
+            var loaded = service.LoadOrCreate("gd66-live", out string banner);
+            Assert.That(loaded, Is.Not.Null, banner);
+            CollectionAssert.AreEqual(original, service.CanonicalSession.GetCurrentBytes());
             GameRoot root = Root(service);
             TimeService observationOwner = root.TimeService;
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            var completeLoad = typeof(GameRoot).GetMethod("CompleteLoadedBoot", flags);
+            var update = typeof(GameRoot).GetMethod("UpdateForeground", flags);
 
-            Assert.That(root.TryRepairMigrationBlockedNarrowHall(), Is.True);
-
-            Assert.That(root.Save.timeProvenance.Episode, Is.Not.Null);
+            Assert.That(completeLoad.Invoke(root, new object[] { loaded, banner }), Is.False);
             Assert.That(root.TimeService.RecoveryClockActive, Is.True);
             Assert.That(root.StateLine, Does.Not.Contain("Home"));
+            Assert.That(root.GameplayServicesInitializedForTests, Is.False);
+            update.Invoke(root, null);
+            Assert.That(root.Save.timeProvenance.Episode, Is.Not.Null);
             Assert.That(root.GameplayServicesInitializedForTests, Is.False);
             CollectionAssert.AreEqual(service.CanonicalSession.GetCurrentBytes(), fs.ReadAllBytes(service.SavePath));
             ObserveForegroundReturn(root);
             Assert.That(root.StateLine, Does.Contain("Home"));
             Assert.That(root.GameplayServicesInitializedForTests, Is.True);
             Assert.That(root.TimeService, Is.SameAs(observationOwner));
+            Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(root.Save));
+            SaveData initialized = root.Save;
             byte[] completed = fs.ReadAllBytes(service.SavePath);
-            Assert.That(root.TryRepairMigrationBlockedNarrowHall(), Is.False);
+            typeof(GameRoot).GetMethod("FinishRecoveryBoot", flags).Invoke(root, null);
+            Assert.That(root.Save, Is.SameAs(initialized));
+            Assert.That(root.TimeService.AttachedSaveForTests, Is.SameAs(initialized));
             CollectionAssert.AreEqual(completed, fs.ReadAllBytes(service.SavePath));
         }
 
         [Test]
-        public void FailedNarrowHallRepairKeepsRootBlockedWithoutPartialServices()
+        public void FailedFrozenNarrowHallRepairPreservesBytesAndCurrentRootStaysBlocked()
         {
-            byte[] original = Encoding.UTF8.GetBytes("{\"schema\":\"save_root\",\"schemaVersion\":6," +
-                "\"primary\":{\"mvpDungeonPlacements\":{\"Entries\":[{" +
-                "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\"," +
-                "\"Revision\":1}],\"NextRevision\":2}}}");
-            original = ExplicitLegacyBootState(original);
-            Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture fixture = Fixture(original);
-            var fileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var fixture = NarrowHallLegacyFixture();
+            byte[] candidate = PrepareFrozenNarrowHallRepair(fixture);
+            var fileSystem = new FrozenMigration.DeterministicFileSystem();
             var errors = new List<string>();
             SaveService service = Service(fixture, fileSystem, "root-repair-failed.json", errors);
-            fileSystem.Seed(service.SavePath, original);
-            Assert.That(service.LoadOrCreate("gd66-live", out _), Is.Null);
-            CollectionAssert.AreEqual(new[] { NarrowHallLoadError }, errors);
-            GameRoot root = Root(service);
-            const string blockedBanner = "Replace Narrow Hall to continue safely.";
-            root.SetBanner(blockedBanner);
-            fileSystem.EnableFailure(Gd66DetachedSpatialMigrationTransactionTests.OperationType.Write, 1);
+            fileSystem.Seed(service.SavePath, fixture.Original);
+            fileSystem.EnableFailure(FrozenMigration.OperationType.Write, 1);
 
-            bool repaired = root.TryRepairMigrationBlockedNarrowHall();
+            string failure = PersistFrozenNarrowHallRepair(fileSystem, service.SavePath, fixture, candidate);
 
-            Assert.That(repaired, Is.False);
-            Assert.That(root.Save, Is.Null);
-            Assert.That(root.TimeService, Is.SameAs(bootOwners[service].Time));
-            Assert.That(root.TimeService.AttachedSaveForTests, Is.Null);
-            Assert.That(root.GameplayServicesInitializedForTests, Is.False);
-            Assert.That(root.StateLine, Does.Not.Contain("Home"));
-            Assert.That(root.BannerMessage, Is.Not.Empty);
-            Assert.That(root.BannerMessage, Is.Not.EqualTo(blockedBanner));
+            Assert.That(failure, Is.EqualTo(DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
+            Assert.That(fileSystem.Operations.Any(operation => operation.Type == FrozenMigration.OperationType.Write &&
+                operation.Index == 1 && !operation.MutationCompleted), Is.True);
+            fileSystem.DisableFailure();
+            CollectionAssert.AreEqual(fixture.Original, fileSystem.ReadAllBytes(service.SavePath));
+            string refusal = AssertObsoleteBootLoad(service, fileSystem, errors, fixture.Original);
+            AssertBlockedRootCannotRepair(service, fileSystem, fixture.Original, refusal);
         }
 
         [Test]
@@ -1363,12 +1340,59 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return service;
         }
 
-        private const string NarrowHallLoadError =
-            "[ERROR] GD66 load failed: gd66.content.migration_blocked_narrow_hall";
+        private static FrozenMigration.PreparedFixture NarrowHallLegacyFixture() => Fixture(Encoding.UTF8.GetBytes(
+            "{\"schema\":\"save_root\",\"schemaVersion\":6,\"primary\":{\"lastSavedUtcUnix\":100," +
+            "\"researchPending\":null,\"researchProgress\":null,\"mvpDungeonPlacements\":{\"Entries\":[{" +
+            "\"CategoryId\":\"placement.category.room\",\"OptionId\":\"placement.option.room.narrow_hall\"," +
+            "\"Revision\":1}],\"NextRevision\":2}}}"));
 
-        private static byte[] ExplicitLegacyBootState(byte[] original) => Encoding.UTF8.GetBytes(
-            Encoding.UTF8.GetString(original).Replace("\"primary\":{", "\"primary\":{\"lastSavedUtcUnix\":100," +
-                "\"researchPending\":null,\"researchProgress\":null,"));
+        private static byte[] PrepareFrozenNarrowHallRepair(FrozenMigration.PreparedFixture fixture)
+        {
+            Assert.That(fixture.Result.IsSuccess, Is.False);
+            Assert.That(fixture.Result.Reason, Is.EqualTo(DetachedSpatialMigrationPreparer.NarrowHallReason));
+            CollectionAssert.AreEqual(new[] { 0 }, LegacyNarrowHallRepair.FindRepairTargets(fixture.Classification));
+            var repair = LegacyNarrowHallRepair.Prepare(fixture.Original, fixture.Classification,
+                PhaseFourTestSupport.ProductionProfile().Raw, new RawSaveEnvelopeVersionContract(1, 6),
+                FrozenMigration.BlankFloorForCoordinator, 0);
+            Assert.That(repair.IsSuccess, Is.True, repair.Reason);
+            return repair.GetBytes();
+        }
+
+        private static string PersistFrozenNarrowHallRepair(FrozenMigration.DeterministicFileSystem fs,
+            string path, FrozenMigration.PreparedFixture fixture, byte[] candidate) =>
+            ExactCompleteSaveAtomicPersistence.Persist(path, fs, fixture.Original, candidate,
+                fixture.Limits.Serialized.MaximumCollectionRecords);
+
+        private static string AssertObsoleteBootLoad(SaveService service, FrozenMigration.DeterministicFileSystem fs,
+            List<string> errors, byte[] original)
+        {
+            int operationCount = fs.Operations.Count();
+            Assert.That(service.LoadOrCreate("gd66-live", out string banner), Is.Null);
+            CollectionAssert.AreEqual(new[] { "[ERROR] GD66 load failed: " + RecoveryEpisode.ObsoleteDevelopmentSave }, errors);
+            Assert.That(banner, Is.EqualTo(RecoveryEpisode.PlayerLocalizationKey(RecoveryEpisode.ObsoleteDevelopmentSave)));
+            Assert.That(service.CanonicalSession, Is.Null);
+            Assert.That(service.NarrowHallRepairAvailable, Is.False);
+            CollectionAssert.AreEqual(original, fs.ReadAllBytes(service.SavePath));
+            Assert.That(fs.Operations.Skip(operationCount).Any(operation => operation.MutationCompleted), Is.False);
+            return banner;
+        }
+
+        private void AssertBlockedRootCannotRepair(SaveService service, FrozenMigration.DeterministicFileSystem fs,
+            byte[] original, string refusal)
+        {
+            GameRoot root = Root(service);
+            root.SetBanner(refusal);
+            int operationCount = fs.Operations.Count();
+            Assert.That(root.TryRepairMigrationBlockedNarrowHall(), Is.False);
+            Assert.That(fs.Operations.Count(), Is.EqualTo(operationCount));
+            Assert.That(root.Save, Is.Null);
+            Assert.That(root.TimeService, Is.SameAs(bootOwners[service].Time));
+            Assert.That(root.TimeService.AttachedSaveForTests, Is.Null);
+            Assert.That(root.GameplayServicesInitializedForTests, Is.False);
+            Assert.That(root.StateLine, Does.Not.Contain("Home"));
+            Assert.That(root.BannerMessage, Is.EqualTo(refusal));
+            CollectionAssert.AreEqual(original, fs.ReadAllBytes(service.SavePath));
+        }
 
         private static Gd66DetachedSpatialMigrationTransactionTests.PreparedFixture Fixture(byte[] original = null)
         {

@@ -70,10 +70,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             current = SyntheticCurrent(historical, limits); return true;
         }
 
-        internal static bool UpgradeFrozenSixteen(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] current)
+        internal static bool UpgradeFrozenThirteen(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] thirteen)
         {
             source = WithTestTimestamp(source, limits);
-            current = null;
+            thirteen = null;
             if (!SchemaSevenToEightUpgrade.TryPrepare(source, limits, out byte[] eight))
             { return false; }
             if (!SchemaEightToNineUpgrade.TryPrepare(eight, limits, out byte[] nine))
@@ -84,10 +84,14 @@ namespace DungeonBuilder.M0.Tests.EditMode
             { return false; }
             if (!SchemaElevenToTwelveUpgrade.TryPrepare(eleven, limits, out byte[] twelve))
             { return false; }
-            if (!SchemaTwelveToThirteenUpgrade.TryPrepare(twelve, limits, PositionProfiles(limits),
-                    out byte[] thirteen))
-            { return false; }
-            return SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out var fourteen) &&
+            return SchemaTwelveToThirteenUpgrade.TryPrepare(twelve, limits, PositionProfiles(limits), out thirteen);
+        }
+
+        internal static bool UpgradeFrozenSixteen(byte[] source, CanonicalSpatialSerializationLimits limits, out byte[] current)
+        {
+            current = null;
+            return UpgradeFrozenThirteen(source, limits, out var thirteen) &&
+                SchemaThirteenToFourteenUpgrade.TryPrepare(thirteen, limits, out var fourteen) &&
                 SchemaFourteenToFifteenUpgrade.TryPrepare(fourteen, limits, MonsterRecoveryRules.EditorFallback(), out var fifteen) &&
                 SchemaFifteenToSixteenUpgrade.TryPrepareStructure(fifteen, limits, null, out current);
         }

@@ -29,7 +29,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     [Serializable]
     public sealed class FloorRouteEdge : ISerializationCallbackReceiver
     {
-        private enum FootprintPresence { UnknownOrLegacy = 0, Absent = 1, Present = 2 }
+        internal enum FootprintPresence { UnknownOrLegacy = 0, Absent = 1, Present = 2 }
 
         public string EdgeId;
         public string CorridorDefinitionId;

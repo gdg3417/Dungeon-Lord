@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using DungeonBuilder.M0.Economy;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
 using DungeonBuilder.M0.Gameplay.RunSimulation;
@@ -104,7 +105,7 @@ namespace DungeonBuilder.M0.Editor.Tests
             Assert.That(current.researchProgress.CompletionPending, Is.True);
             Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(twoFloors ? 0.6666666666666666 : 0.5));
             byte[] tickBytes = service.CanonicalSession.GetCurrentBytes();
-            Assert.That(SpatialContractSha256.Compute(tickBytes), Is.EqualTo(expectedTick));
+            AssertCurrentBytesMatchSchemaSeventeenGolden(f, tickBytes, expectedTick);
             Assert.That(current.timeProvenance.AccountedBoundary, Is.EqualTo(WallAt(PassiveBoundary)));
 
             service = LivingDungeonB3B2Tests.Service(f, new PairedForegroundObservationTests.PreciseClock { Now = WallAt(PassiveBoundary) });
@@ -119,7 +120,58 @@ namespace DungeonBuilder.M0.Editor.Tests
             Assert.That(current.livingDungeon.Parties.Single().NextOrdinal, Is.EqualTo(10));
             Assert.That(current.researchProgress.ProgressUnits, Is.EqualTo(1.05).Within(1e-12));
             Assert.That(current.structureRuntime.ManaReserve, Is.EqualTo(twoFloors ? 0.6666666666666666 : 0.5));
-            Assert.That(SpatialContractSha256.Compute(service.CanonicalSession.GetCurrentBytes()), Is.EqualTo(expectedFinal));
+            byte[] finalBytes = service.CanonicalSession.GetCurrentBytes();
+            AssertCurrentBytesMatchSchemaSeventeenGolden(f, finalBytes, expectedFinal);
+            CollectionAssert.AreEqual(finalBytes, f.FileSystem.ReadAllBytes(f.ActivePath));
+        }
+
+        private static void AssertCurrentBytesMatchSchemaSeventeenGolden(Fixture fixture, byte[] current,
+            string expectedHistoricalHash)
+        {
+            var validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(current, fixture.Context);
+            Assert.That(validated.CurrentTargetValidated, Is.True, validated.Reason);
+            CollectionAssert.AreEqual(current, validated.GetBytes());
+
+            // Project only the outer schema and the verified legacy spatial wire.
+            // The complete-save golden still covers every other byte, including
+            // the captured runs, their checkpoint identities, and Research timing.
+            const int frozenSchema = CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
+            Assert.That(validated.State.Floors.SelectMany(floor => floor.Layout.Edges)
+                .All(edge => edge.AuthoredGeometry == null), Is.True,
+                "The historical fixture may only contain inferred edges");
+            var limits = fixture.Profile.Canonical;
+            var frozen = CanonicalSpatialSaveSerializer.SerializeMembers(validated.State, limits, frozenSchema);
+            Assert.That(frozen.IsValid, Is.True);
+            var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
+            Assert.That(ContractJson.TryParse(current, limits.Serialized, issues, out var root), Is.True);
+            Assert.That(root.Fields.Single(field => field.Key == "schemaVersion").Value.Text,
+                Is.EqualTo("19"));
+            var writer = new ContractJsonWriter(limits.Serialized);
+            writer.Node(); writer.Token("{");
+            for (int index = 0; index < root.Fields.Count; index++)
+            {
+                if (index != 0) writer.Token(",");
+                var field = root.Fields[index];
+                writer.String(field.Key); writer.Token(":");
+                if (field.Key == "schemaVersion") writer.Token("17");
+                else if (field.Key == "primary")
+                {
+                    writer.Node(); writer.Token("{");
+                    for (int memberIndex = 0; memberIndex < field.Value.Fields.Count; memberIndex++)
+                    {
+                        if (memberIndex != 0) writer.Token(",");
+                        var member = field.Value.Fields[memberIndex];
+                        writer.String(member.Key); writer.Token(":");
+                        if (member.Key == "spatialFloors") writer.Token(Encoding.UTF8.GetString(frozen.Value.Floors));
+                        else DetachedCompleteSaveContract.WriteCanonicalNode(writer, member.Value);
+                    }
+                    writer.Token("}");
+                }
+                else DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
+            }
+            writer.Token("}");
+            byte[] projected = writer.Finish();
+            Assert.That(SpatialContractSha256.Compute(projected), Is.EqualTo(expectedHistoricalHash));
         }
 
         [TestCase(false)]
