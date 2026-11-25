@@ -442,7 +442,12 @@ namespace DungeonBuilder.M0.Tests
                         yield return SettleContentPanel(); Assert.That(controller.IsPlacingContent,Is.False);
                         Assert.That(controller.SafeRoot.ClassListContains("placing-content"),Is.False);
                         Assert.That(controller.World.RoomPlacementGridTileCount,Is.Zero);
-                        AssertReachable(ui.Q<Button>("save")); AssertReachable(ui.Q<Button>("discard"));
+                        var saveButton = ui.Q<Button>("save");
+                        // An empty draft has nothing to publish. After the first
+                        // acknowledged edit the same control must receive input.
+                        Assert.That(saveButton.enabledInHierarchy, Is.EqualTo(controller.Draft.HasChanges));
+                        if (controller.Draft.HasChanges) AssertReachable(saveButton);
+                        AssertReachable(ui.Q<Button>("discard"));
                         controller.TapWorld(ContentCell(room,current.RoomLocalPosition.X,current.RoomLocalPosition.Y)); controller.BeginMove();
                         controller.TapWorld(valid); Assert.That(controller.ConfirmContentPlacement(),Is.True);
                         yield return SettleContentPanel(); Assert.That(controller.SelectedContent.AssignmentId,Is.EqualTo(identity.AssignmentId));

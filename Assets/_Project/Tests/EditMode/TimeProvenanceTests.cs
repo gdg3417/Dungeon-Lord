@@ -183,65 +183,74 @@ namespace DungeonBuilder.M0.Tests.EditMode
         static SpatialMigrationActivationPreflight Supported(FS.DeterministicFileSystem fs, string path) =>
             new SpatialMigrationActivationPreflight(true, SpatialMigrationCapabilityReason.Ready, SpatialMigrationPlatform.WindowsEditor, fs, path);
         [TestCase("dormant")] [TestCase("dormant-monsters")] [TestCase("active-v1")] [TestCase("active-v2")]
-        public void ActualLoadCoordinatorMigratesAndIndependentlyReopensExactTarget(string name)
+        public void FrozenFifteenMigratesToExactSixteenAndCurrentLoadRefuses(string name)
         {
             var f = Fixture.Create(null); var context = Context(f, name); var source = Source(f, name);
             Assert.That(SchemaFifteenToSixteenUpgrade.TryPrepare(source, context, out var expected), Is.True);
-            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(expected,context).IsValid,Is.True);
+            var validated = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(expected, context);
+            Assert.That(validated.IsValid, Is.True, validated.Reason);
+            Assert.That(validated.CurrentTargetValidated, Is.False);
+            CollectionAssert.AreEqual(expected, validated.GetBytes());
             var fs = new FS.DeterministicFileSystem(); string path = FS.ActivePath("h1-f2-load-" + name); fs.Seed(path, source);
             var loaded = Coordinator(f, context).Load(path, Supported(fs, path));
             // This frozen corpus proves its historical reader/executable, not
             // a full bootstrap producer binding for current activation.
-            Assert.That(loaded.IsSuccess,Is.False); Assert.That(loaded.Reason,Is.EqualTo(RecoveryEpisode.ContextMismatch));
+            Assert.That(loaded.IsSuccess,Is.False); Assert.That(loaded.Reason,Is.EqualTo(RecoveryEpisode.ObsoleteDevelopmentSave));
             Assert.That(loaded.Session,Is.Null); Assert.That(loaded.RuntimeProjection,Is.Null);
             CollectionAssert.AreEqual(source,fs.ReadAllBytes(path));
             var reopened = Coordinator(f, context).Load(path, Supported(fs, path));
             Assert.That(reopened.IsSuccess,Is.False); CollectionAssert.AreEqual(source,fs.ReadAllBytes(path));
             Assert.That(fs.Operations.Any(o=>o.Type==FS.OperationType.Write || o.Type==FS.OperationType.Replace),Is.False);
         }
-        private sealed class ActivationClock : IPreciseTimeSource
-        {
-            public UnixTimePoint UtcNow() => new UnixTimePoint(1,0);
-            public long UtcNowUnixSeconds() => 1;
-        }
-        static DetachedSpatialSaveLoadCoordinator BoundCoordinator(Fixture f)
-        {
-            var inputs=f.Context.RecoveryInputs;
-            var coordinator=new DetachedSpatialSaveLoadCoordinator(f.Profile,inputs.Compatibility,f.Production,
-                LegacyGameplayConfigurationContract.SerializeCanonical(inputs.Configuration),new Dictionary<string,byte[]>(),
-                new RawSaveEnvelopeVersionContract(1,CanonicalSaveSchemaVersions.CurrentWritableTarget),FS.BlankFloorForCoordinator,
-                f.PositionProfiles,inputs.Occupancy,new[] { inputs.OneFloor.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized),
-                    inputs.TwoFloor.CreateProfile(f.Profile.Canonical.ForSchema(13).Serialized) },inputs.Monsters);
-            var time=new TimeService(new SimpleLogger(false),inputs.Bootstrap.tickSeconds,inputs.Bootstrap.timeRules.detectClockSkewSeconds,new ActivationClock(),()=>0);
-            time.BeginRecoveryForeground(inputs.TwoFloor.UnitsPerSecond);coordinator.ConfigureRecovery(inputs,time);return coordinator;
-        }
         [TestCase(false)] [TestCase(true)]
-        public void CoordinatorFailureThenIndependentRecoveryNeverPublishesPartialAuthority(bool uncertain)
+        public void FrozenRecoveryActivationFailureThenIndependentRecoveryNeverPublishesPartialBytes(bool uncertain)
         {
-            var profile=SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
-            var f=Fixture.Create("\"researchPending\":null,\"researchProgress\":null",workloadProfile:profile);
-            // Newly authored dormant source, with validated full current inputs;
-            // never attribution of the old active corpus to today's defaults.
-            var source=f.FrozenSixteen;
-            var fs = new FS.DeterministicFileSystem(); string path = FS.ActivePath("h1-f2-load-failure"); fs.Seed(path, source);
+            var profile = SaveSpatialMigrationLimitsLoader.Load(File.ReadAllBytes(SaveSpatialMigrationLimitsLoader.ProductionPath)).Profile;
+            var f = Fixture.Create("\"researchPending\":null,\"researchProgress\":null", workloadProfile: profile);
+            byte[] source = f.FrozenSixteen;
+            var prior = DetachedCompleteSaveContract.ParseValidateFrozenSchemaSixteenAndRoundTrip(source, f.Context);
+            Assert.That(prior.IsValid, Is.True, prior.Reason);
+            var wall = new UnixTimePoint(1, 0);
+            var entry = RecoveryEntryObservation.FromCaptured(wall, prior.TimeProvenance, RecoveryEntryContext.UnknownPostCrash);
+            Assert.That(SchemaSixteenRecoveryActivation.Prepare(source, source, f.Context, entry, wall,
+                0, out var expected), Is.Null);
+
+            bool Validate(byte[] bytes)
+            {
+                var limits = f.Profile.Canonical.ForSchema(CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction).Serialized;
+                return ContractJson.TryParse(bytes, limits, new SpatialIssueCollector(limits.MaximumDiagnostics), out var root) &&
+                    TimeProvenance.TryRead(root.Fields[2].Value, CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction, out var time) &&
+                    time.AccountedBoundary.Equals(wall) && time.Episode?.Phase == RecoveryEpisode.OriginalPending &&
+                    time.RecoveryContextSha256 == f.Context.RecoveryInputs.Identity.Digest;
+            }
+
+            var fs = new FS.DeterministicFileSystem();
+            string path = FS.ActivePath("h1-f2-load-failure");
+            fs.Seed(path, source);
             if (uncertain) fs.EnableFailureSequence(FS.OperationType.Flush, 1, FS.OperationType.Replace, 2);
             else fs.EnableTargetedFailure(FS.OperationType.Replace, _ => true, 1, false);
-            var failed = BoundCoordinator(f).Load(path, Supported(fs, path));
-            Assert.That(failed.IsSuccess, Is.False); Assert.That(failed.RuntimeProjection, Is.Null); Assert.That(failed.Session, Is.Null);
-            if (!uncertain) CollectionAssert.AreEqual(source, fs.ReadAllBytes(path));
+            string failed = ExactCompleteSaveAtomicPersistence.Persist(path, fs, source, expected, 64, Validate);
+            Assert.That(failed, Is.EqualTo(uncertain ? DetachedCanonicalWriteAuthority.RecoveryRequiredReason :
+                DetachedCanonicalWriteAuthority.AtomicSaveFailedReason));
             fs.DisableFailure();
-            var recovered = BoundCoordinator(f).Load(path, Supported(fs, path));
-            Assert.That(recovered.IsSuccess, Is.True, recovered.Reason);
-            Assert.That(recovered.RuntimeProjection.timeProvenance.AccountedBoundary, Is.EqualTo(new UnixTimePoint(1, 0)));
-            Assert.That(recovered.RuntimeProjection.timeProvenance.Episode.Phase,Is.EqualTo(RecoveryEpisode.OriginalPending));
-            Assert.That(recovered.RuntimeProjection.timeProvenance.RecoveryContextSha256,Is.EqualTo(f.Context.RecoveryInputs.Identity.Digest));
-            CollectionAssert.AreEqual(recovered.Session.GetCurrentBytes(), fs.ReadAllBytes(path));
+            CollectionAssert.AreEqual(uncertain ? expected : source, fs.ReadAllBytes(path));
+            Assert.That(ExactCompleteSaveAtomicPersistence.Persist(path, fs, source, expected, 64, Validate), Is.Null);
+            byte[] recovered = fs.ReadAllBytes(path);
+            CollectionAssert.AreEqual(expected, recovered);
+            Assert.That(Validate(recovered), Is.True);
+
+            var current = Coordinator(f, f.Context).Load(path, Supported(fs, path));
+            Assert.That(current.Reason, Is.EqualTo(RecoveryEpisode.ObsoleteDevelopmentSave));
+            Assert.That(current.RuntimeProjection, Is.Null);
+            Assert.That(current.Session, Is.Null);
+            CollectionAssert.AreEqual(expected, fs.ReadAllBytes(path));
         }
         [Test] public void FutureSchemaAndInvalidHistoricalBoundaryLeaveExactSourceUntouched()
         {
             var f = Fixture.Create(null); var context = Context(f, "dormant");
             foreach (var bytes in new[] { Read("dormant"), Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(f.Session.GetCurrentBytes())
-                .Replace("\"schemaVersion\":17", "\"schemaVersion\":18")) }) {
+                .Replace("\"schemaVersion\":" + CanonicalSaveSchemaVersions.CurrentWritableTarget,
+                    "\"schemaVersion\":" + (CanonicalSaveSchemaVersions.CurrentWritableTarget + 1))) }) {
                 var fs = new FS.DeterministicFileSystem(); string path = FS.ActivePath("h1-f2-refuse"); fs.Seed(path, bytes);
                 var result = Coordinator(f, context).Load(path, Supported(fs, path));
                 Assert.That(result.IsSuccess, Is.False); Assert.That(result.RuntimeProjection, Is.Null);
@@ -250,7 +259,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
         }
         [TestCase("active-v1")] [TestCase("active-v2")]
-        public void MigratedAcceptedWorkDrainsThroughTheExistingForegroundAuthority(string name)
+        public void FrozenMigrationRetainsAcceptedWorkWhileCurrentLoadRefuses(string name)
         {
             var f = Fixture.Create(null); var context = Context(f, name); var source = Source(f, name);
             var fs = new FS.DeterministicFileSystem(); string path = FS.ActivePath("h1-f2-drain-" + name); fs.Seed(path, source);
@@ -260,7 +269,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             long accepted=frozen.LivingDungeon.Scheduler.AcceptedThrough;
             long closed=frozen.LivingDungeon.Scheduler.ClosedThrough;
             var loaded = Coordinator(f, context).Load(path, Supported(fs, path));
-            Assert.That(loaded.IsSuccess,Is.False);Assert.That(loaded.Reason,Is.EqualTo(RecoveryEpisode.ContextMismatch));
+            Assert.That(loaded.IsSuccess,Is.False);Assert.That(loaded.Reason,Is.EqualTo(RecoveryEpisode.ObsoleteDevelopmentSave));
             CollectionAssert.AreEqual(source,fs.ReadAllBytes(path));
             Assert.That(accepted,Is.EqualTo(100));Assert.That(closed,Is.EqualTo(-1));
             foreach(var party in frozen.LivingDungeon.Parties) {

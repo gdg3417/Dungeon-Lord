@@ -115,17 +115,21 @@ namespace DungeonBuilder.Tests.EditMode
                     bootstrap.researchVerificationScaffold = JsonUtility.FromJson<ResearchVerificationScaffoldConfig>(JsonUtility.ToJson(previousBootstrap.researchVerificationScaffold));
                     bootstrap.researchUnlockBridge = JsonUtility.FromJson<ResearchUnlockBridgeConfig>(JsonUtility.ToJson(previousBootstrap.researchUnlockBridge));
                 });
+                var profile = DungeonBuilder.M0.Tests.EditMode.PhaseFourTestSupport.ProductionProfile();
+                var captured = DetachedRecognizedSaveStateSnapshot.Capture(legacy, profile);
+                Assert.That(captured.IsSuccess, Is.True, captured.Reason);
+                Assert.That(captured.Snapshot.TryGet("researchProgress", out var progressBytes), Is.True);
                 string JsonOrNull(object value) => value == null ? "null" : JsonUtility.ToJson(value);
                 // Explicit synthetic initial Research/history, before ownership.
                 // Do not clone the presentation sandbox's time/spatial authority
                 // or overwrite a bound owner's runtime with that legacy object.
                 var fixture = Fixture.Create("\"lastSavedUtcUnix\":" + Math.Max(1, legacy.lastSavedUtcUnix) +
                     ",\"researchPending\":" + JsonOrNull(legacy.researchPending) +
-                    ",\"researchProgress\":" + JsonOrNull(legacy.researchProgress) +
+                    ",\"researchProgress\":" + Encoding.UTF8.GetString(progressBytes) +
                     ",\"completedResearch\":" + JsonOrNull(legacy.completedResearch) +
                     ",\"completedObjectives\":" + JsonOrNull(legacy.completedObjectives) +
                     ",\"runHistory\":" + JsonOrNull(legacy.runHistory),
-                    workloadProfile: DungeonBuilder.M0.Tests.EditMode.PhaseFourTestSupport.ProductionProfile(), recoveryInputBytes: bytes);
+                    workloadProfile: profile, recoveryInputBytes: bytes);
                 if (starterDungeon)
                 {
                     foreach (var pair in new[] {

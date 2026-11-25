@@ -406,29 +406,46 @@ namespace DungeonBuilder.M0.Tests.EditMode
             }
             finally { UnityEngine.Object.DestroyImmediate(policy); }
         }
-        [Test] public void WindowsSchemaFourteenMigrationAndNativeFifteenReopenUseIsolatedFiles()
+        [Test] public void WindowsFrozenFourteenMigrationAndNativeCurrentReopenUseIsolatedFiles()
         {
             if(UnityEngine.Application.platform!=UnityEngine.RuntimePlatform.WindowsEditor) Assert.Ignore("Windows qualification only");
-            var f=Deployed(); var directory=Path.GetFullPath(Path.Combine("Temp","combat-c2-windows",Guid.NewGuid().ToString("N")));
-            Directory.CreateDirectory(directory); var path=Path.Combine(directory,"migration.json");
-            var source=PhaseFourTestSupport.FrozenFourteen(f.Session.GetCurrentBytes()); File.WriteAllBytes(path,source);
-            var preflight=SpatialMigrationFileSystemSelector.Evaluate(path); Assert.That(preflight.IsSupported,Is.True,preflight.Reason);
-            var legacy=LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration);
-            var coordinator=new DetachedSpatialSaveLoadCoordinator(f.Profile,f.Compatibility,f.Production,legacy,
-                new Dictionary<string,byte[]>(),new RawSaveEnvelopeVersionContract(1,6),Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator,
-                f.PositionProfiles,f.Occupancy,monsterRecovery:Rules);
-            var clock=new RecoveryClock { Seconds=1000 }; var inputs=f.Context.RecoveryInputs;
-            var time=new TimeService(new SimpleLogger(false),inputs.Bootstrap.tickSeconds,inputs.Bootstrap.timeRules.detectClockSkewSeconds,clock,()=>0);
-            coordinator.ConfigureRecovery(inputs,time);
-            var migrated=coordinator.Load(path,preflight); Assert.That(migrated.IsSuccess,Is.True,migrated.Reason);
-            Assert.That(migrated.RuntimeProjection.monsterContinuity.Records.Single().Health,Is.EqualTo(8));
-            var bytes=File.ReadAllBytes(path); CollectionAssert.AreEqual(source,PhaseFourTestSupport.FrozenFourteen(bytes));
-            var reopened=coordinator.Load(path,preflight); Assert.That(reopened.IsSuccess,Is.True,reopened.Reason); CollectionAssert.AreEqual(bytes,File.ReadAllBytes(path));
-            var nativePath=Path.Combine(directory,"native.json"); var nativeFs=SpatialMigrationFileSystemSelector.Evaluate(nativePath);
-            // Retain the historical fixture identity, but exercise the current
-            // writer explicitly. Frozen 14->15 bytes are checked independently.
-            Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(source,f.Profile.Canonical,Rules,out var fifteen),Is.True);
-            Assert.That(DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(fifteen,f.Context).IsValid,Is.True);
+            var f = Deployed();
+            string directory = Path.Combine(UnityEngine.Application.persistentDataPath,
+                "c2-" + Guid.NewGuid().ToString("N").Substring(0, 12));
+            Directory.CreateDirectory(directory);
+            string path = Path.Combine(directory, "historical.json");
+            byte[] source = PhaseFourTestSupport.FrozenFourteen(f.Session.GetCurrentBytes());
+            File.WriteAllBytes(path, source);
+            var preflight = SpatialMigrationFileSystemSelector.Evaluate(path);
+            Assert.That(preflight.IsSupported, Is.True, preflight.Reason);
+            var legacy = LegacyGameplayConfigurationContract.SerializeCanonical(f.Configuration);
+            var coordinator = new DetachedSpatialSaveLoadCoordinator(f.Profile, f.Compatibility, f.Production, legacy,
+                new Dictionary<string, byte[]>(), new RawSaveEnvelopeVersionContract(1, 6),
+                Gd66DetachedSpatialMigrationTransactionTests.BlankFloorForCoordinator,
+                f.PositionProfiles, f.Occupancy, monsterRecovery: Rules);
+            var refused = coordinator.Load(path, preflight);
+            Assert.That(refused.Reason, Is.EqualTo(RecoveryEpisode.ObsoleteDevelopmentSave));
+            Assert.That(refused.Session, Is.Null);
+            Assert.That(refused.RuntimeProjection, Is.Null);
+            CollectionAssert.AreEqual(source, File.ReadAllBytes(path));
+
+            Assert.That(SchemaFourteenToFifteenUpgrade.TryPrepare(source, f.Profile.Canonical, Rules, out var fifteen), Is.True);
+            DetachedCompleteSaveValidationResult ReadFifteen(byte[] bytes) =>
+                DetachedCompleteSaveContract.ParseValidateFrozenSchemaFifteenAndRoundTrip(bytes, f.Context);
+            Assert.That(ExactCompleteSaveAtomicPersistence.Persist(path, preflight.FileSystem, source, fifteen,
+                f.Profile.Canonical.Serialized.MaximumCollectionRecords, bytes => ReadFifteen(bytes).IsValid), Is.Null);
+            byte[] bytes = File.ReadAllBytes(path);
+            var historical = ReadFifteen(bytes);
+            Assert.That(historical.IsValid, Is.True, historical.Reason);
+            Assert.That(historical.CurrentTargetValidated, Is.False);
+            Assert.That(historical.MonsterContinuity.Records.Single().Health, Is.EqualTo(8));
+            CollectionAssert.AreEqual(fifteen, historical.GetBytes());
+            CollectionAssert.AreEqual(source, PhaseFourTestSupport.FrozenFourteen(bytes));
+
+            string nativePath = Path.Combine(directory, "native.json");
+            var nativeFs = SpatialMigrationFileSystemSelector.Evaluate(nativePath);
+            Assert.That(nativeFs.IsSupported, Is.True, nativeFs.Reason);
+            var inputs = f.Context.RecoveryInputs;
             var native=NativeCanonicalSaveCreator.CreatePrecise(nativePath,nativeFs.FileSystem,new SaveData(),f.Production,f.Profile,f.Acquisition,inputs,new UnixTimePoint(1000,0));
             Assert.That(native.IsSuccess,Is.True,native.Reason); Assert.That(native.RuntimeProjection.monsterContinuity.Records,Is.Empty);
             Assert.That(DetachedCanonicalSaveSession.Open(File.ReadAllBytes(nativePath),f.Context,f.Profile).IsSuccess,Is.True);

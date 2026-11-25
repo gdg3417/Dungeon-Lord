@@ -158,7 +158,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.IsSuccess, Is.True, result.Reason);
             string json = Encoding.UTF8.GetString(result.Update.GetBytes());
             Assert.That(json, Does.Not.Contain(fixture.Context.RecoveryInputs.Bootstrap.researchPendingScaffold.projectId));
-            Assert.That(json, Does.Not.Contain("rule.old"));
+            Assert.That(json, Does.Not.Contain(fixture.Context.RecoveryInputs.Bootstrap.researchProgressScaffold.ruleSourceId));
             Assert.That(json, Does.Contain("\"researchPending\":null"));
             Assert.That(json, Does.Contain("\"researchProgress\":null"));
             Assert.That(json, Does.Contain("\"lastOfflineSummary\":null"));
@@ -240,10 +240,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 : placements + "," + floor + "," + assignments + "," : string.Empty;
             var bootstrap = JsonUtility.FromJson<ContentBootstrap>(Encoding.UTF8.GetString(H1F4RecoveryContractTests.Inputs()[10]));
             string project = bootstrap.researchPendingScaffold.projectId;
+            string slot = bootstrap.researchPendingScaffold.slotId;
+            string progressRule = bootstrap.researchProgressScaffold.ruleSourceId;
             string nullable = includeNullable
-                ? "\"researchPending\":{\"SlotId\":\"slot.0\",\"ProjectId\":\"" + project + "\"}," +
-                    "\"researchProgress\":{\"SlotId\":\"slot.0\",\"ProjectId\":\"" + project + "\"," +
-                    "\"ProgressUnits\":1.00,\"CompletionPending\":false,\"RuleSourceIdUsed\":\"rule.old\"}," +
+                ? "\"researchPending\":{\"SlotId\":\"" + slot + "\",\"ProjectId\":\"" + project + "\"}," +
+                    "\"researchProgress\":{\"SlotId\":\"" + slot + "\",\"ProjectId\":\"" + project + "\"," +
+                    "\"ProgressUnits\":0.5,\"CompletionPending\":false,\"RuleSourceIdUsed\":\"" + progressRule + "\"}," +
                     "\"lastOfflineSummary\":{\"RuleResolved\":true},"
                 : string.Empty;
             string json = "{\"rootUnknown\":{\"lexical\":1.00,\"items\":[true,null,{\"s\":\"a \\\" b \\\\ c\"}]}," +
