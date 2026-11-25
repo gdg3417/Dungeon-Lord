@@ -454,6 +454,8 @@ namespace DungeonBuilder.M0.Tests
                         controller.TapWorld(valid); Assert.That(controller.ConfirmContentPlacement(),Is.True);
                         yield return SettleContentPanel(); Assert.That(controller.SelectedContent.AssignmentId,Is.EqualTo(identity.AssignmentId));
                         Assert.That(controller.IsPlacingContent,Is.False); Assert.That(controller.SafeRoot.ClassListContains("placing-content"),Is.False);
+                        if (!accumulated && identity == identities[0] && text == DungeonTextSize.Large && size.x == 1024)
+                            yield return RoomContentCapture("placement-compact-narrow-after-confirm.png");
                         AssertReachable(ui.Q<Button>("save")); AssertReachable(ui.Q<Button>("discard")); AssertCanonicalUnchanged(before,mana);
                     }
                     iteration++;

@@ -187,7 +187,6 @@ namespace DungeonBuilder.M0
         {
             var ui = document.rootVisualElement;
             bool managing = IsEditing && contentCategory != null && ContextRoomId != null;
-            safe.EnableInClassList("managing-room-content", managing);
             string activeCategory = contentCategory ?? selected?.CategoryId;
             ui.Q<Button>("roomsCategory").EnableInClassList("selected-floor", activeCategory == null);
             ui.Q<Button>("monstersCategory").EnableInClassList("selected-floor", activeCategory == MvpDungeonPlacementIds.MonsterCategoryId);
