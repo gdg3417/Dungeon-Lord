@@ -139,6 +139,12 @@ namespace DungeonBuilder.M0.Editor.Tests
             Assert.That(validated.State.Floors.SelectMany(floor => floor.Layout.Edges)
                 .All(edge => edge.AuthoredGeometry == null), Is.True,
                 "The historical fixture may only contain inferred edges");
+            // The exact qualified baseline and Amendment A packs differ in the
+            // catalog and registration components of the twelve-input identity.
+            const string historicalContext = "67559c631dc9057834888a010fd117faed7b1dcce9d4566c026d5fc0ecab354b";
+            const string nativeContext = "deeec93232377bf9110ee595fb28f766a8c6162e986871a0024ad4e08e1f4f4a";
+            Assert.That(validated.TimeProvenance.RecoveryContextSha256, Is.EqualTo(nativeContext));
+            Assert.That(validated.TimeProvenance.Episode, Is.Null);
             var limits = fixture.Profile.Canonical;
             var frozen = CanonicalSpatialSaveSerializer.SerializeMembers(validated.State, limits, frozenSchema);
             Assert.That(frozen.IsValid, Is.True);
@@ -163,6 +169,8 @@ namespace DungeonBuilder.M0.Editor.Tests
                         var member = field.Value.Fields[memberIndex];
                         writer.String(member.Key); writer.Token(":");
                         if (member.Key == "spatialFloors") writer.Token(Encoding.UTF8.GetString(frozen.Value.Floors));
+                        else if (member.Key == TimeProvenance.Owner)
+                            new TimeProvenance(validated.TimeProvenance.AccountedBoundary, historicalContext, null).Write(writer);
                         else DetachedCompleteSaveContract.WriteCanonicalNode(writer, member.Value);
                     }
                     writer.Token("}");
