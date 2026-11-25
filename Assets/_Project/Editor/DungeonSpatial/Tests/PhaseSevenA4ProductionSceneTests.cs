@@ -1208,6 +1208,10 @@ namespace DungeonBuilder.M0.Tests
         {
             yield return ExplicitDeleteShell(false);
             var root = GameRoot.Instance;
+            // The deletion fixture stops the replacement root for its inert-shell
+            // assertions. The starter action requires the normal foreground owner.
+            root.enabled = true;
+            PumpSceneToClosed(establishForeground: true);
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             var build = ui.Q<Button>("buildFirstRoom");
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720, 1280);
@@ -1244,7 +1248,9 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(controller.Discard(), Is.True);
 
             Click(build);
+            Assert.That(ui.Q<Label>("modalText").text, Is.EqualTo(root.Content.GetString("ui.dungeon.first_room.review", null)));
             Click(ui.Q<Button>("confirm"));
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors, Has.Length.EqualTo(1), ui.Q<Label>("status").text);
             var floor = root.Save.validatedCanonicalSpatialState.Floors.Single();
             var room = floor.Layout.Rooms.Single();
             Assert.That(floor.ActivationState, Is.EqualTo(FloorActivationState.Active));
