@@ -3523,7 +3523,7 @@
     },
     {
       "key": "ui.dungeon.route.append_room",
-      "text": "Append {0} to the required route"
+      "text": "Append {0} at the end of the route"
     },
     {
       "key": "ui.dungeon.route.place_hint",
@@ -3545,9 +3545,9 @@
       "key": "ui.dungeon.route.edit_for_room",
       "text": "Edit route for {0}"
     },
-    {"key": "ui.dungeon.route.map_start", "text": "Tap the room that should come before the new room."},
+    {"key": "ui.dungeon.route.map_start", "text": "Tap the room or entrance that should come before the new room."},
     {"key": "ui.dungeon.route.map_new", "text": "Tap the new room marked +."},
-    {"key": "ui.dungeon.route.map_next", "text": "Tap the room that should come next."},
+    {"key": "ui.dungeon.route.map_next", "text": "Tap the room or terminal that should come next."},
     {"key": "ui.dungeon.route.map_edit", "text": "Tap a doorway or a corridor handle on the map to adjust the route."},
     {"key": "ui.dungeon.route.map_cancel", "text": "Close route editor"},
     {"key": "ui.dungeon.route.map_choose_again", "text": "Choose rooms again"},

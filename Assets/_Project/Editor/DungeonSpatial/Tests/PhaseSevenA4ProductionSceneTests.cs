@@ -591,12 +591,12 @@ namespace DungeonBuilder.M0.Tests
                 Vector2 end = camera.WorldToScreenPoint(destination ?? world);
                 Assert.That(controller.Viewport.ScreenRect.Contains(begin), Is.True, world.ToString());
                 Assert.That(controller.IsChrome(begin, pointer.deviceId), Is.False, world.ToString());
-                InputSystem.QueueStateEvent(pointer, new MouseState { position = begin }.WithButton(MouseButton.Left));
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = begin }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
                 yield return null;
                 yield return null;
                 if (destination.HasValue)
                 {
-                    InputSystem.QueueStateEvent(pointer, new MouseState { position = end }.WithButton(MouseButton.Left));
+                    InputSystem.QueueStateEvent(pointer, new MouseState { position = end }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
                     yield return null;
                     yield return null;
                 }

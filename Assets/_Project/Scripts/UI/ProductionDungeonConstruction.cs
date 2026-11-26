@@ -73,7 +73,11 @@ namespace DungeonBuilder.M0
                 Orientation = definition.AllowedOrientations.First(), TerminalConnectionPointId = definition.ConnectionPoints.First().ConnectionPointId };
             RefreshConstructionGuidance();
             Present();
-            if (independent) FocusInteraction(world.LegalBounds);
+            if (independent)
+            {
+                viewport.Configure(world.LegalBounds, viewport.ScreenRect, false);
+                FocusInteraction(world.LegalBounds);
+            }
             else FocusConstructionArea();
             return true;
         }

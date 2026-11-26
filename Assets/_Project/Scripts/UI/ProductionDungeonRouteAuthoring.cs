@@ -35,6 +35,7 @@ namespace DungeonBuilder.M0
 
         private bool CanAuthorRoutes => CanonicalSaveSchemaVersions.HasAuthoredRoutes(CanonicalSaveSchemaVersions.CurrentWritableTarget);
         private bool IsAuthoringRoute => IsEditing && routeRoom != null;
+        private Rect RouteInteractionBounds => independentRoomPlacement || IsAuthoringRoute ? world.LegalBounds : world.Bounds;
         private IndependentRoomPlacementRequest IndependentPlacementRequest() => new IndependentRoomPlacementRequest
         {
             FloorInstanceId = constructionRequest.FloorInstanceId,
@@ -71,6 +72,7 @@ namespace DungeonBuilder.M0
             autoFit = false;
             interactionFocus = null;
             routeRoom = roomId;
+            viewport.Configure(RouteInteractionBounds, viewport.ScreenRect, false);
             routeEdges = root.SaveService.EligibleRouteInsertions(root.Save, draft, selectedFloor);
             routeRequest = draft.AcceptedRouteInsertion(roomId);
             RefreshRouteProposal();
@@ -338,7 +340,7 @@ namespace DungeonBuilder.M0
         private Vector2? AddOpeningHandles(string nodeId, string selected, bool incoming, bool source)
         {
             Vector2? selectedPosition = null;
-            var placed = DraftSelectedFloor().Layout.Nodes.Single(n => n.RoomInstanceId == routeRoom);
+            bool isPlacedRoom = DraftSelectedFloor().Layout.Nodes.Any(n => n.NodeId == nodeId && n.RoomInstanceId == routeRoom);
             foreach (var opening in RouteOpenings(nodeId))
             {
                 var position = OpeningCenter(opening);
@@ -346,7 +348,7 @@ namespace DungeonBuilder.M0
                 if (active) selectedPosition = position;
                 // The incoming and outgoing sockets on the new room share the same authored points.
                 // Separate their handles toward the room interior and exterior.
-                if (nodeId == placed.NodeId)
+                if (isPlacedRoom)
                     position += (position - CellCenter(opening.World)).normalized * (incoming ? -.24f : .24f);
                 world.AddRouteMarker(position, active ? (incoming ? "1" : "2") : (incoming ? "i" : "o"), active, .36f);
                 routeHandles.Add((position, () =>

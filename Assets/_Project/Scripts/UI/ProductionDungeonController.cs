@@ -445,7 +445,7 @@ namespace DungeonBuilder.M0
             RefreshRouteProposal();
             PresentRouteMap();
             RefreshEconomy();
-            viewport.Configure(world.Bounds, worldCamera.pixelRect.width > 0 ? worldCamera.pixelRect : new Rect(0, 0, Screen.width, Screen.height), reset);
+            viewport.Configure(RouteInteractionBounds, worldCamera.pixelRect.width > 0 ? worldCamera.pixelRect : new Rect(0, 0, Screen.width, Screen.height), reset);
             ApplyCamera();
             PresentFloorRail();
             SetTextSize(textSize);
@@ -585,7 +585,7 @@ namespace DungeonBuilder.M0
             var rect = new Rect(panelRect.x * scale, Screen.height - panelRect.yMax * scale,
                 panelRect.width * scale, panelRect.height * scale);
             if (rect.width < 1 || rect.height < 1) return;
-            worldCamera.pixelRect = rect; viewport.Configure(world.Bounds, rect, autoFit);
+            worldCamera.pixelRect = rect; viewport.Configure(RouteInteractionBounds, rect, autoFit);
             if (interactionFocus.HasValue) viewport.Focus(interactionFocus.Value);
             ApplyCamera();
         }
