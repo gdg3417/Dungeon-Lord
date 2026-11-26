@@ -208,7 +208,7 @@ namespace DungeonBuilder.M0
             if (!IsAuthoringRoute)
             {
                 if (!IsEditing) return false;
-                var roomId = world.SelectRoom(cell, true);
+                var roomId = world.SelectRoom(cell, false);
                 if (roomId == null || !draft.RouteAuthoringRoomIds.Contains(roomId)) return false;
                 OpenRouteAuthoring(roomId);
                 return true;
@@ -223,7 +223,7 @@ namespace DungeonBuilder.M0
             if (TryEditPassage(cell)) return true;
 
             var floor = DraftSelectedFloor();
-            var hitRoom = world.SelectRoom(cell, true);
+            var hitRoom = world.SelectRoom(cell, false);
             var selectedNode = floor.Layout.Nodes.FirstOrDefault(n => n.Kind == FloorRouteNodeKind.Room
                 ? n.RoomInstanceId == hitRoom
                 : TryRouteNodeBounds(floor, n, out var bounds) && bounds.Contains(point));
@@ -291,15 +291,20 @@ namespace DungeonBuilder.M0
             var edge = baseline.Layout.Edges.FirstOrDefault(e => e.EdgeId == routeRequest?.ReplacedEdgeId);
             var placed = floor.Layout.Nodes.Single(n => n.RoomInstanceId == routeRoom);
             IEnumerable<FloorRouteNode> order = currentOrder;
-            if (edge != null)
+            var proposedFloor = routePreview?.Candidate?.Floors.Single(f => f.FloorInstanceId == selectedFloor);
+            if (proposedFloor != null && RequiredFloorTraversal.TryResolve(proposedFloor.Layout, out var proposedOrder))
+                order = proposedOrder;
+            else if (edge != null)
                 order = currentOrder.SelectMany(n => n.NodeId == edge.SourceNodeId ? new[] { n, placed } : new[] { n });
+            else if (RequiredFloorTraversal.TryResolve(floor.Layout, out var draftOrder))
+                order = draftOrder;
             var eligible = baseline.Layout.Edges.Where(e => routeEdges.Contains(e.EdgeId)).ToArray();
             int index = 0;
             foreach (var node in order)
             {
                 index++;
                 if (!TryRouteNodeBounds(floor, node, out var bounds)) continue;
-                bool highlighted = node.NodeId == routeStart || node == placed ||
+                bool highlighted = node.NodeId == routeStart || node.NodeId == placed.NodeId ||
                     eligible.Any(e => routeMiddleSelected ? e.SourceNodeId == routeStart && e.DestinationNodeId == node.NodeId :
                         e.SourceNodeId == node.NodeId);
                 string number = index.ToString(Culture);
@@ -307,7 +312,7 @@ namespace DungeonBuilder.M0
             }
             if (edge == null)
             {
-                if (TryRouteNodeBounds(floor, placed, out var bounds))
+                if (!order.Any(n => n.NodeId == placed.NodeId) && TryRouteNodeBounds(floor, placed, out var bounds))
                     world.AddRouteMarker(bounds.center, routeMiddleSelected ? "[+]" : "+", true, .85f);
                 return;
             }

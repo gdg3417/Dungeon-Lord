@@ -528,13 +528,18 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
                 CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
 
-                yield return MapTap(new Vector2(2, 8));
+                var alternate = starter.Layout.Edges.First(e => e.EdgeId != middle.EdgeId &&
+                    root.SaveService.EligibleRouteInsertions(root.Save, controller.Draft, starter.FloorInstanceId).Contains(e.EdgeId));
+                yield return MapTap(NodeCenter(alternate.SourceNodeId));
                 yield return MapTap(new Vector2(6, 5));
-                yield return MapTap(new Vector2(2, 11));
+                yield return MapTap(NodeCenter(alternate.DestinationNodeId));
                 Assert.That(ui.Q<Button>("chooseRouteRoomsAgain"), Is.Not.Null,
-                    "Selecting the last room, new room and Completion opens that replacement preview");
+                    "Selecting an alternative eligible pair on the map opens its replacement preview");
                 Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
-                Click(ui.Q<Button>("chooseRouteRoomsAgain"));
+                Click(ui.Q<Button>("cancelRoute"));
+                Assert.That(controller.Draft.DisconnectedRoomIds, Has.Length.EqualTo(1));
+                CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
+                yield return MapTap(new Vector2(6, 5)); // Reopen from the disconnected room.
                 yield return MapTap(new Vector2(2, 4));
                 yield return MapTap(new Vector2(6, 5));
                 yield return MapTap(new Vector2(2, 8));
@@ -603,6 +608,20 @@ namespace DungeonBuilder.M0.Tests
                 InputSystem.QueueStateEvent(pointer, new MouseState { position = end });
                 yield return null;
                 yield return null;
+            }
+
+            Vector2 NodeCenter(string nodeId)
+            {
+                var node = starter.Layout.Nodes.Single(n => n.NodeId == nodeId);
+                string id = node.RoomInstanceId;
+                if (id == null)
+                {
+                    var kind = node.Kind == FloorRouteNodeKind.Entrance
+                        ? FixedSpatialStructureKind.Entrance : FixedSpatialStructureKind.CompletionTerminal;
+                    id = starter.FixedStructures.Single(f => f.Kind == kind).FixedStructureInstanceId;
+                }
+                Assert.That(controller.World.TryRouteLocationBounds(id, out var bounds), Is.True);
+                return bounds.center;
             }
 
             Vector2 Door(RouteOpening opening)
