@@ -71,7 +71,11 @@ namespace DungeonBuilder.M0
             constructionIntentId = Guid.NewGuid().ToString("N");
             constructionRequest = new StructuralConstructionRequest { FloorInstanceId = selectedFloor, RoomDefinitionId = definitionId,
                 Orientation = definition.AllowedOrientations.First(), TerminalConnectionPointId = definition.ConnectionPoints.First().ConnectionPointId };
-            RefreshConstructionGuidance(); Present(); FocusConstructionArea(); return true;
+            RefreshConstructionGuidance();
+            Present();
+            if (independent) FocusInteraction(world.LegalBounds);
+            else FocusConstructionArea();
+            return true;
         }
 
         private void FocusConstructionArea()
@@ -260,7 +264,7 @@ namespace DungeonBuilder.M0
             // Reasons remain visible once, above the optional details and local actions.
             ui.Q<Label>("constructionFeedback").text = string.Empty;
             ui.Q("constructionFeedback").style.display = DisplayStyle.None;
-            ui.Q("constructionCategories").style.display = IsEditing ? DisplayStyle.Flex : DisplayStyle.None;
+            ui.Q("constructionCategories").style.display = IsEditing && !IsAuthoringRoute ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("collapseDetails").text = Text(detailsCollapsed ? "ui.dungeon.details.expand" : "ui.dungeon.details.collapse");
             ui.Q("contextDetails").style.display = detailsCollapsed ? DisplayStyle.None : DisplayStyle.Flex;
             var panel = ui.Q("constructionSheet"); panel.style.display = IsEditing && selected == null && selectedRoomId == null && selectedEdgeId==null && !moveMode ? DisplayStyle.Flex : DisplayStyle.None;
@@ -269,6 +273,9 @@ namespace DungeonBuilder.M0
                 ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q("roomChoicesHint").style.display = DisplayStyle.None;
             var availableRooms = ConstructionRooms();
+            var floor = IsEditing ? DraftSelectedFloor() : null;
+            bool canInsertRoom = CanAuthorRoutes && !IsAuthoringRoute && constructionRequest == null && floor?.Layout.Rooms.Length >= 2 &&
+                root.SaveService.EligibleRouteInsertions(root.Save, draft, selectedFloor).Length > 0;
             var previewLimits = new SpatialValidationWorkloadLimits(root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles);
             var footprints = availableRooms.Select(room => room.TryResolveGrossTiles(new TileCoordinate(0,0),room.AllowedOrientations.First(),previewLimits,out var footprint)
                 ? footprint.OccupiedTiles : Array.Empty<TileCoordinate>()).ToArray();
@@ -278,7 +285,7 @@ namespace DungeonBuilder.M0
                 {
                     var room=availableRooms[roomIndex];
                     string id = room.RoomDefinitionId;
-                    var button = new Button(() => SelectConstructionRoom(id)) { text = string.Empty, userData = id };
+                    var button = new Button(() => SelectConstructionRoom(id, canInsertRoom)) { text = string.Empty, userData = id };
                     var top = new VisualElement { pickingMode = PickingMode.Ignore }; top.AddToClassList("room-card-top"); button.Add(top);
                     var preview = new DungeonRoomFootprintPreview(footprints[roomIndex],previewSpan,presentationPolicy.Visuals.RoomStone[0]) { name = "roomCardPreview" };
                     preview.AddToClassList("room-card-preview"); top.Add(preview);
@@ -298,14 +305,13 @@ namespace DungeonBuilder.M0
                     button.tooltip = Format("ui.dungeon.construction.card", RoomName(room), room.GrossFootprint.Width, room.GrossFootprint.Height,
                         root.SaveService.TryRoomConstructionBaseCost(id, out double tooltipCost) ? PlayerManaPresentationFormatter.FormatDiscreteAmount(tooltipCost, Culture) : Text("ui.dungeon.unavailable"));
                     button.AddToClassList("room-card"); choices.Add(button);
-                    if (CanAuthorRoutes)
+                    if (canInsertRoom)
                     {
-                        button.tooltip = Format("ui.dungeon.route.append_room", RoomName(room));
-                        button.Add(new Label(Text("ui.dungeon.route.append_card")) { pickingMode = PickingMode.Ignore });
-                        var place = ButtonFor(choices, Format("ui.dungeon.route.place_room", RoomName(room)),
-                            () => SelectConstructionRoom(id, true));
-                        place.name = "placeIndependentRoom";
-                        place.userData = id;
+                        button.tooltip = Format("ui.dungeon.route.place_room", RoomName(room));
+                        var append = ButtonFor(choices, Format("ui.dungeon.route.append_room", RoomName(room)),
+                            () => SelectConstructionRoom(id, false));
+                        append.name = "appendRoomAtEnd";
+                        append.userData = id;
                     }
                 }
             var options = ui.Q("constructionOptions"); options.Clear();

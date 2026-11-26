@@ -521,6 +521,57 @@ namespace DungeonBuilder.M0
             highlight.transform.localPosition = new Vector3(cell.X + 0.5f, cell.Y + 0.5f);
             highlight.transform.localScale = new Vector3(policy.PreviewSize, policy.PreviewSize, 1);
         }
+        private readonly List<TextMesh> routeLabels = new List<TextMesh>();
+        private readonly List<SpriteRenderer> routeLines = new List<SpriteRenderer>();
+        private int routeLabelCount;
+        private int routeLineCount;
+
+        internal bool TryRouteLocationBounds(string locationId, out Rect bounds)
+        {
+            bounds = default;
+            return locationId != null && replayLocationRegions.TryGetValue(locationId, out bounds);
+        }
+
+        internal void ClearRouteMarkers()
+        {
+            for (int i = 0; i < routeLabelCount; i++) routeLabels[i].gameObject.SetActive(false);
+            for (int i = 0; i < routeLineCount; i++) routeLines[i].gameObject.SetActive(false);
+            routeLabelCount = routeLineCount = 0;
+        }
+
+        internal void AddRouteMarker(Vector2 position, string label, bool selected, float size)
+        {
+            if (routeLabelCount == routeLabels.Count)
+            {
+                var child = new GameObject("RouteMarker", typeof(TextMesh));
+                child.layer = gameObject.layer;
+                child.transform.SetParent(transform, false);
+                var text = child.GetComponent<TextMesh>();
+                text.fontSize = 64;
+                text.anchor = TextAnchor.MiddleCenter;
+                child.GetComponent<MeshRenderer>().sortingOrder = 8;
+                routeLabels.Add(text);
+            }
+            var marker = routeLabels[routeLabelCount++];
+            marker.text = label;
+            marker.characterSize = size / 6;
+            marker.color = selected ? new Color(1f, .84f, .48f) : Color.white;
+            marker.transform.localPosition = position;
+            marker.gameObject.SetActive(true);
+        }
+
+        internal void AddRouteLine(Vector2 from, Vector2 to, bool valid)
+        {
+            if (routeLineCount == routeLines.Count) routeLines.Add(Entity("ProposedConnection", 6));
+            var line = routeLines[routeLineCount++];
+            var delta = to - from;
+            line.transform.localPosition = (from + to) * .5f;
+            line.transform.localScale = new Vector3(delta.magnitude, .12f, 1);
+            line.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+            line.color = valid ? policy.ValidColor : policy.InvalidColor;
+            line.gameObject.SetActive(true);
+        }
+
         internal void PresentRoutePreview(IEnumerable<TileCoordinate> tiles, bool valid, IEnumerable<TileCoordinate> selected)
         {
             constructionPreview.ClearAllTiles();

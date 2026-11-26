@@ -3487,7 +3487,7 @@
     },
     {
       "key": "structural.edit.connection_unavailable",
-      "text": "No aligned doorway or straight corridor connects this anchor to the required route. Choose a highlighted diamond, rotate the room or change its terminal side. Bent corridors are not available yet."
+      "text": "No aligned doorway or straight corridor connects this anchor to the required route. Choose a highlighted diamond, rotate the room or change its terminal side. For bent corridors, place a room independently and connect it from the map."
     },
     {
       "key": "structural.edit.connection_ambiguous",
@@ -3545,6 +3545,14 @@
       "key": "ui.dungeon.route.edit_for_room",
       "text": "Edit route for {0}"
     },
+    {"key": "ui.dungeon.route.map_start", "text": "Tap the room that should come before the new room."},
+    {"key": "ui.dungeon.route.map_new", "text": "Tap the new room marked +."},
+    {"key": "ui.dungeon.route.map_next", "text": "Tap the room that should come next."},
+    {"key": "ui.dungeon.route.map_edit", "text": "Tap a doorway or a corridor handle on the map to adjust the route."},
+    {"key": "ui.dungeon.route.map_cancel", "text": "Close route editor"},
+    {"key": "ui.dungeon.route.map_choose_again", "text": "Choose rooms again"},
+    {"key": "ui.dungeon.route.map_finish_segment", "text": "Finish moving segment"},
+    {"key": "ui.dungeon.route.map_finish_tiles", "text": "Finish drawing tiles"},
     {
       "key": "ui.dungeon.route.choose_edge",
       "text": "Choose the required edge to replace with a visit to {0}."
@@ -3663,7 +3671,7 @@
     },
     {
       "key": "structural.edit.corridor_length_invalid",
-      "text": "This aligned straight corridor is outside the authored length limits. Move closer or farther along a highlighted anchor. Bent corridors are not available yet."
+      "text": "This aligned straight corridor is outside the authored length limits. Move closer or farther along a highlighted anchor. For bent corridors, place a room independently and connect it from the map."
     },
     {
       "key": "ui.structural.heading",

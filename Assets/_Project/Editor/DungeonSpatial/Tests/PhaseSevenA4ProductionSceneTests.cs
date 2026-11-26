@@ -390,7 +390,8 @@ namespace DungeonBuilder.M0.Tests
 
             controller.EnterEdit();
             Click(ui.Q<Button>("roomsCategory"));
-            Assert.That(controller.SelectConstructionRoom("spatial.room.basic"), Is.True);
+            Click(ui.Query<Button>(className: "room-card").ToList()
+                .Single(button => (string)button.userData == "spatial.room.basic"));
             Assert.That(controller.SelectTerminalConnection("north"), Is.True);
             var anchor = new TileCoordinate(0, 6);
             Assert.That(controller.World.MoveGuidanceAnchors, Does.Contain(anchor));
@@ -509,68 +510,108 @@ namespace DungeonBuilder.M0.Tests
 
             Click(ui.Q<Button>("edit"));
             Click(ui.Q<Button>("roomsCategory"));
-            var place = ui.Query<Button>("placeIndependentRoom").ToList().Single(button =>
-                (string)button.userData == "spatial.room.basic");
-            Click(place);
-            controller.TapWorld(new TileCoordinate(0, 2));
-            Assert.That(controller.ConstructionPreview.ReasonCodes, Does.Contain(StructuralEditService.RoomOverlapReason));
-            Assert.That(ui.Q<Button>("confirmPlacement").enabledSelf, Is.False);
-            controller.TapWorld(new TileCoordinate(4, 3));
-            Assert.That(controller.ConstructionPreview.IsValid, Is.True, string.Join(",", controller.ConstructionPreview.ReasonCodes));
-            Click(ui.Q<Button>("confirmPlacement"));
-            yield return null;
-            Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
-            Assert.That(controller.Draft.DisconnectedRoomIds, Has.Length.EqualTo(1));
-            Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
-            CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
+            Click(ui.Query<Button>(className: "room-card").ToList().Single(button =>
+                (string)button.userData == "spatial.room.basic"));
+            var camera = GameObject.Find("ProductionDungeonCamera").GetComponent<Camera>();
+            var pointer = InputSystem.AddDevice<Mouse>();
+            try
+            {
+                yield return MapTap(new Vector2(.5f, 2.5f));
+                Assert.That(controller.ConstructionPreview.ReasonCodes, Does.Contain(StructuralEditService.RoomOverlapReason));
+                Assert.That(ui.Q<Button>("confirmPlacement").enabledSelf, Is.False);
+                yield return MapTap(new Vector2(4.5f, 3.5f));
+                Assert.That(controller.ConstructionPreview.IsValid, Is.True, string.Join(",", controller.ConstructionPreview.ReasonCodes));
+                Click(ui.Q<Button>("confirmPlacement"));
+                yield return null;
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+                Assert.That(controller.Draft.DisconnectedRoomIds, Has.Length.EqualTo(1));
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+                CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
 
-            var alternate = ui.Query<Button>("replaceRouteEdge").ToList().First(button => (string)button.userData != middle.EdgeId);
-            string alternateId = (string)alternate.userData;
-            Click(alternate);
-            Assert.That(ui.Query<Button>("replaceRouteEdge").ToList()
-                .Single(button => (string)button.userData == alternateId).ClassListContains("selected-floor"), Is.True);
-            var choice = ui.Query<Button>("replaceRouteEdge").ToList().Single(button => (string)button.userData == middle.EdgeId);
-            Click(choice);
-            string placedId = controller.Draft.DisconnectedRoomIds.Single();
-            var documented = new StructuralRouteInsertionRequest {
-                FloorInstanceId = starter.FloorInstanceId, ReplacedEdgeId = middle.EdgeId, RoomInstanceId = placedId,
-                Incoming = new AuthoredRouteGeometry { SourcePointId = "east.2", DestinationPointId = "west" },
-                Outgoing = new AuthoredRouteGeometry { SourcePointId = "north", DestinationPointId = "east",
-                    Passage = new[] { new TileCoordinate(5, 7), new TileCoordinate(4, 7) } }
-            };
-            var documentedPreview = root.SaveService.PreviewRouteInsertion(root.Save, controller.Draft, documented, out var documentedQuote);
-            Assert.That(documentedPreview.IsValid, Is.True, $"Documented native insertion rejected: {documentedPreview.Reason}");
-            Assert.That(documentedQuote.Cost, Is.EqualTo(expectedCost));
-            Assert.That(documentedQuote.IsAffordable, Is.True, documentedQuote.Reason);
-            Assert.That(root.SaveService.SuggestRouteInsertion(root.Save, controller.Draft, starter.FloorInstanceId,
-                middle.EdgeId, placedId), Is.Not.Null, "The documented geometry must be discoverable by the production suggestion authority");
-            Click(ui.Q<Button>("suggestRoute"));
-            Assert.That(controller.Draft.CommandCount, Is.EqualTo(1), "Suggestion remains transient");
-            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q("routeAuthoring").Query<Label>().ToList()
-                .Select(label => label.text).Aggregate(string.Empty, (left, right) => left + "\n" + right));
-            Click(ui.Q<Button>("slideOutgoingSegment"));
-            controller.TapWorld(new TileCoordinate(5, 6));
-            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False, "The moved segment intersects the new room");
-            controller.TapWorld(new TileCoordinate(5, 7));
-            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
-            controller.TapWorld(new TileCoordinate(5, 6));
-            Click(ui.Q<Button>("revertRouteSegment"));
-            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
-            Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
-            Click(ui.Q<Button>("drawOutgoingPassage"));
-            Click(ui.Q<Button>("clearPassage"));
-            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False);
-            controller.TapWorld(new TileCoordinate(5, 7));
-            controller.TapWorld(new TileCoordinate(5, 8));
-            controller.TapWorld(new TileCoordinate(4, 8));
-            controller.TapWorld(new TileCoordinate(4, 7));
-            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False, "The detour exceeds the floor capacity");
-            Click(ui.Query<Button>("slideOutgoingSegment").ToList()[1]);
-            controller.TapWorld(new TileCoordinate(5, 7));
-            Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
-            Click(ui.Q<Button>("acceptRoute"));
-            yield return null;
-            Assert.That(controller.Draft.CommandCount, Is.EqualTo(2));
+                yield return MapTap(new Vector2(2, 8));
+                yield return MapTap(new Vector2(6, 5));
+                yield return MapTap(new Vector2(2, 11));
+                Assert.That(ui.Q<Button>("chooseRouteRoomsAgain"), Is.Not.Null,
+                    "Selecting the last room, new room and Completion opens that replacement preview");
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+                Click(ui.Q<Button>("chooseRouteRoomsAgain"));
+                yield return MapTap(new Vector2(2, 4));
+                yield return MapTap(new Vector2(6, 5));
+                yield return MapTap(new Vector2(2, 8));
+                string placedId = controller.Draft.DisconnectedRoomIds.Single();
+                var documented = new StructuralRouteInsertionRequest {
+                    FloorInstanceId = starter.FloorInstanceId, ReplacedEdgeId = middle.EdgeId, RoomInstanceId = placedId,
+                    Incoming = new AuthoredRouteGeometry { SourcePointId = "east.2", DestinationPointId = "west" },
+                    Outgoing = new AuthoredRouteGeometry { SourcePointId = "north", DestinationPointId = "east",
+                        Passage = new[] { new TileCoordinate(5, 7), new TileCoordinate(4, 7) } }
+                };
+                var documentedPreview = root.SaveService.PreviewRouteInsertion(root.Save, controller.Draft, documented, out var documentedQuote);
+                Assert.That(documentedPreview.IsValid, Is.True, $"Documented native insertion rejected: {documentedPreview.Reason}");
+                Assert.That(documentedQuote.Cost, Is.EqualTo(expectedCost));
+                Assert.That(documentedQuote.IsAffordable, Is.True, documentedQuote.Reason);
+                Assert.That(root.SaveService.SuggestRouteInsertion(root.Save, controller.Draft, starter.FloorInstanceId,
+                    middle.EdgeId, placedId), Is.Not.Null, "The documented geometry must be discoverable by the production suggestion authority");
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1), "Automatic suggestion remains transient");
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q("routeAuthoring").Query<Label>().ToList()
+                    .Select(label => label.text).Aggregate(string.Empty, (left, right) => left + "\n" + right));
+
+                var firstNode = starter.Layout.Nodes.Single(n => n.RoomInstanceId == first.RoomInstanceId);
+                var openings = AuthoredRouteGeometry.Openings(starter, firstNode.NodeId, root.ProductionSpatialContent.Catalog);
+                yield return MapTap(Door(openings.Single(p => p.Id == "east")));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False);
+                yield return MapTap(Door(openings.Single(p => p.Id == "east.2")));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+
+                yield return MapTap(new Vector2(5f, 7.5f));
+                yield return MapTap(new Vector2(5.5f, 6.5f));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False, "The moved segment intersects the new room");
+                yield return MapTap(new Vector2(5.5f, 7.5f));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+                yield return MapTap(new Vector2(5.5f, 6.5f));
+                Click(ui.Q<Button>("revertRouteSegment"));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+
+                yield return MapTap(new Vector2(5f, 7.5f), new Vector2(5f, 8.5f));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False, "The detour exceeds the floor capacity");
+                Click(ui.Q<Button>("finishRouteSegment"));
+                yield return MapTap(new Vector2(5f, 8.5f));
+                yield return MapTap(new Vector2(5.5f, 7.5f));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+                Click(ui.Q<Button>("acceptRoute"));
+                yield return null;
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(2));
+            }
+            finally { InputSystem.RemoveDevice(pointer); }
+
+            IEnumerator MapTap(Vector2 world, Vector2? destination = null)
+            {
+                yield return WaitForViewportGeometry();
+                Vector2 begin = camera.WorldToScreenPoint(world);
+                Vector2 end = camera.WorldToScreenPoint(destination ?? world);
+                Assert.That(controller.Viewport.ScreenRect.Contains(begin), Is.True, world.ToString());
+                Assert.That(controller.IsChrome(begin, pointer.deviceId), Is.False, world.ToString());
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = begin }.WithButton(MouseButton.Left));
+                yield return null;
+                yield return null;
+                if (destination.HasValue)
+                {
+                    InputSystem.QueueStateEvent(pointer, new MouseState { position = end }.WithButton(MouseButton.Left));
+                    yield return null;
+                    yield return null;
+                }
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = end });
+                yield return null;
+                yield return null;
+            }
+
+            Vector2 Door(RouteOpening opening)
+            {
+                float angle = -(int)opening.Facing * Mathf.PI / 2f;
+                return new Vector2(opening.World.X + .5f, opening.World.Y + .5f) +
+                    new Vector2(-Mathf.Sin(angle), Mathf.Cos(angle)) * .5f;
+            }
+
             string added = controller.Draft.RouteAuthoringRoomIds.Single();
             var recoveredStore = root.SaveService.CreateDungeonDraftStore();
             var recovered = TransactionalDungeonDraft.Recover(recoveredStore.Read(),

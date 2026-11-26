@@ -1239,3 +1239,11 @@ Apply the [owner decisions v0.6](decisions/gameplay-decision-log.md) and amended
 - **Approved future Reset Hallways.** Confirm a selected-floor draft reset of all editable direct and physical connections, including optional links and editable links to the fixed structures. Keep rooms, room contents, fixed structures and other floors. Disclose affected contents, branch state and investment. Require explicit, authorized disposition before commit and deliberate one-pair-at-a-time acceptance when rebuilding. The normal Discard path restores the canonical baseline. This reset flow depends on Amendment C and applicable Amendment D ownership rules.
 
 The [implementation handoff](decisions/amendment-a-construction-contract-2026-11-21.md) defines the proposed integration and qualification for one playable construction PR after this documentation amendment.
+
+## Owner UAT interaction clarification (2026-11-26)
+
+Owner UAT at PR #275 head a6961215 confirmed independent room placement and rejected the bottom-menu route workflow. In supported insertion contexts, the room card starts independent placement. Linked append remains available for initial progression and as an explicit end-of-route action where supported.
+
+After confirming placement, tap the preceding room or eligible fixed structure, the new room, and the following room or eligible fixed structure directly on the map. Use the existing retirement authority to resolve that sequence. A complete supported sequence automatically previews a bounded suggestion. Map markers show visit order, the disconnected room, the proposed links, doorway choices and segment handles. Tap openings on the map, or tap and move a segment or drag its handle. Supporting controls show the price, space and blockers and allow revert, acceptance and final Save Changes.
+
+This interaction uses the existing restricted insertion, ordered geometry, draft and atomic publication contracts. Accept Route records an explicit draft edit. Save Changes publishes the valid draft. The original automated qualification remains evidence for its recorded head. Replacement owner UAT requires independent approval of the corrected build.

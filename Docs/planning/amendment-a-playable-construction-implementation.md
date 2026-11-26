@@ -25,3 +25,11 @@ The integration merges main `ecf52331` and retains the historical migration, ref
 Automated results for the integrated source belong to their source-pinned campaigns linked from PR #275. Previous verdicts and receipts remain historical evidence. Independent review determines UAT readiness. The temporary development UI supports the accepted Small text option at 1024 × 600 landscape. Large text at that resolution remains a release-candidate issue.
 
 Scope follows [Spec 38](../38%20-%20Dungeon_Floor_Spatial_Capacity_and_Route_Graph.md) and the [Amendment A handoff](../../docs/planning/decisions/amendment-a-construction-contract-2026-11-21.md).
+
+## Owner UAT interaction clarification (2026-11-26)
+
+Owner UAT at PR #275 head a6961215 confirmed independent room placement and rejected the bottom-menu route workflow. In supported insertion contexts, the room card starts independent placement. Linked append remains available for initial progression and as an explicit end-of-route action where supported.
+
+After confirming placement, tap the preceding room or eligible fixed structure, the new room, and the following room or eligible fixed structure directly on the map. Use the existing retirement authority to resolve that sequence. A complete supported sequence automatically previews a bounded suggestion. Map markers show visit order, the disconnected room, the proposed links, doorway choices and segment handles. Tap openings on the map, or tap and move a segment or drag its handle. Supporting controls show the price, space and blockers and allow revert, acceptance and final Save Changes.
+
+This interaction uses the existing restricted insertion, ordered geometry, draft and atomic publication contracts. Accept Route records an explicit draft edit. Save Changes publishes the valid draft. The original automated qualification remains evidence for its recorded head. Replacement owner UAT requires independent approval of the corrected build.

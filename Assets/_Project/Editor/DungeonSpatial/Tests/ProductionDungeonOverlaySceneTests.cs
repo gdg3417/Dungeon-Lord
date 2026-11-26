@@ -204,9 +204,10 @@ namespace DungeonBuilder.M0.Tests
                     controller.SetTextSize(text); for(int i=0;i<10;i++) yield return null;
                     var cards=ui.Q("roomChoices").Query<Button>(className: "room-card").ToList();
                     Assert.That(cards.Count,Is.EqualTo(root.ProductionSpatialContent.Catalog.Rooms.Length));
-                    var placementActions=ui.Q("roomChoices").Query<Button>("placeIndependentRoom").ToList();
-                    CollectionAssert.AreEquivalent(cards.Select(card=>card.userData), placementActions.Select(button=>button.userData));
-                    foreach(var action in placementActions)
+                    var appendActions=ui.Q("roomChoices").Query<Button>("appendRoomAtEnd").ToList();
+                    if (appendActions.Count > 0)
+                        CollectionAssert.AreEquivalent(cards.Select(card=>card.userData), appendActions.Select(button=>button.userData));
+                    foreach(var action in appendActions)
                         Assert.That(action.worldBound.height*controller.GetComponent<UIDocument>().panelSettings.scale,Is.GreaterThanOrEqualTo(48));
                     foreach(var card in cards)
                     {
