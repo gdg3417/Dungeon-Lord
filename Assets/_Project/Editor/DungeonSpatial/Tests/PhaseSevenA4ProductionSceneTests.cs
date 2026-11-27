@@ -574,8 +574,8 @@ namespace DungeonBuilder.M0.Tests
                     string capture = $"route-dock-{size.x}x{size.y}-{textSize}";
                     DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-collapsed.png");
                     yield return null;
-                    AssertRouteLayout(accept, ui.Q<Button>("chooseRouteRoomsAgain"), ui.Q<Button>("cancelRoute"));
-                    Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(root.Content.GetString("ui.dungeon.route.ready", null)));
+                    AssertRouteLayout(accept, ui.Q<Button>("chooseRouteRoomsAgain"), ui.Q<Button>("cancelRoute"), ui.Q<Button>("moveRouteRoom"));
+                    Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(root.Content.GetString("ui.dungeon.route.proposal_ready", null)));
                     Assert.That(ui.Q<Label>("status").text, Is.Empty);
                     Assert.That(ui.Q<Label>("routeMetrics").text, Does.Contain("110"));
                     yield return ClickVisible(ui.Q<Button>("collapseDetails"));
@@ -583,14 +583,14 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(controller.DetailsCollapsed, Is.False);
                     Assert.That(controller.Viewport.ScreenRect, Is.EqualTo(map));
                     Assert.That(ui.Q<Button>("acceptRoute"), Is.SameAs(accept));
-                    AssertRouteLayout(accept, ui.Q<Button>("chooseRouteRoomsAgain"), ui.Q<Button>("cancelRoute"));
+                    AssertRouteLayout(accept, ui.Q<Button>("chooseRouteRoomsAgain"), ui.Q<Button>("cancelRoute"), ui.Q<Button>("moveRouteRoom"));
                     DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-expanded.png");
                     yield return null;
                     yield return MapTap(new Vector2(5f, 7.5f));
                     yield return MapTap(new Vector2(5.5f, 6.5f));
                     Assert.That(accept.enabledSelf, Is.False);
                     Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(
-                        root.Content.GetString("ui.dungeon.route.passage_overlap", null)));
+                        root.Content.GetString("ui.dungeon.route.opening_mismatch", null)));
                     Assert.That(controller.Viewport.ScreenRect, Is.EqualTo(map));
                     AssertRouteLayout(accept, ui.Q<Button>("revertRouteSegment"), ui.Q<Button>("finishRouteSegment"));
                     DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-invalid.png");

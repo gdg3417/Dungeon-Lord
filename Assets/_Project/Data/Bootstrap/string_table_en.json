@@ -3515,7 +3515,7 @@
     },
     {
       "key": "ui.dungeon.route.reposition_room",
-      "text": "Move room"
+      "text": "Move"
     },
     {
       "key": "ui.dungeon.route.resulting_usable",
@@ -3545,8 +3545,9 @@
       "key": "ui.dungeon.route.edit_for_room",
       "text": "Edit route for {0}"
     },
+    {"key": "ui.dungeon.route.dock_title", "text": "Connect rooms"},
     {"key": "ui.dungeon.route.waiting", "text": "The new room needs two connections."},
-    {"key": "ui.dungeon.route.ready", "text": "Route ready to accept."},
+    {"key": "ui.dungeon.route.proposal_ready", "text": "Route ready to accept."},
     {"key": "ui.dungeon.route.preview_only", "text": "Accept Route adds this preview to the draft."},
     {"key": "ui.dungeon.route.order_on_map", "text": "Map numbers show visit order."},
     {"key": "ui.dungeon.route.opening_mismatch", "text": "The passage does not join the chosen doors."},
@@ -3565,7 +3566,7 @@
     {"key": "ui.dungeon.route.map_next", "text": "Tap the next room or terminal."},
     {"key": "ui.dungeon.route.map_edit", "text": "Tap a doorway or corridor handle to edit."},
     {"key": "ui.dungeon.route.map_cancel", "text": "Close"},
-    {"key": "ui.dungeon.route.map_choose_again", "text": "Choose rooms"},
+    {"key": "ui.dungeon.route.map_choose_again", "text": "Reselect"},
     {"key": "ui.dungeon.route.map_finish_segment", "text": "Done"},
     {"key": "ui.dungeon.route.map_finish_tiles", "text": "Done"},
     {

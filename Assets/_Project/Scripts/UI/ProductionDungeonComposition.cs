@@ -101,6 +101,7 @@ namespace DungeonBuilder.M0
             safe.EnableInClassList("details-collapsed",detailsCollapsed);
             safe.EnableInClassList("blocked-state",IsEditing && (!draft.IsStructurallyValid || draft.Durability!=DraftDurability.Acknowledged));
             ui.Q<Label>("sheetTitle").text=Text(IsEditing && contentCategory != null && ContextRoomId != null ? ContentHeadingKey :
+                IsAuthoringRoute ? "ui.dungeon.route.dock_title" :
                 IsConstructing ? "ui.dungeon.sheet.placement" : inspecting ? "ui.dungeon.sheet.inspection" :
                 IsEditing ? "ui.dungeon.sheet.edit" : "ui.dungeon.floor_summary");
             ui.Q("floorSummary").style.display=!IsEditing && !inspecting ? DisplayStyle.Flex : DisplayStyle.None;

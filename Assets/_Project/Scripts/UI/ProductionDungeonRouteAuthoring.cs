@@ -514,7 +514,7 @@ namespace DungeonBuilder.M0
                 : routeEdges.Length == 0 || feedback == StructuralRouteInsertionService.RetirementUnavailable
                     ? StructuralRouteInsertionService.RetirementUnavailable : null;
             routeState.EnableInClassList("route-problem", problem != null);
-            routeState.text = Text(problem == null ? valid ? "ui.dungeon.route.ready" : "ui.dungeon.route.waiting"
+            routeState.text = Text(problem == null ? valid ? "ui.dungeon.route.proposal_ready" : "ui.dungeon.route.waiting"
                 : ConstructionReason(problem));
             routeDetail.text = Text(valid ? "ui.dungeon.route.preview_only" : "ui.dungeon.route.order_on_map");
             routeDetail.style.visibility = detailsCollapsed ? Visibility.Hidden : Visibility.Visible;
