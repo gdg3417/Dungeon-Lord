@@ -677,7 +677,11 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 MvpDungeonPlacementIds.BasicLootNodeOptionId, lastRoom.RoomInstanceId, floorOneId, new TileCoordinate(1, 1))));
             VerifyOwnerInsertionBaseline(floorOne, floorOneId, new TileCoordinate(0, 2), new TileCoordinate(0, 6));
             WriteSeed(floorOne, directory, "aa1", null, 0);
+            WriteSeed(CreateAmendmentAOwnerFloorTwo(utc), directory, "aa2", null, 0);
+        }
 
+        internal static Fixture CreateAmendmentAOwnerFloorTwo(long utc)
+        {
             // Use the existing Architecture eligibility and floor-construction
             // fixture, then stage the approved diagnostic geometry as a detached
             // candidate through the complete canonical authority.
@@ -733,7 +737,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             floorTwo.Accept(PhaseSixA4Tests.Writer(floorTwo).CommitFloorLifecycle(floorTwo.ActivePath, floorTwo.FileSystem,
                 floorTwo.Session, floorTwo.Runtime, FloorLifecycleAction.Activate, floorTwoId));
             VerifyOwnerInsertionBaseline(floorTwo, floorTwoId, new TileCoordinate(2, 5), new TileCoordinate(6, 5));
-            WriteSeed(floorTwo, directory, "aa2", null, 0);
+            return floorTwo;
         }
 
         private static void FundConstruction(Fixture fixture) =>

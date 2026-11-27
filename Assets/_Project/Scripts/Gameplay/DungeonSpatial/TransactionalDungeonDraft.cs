@@ -428,6 +428,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 });
         }
 
+        internal AuthoredRouteGeometry ReconnectRouteLink(StructuralRouteInsertionRequest request, bool incoming,
+            TileCoordinate? waypoint, TileCoordinate? replacedTile, bool requireTurn, out string reason)
+        {
+            reason = StructuralRouteInsertionService.RetirementUnavailable;
+            var original = baseline.Floors.SingleOrDefault(f => f.FloorInstanceId == request.FloorInstanceId)
+                ?.Layout.Edges.SingleOrDefault(e => e.EdgeId == request.ReplacedEdgeId);
+            var floor = presented.Floors.SingleOrDefault(f => f.FloorInstanceId == request.FloorInstanceId);
+            var placed = floor?.Layout.Nodes.SingleOrDefault(n => n.RoomInstanceId == request.RoomInstanceId);
+            if (original == null || placed == null) return null;
+            var previous = CurrentInsertions.LastOrDefault(edit => edit.Request.RoomInstanceId == request.RoomInstanceId);
+            return StructuralRouteInsertionService.Reconnect(context, floor,
+                incoming ? original.SourceNodeId : placed.NodeId, incoming ? placed.NodeId : original.DestinationNodeId,
+                incoming ? request.Incoming : request.Outgoing, incoming ? request.Outgoing : request.Incoming,
+                previous?.ExpectedIncomingEdgeId, previous?.ExpectedOutgoingEdgeId, waypoint, replacedTile, requireTurn, out reason);
+        }
+
         internal string[] RouteAuthoringRoomIds => commands.Where(c => c.Kind == DungeonDraftCommandKind.IndependentRoomPlacement)
             .Select(c => c.IndependentRoomPlacement.ExpectedRoomInstanceId).Distinct(StringComparer.Ordinal).ToArray();
 

@@ -118,3 +118,19 @@ Owner UAT at PR #275 head a6961215 confirmed independent room placement and reje
 After confirming placement, tap the preceding room or eligible fixed structure, the new room, and the following room or eligible fixed structure directly on the map. Use the existing retirement authority to resolve that sequence. A complete supported sequence automatically previews a bounded suggestion. Map markers show visit order, the disconnected room, the proposed links, doorway choices and segment handles. Tap openings on the map, or tap and move a segment or drag its handle. Supporting controls show the price, space and blockers and allow revert, acceptance and final Save Changes.
 
 This interaction uses the existing restricted insertion, ordered geometry, draft and atomic publication contracts. Accept Route records an explicit draft edit. Save Changes publishes the valid draft. The original automated qualification remains evidence for its recorded head. Replacement owner UAT requires independent approval of the corrected build.
+
+
+## Owner-approved doorway and corridor manipulation clarification (2026-11-27)
+
+The third owner UAT accepted the placement, map sequence, automatic proposal and persistent dock interaction and failed overall because doorway and corridor editing were unintuitive. The owner approved these eight interaction changes.
+
+1. Select an existing map doorway, then choose a replacement on that structure. Reconnect with the other endpoint fixed.
+2. Select or drag the actual corridor tiles, sections and bends on the map.
+3. Adjust adjoining orthogonal geometry automatically while preserving both doors.
+4. Preserve the last valid proposal when an attempt fails and show the attempted position and localized blocker.
+5. Complete each valid adjustment on the destination tap or drag release.
+6. Provide transient undo and cancel while retaining the rest of the proposal.
+7. Remove manual tile drawing from the primary flow. An advanced fallback is optional.
+8. Preserve the existing eligibility, validation, economy, draft and canonical publication authorities.
+
+The proposed route remains transient until Accept Route. Save Changes publishes accepted draft geometry. Doorway-only edits with a pinned opposite endpoint may be physically unable to convert a valid adjacent direct connection to a corridor, or a valid corridor to a direct connection. The opposite doorway opens straight into either a room wall or corridor space in those cases. Reject infeasible moves through the existing geometry rules without altering the other door.

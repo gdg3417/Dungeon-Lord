@@ -560,13 +560,13 @@ namespace DungeonBuilder.M0
             marker.gameObject.SetActive(true);
         }
 
-        internal void AddRouteLine(Vector2 from, Vector2 to, bool valid)
+        internal void AddRouteLine(Vector2 from, Vector2 to, bool valid, bool selected = false)
         {
             if (routeLineCount == routeLines.Count) routeLines.Add(Entity("ProposedConnection", 6));
             var line = routeLines[routeLineCount++];
             var delta = to - from;
             line.transform.localPosition = (from + to) * .5f;
-            line.transform.localScale = new Vector3(delta.magnitude, .12f, 1);
+            line.transform.localScale = new Vector3(delta.magnitude, selected ? .22f : .12f, 1);
             line.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
             line.color = valid ? policy.ValidColor : policy.InvalidColor;
             line.gameObject.SetActive(true);
@@ -585,6 +585,12 @@ namespace DungeonBuilder.M0
                     if (constructionPreview.HasTile(position))
                         constructionPreview.SetTile(position, valid ? moveAnchorTile : invalidIntentTile);
                 }
+        }
+
+        internal void OverlayRouteAttempt(IEnumerable<TileCoordinate> tiles, bool valid)
+        {
+            foreach (var cell in tiles)
+                constructionPreview.SetTile(new Vector3Int(cell.X, cell.Y, 0), valid ? moveAnchorTile : invalidIntentTile);
         }
 
         public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); selectedRoom?.ClearAllTiles(); constructionPreview?.ClearAllTiles(); ConstructionPreviewTileCount = 0; ClearRoomPlacementGrid(); }

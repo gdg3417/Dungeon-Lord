@@ -645,7 +645,11 @@ namespace DungeonBuilder.M0
             if (suppressTouch)
             { if (!pressed && !second.HasValue) suppressTouch = false; else return; }
             if (pointerDown && primaryTouchId != 0 && !pressed && second.HasValue)
-            { gesture.Cancel(); pointerDown = false; draggingIndependentPlacement = false; routeDrag = null; suppressTouch = true; return; }
+            {
+                gesture.Cancel(); pointerDown = false; draggingIndependentPlacement = false;
+                if (routeDrag != null && routeDragging) CancelRouteAdjustment();
+                routeDrag = null; suppressTouch = true; return;
+            }
             if (!pressed && !second.HasValue && Mouse.current != null)
             {
                 point = Mouse.current.position.ReadValue(); pressed = Mouse.current.leftButton.isPressed; id = Mouse.current.deviceId;
@@ -666,10 +670,14 @@ namespace DungeonBuilder.M0
                 if (!chrome && IsAuthoringRoute && !second.HasValue)
                 {
                     var handle = RouteHandleAt(viewport.ScreenToWorld(point));
-                    if (handle.Segment)
+                    if (handle?.IsPassage == true)
                     {
-                        routeDrag = handle.Select;
+                        routeDrag = handle;
                         routeDragStart = routeDragEnd = point;
+                        routeDragViewport = viewport.ScreenRect;
+                        routeDragCameraCenter = viewport.Center;
+                        routeDragCameraSize = viewport.Size;
+                        routeDragging = false;
                         return;
                     }
                 }
@@ -695,21 +703,49 @@ namespace DungeonBuilder.M0
             }
             if (routeDrag != null)
             {
-                if (second.HasValue)
+                if (second.HasValue || routeDragViewport != viewport.ScreenRect ||
+                    routeDragCameraCenter != viewport.Center || routeDragCameraSize != viewport.Size)
                 {
+                    if (routeDragging) CancelRouteAdjustment();
                     routeDrag = null;
                     gesture.Cancel();
                     return;
                 }
-                if (pressed) { routeDragEnd = point; return; }
-                var selectSegment = routeDrag;
+
+                if (pressed)
+                {
+                    routeDragEnd = point;
+                    float slop = presentationPolicy.TapSlopPhysicalUnits * pixelsPerPhysicalUnit;
+                    if (!routeDragging && (point - routeDragStart).sqrMagnitude > slop * slop)
+                    {
+                        routeDragging = true;
+                        SelectRouteTarget(routeDrag);
+                    }
+                    if (routeDragging && viewport.ScreenRect.Contains(point) && !IsChrome(point, primaryTouchId))
+                    {
+                        var destination = ScreenCell(point);
+                        if (!attemptedCell.Equals(destination))
+                        {
+                            AdjustRoute(routeDrag, destination);
+                            PresentAdjustment();
+                        }
+                    }
+                    return;
+                }
+
                 routeDrag = null;
                 pointerDown = false;
-                if (!viewport.ScreenRect.Contains(routeDragEnd) || IsChrome(routeDragEnd, primaryTouchId)) return;
-                var destination = ScreenCell(routeDragEnd);
-                selectSegment();
-                float slop = presentationPolicy.TapSlopPhysicalUnits * pixelsPerPhysicalUnit;
-                if ((routeDragEnd - routeDragStart).sqrMagnitude > slop * slop) TryEditPassage(destination);
+                if (!viewport.ScreenRect.Contains(routeDragEnd) || IsChrome(routeDragEnd, primaryTouchId))
+                {
+                    if (routeDragging) CancelRouteAdjustment();
+                    return;
+                }
+                if (routeDragging)
+                {
+                    if (attemptedRoute == null && attemptReason == null) AdjustRoute(routeSelection, ScreenCell(routeDragEnd));
+                    CompleteRouteAdjustment();
+                }
+                else TryRouteMap(viewport.ScreenToWorld(routeDragStart));
                 return;
             }
             if (pressed && pointerDown)

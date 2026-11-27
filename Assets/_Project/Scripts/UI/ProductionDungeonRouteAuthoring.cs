@@ -15,20 +15,35 @@ namespace DungeonBuilder.M0
         private string routeRoom;
         private string routeStart;
         private bool routeMiddleSelected;
-        private readonly List<(Vector2 Position, Action Select, bool Segment)> routeHandles =
-            new List<(Vector2, Action, bool)>();
-        private Action routeDrag;
-        private Vector2 routeDragStart;
-        private Vector2 routeDragEnd;
+        private enum RouteTargetKind { Doorway, Replacement, Section, Bend, Tile }
+
+        private sealed class RouteTarget
+        {
+            internal RouteTargetKind Kind;
+            internal bool Incoming;
+            internal bool Source;
+            internal string Opening;
+            internal int Start, End;
+            internal Vector2 Position;
+            internal bool IsPassage => Kind == RouteTargetKind.Section || Kind == RouteTargetKind.Bend || Kind == RouteTargetKind.Tile;
+        }
+
+        private const int RouteUndoDepth = 8;
+        private readonly List<RouteTarget> routeHandles = new List<RouteTarget>();
+        private readonly List<StructuralRouteInsertionRequest> routeUndo = new List<StructuralRouteInsertionRequest>();
+        private RouteTarget routeSelection, routeDrag;
+        private Vector2 routeDragStart, routeDragEnd, routeDragCameraCenter;
+        private Rect routeDragViewport;
+        private float routeDragCameraSize;
+        private bool routeDragging;
+        private TileCoordinate? attemptedCell;
+        private Vector2? attemptedMarker;
+        private StructuralRouteInsertionRequest attemptedRoute;
+        private string attemptReason;
         private string[] routeEdges = Array.Empty<string>();
         private StructuralRouteInsertionRequest routeRequest;
         private StructuralRouteInsertionPreview routePreview;
         private StructuralEconomyPreview routeQuote;
-        private bool? drawIncomingPassage;
-        private TileCoordinate[] segmentOrigin;
-        private (int Start, int End) selectedSegment;
-        private TileCoordinate segmentTarget;
-        private bool segmentExceedsLimit;
         private bool draggingIndependentPlacement;
         private TileCoordinate dragAnchorOffset;
         private Vector2 placementDragPoint;
@@ -101,8 +116,8 @@ namespace DungeonBuilder.M0
             routeRequest = null;
             routePreview = null;
             routeQuote = null;
-            drawIncomingPassage = null;
-            ClearSegmentSelection();
+            ClearRouteAdjustment();
+            routeUndo.Clear();
         }
 
         private SavedSpatialFloor DraftSelectedFloor() => draft?.ReadModel.Floors.SingleOrDefault(f => f.FloorInstanceId == selectedFloor);
@@ -130,8 +145,8 @@ namespace DungeonBuilder.M0
                 Incoming = new AuthoredRouteGeometry { SourcePointId = from[0].Id, DestinationPointId = placed[0].Id },
                 Outgoing = new AuthoredRouteGeometry { SourcePointId = placed[1].Id, DestinationPointId = to[0].Id }
             };
-            drawIncomingPassage = null;
-            ClearSegmentSelection();
+            ClearRouteAdjustment();
+            routeUndo.Clear();
             SuggestRoute();
         }
 
@@ -140,66 +155,128 @@ namespace DungeonBuilder.M0
             var suggested = root.SaveService.SuggestRouteInsertion(root.Save, draft, selectedFloor, routeRequest.ReplacedEdgeId, routeRoom);
             if (suggested == null)
             {
-                feedback = "ui.dungeon.route.no_suggestion";
+                feedback = "ui.dungeon.route.no_suggestion_move";
                 UpdateRouteProposal();
                 return;
             }
             feedback = null;
             routeRequest = suggested;
-            drawIncomingPassage = null;
-            ClearSegmentSelection();
+            ClearRouteAdjustment();
+            routeUndo.Clear();
             UpdateRouteProposal();
         }
 
         private RouteOpening[] RouteOpenings(string nodeId) =>
             AuthoredRouteGeometry.Openings(DraftSelectedFloor(), nodeId, root.ProductionSpatialContent.Catalog);
 
-        private void EditPassage(bool incoming, bool clear)
+        private AuthoredRouteGeometry RouteLink(bool incoming) => incoming ? routeRequest.Incoming : routeRequest.Outgoing;
+
+        private StructuralRouteInsertionRequest CopyRoute() => new StructuralRouteInsertionRequest
         {
-            ClearSegmentSelection();
-            drawIncomingPassage = incoming;
-            if (clear) (incoming ? routeRequest.Incoming : routeRequest.Outgoing).Passage = Array.Empty<TileCoordinate>();
+            FloorInstanceId = routeRequest.FloorInstanceId,
+            RoomInstanceId = routeRequest.RoomInstanceId,
+            ReplacedEdgeId = routeRequest.ReplacedEdgeId,
+            Incoming = routeRequest.Incoming.Copy(),
+            Outgoing = routeRequest.Outgoing.Copy()
+        };
+
+        private void ClearRouteAdjustment()
+        {
+            routeSelection = null;
+            attemptedCell = null;
+            attemptedMarker = null;
+            attemptedRoute = null;
+            attemptReason = null;
+        }
+
+        private void CancelRouteAdjustment()
+        {
+            ClearRouteAdjustment();
+            PresentAdjustment();
+        }
+
+        private void UndoRouteAdjustment()
+        {
+            if (routeUndo.Count == 0 || routeSelection != null) return;
+            routeRequest = routeUndo[routeUndo.Count - 1];
+            routeUndo.RemoveAt(routeUndo.Count - 1);
             UpdateRouteProposal();
         }
 
-        private bool TryEditPassage(TileCoordinate cell)
+        private void SelectRouteTarget(RouteTarget target)
         {
-            if (!IsAuthoringRoute || !drawIncomingPassage.HasValue || routeRequest == null) return false;
-            var link = drawIncomingPassage.Value ? routeRequest.Incoming : routeRequest.Outgoing;
-            var definition = root.ProductionSpatialContent.Catalog.Corridors.Single(c => c.CorridorDefinitionId ==
-                OptionalBranchStructuralEditService.CorridorDefinitionId);
-            if (segmentOrigin != null)
+            ClearRouteAdjustment();
+            routeSelection = target;
+            PresentAdjustment();
+        }
+
+        private void AdjustRoute(RouteTarget target, TileCoordinate cell, RouteTarget replacement = null)
+        {
+            attemptedCell = cell;
+            attemptedMarker = replacement?.Position ?? CellCenter(cell);
+            attemptedRoute = null;
+            attemptReason = null;
+            var next = CopyRoute();
+            var link = target.Incoming ? next.Incoming : next.Outgoing;
+            if (replacement != null)
             {
-                segmentExceedsLimit = !AuthoredRouteGeometry.TrySlideSegment(segmentOrigin, selectedSegment.Start,
-                    selectedSegment.End, cell, definition.MaximumLength, out var moved);
-                if (!segmentExceedsLimit)
-                {
-                    segmentTarget = cell;
-                    link.Passage = moved;
-                }
-                UpdateRouteProposal();
-                return true;
+                if (target.Source) link.SourcePointId = replacement.Opening;
+                else link.DestinationPointId = replacement.Opening;
             }
-            if (link.Passage.Length < definition.MaximumLength) link.Passage = link.Passage.Append(cell).ToArray();
-            else feedback = StructuralEditService.CorridorLengthReason;
-            UpdateRouteProposal();
-            return true;
+            if (target.Kind == RouteTargetKind.Section)
+            {
+                var definition = root.ProductionSpatialContent.Catalog.Corridors.Single(c => c.CorridorDefinitionId ==
+                    OptionalBranchStructuralEditService.CorridorDefinitionId);
+                if (!AuthoredRouteGeometry.TrySlideSegment(link.Passage, target.Start, target.End, cell,
+                    definition.MaximumLength, out var moved))
+                    attemptReason = StructuralEditService.CorridorLengthReason;
+                else link.Passage = moved;
+            }
+            else
+            {
+                TileCoordinate? replaced = replacement == null ? link.Passage[target.Start] : (TileCoordinate?)null;
+                link = draft.ReconnectRouteLink(next, target.Incoming, replacement == null ? cell : (TileCoordinate?)null,
+                    replaced, target.Kind == RouteTargetKind.Bend, out string reason);
+                if (link == null) attemptReason = reason;
+            }
+            if (attemptReason == null)
+            {
+                if (target.Incoming) next.Incoming = link;
+                else next.Outgoing = link;
+                attemptedRoute = next;
+                attemptReason = draft.PreviewRouteGeometry(next).Reason;
+            }
         }
 
-        private void ClearSegmentSelection()
+        private void CompleteRouteAdjustment()
         {
-            segmentOrigin = null;
-            segmentExceedsLimit = false;
+            if (attemptReason == null && attemptedRoute != null)
+            {
+                var preview = root.SaveService.PreviewRouteInsertion(root.Save, draft, attemptedRoute, out var quote);
+                if (preview.IsValid)
+                {
+                    var before = RouteLink(routeSelection.Incoming);
+                    var after = routeSelection.Incoming ? attemptedRoute.Incoming : attemptedRoute.Outgoing;
+                    if (before.SourcePointId != after.SourcePointId || before.DestinationPointId != after.DestinationPointId ||
+                        !before.Passage.SequenceEqual(after.Passage))
+                    {
+                        if (routeUndo.Count == RouteUndoDepth) routeUndo.RemoveAt(0);
+                        routeUndo.Add(routeRequest);
+                    }
+                    routeRequest = attemptedRoute;
+                    routePreview = preview;
+                    routeQuote = quote;
+                    ClearRouteAdjustment();
+                }
+                else attemptReason = preview.Reason;
+            }
+            PresentAdjustment();
         }
 
-        private void SelectSegment(bool incoming, AuthoredRouteGeometry link, (int Start, int End) segment)
+        private void PresentAdjustment()
         {
-            drawIncomingPassage = incoming;
-            segmentOrigin = (TileCoordinate[])link.Passage.Clone();
-            selectedSegment = segment;
-            segmentTarget = link.Passage[segment.Start];
-            segmentExceedsLimit = false;
-            UpdateRouteProposal();
+            PresentRouteMap();
+            PresentRouteAuthoring(document.rootVisualElement.Q("routeAuthoring"));
         }
 
         private bool TryRouteMap(Vector2 point)
@@ -214,13 +291,29 @@ namespace DungeonBuilder.M0
                 return true;
             }
 
-            var handle = RouteHandleAt(point);
-            if (handle.Select != null && !drawIncomingPassage.HasValue)
+            if (routeRequest != null)
             {
-                handle.Select();
+                var handle = RouteHandleAt(point);
+                if (handle?.Kind == RouteTargetKind.Replacement && routeSelection?.Kind == RouteTargetKind.Doorway)
+                {
+                    AdjustRoute(routeSelection, cell, handle);
+                    CompleteRouteAdjustment();
+                }
+                else if (handle != null)
+                {
+                    if (routeSelection != null && handle.Kind == routeSelection.Kind &&
+                        handle.Incoming == routeSelection.Incoming && handle.Source == routeSelection.Source &&
+                        handle.Start == routeSelection.Start && handle.End == routeSelection.End)
+                        CancelRouteAdjustment();
+                    else SelectRouteTarget(handle);
+                }
+                else if (routeSelection?.IsPassage == true)
+                {
+                    AdjustRoute(routeSelection, cell);
+                    CompleteRouteAdjustment();
+                }
                 return true;
             }
-            if (TryEditPassage(cell)) return true;
 
             var floor = DraftSelectedFloor();
             var hitRoom = world.SelectRoom(cell, false);
@@ -256,8 +349,9 @@ namespace DungeonBuilder.M0
             return true;
         }
 
-        private (Vector2 Position, Action Select, bool Segment) RouteHandleAt(Vector2 point) =>
-            routeHandles.Where(handle => (handle.Position - point).sqrMagnitude <= .22f)
+        private RouteTarget RouteHandleAt(Vector2 point) =>
+            routeHandles.Where(handle => (handle.Position - point).sqrMagnitude <=
+                (handle.IsPassage ? .185f : .12f))
                 .OrderBy(handle => (handle.Position - point).sqrMagnitude).FirstOrDefault();
 
         private bool TryRouteNodeBounds(SavedSpatialFloor floor, FloorRouteNode node, out Rect bounds)
@@ -320,54 +414,90 @@ namespace DungeonBuilder.M0
             var retiredOpening = world.ConnectionVisuals.FirstOrDefault(connection => connection.EdgeId == edge.EdgeId);
             if (retiredOpening.EdgeId != null)
                 world.AddRouteMarker(retiredOpening.Center, "X", false, .48f);
+            world.PresentRoutePreview(routeRequest.Incoming.Passage.Concat(routeRequest.Outgoing.Passage),
+                routePreview?.IsValid == true, null);
+            if (attemptedRoute != null)
+                world.OverlayRouteAttempt((routeSelection.Incoming ? attemptedRoute.Incoming : attemptedRoute.Outgoing).Passage,
+                    attemptReason == null);
             PresentRouteLink(true, edge.SourceNodeId, placed.NodeId);
             PresentRouteLink(false, placed.NodeId, edge.DestinationNodeId);
         }
 
         private void PresentRouteLink(bool incoming, string source, string destination)
         {
-            var link = incoming ? routeRequest.Incoming : routeRequest.Outgoing;
-            var from = AddOpeningHandles(source, link.SourcePointId, incoming, true);
-            var to = AddOpeningHandles(destination, link.DestinationPointId, incoming, false);
-            if (!from.HasValue || !to.HasValue) return;
-            var points = new[] { from.Value }.Concat(link.Passage.Select(CellCenter)).Append(to.Value).ToArray();
-            for (int i = 1; i < points.Length; i++)
-                world.AddRouteLine(points[i - 1], points[i], routePreview?.IsValid == true);
-            if (segmentOrigin != null || drawIncomingPassage.HasValue) return;
+            var link = RouteLink(incoming);
+            var from = AddDoorwayHandles(source, link.SourcePointId, incoming, true);
+            var to = AddDoorwayHandles(destination, link.DestinationPointId, incoming, false);
+            bool selected = routeSelection?.Incoming == incoming;
+            DrawConnectedRoute(from, to, link.Passage, routePreview?.IsValid == true, selected);
+            if (link.Passage.Length > 0)
+                for (int i = 0; i < link.Passage.Length; i++)
+                {
+                    bool bend = from.Id != null && to.Id != null &&
+                        AuthoredRouteGeometry.TryFacing(i == 0 ? from.World : link.Passage[i - 1], link.Passage[i], out var preceding) &&
+                        AuthoredRouteGeometry.TryFacing(link.Passage[i], i + 1 == link.Passage.Length ? to.World : link.Passage[i + 1], out var following) &&
+                        (int)preceding % 2 != (int)following % 2;
+                    var position = CellCenter(link.Passage[i]);
+                    var kind = bend ? RouteTargetKind.Bend : RouteTargetKind.Tile;
+                    routeHandles.Add(new RouteTarget { Kind = kind, Position = position, Incoming = incoming, Start = i, End = i });
+                    if (bend) world.AddRouteMarker(position, "◆", selected && routeSelection.Start == i, .36f);
+                }
             foreach (var segment in AuthoredRouteGeometry.Segments(link.Passage))
             {
-                var position = (CellCenter(link.Passage[segment.Start]) + CellCenter(link.Passage[segment.End])) * .5f;
-                world.AddRouteMarker(position, "=", true, .45f);
-                routeHandles.Add((position, () => SelectSegment(incoming, link, segment), true));
+                // Place the section handle on the first tile join so tile centers are always targetable.
+                var position = (CellCenter(link.Passage[segment.Start]) + CellCenter(link.Passage[segment.Start + 1])) * .5f;
+                world.AddRouteMarker(position, "●", selected && routeSelection.Kind == RouteTargetKind.Section &&
+                    routeSelection.Start == segment.Start, .28f);
+                routeHandles.Add(new RouteTarget { Kind = RouteTargetKind.Section, Position = position, Incoming = incoming,
+                    Start = segment.Start, End = segment.End });
             }
+            if (!selected) return;
+            world.AddRouteMarker(routeSelection.Position, "□", true, .56f);
+            if (attemptedMarker.HasValue)
+                world.AddRouteMarker(attemptedMarker.Value, attemptReason == null ? "+" : "×", false, .55f);
+            if (attemptedRoute == null) return;
+            var attempted = incoming ? attemptedRoute.Incoming : attemptedRoute.Outgoing;
+            DrawConnectedRoute(RouteOpenings(source).FirstOrDefault(p => p.Id == attempted.SourcePointId),
+                RouteOpenings(destination).FirstOrDefault(p => p.Id == attempted.DestinationPointId),
+                attempted.Passage, attemptReason == null, true);
         }
 
-        private Vector2? AddOpeningHandles(string nodeId, string selected, bool incoming, bool source)
+        private void DrawConnectedRoute(RouteOpening from, RouteOpening to, TileCoordinate[] path, bool valid, bool selected)
         {
-            Vector2? selectedPosition = null;
-            bool isPlacedRoom = DraftSelectedFloor().Layout.Nodes.Any(n => n.NodeId == nodeId && n.RoomInstanceId == routeRoom);
+            if (from.Id == null || to.Id == null) return;
+            if (path.Length == 0)
+            {
+                if (from.OpensToward(to.World) && to.OpensToward(from.World))
+                    world.AddRouteLine(CellCenter(from.World), CellCenter(to.World), valid, selected);
+                return;
+            }
+            if (!from.OpensToward(path[0]) || !to.OpensToward(path[path.Length - 1]) ||
+                !AuthoredRouteGeometry.IsContinuous(path)) return;
+            var points = new[] { OpeningCenter(from) }.Concat(path.Select(CellCenter)).Append(OpeningCenter(to)).ToArray();
+            for (int i = 1; i < points.Length; i++)
+                world.AddRouteLine(points[i - 1], points[i], valid, selected);
+        }
+
+        private RouteOpening AddDoorwayHandles(string nodeId, string selected, bool incoming, bool source)
+        {
+            RouteOpening active = default;
+            bool replacing = routeSelection?.Kind == RouteTargetKind.Doorway && routeSelection.Incoming == incoming &&
+                routeSelection.Source == source;
             foreach (var opening in RouteOpenings(nodeId))
             {
-                var position = OpeningCenter(opening);
-                bool active = opening.Id == selected;
-                if (active) selectedPosition = position;
-                // The incoming and outgoing sockets on the new room share the same authored points.
-                // Separate their handles toward the room interior and exterior.
-                if (isPlacedRoom)
-                    position += (position - CellCenter(opening.World)).normalized * (incoming ? -.24f : .24f);
-                world.AddRouteMarker(position, active ? (incoming ? "1" : "2") : (incoming ? "i" : "o"), active, .36f);
-                if (drawIncomingPassage.HasValue) continue;
-                routeHandles.Add((position, () =>
-                {
-                    var link = incoming ? routeRequest.Incoming : routeRequest.Outgoing;
-                    if (source) link.SourcePointId = opening.Id;
-                    else link.DestinationPointId = opening.Id;
-                    ClearSegmentSelection();
-                    drawIncomingPassage = null;
-                    UpdateRouteProposal();
-                }, false));
+                bool isActive = opening.Id == selected;
+                if (isActive) active = opening;
+                if (!isActive && (!replacing || (incoming && !source && opening.Id == routeRequest.Outgoing.SourcePointId) ||
+                    (!incoming && source && opening.Id == routeRequest.Incoming.DestinationPointId))) continue;
+                var boundary = OpeningCenter(opening);
+                // Each handle sits just inside its own room. Two doors on opposite faces
+                // of the same grid line remain separately selectable.
+                var position = Vector2.Lerp(boundary, CellCenter(opening.World), .48f);
+                world.AddRouteMarker(position, isActive ? "◇" : "+", replacing, .50f);
+                routeHandles.Add(new RouteTarget { Kind = isActive ? RouteTargetKind.Doorway : RouteTargetKind.Replacement,
+                    Position = position, Opening = opening.Id, Incoming = incoming, Source = source });
             }
-            return selectedPosition;
+            return active;
         }
 
         private void UpdateRouteProposal()
@@ -379,33 +509,15 @@ namespace DungeonBuilder.M0
 
         private void RefreshRouteProposal()
         {
-            routePreview = null; routeQuote = null;
+            routePreview = null;
+            routeQuote = null;
             if (routeRequest == null) return;
-            routePreview = segmentExceedsLimit
-                ? StructuralRouteInsertionService.Fail(StructuralEditService.CorridorLengthReason)
-                : root.SaveService.PreviewRouteInsertion(root.Save, draft, routeRequest, out routeQuote);
-            var edge = CommittedSelectedFloor().Layout.Edges.Single(e => e.EdgeId == routeRequest.ReplacedEdgeId);
-            var node = DraftSelectedFloor().Layout.Nodes.Single(n => n.RoomInstanceId == routeRoom);
-            var selectedOpenings = new[] {
-                (edge.SourceNodeId, routeRequest.Incoming.SourcePointId), (node.NodeId, routeRequest.Incoming.DestinationPointId),
-                (node.NodeId, routeRequest.Outgoing.SourcePointId), (edge.DestinationNodeId, routeRequest.Outgoing.DestinationPointId) };
-            var doorTiles = selectedOpenings.SelectMany(value => RouteOpenings(value.Item1).Where(p => p.Id == value.Item2)
-                .Select(p => p.World));
-            IEnumerable<TileCoordinate> selected = null;
-            if (segmentOrigin != null)
-            {
-                bool horizontal = segmentOrigin[selectedSegment.Start].Y == segmentOrigin[selectedSegment.End].Y;
-                selected = segmentOrigin.Skip(selectedSegment.Start).Take(selectedSegment.End - selectedSegment.Start + 1)
-                    .Select(cell => horizontal ? new TileCoordinate(cell.X, segmentTarget.Y) :
-                        new TileCoordinate(segmentTarget.X, cell.Y));
-            }
-            world.PresentRoutePreview(doorTiles.Concat(routeRequest.Incoming.Passage).Concat(routeRequest.Outgoing.Passage),
-                routePreview.IsValid, selected);
+            routePreview = root.SaveService.PreviewRouteInsertion(root.Save, draft, routeRequest, out routeQuote);
         }
 
         private void AcceptRoute()
         {
-            if (routePreview?.IsValid != true || !root.SaveService.AcceptRouteInsertion(root.Save, draft, routeRequest))
+            if (routeSelection != null || routePreview?.IsValid != true || !root.SaveService.AcceptRouteInsertion(root.Save, draft, routeRequest))
             {
                 feedback = draft.Reason;
                 Present();
@@ -419,8 +531,7 @@ namespace DungeonBuilder.M0
         }
 
         private Label routeInstruction, routeState, routeMetrics, routeDetail;
-        private Button acceptRoute, cancelRoute, chooseRouteRoomsAgain, moveRouteRoom, revertRouteSegment,
-            finishRouteSegment, drawIncoming, drawOutgoing, finishRouteTiles, clearRouteTiles, undoRouteTile;
+        private Button acceptRoute, chooseRouteRoomsAgain, moveRouteRoom, cancelRouteAdjustment, undoRouteAdjustment;
 
         private void BindRouteDock(VisualElement panel)
         {
@@ -439,7 +550,7 @@ namespace DungeonBuilder.M0
             main.AddToClassList("route-action-row");
             actions.Add(main);
             acceptRoute = RouteAction(main, "acceptRoute", "accept", AcceptRoute);
-            cancelRoute = RouteAction(main, "cancelRoute", "map_cancel", () =>
+            RouteAction(main, "cancelRoute", "map_cancel", () =>
             {
                 ClearRouteAuthoring();
                 world.ClearPreview();
@@ -449,8 +560,10 @@ namespace DungeonBuilder.M0
             chooseRouteRoomsAgain = RouteAction(main, "chooseRouteRoomsAgain", "map_choose_again", () =>
             {
                 routeRequest = null;
-                drawIncomingPassage = null;
-                ClearSegmentSelection();
+                routeStart = null;
+                routeMiddleSelected = false;
+                ClearRouteAdjustment();
+                routeUndo.Clear();
                 world.ClearPreview();
                 feedback = null;
                 UpdateRouteProposal();
@@ -459,22 +572,8 @@ namespace DungeonBuilder.M0
             var adjustments = new VisualElement();
             adjustments.AddToClassList("route-action-row");
             actions.Add(adjustments);
-            revertRouteSegment = RouteAction(adjustments, "revertRouteSegment", "revert_segment", () =>
-            {
-                (drawIncomingPassage.Value ? routeRequest.Incoming : routeRequest.Outgoing).Passage = segmentOrigin;
-                FinishRouteAdjustment();
-            });
-            finishRouteSegment = RouteAction(adjustments, "finishRouteSegment", "map_finish_segment", FinishRouteAdjustment);
-            drawIncoming = RouteAction(adjustments, "drawIncomingPassage", "map_draw_in", () => EditPassage(true, false));
-            drawOutgoing = RouteAction(adjustments, "drawOutgoingPassage", "map_draw_out", () => EditPassage(false, false));
-            finishRouteTiles = RouteAction(adjustments, "finishRouteTiles", "map_finish_tiles", FinishRouteAdjustment);
-            clearRouteTiles = RouteAction(adjustments, "clearPassage", "clear_passage", () => EditPassage(drawIncomingPassage.Value, true));
-            undoRouteTile = RouteAction(adjustments, "undoRouteTile", "undo_tile", () =>
-            {
-                var link = drawIncomingPassage.Value ? routeRequest.Incoming : routeRequest.Outgoing;
-                link.Passage = link.Passage.Take(Math.Max(0, link.Passage.Length - 1)).ToArray();
-                UpdateRouteProposal();
-            });
+            cancelRouteAdjustment = RouteAction(adjustments, "cancelRouteAdjustment", "cancel_adjustment", CancelRouteAdjustment);
+            undoRouteAdjustment = RouteAction(adjustments, "undoRouteAdjustment", "undo_adjustment", UndoRouteAdjustment);
         }
 
         private Button RouteAction(VisualElement row, string name, string key, Action action)
@@ -482,13 +581,6 @@ namespace DungeonBuilder.M0
             var button = ButtonFor(row, Text("ui.dungeon.route." + key), action);
             button.name = name;
             return button;
-        }
-
-        private void FinishRouteAdjustment()
-        {
-            ClearSegmentSelection();
-            drawIncomingPassage = null;
-            UpdateRouteProposal();
         }
 
         private void PresentRouteAuthoring(VisualElement panel)
@@ -499,39 +591,33 @@ namespace DungeonBuilder.M0
             if (acceptRoute == null) BindRouteDock(panel);
             bool valid = routePreview?.IsValid == true;
             bool proposal = routeRequest != null;
-            bool sliding = segmentOrigin != null;
-            bool drawing = drawIncomingPassage.HasValue && !sliding;
-            string instruction = sliding
-                ? segmentOrigin[selectedSegment.Start].Y == segmentOrigin[selectedSegment.End].Y
+            string instruction = routeSelection?.Kind == RouteTargetKind.Doorway ? "ui.dungeon.route.pick_door"
+                : routeSelection?.Kind == RouteTargetKind.Section ? RouteLink(routeSelection.Incoming).Passage[routeSelection.Start].Y ==
+                    RouteLink(routeSelection.Incoming).Passage[routeSelection.End].Y
                     ? "ui.dungeon.route.slide_row" : "ui.dungeon.route.slide_column"
-                : drawing ? "ui.dungeon.route.map_draw_hint"
+                : routeSelection?.Kind == RouteTargetKind.Bend ? "ui.dungeon.route.move_bend"
+                : routeSelection?.Kind == RouteTargetKind.Tile ? "ui.dungeon.route.move_tile"
                 : proposal ? "ui.dungeon.route.map_edit"
                 : routeMiddleSelected ? "ui.dungeon.route.map_next"
                 : routeStart != null ? "ui.dungeon.route.map_new" : "ui.dungeon.route.map_start";
             routeInstruction.text = Text(instruction);
             string problem = draft.Durability != DraftDurability.Acknowledged ? draft.Reason
-                : proposal && !valid ? routePreview?.Reason
+                : attemptReason != null ? attemptReason
+                : proposal && !valid ? feedback ?? routePreview?.Reason
                 : routeEdges.Length == 0 || feedback == StructuralRouteInsertionService.RetirementUnavailable
                     ? StructuralRouteInsertionService.RetirementUnavailable : null;
             routeState.EnableInClassList("route-problem", problem != null);
-            routeState.text = Text(problem == null ? valid ? "ui.dungeon.route.proposal_ready" : "ui.dungeon.route.waiting"
+            routeState.text = Text(problem == null ? valid ? routeSelection != null ? "ui.dungeon.route.adjusting" :
+                "ui.dungeon.route.proposal_ready" : "ui.dungeon.route.waiting"
                 : ConstructionReason(problem));
             routeDetail.text = Text(valid ? "ui.dungeon.route.preview_only" : "ui.dungeon.route.order_on_map");
             routeDetail.style.visibility = detailsCollapsed ? Visibility.Hidden : Visibility.Visible;
             acceptRoute.style.visibility = proposal ? Visibility.Visible : Visibility.Hidden;
-            acceptRoute.SetEnabled(valid && draft.Durability == DraftDurability.Acknowledged);
+            acceptRoute.SetEnabled(valid && routeSelection == null && draft.Durability == DraftDurability.Acknowledged);
             ShowRouteAction(chooseRouteRoomsAgain, proposal);
             ShowRouteAction(moveRouteRoom, draft.DisconnectedRoomIds.Contains(routeRoom));
-            ShowRouteAction(revertRouteSegment, sliding);
-            finishRouteSegment.style.display = DisplayStyle.Flex;
-            finishRouteSegment.style.visibility = sliding && !segmentExceedsLimit ? Visibility.Visible : Visibility.Hidden;
-            ShowRouteAction(drawIncoming, proposal && !valid && !sliding && !drawing);
-            ShowRouteAction(drawOutgoing, proposal && !valid && !sliding && !drawing);
-            ShowRouteAction(finishRouteTiles, drawing);
-            ShowRouteAction(clearRouteTiles, drawing);
-            ShowRouteAction(undoRouteTile, drawing);
-            // Reserve the edit row in every state. A new blocker or prompt must not move the map.
-            if (drawing || proposal && !valid && !sliding) finishRouteSegment.style.display = DisplayStyle.None;
+            cancelRouteAdjustment.style.visibility = routeSelection != null ? Visibility.Visible : Visibility.Hidden;
+            undoRouteAdjustment.style.visibility = routeUndo.Count > 0 && routeSelection == null ? Visibility.Visible : Visibility.Hidden;
             PresentRouteBalance();
         }
 
@@ -564,7 +650,7 @@ namespace DungeonBuilder.M0
         {
             if (!IsAuthoringRoute && !independentRoomPlacement) return reason;
             if (reason == StructuralEditService.ConnectionUnavailableReason && IsAuthoringRoute)
-                return "ui.dungeon.route.opening_mismatch";
+                return routeSelection != null ? "ui.dungeon.route.no_connection" : "ui.dungeon.route.opening_mismatch";
             if (reason == StructuralEditService.CorridorLengthReason && IsAuthoringRoute)
                 return "ui.dungeon.route.passage_length";
             if (reason == StructuralEditService.RequiredRouteReason) return "ui.dungeon.route.waiting";

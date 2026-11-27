@@ -192,6 +192,146 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 : evaluated[0].Candidate;
         }
 
+        // Fixed-opening edits use the same socket, occupancy and corridor rules as suggestions.
+        // Search simple paths in stable cardinal order, with an explicit work budget per edit.
+        internal static AuthoredRouteGeometry Reconnect(DungeonDraftContext context, SavedSpatialFloor floor,
+            string sourceNode, string destinationNode, AuthoredRouteGeometry link, AuthoredRouteGeometry neighbor,
+            string previousIncoming, string previousOutgoing, TileCoordinate? waypoint, TileCoordinate? replacedTile, bool requireTurn,
+            out string reason)
+        {
+            reason = StructuralEditService.ConnectionUnavailableReason;
+            var catalog = context.Production.Catalog;
+            var from = AuthoredRouteGeometry.Openings(floor, sourceNode, catalog).FirstOrDefault(p => p.Id == link.SourcePointId);
+            var to = AuthoredRouteGeometry.Openings(floor, destinationNode, catalog).FirstOrDefault(p => p.Id == link.DestinationPointId);
+            if (from.Id == null || to.Id == null || !catalog.SocketTypes.Any(s => s.SocketTypeId == from.SocketTypeId &&
+                s.CompatibleSocketTypeIds.Contains(to.SocketTypeId))) return null;
+
+            var result = link.Copy();
+            if (!waypoint.HasValue && from.OpensToward(to.World) && to.OpensToward(from.World))
+            {
+                result.Passage = Array.Empty<TileCoordinate>();
+                return result;
+            }
+
+            var configured = catalog.Floors.Single(f => f.FloorDefinitionId == floor.FloorDefinitionId);
+            var corridor = catalog.Corridors.SingleOrDefault(c =>
+                c.CorridorDefinitionId == OptionalBranchStructuralEditService.CorridorDefinitionId);
+            var limits = new SpatialValidationWorkloadLimits(context.Limits.Canonical.Spatial.MaximumMaterializedTiles);
+            if (corridor?.Category != CorridorSpatialCategory.Orthogonal || !limits.Allows(corridor.MaximumLength) ||
+                !configured.AllowedCorridorDefinitionIds.Contains(corridor.CorridorDefinitionId) ||
+                !corridor.CompatibleSocketTypeIds.Contains(from.SocketTypeId) ||
+                !corridor.CompatibleSocketTypeIds.Contains(to.SocketTypeId) ||
+                !corridor.AllowedOrientations.Contains((CardinalOrientation)((int)from.Facing % 2)) ||
+                !corridor.AllowedOrientations.Contains((CardinalOrientation)((int)to.Facing % 2)) ||
+                !TryOutside(from, out var start) || !TryOutside(to, out var end)) return null;
+
+            var bounds = configured.Bounds;
+            if (!bounds.Contains(start) || !bounds.Contains(end) || waypoint.HasValue && !bounds.Contains(waypoint.Value))
+            {
+                reason = StructuralEditService.OutOfBoundsReason;
+                return null;
+            }
+            var occupied = new HashSet<TileCoordinate>();
+            foreach (var room in floor.Layout.Rooms)
+            {
+                var definition = catalog.Rooms.Single(d => d.RoomDefinitionId == room.RoomDefinitionId);
+                if (!definition.TryResolveGrossTiles(room.Anchor, room.Orientation, limits, out var footprint)) return null;
+                occupied.UnionWith(footprint.OccupiedTiles);
+            }
+            foreach (var structure in floor.FixedStructures)
+            {
+                var definition = catalog.FixedStructures.Single(d => d.StructureDefinitionId == structure.FixedStructureDefinitionId);
+                if (!TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint, structure.Anchor,
+                    structure.Orientation, limits, out var footprint)) return null;
+                occupied.UnionWith(footprint.OccupiedTiles);
+            }
+            foreach (var edge in floor.Layout.Edges)
+                if (edge.EdgeId != previousIncoming && edge.EdgeId != previousOutgoing)
+                    occupied.UnionWith(edge.CorridorTiles ?? Array.Empty<TileCoordinate>());
+            occupied.UnionWith(neighbor.Passage);
+
+            if (occupied.Contains(start) || occupied.Contains(end) || waypoint.HasValue && occupied.Contains(waypoint.Value))
+            {
+                reason = StructuralEditService.CorridorOverlapReason;
+                return null;
+            }
+            if (Remaining(start, waypoint.HasValue && !start.Equals(waypoint.Value)) + 1 > corridor.MaximumLength)
+            {
+                reason = StructuralEditService.CorridorLengthReason;
+                return null;
+            }
+            // A doorway's exterior tile is pinned. Interior tiles being moved must actually leave
+            // their old position unless it is also the requested destination.
+            if (replacedTile.HasValue && !replacedTile.Equals(waypoint) && !replacedTile.Value.Equals(start) && !replacedTile.Value.Equals(end))
+                occupied.Add(replacedTile.Value);
+
+            if (link.Passage.Length != 0 && link.Passage[0].Equals(start) && link.Passage.Last().Equals(end) &&
+                (!waypoint.HasValue || link.Passage.Contains(waypoint.Value) && (!requireTurn || TurnsAt(link.Passage))) &&
+                !link.Passage.Any(occupied.Contains) && link.HasValidPassage(corridor))
+                return result;
+
+            var visited = new HashSet<TileCoordinate> { start };
+            var path = new List<TileCoordinate> { start };
+            TileCoordinate[] best = null;
+            int work = 0;
+            int bestKept = -1;
+            // Shortest legal replacement avoids consuming extra space. Preserve the most original
+            // joins among equal-length paths, then resolve ties by canonical step order.
+            Search(start, waypoint.HasValue && !start.Equals(waypoint.Value));
+            if (best == null)
+            {
+                if (!limits.Allows(work)) reason = StructuralEditService.WorkloadReason;
+                return null;
+            }
+            result.Passage = best;
+            return result;
+
+            long Distance(TileCoordinate a, TileCoordinate b) =>
+                Math.Abs((long)a.X - b.X) + Math.Abs((long)a.Y - b.Y);
+            long Remaining(TileCoordinate cell, bool needsWaypoint) => needsWaypoint
+                ? Distance(cell, waypoint.Value) + Distance(waypoint.Value, end) : Distance(cell, end);
+
+            bool TurnsAt(IReadOnlyList<TileCoordinate> tiles)
+            {
+                for (int i = 0; i < tiles.Count; i++)
+                    if (tiles[i].Equals(waypoint.Value))
+                        return AuthoredRouteGeometry.TryFacing(i > 0 ? tiles[i - 1] : from.World, tiles[i], out var prior) &&
+                            AuthoredRouteGeometry.TryFacing(tiles[i], i + 1 < tiles.Count ? tiles[i + 1] : to.World, out var next) &&
+                            (int)prior % 2 != (int)next % 2;
+                return false;
+            }
+
+            void Search(TileCoordinate cell, bool needsWaypoint)
+            {
+                if (!limits.Allows(++work) ||
+                    path.Count + Remaining(cell, needsWaypoint) > (best?.Length ?? corridor.MaximumLength)) return;
+                if (cell.Equals(end))
+                {
+                    if (needsWaypoint || path.Count < corridor.MinimumLength || requireTurn && !TurnsAt(path)) return;
+                    int kept = 0;
+                    for (int i = 1; i < path.Count; i++)
+                        for (int j = 1; j < link.Passage.Length; j++)
+                            if (path[i - 1].Equals(link.Passage[j - 1]) && path[i].Equals(link.Passage[j])) kept++;
+                    if (best == null || path.Count < best.Length || kept > bestKept)
+                    {
+                        best = path.ToArray();
+                        bestKept = kept;
+                    }
+                    return;
+                }
+                foreach (var step in CardinalSteps)
+                {
+                    if (!corridor.AllowedOrientations.Contains(step.X == 0 ? CardinalOrientation.Zero : CardinalOrientation.Ninety) ||
+                        !TryOffset(cell, step, out var next) || !bounds.Contains(next) || occupied.Contains(next) ||
+                        !visited.Add(next)) continue;
+                    path.Add(next);
+                    Search(next, needsWaypoint && !next.Equals(waypoint.Value));
+                    path.RemoveAt(path.Count - 1);
+                    visited.Remove(next);
+                }
+            }
+        }
+
         private static AuthoredRouteGeometry SuggestLink(RouteOpening from, RouteOpening to,
             SpatialContentCatalog catalog, CorridorSpatialDefinition corridor, RectangularFloorBounds bounds,
             SpatialValidationWorkloadLimits limits, HashSet<TileCoordinate> occupied)
