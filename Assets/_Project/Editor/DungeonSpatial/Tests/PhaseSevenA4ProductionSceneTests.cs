@@ -614,13 +614,13 @@ namespace DungeonBuilder.M0.Tests
             {
                 var node = starter.Layout.Nodes.Single(n => n.NodeId == nodeId);
                 string id = node.RoomInstanceId;
-                if (id == null)
+                if (node.Kind != FloorRouteNodeKind.Room)
                 {
                     var kind = node.Kind == FloorRouteNodeKind.Entrance
                         ? FixedSpatialStructureKind.Entrance : FixedSpatialStructureKind.CompletionTerminal;
                     id = starter.FixedStructures.Single(f => f.Kind == kind).FixedStructureInstanceId;
                 }
-                Assert.That(controller.World.TryRouteLocationBounds(id, out var bounds), Is.True);
+                Assert.That(controller.World.TryRouteLocationBounds(id, out var bounds), Is.True, $"{node.Kind} {nodeId} {id}");
                 return bounds.center;
             }
 
