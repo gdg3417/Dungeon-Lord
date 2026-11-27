@@ -215,7 +215,7 @@ namespace DungeonBuilder.M0
             }
 
             var handle = RouteHandleAt(point);
-            if (handle.Select != null && (!drawIncomingPassage.HasValue || segmentOrigin != null))
+            if (handle.Select != null && !drawIncomingPassage.HasValue)
             {
                 handle.Select();
                 return true;
@@ -356,6 +356,7 @@ namespace DungeonBuilder.M0
                 if (isPlacedRoom)
                     position += (position - CellCenter(opening.World)).normalized * (incoming ? -.24f : .24f);
                 world.AddRouteMarker(position, active ? (incoming ? "1" : "2") : (incoming ? "i" : "o"), active, .36f);
+                if (drawIncomingPassage.HasValue) continue;
                 routeHandles.Add((position, () =>
                 {
                     var link = incoming ? routeRequest.Incoming : routeRequest.Outgoing;
