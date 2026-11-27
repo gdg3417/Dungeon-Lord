@@ -639,7 +639,13 @@ namespace DungeonBuilder.M0.Tests
             IEnumerator ClickVisible(Button button)
             {
                 yield return WaitForViewportGeometry();
-                AssertRouteLayout(button);
+                if (ui.Q("routeAuthoring").Contains(button)) AssertRouteLayout(button);
+                else
+                {
+                    AssertReachable(button);
+                    var picked = ui.panel.Pick(button.worldBound.center);
+                    Assert.That(picked == button || button.Contains(picked), Is.True, button.name);
+                }
                 float scale = controller.GetComponent<UIDocument>().panelSettings.scale;
                 var center = button.worldBound.center * scale;
                 var point = new Vector2(center.x, Screen.height - center.y);
@@ -731,9 +737,13 @@ namespace DungeonBuilder.M0.Tests
             CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
             Assert.That(root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft).Cost, Is.EqualTo(expectedCost));
 
-            Click(ui.Q<Button>("save"));
-            Click(ui.Q<Button>("confirm"));
-            yield return null;
+            pointer = InputSystem.AddDevice<Mouse>();
+            try
+            {
+                yield return ClickVisible(ui.Q<Button>("save"));
+                yield return ClickVisible(ui.Q<Button>("confirm"));
+            }
+            finally { InputSystem.RemoveDevice(pointer); }
             Assert.That(controller.IsEditing, Is.False, ui.Q<Label>("status").text);
             Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(balance - expectedCost));
             var committed = root.Save.validatedCanonicalSpatialState.Floors.Single();

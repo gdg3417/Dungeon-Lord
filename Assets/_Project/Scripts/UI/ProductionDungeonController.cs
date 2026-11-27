@@ -471,7 +471,9 @@ namespace DungeonBuilder.M0
             string structuralReason = draft?.StructuralReason;
             if (structuralReason == StructuralEditService.RequiredRouteReason && draft.DisconnectedRoomIds.Length > 0)
                 structuralReason = "ui.dungeon.route.waiting";
-            status.text = Text(IsAuthoringRoute ? null : ConstructionReason(statusKey));
+            if (statusKey == StructuralEditService.RequiredRouteReason && draft?.DisconnectedRoomIds.Length > 0)
+                statusKey = "ui.dungeon.route.waiting";
+            status.text = IsAuthoringRoute ? string.Empty : Text(ConstructionReason(statusKey));
             if (!IsAuthoringRoute && structuralReason != null && structuralReason != statusKey)
                 status.text += "\n" + Text(ConstructionReason(structuralReason));
             bool showFirstRoom = NeedsFirstRoom && !IsEditing;

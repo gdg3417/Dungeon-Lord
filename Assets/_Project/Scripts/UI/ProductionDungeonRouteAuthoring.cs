@@ -432,9 +432,12 @@ namespace DungeonBuilder.M0
             panel.Add(routeInstruction);
             panel.Add(routeMetrics);
             panel.Add(routeDetail);
+            var actions = new VisualElement();
+            actions.AddToClassList("route-actions");
+            panel.Add(actions);
             var main = new VisualElement();
             main.AddToClassList("route-action-row");
-            panel.Add(main);
+            actions.Add(main);
             acceptRoute = RouteAction(main, "acceptRoute", "accept", AcceptRoute);
             cancelRoute = RouteAction(main, "cancelRoute", "map_cancel", () =>
             {
@@ -455,7 +458,7 @@ namespace DungeonBuilder.M0
             moveRouteRoom = RouteAction(main, "moveRouteRoom", "reposition_room", () => RepositionDraftRoom(routeRoom));
             var adjustments = new VisualElement();
             adjustments.AddToClassList("route-action-row");
-            panel.Add(adjustments);
+            actions.Add(adjustments);
             revertRouteSegment = RouteAction(adjustments, "revertRouteSegment", "revert_segment", () =>
             {
                 (drawIncomingPassage.Value ? routeRequest.Incoming : routeRequest.Outgoing).Passage = segmentOrigin;
@@ -490,6 +493,7 @@ namespace DungeonBuilder.M0
 
         private void PresentRouteAuthoring(VisualElement panel)
         {
+            safe.EnableInClassList("routing", IsAuthoringRoute);
             panel.style.display = IsAuthoringRoute ? DisplayStyle.Flex : DisplayStyle.None;
             if (!IsAuthoringRoute) return;
             if (acceptRoute == null) BindRouteDock(panel);
