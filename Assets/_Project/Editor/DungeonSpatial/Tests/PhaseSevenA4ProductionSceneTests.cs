@@ -2163,8 +2163,99 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
                 CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
                 yield return ButtonTap("acceptRoute");
-                Assert.That(controller.Draft.AcceptedRouteInsertion(initial.RoomInstanceId), Is.Not.Null);
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.True);
+                var store = root.SaveService.CreateDungeonDraftStore();
+                byte[] acceptedBytes = store.Read();
+                Assert.That(acceptedBytes, Is.Not.Null.And.Not.Empty);
+                AssertAccepted(original);
+                yield return ButtonTap("reset");
+                yield return Tap(new Vector2(4, 12));
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+                yield return Revise();
+                Assert.That(ui.Q<Label>("routeDetail").text,
+                    Is.EqualTo(root.Content.GetString("ui.dungeon.route.save_after_edit", null)));
+                yield return AssertPublicationBlocked();
+                Capture("save-blocked");
+                yield return ButtonTap("cancelRoute");
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.True);
+                AssertAccepted(original);
+                CollectionAssert.AreEqual(acceptedBytes, store.Read());
                 CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
+
+                yield return Tap(new Vector2(4, 12));
+                yield return Revise();
+                var modified = Preview();
+                yield return Tap(new Vector2(7.5f, 10.5f));
+                yield return Tap(new Vector2(4.5f, 11.5f));
+                Assert.That(ui.Q<Label>("routeState").text, Does.Contain("overlaps"));
+                Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(JsonUtility.ToJson(modified)));
+                yield return AssertPublicationBlocked();
+
+                yield return ButtonTap("cancelRouteAdjustment");
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+                yield return ButtonTap("acceptRoute");
+                AssertAccepted(JsonUtility.ToJson(modified));
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.True);
+                CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
+                yield return ButtonTap("save");
+                Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                yield return ButtonTap("confirm");
+                Assert.That(controller.IsEditing, Is.False);
+                AssertCommitted(root.Save.validatedCanonicalSpatialState);
+                byte[] committedBytes = root.SaveService.CanonicalSession.GetCurrentBytes();
+
+                UnityEngine.Object.Destroy(controller.gameObject);
+                UnityEngine.Object.Destroy(root.gameObject);
+                yield return null;
+                yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
+                for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
+                root = GameRoot.Instance;
+                controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+                Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename));
+                CollectionAssert.AreEqual(committedBytes, root.SaveService.CanonicalSession.GetCurrentBytes());
+                AssertCommitted(root.Save.validatedCanonicalSpatialState);
+
+                IEnumerator Revise()
+                {
+                    yield return Tap(Door(a, initial.Incoming.SourcePointId));
+                    yield return Tap(Door(a, otherNorth));
+                    yield return Tap(new Vector2(6.5f, 11f));
+                    yield return Tap(new Vector2(7.5f, 10.5f));
+                    Assert.That(Preview().Incoming.SourcePointId, Is.EqualTo(otherNorth));
+                    Assert.That(Preview().Outgoing.Passage, Does.Contain(new TileCoordinate(7, 10)));
+                    Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+                }
+
+                IEnumerator AssertPublicationBlocked()
+                {
+                    var save = ui.Q<Button>("save");
+                    Assert.That(save.enabledSelf, Is.False);
+                    float scale = controller.GetComponent<UIDocument>().panelSettings.scale;
+                    Vector2 pixel = save.worldBound.center * scale;
+                    var point = new Vector2(pixel.x, Screen.height - pixel.y);
+                    yield return Pointer(point, point, false);
+                    Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                    typeof(ProductionDungeonController).GetMethod("ReviewSave", System.Reflection.BindingFlags.Instance |
+                        System.Reflection.BindingFlags.NonPublic).Invoke(controller, null);
+                    Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                    Assert.That(controller.Commit(), Is.False);
+                    AssertAccepted(original);
+                    CollectionAssert.AreEqual(acceptedBytes, store.Read());
+                    CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
+                }
+
+                void AssertAccepted(string expected) => Assert.That(
+                    JsonUtility.ToJson(controller.Draft.AcceptedRouteInsertion(initial.RoomInstanceId)), Is.EqualTo(expected));
+
+                void AssertCommitted(DetachedCanonicalSpatialSaveState state)
+                {
+                    var committedFloor = state.Floors.Single(f => f.FloorInstanceId == floor.FloorInstanceId);
+                    var incoming = committedFloor.Layout.Edges.Single(edge => edge.DestinationNodeId == placed);
+                    var outgoing = committedFloor.Layout.Edges.Single(edge => edge.SourceNodeId == placed);
+                    Assert.That(JsonUtility.ToJson(incoming.AuthoredGeometry), Is.EqualTo(JsonUtility.ToJson(modified.Incoming)));
+                    Assert.That(JsonUtility.ToJson(outgoing.AuthoredGeometry), Is.EqualTo(JsonUtility.ToJson(modified.Outgoing)));
+                }
 
                 void AssertMoved(TileCoordinate cell)
                 {

@@ -3555,6 +3555,7 @@
     {"key": "ui.dungeon.route.no_suggestion_move", "text": "No route fits here. Move the room or reselect the visit order."},
     {"key": "ui.dungeon.route.no_alternate_door", "text": "This doorway has no other opening."},
     {"key": "ui.dungeon.route.previous_kept", "text": "Previous route kept."},
+    {"key": "ui.dungeon.route.save_after_edit", "text": "Accept changes or close to save."},
     {"key": "ui.dungeon.route.dock_title", "text": "Connect rooms"},
     {"key": "ui.dungeon.route.waiting", "text": "The new room needs two connections."},
     {"key": "ui.dungeon.route.proposal_ready", "text": "Route ready to accept."},

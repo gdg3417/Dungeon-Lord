@@ -328,7 +328,7 @@ namespace DungeonBuilder.M0
         private void ReviewSave()
         {
             if (!HasCanonicalRuntime()) return;
-            if (draft?.CanSave != true) return;
+            if (IsAuthoringRoute || draft?.CanSave != true) return;
             RefreshEconomy();
             ShowModal("ui.dungeon.commit_review", () => Commit(), "ui.dungeon.save");
             if (economicPreview != null) document.rootVisualElement.Q<Label>("modalText").text += "\n" +
@@ -342,7 +342,7 @@ namespace DungeonBuilder.M0
         }
         public bool Commit()
         {
-            if (!HasCanonicalRuntime()) return false;
+            if (!HasCanonicalRuntime() || IsAuthoringRoute) return false;
             var result = root.CommitProductionDungeonDraft(draft);
             if (!result.IsSuccess) { feedback = result.Reason; Present(); return false; }
             feedback = draft.Reason ?? "ui.dungeon.committed"; draft = null; CloseSheet(); detailsCollapsed=false;
@@ -482,7 +482,7 @@ namespace DungeonBuilder.M0
             ui.Q<Button>("edit").style.display = IsEditing || showFirstRoom ? DisplayStyle.None : DisplayStyle.Flex;
             ui.Q("editActions").style.display = IsEditing ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("edit").SetEnabled(recoveryBytes == null && recoveryReason == null);
-            ui.Q<Button>("save").SetEnabled(draft?.CanSave == true && draftContext.Fingerprint(root.Save.validatedCanonicalSpatialState) == draft.BaselineFingerprint);
+            ui.Q<Button>("save").SetEnabled(!IsAuthoringRoute && draft?.CanSave == true && draftContext.Fingerprint(root.Save.validatedCanonicalSpatialState) == draft.BaselineFingerprint);
             ui.Q<Button>("discard").SetEnabled(IsEditing);
             ui.Q<Button>("retry").style.display = IsEditing && draft.Durability == DraftDurability.Failed ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("move").SetEnabled(IsEditing && (selected != null || selectedRoomId != null) && draft.Durability != DraftDurability.Unknown);

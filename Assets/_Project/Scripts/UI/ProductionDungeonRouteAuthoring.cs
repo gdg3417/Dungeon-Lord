@@ -612,9 +612,11 @@ namespace DungeonBuilder.M0
             routeState.text = Text(problem == null ? valid ? routeSelection != null ? "ui.dungeon.route.adjusting" :
                 "ui.dungeon.route.proposal_ready" : "ui.dungeon.route.waiting"
                 : ConstructionReason(problem));
-            routeDetail.text = Text(routeSelection != null && valid ? "ui.dungeon.route.previous_kept" :
+            bool saveBlockedByEditor = draft.CanSave;
+            routeDetail.text = Text(saveBlockedByEditor ? "ui.dungeon.route.save_after_edit" :
+                routeSelection != null && valid ? "ui.dungeon.route.previous_kept" :
                 valid ? "ui.dungeon.route.preview_only" : "ui.dungeon.route.order_on_map");
-            routeDetail.style.visibility = detailsCollapsed ? Visibility.Hidden : Visibility.Visible;
+            routeDetail.style.visibility = detailsCollapsed && !saveBlockedByEditor ? Visibility.Hidden : Visibility.Visible;
             acceptRoute.style.visibility = proposal ? Visibility.Visible : Visibility.Hidden;
             acceptRoute.SetEnabled(valid && routeSelection == null && draft.Durability == DraftDurability.Acknowledged);
             ShowRouteAction(chooseRouteRoomsAgain, proposal);
