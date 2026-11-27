@@ -165,7 +165,7 @@ namespace DungeonBuilder.M0.Tests
             config.save.fileName = filename;
             byte[] one = null, two = null;
             string test = TestContext.CurrentContext.Test.Name;
-            if (test == nameof(ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles))
+            if (isolationCallbacks == 1 && test == nameof(ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles))
             {
                 string path = Path.Combine(Application.persistentDataPath, filename);
                 Assert.That(File.Exists(path), Is.False);
