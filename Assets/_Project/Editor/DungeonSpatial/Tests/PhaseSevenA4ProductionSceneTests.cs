@@ -600,7 +600,7 @@ namespace DungeonBuilder.M0.Tests
                     DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-expanded.png");
                     yield return null;
                     yield return MapTap(new Vector2(5f, 7.5f));
-                    yield return MapTap(new Vector2(5.5f, 6.5f));
+                    yield return MapTap(new Vector2(6.5f, 6.5f));
                     Assert.That(accept.enabledSelf, Is.False);
                     Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(
                         root.Content.GetString("ui.dungeon.route.no_connection", null)));
@@ -2123,11 +2123,25 @@ namespace DungeonBuilder.M0.Tests
                 Capture("bend");
                 yield return ButtonTap("undoRouteAdjustment");
 
-                yield return Tap(new Vector2(6.5f, 10.5f));
-                yield return Tap(new Vector2(7.5f, 10.5f));
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720, 1280);
+                var touch = InputSystem.AddDevice<Touchscreen>();
+                try
+                {
+                    yield return TouchTap(touch, new Vector2(6.5f, 10.5f));
+                    yield return TouchTap(touch, new Vector2(7.5f, 10.5f));
+                }
+                finally { InputSystem.RemoveDevice(touch); }
                 AssertMoved(new TileCoordinate(7,10));
                 Capture("tile");
                 yield return ButtonTap("undoRouteAdjustment");
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
+
+                yield return Tap(new Vector2(6.5f, 10.5f));
+                yield return Tap(new Vector2(12.5f, 5.5f));
+                Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(
+                    root.Content.GetString("ui.dungeon.route.passage_length", null)));
+                Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(original));
+                yield return ButtonTap("cancelRouteAdjustment");
 
                 yield return Tap(new Vector2(6.5f, 10.5f));
                 yield return Tap(new Vector2(4.5f, 11.5f));
@@ -2138,7 +2152,13 @@ namespace DungeonBuilder.M0.Tests
                 yield return ButtonTap("cancelRouteAdjustment");
                 Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
                 yield return Tap(new Vector2(8.5f, 11.5f));
+                var empty = (Vector2)camera.WorldToScreenPoint(new Vector2(8.5f, 11.5f));
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = empty, scroll = new Vector2(0, 120) });
+                yield return null;
+                yield return null;
+                var centerBeforePan = controller.Viewport.Center;
                 yield return Tap(new Vector2(8.5f, 11.5f), new Vector2(10.5f, 11.5f));
+                Assert.That(controller.Viewport.Center, Is.Not.EqualTo(centerBeforePan));
                 Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(original));
                 Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
                 CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
@@ -2183,6 +2203,18 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(controller.Viewport.ScreenRect.Contains(begin) && !controller.IsChrome(begin, pointer.deviceId), Is.True, start.ToString());
                 Assert.That(controller.Viewport.ScreenRect.Contains(target) && !controller.IsChrome(target, pointer.deviceId), Is.True, target.ToString());
                 yield return Pointer(begin, target, end.HasValue);
+            }
+            IEnumerator TouchTap(Touchscreen device, Vector2 tile)
+            {
+                yield return WaitForViewportGeometry();
+                Vector2 position = camera.WorldToScreenPoint(tile);
+                Assert.That(controller.Viewport.ScreenRect.Contains(position), Is.True);
+                InputSystem.QueueStateEvent(device, new TouchState { touchId = 1, position = position, phase = InputTouchPhase.Began });
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(device, new TouchState { touchId = 1, position = position, phase = InputTouchPhase.Ended });
+                yield return null;
+                yield return null;
             }
             IEnumerator ButtonTap(string name)
             {
