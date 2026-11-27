@@ -84,7 +84,12 @@ namespace DungeonBuilder.M0
             RefreshFloorManagementIfNeeded();
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
             if (IsResearch && researchRecoveryRequired != root.SaveService.RequiresCanonicalRecovery) PresentResearch();
-            if (!legacy && !IsAnalysis && !IsResearch) ReadInput();
+            if (!legacy && !IsAnalysis && !IsResearch)
+            {
+                // An ancestor can move the panel without changing the viewport's local layout.
+                SyncViewportGeometry();
+                ReadInput();
+            }
             UpdateReplay();
             PresentForegroundActivity();
         }
@@ -579,12 +584,14 @@ namespace DungeonBuilder.M0
             viewportElement.UnregisterCallback<GeometryChangedEvent>(ViewportGeometry);
             viewportElement.RegisterCallback<GeometryChangedEvent>(ViewportGeometry);
         }
-        private void ViewportGeometry(GeometryChangedEvent evt)
+        private void ViewportGeometry(GeometryChangedEvent evt) => SyncViewportGeometry();
+
+        private void SyncViewportGeometry()
         {
             Rect panelRect = viewportElement.worldBound; float scale = document.panelSettings.scale;
             var rect = new Rect(panelRect.x * scale, Screen.height - panelRect.yMax * scale,
                 panelRect.width * scale, panelRect.height * scale);
-            if (rect.width < 1 || rect.height < 1) return;
+            if (rect.width < 1 || rect.height < 1 || rect == viewport.ScreenRect) return;
             worldCamera.pixelRect = rect; viewport.Configure(RouteInteractionBounds, rect, autoFit);
             if (interactionFocus.HasValue) viewport.Focus(interactionFocus.Value);
             ApplyCamera();
