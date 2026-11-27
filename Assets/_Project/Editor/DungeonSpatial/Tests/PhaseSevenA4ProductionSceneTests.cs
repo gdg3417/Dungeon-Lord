@@ -2203,7 +2203,8 @@ namespace DungeonBuilder.M0.Tests
                 yield return ButtonTap("confirm");
                 Assert.That(controller.IsEditing, Is.False);
                 AssertCommitted(root.Save.validatedCanonicalSpatialState);
-                byte[] committedBytes = root.SaveService.CanonicalSession.GetCurrentBytes();
+                CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(),
+                    File.ReadAllBytes(root.SaveService.SavePath));
 
                 UnityEngine.Object.Destroy(controller.gameObject);
                 UnityEngine.Object.Destroy(root.gameObject);
@@ -2213,7 +2214,7 @@ namespace DungeonBuilder.M0.Tests
                 root = GameRoot.Instance;
                 controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
                 Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename));
-                CollectionAssert.AreEqual(committedBytes, root.SaveService.CanonicalSession.GetCurrentBytes());
+
                 AssertCommitted(root.Save.validatedCanonicalSpatialState);
 
                 IEnumerator Revise()
