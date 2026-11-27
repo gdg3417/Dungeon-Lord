@@ -591,7 +591,9 @@ namespace DungeonBuilder.M0
             if (acceptRoute == null) BindRouteDock(panel);
             bool valid = routePreview?.IsValid == true;
             bool proposal = routeRequest != null;
-            string instruction = routeSelection?.Kind == RouteTargetKind.Doorway ? "ui.dungeon.route.pick_door"
+            string instruction = routeSelection?.Kind == RouteTargetKind.Doorway
+                ? routeHandles.Any(handle => handle.Kind == RouteTargetKind.Replacement)
+                    ? "ui.dungeon.route.pick_door" : "ui.dungeon.route.no_alternate_door"
                 : routeSelection?.Kind == RouteTargetKind.Section ? RouteLink(routeSelection.Incoming).Passage[routeSelection.Start].Y ==
                     RouteLink(routeSelection.Incoming).Passage[routeSelection.End].Y
                     ? "ui.dungeon.route.slide_row" : "ui.dungeon.route.slide_column"

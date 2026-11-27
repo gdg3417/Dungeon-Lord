@@ -140,22 +140,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !limits.Allows(corridor.MaximumLength) || !configured.AllowedCorridorDefinitionIds.Contains(corridor.CorridorDefinitionId))
                 return null;
 
-            var occupied = new HashSet<TileCoordinate>();
-            foreach (var room in floor.Layout.Rooms)
-            {
-                var definition = catalog.Rooms.Single(d => d.RoomDefinitionId == room.RoomDefinitionId);
-                if (!definition.TryResolveGrossTiles(room.Anchor, room.Orientation, limits, out var footprint)) return null;
-                occupied.UnionWith(footprint.OccupiedTiles);
-            }
-            foreach (var structure in floor.FixedStructures)
-            {
-                var definition = catalog.FixedStructures.Single(d => d.StructureDefinitionId == structure.FixedStructureDefinitionId);
-                if (!TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint, structure.Anchor,
-                    structure.Orientation, limits, out var footprint)) return null;
-                occupied.UnionWith(footprint.OccupiedTiles);
-            }
-            foreach (var connection in floor.Layout.Edges)
-                occupied.UnionWith(connection.CorridorTiles ?? Array.Empty<TileCoordinate>());
+            if (!TryOccupiedTiles(floor, catalog, limits, null, null, out var occupied)) return null;
 
             var from = AuthoredRouteGeometry.Openings(floor, edge.SourceNodeId, catalog);
             var to = AuthoredRouteGeometry.Openings(floor, edge.DestinationNodeId, catalog);
@@ -231,23 +216,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 reason = StructuralEditService.OutOfBoundsReason;
                 return null;
             }
-            var occupied = new HashSet<TileCoordinate>();
-            foreach (var room in floor.Layout.Rooms)
-            {
-                var definition = catalog.Rooms.Single(d => d.RoomDefinitionId == room.RoomDefinitionId);
-                if (!definition.TryResolveGrossTiles(room.Anchor, room.Orientation, limits, out var footprint)) return null;
-                occupied.UnionWith(footprint.OccupiedTiles);
-            }
-            foreach (var structure in floor.FixedStructures)
-            {
-                var definition = catalog.FixedStructures.Single(d => d.StructureDefinitionId == structure.FixedStructureDefinitionId);
-                if (!TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint, structure.Anchor,
-                    structure.Orientation, limits, out var footprint)) return null;
-                occupied.UnionWith(footprint.OccupiedTiles);
-            }
-            foreach (var edge in floor.Layout.Edges)
-                if (edge.EdgeId != previousIncoming && edge.EdgeId != previousOutgoing)
-                    occupied.UnionWith(edge.CorridorTiles ?? Array.Empty<TileCoordinate>());
+            if (!TryOccupiedTiles(floor, catalog, limits, previousIncoming, previousOutgoing, out var occupied))
+                return null;
             occupied.UnionWith(neighbor.Passage);
 
             if (occupied.Contains(start) || occupied.Contains(end) || waypoint.HasValue && occupied.Contains(waypoint.Value))
@@ -330,6 +300,30 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     visited.Remove(next);
                 }
             }
+        }
+
+        private static bool TryOccupiedTiles(SavedSpatialFloor floor, SpatialContentCatalog catalog,
+            SpatialValidationWorkloadLimits limits, string exceptIncoming, string exceptOutgoing,
+            out HashSet<TileCoordinate> occupied)
+        {
+            occupied = new HashSet<TileCoordinate>();
+            foreach (var room in floor.Layout.Rooms)
+            {
+                var definition = catalog.Rooms.Single(d => d.RoomDefinitionId == room.RoomDefinitionId);
+                if (!definition.TryResolveGrossTiles(room.Anchor, room.Orientation, limits, out var footprint)) return false;
+                occupied.UnionWith(footprint.OccupiedTiles);
+            }
+            foreach (var structure in floor.FixedStructures)
+            {
+                var definition = catalog.FixedStructures.Single(d => d.StructureDefinitionId == structure.FixedStructureDefinitionId);
+                if (!TileFootprintResolver.TryResolveRectangle(definition.GrossFootprint, structure.Anchor,
+                    structure.Orientation, limits, out var footprint)) return false;
+                occupied.UnionWith(footprint.OccupiedTiles);
+            }
+            foreach (var connection in floor.Layout.Edges)
+                if (connection.EdgeId != exceptIncoming && connection.EdgeId != exceptOutgoing)
+                    occupied.UnionWith(connection.CorridorTiles ?? Array.Empty<TileCoordinate>());
+            return true;
         }
 
         private static AuthoredRouteGeometry SuggestLink(RouteOpening from, RouteOpening to,

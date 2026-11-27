@@ -107,6 +107,10 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         { yield return Invoke("NativeConstructionAuthorsMiddleInsertionAndReopens"); }
 
         [UnityTest]
+        public IEnumerator ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles()
+        { yield return Invoke("ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles"); }
+
+        [UnityTest]
         public IEnumerator TransactionalRoomConstructionProductionParity()
         { yield return Invoke("TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery"); }
         [UnityTest]
