@@ -560,8 +560,7 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q("routeAuthoring").Query<Label>().ToList()
                     .Select(label => label.text).Aggregate(string.Empty, (left, right) => left + "\n" + right));
 
-                var originalSize = new Vector2Int(Screen.width, Screen.height);
-                foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(720, 1280) })
+                    foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(720, 1280) })
                 foreach (var textSize in new[] { DungeonTextSize.Default, DungeonTextSize.Small })
                 {
                     DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
@@ -572,13 +571,13 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(controller.DetailsCollapsed, Is.True);
                     var map = controller.Viewport.ScreenRect;
                     var accept = ui.Q<Button>("acceptRoute");
+                    string capture = $"route-dock-{size.x}x{size.y}-{textSize}";
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-collapsed.png");
+                    yield return null;
                     AssertRouteLayout(accept, ui.Q<Button>("chooseRouteRoomsAgain"), ui.Q<Button>("cancelRoute"));
                     Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(root.Content.GetString("ui.dungeon.route.ready", null)));
                     Assert.That(ui.Q<Label>("status").text, Is.Empty);
                     Assert.That(ui.Q<Label>("routeMetrics").text, Does.Contain("110"));
-                    string capture = $"route-dock-{size.x}x{size.y}-{textSize}";
-                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-collapsed.png");
-                    yield return null;
                     yield return ClickVisible(ui.Q<Button>("collapseDetails"));
                     yield return WaitForViewportGeometry();
                     Assert.That(controller.DetailsCollapsed, Is.False);
@@ -600,7 +599,7 @@ namespace DungeonBuilder.M0.Tests
                     Assert.That(accept.enabledSelf, Is.True);
                     Assert.That(controller.Viewport.ScreenRect, Is.EqualTo(map));
                 }
-                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(originalSize.x, originalSize.y);
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
                 controller.SetTextSize(DungeonTextSize.Default);
                 yield return WaitForViewportGeometry();
 

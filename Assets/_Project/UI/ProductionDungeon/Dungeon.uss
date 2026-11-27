@@ -234,3 +234,7 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .route-actions { flex-shrink: 0; }
 .landscape .route-actions { flex-direction: row; }
 .routing .bottom-chrome { flex-shrink: 0; max-height: none; }
+
+.landscape.routing.working-sheet .map-area { flex-grow: 1; flex-basis: 0; }
+.landscape.routing.working-sheet .bottom-chrome { flex-basis: 480px; width: 480px; max-height: 100%; }
+.landscape.routing.working-sheet .route-actions { flex-direction: column; }

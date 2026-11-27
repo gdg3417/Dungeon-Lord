@@ -85,7 +85,9 @@ namespace DungeonBuilder.M0
             bool compactRoomContent = IsEditing && shortLandscape &&
                 (managingRoomContent || selected != null && draft.HasContentIntent);
             safe.EnableInClassList("compact-content-hud", IsPlacingContent || reassigning != null || compactRoomContent);
-            bool working = landscape && IsEditing && (IsConstructing || managingRoomContent || compactRoomContent);
+            bool wideRoute = IsAuthoringRoute && Screen.safeArea.width / document.panelSettings.scale >=
+                presentationPolicy.ReferenceShortSide * 1.5f;
+            bool working = landscape && IsEditing && (IsConstructing || managingRoomContent || compactRoomContent || wideRoute);
             safe.EnableInClassList("working-sheet",working);
             var workspace=ui.Q("workspace"); var map=ui.Q("mapArea");
             workspace.style.display=working ? DisplayStyle.Flex : DisplayStyle.None;
