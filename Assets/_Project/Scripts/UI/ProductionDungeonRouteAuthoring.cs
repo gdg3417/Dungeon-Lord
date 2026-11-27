@@ -418,124 +418,158 @@ namespace DungeonBuilder.M0
             Present();
         }
 
-        private void PresentRouteAuthoring(VisualElement panel)
+        private Label routeInstruction, routeState, routeMetrics, routeDetail;
+        private Button acceptRoute, cancelRoute, chooseRouteRoomsAgain, moveRouteRoom, revertRouteSegment,
+            finishRouteSegment, drawIncoming, drawOutgoing, finishRouteTiles, clearRouteTiles, undoRouteTile;
+
+        private void BindRouteDock(VisualElement panel)
         {
-            panel.Clear();
-            panel.style.display = DisplayStyle.None;
-            if (!CanAuthorRoutes || !IsEditing || IsConstructing) return;
-            if (!IsAuthoringRoute) return;
-            panel.style.display = DisplayStyle.Flex;
-            string instruction = routeRequest != null ? "ui.dungeon.route.map_edit" :
-                routeMiddleSelected ? "ui.dungeon.route.map_next" :
-                routeStart != null ? "ui.dungeon.route.map_new" : "ui.dungeon.route.map_start";
-            panel.Add(new Label(Text(instruction)));
-            var actions = new VisualElement();
-            actions.AddToClassList("row");
-            panel.Add(actions);
-            ButtonFor(actions, Text("ui.dungeon.route.map_cancel"), () =>
+            routeInstruction = new Label { name = "routeInstruction" };
+            routeState = new Label { name = "routeState" };
+            routeMetrics = new Label { name = "routeMetrics" };
+            routeDetail = new Label { name = "routeDetail" };
+            panel.Add(routeState);
+            panel.Add(routeInstruction);
+            panel.Add(routeMetrics);
+            panel.Add(routeDetail);
+            var main = new VisualElement();
+            main.AddToClassList("route-action-row");
+            panel.Add(main);
+            acceptRoute = RouteAction(main, "acceptRoute", "accept", AcceptRoute);
+            cancelRoute = RouteAction(main, "cancelRoute", "map_cancel", () =>
             {
                 ClearRouteAuthoring();
                 world.ClearPreview();
                 feedback = null;
                 Present();
-            }).name = "cancelRoute";
-            if (routeRequest != null)
-                ButtonFor(actions, Text("ui.dungeon.route.map_choose_again"), () =>
-                {
-                    routeRequest = null;
-                    drawIncomingPassage = null;
-                    ClearSegmentSelection();
-                    world.ClearPreview();
-                    feedback = null;
-                    UpdateRouteProposal();
-                }).name = "chooseRouteRoomsAgain";
-            if (draft.DisconnectedRoomIds.Contains(routeRoom))
-                ButtonFor(actions, Text("ui.dungeon.route.reposition_room"), () => RepositionDraftRoom(routeRoom));
-            if (routeEdges.Length == 0) panel.Add(new Label(Text(StructuralRouteInsertionService.RetirementUnavailable)));
-            if (routeRequest == null) return;
+            });
+            chooseRouteRoomsAgain = RouteAction(main, "chooseRouteRoomsAgain", "map_choose_again", () =>
+            {
+                routeRequest = null;
+                drawIncomingPassage = null;
+                ClearSegmentSelection();
+                world.ClearPreview();
+                feedback = null;
+                UpdateRouteProposal();
+            });
+            moveRouteRoom = RouteAction(main, "moveRouteRoom", "reposition_room", () => RepositionDraftRoom(routeRoom));
+            var adjustments = new VisualElement();
+            adjustments.AddToClassList("route-action-row");
+            panel.Add(adjustments);
+            revertRouteSegment = RouteAction(adjustments, "revertRouteSegment", "revert_segment", () =>
+            {
+                (drawIncomingPassage.Value ? routeRequest.Incoming : routeRequest.Outgoing).Passage = segmentOrigin;
+                FinishRouteAdjustment();
+            });
+            finishRouteSegment = RouteAction(adjustments, "finishRouteSegment", "map_finish_segment", FinishRouteAdjustment);
+            drawIncoming = RouteAction(adjustments, "drawIncomingPassage", "map_draw_in", () => EditPassage(true, false));
+            drawOutgoing = RouteAction(adjustments, "drawOutgoingPassage", "map_draw_out", () => EditPassage(false, false));
+            finishRouteTiles = RouteAction(adjustments, "finishRouteTiles", "map_finish_tiles", FinishRouteAdjustment);
+            clearRouteTiles = RouteAction(adjustments, "clearPassage", "clear_passage", () => EditPassage(drawIncomingPassage.Value, true));
+            undoRouteTile = RouteAction(adjustments, "undoRouteTile", "undo_tile", () =>
+            {
+                var link = drawIncomingPassage.Value ? routeRequest.Incoming : routeRequest.Outgoing;
+                link.Passage = link.Passage.Take(Math.Max(0, link.Passage.Length - 1)).ToArray();
+                UpdateRouteProposal();
+            });
+        }
 
-            if (segmentOrigin != null)
-            {
-                bool horizontal = segmentOrigin[selectedSegment.Start].Y == segmentOrigin[selectedSegment.End].Y;
-                panel.Add(new Label(Text(horizontal ? "ui.dungeon.route.slide_row" : "ui.dungeon.route.slide_column")));
-                ButtonFor(panel, Text("ui.dungeon.route.revert_segment"), () =>
-                {
-                    var link = drawIncomingPassage.Value ? routeRequest.Incoming : routeRequest.Outgoing;
-                    link.Passage = segmentOrigin;
-                    ClearSegmentSelection();
-                    drawIncomingPassage = null;
-                    UpdateRouteProposal();
-                }).name = "revertRouteSegment";
-                if (!segmentExceedsLimit)
-                    ButtonFor(panel, Text("ui.dungeon.route.map_finish_segment"), () =>
-                    {
-                        ClearSegmentSelection();
-                        drawIncomingPassage = null;
-                        UpdateRouteProposal();
-                    }).name = "finishRouteSegment";
-            }
-            if (routePreview?.IsValid != true && segmentOrigin == null && !drawIncomingPassage.HasValue)
-            {
-                ButtonFor(actions, Format("ui.dungeon.route.draw_incoming", routeRequest.Incoming.Passage.Length),
-                    () => EditPassage(true, false));
-                ButtonFor(actions, Format("ui.dungeon.route.draw_outgoing", routeRequest.Outgoing.Passage.Length),
-                    () => EditPassage(false, false)).name = "drawOutgoingPassage";
-            }
-            if (drawIncomingPassage.HasValue && segmentOrigin == null)
-            {
-                ButtonFor(panel, Text("ui.dungeon.route.map_finish_tiles"), () =>
-                {
-                    drawIncomingPassage = null;
-                    UpdateRouteProposal();
-                }).name = "finishRouteTiles";
-                panel.Add(new Label(Text(drawIncomingPassage.Value ? "ui.dungeon.route.drawing_incoming" : "ui.dungeon.route.drawing_outgoing")));
-                ButtonFor(panel, Text("ui.dungeon.route.clear_passage"), () => EditPassage(drawIncomingPassage.Value, true)).name = "clearPassage";
-                ButtonFor(panel, Text("ui.dungeon.route.undo_tile"), () =>
-                {
-                    var link = drawIncomingPassage.Value ? routeRequest.Incoming : routeRequest.Outgoing;
-                    link.Passage = link.Passage.Take(Math.Max(0, link.Passage.Length - 1)).ToArray();
-                    UpdateRouteProposal();
-                });
-            }
+        private Button RouteAction(VisualElement row, string name, string key, Action action)
+        {
+            var button = ButtonFor(row, Text("ui.dungeon.route." + key), action);
+            button.name = name;
+            return button;
+        }
+
+        private void FinishRouteAdjustment()
+        {
+            ClearSegmentSelection();
+            drawIncomingPassage = null;
+            UpdateRouteProposal();
+        }
+
+        private void PresentRouteAuthoring(VisualElement panel)
+        {
+            panel.style.display = IsAuthoringRoute ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!IsAuthoringRoute) return;
+            if (acceptRoute == null) BindRouteDock(panel);
+            bool valid = routePreview?.IsValid == true;
+            bool proposal = routeRequest != null;
+            bool sliding = segmentOrigin != null;
+            bool drawing = drawIncomingPassage.HasValue && !sliding;
+            string instruction = sliding
+                ? segmentOrigin[selectedSegment.Start].Y == segmentOrigin[selectedSegment.End].Y
+                    ? "ui.dungeon.route.slide_row" : "ui.dungeon.route.slide_column"
+                : drawing ? "ui.dungeon.route.map_draw_hint"
+                : proposal ? "ui.dungeon.route.map_edit"
+                : routeMiddleSelected ? "ui.dungeon.route.map_next"
+                : routeStart != null ? "ui.dungeon.route.map_new" : "ui.dungeon.route.map_start";
+            routeInstruction.text = Text(instruction);
+            string problem = draft.Durability != DraftDurability.Acknowledged ? draft.Reason
+                : proposal && !valid ? routePreview?.Reason
+                : routeEdges.Length == 0 || feedback == StructuralRouteInsertionService.RetirementUnavailable
+                    ? StructuralRouteInsertionService.RetirementUnavailable : null;
+            routeState.EnableInClassList("route-problem", problem != null);
+            routeState.text = Text(problem == null ? valid ? "ui.dungeon.route.ready" : "ui.dungeon.route.waiting"
+                : ConstructionReason(problem));
+            routeDetail.text = Text(valid ? "ui.dungeon.route.preview_only" : "ui.dungeon.route.order_on_map");
+            routeDetail.style.visibility = detailsCollapsed ? Visibility.Hidden : Visibility.Visible;
+            acceptRoute.style.visibility = proposal ? Visibility.Visible : Visibility.Hidden;
+            acceptRoute.SetEnabled(valid && draft.Durability == DraftDurability.Acknowledged);
+            ShowRouteAction(chooseRouteRoomsAgain, proposal);
+            ShowRouteAction(moveRouteRoom, draft.DisconnectedRoomIds.Contains(routeRoom));
+            ShowRouteAction(revertRouteSegment, sliding);
+            finishRouteSegment.style.display = DisplayStyle.Flex;
+            finishRouteSegment.style.visibility = sliding && !segmentExceedsLimit ? Visibility.Visible : Visibility.Hidden;
+            ShowRouteAction(drawIncoming, proposal && !valid && !sliding && !drawing);
+            ShowRouteAction(drawOutgoing, proposal && !valid && !sliding && !drawing);
+            ShowRouteAction(finishRouteTiles, drawing);
+            ShowRouteAction(clearRouteTiles, drawing);
+            ShowRouteAction(undoRouteTile, drawing);
+            // Reserve the edit row in every state. A new blocker or prompt must not move the map.
+            if (drawing || proposal && !valid && !sliding) finishRouteSegment.style.display = DisplayStyle.None;
+            PresentRouteBalance();
+        }
+
+        private static void ShowRouteAction(Button action, bool visible) =>
+            action.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+
+        private void PresentRouteBalance()
+        {
+            if (routeMetrics == null) return;
+            var quote = routeQuote;
+            string value = string.Empty;
             if (routePreview?.IsValid == true)
             {
-                var proposedFloor = routePreview.Candidate.Floors.Single(f => f.FloorInstanceId == selectedFloor);
-                if (RequiredFloorTraversal.TryResolve(proposedFloor.Layout, out var order))
-                    panel.Add(new Label(Format("ui.dungeon.route.order", string.Join(Text("ui.dungeon.route.separator"),
-                        order.Select(node => RouteNodeName(proposedFloor, node.NodeId))))));
-                panel.Add(new Label(Format("ui.dungeon.route.floor_space", routePreview.UsedFloorSpace, routePreview.FloorCapacity)));
-                if (routeQuote != null)
+                value = Format("ui.dungeon.route.floor_space", routePreview.UsedFloorSpace, routePreview.FloorCapacity);
+                if (quote != null)
                 {
-                    root.SaveService.RefreshDraftPreviewBalance(routeQuote, root.Save.structureRuntime.ManaReserve);
-                    panel.Add(new Label(StructuralEconomyPresenter.Present(routeQuote, Text, root.PassiveManaPerHourForPresentation)));
-                    if (root.Save.structureRuntime.PlacementLocked) panel.Add(new Label(Text("ui.banner.place_blocked_heat_crisis")));
-                    panel.Add(new Label(Format("ui.dungeon.route.resulting_usable",
+                    root.SaveService.RefreshDraftPreviewBalance(quote, root.Save.structureRuntime.ManaReserve);
+                    value += "   " + Format("ui.dungeon.route.compact_cost",
+                        StructuralEconomyPresenter.FormatTransactionAmount(quote.Cost),
                         PlayerManaPresentationFormatter.FormatDiscreteAmount(
-                            Math.Max(0d, routeQuote.ResultingMana - routeQuote.RequiredReserveAfter), Culture))));
+                            Math.Max(0d, quote.ResultingMana - quote.RequiredReserveAfter), Culture));
+                    if (root.Save.structureRuntime.PlacementLocked) value += "\n" + Text("ui.banner.place_blocked_heat_crisis");
+                    else if (!quote.IsAffordable && quote.Reason != null) value += "\n" + Text(quote.Reason);
                 }
             }
-            else if (routePreview?.Reason != null) panel.Add(new Label(Text(routePreview.Reason)));
-
-            var accept = ButtonFor(panel, Text("ui.dungeon.route.accept"), AcceptRoute);
-            accept.name = "acceptRoute";
-            accept.SetEnabled(routePreview?.IsValid == true && draft.Durability == DraftDurability.Acknowledged);
+            if (routeMetrics.text != value) routeMetrics.text = value;
         }
 
-        private string RouteRoomName(SavedSpatialFloor floor, string roomId)
+        private string ConstructionReason(string reason)
         {
-            var room = floor.Layout.Rooms.Single(r => r.RoomInstanceId == roomId);
-            var definition = root.ProductionSpatialContent.Catalog.Rooms.Single(r => r.RoomDefinitionId == room.RoomDefinitionId);
-            return Format("ui.dungeon.route.room_location", RoomName(definition), room.Anchor.X, room.Anchor.Y);
-        }
-
-        private string RouteNodeName(SavedSpatialFloor floor, string nodeId)
-        {
-            var node = floor.Layout.Nodes.Single(n => n.NodeId == nodeId);
-            if (node.Kind == FloorRouteNodeKind.Room) return RouteRoomName(floor, node.RoomInstanceId);
-            var kind = node.Kind == FloorRouteNodeKind.Entrance ? FixedSpatialStructureKind.Entrance : FixedSpatialStructureKind.CompletionTerminal;
-            var structure = floor.FixedStructures.Single(s => s.Kind == kind);
-            return SpatialName(root.ProductionSpatialContent.Catalog.FixedStructures
-                .Single(d => d.StructureDefinitionId == structure.FixedStructureDefinitionId).LocalizationKey);
+            if (!IsAuthoringRoute && !independentRoomPlacement) return reason;
+            if (reason == StructuralEditService.ConnectionUnavailableReason && IsAuthoringRoute)
+                return "ui.dungeon.route.opening_mismatch";
+            if (reason == StructuralEditService.CorridorLengthReason && IsAuthoringRoute)
+                return "ui.dungeon.route.passage_length";
+            if (reason == StructuralEditService.RequiredRouteReason) return "ui.dungeon.route.waiting";
+            if (reason == StructuralEditService.OutOfBoundsReason) return "ui.dungeon.route.outside";
+            if (reason == StructuralEditService.RoomOverlapReason) return "ui.dungeon.route.room_overlap";
+            if (reason == StructuralEditService.FixedOverlapReason) return "ui.dungeon.route.fixed_overlap";
+            if (reason == StructuralEditService.CorridorOverlapReason)
+                return IsAuthoringRoute ? "ui.dungeon.route.passage_overlap" : "ui.dungeon.route.room_corridor_overlap";
+            return reason;
         }
 
         private static Button ButtonFor(VisualElement container, string label, Action action)

@@ -78,7 +78,7 @@ namespace DungeonBuilder.M0
                 PresentHud(); PresentEconomy();
                 PresentResearch();
                 if (IsConstructing) PresentConstructionInformation();
-                if (IsAuthoringRoute) PresentRouteAuthoring(document.rootVisualElement.Q("routeAuthoring"));
+                if (IsAuthoringRoute) PresentRouteBalance();
                 if (IsPlacingContent) PresentAcquisitionInformation();
             }
             RefreshFloorManagementIfNeeded();
@@ -468,9 +468,12 @@ namespace DungeonBuilder.M0
             ui.Q<Label>("mode").text = Text(IsEditing ? "ui.dungeon.edit_mode" : "ui.dungeon.normal");
             string statusKey = draft != null && draft.Durability != DraftDurability.Acknowledged ? draft.Reason :
                 feedback ?? ProductionDungeonPresenter.DraftStatus(draft);
-            status.text = Text(statusKey);
-            if (draft?.StructuralReason != null && draft.StructuralReason != statusKey)
-                status.text += "\n" + Text(draft.StructuralReason);
+            string structuralReason = draft?.StructuralReason;
+            if (structuralReason == StructuralEditService.RequiredRouteReason && draft.DisconnectedRoomIds.Length > 0)
+                structuralReason = "ui.dungeon.route.waiting";
+            status.text = Text(IsAuthoringRoute ? null : ConstructionReason(statusKey));
+            if (!IsAuthoringRoute && structuralReason != null && structuralReason != statusKey)
+                status.text += "\n" + Text(ConstructionReason(structuralReason));
             bool showFirstRoom = NeedsFirstRoom && !IsEditing;
             ui.Q<Button>("buildFirstRoom").style.display = showFirstRoom ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("buildFirstRoom").SetEnabled(recoveryBytes == null && recoveryReason == null);
@@ -557,6 +560,13 @@ namespace DungeonBuilder.M0
             safe.EnableInClassList("large-text",size==DungeonTextSize.Large);
             float font = presentationPolicy.Text(size);
             foreach (var text in document.rootVisualElement.Query<TextElement>().ToList()) text.style.fontSize = font;
+            if (routeState != null)
+            {
+                routeState.style.minHeight = font * 2.4f;
+                routeInstruction.style.minHeight = font * 1.2f;
+                routeMetrics.style.minHeight = font * 2.4f;
+                routeDetail.style.minHeight = font * 1.2f;
+            }
             var platform = Application.platform == RuntimePlatform.Android ? DungeonTargetPlatform.Android :
                 Application.platform == RuntimePlatform.IPhonePlayer ? DungeonTargetPlatform.IOS : DungeonTargetPlatform.Desktop;
             float target = presentationPolicy.MinimumPanelUnitsFromNativeScale(platform, pixelsPerPhysicalUnit, document.panelSettings.scale);

@@ -223,3 +223,10 @@ Button:disabled { color: rgb(141,150,151); -unity-background-image-tint-color: r
 .sheet-header #collapseDetails { flex-shrink: 0; }
 #openAnalysis .performance-summary { margin: 0; padding: 0; -unity-text-align: middle-left; }
 #openAnalysis .replay-summary, #openAnalysis .bounded-summary { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.route-dock { display: none; flex-shrink: 0; }
+.route-dock Label { margin-top: 0; margin-bottom: 0; flex-shrink: 0; }
+.route-dock .route-action-row { flex-direction: row; flex-wrap: nowrap; flex-shrink: 0; }
+.route-action-row > Button { white-space: nowrap; flex-shrink: 0; padding-left: 6px; padding-right: 6px; }
+#acceptRoute { border-color: var(--gold); -unity-font-style: bold; }
+.route-problem { color: rgb(255,193,166); }

@@ -3515,7 +3515,7 @@
     },
     {
       "key": "ui.dungeon.route.reposition_room",
-      "text": "Reposition disconnected room"
+      "text": "Move room"
     },
     {
       "key": "ui.dungeon.route.resulting_usable",
@@ -3545,14 +3545,29 @@
       "key": "ui.dungeon.route.edit_for_room",
       "text": "Edit route for {0}"
     },
-    {"key": "ui.dungeon.route.map_start", "text": "Tap the room or entrance that should come before the new room."},
+    {"key": "ui.dungeon.route.waiting", "text": "The new room needs two connections."},
+    {"key": "ui.dungeon.route.ready", "text": "Route ready to accept."},
+    {"key": "ui.dungeon.route.preview_only", "text": "Accept Route adds this preview to the draft."},
+    {"key": "ui.dungeon.route.order_on_map", "text": "Map numbers show visit order."},
+    {"key": "ui.dungeon.route.opening_mismatch", "text": "The passage does not join the chosen doors."},
+    {"key": "ui.dungeon.route.outside", "text": "The preview extends beyond the floor grid."},
+    {"key": "ui.dungeon.route.room_overlap", "text": "The room overlaps another room."},
+    {"key": "ui.dungeon.route.fixed_overlap", "text": "The room overlaps a fixed structure."},
+    {"key": "ui.dungeon.route.passage_overlap", "text": "The passage overlaps another structure."},
+    {"key": "ui.dungeon.route.passage_length", "text": "The corridor must fit within six tiles."},
+    {"key": "ui.dungeon.route.room_corridor_overlap", "text": "The room overlaps a corridor."},
+    {"key": "ui.dungeon.route.compact_cost", "text": "Cost: {0} mana · Usable after save: {1}"},
+    {"key": "ui.dungeon.route.map_draw_in", "text": "Draw entry"},
+    {"key": "ui.dungeon.route.map_draw_out", "text": "Draw exit"},
+    {"key": "ui.dungeon.route.map_draw_hint", "text": "Tap passage tiles in travel order."},
+    {"key": "ui.dungeon.route.map_start", "text": "Tap the room or entrance to visit first."},
     {"key": "ui.dungeon.route.map_new", "text": "Tap the new room marked +."},
-    {"key": "ui.dungeon.route.map_next", "text": "Tap the room or terminal that should come next."},
-    {"key": "ui.dungeon.route.map_edit", "text": "Tap a doorway or a corridor handle on the map to adjust the route."},
-    {"key": "ui.dungeon.route.map_cancel", "text": "Close route editor"},
-    {"key": "ui.dungeon.route.map_choose_again", "text": "Choose rooms again"},
-    {"key": "ui.dungeon.route.map_finish_segment", "text": "Finish moving segment"},
-    {"key": "ui.dungeon.route.map_finish_tiles", "text": "Finish drawing tiles"},
+    {"key": "ui.dungeon.route.map_next", "text": "Tap the next room or terminal."},
+    {"key": "ui.dungeon.route.map_edit", "text": "Tap a doorway or corridor handle to edit."},
+    {"key": "ui.dungeon.route.map_cancel", "text": "Close"},
+    {"key": "ui.dungeon.route.map_choose_again", "text": "Choose rooms"},
+    {"key": "ui.dungeon.route.map_finish_segment", "text": "Done"},
+    {"key": "ui.dungeon.route.map_finish_tiles", "text": "Done"},
     {
       "key": "ui.dungeon.route.choose_edge",
       "text": "Choose the required edge to replace with a visit to {0}."
@@ -3595,15 +3610,15 @@
     },
     {
       "key": "ui.dungeon.route.slide_row",
-      "text": "Tap a row to move the highlighted segment and adjust its bends."
+      "text": "Tap a row to move the segment."
     },
     {
       "key": "ui.dungeon.route.slide_column",
-      "text": "Tap a column to move the highlighted segment and adjust its bends."
+      "text": "Tap a column to move the segment."
     },
     {
       "key": "ui.dungeon.route.revert_segment",
-      "text": "Revert segment edit"
+      "text": "Revert"
     },
     {
       "key": "ui.dungeon.route.draw_incoming",
@@ -3623,11 +3638,11 @@
     },
     {
       "key": "ui.dungeon.route.clear_passage",
-      "text": "Clear passage tiles"
+      "text": "Clear tiles"
     },
     {
       "key": "ui.dungeon.route.undo_tile",
-      "text": "Undo last tile"
+      "text": "Undo tile"
     },
     {
       "key": "ui.dungeon.route.order",
@@ -3643,7 +3658,7 @@
     },
     {
       "key": "ui.dungeon.route.accept",
-      "text": "Accept route into draft"
+      "text": "Accept Route"
     },
     {
       "key": "ui.dungeon.route.room_location",

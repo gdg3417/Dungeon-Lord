@@ -560,6 +560,50 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q("routeAuthoring").Query<Label>().ToList()
                     .Select(label => label.text).Aggregate(string.Empty, (left, right) => left + "\n" + right));
 
+                var originalSize = new Vector2Int(Screen.width, Screen.height);
+                foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(720, 1280) })
+                foreach (var textSize in new[] { DungeonTextSize.Default, DungeonTextSize.Small })
+                {
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
+                    controller.SetTextSize(textSize);
+                    yield return WaitForViewportGeometry();
+                    if (!controller.DetailsCollapsed) yield return ClickVisible(ui.Q<Button>("collapseDetails"));
+                    yield return WaitForViewportGeometry();
+                    Assert.That(controller.DetailsCollapsed, Is.True);
+                    var map = controller.Viewport.ScreenRect;
+                    var accept = ui.Q<Button>("acceptRoute");
+                    AssertRouteLayout(accept, ui.Q<Button>("chooseRouteRoomsAgain"), ui.Q<Button>("cancelRoute"));
+                    Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(root.Content.GetString("ui.dungeon.route.ready", null)));
+                    Assert.That(ui.Q<Label>("status").text, Is.Empty);
+                    Assert.That(ui.Q<Label>("routeMetrics").text, Does.Contain("110"));
+                    string capture = $"route-dock-{size.x}x{size.y}-{textSize}";
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-collapsed.png");
+                    yield return null;
+                    yield return ClickVisible(ui.Q<Button>("collapseDetails"));
+                    yield return WaitForViewportGeometry();
+                    Assert.That(controller.DetailsCollapsed, Is.False);
+                    Assert.That(controller.Viewport.ScreenRect, Is.EqualTo(map));
+                    Assert.That(ui.Q<Button>("acceptRoute"), Is.SameAs(accept));
+                    AssertRouteLayout(accept, ui.Q<Button>("chooseRouteRoomsAgain"), ui.Q<Button>("cancelRoute"));
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-expanded.png");
+                    yield return null;
+                    yield return MapTap(new Vector2(5f, 7.5f));
+                    yield return MapTap(new Vector2(5.5f, 6.5f));
+                    Assert.That(accept.enabledSelf, Is.False);
+                    Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(
+                        root.Content.GetString("ui.dungeon.route.passage_overlap", null)));
+                    Assert.That(controller.Viewport.ScreenRect, Is.EqualTo(map));
+                    AssertRouteLayout(accept, ui.Q<Button>("revertRouteSegment"), ui.Q<Button>("finishRouteSegment"));
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-invalid.png");
+                    yield return null;
+                    yield return ClickVisible(ui.Q<Button>("revertRouteSegment"));
+                    Assert.That(accept.enabledSelf, Is.True);
+                    Assert.That(controller.Viewport.ScreenRect, Is.EqualTo(map));
+                }
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(originalSize.x, originalSize.y);
+                controller.SetTextSize(DungeonTextSize.Default);
+                yield return WaitForViewportGeometry();
+
                 var firstNode = starter.Layout.Nodes.Single(n => n.RoomInstanceId == first.RoomInstanceId);
                 var openings = AuthoredRouteGeometry.Openings(starter, firstNode.NodeId, root.ProductionSpatialContent.Catalog);
                 yield return MapTap(Door(openings.Single(p => p.Id == "east")));
@@ -585,11 +629,52 @@ namespace DungeonBuilder.M0.Tests
                 yield return MapTap(new Vector2(5f, 8.5f));
                 yield return MapTap(new Vector2(5.5f, 7.5f));
                 Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
-                Click(ui.Q<Button>("acceptRoute"));
+                if (!controller.DetailsCollapsed) yield return ClickVisible(ui.Q<Button>("collapseDetails"));
+                yield return ClickVisible(ui.Q<Button>("acceptRoute"));
                 yield return null;
                 Assert.That(controller.Draft.CommandCount, Is.EqualTo(2));
             }
             finally { InputSystem.RemoveDevice(pointer); }
+
+            IEnumerator ClickVisible(Button button)
+            {
+                yield return WaitForViewportGeometry();
+                AssertRouteLayout(button);
+                float scale = controller.GetComponent<UIDocument>().panelSettings.scale;
+                var center = button.worldBound.center * scale;
+                var point = new Vector2(center.x, Screen.height - center.y);
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = point }
+                    .WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = point });
+                yield return null;
+                yield return null;
+            }
+
+            void AssertRouteLayout(params Button[] buttons)
+            {
+                var dock = ui.Q("bottomChrome").worldBound;
+                float scale = controller.GetComponent<UIDocument>().panelSettings.scale;
+                Assert.That(controller.Viewport.ScreenRect.height, Is.GreaterThan(Screen.height * .24f));
+                for (int i = 0; i < buttons.Length; i++)
+                {
+                    var button = buttons[i];
+                    Assert.That(button.resolvedStyle.visibility, Is.EqualTo(Visibility.Visible), button.name);
+                    var bounds = button.worldBound;
+                    Assert.That(bounds.width * scale, Is.GreaterThanOrEqualTo(48), button.name);
+                    Assert.That(bounds.height * scale, Is.GreaterThanOrEqualTo(48), button.name);
+                    Assert.That(bounds.xMin, Is.GreaterThanOrEqualTo(dock.xMin - 1), button.name);
+                    Assert.That(bounds.xMax, Is.LessThanOrEqualTo(dock.xMax + 1), button.name);
+                    Assert.That(bounds.yMax, Is.LessThanOrEqualTo(Math.Min(dock.yMax, Screen.height / scale) + 1), button.name);
+                    var text = button.MeasureTextSize(button.text, 0, VisualElement.MeasureMode.Undefined,
+                        0, VisualElement.MeasureMode.Undefined);
+                    Assert.That(button.contentRect.width, Is.GreaterThanOrEqualTo(text.x - 1), button.name);
+                    var picked = ui.panel.Pick(bounds.center);
+                    Assert.That(picked == button || button.Contains(picked), Is.True, button.name);
+                    for (int j = 0; j < i; j++) Assert.That(bounds.Overlaps(buttons[j].worldBound), Is.False, button.name);
+                }
+            }
 
             IEnumerator MapTap(Vector2 world, Vector2? destination = null)
             {
