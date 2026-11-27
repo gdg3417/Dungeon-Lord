@@ -577,7 +577,9 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
                 Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
 
-                yield return MapTap(new Vector2(5f, 7.5f), new Vector2(5f, 8.5f));
+                // Cross the physical drag threshold even in the narrow portrait viewport.
+                // The selected horizontal segment uses the destination row.
+                yield return MapTap(new Vector2(5f, 7.5f), new Vector2(1.5f, 8.5f));
                 Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False, "The detour exceeds the floor capacity");
                 Click(ui.Q<Button>("finishRouteSegment"));
                 yield return MapTap(new Vector2(5f, 8.5f));
@@ -601,6 +603,8 @@ namespace DungeonBuilder.M0.Tests
                 yield return null;
                 if (destination.HasValue)
                 {
+                    Assert.That(controller.Viewport.ScreenRect.Contains(end), Is.True, destination.ToString());
+                    Assert.That(controller.IsChrome(end, pointer.deviceId), Is.False, destination.ToString());
                     InputSystem.QueueStateEvent(pointer, new MouseState { position = end }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
                     yield return null;
                     yield return null;
