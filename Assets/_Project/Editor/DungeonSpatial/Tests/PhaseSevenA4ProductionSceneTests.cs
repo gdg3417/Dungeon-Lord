@@ -573,9 +573,9 @@ namespace DungeonBuilder.M0.Tests
                     middle.EdgeId, placedId), Is.Not.Null, "Production must suggest a valid insertion before manual adjustment");
                 var placementFloor = controller.Draft.ReadModel.Floors.Single();
                 var placedNode = placementFloor.Layout.Nodes.Single(node => node.RoomInstanceId == placedId);
-                var catalog = root.ProductionSpatialContent.Catalog;
+                var placementCatalog = root.ProductionSpatialContent.Catalog;
                 Vector2 DoorOnNode(string node, string id) => Door(AuthoredRouteGeometry.Openings(placementFloor,
-                    node, catalog).Single(value => value.Id == id));
+                    node, placementCatalog).Single(value => value.Id == id));
 
                 // The expanded perimeter can suggest a cheaper two-doorway insertion.
                 // Explicitly choose the physical passage used by the travel and capacity assertions.
