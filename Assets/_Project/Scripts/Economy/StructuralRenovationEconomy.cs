@@ -92,11 +92,19 @@ namespace DungeonBuilder.M0.Economy
             HashSet<string> explicitlyRetired, StructuralEconomySnapshot config, FormulaEngine formula,
             IReadOnlyList<FormulaModifier> modifiers, StructuralEconomyPreview quote)
         {
-            var replacement = after.Layout.Edges.Where(ReusableCorridor).OrderBy(edge => edge.EdgeId, StringComparer.Ordinal).ToArray();
+            var replacement = after.Layout.Edges.Where(ReusableCorridor)
+                .OrderBy(edge => edge.SourceNodeId, StringComparer.Ordinal)
+                .ThenBy(edge => edge.Classification)
+                .ThenBy(edge => edge.Classification == RouteClassification.Required ? edge.DestinationNodeId : string.Empty, StringComparer.Ordinal)
+                .ThenBy(edge => edge.EdgeId, StringComparer.Ordinal).ToArray();
             var source = before.Layout.Edges.Where(ReusableCorridor).OrderBy(edge => edge.EdgeId, StringComparer.Ordinal).ToArray();
             var materialized = replacement.ToDictionary(edge => edge.EdgeId, edge =>
                 new HashSet<TileCoordinate>(edge.CorridorTiles), StringComparer.Ordinal);
             var byId = after.Layout.Edges.ToDictionary(edge => edge.EdgeId, StringComparer.Ordinal);
+            if (after.Layout.Edges.Any(edge => edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor &&
+                !ReusableCorridor(edge) && !before.Layout.Edges.Any(prior => prior.EdgeId == edge.EdgeId &&
+                    prior.CorridorDefinitionId == edge.CorridorDefinitionId && prior.CorridorTiles != null &&
+                    prior.CorridorTiles.SequenceEqual(edge.CorridorTiles ?? Array.Empty<TileCoordinate>())))) return false;
             foreach (var edge in before.Layout.Edges.Where(edge => !ReusableCorridor(edge)))
             {
                 var record = old[edge.EdgeId];

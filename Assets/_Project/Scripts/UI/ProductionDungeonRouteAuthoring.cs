@@ -421,7 +421,9 @@ namespace DungeonBuilder.M0
                     ? FixedSpatialStructureKind.Entrance : FixedSpatialStructureKind.CompletionTerminal;
                 location = floor.FixedStructures.Single(structure => structure.Kind == kind).FixedStructureInstanceId;
             }
-            return world.TryRouteLocationBounds(location, out bounds);
+            if (location != null) return world.TryRouteLocationBounds(location, out bounds);
+            bounds = default;
+            return false;
         }
 
         private static Vector2 CellCenter(TileCoordinate cell) => new Vector2(cell.X + .5f, cell.Y + .5f);

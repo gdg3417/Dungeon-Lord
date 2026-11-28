@@ -123,7 +123,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(new[] { start, middle, end }, route.Select(node => node.NodeId));
             Assert.That(f.Economy.TryRoom(room.RoomDefinitionId, out double roomCost), Is.True);
             Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(500 -
-                new FormulaEngine().Evaluate(new FormulaInput(roomCost * f.Economy.MovementFactor)).Value));
+                new FormulaEngine().Evaluate(new FormulaInput(roomCost * f.Economy.MovementFactor, null)).Value));
 
             void Move(string id, int x, int y) => Apply(new StructuralRouteRenovation
             {

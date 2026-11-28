@@ -14,11 +14,11 @@ namespace DungeonBuilder.M0
         private string renovationNode, movingStructure, branchPointId;
         private CardinalOrientation moveOrientation;
         private StructuralRouteRenovation renovationIntent;
-        private StructuralRouteRenovation branchDraft;
+        private StructuralRouteRenovation branchDraft, structureMoveDraft;
         private CorridorContentAssignment[] displacedCorridorContents = Array.Empty<CorridorContentAssignment>();
         private string corridorRenovationBlocker;
         private VisualElement renovationActions;
-        private Button moveStructureAction, rotateStructureAction, disconnectAction, retireAction, confirmBranchAction;
+        private Button moveStructureAction, rotateStructureAction, confirmStructureMove, disconnectAction, retireAction, confirmBranchAction;
         private Button returnCorridorContentAction, moveCorridorContentAction;
 
         private CorridorContentAssignment ActiveDisplacedContent => displacedCorridorContents
@@ -46,6 +46,7 @@ namespace DungeonBuilder.M0
             movingStructure = null;
             branchPointId = null;
             branchDraft = null;
+            structureMoveDraft = null;
             pickingMove = pickingBranch = pickingContentDestination = false;
         }
 
@@ -85,8 +86,9 @@ namespace DungeonBuilder.M0
             if (draft.Durability != DraftDurability.Acknowledged || floor == null) return true;
             if (pickingMove && movingStructure != null)
             {
-                ApplyRenovation(new StructuralRouteRenovation { Kind = StructuralRouteRenovationKind.MoveStructure,
-                    FloorInstanceId = selectedFloor, TargetId = movingStructure, Anchor = cell, Orientation = moveOrientation });
+                structureMoveDraft = new StructuralRouteRenovation { Kind = StructuralRouteRenovationKind.MoveStructure,
+                    FloorInstanceId = selectedFloor, TargetId = movingStructure, Anchor = cell, Orientation = moveOrientation };
+                PreviewStructureMove();
                 return true;
             }
             if (pickingContentDestination && ActiveDisplacedContent != null)
@@ -162,7 +164,7 @@ namespace DungeonBuilder.M0
                 var start = points.Single(point => point.Local.Equals(source));
                 geometry = new AuthoredRouteGeometry { SourcePointId = start.Id,
                     DestinationPointId = ends.Single(point => point.Local.Equals(destination)).Id,
-                    Passage = existing.CorridorTiles.OrderBy(tile => Math.Abs((long)tile.X - start.World.X) +
+                    Passage = (existing.CorridorTiles ?? Array.Empty<TileCoordinate>()).OrderBy(tile => Math.Abs((long)tile.X - start.World.X) +
                         Math.Abs((long)tile.Y - start.World.Y)).ToArray() };
             }
             geometry ??= root.SaveService.SuggestRenovation(root.Save, draft, renovationIntent);
@@ -216,6 +218,29 @@ namespace DungeonBuilder.M0
                 ? catalog.FixedStructures.Single(value => value.StructureDefinitionId == fixedStructure.FixedStructureDefinitionId).AllowedOrientations
                 : catalog.Rooms.Single(value => value.RoomDefinitionId == room.RoomDefinitionId).AllowedOrientations;
             moveOrientation = orientations[(Array.IndexOf(orientations, moveOrientation) + 1) % orientations.Length];
+            if (structureMoveDraft == null) Present();
+            else
+            {
+                structureMoveDraft.Orientation = moveOrientation;
+                PreviewStructureMove();
+            }
+        }
+
+        private void PreviewStructureMove()
+        {
+            var floor = DraftSelectedFloor();
+            var catalog = root.ProductionSpatialContent.Catalog;
+            var room = floor.Layout.Rooms.SingleOrDefault(value => value.RoomInstanceId == movingStructure);
+            var structure = floor.FixedStructures.SingleOrDefault(value => value.FixedStructureInstanceId == movingStructure);
+            var footprint = room != null
+                ? catalog.Rooms.Single(value => value.RoomDefinitionId == room.RoomDefinitionId).GrossFootprint
+                : catalog.FixedStructures.Single(value => value.StructureDefinitionId == structure.FixedStructureDefinitionId).GrossFootprint;
+            var workload = new SpatialValidationWorkloadLimits(draftContext.Limits.Canonical.Spatial.MaximumMaterializedTiles);
+            var preview = draft.PreviewRenovation(structureMoveDraft);
+            feedback = preview.Reason;
+            if (TileFootprintResolver.TryResolveRectangle(footprint, structureMoveDraft.Anchor, structureMoveDraft.Orientation,
+                workload, out var tiles))
+                world.PresentRoutePreview(tiles.OccupiedTiles, preview.IsValid, null);
             Present();
         }
 
@@ -318,6 +343,7 @@ namespace DungeonBuilder.M0
             });
             moveStructureAction = RouteAction(rows[0], "moveStructure", "move_structure", BeginStructureRelocation);
             rotateStructureAction = RouteAction(rows[0], "rotateStructure", "rotate_structure", RotateRenovationStructure);
+            confirmStructureMove = RouteAction(rows[1], "confirmStructureMove", "confirm_move", () => ApplyRenovation(structureMoveDraft));
             RouteAction(rows[0], "startOptionalBranch", "add_branch", () =>
             {
                 ResetRenovationSelection(); pickingBranch = true; feedback = null; ShowRenovationMap();
@@ -353,6 +379,9 @@ namespace DungeonBuilder.M0
             var item = ActiveDisplacedContent;
             ShowRouteAction(moveStructureAction, renovationNode != null && renovationIntent == null && !pickingBranch && !pickingMove);
             ShowRouteAction(rotateStructureAction, pickingMove);
+            ShowRouteAction(confirmStructureMove, pickingMove && structureMoveDraft != null);
+            confirmStructureMove.SetEnabled(structureMoveDraft != null && feedback == null &&
+                draft.Durability == DraftDurability.Acknowledged);
             ShowRouteAction(disconnectAction, renovationIntent?.TargetId != null);
             var original = CommittedSelectedFloor()?.Layout.Edges.SingleOrDefault(value => value.EdgeId == renovationIntent?.TargetId);
             ShowRouteAction(retireAction, original?.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor);
@@ -370,11 +399,12 @@ namespace DungeonBuilder.M0
                     branchPointId == null ? "ui.dungeon.route.branch_opening" : "ui.dungeon.route.branch_end" :
                 routeStart == null ? "ui.dungeon.route.rebuild_start" : "ui.dungeon.route.rebuild_next";
             routeInstruction.text = Text(instruction);
-            routeState.text = Text(feedback ?? (draft.Durability == DraftDurability.Acknowledged ? null : draft.Reason));
+            string status = feedback ?? (draft.Durability == DraftDurability.Acknowledged ? null : draft.Reason);
+            routeState.text = status == null ? string.Empty : Text(ConstructionReason(status));
             routeState.EnableInClassList("route-problem", feedback != null && feedback != "ui.dungeon.route.connection_accepted");
             routeMetrics.text = string.Empty;
             var item = ActiveDisplacedContent;
-            routeDetail.text = item == null ? Text(corridorRenovationBlocker) :
+            routeDetail.text = item == null ? corridorRenovationBlocker == null ? string.Empty : Text(corridorRenovationBlocker) :
                 Format("ui.dungeon.route.affected_content", MvpDungeonPlacementPresenter.ResolveOptionName(item.OptionId,
                     (key, fallback) => root.Content.GetString(key, fallback)));
             routeDetail.style.visibility = Visibility.Visible;

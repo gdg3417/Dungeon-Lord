@@ -3551,6 +3551,7 @@
     {"key": "ui.dungeon.route.reset_confirm", "text": "Clear this floor’s connections? Rooms and their contents stay in place. Any displaced corridor contents need your attention before saving."},
     {"key": "ui.dungeon.route.move_structure", "text": "Move structure"},
     {"key": "ui.dungeon.route.rotate_structure", "text": "Rotate"},
+    {"key": "ui.dungeon.route.confirm_move", "text": "Confirm move"},
     {"key": "ui.dungeon.route.add_branch", "text": "Add branch"},
     {"key": "ui.dungeon.route.disconnect", "text": "Disconnect"},
     {"key": "ui.dungeon.route.disconnect_confirm", "text": "Disconnect these structures in the draft? Reconnect the required route before saving."},

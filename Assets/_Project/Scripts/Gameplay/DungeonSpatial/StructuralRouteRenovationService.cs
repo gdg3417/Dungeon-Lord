@@ -411,7 +411,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private bool ApplyRenovation(StructuralRouteRenovation intent)
         {
             var preview = PreviewRenovation(intent);
-            if (!preview.IsValid || !string.Equals(preview.ConnectionId, intent.ExpectedConnectionId, StringComparison.Ordinal))
+            if (!preview.IsValid || !string.Equals(preview.ConnectionId ?? string.Empty,
+                intent.ExpectedConnectionId ?? string.Empty, StringComparison.Ordinal))
                 return false;
             presented = preview.Candidate;
             return true;

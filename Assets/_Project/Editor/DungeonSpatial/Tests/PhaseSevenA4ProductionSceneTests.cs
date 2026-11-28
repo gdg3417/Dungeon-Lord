@@ -110,7 +110,8 @@ namespace DungeonBuilder.M0.Tests
             PumpSceneToClosed(establishForeground: true);
             if (TestContext.CurrentContext.Test.Name == nameof(NativeConstructionReachesUninvestedMiddleDoorway) ||
                 TestContext.CurrentContext.Test.Name == nameof(NativeConstructionAuthorsMiddleInsertionAndReopens) ||
-                TestContext.CurrentContext.Test.Name == nameof(ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles))
+                TestContext.CurrentContext.Test.Name == nameof(ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles) ||
+                TestContext.CurrentContext.Test.Name == nameof(CombinesBothCornerDoorwaysThroughMapAndSavesConvertedConnection))
             {
                 controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
                 for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
@@ -165,7 +166,8 @@ namespace DungeonBuilder.M0.Tests
             config.save.fileName = filename;
             byte[] one = null, two = null;
             string test = TestContext.CurrentContext.Test.Name;
-            if (isolationCallbacks == 1 && test == nameof(ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles))
+            if (isolationCallbacks == 1 && (test == nameof(ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles) ||
+                test == nameof(CombinesBothCornerDoorwaysThroughMapAndSavesConvertedConnection)))
             {
                 string path = Path.Combine(Application.persistentDataPath, filename);
                 Assert.That(File.Exists(path), Is.False);
@@ -2052,6 +2054,98 @@ namespace DungeonBuilder.M0.Tests
                     AssertReachable(ui.Q<Button>("cancelPlacement"));
                     Assert.That(controller.Discard(),Is.True); yield return null;
                 }
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator CombinesBothCornerDoorwaysThroughMapAndSavesConvertedConnection()
+        {
+            var root = GameRoot.Instance;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var floor = root.Save.validatedCanonicalSpatialState.Floors.Single(value => value.FloorIndex == 1);
+            var camera = GameObject.Find("ProductionDungeonCamera").GetComponent<Camera>();
+            var canonical = root.SaveService.CanonicalSession.GetCurrentBytes();
+            var source = floor.Layout.Nodes.Single(node => node.RoomInstanceId ==
+                floor.Layout.Rooms.Single(room => room.Anchor.Equals(new TileCoordinate(2, 5))).RoomInstanceId);
+            var destination = floor.Layout.Nodes.Single(node => node.RoomInstanceId ==
+                floor.Layout.Rooms.Single(room => room.Anchor.Equals(new TileCoordinate(6, 5))).RoomInstanceId);
+            var direct = floor.Layout.Edges.Single(edge => edge.SourceNodeId == source.NodeId && edge.DestinationNodeId == destination.NodeId);
+            Assert.That(direct.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
+            controller.SelectFloor(floor.FloorInstanceId);
+            Click(ui.Q<Button>("edit"));
+            Click(ui.Q<Button>("renovateRoutes"));
+            var pointer = InputSystem.AddDevice<Mouse>();
+            try
+            {
+                yield return Tap(new Vector2(6, 6.5f));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q<Label>("routeState").text);
+                yield return Tap(Door(source.NodeId, "east"));
+                yield return Tap(Door(source.NodeId, "perimeter.north.3"));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False);
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+                Assert.That(controller.Draft.CommandCount, Is.Zero);
+
+                Click(ui.Q<Button>("cancelRouteAdjustment"));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+                yield return Tap(Door(source.NodeId, "east"), Door(source.NodeId, "perimeter.north.3"));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False);
+                yield return Tap(Door(destination.NodeId, "west"));
+                yield return Tap(Door(destination.NodeId, "perimeter.north.0"));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q<Label>("routeState").text);
+                CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("renovation-combined-corner-doors.png");
+
+                Click(ui.Q<Button>("acceptRoute"));
+                yield return null;
+                yield return null;
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+                var draftFloor = controller.Draft.ReadModel.Floors.Single(value => value.FloorIndex == 1);
+                var accepted = draftFloor.Layout.Edges.Single(edge => edge.EdgeId == direct.EdgeId);
+                Assert.That(accepted.AuthoredGeometry.SourcePointId, Is.EqualTo("perimeter.north.3"));
+                Assert.That(accepted.AuthoredGeometry.DestinationPointId, Is.EqualTo("perimeter.north.0"));
+                CollectionAssert.AreEqual(new[] { new TileCoordinate(5, 9), new TileCoordinate(6, 9) },
+                    accepted.AuthoredGeometry.Passage);
+                CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
+                Click(ui.Q<Button>("cancelRoute"));
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.True);
+                Click(ui.Q<Button>("save"));
+                Click(ui.Q<Button>("confirm"));
+                Assert.That(controller.IsEditing, Is.False);
+                var committed = root.Save.validatedCanonicalSpatialState.Floors.Single(value => value.FloorIndex == 1)
+                    .Layout.Edges.Single(edge => edge.EdgeId == direct.EdgeId);
+                Assert.That(JsonUtility.ToJson(committed.AuthoredGeometry), Is.EqualTo(JsonUtility.ToJson(accepted.AuthoredGeometry)));
+            }
+            finally { InputSystem.RemoveDevice(pointer); }
+
+            Vector2 Door(string nodeId, string openingId)
+            {
+                var opening = AuthoredRouteGeometry.Openings(floor, nodeId, root.ProductionSpatialContent.Catalog)
+                    .Single(value => value.Id == openingId);
+                float angle = -(int)opening.Facing * Mathf.PI / 2f;
+                return new Vector2(opening.World.X + .5f, opening.World.Y + .5f) +
+                    new Vector2(-Mathf.Sin(angle), Mathf.Cos(angle)) * .26f;
+            }
+
+            IEnumerator Tap(Vector2 world, Vector2? end = null)
+            {
+                yield return WaitForViewportGeometry();
+                Vector2 start = camera.WorldToScreenPoint(world);
+                Vector2 release = camera.WorldToScreenPoint(end ?? world);
+                Assert.That(controller.Viewport.ScreenRect.Contains(start) && !controller.IsChrome(start, pointer.deviceId), Is.True);
+                Assert.That(controller.Viewport.ScreenRect.Contains(release) && !controller.IsChrome(release, pointer.deviceId), Is.True);
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = start }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                yield return null;
+                yield return null;
+                if (end.HasValue)
+                {
+                    InputSystem.QueueStateEvent(pointer, new MouseState { position = release }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                    yield return null;
+                    yield return null;
+                }
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = release });
+                yield return null;
+                yield return null;
             }
         }
 
