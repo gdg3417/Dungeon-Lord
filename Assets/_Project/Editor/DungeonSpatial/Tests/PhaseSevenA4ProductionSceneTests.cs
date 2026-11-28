@@ -2237,19 +2237,19 @@ namespace DungeonBuilder.M0.Tests
                 yield return Tap(Center(east.World) + Vector2.right * .26f);
                 int acknowledged = controller.Draft.CommandCount;
                 yield return Tap(Center(new TileCoordinate(east.World.X + 7, east.World.Y)));
-                Rejected("over length");
+                Rejected("over length", "ui.dungeon.route.passage_length");
                 yield return Tap(Center(new TileCoordinate(east.World.X + 1, east.World.Y + 1)));
-                Rejected("diagonal first segment");
-                yield return Tap(Center(new TileCoordinate(east.World.X, east.World.Y - 1)));
-                Rejected("wrong-facing first segment");
+                Rejected("diagonal first segment", "ui.dungeon.route.opening_mismatch");
+                yield return Tap(Center(new TileCoordinate(east.World.X - 2, east.World.Y)));
+                Rejected("wrong-facing first segment", "ui.dungeon.route.opening_mismatch");
                 yield return Tap(Center(west.World) + Vector2.left * .26f);
                 yield return Tap(Center(new TileCoordinate(west.World.X - 1, west.World.Y)));
-                Rejected("out-of-bounds west of the first room");
+                Rejected("out-of-bounds west of the first room", "ui.dungeon.route.outside");
                 yield return Tap(Center(east.World) + Vector2.right * .26f);
                 yield return Tap(Center(new TileCoordinate(east.World.X + 1, east.World.Y)));
                 yield return Tap(Center(new TileCoordinate(east.World.X + 1, east.World.Y + 1)));
-                yield return Tap(Center(new TileCoordinate(east.World.X, east.World.Y + 1)));
-                Rejected("occupied room tile after turn");
+                yield return Tap(Center(new TileCoordinate(east.World.X - 1, east.World.Y + 1)));
+                Rejected("occupied room tile after turn", "ui.dungeon.route.passage_overlap");
                 yield return Tap(Center(new TileCoordinate(east.World.X + 2, east.World.Y + 1)));
                 Assert.That(accepted.enabledSelf, Is.True, ui.Q<Label>("routeState").text);
                 Click(accepted);
@@ -2271,11 +2271,11 @@ namespace DungeonBuilder.M0.Tests
                 CollectionAssert.AreEqual(bent.AuthoredGeometry.Passage, committed.AuthoredGeometry.Passage);
                 DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture("renovation-bent-optional-passage.png");
 
-                void Rejected(string reason)
+                void Rejected(string reason, string expectedKey)
                 {
                     Assert.That(!accepted.enabledSelf || accepted.style.display.value == DisplayStyle.None, Is.True, reason);
                     Assert.That(controller.Draft.CommandCount, Is.EqualTo(acknowledged), reason);
-                    Assert.That(ui.Q<Label>("routeState").text, Is.Not.Empty, reason);
+                    Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(root.Content.GetString(expectedKey, null)), reason);
                 }
             }
             finally { InputSystem.RemoveDevice(pointer); }
