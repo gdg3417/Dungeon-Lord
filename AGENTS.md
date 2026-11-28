@@ -2,6 +2,8 @@
 
 ## Repository-wide guardrails
 
+Deliver coherent player-facing capabilities under the [active MVP execution plan](docs/planning/post-gd60-mvp-execution-plan.md#active-product-milestones-2026-11-27). Use internal milestones and incremental commits for ordered dependencies within a PR. Apply the readiness and review gates to the integrated capability.
+
 Follow `docs/development/codex-development-rules.md`, the applicable approved specifications, `Docs/Cross_Spec_Glossary_of_Invariants_UPDATED.md`, and current dated amendments. Historical sprint gates apply only to work that remains in their scope.
 
 1. Preserve deterministic simulation, stable content IDs, and canonical ordering.
