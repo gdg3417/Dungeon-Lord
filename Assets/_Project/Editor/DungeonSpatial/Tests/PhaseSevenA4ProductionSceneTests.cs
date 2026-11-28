@@ -2085,6 +2085,9 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False);
                 Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
                 Assert.That(controller.Draft.CommandCount, Is.Zero);
+                Assert.That(ui.Q<Button>("beginManualRoute").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+                Click(ui.Q<Button>("beginManualRoute"));
+                Assert.That(ui.Q<Button>("finishManualRoute").enabledSelf, Is.False);
 
                 Click(ui.Q<Button>("cancelRouteAdjustment"));
                 Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
@@ -2115,6 +2118,17 @@ namespace DungeonBuilder.M0.Tests
                 var committed = root.Save.validatedCanonicalSpatialState.Floors.Single(value => value.FloorIndex == 1)
                     .Layout.Edges.Single(edge => edge.EdgeId == direct.EdgeId);
                 Assert.That(JsonUtility.ToJson(committed.AuthoredGeometry), Is.EqualTo(JsonUtility.ToJson(accepted.AuthoredGeometry)));
+
+                // All three required links on this floor are now physical. Independent
+                // placement must still be available without the legacy direct insertion edge.
+                Click(ui.Q<Button>("edit"));
+                Click(ui.Q<Button>("roomsCategory"));
+                Click(ui.Query<Button>(className: "room-card").ToList()
+                    .Single(button => (string)button.userData == "spatial.room.basic"));
+                yield return Tap(new Vector2(1.5f, 9.5f));
+                Assert.That(controller.ConstructionPreview.IsValid, Is.True);
+                Assert.That(controller.ConstructionPreview.Operation, Is.EqualTo(StructuralEditOperation.IndependentRoomPlacement));
+                Assert.That(controller.Discard(), Is.True);
             }
             finally { InputSystem.RemoveDevice(pointer); }
 

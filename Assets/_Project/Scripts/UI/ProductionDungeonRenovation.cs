@@ -319,6 +319,8 @@ namespace DungeonBuilder.M0
             {
                 world.PresentRoutePreview(routeRequest.Incoming.Passage, routePreview?.IsValid == true, null);
                 PresentRouteLink(true, renovationIntent.SourceNodeId, renovationIntent.DestinationNodeId);
+                if (manualRoute != null)
+                    world.OverlayRouteAttempt(manualRoute.Incoming.Passage, manualReason == null);
             }
             else if (pickingBranch && renovationNode != null)
             {
@@ -413,6 +415,8 @@ namespace DungeonBuilder.M0
             ShowRouteAction(moveRouteRoom, false);
             cancelRouteAdjustment.style.visibility = Visibility.Hidden;
             undoRouteAdjustment.style.visibility = Visibility.Hidden;
+            ShowRouteAction(beginManualRoute, false);
+            ShowRouteAction(finishManualRoute, false);
         }
     }
 }

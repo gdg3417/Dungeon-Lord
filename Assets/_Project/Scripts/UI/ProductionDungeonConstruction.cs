@@ -278,8 +278,9 @@ namespace DungeonBuilder.M0
             ui.Q("roomChoicesHint").style.display = DisplayStyle.None;
             var availableRooms = ConstructionRooms();
             var floor = IsEditing ? DraftSelectedFloor() : null;
-            bool canInsertRoom = CanAuthorRoutes && !IsAuthoringRoute && constructionRequest == null && floor?.Layout.Rooms.Length >= 2 &&
-                root.SaveService.EligibleRouteInsertions(root.Save, draft, selectedFloor).Length > 0;
+            bool canInsertRoom = CanAuthorRoutes && !IsAuthoringRoute && constructionRequest == null &&
+                floor?.ActivationState == FloorActivationState.Active &&
+                (floor.Layout.Rooms.Length >= 2 || draft.IsRebuildingFloor(selectedFloor));
             var previewLimits = new SpatialValidationWorkloadLimits(root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles);
             var footprints = availableRooms.Select(room => room.TryResolveGrossTiles(new TileCoordinate(0,0),room.AllowedOrientations.First(),previewLimits,out var footprint)
                 ? footprint.OccupiedTiles : Array.Empty<TileCoordinate>()).ToArray();
