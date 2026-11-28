@@ -81,9 +81,27 @@
                     "SocketTypeId": "spatial.socket.standard_passage"
                 },
                 {
+                    "ConnectionPointId": "east.2",
+                    "Offset": {
+                        "X": 3,
+                        "Y": 2
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
                     "ConnectionPointId": "north",
                     "Offset": {
                         "X": 1,
+                        "Y": 3
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "north.2",
+                    "Offset": {
+                        "X": 2,
                         "Y": 3
                     },
                     "Facing": 0,
@@ -224,9 +242,9 @@
         {
             "CorridorDefinitionId": "spatial.corridor.straight_stone",
             "LocalizationKey": "spatial.corridor.straight_stone.display_name",
-            "Category": 1,
+            "Category": 2,
             "MinimumLength": 1,
-            "MaximumLength": 4,
+            "MaximumLength": 6,
             "Width": 1,
             "MonsterCapacity": 0,
             "TrapCapacity": 1,

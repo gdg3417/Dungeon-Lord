@@ -46,7 +46,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { typeof(RoomSpatialInstance), new[] { "RoomInstanceId", "RoomDefinitionId", "FloorId", "Anchor", "Orientation" } },
             { typeof(TileCoordinate), new[] { "X", "Y" } },
             { typeof(FloorRouteNode), new[] { "NodeId", "FloorId", "Kind", "RoomInstanceId" } },
-            { typeof(FloorRouteEdge), new[] { "EdgeId", "CorridorDefinitionId", "FloorId", "SourceNodeId", "DestinationNodeId", "Footprint", "Classification", "OptionalBranchId", "ConnectionKind" } },
+            { typeof(FloorRouteEdge), new[] { "EdgeId", "CorridorDefinitionId", "FloorId", "SourceNodeId", "DestinationNodeId", "Footprint", "Classification", "OptionalBranchId", "ConnectionKind", "AuthoredGeometry" } },
+            { typeof(AuthoredRouteGeometry), new[] { "SourcePointId", "DestinationPointId", "Passage" } },
             { typeof(ResolvedTileFootprint), new[] { "OccupiedTiles" } },
             { typeof(SavedFixedSpatialStructure), new[] { "FixedStructureInstanceId", "FixedStructureDefinitionId", "FloorInstanceId", "Anchor", "Orientation", "Kind" } },
             { typeof(FloorRoomContentState), new[] { "Assignments", "RoomSemantics", "NextSequence" } },
@@ -61,8 +62,14 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static readonly string[] FrozenRoomContentAssignmentFields =
             { "AssignmentId", "RoomInstanceId", "CategoryId", "OptionId", "Sequence" };
 
+        private static readonly string[] FrozenEdgeFields =
+            { "EdgeId", "CorridorDefinitionId", "FloorId", "SourceNodeId", "DestinationNodeId", "Footprint",
+              "Classification", "OptionalBranchId", "ConnectionKind" };
+
         private static string[] FieldsFor(Type type, int schemaVersion)
         {
+            if (type == typeof(FloorRouteEdge) && !CanonicalSaveSchemaVersions.HasAuthoredRoutes(schemaVersion))
+                return FrozenEdgeFields;
             if (type == typeof(SavedSpatialFloor) &&
                 schemaVersion < CanonicalSaveSchemaVersions.FloorActivationIntroduction)
                 return FrozenFloorFields;
@@ -76,7 +83,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CanonicalSpatialSerializationLimits limits) =>
             SerializeForSchema(source, limits, CanonicalSaveSchemaVersions.CurrentWritableTarget);
 
-        private static SpatialContractResult<byte[]> SerializeForSchema(DetachedCanonicalSpatialSaveState source,
+        internal static SpatialContractResult<byte[]> SerializeForSchema(DetachedCanonicalSpatialSaveState source,
             CanonicalSpatialSerializationLimits limits, int schemaVersion)
         {
             limits = limits.ForSchema(schemaVersion);
@@ -144,6 +151,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return new SpatialContractResult<SerializedMembers>(null,
                     new[] { SpatialContractIssue.InvalidField });
             }
+        }
+
+        // Floor knowledge hashes preserve the frozen edge representation when a
+        // route has no authored geometry. An authored passage remains in the hash.
+        internal static void OmitUnspecifiedRouteGeometry(ContractJsonNode floor)
+        {
+            var layout = floor.Fields.Single(field => field.Key == nameof(SavedSpatialFloor.Layout)).Value;
+            var edges = layout.Fields.Single(field => field.Key == nameof(FloorSpatialLayout.Edges)).Value;
+            foreach (var edge in edges.Items)
+                edge.Fields.RemoveAll(field => field.Key == nameof(FloorRouteEdge.AuthoredGeometry) &&
+                    field.Value.Kind == ContractJsonKind.Null);
         }
 
         internal static SpatialContractResult<SerializedMembers> SerializeFrozenSchemaSevenMembers(
@@ -225,9 +243,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         private static CanonicalSpatialSaveValidationResult ValidateForSchema(
             DetachedCanonicalSpatialSaveState state, CanonicalSpatialSerializationLimits limits,
-            bool ordered, int schemaVersion) => schemaVersion <= CanonicalSaveSchemaVersions.FrozenSchemaSixteen
-                ? CanonicalSpatialSaveContracts.ValidateFrozenWithLifecycle(state, limits.Spatial, schemaVersion, ordered)
-                : CanonicalSpatialSaveContracts.Validate(state, limits.Spatial, ordered);
+            bool ordered, int schemaVersion) => CanonicalSpatialSaveContracts.ValidateForSchema(state,
+                limits.Spatial, schemaVersion, ordered);
 
         public static bool DeclaredFieldsMatchSerializableFields()
         {
@@ -239,7 +256,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!actual.SequenceEqual(declared)) return false;
             }
             // Historical contracts omit only the member introduced at their next schema.
-            return FrozenFloorFields.SequenceEqual(Fields[typeof(SavedSpatialFloor)]
+            return FrozenEdgeFields.SequenceEqual(Fields[typeof(FloorRouteEdge)]
+                       .Where(name => name != nameof(FloorRouteEdge.AuthoredGeometry))) &&
+                   FrozenFloorFields.SequenceEqual(Fields[typeof(SavedSpatialFloor)]
                        .Where(name => name != nameof(SavedSpatialFloor.ActivationState))) &&
                    FrozenRoomContentAssignmentFields.SequenceEqual(
                        Fields[typeof(RoomContentAssignment)].Where(name =>

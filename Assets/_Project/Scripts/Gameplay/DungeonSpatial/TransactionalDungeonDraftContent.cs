@@ -123,7 +123,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var preview = context.PreviewContent(presented, command.RoomContentChanges[0]);
             if (!preview.IsValid) { Reason = preview.Reason; return false; }
             commands.Add(command); presented = preview.Candidate;
-            formatVersion = CurrentFormatVersion; ruleIdentity = context.RuleIdentity(formatVersion);
+            formatVersion = Math.Max(formatVersion, RoomContentFormatVersion);
+            ruleIdentity = context.RuleIdentity(formatVersion);
             if (Durability != DraftDurability.Failed) Durability = DraftDurability.Pending;
             Reason = Durability == DraftDurability.Failed ? FailedReason : PendingReason;
             return true;

@@ -124,6 +124,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(Read(Closed, 16, 100, out _), Is.False);
             Assert.That(Read(TimeProvenance.LegacyJson, 17, 100, out _), Is.False);
             Assert.That(Read(Closed, CanonicalSaveSchemaVersions.ResearchTimingIntroduction, 100, out _), Is.True);
+            Assert.That(Read(Closed, CanonicalSaveSchemaVersions.AuthoredRouteIntroduction, 100, out _), Is.True);
             Assert.That(Read(Closed, CanonicalSaveSchemaVersions.CurrentWritableTarget + 1, 100, out _), Is.False);
         }
         [TestCase("\"FormatVersion\":2", "\"FormatVersion\":1")]

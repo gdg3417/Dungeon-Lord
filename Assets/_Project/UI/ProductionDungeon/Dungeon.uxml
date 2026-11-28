@@ -64,6 +64,7 @@
                 <ui:VisualElement name="placementActions" class="row placement-actions"><ui:Button name="cancelPlacement" tooltip="ui.dungeon.construction.cancel" /><ui:Button name="confirmPlacement" tooltip="ui.dungeon.construction.confirm" /></ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
+            <ui:VisualElement name="routeAuthoring" class="route-dock" />
             <ui:ScrollView name="contextDetails" mode="Vertical" class="context-details">
             <ui:Label name="replayLegend" />
             <ui:VisualElement name="floorSummary" class="summary-card">

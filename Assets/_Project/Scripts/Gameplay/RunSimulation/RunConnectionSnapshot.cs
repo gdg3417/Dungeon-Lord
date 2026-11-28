@@ -21,6 +21,13 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
             {
                 var edge = floor.Layout.Edges.Single(e => e.Classification == RouteClassification.Required &&
                     e.SourceNodeId == nodes[i - 1].NodeId && e.DestinationNodeId == nodes[i].NodeId);
+                if (edge.AuthoredGeometry != null)
+                {
+                    if (!edge.AuthoredGeometry.TryResolve(floor, edge, catalog, out _, out _, out var authoredPath) ||
+                        authoredPath.Length > maximumTiles) IntraroomSnapshot.Invalid();
+                    required.Add(new RunConnectionPath { Id = edge.EdgeId, RoomId = nodes[i].RoomInstanceId, Path = authoredPath });
+                    continue;
+                }
                 if (!StructuralRenovationService.TryResolveSavedConnection(floor, edge, catalog,
                     out var source, out var destination)) IntraroomSnapshot.Invalid();
                 source = World(floor, nodes[i - 1], catalog, source);
@@ -38,7 +45,10 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 var room = floor.Layout.Rooms.Single(r => r.RoomInstanceId == fork.RoomInstanceId);
                 var definition = catalog.Rooms.Single(d => d.RoomDefinitionId == room.RoomDefinitionId);
                 var spatial = plan.RequiredRooms.Single(r => r.Room.RoomInstanceId == room.RoomInstanceId).Room.Spatial;
-                var sources = definition.ConnectionPoints.Select(p => p.Offset).Where(t => {
+                var sources = edge.AuthoredGeometry != null
+                    ? definition.ConnectionPoints.Where(p => p.ConnectionPointId == edge.AuthoredGeometry.SourcePointId)
+                        .Select(p => p.Offset).ToArray()
+                    : definition.ConnectionPoints.Select(p => p.Offset).Where(t => {
                     var offset = StructuralEditService.TransformConnectionPointOffset(t, room.Orientation, definition.GrossFootprint);
                     var world = new TileCoordinate(checked(room.Anchor.X + offset.X), checked(room.Anchor.Y + offset.Y));
                     return Math.Abs((long)world.X - sourceWorld.X) + Math.Abs((long)world.Y - sourceWorld.Y) == 1;

@@ -14,6 +14,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string TerminalConnectionPointId;
     }
 
+    [Serializable]
+    public sealed class IndependentRoomPlacementRequest
+    {
+        public string FloorInstanceId;
+        public string ExistingDraftRoomId;
+        public string RoomDefinitionId;
+        public TileCoordinate Anchor;
+        public CardinalOrientation Orientation;
+    }
+
     public sealed class StructuralEditPreview
     {
         internal DetachedCanonicalSpatialSaveState DetachedCandidate { get; set; }
@@ -49,7 +59,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         Replacement = 3,
         Deletion = 4,
         OptionalBranchConstruction = 5,
-        OptionalBranchRemoval = 6
+        OptionalBranchRemoval = 6,
+        IndependentRoomPlacement = 7
     }
     public enum StructuralChangeKind { RoomAdded = 1, FixedStructureMoved = 2, EdgeAdded = 3, EdgeRemoved = 4,
         RoomMoved = 5, RoomReplaced = 6, EdgeReconnected = 7, CorridorMoved = 8, ContentPreserved = 9,
@@ -152,6 +163,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Fail(result, InvalidContextReason);
             if (!CanonicalEditFloorTarget.TryResolve(current, request.FloorInstanceId, out SavedSpatialFloor sourceFloor))
                 return Fail(result, CanonicalEditFloorTarget.InvalidReason);
+            if (sourceFloor.Layout.Edges.Any(edge => edge.AuthoredGeometry != null))
+                return Fail(result, ConnectionUnavailableReason);
             if (!TryFingerprint(current, limits, out string baseline)) return Fail(result, InvalidContextReason);
             result.BaselineFingerprint = baseline;
             result.Intent = new StructuralConstructionRequest { FloorInstanceId = sourceFloor.FloorInstanceId,
@@ -236,7 +249,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 CorridorSpatialDefinition[] corridors = (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>())
                     .Where(value => value != null && (floorDefinition.AllowedCorridorDefinitionIds ?? Array.Empty<string>())
-                        .Contains(value.CorridorDefinitionId) && value.Category == CorridorSpatialCategory.Straight).ToArray();
+                        .Contains(value.CorridorDefinitionId) && (value.Category == CorridorSpatialCategory.Straight ||
+                            value.Category == CorridorSpatialCategory.Orthogonal)).ToArray();
                 if (corridors.Length != 1) return Fail(result, CorridorDefinitionReason);
                 corridor = corridors[0];
                 CorridorAnalysis analysis = AnalyzeCorridors(previousRoom, previousDefinition, newRoom,
@@ -324,6 +338,99 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 .Where(value => value.StableId != null).OrderBy(value => value.Kind)
                 .ThenBy(value => value.StableId, StringComparer.Ordinal).ToArray();
             result.DetachedCandidate = candidate;
+            return result;
+        }
+
+        /// <summary>Stages only a room and its node. The detached result can have an incomplete route.</summary>
+        internal static StructuralEditPreview PreviewIndependentPlacement(DetachedCanonicalSpatialSaveState current,
+            IndependentRoomPlacementRequest request, DungeonDraftContext context)
+        {
+            var result = new StructuralEditPreview
+            {
+                Operation = StructuralEditOperation.IndependentRoomPlacement,
+                RoomDefinitionId = request?.RoomDefinitionId,
+                Anchor = request?.Anchor ?? default,
+                Orientation = request?.Orientation ?? default
+            };
+            if (request == null || context?.Limits == null || context.Production == null || current?.Authority == null)
+                return Fail(result, InvalidContextReason);
+            if (string.IsNullOrWhiteSpace(request.FloorInstanceId) ||
+                !CanonicalEditFloorTarget.TryResolve(current, request.FloorInstanceId, out var source))
+                return Fail(result, CanonicalEditFloorTarget.InvalidReason);
+
+            var existing = string.IsNullOrEmpty(request.ExistingDraftRoomId) ? null :
+                source.Layout.Rooms.SingleOrDefault(room => room.RoomInstanceId == request.ExistingDraftRoomId);
+            if (!string.IsNullOrEmpty(request.ExistingDraftRoomId) &&
+                (existing == null || existing.RoomDefinitionId != request.RoomDefinitionId ||
+                    source.Layout.Nodes.Where(node => node.RoomInstanceId == existing.RoomInstanceId).Any(node =>
+                        source.Layout.Edges.Any(edge => edge.SourceNodeId == node.NodeId || edge.DestinationNodeId == node.NodeId))))
+                return Fail(result, TargetRoomNotBuildableReason);
+            var catalog = context.Production.Catalog;
+            var floorDefinition = catalog.Floors.SingleOrDefault(f =>
+                f.FloorDefinitionId == source.FloorDefinitionId && f.FloorIndex == source.FloorIndex);
+            var definition = catalog.Rooms.SingleOrDefault(r => r.RoomDefinitionId == request.RoomDefinitionId);
+            if (definition == null) return Fail(result, RoomDefinitionInvalidReason);
+            if (floorDefinition?.AllowedRoomDefinitionIds.Contains(definition.RoomDefinitionId) != true)
+                return Fail(result, RoomNotAllowedReason);
+            if (!definition.AllowedOrientations.Contains(request.Orientation)) return Fail(result, OrientationInvalidReason);
+            var limits = context.Limits.Canonical.Spatial;
+            var workload = new SpatialValidationWorkloadLimits(limits.MaximumMaterializedTiles);
+            if (!definition.TryResolveGrossTiles(request.Anchor, request.Orientation, workload, out var footprint))
+                return Fail(result, WorkloadReason);
+
+            result.OccupiedTiles = footprint.OccupiedTiles;
+            result.ProspectiveFloorSpace = footprint.OccupiedTiles.Length;
+            if (footprint.OccupiedTiles.Any(tile => !floorDefinition.Bounds.Contains(tile))) return Fail(result, OutOfBoundsReason);
+            if (OverlapsRooms(footprint.OccupiedTiles, source.Layout.Rooms.Where(room => room != existing), catalog.Rooms, workload))
+                return Fail(result, RoomOverlapReason);
+            if (OverlapsFixed(footprint.OccupiedTiles, source.FixedStructures, catalog.FixedStructures, workload,
+                    includeCompletion: true))
+                return Fail(result, FixedOverlapReason);
+            if (OverlapsCorridors(footprint.OccupiedTiles, source.Layout.Edges))
+                return Fail(result, CorridorOverlapReason);
+
+            var candidate = context.Copy(current);
+            if (candidate == null) return Fail(result, WorkloadReason);
+            var floor = candidate.Floors.Single(f => f.FloorInstanceId == source.FloorInstanceId);
+            RoomSpatialInstance room;
+            if (existing == null)
+            {
+                if (!NativeStructuralIdentity.TryAllocateConstructionIdentity(candidate, source.FloorInstanceId,
+                        out var identity, out var reason)) return Fail(result, reason);
+                var lifecycle = candidate.LifecycleAndOwnership.Floors.Single(f => f.FloorInstanceId == source.FloorInstanceId);
+                lifecycle.NextNativeRoomOrdinal++;
+                room = new RoomSpatialInstance { RoomInstanceId = identity.RoomInstanceId,
+                    RoomDefinitionId = request.RoomDefinitionId, FloorId = floor.FloorInstanceId };
+                floor.Layout.Rooms = floor.Layout.Rooms.Append(room).ToArray();
+                floor.Layout.Nodes = floor.Layout.Nodes.Append(new FloorRouteNode
+                {
+                    NodeId = identity.RoomNodeId, FloorId = floor.FloorInstanceId,
+                    Kind = FloorRouteNodeKind.Room, RoomInstanceId = room.RoomInstanceId
+                }).ToArray();
+                floor.RoomContents.RoomSemantics = floor.RoomContents.RoomSemantics.Append(new CanonicalRoomSemantics
+                {
+                    RoomInstanceId = room.RoomInstanceId, LegacyRoomOriginKind = LegacyRoomOriginKind.CanonicalPlayerPlaced
+                }).ToArray();
+            }
+            else room = floor.Layout.Rooms.Single(value => value.RoomInstanceId == existing.RoomInstanceId);
+            room.Anchor = request.Anchor;
+            room.Orientation = request.Orientation;
+            var validation = FloorLayoutValidator.Validate(floor.Layout, floorDefinition, catalog.Rooms, catalog.Corridors,
+                workload, floor.FixedStructures, catalog.FixedStructures, CanonicalEditFloorTarget.Mode(floor));
+            // Detached drafts can add isolated rooms. Every other topology or geometry failure still blocks placement.
+            var issues = validation.Issues.Where(issue => issue.Reason != FloorLayoutValidationReason.UnreachableRoom ||
+                floor.Layout.Edges.Any(edge => edge.SourceNodeId == issue.SubjectId || edge.DestinationNodeId == issue.SubjectId)).ToArray();
+            if (issues.Length != 0) return Fail(result, Map(issues));
+            result.DetachedCandidate = context.Copy(candidate);
+            if (result.DetachedCandidate == null) return Fail(result, WorkloadReason);
+            result.TargetRoomInstanceId = room.RoomInstanceId;
+            result.ResultingUsedFloorSpace = validation.Capacity.UsedFloorSpaceCapacity;
+            result.ResultingRemainingFloorSpace = validation.Capacity.RemainingFloorSpaceCapacity;
+            result.Consequences = new[] { new StructuralChange
+            {
+                Kind = existing == null ? StructuralChangeKind.RoomAdded : StructuralChangeKind.RoomMoved,
+                StableId = room.RoomInstanceId, From = existing?.Anchor ?? default, To = request.Anchor
+            } };
             return result;
         }
 
@@ -425,14 +532,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
               return d.TryResolveGrossTiles(room.Anchor, room.Orientation, limits, out ResolvedTileFootprint f)
                 ? f.OccupiedTiles : Array.Empty<TileCoordinate>(); }));
         private static bool OverlapsFixed(IEnumerable<TileCoordinate> tiles, IEnumerable<SavedFixedSpatialStructure> values,
-            IEnumerable<FixedSpatialStructureDefinition> definitions, SpatialValidationWorkloadLimits limits) =>
-            Overlaps(tiles, (values ?? Enumerable.Empty<SavedFixedSpatialStructure>()).Where(value => value.Kind != FixedSpatialStructureKind.CompletionTerminal).SelectMany(value =>
+            IEnumerable<FixedSpatialStructureDefinition> definitions, SpatialValidationWorkloadLimits limits,
+            bool includeCompletion = false) =>
+            Overlaps(tiles, (values ?? Enumerable.Empty<SavedFixedSpatialStructure>())
+                .Where(value => includeCompletion || value.Kind != FixedSpatialStructureKind.CompletionTerminal).SelectMany(value =>
             { FixedSpatialStructureDefinition d = definitions.Single(item => item.StructureDefinitionId == value.FixedStructureDefinitionId);
               return TileFootprintResolver.TryResolveRectangle(d.GrossFootprint, value.Anchor, value.Orientation, limits,
                     out ResolvedTileFootprint f) ? f.OccupiedTiles : Array.Empty<TileCoordinate>(); }));
         private static bool OverlapsCorridors(IEnumerable<TileCoordinate> tiles, IEnumerable<FloorRouteEdge> edges) =>
             Overlaps(tiles, (edges ?? Enumerable.Empty<FloorRouteEdge>()).Where(value => value?.ConnectionKind ==
-                FloorRouteConnectionKind.PhysicalCorridor).SelectMany(value => value.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>()));
+                FloorRouteConnectionKind.PhysicalCorridor).SelectMany(value => value.CorridorTiles ?? Array.Empty<TileCoordinate>()));
         private static bool Overlaps(IEnumerable<TileCoordinate> a, IEnumerable<TileCoordinate> b) =>
             new HashSet<TileCoordinate>(a).Overlaps(b);
         private static string Map(IEnumerable<FloorLayoutValidationIssue> issues)

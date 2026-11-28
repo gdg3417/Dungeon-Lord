@@ -172,13 +172,67 @@ namespace DungeonBuilder.M0
             if (proposed != null && !DungeonDraftContext.Validate(proposed)) return null;
             var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(_canonicalSession.GetCurrentBytes(), _validationContext);
             if (!owned.IsValid) return null;
-            var result = StructuralEconomyService.PreviewFinalContentDraft(owned.State, proposed ?? draft.ReadModel, owned.Investment,
-                draft.NormalizedMovementTargets(proposed), current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _acquisition, _economyModifiers);
+            if (!draft.VerifyInsertionRetirements(owned)) return null;
+            return QuoteDungeonDraft(current, draft, owned, proposed ?? draft.ReadModel);
+        }
+
+        private StructuralEconomyPreview QuoteDungeonDraft(SaveData current, TransactionalDungeonDraft draft,
+            DetachedCompleteSaveValidationResult owned, DetachedCanonicalSpatialSaveState candidate)
+        {
+            var result = StructuralEconomyService.PreviewFinalContentDraft(owned.State, candidate, owned.Investment,
+                draft.NormalizedMovementTargets(candidate), current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _acquisition, _economyModifiers);
             result.RequiredReserveBefore = MonsterContinuity.RequiredReserve(owned.State, _validationContext.MonsterRecovery);
-            result.RequiredReserveAfter = MonsterContinuity.RequiredReserve(proposed ?? draft.ReadModel, _validationContext.MonsterRecovery);
+            result.RequiredReserveAfter = MonsterContinuity.RequiredReserve(candidate, _validationContext.MonsterRecovery);
             StructuralEconomyService.RefreshBalance(result, current?.structureRuntime?.ManaReserve ?? double.NaN, _economy);
             return result;
         }
+        internal string[] EligibleRouteInsertions(SaveData current, TransactionalDungeonDraft draft, string floorId)
+        {
+            var owner = ValidateRouteDraftBaseline(current, draft);
+            var floor = owner?.State.Floors.SingleOrDefault(f => f.FloorInstanceId == floorId);
+            return floor?.Layout.Edges.Where(e => StructuralRouteInsertionService.RetirementEligible(owner, floorId, e.EdgeId))
+                .Select(e => e.EdgeId).OrderBy(id => id, StringComparer.Ordinal).ToArray() ?? Array.Empty<string>();
+        }
+
+        internal StructuralRouteInsertionPreview PreviewRouteInsertion(SaveData current, TransactionalDungeonDraft draft,
+            StructuralRouteInsertionRequest request, out StructuralEconomyPreview quote)
+        {
+            quote = null;
+            var owner = ValidateRouteDraftBaseline(current, draft);
+            if (!StructuralRouteInsertionService.RetirementEligible(owner, request?.FloorInstanceId, request?.ReplacedEdgeId))
+                return StructuralRouteInsertionService.Fail(StructuralRouteInsertionService.RetirementUnavailable);
+            var preview = draft.PreviewRouteGeometry(request);
+            if (preview.IsValid) quote = QuoteDungeonDraft(current, draft, owner, preview.Candidate);
+            return preview;
+        }
+
+        internal StructuralRouteInsertionRequest SuggestRouteInsertion(SaveData current, TransactionalDungeonDraft draft,
+            string floorId, string edgeId, string roomId)
+        {
+            var owner = ValidateRouteDraftBaseline(current, draft);
+            if (!StructuralRouteInsertionService.RetirementEligible(owner, floorId, edgeId)) return null;
+            return draft.SuggestRouteInsertion(floorId, edgeId, roomId, candidate =>
+            {
+                var quote = QuoteDungeonDraft(current, draft, owner, candidate);
+                return quote.Reason == null || quote.Reason == StructuralEconomyService.InsufficientReason ||
+                    quote.Reason == MonsterRecoveryRules.Insufficient ? quote.Cost : null;
+            });
+        }
+
+        internal bool AcceptRouteInsertion(SaveData current, TransactionalDungeonDraft draft, StructuralRouteInsertionRequest request) =>
+            draft?.AcceptRouteInsertion(request, ValidateRouteDraftBaseline(current, draft)) == true;
+
+        private DetachedCompleteSaveValidationResult ValidateRouteDraftBaseline(SaveData current, TransactionalDungeonDraft draft)
+        {
+            if (draft == null || draft.IsClosed || _canonicalSession == null) return null;
+            var context = DungeonDraftContext;
+            if (context == null || !draft.MatchesRuleContext(context) ||
+                draft.BaselineFingerprint != context.Fingerprint(current?.validatedCanonicalSpatialState)) return null;
+            var owner = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(_canonicalSession.GetCurrentBytes(), _validationContext);
+            return owner.IsValid && owner.CurrentTargetValidated &&
+                draft.BaselineFingerprint == context.Fingerprint(owner.State) ? owner : null;
+        }
+
         public IDungeonDraftStore CreateDungeonDraftStore() => _canonicalConfigured && _canonicalFileSystem != null
             ? new FileDungeonDraftStore(SavePath + ".editor-draft", _canonicalFileSystem, _limits) : null;
         public DetachedCanonicalWriteResult CommitDungeonDraft(SaveData current, TransactionalDungeonDraft draft, GateEvaluationInput? purchaseInput = null)

@@ -217,7 +217,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 (context.RecoveryInputs == null || !context.RecoveryInputs.ConsumedValuesStillBound(context.RoomContentOccupancy) ||
                  context.RecoveryContext?.Matches(result.TimeProvenance) != true ||
                  result.TimeProvenance.Episode?.Phase == RecoveryEpisode.ResidualPending && !result.LivingDungeon.IsClosed)) return Failure();
-            if (schemaVersion == CanonicalSaveSchemaVersions.ResearchTimingIntroduction) {
+            if (CanonicalSaveSchemaVersions.HasResearchTiming(schemaVersion)) {
                 string researchReason = CurrentResearchReason(result, context.RecoveryInputs);
                 if (researchReason != null) return new DetachedCompleteSaveValidationResult(null, researchReason);
             } else if (schemaVersion == CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction &&
@@ -340,7 +340,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static DetachedCompleteSaveValidationResult ParseValidateAndRoundTripCore(byte[] bytes,
             CanonicalSpatialSerializationLimits limits, int schemaVersion, bool requireLifecycle,
             string expectedTransactionId, string expectedDescriptorFingerprint,
-            IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles = null)
+            IReadOnlyList<LivingDungeonProfile> livingDungeonProfiles = null,
+            int? projectedSpatialSchema = null)
         {
             limits = limits.ForSchema(schemaVersion);
             if (bytes == null || !limits.IsValid) return Failure();
@@ -402,22 +403,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (requireLifecycle) WriteNode(spatialWriter, primary.Fields[canonicalStart + 2].Value);
                 else spatialWriter.Token("null");
                 spatialWriter.Token("}");
+                int spatialSchema = projectedSpatialSchema ?? schemaVersion;
                 SpatialContractResult<DetachedCanonicalSpatialSaveState> parsedSpatial =
                     !requireLifecycle ? CanonicalSpatialSaveSerializer.ParseFrozenSchemaSeven(
-                        spatialWriter.Finish(), limits) :
-                    schemaVersion != CanonicalSaveSchemaVersions.FrozenSchemaFifteen &&
-                    schemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget
-                        ? CanonicalSpatialSaveSerializer.Parse(spatialWriter.Finish(), limits) :
-                    CanonicalSpatialSaveSerializer.ParseFrozenWithLifecycle(
-                        spatialWriter.Finish(), limits, schemaVersion);
+                        spatialWriter.Finish(), limits) : CanonicalSpatialSaveSerializer.ParseFrozenWithLifecycle(
+                        spatialWriter.Finish(), limits, spatialSchema);
                 CanonicalSpatialSaveValidationResult structuralValidation = !parsedSpatial.IsValid ? null :
                     !requireLifecycle ? CanonicalSpatialSaveContracts.ValidateFrozenSchemaSeven(
                         parsedSpatial.Value, limits.Spatial, true) :
-                    schemaVersion != CanonicalSaveSchemaVersions.FrozenSchemaFifteen &&
-                    schemaVersion == CanonicalSaveSchemaVersions.CurrentWritableTarget
-                        ? CanonicalSpatialSaveContracts.Validate(parsedSpatial.Value,
-                        limits.Spatial, true) : CanonicalSpatialSaveContracts.ValidateFrozenWithLifecycle(
-                        parsedSpatial.Value, limits.Spatial, schemaVersion, true);
+                    CanonicalSpatialSaveContracts.ValidateForSchema(parsedSpatial.Value, limits.Spatial, spatialSchema, true);
                 if (!parsedSpatial.IsValid || structuralValidation == null || !structuralValidation.IsValid ||
                     (expectedTransactionId != null && parsedSpatial.Value.Authority.MigrationTransactionId != expectedTransactionId) ||
                     (expectedDescriptorFingerprint != null &&
@@ -497,8 +491,16 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         else WriteNode(baseWriter, field.Value);
                     }
                     baseWriter.Token("}");
-                    if (!ParseValidateFrozenSchemaThirteenAndRoundTrip(baseWriter.Finish(),
-                        new CanonicalSpatialSerializationLimits(profile.BaseBudget, limits.Spatial)).IsValid) return Failure();
+                    var baseLimits = new CanonicalSpatialSerializationLimits(profile.BaseBudget, limits.Spatial);
+                    // The budget projection excludes foreground owners. It still validates
+                    // the exact edge representation under the root that produced those bytes.
+                    var baseBytes = baseWriter.Finish();
+                    var baseValidation = CanonicalSaveSchemaVersions.HasAuthoredRoutes(schemaVersion)
+                        ? ParseValidateAndRoundTripCore(baseBytes, baseLimits,
+                            CanonicalSaveSchemaVersions.RoomContentPositionIntroduction, true, null, null,
+                            projectedSpatialSchema: spatialSchema)
+                        : ParseValidateFrozenSchemaThirteenAndRoundTrip(baseBytes, baseLimits);
+                    if (!baseValidation.IsValid) return Failure();
                 }
                 var completeWriter = new ContractJsonWriter(limits.Serialized);
                 WriteNode(completeWriter, root); byte[] again = completeWriter.Finish();
@@ -509,7 +511,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     ExplicitNull(primary, "researchProgress"),
                     ExplicitNull(primary, "lastOfflineSummary"), corridorContent,
                         branchKnowledge, floorKnowledge) { Investment = investment, LivingDungeon = livingDungeon, MonsterContinuity = monsters,
-                            TimeProvenance = timeProvenance, ResearchProgressWire = schemaVersion == CanonicalSaveSchemaVersions.ResearchTimingIntroduction
+                            TimeProvenance = timeProvenance, ResearchProgressWire = CanonicalSaveSchemaVersions.HasResearchTiming(schemaVersion)
                                 ? primary.Fields.SingleOrDefault(field => field.Key == "researchProgress").Value : null };
             }
             catch { return Failure(); }

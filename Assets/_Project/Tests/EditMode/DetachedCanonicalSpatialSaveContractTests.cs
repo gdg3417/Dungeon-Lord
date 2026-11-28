@@ -14,6 +14,38 @@ namespace DungeonBuilder.M0.Tests
             new CanonicalSpatialSaveWorkloadLimits(records, tiles);
 
         [Test]
+        public void AuthoredRouteWirePreservesPassageOrderAndRejectsMixedOrFrozenGeometry()
+        {
+            var floor = Floor("floor.a", 0, "room.a");
+            var edge = floor.Layout.Edges[0];
+            var passage = new[] { new TileCoordinate(2, 2), new TileCoordinate(1, 2), new TileCoordinate(1, 1) };
+            edge.ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor;
+            edge.CorridorDefinitionId = "corridor.test";
+            edge.Footprint = null;
+            edge.AuthoredGeometry = new AuthoredRouteGeometry
+            {
+                SourcePointId = "route", DestinationPointId = "south", Passage = passage
+            };
+            var state = State(floor);
+            var limits = new CanonicalSpatialSerializationLimits(
+                new SpatialSerializedInputLimits(100000, 10000, 1000, 10000, 20), Limits());
+            int current = CanonicalSaveSchemaVersions.AuthoredRouteIntroduction;
+            var encoded = CanonicalSpatialSaveSerializer.SerializeForSchema(state, limits, current);
+            Assert.That(encoded.IsValid, Is.True, string.Join(", ", encoded.Issues));
+            var decoded = CanonicalSpatialSaveSerializer.ParseFrozenWithLifecycle(encoded.Value, limits, current);
+            Assert.That(decoded.IsValid, Is.True, string.Join(", ", decoded.Issues));
+            var restored = decoded.Value.Floors.Single().Layout.Edges.Single(e => e.EdgeId == edge.EdgeId);
+            Assert.That(restored.Footprint, Is.Null);
+            Assert.That(restored.AuthoredGeometry.SourcePointId, Is.EqualTo("route"));
+            Assert.That(restored.AuthoredGeometry.DestinationPointId, Is.EqualTo("south"));
+            CollectionAssert.AreEqual(passage, restored.AuthoredGeometry.Passage);
+            Assert.That(CanonicalSpatialSaveSerializer.SerializeForSchema(state, limits,
+                CanonicalSaveSchemaVersions.ResearchTimingIntroduction).IsValid, Is.False);
+            edge.Footprint = new ResolvedTileFootprint(passage);
+            Assert.That(CanonicalSpatialSaveSerializer.SerializeForSchema(state, limits, current).IsValid, Is.False);
+        }
+
+        [Test]
         public void EmptyNativeState_NormalizesNullFloorsOnlyOnDetachedCopyAndRoundTrips()
         {
             var source = new DetachedCanonicalSpatialSaveState

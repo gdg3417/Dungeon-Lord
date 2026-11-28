@@ -153,7 +153,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             catch { return Failure("gd66.profile.invalid"); }
 
-            bool currentOnly = CanonicalSaveSchemaVersions.CurrentWritableTarget == CanonicalSaveSchemaVersions.ResearchTimingIntroduction;
+            bool currentOnly = CanonicalSaveSchemaVersions.HasResearchTiming(CanonicalSaveSchemaVersions.CurrentWritableTarget);
             byte[] trusted = null;
             DetachedSpatialMigrationOutcome recovered = null;
             if (currentOnly) {

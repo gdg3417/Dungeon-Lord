@@ -35,6 +35,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SpatialContentCatalog catalog = production.Catalog;
             FloorRouteNode[] nodes = floor.Layout?.Nodes ?? Array.Empty<FloorRouteNode>();
             FloorRouteEdge[] edges = floor.Layout?.Edges ?? Array.Empty<FloorRouteEdge>();
+            if (edges.Any(edge => edge.AuthoredGeometry != null))
+                return Fail(result, StructuralEditService.ConnectionUnavailableReason);
             RoomSpatialInstance[] rooms = floor.Layout?.Rooms ?? Array.Empty<RoomSpatialInstance>();
             FloorRouteNode[] targetNodes = nodes.Where(n => n?.Kind == FloorRouteNodeKind.Room &&
                 n.RoomInstanceId == request.TargetRoomInstanceId).ToArray();

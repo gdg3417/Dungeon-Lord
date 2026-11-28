@@ -408,7 +408,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
                         if (p.Key == TimeProvenance.Owner) w.Token(TimeProvenance.LegacyJson);
                         else if (p.Key == "livingDungeon") LivingDungeonContracts.Write(w, owner);
                         else if (p.Key == "runHistory") w.Token(Encoding.UTF8.GetString(history));
-                        else DetachedCompleteSaveContract.WriteCanonicalNode(w, p.Value);
+                        else
+                        {
+                            if (p.Key == "spatialFloors")
+                                foreach (var floor in p.Value.Items)
+                                    CanonicalSpatialSaveSerializer.OmitUnspecifiedRouteGeometry(floor);
+                            DetachedCompleteSaveContract.WriteCanonicalNode(w, p.Value);
+                        }
                     }
                     w.Token("}");
                 }

@@ -316,9 +316,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void PrivateFootprintPresence_IsNotPartOfCanonicalParserContract()
         {
             byte[] bytes = CanonicalSpatialSaveSerializer.Serialize(Populated(1, false), SaveLimits).Value;
-            string json = Encoding.UTF8.GetString(bytes).Replace(
-                "\"ConnectionKind\":1}",
-                "\"ConnectionKind\":1,\"footprintPresence\":0}");
+            string canonical = Encoding.UTF8.GetString(bytes);
+            const string directEdgeTail = "\"ConnectionKind\":1,\"AuthoredGeometry\":null";
+            string json = canonical.Replace(directEdgeTail + "}", directEdgeTail + ",\"footprintPresence\":0}");
+            Assert.That(json, Is.Not.EqualTo(canonical), "The schema 19 direct edge must receive the private marker");
             SpatialContractResult<DetachedCanonicalSpatialSaveState> parsed =
                 CanonicalSpatialSaveSerializer.Parse(Encoding.UTF8.GetBytes(json), SaveLimits);
             Assert.IsFalse(parsed.IsValid);

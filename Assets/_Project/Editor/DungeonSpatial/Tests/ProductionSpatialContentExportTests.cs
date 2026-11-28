@@ -180,7 +180,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
             });
             AssertExactFailure(overTop, exactTop, ProductionSpatialGeneratedSetDiagnostic.WorkloadExceeded);
 
-            var exactNested = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords, 45,
+            // Amendment A adds two room opening records to this generated catalog.
+            var exactNested = new SpatialContentValidationWorkloadLimits(production.MaximumTopLevelRecords, 47,
                 production.MaximumMaterializedTiles, production.MaximumIssues,
                 production.MaximumStringCharacters);
             Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(valid, exactNested).Success, Is.True);
@@ -475,7 +476,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 json => json.Replace("\"schemaVersion\": 1", "\"schemaVersion\": 2147483648"),
                 ProductionSpatialGeneratedSetDiagnostic.IntegerOverflow);
             AssertExactReplacement(ProductionSpatialGeneratedSetParser.CatalogPath,
-                json => json.Replace("\"Category\": 1", "\"Category\": 99"),
+                json => ReplaceFirst(json, "\"Category\": 2", "\"Category\": 99"),
                 ProductionSpatialGeneratedSetDiagnostic.UnknownEnum);
         }
 
@@ -605,7 +606,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         private static string ReplaceFirst(string source, string oldValue, string newValue)
         {
             int index = source.IndexOf(oldValue, StringComparison.Ordinal);
-            return index < 0 ? source : source.Substring(0, index) + newValue + source.Substring(index + oldValue.Length);
+            Assert.That(index, Is.GreaterThanOrEqualTo(0), $"Fixture mutation did not find {oldValue}");
+            return source.Substring(0, index) + newValue + source.Substring(index + oldValue.Length);
         }
 
         private static void AssertExactFailure(ProductionSpatialGeneratedSet files,
@@ -793,16 +795,17 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(floor.AllowedRoomDefinitionIds, floorTwo.AllowedRoomDefinitionIds);
             CollectionAssert.AreEqual(floor.AllowedCorridorDefinitionIds, floorTwo.AllowedCorridorDefinitionIds);
             AssertRoom(catalog, "spatial.room.basic", 4, 4, 3, 2, 2, 2, new[] { CardinalOrientation.Zero },
-                new[] { "east:3:1:Ninety", "north:1:3:Zero", "south:1:0:OneEighty", "west:0:1:TwoSeventy" });
+                new[] { "east:3:1:Ninety", "east.2:3:2:Ninety", "north:1:3:Zero", "north.2:2:3:Zero",
+                    "south:1:0:OneEighty", "west:0:1:TwoSeventy" });
             AssertRoom(catalog, "spatial.room.large_chamber", 5, 6, 3, 4, 4, 4, new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety },
                 new[] { "east:4:2:Ninety", "north:2:5:Zero", "south:2:0:OneEighty", "west:0:2:TwoSeventy" });
             AssertRoom(catalog, "spatial.room.rectangle", 3, 5, 3, 3, 1, 2, new[] { CardinalOrientation.Zero, CardinalOrientation.Ninety },
                 new[] { "east:2:2:Ninety", "north:1:4:Zero", "south:1:0:OneEighty", "west:0:2:TwoSeventy" });
             CorridorSpatialDefinition corridor = catalog.Corridors.Single();
             Assert.That(corridor.CorridorDefinitionId, Is.EqualTo("spatial.corridor.straight_stone"));
-            Assert.That(corridor.Category, Is.EqualTo(CorridorSpatialCategory.Straight));
+            Assert.That(corridor.Category, Is.EqualTo(CorridorSpatialCategory.Orthogonal));
             Assert.That(corridor.MinimumLength, Is.EqualTo(1));
-            Assert.That(corridor.MaximumLength, Is.EqualTo(4));
+            Assert.That(corridor.MaximumLength, Is.EqualTo(6));
             Assert.That(corridor.Width, Is.EqualTo(1));
             Assert.That(corridor.MonsterCapacity, Is.Zero);
             Assert.That(corridor.TrapCapacity, Is.EqualTo(1));
@@ -816,7 +819,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(new[] { "Straight Stone Corridor", "Completion Terminal", "Entrance Hall", "Basic Room", "Large Chamber", "Rectangle Room" }, result.Projection.English.entries.Select(entry => entry.text));
             CollectionAssert.AreEqual(new[] { "spatial.corridor.straight_stone.display_name", "spatial.fixed.completion_terminal.display_name", "spatial.fixed.entrance_hall.display_name", "spatial.room.basic.display_name", "spatial.room.large_chamber.display_name", "spatial.room.rectangle.display_name" }, result.Projection.English.entries.Select(entry => entry.key));
             int nested = floor.AllowedRoomDefinitionIds.Length + floor.AllowedCorridorDefinitionIds.Length + catalog.Rooms.Sum(room => room.AllowedOrientations.Length + room.ReservedTileOffsets.Length + room.ConnectionPoints.Length) + corridor.AllowedOrientations.Length + corridor.CompatibleSocketTypeIds.Length + catalog.FixedStructures.Sum(item => item.AllowedOrientations.Length + item.ReservedTileOffsets.Length + item.ConnectionPoints.Length) + socket.CompatibleSocketTypeIds.Length + result.Projection.English.entries.Length;
-            Assert.That(nested, Is.EqualTo(41));
+            Assert.That(nested, Is.EqualTo(43));
         }
 
         [Test]

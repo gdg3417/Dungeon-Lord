@@ -183,7 +183,7 @@ namespace DungeonBuilder.M0
             }
             Tile corridorTile = Tile(art != null ? Color.white : policy.CorridorColor, policy.TileSize,art?.Corridor);
             foreach (FloorRouteEdge edge in selected.Layout.Edges)
-                if (edge.Footprint?.OccupiedTiles != null) Draw(corridors, edge.Footprint.OccupiedTiles, corridorTile, visible);
+                if (edge.CorridorTiles != null) Draw(corridors, edge.CorridorTiles, corridorTile, visible);
             // Canonical tile centers are integer cells plus one half presentation unit.
             Bounds = visible.Count == 0 ? new Rect(0, 0, 1, 1) : new Rect(visible.Min(t => t.X), visible.Min(t => t.Y),
                 visible.Max(t => t.X) - visible.Min(t => t.X) + 1, visible.Max(t => t.Y) - visible.Min(t => t.Y) + 1);
@@ -219,6 +219,7 @@ namespace DungeonBuilder.M0
                         if (roomPassages.TryGetValue((room.Key, cell), out int open)) mask &= ~open;
                         perimeter.SetTile(new Vector3Int(cell.X, cell.Y, 0), mask == 0 ? null : Tile(Color.white, 1, art.Boundaries[mask]));
                     }
+                RenderCorridorBoundaries(selected, catalog, art.Boundaries);
                 for (int i=0;i<connections.Count;i++)
                 {
                     if(i==connectionPool.Count) connectionPool.Add(Entity("SavedConnectionThreshold",4));
@@ -262,6 +263,51 @@ namespace DungeonBuilder.M0
                 if (!footprint.Contains(new TileCoordinate(cell.X + BoundarySteps[i].X, cell.Y + BoundarySteps[i].Y))) mask |= 1 << i;
             return mask;
         }
+        private void RenderCorridorBoundaries(SavedSpatialFloor selected, SpatialContentCatalog catalog, Sprite[] boundaries)
+        {
+            foreach (var edge in selected.Layout.Edges.Where(e => e.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor))
+            {
+                var tiles = new HashSet<TileCoordinate>(edge.CorridorTiles ?? Array.Empty<TileCoordinate>());
+                if (tiles.Count == 0) continue;
+                if (edge.AuthoredGeometry != null)
+                {
+                    if (!edge.AuthoredGeometry.TryResolve(selected, edge, catalog, out _, out _, out var passage)) continue;
+                    // One open face at each step in the captured passage, even when two
+                    // nonconsecutive sections of this same edge touch.
+                    var closed = tiles.ToDictionary(tile => tile, _ => 15);
+                    for (int i = 1; i < passage.Length; i++)
+                    {
+                        if (!AuthoredRouteGeometry.TryFacing(passage[i - 1], passage[i], out var facing)) continue;
+                        Open(passage[i - 1], (int)facing);
+                        Open(passage[i], ((int)facing + 2) % BoundarySteps.Length);
+                    }
+                    foreach (var cell in tiles) SetWall(cell, closed[cell]);
+
+                    void Open(TileCoordinate cell, int facing)
+                    {
+                        if (closed.TryGetValue(cell, out int mask)) closed[cell] = mask & ~(1 << facing);
+                    }
+                }
+                else
+                {
+                    // An inferred straight edge has no internal side contacts. Use only
+                    // the already resolved thresholds to open its boundary to a room.
+                    var openings = connections.Where(c => c.EdgeId == edge.EdgeId).ToArray();
+                    foreach (var cell in tiles)
+                    {
+                        int mask = ExposedEdges(cell, tiles);
+                        foreach (var opening in openings)
+                            if (AuthoredRouteGeometry.TryFacing(opening.Socket, cell, out var facing) &&
+                                facing == opening.Facing) mask &= ~(1 << (((int)facing + 2) % BoundarySteps.Length));
+                        SetWall(cell, mask);
+                    }
+                }
+            }
+
+            void SetWall(TileCoordinate cell, int mask) => perimeter.SetTile(new Vector3Int(cell.X, cell.Y, 0),
+                mask == 0 ? null : Tile(Color.white, 1, boundaries[mask]));
+        }
+
         private Dictionary<(string, TileCoordinate), int> RoomPassages(SavedSpatialFloor floor, SpatialContentCatalog catalog)
         {
             var result = new Dictionary<(string, TileCoordinate), int>();
@@ -309,6 +355,20 @@ namespace DungeonBuilder.M0
             foreach (var edge in floor.Layout.Edges.OrderBy(e=>e.EdgeId,StringComparer.Ordinal))
             {
                 sockets.TryGetValue(edge.SourceNodeId, out var source); sockets.TryGetValue(edge.DestinationNodeId, out var destination);
+                if (edge.AuthoredGeometry != null)
+                {
+                    if (!edge.AuthoredGeometry.TryResolve(floor, edge, catalog, out var from, out var to, out _)) continue;
+                    var first = source.Single(s => s.local.Equals(from.Local));
+                    Open(first);
+                    Threshold(edge, first);
+                    if (to.Id != null)
+                    {
+                        var last = destination.Single(s => s.local.Equals(to.Local));
+                        Open(last);
+                        if (edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor) Threshold(edge, last);
+                    }
+                    continue;
+                }
                 // Reuse the gameplay's read-only saved-edge adapter, which rejects alternate paths
                 // and ambiguous endpoint sockets. Rendering cannot authorize a connection.
                 bool resolved = StructuralRenovationService.TryResolveSavedConnection(floor, edge, catalog, out var sourceLocal, out var destinationLocal);
@@ -394,7 +454,7 @@ namespace DungeonBuilder.M0
             }
             return null;
         }
-        public string SelectCorridor(TileCoordinate cell) => floor?.Layout.Edges.Where(e=>e.Footprint?.OccupiedTiles?.Contains(cell)==true)
+        public string SelectCorridor(TileCoordinate cell) => floor?.Layout.Edges.Where(e=>e.CorridorTiles?.Contains(cell)==true)
             .OrderBy(e=>e.EdgeId,StringComparer.Ordinal).Select(e=>e.EdgeId).FirstOrDefault();
         public string SelectContentRoom(TileCoordinate cell) => floor?.Layout.Rooms
             .Where(r => floor.RoomContents.RoomSemantics.Any(s => s.RoomInstanceId == r.RoomInstanceId &&
@@ -414,7 +474,7 @@ namespace DungeonBuilder.M0
         {
             selectedRoom.ClearAllTiles();
             var edge=floor?.Layout.Edges.SingleOrDefault(e=>e.EdgeId==edgeId);
-            if(edge?.Footprint?.OccupiedTiles!=null) SelectFootprint(edge.Footprint.OccupiedTiles);
+            if(edge?.CorridorTiles!=null) SelectFootprint(edge.CorridorTiles);
         }
         private void SelectFootprint(IEnumerable<TileCoordinate> footprint, string roomId = null)
         {
@@ -461,6 +521,78 @@ namespace DungeonBuilder.M0
             highlight.transform.localPosition = new Vector3(cell.X + 0.5f, cell.Y + 0.5f);
             highlight.transform.localScale = new Vector3(policy.PreviewSize, policy.PreviewSize, 1);
         }
+        private readonly List<TextMesh> routeLabels = new List<TextMesh>();
+        private readonly List<SpriteRenderer> routeLines = new List<SpriteRenderer>();
+        private int routeLabelCount;
+        private int routeLineCount;
+
+        internal bool TryRouteLocationBounds(string locationId, out Rect bounds)
+        {
+            bounds = default;
+            return locationId != null && replayLocationRegions.TryGetValue(locationId, out bounds);
+        }
+
+        internal void ClearRouteMarkers()
+        {
+            for (int i = 0; i < routeLabelCount; i++) routeLabels[i].gameObject.SetActive(false);
+            for (int i = 0; i < routeLineCount; i++) routeLines[i].gameObject.SetActive(false);
+            routeLabelCount = routeLineCount = 0;
+        }
+
+        internal void AddRouteMarker(Vector2 position, string label, bool selected, float size)
+        {
+            if (routeLabelCount == routeLabels.Count)
+            {
+                var child = new GameObject("RouteMarker", typeof(TextMesh));
+                child.layer = gameObject.layer;
+                child.transform.SetParent(transform, false);
+                var text = child.GetComponent<TextMesh>();
+                text.fontSize = 64;
+                text.anchor = TextAnchor.MiddleCenter;
+                child.GetComponent<MeshRenderer>().sortingOrder = 8;
+                routeLabels.Add(text);
+            }
+            var marker = routeLabels[routeLabelCount++];
+            marker.text = label;
+            marker.characterSize = size / 6;
+            marker.color = selected ? new Color(1f, .84f, .48f) : Color.white;
+            marker.transform.localPosition = position;
+            marker.gameObject.SetActive(true);
+        }
+
+        internal void AddRouteLine(Vector2 from, Vector2 to, bool valid, bool selected = false)
+        {
+            if (routeLineCount == routeLines.Count) routeLines.Add(Entity("ProposedConnection", 6));
+            var line = routeLines[routeLineCount++];
+            var delta = to - from;
+            line.transform.localPosition = (from + to) * .5f;
+            line.transform.localScale = new Vector3(delta.magnitude, selected ? .22f : .12f, 1);
+            line.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+            line.color = valid ? policy.ValidColor : policy.InvalidColor;
+            line.gameObject.SetActive(true);
+        }
+
+        internal void PresentRoutePreview(IEnumerable<TileCoordinate> tiles, bool valid, IEnumerable<TileCoordinate> selected)
+        {
+            constructionPreview.ClearAllTiles();
+            var tile = valid ? roomSelectionTile : invalidIntentTile;
+            foreach (var cell in tiles.Distinct())
+                constructionPreview.SetTile(new Vector3Int(cell.X, cell.Y, 0), tile);
+            if (selected != null)
+                foreach (var cell in selected)
+                {
+                    var position = new Vector3Int(cell.X, cell.Y, 0);
+                    if (constructionPreview.HasTile(position))
+                        constructionPreview.SetTile(position, valid ? moveAnchorTile : invalidIntentTile);
+                }
+        }
+
+        internal void OverlayRouteAttempt(IEnumerable<TileCoordinate> tiles, bool valid)
+        {
+            foreach (var cell in tiles)
+                constructionPreview.SetTile(new Vector3Int(cell.X, cell.Y, 0), valid ? moveAnchorTile : invalidIntentTile);
+        }
+
         public void ClearPreview() { if (highlight != null) highlight.gameObject.SetActive(false); selectedRoom?.ClearAllTiles(); constructionPreview?.ClearAllTiles(); ConstructionPreviewTileCount = 0; ClearRoomPlacementGrid(); }
 
         public void ClearRoomPlacementGrid()

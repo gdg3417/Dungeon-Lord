@@ -26,6 +26,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             catch { return Failure(AtomicSaveFailedReason); }
             if (!draft.PrepareCommit(owned.State, draftContext, out var recovered, out string reason)) return Failure(reason);
+            if (!recovered.VerifyInsertionRetirements(owned)) return Failure(StructuralRouteInsertionService.RetirementUnavailable);
             var final = recovered.ReadModel;
             if (!DetachedCanonicalProductionSemanticValidation.Validate(final, production, configuration,
                     limits.Canonical.Spatial, context.RoomContentOccupancy, true).IsValid)

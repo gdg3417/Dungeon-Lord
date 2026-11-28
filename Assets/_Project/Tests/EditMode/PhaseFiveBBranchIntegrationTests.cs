@@ -118,7 +118,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(JsonUtility.ToJson(before.runHistory), Is.Not.EqualTo(JsonUtility.ToJson(f.Runtime.runHistory)));
             Assert.That(JsonUtility.ToJson(f.State), Is.EqualTo(topology)); Assert.That(JsonUtility.ToJson(f.Runtime.corridorContent), Is.EqualTo(corridor));
             Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.CurrentWritableTarget));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.ResearchTimingIntroduction));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AuthoredRouteIntroduction));
             string aggregate = JsonUtility.ToJson(run); double heat = f.Runtime.structureRuntime.Heat;
             Assert.That(aggregate, Does.Not.Contain("BranchOutcomes").And.Not.Contain("EncounterEvents").And.Not.Contain("CurrentHealth"));
             f.Reopen(); Assert.That(f.Runtime.runHistory.LatestOutcome.BranchOutcomes, Is.Null);

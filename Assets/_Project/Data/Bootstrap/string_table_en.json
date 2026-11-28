@@ -3487,7 +3487,7 @@
     },
     {
       "key": "structural.edit.connection_unavailable",
-      "text": "No aligned doorway or straight corridor connects this anchor to the required route. Choose a highlighted diamond, rotate the room or change its terminal side. Bent corridors are not available yet."
+      "text": "No aligned doorway or straight corridor connects this anchor to the required route. Choose a highlighted diamond, rotate the room or change its terminal side. For bent corridors, place a room independently and connect it from the map."
     },
     {
       "key": "structural.edit.connection_ambiguous",
@@ -3504,6 +3504,181 @@
     {
       "key": "structural.edit.terminal_placement_invalid",
       "text": "The Completion Terminal cannot be placed at the derived position."
+    },
+    {
+      "key": "ui.dungeon.route.place_room",
+      "text": "Place {0} independently"
+    },
+    {
+      "key": "ui.dungeon.route.append_card",
+      "text": "Append to route"
+    },
+    {
+      "key": "ui.dungeon.route.reposition_room",
+      "text": "Move"
+    },
+    {
+      "key": "ui.dungeon.route.resulting_usable",
+      "text": "Usable mana after saving: {0}"
+    },
+    {
+      "key": "ui.dungeon.route.append_room",
+      "text": "Append {0} at the end of the route"
+    },
+    {
+      "key": "ui.dungeon.route.place_hint",
+      "text": "Tap a floor tile to preview the room. Drag the preview to move it."
+    },
+    {
+      "key": "ui.dungeon.route.place_preview",
+      "text": "Confirm this room in the draft, then connect it to the route."
+    },
+    {
+      "key": "ui.dungeon.route.room_confirmed",
+      "text": "Room added to the draft. Connect it before saving."
+    },
+    {
+      "key": "ui.dungeon.route.connection_accepted",
+      "text": "Connection accepted into the draft. Save Changes to build it."
+    },
+    {
+      "key": "ui.dungeon.route.edit_for_room",
+      "text": "Edit route for {0}"
+    },
+    {"key": "ui.dungeon.route.pick_door", "text": "Choose a highlighted doorway on this room."},
+    {"key": "ui.dungeon.route.move_bend", "text": "Choose a tile for this bend."},
+    {"key": "ui.dungeon.route.move_tile", "text": "Choose a new tile for this passage."},
+    {"key": "ui.dungeon.route.no_connection", "text": "No legal passage joins these doorways."},
+    {"key": "ui.dungeon.route.adjusting", "text": "Adjusting preview. Cancel to keep the previous route."},
+    {"key": "ui.dungeon.route.cancel_adjustment", "text": "Cancel edit"},
+    {"key": "ui.dungeon.route.undo_adjustment", "text": "Undo"},
+    {"key": "ui.dungeon.route.no_suggestion_move", "text": "No route fits here. Move the room or reselect the visit order."},
+    {"key": "ui.dungeon.route.no_alternate_door", "text": "This doorway has no other opening."},
+    {"key": "ui.dungeon.route.previous_kept", "text": "Previous route kept."},
+    {"key": "ui.dungeon.route.save_after_edit", "text": "Accept changes or close to save."},
+    {"key": "ui.dungeon.route.dock_title", "text": "Connect rooms"},
+    {"key": "ui.dungeon.route.waiting", "text": "The new room needs two connections."},
+    {"key": "ui.dungeon.route.proposal_ready", "text": "Route ready to accept."},
+    {"key": "ui.dungeon.route.preview_only", "text": "Accept Route adds this preview to the draft."},
+    {"key": "ui.dungeon.route.order_on_map", "text": "Map numbers show visit order."},
+    {"key": "ui.dungeon.route.opening_mismatch", "text": "The passage does not join the chosen doors."},
+    {"key": "ui.dungeon.route.outside", "text": "The preview extends beyond the floor grid."},
+    {"key": "ui.dungeon.route.room_overlap", "text": "The room overlaps another room."},
+    {"key": "ui.dungeon.route.fixed_overlap", "text": "The room overlaps a fixed structure."},
+    {"key": "ui.dungeon.route.passage_overlap", "text": "The passage overlaps another structure."},
+    {"key": "ui.dungeon.route.passage_length", "text": "The corridor must fit within six tiles."},
+    {"key": "ui.dungeon.route.room_corridor_overlap", "text": "The room overlaps a corridor."},
+    {"key": "ui.dungeon.route.compact_cost", "text": "Cost: {0} mana · Usable after save: {1}"},
+    {"key": "ui.dungeon.route.map_draw_in", "text": "Draw entry"},
+    {"key": "ui.dungeon.route.map_draw_out", "text": "Draw exit"},
+    {"key": "ui.dungeon.route.map_draw_hint", "text": "Tap passage tiles in travel order."},
+    {"key": "ui.dungeon.route.map_start", "text": "Tap the room or entrance to visit first."},
+    {"key": "ui.dungeon.route.map_new", "text": "Tap the new room marked +."},
+    {"key": "ui.dungeon.route.map_next", "text": "Tap the next room or terminal."},
+    {"key": "ui.dungeon.route.map_edit", "text": "Select a doorway, corridor tile or handle to edit."},
+    {"key": "ui.dungeon.route.map_cancel", "text": "Close"},
+    {"key": "ui.dungeon.route.map_choose_again", "text": "Reselect"},
+    {"key": "ui.dungeon.route.map_finish_segment", "text": "Done"},
+    {"key": "ui.dungeon.route.map_finish_tiles", "text": "Done"},
+    {
+      "key": "ui.dungeon.route.choose_edge",
+      "text": "Choose the required edge to replace with a visit to {0}."
+    },
+    {
+      "key": "ui.dungeon.route.edge",
+      "text": "{0} → {1}"
+    },
+    {
+      "key": "ui.dungeon.route.suggest",
+      "text": "Suggest both connections"
+    },
+    {
+      "key": "ui.dungeon.route.no_suggestion",
+      "text": "No suggestion found. Choose doorways and draw the passages."
+    },
+    {
+      "key": "ui.dungeon.route.predecessor_opening",
+      "text": "Earlier exit · {0} ({1}, {2})"
+    },
+    {
+      "key": "ui.dungeon.route.new_room_entry",
+      "text": "New room entrance · {0} ({1}, {2})"
+    },
+    {
+      "key": "ui.dungeon.route.new_room_exit",
+      "text": "New room exit · {0} ({1}, {2})"
+    },
+    {
+      "key": "ui.dungeon.route.successor_opening",
+      "text": "Later entrance · {0} ({1}, {2})"
+    },
+    {
+      "key": "ui.dungeon.route.incoming_segment",
+      "text": "Move incoming segment {0} ({1}, {2} to {3}, {4})"
+    },
+    {
+      "key": "ui.dungeon.route.outgoing_segment",
+      "text": "Move outgoing segment {0} ({1}, {2} to {3}, {4})"
+    },
+    {
+      "key": "ui.dungeon.route.slide_row",
+      "text": "Tap a row to move the segment."
+    },
+    {
+      "key": "ui.dungeon.route.slide_column",
+      "text": "Tap a column to move the segment."
+    },
+    {
+      "key": "ui.dungeon.route.revert_segment",
+      "text": "Revert"
+    },
+    {
+      "key": "ui.dungeon.route.draw_incoming",
+      "text": "Edit incoming passage ({0} tiles)"
+    },
+    {
+      "key": "ui.dungeon.route.draw_outgoing",
+      "text": "Edit outgoing passage ({0} tiles)"
+    },
+    {
+      "key": "ui.dungeon.route.drawing_incoming",
+      "text": "Tap tiles in order from the earlier room to the new room."
+    },
+    {
+      "key": "ui.dungeon.route.drawing_outgoing",
+      "text": "Tap tiles in order from the new room to the next room."
+    },
+    {
+      "key": "ui.dungeon.route.clear_passage",
+      "text": "Clear tiles"
+    },
+    {
+      "key": "ui.dungeon.route.undo_tile",
+      "text": "Undo tile"
+    },
+    {
+      "key": "ui.dungeon.route.order",
+      "text": "Required route: {0}"
+    },
+    {
+      "key": "ui.dungeon.route.separator",
+      "text": " → "
+    },
+    {
+      "key": "ui.dungeon.route.floor_space",
+      "text": "Floor space: {0} of {1} tiles"
+    },
+    {
+      "key": "ui.dungeon.route.accept",
+      "text": "Accept Route"
+    },
+    {
+      "key": "ui.dungeon.route.room_location",
+      "text": "{0} ({1}, {2})"
+    },
+    {
+      "key": "structural.edit.insertion_retirement_unavailable",
+      "text": "Select a required doorway with no historical construction or renovation cost."
     },
     {
       "key": "structural.edit.required_route_disconnected",
@@ -3523,7 +3698,7 @@
     },
     {
       "key": "structural.edit.corridor_length_invalid",
-      "text": "This aligned straight corridor is outside the authored length limits. Move closer or farther along a highlighted anchor. Bent corridors are not available yet."
+      "text": "This aligned straight corridor is outside the authored length limits. Move closer or farther along a highlighted anchor. For bent corridors, place a room independently and connect it from the map."
     },
     {
       "key": "ui.structural.heading",

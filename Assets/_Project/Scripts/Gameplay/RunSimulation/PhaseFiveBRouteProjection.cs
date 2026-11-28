@@ -88,11 +88,15 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                     int requiredIndex = Array.FindIndex(required, r => r.FloorInstanceId == floor.FloorInstanceId && r.NodeId == origin.NodeId);
                     if (requiredIndex < 0) throw new ArgumentException(InvalidRoute);
                     PhaseFiveBRequiredRoom[] suffix = required.Skip(requiredIndex + 1).ToArray();
+                    var tiles = edge.AuthoredGeometry?.Passage ?? edge.Footprint.OccupiedTiles
+                        .OrderBy(t => Distance(source, t)).ToArray();
                     result.Add(new PhaseFiveBFork { FloorIndex = floor.FloorIndex, RoomIndex = room.RoomIndex,
                         FloorInstanceId = floor.FloorInstanceId, RoomInstanceId = room.RoomInstanceId, OriginNodeId = origin.NodeId,
                         OptionalBranchId = edge.OptionalBranchId, EdgeId = edge.EdgeId, DeadEndNodeId = destination.NodeId,
-                        Fingerprint = fingerprint, Tiles = edge.Footprint.OccupiedTiles.OrderBy(t => Distance(source, t)).ToArray(),
-                        Assignments = Order(assignments, source), Knowledge = knowledge,
+                        Fingerprint = fingerprint, Tiles = tiles,
+                        Assignments = assignments.OrderBy(a => Array.IndexOf(tiles, a.Tile)).ThenBy(a => a.Sequence)
+                            .ThenBy(a => a.AssignmentId, StringComparer.Ordinal).ToArray(),
+                        Knowledge = knowledge,
                         Applicable = BranchTopologyFingerprint.IsApplicable(knowledge, owned.State),
                         RequiredSuffix = suffix,
                         RemainingRequiredDanger = suffix.Sum(r =>

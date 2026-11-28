@@ -132,14 +132,74 @@ namespace DungeonBuilder.M0.Editor.Tests
             Assert.That(validated.CurrentTargetValidated, Is.True, validated.Reason);
             CollectionAssert.AreEqual(current, validated.GetBytes());
 
-            // This scenario uses the original Research rule. Schema 18 keeps
-            // its wire shape, so the historical oracle differs only in the root
-            // version. Compare without changing either persisted or golden bytes.
-            const string currentPrefix = "{\"schema\":\"save_root\",\"schemaVersion\":18,";
-            const string historicalPrefix = "{\"schema\":\"save_root\",\"schemaVersion\":17,";
-            string json = Encoding.UTF8.GetString(current);
-            Assert.That(json, Does.StartWith(currentPrefix));
-            byte[] projected = Encoding.UTF8.GetBytes(historicalPrefix + json.Substring(currentPrefix.Length));
+            // The deterministic fixture rebuilds migrated spatial state. Its
+            // migration descriptor includes the exact production package identity.
+            var authority = validated.State.Authority;
+            Assert.That(authority.CreationKind, Is.EqualTo(CanonicalSpatialCreationKind.Migrated));
+            Assert.That(authority.MigrationTransactionId,
+                Is.EqualTo("gd66-392edc8eaaf51de04709bd3bacdffd547d79052dd9a96b77089a4e6c59d2be1b"));
+            Assert.That(authority.MigrationDescriptorFingerprint,
+                Is.EqualTo("2a6930acd0236e76377f2109b137a4bca3e21ff12785927fe484447d18aac9f2"));
+            const string historicalTransaction = "gd66-6e016749a5c97b3b88a6791148d93126a36c36625dfc72c77e7b05624c92bd0c";
+            const string historicalDescriptor = "33ef7de6b8babab6b28840102b16bfd068be66c8eb479db863fdb9b04e433a32";
+
+            // Compare known schema, spatial wire and production-input identities.
+            // The complete-save golden still covers every other byte, including
+            // the captured runs, their checkpoint identities, and Research timing.
+            const int frozenSchema = CanonicalSaveSchemaVersions.AtomicRecoveryIntroduction;
+            Assert.That(validated.State.Floors.SelectMany(floor => floor.Layout.Edges)
+                .All(edge => edge.AuthoredGeometry == null), Is.True,
+                "The historical fixture may only contain inferred edges");
+            // The exact qualified baseline and Amendment A packs differ in the
+            // catalog and registration components of the twelve-input identity.
+            const string historicalContext = "67559c631dc9057834888a010fd117faed7b1dcce9d4566c026d5fc0ecab354b";
+            const string nativeContext = "deeec93232377bf9110ee595fb28f766a8c6162e986871a0024ad4e08e1f4f4a";
+            Assert.That(validated.TimeProvenance.RecoveryContextSha256, Is.EqualTo(nativeContext));
+            Assert.That(validated.TimeProvenance.Episode, Is.Null);
+            var limits = fixture.Profile.Canonical;
+            var frozen = CanonicalSpatialSaveSerializer.SerializeMembers(validated.State, limits, frozenSchema);
+            Assert.That(frozen.IsValid, Is.True);
+            var issues = new SpatialIssueCollector(limits.Serialized.MaximumDiagnostics);
+            Assert.That(ContractJson.TryParse(current, limits.Serialized, issues, out var root), Is.True);
+            Assert.That(root.Fields.Single(field => field.Key == "schemaVersion").Value.Text,
+                Is.EqualTo("19"));
+            var writer = new ContractJsonWriter(limits.Serialized);
+            writer.Node(); writer.Token("{");
+            for (int index = 0; index < root.Fields.Count; index++)
+            {
+                if (index != 0) writer.Token(",");
+                var field = root.Fields[index];
+                writer.String(field.Key); writer.Token(":");
+                if (field.Key == "schemaVersion") writer.Token("17");
+                else if (field.Key == "primary")
+                {
+                    writer.Node(); writer.Token("{");
+                    for (int memberIndex = 0; memberIndex < field.Value.Fields.Count; memberIndex++)
+                    {
+                        if (memberIndex != 0) writer.Token(",");
+                        var member = field.Value.Fields[memberIndex];
+                        writer.String(member.Key); writer.Token(":");
+                        if (member.Key == "spatialFloors") writer.Token(Encoding.UTF8.GetString(frozen.Value.Floors));
+                        else if (member.Key == "canonicalSpatialAuthority")
+                        {
+                            // Preserve version, kind and member order from the
+                            // validated authority. Substitute only the two proven IDs.
+                            member.Value.Fields.Single(f => f.Key == nameof(CanonicalSpatialAuthorityMarker.MigrationTransactionId))
+                                .Value.Text = historicalTransaction;
+                            member.Value.Fields.Single(f => f.Key == nameof(CanonicalSpatialAuthorityMarker.MigrationDescriptorFingerprint))
+                                .Value.Text = historicalDescriptor;
+                            DetachedCompleteSaveContract.WriteCanonicalNode(writer, member.Value);
+                        }
+                        else if (member.Key == TimeProvenance.Owner)
+                            new TimeProvenance(validated.TimeProvenance.AccountedBoundary, historicalContext, null).Write(writer);
+                        else DetachedCompleteSaveContract.WriteCanonicalNode(writer, member.Value);
+                    }
+                    writer.Token("}");
+                }
+                else DetachedCompleteSaveContract.WriteCanonicalNode(writer, field.Value);
+            }
+            writer.Token("}");
+            byte[] projected = writer.Finish();
             Assert.That(SpatialContractSha256.Compute(projected), Is.EqualTo(expectedHistoricalHash));
         }
 

@@ -24,11 +24,84 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
         {
             FloorInstanceId = floor.FloorInstanceId; FloorIndex = floor.FloorIndex;
             KnowledgeFingerprint = fingerprint;
-            plan = JsonUtility.ToJson(value); spatial = JsonUtility.ToJson(floor);
+            plan = JsonUtility.ToJson(value);
+            spatial = floor.Layout.Edges.All(edge => edge.AuthoredGeometry == null)
+                ? JsonUtility.ToJson(new LegacyFloorCapture(floor))
+                : JsonUtility.ToJson(floor);
             connections = JsonUtility.ToJson(movement);
             ConnectionWorkBound = movement.Required.Sum(p => (long)p.Path.Length) +
                 movement.BranchApproach.Sum(p => 2L * p.Path.Length);
         }
+        // Checkpoint format 2 embeds the original JsonUtility floor byte sequence.
+        // Keep that wire for inferred routes. Authored floors carry the complete
+        // current capture, and restored checkpoints retain the bytes they read.
+        [Serializable]
+        private sealed class LegacyFloorCapture
+        {
+            public string FloorInstanceId;
+            public string FloorDefinitionId;
+            public int FloorIndex;
+            public FloorActivationState ActivationState;
+            public LegacyLayoutCapture Layout;
+            public SavedFixedSpatialStructure[] FixedStructures;
+            public FloorRoomContentState RoomContents;
+
+            internal LegacyFloorCapture(SavedSpatialFloor floor)
+            {
+                FloorInstanceId = floor.FloorInstanceId;
+                FloorDefinitionId = floor.FloorDefinitionId;
+                FloorIndex = floor.FloorIndex;
+                ActivationState = floor.ActivationState;
+                Layout = new LegacyLayoutCapture
+                {
+                    FloorId = floor.Layout.FloorId,
+                    Rooms = floor.Layout.Rooms,
+                    Nodes = floor.Layout.Nodes,
+                    Edges = floor.Layout.Edges.Select(edge => new LegacyEdgeCapture(edge)).ToArray()
+                };
+                FixedStructures = floor.FixedStructures;
+                RoomContents = floor.RoomContents;
+            }
+        }
+
+        [Serializable]
+        private sealed class LegacyLayoutCapture
+        {
+            public string FloorId;
+            public RoomSpatialInstance[] Rooms;
+            public FloorRouteNode[] Nodes;
+            public LegacyEdgeCapture[] Edges;
+        }
+
+        [Serializable]
+        private sealed class LegacyEdgeCapture
+        {
+            public string EdgeId;
+            public string CorridorDefinitionId;
+            public string FloorId;
+            public string SourceNodeId;
+            public string DestinationNodeId;
+            public ResolvedTileFootprint Footprint;
+            public RouteClassification Classification;
+            public string OptionalBranchId;
+            public FloorRouteConnectionKind ConnectionKind;
+            public FloorRouteEdge.FootprintPresence footprintPresence;
+
+            internal LegacyEdgeCapture(FloorRouteEdge edge)
+            {
+                EdgeId = edge.EdgeId;
+                CorridorDefinitionId = edge.CorridorDefinitionId;
+                FloorId = edge.FloorId;
+                SourceNodeId = edge.SourceNodeId;
+                DestinationNodeId = edge.DestinationNodeId;
+                Footprint = edge.Footprint;
+                Classification = edge.Classification;
+                OptionalBranchId = edge.OptionalBranchId;
+                ConnectionKind = edge.ConnectionKind;
+                footprintPresence = Footprint == null ? FloorRouteEdge.FootprintPresence.Absent : FloorRouteEdge.FootprintPresence.Present;
+            }
+        }
+
         public PhaseFiveBRoutePlan MaterializePlan() => JsonUtility.FromJson<PhaseFiveBRoutePlan>(plan);
         public SavedSpatialFloor InspectSpatialInputs() => JsonUtility.FromJson<SavedSpatialFloor>(spatial);
         internal void WriteCheckpoint(BinaryWriter w)

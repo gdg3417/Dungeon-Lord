@@ -150,7 +150,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (edge.ConnectionKind == FloorRouteConnectionKind.DirectDoorway)
                 {
                     bool definitionAbsent = string.IsNullOrWhiteSpace(edge.CorridorDefinitionId);
-                    bool footprintAbsent = edge.Footprint == null;
+                    bool footprintAbsent = edge.Footprint == null &&
+                        (edge.AuthoredGeometry == null || edge.AuthoredGeometry.Passage?.Length == 0);
                     if (!definitionAbsent) Add(issues, FloorLayoutValidationReason.DirectDoorwayHasCorridorDefinition, edge.EdgeId, edge.CorridorDefinitionId);
                     if (!footprintAbsent) Add(issues, FloorLayoutValidationReason.DirectDoorwayHasFootprint, edge.EdgeId);
                     kindContractValid = definitionAbsent && footprintAbsent;
@@ -160,15 +161,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     bool definitionResolved = corridorDefinitionById.TryGetValue(edge.CorridorDefinitionId ?? string.Empty,
                         out CorridorSpatialDefinition corridorDefinition);
                     if (!definitionResolved) Add(issues, FloorLayoutValidationReason.MissingCorridorDefinition, edge.EdgeId, edge.CorridorDefinitionId);
-                    bool footprintValid = ValidateCorridorFootprint(edge, limits, issues);
-                    if (definitionResolved && footprintValid && !MatchesCorridorDefinition(edge.Footprint.OccupiedTiles,
-                            corridorDefinition))
+                    TileCoordinate[] suppliedTiles = edge.CorridorTiles;
+                    bool footprintValid = edge.AuthoredGeometry == null
+                        ? ValidateCorridorFootprint(edge, limits, issues)
+                        : edge.Footprint == null && suppliedTiles != null && limits.Allows(suppliedTiles.LongLength);
+                    bool matchesDefinition = definitionResolved && footprintValid &&
+                        (edge.AuthoredGeometry == null
+                            ? MatchesCorridorDefinition(suppliedTiles, corridorDefinition)
+                            : edge.AuthoredGeometry.HasValidPassage(corridorDefinition));
+                    if (definitionResolved && !matchesDefinition)
                         Add(issues, FloorLayoutValidationReason.CorridorDefinitionGeometryMismatch,
                             edge.EdgeId, edge.CorridorDefinitionId);
-                    footprintValid = footprintValid && definitionResolved &&
-                        MatchesCorridorDefinition(edge.Footprint.OccupiedTiles, corridorDefinition);
-                    kindContractValid = definitionResolved && footprintValid;
-                    TileCoordinate[] suppliedTiles = edge.Footprint?.OccupiedTiles;
+                    kindContractValid = matchesDefinition;
                     if (suppliedTiles != null && suppliedTiles.Length > 0 && limits.Allows(suppliedTiles.LongLength))
                     {
                         TileCoordinate[] diagnosticTiles = suppliedTiles.Distinct().OrderBy(tile => tile).ToArray();

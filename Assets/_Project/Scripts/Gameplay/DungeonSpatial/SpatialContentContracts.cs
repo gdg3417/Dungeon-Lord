@@ -2,7 +2,7 @@ using System;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
-    public enum CorridorSpatialCategory { Straight = 1 }
+    public enum CorridorSpatialCategory { Straight = 1, Orthogonal = 2 }
     public enum FixedSpatialStructureKind { Entrance = 1, CompletionTerminal = 2 }
 
     [Serializable]

@@ -25,7 +25,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static DetachedCanonicalProductionSemanticValidationResult Validate(
             DetachedCanonicalSpatialSaveState state, ProductionSpatialContentSnapshot production,
             RunSimulationConfig configuration, CanonicalSpatialSaveWorkloadLimits limits,
-            RoomContentSpatialOccupancySnapshot occupancy = null, bool requirePositions = false)
+            RoomContentSpatialOccupancySnapshot occupancy = null, bool requirePositions = false,
+            string[] disconnectedRoomIds = null)
         {
             var issues = new List<DetachedCanonicalProductionSemanticIssue>();
             if (state == null || production == null || configuration == null || !limits.IsValid ||
@@ -70,9 +71,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         !OptionalBranchGeometry.IsPersistedBranchGeometryValid(floor, edge, catalog))
                         issues.Add(DetachedCanonicalProductionSemanticIssue.BranchGeometry);
                 }
+                if (!AuthoredOpeningsValid(floor, catalog))
+                    issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
                 ValidateFixed(floor, floorDefinition, catalog, limits, issues);
-                if (!layoutValidation.IsValid && !ContainsOnlyIndividuallyClassifiedFixedIssues(
-                        layoutValidation, floor.FixedStructures))
+                var layoutIssues = layoutValidation.Issues.Where(issue =>
+                    !StructuralRouteInsertionService.AllowedIncomplete(issue, floor, disconnectedRoomIds)).ToArray();
+                if (layoutIssues.Length != 0 && !ContainsOnlyIndividuallyClassifiedFixedIssues(
+                        layoutIssues, floor.FixedStructures))
                     issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
                 ValidateAssignments(floor, roomByInstance, configured, limits, occupancy,
                     requirePositions, issues);
@@ -80,14 +85,44 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return new DetachedCanonicalProductionSemanticValidationResult(issues);
         }
 
-        private static bool ContainsOnlyIndividuallyClassifiedFixedIssues(
-            FloorLayoutValidationResult validation, IEnumerable<SavedFixedSpatialStructure> fixedStructures)
+        private static bool AuthoredOpeningsValid(SavedSpatialFloor floor, SpatialContentCatalog catalog)
         {
-            if (validation?.Issues == null || validation.Issues.Length == 0) return false;
+            var edges = floor.Layout?.Edges;
+            if (edges == null || !edges.Any(edge => edge?.AuthoredGeometry != null)) return true;
+            var occupied = new HashSet<(string NodeId, TileCoordinate Local)>();
+            foreach (var edge in edges.Where(edge => edge?.AuthoredGeometry != null))
+            {
+                if (!edge.AuthoredGeometry.TryResolve(floor, edge, catalog, out var source, out var destination, out _) ||
+                    !occupied.Add((edge.SourceNodeId, source.Local)) ||
+                    (destination.Id != null && !occupied.Add((edge.DestinationNodeId, destination.Local))))
+                    return false;
+            }
+
+            // Legacy edges can coexist with authored edges in a current floor. They keep their
+            // resolved openings and cannot share one with an authored link.
+            foreach (var edge in edges.Where(edge => edge != null && edge.AuthoredGeometry == null))
+            {
+                if (edge.Classification == RouteClassification.Optional)
+                {
+                    if (!OptionalBranchGeometry.TryResolveSourceTile(floor, edge, catalog, out var sourceTile))
+                        return false;
+                    if (AuthoredRouteGeometry.Openings(floor, edge.SourceNodeId, catalog).Any(p =>
+                        p.OpensToward(sourceTile) && occupied.Contains((edge.SourceNodeId, p.Local)))) return false;
+                }
+                else if (!StructuralRenovationService.TryResolveSavedConnection(floor, edge, catalog, out var from, out var to) ||
+                    occupied.Contains((edge.SourceNodeId, from)) || occupied.Contains((edge.DestinationNodeId, to)))
+                    return false;
+            }
+            return true;
+        }
+
+        private static bool ContainsOnlyIndividuallyClassifiedFixedIssues(
+            FloorLayoutValidationIssue[] issues, IEnumerable<SavedFixedSpatialStructure> fixedStructures)
+        {
             var instanceIds = new HashSet<string>((fixedStructures ??
                 Enumerable.Empty<SavedFixedSpatialStructure>()).Where(value => value != null)
                 .Select(value => value.FixedStructureInstanceId), StringComparer.Ordinal);
-            return validation.Issues.All(issue => issue != null &&
+            return issues.All(issue => issue != null &&
                 (issue.Reason == FloorLayoutValidationReason.StructureTileOutsideFloorBounds &&
                     issue.SubjectId != null && issue.SubjectId.StartsWith("fixed:", StringComparison.Ordinal) ||
                  issue.Reason == FloorLayoutValidationReason.InvalidRoomFootprint &&

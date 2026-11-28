@@ -648,7 +648,148 @@ namespace DungeonBuilder.M0.Tests.EditMode
             return f;
         }
         [Test] public void ExportProductionTwoFloorStandaloneInputsUsingApprovedContentAndTiming()
-        { ExportProductionTwoFloorInputs(); }
+        {
+            string directory = ExportProductionTwoFloorInputs();
+            ExportAmendmentAOwnerInputs(directory);
+        }
+
+        private static void ExportAmendmentAOwnerInputs(string directory)
+        {
+            long utc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var floorOne = Fixture.Create(null, workloadProfile: PhaseFourTestSupport.ProductionProfile());
+            floorOne.FileSystem = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
+            var seed = new SaveData { contentVersion = floorOne.Runtime.contentVersion, createdUtcUnix = utc, lastSavedUtcUnix = utc,
+                structureRuntime = new Gameplay.Structures.StructureRuntimeState() };
+            var created = NativeCanonicalSaveCreator.CreatePrecise(floorOne.ActivePath, floorOne.FileSystem, seed,
+                floorOne.Production, floorOne.Profile, floorOne.Acquisition, floorOne.Context.RecoveryInputs, new UnixTimePoint(utc, 0));
+            Assert.That(created.IsSuccess, Is.True, created.Reason);
+            floorOne.Session = created.Session; floorOne.Runtime = created.RuntimeProjection; floorOne.State = created.Validation.State;
+            floorOne.Accept(floorOne.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.RoomCategoryId,
+                MvpDungeonPlacementIds.BasicRoomOptionId)));
+            FundConstruction(floorOne);
+            var floorOneId = floorOne.State.Floors.Single().FloorInstanceId;
+            AppendBasicRoom(floorOne, floorOneId, new TileCoordinate(0, 6), "north");
+            var starter = floorOne.State.Floors.Single();
+            var lastRoom = starter.Layout.Rooms.Single(room => room.Anchor.Equals(new TileCoordinate(0, 6)));
+            floorOne.Accept(floorOne.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.MonsterCategoryId,
+                MvpDungeonPlacementIds.SkeletonOptionId, lastRoom.RoomInstanceId, floorOneId, new TileCoordinate(2, 1))));
+            floorOne.Accept(floorOne.Execute(DetachedCanonicalMutationRequest.Place(MvpDungeonPlacementIds.LootNodeCategoryId,
+                MvpDungeonPlacementIds.BasicLootNodeOptionId, lastRoom.RoomInstanceId, floorOneId, new TileCoordinate(1, 1))));
+            VerifyOwnerInsertionBaseline(floorOne, floorOneId, new TileCoordinate(0, 2), new TileCoordinate(0, 6));
+            WriteSeed(floorOne, directory, "aa1", null, 0);
+            WriteSeed(CreateAmendmentAOwnerFloorTwo(utc), directory, "aa2", null, 0);
+        }
+
+        internal static Fixture CreateAmendmentAOwnerFloorTwo(long utc)
+        {
+            // Use the existing Architecture eligibility and floor-construction
+            // fixture, then stage the approved diagnostic geometry as a detached
+            // candidate through the complete canonical authority.
+            var floorTwo = PhaseSixA4Tests.Eligible(initialTime: utc);
+            string floorTwoId = PhaseSixA4Tests.FloorTwo(floorTwo);
+            FundConstruction(floorTwo);
+            AppendBasicRoom(floorTwo, floorTwoId, new TileCoordinate(1, 8), "east");
+            var spatial = JsonUtility.FromJson<DetachedCanonicalSpatialSaveState>(JsonUtility.ToJson(floorTwo.State));
+            var floor = spatial.Floors.Single(value => value.FloorInstanceId == floorTwoId);
+            var ordered = floor.Layout.Rooms.OrderBy(room => room.Anchor.Y).ToArray();
+            ordered[0].Anchor = new TileCoordinate(2, 5);
+            ordered[1].Anchor = new TileCoordinate(6, 5);
+            var entranceFixed = floor.FixedStructures.Single(structure => structure.Kind == FixedSpatialStructureKind.Entrance);
+            entranceFixed.Anchor = new TileCoordinate(1, 0);
+            entranceFixed.Orientation = CardinalOrientation.Zero;
+            var completionFixed = floor.FixedStructures.Single(structure => structure.Kind == FixedSpatialStructureKind.CompletionTerminal);
+            completionFixed.Anchor = new TileCoordinate(11, 12);
+            completionFixed.Orientation = CardinalOrientation.Zero;
+            var entrance = floor.Layout.Nodes.Single(node => node.Kind == FloorRouteNodeKind.Entrance);
+            var completion = floor.Layout.Nodes.Single(node => node.Kind == FloorRouteNodeKind.Completion);
+            var a = floor.Layout.Nodes.Single(node => node.RoomInstanceId == ordered[0].RoomInstanceId);
+            var b = floor.Layout.Nodes.Single(node => node.RoomInstanceId == ordered[1].RoomInstanceId);
+            // Preserve the minted IDs and the corresponding identity high-water values.
+            var incoming = floor.Layout.Edges.Single(edge => edge.SourceNodeId == entrance.NodeId);
+            var middle = floor.Layout.Edges.Single(edge => edge.SourceNodeId == a.NodeId);
+            var outgoing = floor.Layout.Edges.Single(edge => edge.DestinationNodeId == completion.NodeId);
+            SetOwnerPassage(incoming, "route", "south", new TileCoordinate(2, 2), new TileCoordinate(3, 2),
+                new TileCoordinate(3, 3), new TileCoordinate(3, 4));
+            middle.DestinationNodeId = b.NodeId;
+            middle.ConnectionKind = FloorRouteConnectionKind.DirectDoorway;
+            middle.CorridorDefinitionId = string.Empty;
+            middle.Footprint = null;
+            middle.AuthoredGeometry = new AuthoredRouteGeometry { SourcePointId = "east", DestinationPointId = "west" };
+            SetOwnerPassage(outgoing, "north.2", "route", new TileCoordinate(8, 9), new TileCoordinate(9, 9),
+                new TileCoordinate(10, 9), new TileCoordinate(11, 9), new TileCoordinate(11, 10), new TileCoordinate(11, 11));
+            var structural = CanonicalSpatialSaveContracts.Validate(spatial, floorTwo.Profile.Canonical.Spatial, false);
+            Assert.That(structural.IsValid, Is.True, string.Join(",", structural.Issues));
+            var catalog = floorTwo.Production.Catalog;
+            var layout = FloorLayoutValidator.Validate(floor.Layout,
+                catalog.Floors.Single(definition => definition.FloorDefinitionId == floor.FloorDefinitionId),
+                catalog.Rooms, catalog.Corridors,
+                new SpatialValidationWorkloadLimits(floorTwo.Profile.Canonical.Spatial.MaximumMaterializedTiles),
+                floor.FixedStructures, catalog.FixedStructures);
+            Assert.That(layout.IsValid, Is.True, string.Join(", ", layout.Issues.Select(issue => $"{issue.SubjectId}: {issue.Reason}")));
+            Assert.That(layout.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(52));
+            var semantic = DetachedCanonicalProductionSemanticValidation.Validate(spatial, floorTwo.Production,
+                floorTwo.Configuration, floorTwo.Profile.Canonical.Spatial, floorTwo.Occupancy, requirePositions: true);
+            Assert.That(semantic.IsValid, Is.True, string.Join(",", semantic.Issues));
+            floorTwo = floorTwo.Rebase(spatial);
+            PhaseSixA4Tests.AddContent(floorTwo, 0, MvpDungeonPlacementIds.MonsterCategoryId, MvpDungeonPlacementIds.GoblinOptionId);
+            PhaseSixA4Tests.AddContent(floorTwo, 0, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+            PhaseSixA4Tests.AddContent(floorTwo, 1, MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId);
+            floorTwo.Accept(PhaseSixA4Tests.Writer(floorTwo).CommitFloorLifecycle(floorTwo.ActivePath, floorTwo.FileSystem,
+                floorTwo.Session, floorTwo.Runtime, FloorLifecycleAction.Activate, floorTwoId));
+            VerifyOwnerInsertionBaseline(floorTwo, floorTwoId, new TileCoordinate(2, 5), new TileCoordinate(6, 5));
+            return floorTwo;
+        }
+
+        private static void FundConstruction(Fixture fixture) =>
+            fixture.Accept(PhaseSixA4Tests.Writer(fixture).SaveQaMana(fixture.ActivePath, fixture.FileSystem,
+                fixture.Session, fixture.Runtime, true));
+
+        private static void AppendBasicRoom(Fixture fixture, string floorId, TileCoordinate anchor, string terminalPoint)
+        {
+            var preview = StructuralEditService.Preview(fixture.State, new StructuralConstructionRequest
+            {
+                FloorInstanceId = floorId,
+                RoomDefinitionId = "spatial.room.basic",
+                Anchor = anchor,
+                Orientation = CardinalOrientation.Zero,
+                TerminalConnectionPointId = terminalPoint
+            }, fixture.Production, fixture.Compatibility, fixture.Configuration, fixture.Profile.Canonical);
+            Assert.That(preview.IsValid, Is.True, string.Join(",", preview.ReasonCodes));
+            fixture.Accept(PhaseSixA4Tests.Writer(fixture).Execute(fixture.ActivePath, fixture.FileSystem,
+                fixture.Session, fixture.Runtime, DetachedCanonicalMutationRequest.Construct(preview)));
+        }
+
+        private static void SetOwnerPassage(FloorRouteEdge edge, string source, string destination, params TileCoordinate[] tiles)
+        {
+            edge.ConnectionKind = FloorRouteConnectionKind.PhysicalCorridor;
+            edge.CorridorDefinitionId = OptionalBranchStructuralEditService.CorridorDefinitionId;
+            edge.Footprint = null;
+            edge.AuthoredGeometry = new AuthoredRouteGeometry
+            {
+                SourcePointId = source,
+                DestinationPointId = destination,
+                Passage = tiles
+            };
+        }
+
+        private static void VerifyOwnerInsertionBaseline(Fixture fixture, string floorId, TileCoordinate first, TileCoordinate second)
+        {
+            var bytes = fixture.Session.GetCurrentBytes();
+            var validated = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(bytes, fixture.Context);
+            Assert.That(validated.CurrentTargetValidated, Is.True, validated.Reason);
+            CollectionAssert.AreEqual(bytes, validated.GetBytes());
+            var selected = validated.State.Floors.Single(floor => floor.FloorInstanceId == floorId);
+            Assert.That(selected.ActivationState, Is.EqualTo(FloorActivationState.Active));
+            Assert.That(selected.Layout.Rooms, Has.Length.EqualTo(2));
+            string NodeAt(TileCoordinate cell)
+            {
+                string id = selected.Layout.Rooms.Single(room => room.Anchor.Equals(cell)).RoomInstanceId;
+                return selected.Layout.Nodes.Single(node => node.RoomInstanceId == id).NodeId;
+            }
+            var target = selected.Layout.Edges.Single(edge => edge.SourceNodeId == NodeAt(first) &&
+                edge.DestinationNodeId == NodeAt(second));
+            Assert.That(StructuralRouteInsertionService.RetirementEligible(validated, floorId, target.EdgeId), Is.True);
+        }
 
         internal static string ExportProductionTwoFloorInputs(long? authoredUtc = null)
         {

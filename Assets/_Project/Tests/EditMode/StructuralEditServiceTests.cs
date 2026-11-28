@@ -38,10 +38,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void StraightStoneCorridor_AboveMaximumHasLengthReason()
         {
             PreviewFixture fixture = CreateR1();
+            SpatialContentCatalog catalog = fixture.Production.Catalog;
+            catalog.Floors[0].Bounds.Width += 4;
             AssertInvalidUnchanged(fixture, new StructuralConstructionRequest
-            { RoomDefinitionId = "spatial.room.rectangle", Anchor = new TileCoordinate(9, 1),
+            { RoomDefinitionId = "spatial.room.rectangle", Anchor = new TileCoordinate(11, 1),
               Orientation = CardinalOrientation.Zero, TerminalConnectionPointId = "north" },
-                fixture.Production, fixture.Limits, StructuralEditService.CorridorLengthReason);
+                Snapshot(fixture, catalog), fixture.Limits, StructuralEditService.CorridorLengthReason);
         }
 
         [Test]
@@ -786,7 +788,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             SpatialContentCatalog catalog = fixture.Production.Catalog;
             catalog.Floors[0].Bounds.Width += 4;
             ProductionSpatialContentSnapshot production = Snapshot(fixture, catalog);
-            AssertMoveInvalidUnchanged(fixture, new TileCoordinate(9, 2),
+            AssertMoveInvalidUnchanged(fixture, new TileCoordinate(11, 2),
                 StructuralEditService.CorridorLengthReason, production);
         }
 

@@ -321,6 +321,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal static bool IsPersistedBranchGeometryValid(SavedSpatialFloor floor,
             FloorRouteEdge edge, SpatialContentCatalog catalog)
         {
+            if (edge?.AuthoredGeometry != null)
+                return edge.Classification == RouteClassification.Optional &&
+                    edge.AuthoredGeometry.TryResolve(floor, edge, catalog, out _, out _, out _);
             FloorRouteNode source = (floor?.Layout?.Nodes ?? Array.Empty<FloorRouteNode>())
                 .SingleOrDefault(value => value?.NodeId == edge?.SourceNodeId);
             TileCoordinate[] tiles = edge?.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>();
@@ -353,6 +356,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SpatialContentCatalog catalog, out TileCoordinate sourceTile)
         {
             sourceTile = default;
+            if (edge?.AuthoredGeometry != null)
+            {
+                if (!edge.AuthoredGeometry.TryResolve(floor, edge, catalog, out _, out _, out var path))
+                    return false;
+                sourceTile = path[1];
+                return true;
+            }
             FloorRouteNode source = (floor?.Layout?.Nodes ?? Array.Empty<FloorRouteNode>())
                 .SingleOrDefault(value => value?.NodeId == edge?.SourceNodeId);
             if (source == null) return false;

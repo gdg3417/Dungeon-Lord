@@ -19,8 +19,8 @@ namespace DungeonBuilder.M0.Tests.EditMode
         public void CurrentConstantsAndNativeEmptyCreationUseThirteen()
         {
             Fixture f = Fixture.Create(null);
-            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.ResearchTimingIntroduction));
-            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.ResearchTimingIntroduction));
+            Assert.That(SaveMigration.LatestSchemaVersion, Is.EqualTo(CanonicalSaveSchemaVersions.AuthoredRouteIntroduction));
+            Assert.That(CanonicalSaveSchemaVersions.CurrentWritableTarget, Is.EqualTo(CanonicalSaveSchemaVersions.AuthoredRouteIntroduction));
             var fs = new Gd66DetachedSpatialMigrationTransactionTests.DeterministicFileSystem();
             NativeCanonicalSaveResult created = NativeCanonicalSaveCreator.CreatePrecise(f.ActivePath, fs,
                 f.Runtime, f.Production, f.Profile, f.Acquisition,
@@ -311,7 +311,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             var writer = new ContractJsonWriter(f.Profile.Canonical.Serialized);
             writer.Token("{\"schema\":\"save_root\",\"schemaVersion\":10,\"primary\":{\"canonicalSpatialAuthority\":");
             DetachedCompleteSaveContract.WriteCanonicalNode(writer, root.Fields[0].Value);
-            writer.Token(",\"spatialFloors\":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, root.Fields[1].Value);
+            var floors = root.Fields[1].Value;
+            foreach (var floor in floors.Items)
+                CanonicalSpatialSaveSerializer.OmitUnspecifiedRouteGeometry(floor);
+            writer.Token(",\"spatialFloors\":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, floors);
             writer.Token(",\"structuralLifecycleAndOwnership\":"); DetachedCompleteSaveContract.WriteCanonicalNode(writer, root.Fields[2].Value);
             writer.Token(",\"structuralInvestment\":"); StructuralInvestment.Write(writer, StructuralInvestment.Zero(state));
             writer.Token(",\"corridorContent\":{\"Assignments\":[]},\"sharedBranchKnowledge\":{\"Records\":[]}}}");

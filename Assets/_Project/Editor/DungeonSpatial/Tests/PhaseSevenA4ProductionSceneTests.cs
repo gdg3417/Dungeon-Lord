@@ -4,6 +4,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using DungeonBuilder.M0.Gameplay.DungeonSpatial;
+using DungeonBuilder.M0.Gameplay.RunSimulation;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -107,6 +108,15 @@ namespace DungeonBuilder.M0.Tests
             var root = GameRoot.Instance; Assert.That(root?.Save, Is.Not.Null);
             Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename), "Disposable scene save isolation");
             PumpSceneToClosed(establishForeground: true);
+            if (TestContext.CurrentContext.Test.Name == nameof(NativeConstructionReachesUninvestedMiddleDoorway) ||
+                TestContext.CurrentContext.Test.Name == nameof(NativeConstructionAuthorsMiddleInsertionAndReopens) ||
+                TestContext.CurrentContext.Test.Name == nameof(ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles))
+            {
+                controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+                for (int i = 0; i < 30 && controller.World == null; i++) yield return null;
+                Assert.That(controller.World, Is.Not.Null);
+                yield break;
+            }
             var placed = root.SaveService.ExecuteCanonicalMutation(root.Save,
                 DetachedCanonicalMutationRequest.Place("placement.category.room", "placement.option.room.basic", null, null, null));
             Assert.That(placed.IsSuccess, Is.True, placed.Reason);
@@ -155,6 +165,18 @@ namespace DungeonBuilder.M0.Tests
             config.save.fileName = filename;
             byte[] one = null, two = null;
             string test = TestContext.CurrentContext.Test.Name;
+            if (isolationCallbacks == 1 && test == nameof(ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles))
+            {
+                string path = Path.Combine(Application.persistentDataPath, filename);
+                Assert.That(File.Exists(path), Is.False);
+                Directory.CreateDirectory(Application.persistentDataPath);
+                var fixture = EditMode.LivingDungeonTwoFloorTests.CreateAmendmentAOwnerFloorTwo(sceneClock.UtcNowUnixSeconds());
+                using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write))
+                {
+                    byte[] bytes = fixture.Session.GetCurrentBytes();
+                    stream.Write(bytes, 0, bytes.Length);
+                }
+            }
             AuthorCombatSceneConfiguration(root, test);
             if (test.Contains("ResumeCompletesSeveralBoundedPasses") || test.Contains("SuspendedDrainRecognizes") ||
                 test.Contains("ProvenRollbackRetriesThroughRealSaveBarrier") || test.Contains("UncertainRollbackKeepsRealRootRecoveryLatch")) {
@@ -353,6 +375,458 @@ namespace DungeonBuilder.M0.Tests
             if (filename != null && !failed)
                 foreach (string path in Directory.GetFiles(Application.persistentDataPath, filename + "*")) File.Delete(path);
         }
+        [UnityTest]
+        public IEnumerator NativeConstructionReachesUninvestedMiddleDoorway()
+        {
+            var root = GameRoot.Instance;
+            Assert.That(root.Save.validatedCanonicalSpatialState.Floors, Is.Empty, "Use native creation without seeding a room");
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var initialMana = root.Save.structureRuntime.ManaReserve;
+            Click(ui.Q<Button>("buildFirstRoom"));
+            Click(ui.Q<Button>("confirm"));
+            var starter = root.Save.validatedCanonicalSpatialState.Floors.Single();
+            var first = starter.Layout.Rooms.Single();
+            Assert.That(first.Anchor, Is.EqualTo(new TileCoordinate(0, 2)));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(initialMana));
+
+            Assert.That(root.SaveService.TryRoomConstructionBaseCost("spatial.room.basic", out var roomCost), Is.True);
+            Assert.That(initialMana, Is.LessThan(roomCost));
+            // Supply elapsed time only. The production foreground executor earns and publishes all mana.
+            for (int interval = 0; interval < 60 && root.Save.structureRuntime.ManaReserve < roomCost; interval++)
+            {
+                sceneClock.Advance(30);
+                PumpSceneToClosed(establishForeground: true);
+                yield return null;
+            }
+            double earnedBalance = root.Save.structureRuntime.ManaReserve;
+            Assert.That(earnedBalance, Is.GreaterThanOrEqualTo(roomCost));
+
+            controller.EnterEdit();
+            Click(ui.Q<Button>("roomsCategory"));
+            Click(ui.Query<Button>(className: "room-card").ToList()
+                .Single(button => (string)button.userData == "spatial.room.basic"));
+            Assert.That(controller.SelectTerminalConnection("north"), Is.True);
+            var anchor = new TileCoordinate(0, 6);
+            Assert.That(controller.World.MoveGuidanceAnchors, Does.Contain(anchor));
+            controller.TapWorld(anchor);
+            Assert.That(controller.ConstructionPreview.IsValid, Is.True);
+            var quote = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft, controller.ConstructionPreview.DetachedCandidate);
+            Assert.That(quote.IsAffordable, Is.True, quote.Reason);
+            Assert.That(quote.Cost, Is.EqualTo(roomCost));
+            Click(ui.Q<Button>("confirmPlacement"));
+            yield return null;
+            Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged), controller.Draft.Reason);
+            Assert.That(ui.Q<Button>("save").enabledSelf, Is.True, ui.Q<Label>("status").text);
+            Click(ui.Q<Button>("save"));
+            Assert.That(ui.Q("modal").style.display.value, Is.EqualTo(DisplayStyle.Flex));
+            Click(ui.Q<Button>("confirm"));
+            yield return null;
+
+            Assert.That(controller.IsEditing, Is.False);
+            var floor = root.Save.validatedCanonicalSpatialState.Floors.Single();
+            var second = floor.Layout.Rooms.Single(room => room.Anchor.Equals(anchor));
+            Assert.That(second.RoomInstanceId, Is.Not.EqualTo(first.RoomInstanceId));
+            Assert.That(floor.FixedStructures.Single(value => value.Kind == FixedSpatialStructureKind.CompletionTerminal).Anchor,
+                Is.EqualTo(new TileCoordinate(1, 10)));
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(earnedBalance - quote.Cost));
+            var firstNode = floor.Layout.Nodes.Single(node => node.RoomInstanceId == first.RoomInstanceId);
+            var secondNode = floor.Layout.Nodes.Single(node => node.RoomInstanceId == second.RoomInstanceId);
+            var middle = floor.Layout.Edges.Single(edge => edge.SourceNodeId == firstNode.NodeId && edge.DestinationNodeId == secondNode.NodeId);
+            Assert.That(middle.Classification, Is.EqualTo(RouteClassification.Required));
+            Assert.That(middle.ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
+            Assert.That(middle.OptionalBranchId, Is.Null.Or.Empty);
+            byte[] disk = File.ReadAllBytes(root.SaveService.SavePath);
+            CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(), disk);
+            var context = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(root.SaveService);
+            var saved = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(disk, context);
+            Assert.That(saved.CurrentTargetValidated, Is.True, saved.Reason);
+            var record = saved.Investment.Single(value => value.StructureId == middle.EdgeId);
+            Assert.That(record.ConstructionMana, Is.Zero);
+            Assert.That(record.RenovationMana, Is.Zero);
+            TestContext.WriteLine($"Native construction earned {earnedBalance - initialMana} mana in {sceneClock.Monotonic()} seconds, spent {quote.Cost}, and created {middle.EdgeId} at zero investment.");
+        }
+
+        [UnityTest]
+        public IEnumerator NativeConstructionAuthorsMiddleInsertionAndReopens()
+        {
+            yield return NativeConstructionReachesUninvestedMiddleDoorway();
+            var root = GameRoot.Instance;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var starter = root.Save.validatedCanonicalSpatialState.Floors.Single();
+            var first = starter.Layout.Rooms.Single(r => r.Anchor.Equals(new TileCoordinate(0, 2)));
+            var second = starter.Layout.Rooms.Single(r => r.Anchor.Equals(new TileCoordinate(0, 6)));
+            var middle = starter.Layout.Edges.Single(e => e.SourceNodeId ==
+                starter.Layout.Nodes.Single(n => n.RoomInstanceId == first.RoomInstanceId).NodeId);
+            const double expectedCost = 110d;
+            const string monster = "placement.option.monster.skeleton";
+            const string loot = "placement.option.loot_node.basic";
+            Assert.That(root.SaveService.TryContentAcquisitionCost(CanonicalSpatialSaveContracts.MonsterCategoryId, monster, out double monsterCost), Is.True);
+            Assert.That(root.SaveService.TryContentAcquisitionCost(CanonicalSpatialSaveContracts.LootNodeCategoryId, loot, out double lootCost), Is.True);
+            double budget = expectedCost + monsterCost + lootCost;
+            for (int interval = 0; interval < 120 && root.Save.structureRuntime.ManaReserve < budget; interval++)
+            {
+                sceneClock.Advance(30);
+                PumpSceneToClosed(establishForeground: true);
+                yield return null;
+            }
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.GreaterThanOrEqualTo(budget));
+
+            // Production traffic needs a monster and a loot signal. Keep both beyond
+            // the authored passage so any combat or loot is attributable to that room.
+            controller.EnterEdit();
+            PlaceContent(CanonicalSpatialSaveContracts.MonsterCategoryId, monster, new TileCoordinate(2, 7));
+            yield return null;
+            PlaceContent(CanonicalSpatialSaveContracts.LootNodeCategoryId, loot, new TileCoordinate(1, 7));
+            yield return null;
+            Assert.That(controller.Draft.Durability, Is.EqualTo(DraftDurability.Acknowledged), controller.Draft.Reason);
+            var contentQuote = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft);
+            Assert.That(contentQuote, Is.Not.Null);
+            double fundedBudget = contentQuote.Cost + contentQuote.RequiredReserveAfter + expectedCost;
+            // Leave the protected recovery reserve funded when paying for the insertion.
+            // Traffic starts after the content commit, so fund this while the route is quiet.
+            for (int interval = 0; interval < 120 && root.Save.structureRuntime.ManaReserve < fundedBudget; interval++)
+            {
+                sceneClock.Advance(30);
+                PumpSceneToClosed(establishForeground: true);
+                yield return null;
+            }
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.GreaterThanOrEqualTo(fundedBudget));
+            Assert.That(ui.Q<Button>("save").enabledSelf, Is.True, ui.Q<Label>("status").text);
+            Click(ui.Q<Button>("save"));
+            Click(ui.Q<Button>("confirm"));
+            yield return null;
+            Assert.That(controller.IsEditing, Is.False, ui.Q<Label>("status").text);
+
+            void PlaceContent(string category, string option, TileCoordinate cell)
+            {
+                controller.TapWorld(new TileCoordinate(3, 9));
+                Assert.That(controller.OpenContentCategory(category), Is.True);
+                Assert.That(controller.SelectNewContent(option), Is.True);
+                controller.TapWorld(cell);
+                Assert.That(controller.ContentPreview.IsValid, Is.True, controller.ContentPreview.Reason);
+                Assert.That(controller.ConfirmContentPlacement(), Is.True);
+            }
+
+            for (int interval = 0; interval < 180 && root.Save.livingDungeon.Parties.Count == 0; interval++)
+            {
+                sceneClock.Advance(1);
+                PumpSceneToClosed(establishForeground: true);
+                yield return null;
+            }
+            Assert.That(root.Save.livingDungeon.Parties, Has.Count.EqualTo(1), "Production traffic must admit a party before construction");
+            var oldParty = root.Save.livingDungeon.Parties.Single();
+            byte[] oldCheckpoint = (byte[])oldParty.Checkpoint.Clone();
+            double balance = root.Save.structureRuntime.ManaReserve;
+            Assert.That(balance, Is.GreaterThanOrEqualTo(expectedCost));
+            byte[] before = root.SaveService.CanonicalSession.GetCurrentBytes();
+
+            Click(ui.Q<Button>("edit"));
+            Click(ui.Q<Button>("roomsCategory"));
+            Click(ui.Query<Button>(className: "room-card").ToList().Single(button =>
+                (string)button.userData == "spatial.room.basic"));
+            var camera = GameObject.Find("ProductionDungeonCamera").GetComponent<Camera>();
+            var pointer = InputSystem.AddDevice<Mouse>();
+            try
+            {
+                yield return MapTap(new Vector2(.5f, 2.5f));
+                Assert.That(controller.ConstructionPreview.ReasonCodes, Does.Contain(StructuralEditService.RoomOverlapReason));
+                Assert.That(ui.Q<Button>("confirmPlacement").enabledSelf, Is.False);
+                yield return MapTap(new Vector2(4.5f, 3.5f));
+                Assert.That(controller.ConstructionPreview.IsValid, Is.True, string.Join(",", controller.ConstructionPreview.ReasonCodes));
+                Click(ui.Q<Button>("confirmPlacement"));
+                yield return null;
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+                Assert.That(controller.Draft.DisconnectedRoomIds, Has.Length.EqualTo(1));
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+                CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
+
+                var alternate = starter.Layout.Edges.First(e => e.EdgeId != middle.EdgeId &&
+                    root.SaveService.EligibleRouteInsertions(root.Save, controller.Draft, starter.FloorInstanceId).Contains(e.EdgeId));
+                yield return MapTap(NodeCenter(alternate.SourceNodeId));
+                yield return MapTap(new Vector2(6, 5));
+                yield return MapTap(NodeCenter(alternate.DestinationNodeId));
+                Assert.That(ui.Q<Button>("chooseRouteRoomsAgain"), Is.Not.Null,
+                    "Selecting an alternative eligible pair on the map opens its replacement preview");
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+                Click(ui.Q<Button>("cancelRoute"));
+                Assert.That(controller.Draft.DisconnectedRoomIds, Has.Length.EqualTo(1));
+                CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
+                yield return MapTap(new Vector2(6, 5)); // Reopen from the disconnected room.
+                yield return MapTap(new Vector2(2, 4));
+                yield return MapTap(new Vector2(6, 5));
+                yield return MapTap(new Vector2(2, 8));
+                string placedId = controller.Draft.DisconnectedRoomIds.Single();
+                var documented = new StructuralRouteInsertionRequest {
+                    FloorInstanceId = starter.FloorInstanceId, ReplacedEdgeId = middle.EdgeId, RoomInstanceId = placedId,
+                    Incoming = new AuthoredRouteGeometry { SourcePointId = "east.2", DestinationPointId = "west" },
+                    Outgoing = new AuthoredRouteGeometry { SourcePointId = "north", DestinationPointId = "east",
+                        Passage = new[] { new TileCoordinate(5, 7), new TileCoordinate(4, 7) } }
+                };
+                var documentedPreview = root.SaveService.PreviewRouteInsertion(root.Save, controller.Draft, documented, out var documentedQuote);
+                Assert.That(documentedPreview.IsValid, Is.True, $"Documented native insertion rejected: {documentedPreview.Reason}");
+                Assert.That(documentedQuote.Cost, Is.EqualTo(expectedCost));
+                Assert.That(documentedQuote.IsAffordable, Is.True, documentedQuote.Reason);
+                Assert.That(root.SaveService.SuggestRouteInsertion(root.Save, controller.Draft, starter.FloorInstanceId,
+                    middle.EdgeId, placedId), Is.Not.Null, "The documented geometry must be discoverable by the production suggestion authority");
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1), "Automatic suggestion remains transient");
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q("routeAuthoring").Query<Label>().ToList()
+                    .Select(label => label.text).Aggregate(string.Empty, (left, right) => left + "\n" + right));
+
+                    foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(720, 1280) })
+                foreach (var textSize in new[] { DungeonTextSize.Default, DungeonTextSize.Small })
+                {
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(size.x, size.y);
+                    controller.SetTextSize(textSize);
+                    yield return WaitForViewportGeometry();
+                    if (!controller.DetailsCollapsed) yield return ClickVisible(ui.Q<Button>("collapseDetails"));
+                    yield return WaitForViewportGeometry();
+                    Assert.That(controller.DetailsCollapsed, Is.True);
+                    var map = controller.Viewport.ScreenRect;
+                    var accept = ui.Q<Button>("acceptRoute");
+                    string capture = $"route-dock-{size.x}x{size.y}-{textSize}";
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-collapsed.png");
+                    yield return null;
+                    AssertRouteLayout(accept, ui.Q<Button>("chooseRouteRoomsAgain"), ui.Q<Button>("cancelRoute"), ui.Q<Button>("moveRouteRoom"));
+                    Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(root.Content.GetString("ui.dungeon.route.proposal_ready", null)));
+                    Assert.That(ui.Q<Label>("status").text, Is.Empty);
+                    Assert.That(ui.Q<Label>("routeMetrics").text, Does.Contain("110"));
+                    yield return ClickVisible(ui.Q<Button>("collapseDetails"));
+                    yield return WaitForViewportGeometry();
+                    Assert.That(controller.DetailsCollapsed, Is.False);
+                    Assert.That(controller.Viewport.ScreenRect, Is.EqualTo(map));
+                    Assert.That(ui.Q<Button>("acceptRoute"), Is.SameAs(accept));
+                    AssertRouteLayout(accept, ui.Q<Button>("chooseRouteRoomsAgain"), ui.Q<Button>("cancelRoute"), ui.Q<Button>("moveRouteRoom"));
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-expanded.png");
+                    yield return null;
+                    yield return MapTap(new Vector2(5f, 7.5f));
+                    yield return MapTap(new Vector2(6.5f, 6.5f));
+                    Assert.That(accept.enabledSelf, Is.False);
+                    Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(
+                        root.Content.GetString("ui.dungeon.route.no_connection", null)));
+                    Assert.That(controller.Viewport.ScreenRect, Is.EqualTo(map));
+                    AssertRouteLayout(accept, ui.Q<Button>("cancelRouteAdjustment"));
+                    DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(capture + "-invalid.png");
+                    yield return null;
+                    yield return ClickVisible(ui.Q<Button>("cancelRouteAdjustment"));
+                    Assert.That(accept.enabledSelf, Is.True);
+                    Assert.That(controller.Viewport.ScreenRect, Is.EqualTo(map));
+                }
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
+                controller.SetTextSize(DungeonTextSize.Default);
+                yield return WaitForViewportGeometry();
+
+                var firstNode = starter.Layout.Nodes.Single(n => n.RoomInstanceId == first.RoomInstanceId);
+                var openings = AuthoredRouteGeometry.Openings(starter, firstNode.NodeId, root.ProductionSpatialContent.Catalog);
+                yield return MapTap(Door(openings.Single(p => p.Id == "east.2")));
+                Assert.That(ui.Q<Label>("routeInstruction").text, Does.Contain("highlighted doorway"));
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+                yield return MapTap(Door(openings.Single(p => p.Id == "east")));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False);
+                yield return ClickVisible(ui.Q<Button>("cancelRouteAdjustment"));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+
+                yield return MapTap(new Vector2(5f, 7.5f), new Vector2(1.5f, 8.5f));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False, "The detour exceeds the floor capacity");
+                Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(root.Content.GetString(StructuralEditService.CapacityReason, null)));
+                yield return ClickVisible(ui.Q<Button>("cancelRouteAdjustment"));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+                if (!controller.DetailsCollapsed) yield return ClickVisible(ui.Q<Button>("collapseDetails"));
+                yield return ClickVisible(ui.Q<Button>("acceptRoute"));
+                yield return null;
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(2));
+            }
+            finally { InputSystem.RemoveDevice(pointer); }
+
+            IEnumerator ClickVisible(Button button)
+            {
+                yield return WaitForViewportGeometry();
+                if (ui.Q("routeAuthoring").Contains(button)) AssertRouteLayout(button);
+                else
+                {
+                    AssertReachable(button);
+                    var picked = ui.panel.Pick(button.worldBound.center);
+                    Assert.That(picked == button || button.Contains(picked), Is.True, button.name);
+                }
+                float scale = controller.GetComponent<UIDocument>().panelSettings.scale;
+                var center = button.worldBound.center * scale;
+                var point = new Vector2(center.x, Screen.height - center.y);
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = point }
+                    .WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = point });
+                yield return null;
+                yield return null;
+            }
+
+            void AssertRouteLayout(params Button[] buttons)
+            {
+                var dock = ui.Q("bottomChrome").worldBound;
+                float scale = controller.GetComponent<UIDocument>().panelSettings.scale;
+                Assert.That(controller.Viewport.ScreenRect.height, Is.GreaterThan(Screen.height * .24f));
+                for (int i = 0; i < buttons.Length; i++)
+                {
+                    var button = buttons[i];
+                    Assert.That(button.resolvedStyle.visibility, Is.EqualTo(Visibility.Visible), button.name);
+                    var bounds = button.worldBound;
+                    Assert.That(bounds.width * scale, Is.GreaterThanOrEqualTo(48), button.name);
+                    Assert.That(bounds.height * scale, Is.GreaterThanOrEqualTo(48), button.name);
+                    Assert.That(bounds.xMin, Is.GreaterThanOrEqualTo(dock.xMin - 1), button.name);
+                    Assert.That(bounds.xMax, Is.LessThanOrEqualTo(dock.xMax + 1), button.name);
+                    Assert.That(bounds.yMax, Is.LessThanOrEqualTo(Math.Min(dock.yMax, Screen.height / scale) + 1), button.name);
+                    var text = button.MeasureTextSize(button.text, 0, VisualElement.MeasureMode.Undefined,
+                        0, VisualElement.MeasureMode.Undefined);
+                    Assert.That(button.contentRect.width, Is.GreaterThanOrEqualTo(text.x - 1), button.name);
+                    var picked = ui.panel.Pick(bounds.center);
+                    Assert.That(picked == button || button.Contains(picked), Is.True, button.name);
+                    for (int j = 0; j < i; j++) Assert.That(bounds.Overlaps(buttons[j].worldBound), Is.False, button.name);
+                }
+            }
+
+            IEnumerator MapTap(Vector2 world, Vector2? destination = null)
+            {
+                yield return WaitForViewportGeometry();
+                Vector2 begin = camera.WorldToScreenPoint(world);
+                Vector2 end = camera.WorldToScreenPoint(destination ?? world);
+                Assert.That(controller.Viewport.ScreenRect.Contains(begin), Is.True, world.ToString());
+                Assert.That(controller.IsChrome(begin, pointer.deviceId), Is.False, world.ToString());
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = begin }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                yield return null;
+                yield return null;
+                if (destination.HasValue)
+                {
+                    Assert.That(controller.Viewport.ScreenRect.Contains(end), Is.True, destination.ToString());
+                    Assert.That(controller.IsChrome(end, pointer.deviceId), Is.False, destination.ToString());
+                    InputSystem.QueueStateEvent(pointer, new MouseState { position = end }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                    yield return null;
+                    yield return null;
+                }
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = end });
+                yield return null;
+                yield return null;
+            }
+
+            Vector2 NodeCenter(string nodeId)
+            {
+                var node = starter.Layout.Nodes.Single(n => n.NodeId == nodeId);
+                string id = node.RoomInstanceId;
+                if (node.Kind != FloorRouteNodeKind.Room)
+                {
+                    var kind = node.Kind == FloorRouteNodeKind.Entrance
+                        ? FixedSpatialStructureKind.Entrance : FixedSpatialStructureKind.CompletionTerminal;
+                    id = starter.FixedStructures.Single(f => f.Kind == kind).FixedStructureInstanceId;
+                }
+                Assert.That(controller.World.TryRouteLocationBounds(id, out var bounds), Is.True, $"{node.Kind} {nodeId} {id}");
+                return bounds.center;
+            }
+
+            Vector2 Door(RouteOpening opening)
+            {
+                float angle = -(int)opening.Facing * Mathf.PI / 2f;
+                return new Vector2(opening.World.X + .5f, opening.World.Y + .5f) +
+                    new Vector2(-Mathf.Sin(angle), Mathf.Cos(angle)) * .26f;
+            }
+
+            string added = controller.Draft.RouteAuthoringRoomIds.Single();
+            var recoveredStore = root.SaveService.CreateDungeonDraftStore();
+            var recovered = TransactionalDungeonDraft.Recover(recoveredStore.Read(),
+                root.Save.validatedCanonicalSpatialState, root.SaveService.DungeonDraftContext, recoveredStore, out var reason);
+            Assert.That(recovered, Is.Not.Null, reason);
+            var proposal = recovered.AcceptedRouteInsertion(added);
+            Assert.That(proposal.Incoming.SourcePointId, Is.EqualTo("east.2"));
+            CollectionAssert.AreEqual(new[] { new TileCoordinate(5, 7), new TileCoordinate(4, 7) }, proposal.Outgoing.Passage);
+            CollectionAssert.AreEqual(before, root.SaveService.CanonicalSession.GetCurrentBytes());
+            Assert.That(root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft).Cost, Is.EqualTo(expectedCost));
+
+            pointer = InputSystem.AddDevice<Mouse>();
+            try
+            {
+                yield return ClickVisible(ui.Q<Button>("save"));
+                yield return ClickVisible(ui.Q<Button>("confirm"));
+            }
+            finally { InputSystem.RemoveDevice(pointer); }
+            Assert.That(controller.IsEditing, Is.False, ui.Q<Label>("status").text);
+            Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(balance - expectedCost));
+            var committed = root.Save.validatedCanonicalSpatialState.Floors.Single();
+            Assert.That(RequiredFloorTraversal.TryResolve(committed.Layout, out var route), Is.True);
+            CollectionAssert.AreEqual(new[] { first.RoomInstanceId, added, second.RoomInstanceId },
+                route.Where(n => n.Kind == FloorRouteNodeKind.Room).Select(n => n.RoomInstanceId));
+            Assert.That(committed.Layout.Edges.Any(e => e.EdgeId == middle.EdgeId), Is.False);
+            var catalog = root.ProductionSpatialContent.Catalog;
+            var capacity = FloorLayoutValidator.Validate(committed.Layout, catalog.Floors.Single(f => f.FloorIndex == 0),
+                catalog.Rooms, catalog.Corridors, new SpatialValidationWorkloadLimits(root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles),
+                committed.FixedStructures, catalog.FixedStructures);
+            Assert.That(capacity.IsValid, Is.True);
+            Assert.That(capacity.Capacity.UsedFloorSpaceCapacity, Is.EqualTo(60));
+            CollectionAssert.AreEqual(oldCheckpoint, root.Save.livingDungeon.Parties.Single().Checkpoint);
+
+            string fingerprint = root.SaveService.DungeonDraftContext.Fingerprint(root.Save.validatedCanonicalSpatialState);
+            UnityEngine.Object.Destroy(controller.gameObject);
+            UnityEngine.Object.Destroy(root.gameObject);
+            yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
+            for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
+            root = GameRoot.Instance;
+            Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename));
+            Assert.That(root.SaveService.DungeonDraftContext.Fingerprint(root.Save.validatedCanonicalSpatialState), Is.EqualTo(fingerprint));
+            CollectionAssert.AreEqual(oldCheckpoint, root.Save.livingDungeon.Parties.Single().Checkpoint);
+            controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+
+            var profile = root.SaveService.ForegroundConfiguration.CreateProfile(
+                root.SaveSpatialMigrationLimits.Canonical.ForSchema(CanonicalSaveSchemaVersions.RoomContentPositionIntroduction).Serialized);
+            string nextRunId = null;
+            string outgoingId = committed.Layout.Edges.Single(edge => edge.AuthoredGeometry?.Passage.Length > 0).EdgeId;
+            for (int interval = 0; interval < 360; interval++)
+            {
+                sceneClock.Advance(1);
+                PumpSceneToClosed(establishForeground: true);
+                var nextParty = root.Save.livingDungeon.Parties.SingleOrDefault(party => party.Sequence > oldParty.Sequence);
+                if (nextParty != null && nextRunId == null)
+                {
+                    var execution = LivingDungeonContracts.Restore(nextParty, profile);
+                    try
+                    {
+                        var captured = execution.Snapshot.Floors.Single();
+                        CollectionAssert.AreEqual(new[] { first.RoomInstanceId, added, second.RoomInstanceId },
+                            captured.MaterializePlan().RequiredRooms.Select(entry => entry.Room.RoomInstanceId));
+                        var passage = captured.InspectSpatialInputs().Layout.Edges.Single(edge =>
+                            edge.AuthoredGeometry?.Passage.Length > 0).AuthoredGeometry.Passage;
+                        CollectionAssert.AreEqual(proposal.Outgoing.Passage, passage);
+                        nextRunId = execution.Inspect().RunId;
+                    }
+                    finally { execution.Abandon(); }
+                }
+                var outcome = root.Save.runHistory.LatestOutcome;
+                if (nextRunId != null && outcome?.RunId == nextRunId)
+                {
+                    var steps = outcome.PresentationSteps;
+                    Assert.That(steps, Is.Not.Null.And.Not.Empty);
+                    CollectionAssert.AreEqual(new[] { first.RoomInstanceId, added, second.RoomInstanceId },
+                        steps.Where(step => step.Kind == RunStepKind.RoomEntry).Select(step => step.RoomId));
+                    var traversed = steps.Where(step => step.Kind == RunStepKind.Movement &&
+                        step.PositionSpace == RunPositionSpace.Floor && step.AssignmentId == outgoingId).ToArray();
+                    CollectionAssert.AreEqual(proposal.Outgoing.Passage.Append(new TileCoordinate(3, 7)),
+                        traversed.Select(step => step.Position));
+                    Assert.That(traversed.All(step => step.Distance == 1 && step.Encounter == null &&
+                        step.CombatEvents?.Count is null or 0 && step.CarriedLootValueAfter == 0), Is.True);
+                    Assert.That(steps.Any(step => step.Kind == RunStepKind.TrapTrigger), Is.False);
+                    var interactions = steps.Where(step => step.Kind == RunStepKind.MonsterEngagement || step.Kind == RunStepKind.LootInteraction).ToArray();
+                    Assert.That(interactions.Any(step => step.Kind == RunStepKind.MonsterEngagement), Is.True);
+                    Assert.That(interactions.All(step => step.RoomId == second.RoomInstanceId &&
+                        step.PositionSpace == RunPositionSpace.RoomLocal), Is.True);
+                    TestContext.WriteLine($"Committed {expectedCost} mana and {capacity.Capacity.UsedFloorSpaceCapacity} tiles. " +
+                        $"Captured old checkpoint survived reopen. Subsequent run {nextRunId} visited {first.RoomInstanceId}, {added}, " +
+                        $"{second.RoomInstanceId} and traversed {outgoingId} through " +
+                        string.Join(" → ", traversed.Select(step => $"({step.Position.X},{step.Position.Y})")) + ".");
+                    yield break;
+                }
+                yield return null;
+            }
+            Assert.Fail("The production scheduler did not settle the subsequent party within the test horizon");
+        }
+
         [UnityTest]
         public IEnumerator TransactionalRoomConstructionProductionPreviewConfirmSaveRecovery()
         {
@@ -1578,6 +2052,286 @@ namespace DungeonBuilder.M0.Tests
                     AssertReachable(ui.Q<Button>("cancelPlacement"));
                     Assert.That(controller.Discard(),Is.True); yield return null;
                 }
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles()
+        {
+            var root = GameRoot.Instance;
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            var floor = root.Save.validatedCanonicalSpatialState.Floors.Single(f => f.FloorIndex == 1);
+            var camera = GameObject.Find("ProductionDungeonCamera").GetComponent<Camera>();
+            byte[] canonical = root.SaveService.CanonicalSession.GetCurrentBytes();
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
+            controller.SelectFloor(floor.FloorInstanceId);
+            Click(ui.Q<Button>("edit"));
+            Click(ui.Q<Button>("roomsCategory"));
+            Click(ui.Query<Button>(className: "room-card").ToList().Single(b => (string)b.userData == "spatial.room.basic"));
+            var pointer = InputSystem.AddDevice<Mouse>();
+            try
+            {
+                yield return Tap(new Vector2(2.5f, 10.5f));
+                Assert.That(controller.ConstructionPreview.IsValid, Is.True);
+                Click(ui.Q<Button>("confirmPlacement"));
+                yield return Tap(new Vector2(4, 7));
+                yield return Tap(new Vector2(4, 12));
+                yield return Tap(new Vector2(8, 7));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q<Label>("routeState").text);
+                var initial = Preview();
+                string original = JsonUtility.ToJson(initial);
+                var a = floor.Layout.Nodes.Single(n => n.RoomInstanceId ==
+                    floor.Layout.Rooms.Single(r => r.Anchor.Equals(new TileCoordinate(2,5))).RoomInstanceId).NodeId;
+                var placed = controller.Draft.ReadModel.Floors.Single(f => f.FloorInstanceId == floor.FloorInstanceId)
+                    .Layout.Nodes.Single(n => n.RoomInstanceId == initial.RoomInstanceId).NodeId;
+
+                yield return Tap(Door(a, initial.Incoming.SourcePointId));
+                Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(original));
+                string otherNorth = initial.Incoming.SourcePointId == "north" ? "north.2" : "north";
+                yield return Tap(Door(a, otherNorth));
+                Assert.That(Preview().Incoming.SourcePointId, Is.EqualTo(otherNorth), ui.Q<Label>("routeState").text);
+                Assert.That(Preview().Incoming.DestinationPointId, Is.EqualTo(initial.Incoming.DestinationPointId));
+                Assert.That(JsonUtility.ToJson(Preview().Outgoing), Is.EqualTo(JsonUtility.ToJson(initial.Outgoing)));
+                Capture("doorway");
+                yield return ButtonTap("undoRouteAdjustment");
+                Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(original));
+
+                yield return Tap(Door(placed, initial.Incoming.DestinationPointId));
+                yield return Tap(Door(placed, "west"));
+                Assert.That(Preview().Incoming.DestinationPointId, Is.EqualTo("west"), ui.Q<Label>("routeState").text);
+                Assert.That(Preview().Incoming.SourcePointId, Is.EqualTo(initial.Incoming.SourcePointId));
+                Assert.That(JsonUtility.ToJson(Preview().Outgoing), Is.EqualTo(JsonUtility.ToJson(initial.Outgoing)));
+                yield return ButtonTap("undoRouteAdjustment");
+                Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(original));
+
+                // The exterior doors stay fixed as the straight run moves across the open strip.
+                Assert.That(initial.Outgoing.Passage, Is.EqualTo(new[] { new TileCoordinate(6,11), new TileCoordinate(6,10),
+                    new TileCoordinate(6,9), new TileCoordinate(7,9) }));
+                yield return Tap(new Vector2(6.5f, 11f));
+                yield return Tap(new Vector2(7.5f, 10.5f));
+                string movedSection = JsonUtility.ToJson(Preview());
+                AssertMoved(new TileCoordinate(7,10));
+                Capture("section");
+                yield return ButtonTap("undoRouteAdjustment");
+                yield return Tap(new Vector2(6.5f, 11f), new Vector2(7.5f, 10.5f));
+                Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(movedSection));
+                yield return ButtonTap("undoRouteAdjustment");
+
+                yield return Tap(new Vector2(6.5f, 9.5f));
+                yield return Tap(new Vector2(7.5f, 11.5f));
+                AssertMoved(new TileCoordinate(7,11));
+                Capture("bend");
+                yield return ButtonTap("undoRouteAdjustment");
+
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(720, 1280);
+                var touch = InputSystem.AddDevice<Touchscreen>();
+                try
+                {
+                    yield return TouchTap(touch, new Vector2(6.5f, 10.5f));
+                    yield return TouchTap(touch, new Vector2(7.5f, 10.5f));
+                }
+                finally { InputSystem.RemoveDevice(touch); }
+                AssertMoved(new TileCoordinate(7,10));
+                Capture("tile");
+                yield return ButtonTap("undoRouteAdjustment");
+                DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
+
+                yield return Tap(new Vector2(6.5f, 10.5f));
+                yield return Tap(new Vector2(12.5f, 5.5f));
+                Assert.That(ui.Q<Label>("routeState").text, Is.EqualTo(
+                    root.Content.GetString("ui.dungeon.route.passage_length", null)));
+                Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(original));
+                yield return ButtonTap("cancelRouteAdjustment");
+
+                yield return Tap(new Vector2(6.5f, 10.5f));
+                yield return Tap(new Vector2(4.5f, 11.5f));
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.False);
+                Assert.That(ui.Q<Label>("routeState").text, Does.Contain("overlaps"));
+                Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(original));
+                Capture("blocked");
+                yield return ButtonTap("cancelRouteAdjustment");
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+                yield return Tap(new Vector2(8.5f, 11.5f));
+                var empty = (Vector2)camera.WorldToScreenPoint(new Vector2(8.5f, 11.5f));
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = empty, scroll = new Vector2(0, 120) });
+                yield return null;
+                yield return null;
+                var centerBeforePan = controller.Viewport.Center;
+                yield return Tap(new Vector2(8.5f, 11.5f), new Vector2(10.5f, 11.5f));
+                Assert.That(controller.Viewport.Center, Is.Not.EqualTo(centerBeforePan));
+                Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(original));
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1));
+                CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
+                yield return ButtonTap("acceptRoute");
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.True);
+                var store = root.SaveService.CreateDungeonDraftStore();
+                byte[] acceptedBytes = store.Read();
+                Assert.That(acceptedBytes, Is.Not.Null.And.Not.Empty);
+                AssertAccepted(original);
+                yield return ButtonTap("reset");
+                yield return Tap(new Vector2(4, 12));
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+                yield return Revise();
+                Assert.That(ui.Q<Label>("routeDetail").text,
+                    Is.EqualTo(root.Content.GetString("ui.dungeon.route.save_after_edit", null)));
+                yield return AssertPublicationBlocked();
+                Capture("save-blocked");
+                yield return ButtonTap("cancelRoute");
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.True);
+                AssertAccepted(original);
+                CollectionAssert.AreEqual(acceptedBytes, store.Read());
+                CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
+
+                yield return Tap(new Vector2(4, 12));
+                yield return Revise();
+                var modified = Preview();
+                yield return Tap(new Vector2(7.5f, 10.5f));
+                yield return Tap(new Vector2(4.5f, 11.5f));
+                Assert.That(ui.Q<Label>("routeState").text, Does.Contain("overlaps"));
+                Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(JsonUtility.ToJson(modified)));
+                yield return AssertPublicationBlocked();
+
+                yield return ButtonTap("cancelRouteAdjustment");
+                Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.False);
+                yield return ButtonTap("acceptRoute");
+                AssertAccepted(JsonUtility.ToJson(modified));
+                Assert.That(ui.Q<Button>("save").enabledSelf, Is.True);
+                CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
+                yield return ButtonTap("save");
+                Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
+                yield return ButtonTap("confirm");
+                Assert.That(controller.IsEditing, Is.False);
+                AssertCommitted(root.Save.validatedCanonicalSpatialState);
+                CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(),
+                    File.ReadAllBytes(root.SaveService.SavePath));
+
+                UnityEngine.Object.Destroy(controller.gameObject);
+                UnityEngine.Object.Destroy(root.gameObject);
+                yield return null;
+                yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Bootstrap.unity");
+                for (int i = 0; i < 120 && GameRoot.Instance?.Save == null; i++) yield return null;
+                root = GameRoot.Instance;
+                controller = UnityEngine.Object.FindFirstObjectByType<ProductionDungeonController>();
+                Assert.That(Path.GetFileName(root.SaveService.SavePath), Is.EqualTo(filename));
+
+                AssertCommitted(root.Save.validatedCanonicalSpatialState);
+
+                IEnumerator Revise()
+                {
+                    yield return Tap(Door(a, initial.Incoming.SourcePointId));
+                    yield return Tap(Door(a, otherNorth));
+                    yield return Tap(new Vector2(6.5f, 11f));
+                    yield return Tap(new Vector2(7.5f, 10.5f));
+                    Assert.That(Preview().Incoming.SourcePointId, Is.EqualTo(otherNorth));
+                    Assert.That(Preview().Outgoing.Passage, Does.Contain(new TileCoordinate(7, 10)));
+                    Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True);
+                }
+
+                IEnumerator AssertPublicationBlocked()
+                {
+                    var save = ui.Q<Button>("save");
+                    Assert.That(save.enabledSelf, Is.False);
+                    float scale = controller.GetComponent<UIDocument>().panelSettings.scale;
+                    Vector2 pixel = save.worldBound.center * scale;
+                    var point = new Vector2(pixel.x, Screen.height - pixel.y);
+                    yield return Pointer(point, point, false);
+                    Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                    typeof(ProductionDungeonController).GetMethod("ReviewSave", System.Reflection.BindingFlags.Instance |
+                        System.Reflection.BindingFlags.NonPublic).Invoke(controller, null);
+                    Assert.That(ui.Q("modal").resolvedStyle.display, Is.EqualTo(DisplayStyle.None));
+                    Assert.That(controller.Commit(), Is.False);
+                    AssertAccepted(original);
+                    CollectionAssert.AreEqual(acceptedBytes, store.Read());
+                    CollectionAssert.AreEqual(canonical, root.SaveService.CanonicalSession.GetCurrentBytes());
+                }
+
+                void AssertAccepted(string expected) => Assert.That(
+                    JsonUtility.ToJson(controller.Draft.AcceptedRouteInsertion(initial.RoomInstanceId)), Is.EqualTo(expected));
+
+                void AssertCommitted(DetachedCanonicalSpatialSaveState state)
+                {
+                    var committedFloor = state.Floors.Single(f => f.FloorInstanceId == floor.FloorInstanceId);
+                    var incoming = committedFloor.Layout.Edges.Single(edge => edge.DestinationNodeId == placed);
+                    var outgoing = committedFloor.Layout.Edges.Single(edge => edge.SourceNodeId == placed);
+                    Assert.That(JsonUtility.ToJson(incoming.AuthoredGeometry), Is.EqualTo(JsonUtility.ToJson(modified.Incoming)));
+                    Assert.That(JsonUtility.ToJson(outgoing.AuthoredGeometry), Is.EqualTo(JsonUtility.ToJson(modified.Outgoing)));
+                }
+
+                void AssertMoved(TileCoordinate cell)
+                {
+                    var after = Preview();
+                    Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q<Label>("routeState").text);
+                    Assert.That(after.Outgoing.Passage, Does.Contain(cell));
+                    Assert.That(after.Outgoing.Passage, Is.Not.EqualTo(initial.Outgoing.Passage));
+                    Assert.That(after.Outgoing.SourcePointId, Is.EqualTo(initial.Outgoing.SourcePointId));
+                    Assert.That(after.Outgoing.DestinationPointId, Is.EqualTo(initial.Outgoing.DestinationPointId));
+                    Assert.That(JsonUtility.ToJson(after.Incoming), Is.EqualTo(JsonUtility.ToJson(initial.Incoming)));
+                }
+            }
+            finally { InputSystem.RemoveDevice(pointer); }
+
+            // Read the transient model for exact equality assertions. Every edit uses device input.
+            StructuralRouteInsertionRequest Preview() => (StructuralRouteInsertionRequest)typeof(ProductionDungeonController)
+                .GetField("routeRequest", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .GetValue(controller);
+
+            Vector2 Door(string node, string id)
+            {
+                var draftFloor = controller.Draft.ReadModel.Floors.Single(f => f.FloorInstanceId == floor.FloorInstanceId);
+                var opening = AuthoredRouteGeometry.Openings(draftFloor, node, root.ProductionSpatialContent.Catalog).Single(p => p.Id == id);
+                float angle = -(int)opening.Facing * Mathf.PI / 2f;
+                return new Vector2(opening.World.X + .5f, opening.World.Y + .5f) +
+                    new Vector2(-Mathf.Sin(angle), Mathf.Cos(angle)) * .26f;
+            }
+            void Capture(string state) => DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.Capture(
+                "route-manipulation-floor-two-" + state + ".png");
+
+            IEnumerator Tap(Vector2 start, Vector2? end = null)
+            {
+                yield return WaitForViewportGeometry();
+                var begin = (Vector2)camera.WorldToScreenPoint(start);
+                var target = (Vector2)camera.WorldToScreenPoint(end ?? start);
+                Assert.That(controller.Viewport.ScreenRect.Contains(begin) && !controller.IsChrome(begin, pointer.deviceId), Is.True, start.ToString());
+                Assert.That(controller.Viewport.ScreenRect.Contains(target) && !controller.IsChrome(target, pointer.deviceId), Is.True, target.ToString());
+                yield return Pointer(begin, target, end.HasValue);
+            }
+            IEnumerator TouchTap(Touchscreen device, Vector2 tile)
+            {
+                yield return WaitForViewportGeometry();
+                Vector2 position = camera.WorldToScreenPoint(tile);
+                Assert.That(controller.Viewport.ScreenRect.Contains(position), Is.True);
+                InputSystem.QueueStateEvent(device, new TouchState { touchId = 1, position = position, phase = InputTouchPhase.Began });
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(device, new TouchState { touchId = 1, position = position, phase = InputTouchPhase.Ended });
+                yield return null;
+                yield return null;
+            }
+            IEnumerator ButtonTap(string name)
+            {
+                yield return WaitForViewportGeometry();
+                var button = ui.Q<Button>(name);
+                Assert.That(ui.panel.Pick(button.worldBound.center), Is.SameAs(button), name);
+                float scale = controller.GetComponent<UIDocument>().panelSettings.scale;
+                var pixel = button.worldBound.center * scale;
+                var point = new Vector2(pixel.x, Screen.height - pixel.y);
+                yield return Pointer(point, point, false);
+            }
+            IEnumerator Pointer(Vector2 begin, Vector2 target, bool drag)
+            {
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = begin }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                yield return null;
+                yield return null;
+                if (drag)
+                {
+                    InputSystem.QueueStateEvent(pointer, new MouseState { position = target }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                    yield return null;
+                    yield return null;
+                }
+                InputSystem.QueueStateEvent(pointer, new MouseState { position = target });
+                yield return null;
+                yield return null;
             }
         }
 

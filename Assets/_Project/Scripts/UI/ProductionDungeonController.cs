@@ -78,12 +78,18 @@ namespace DungeonBuilder.M0
                 PresentHud(); PresentEconomy();
                 PresentResearch();
                 if (IsConstructing) PresentConstructionInformation();
+                if (IsAuthoringRoute) PresentRouteBalance();
                 if (IsPlacingContent) PresentAcquisitionInformation();
             }
             RefreshFloorManagementIfNeeded();
             if (lastResolution != new Vector2(Screen.width, Screen.height) || lastSafe != Screen.safeArea) Layout();
             if (IsResearch && researchRecoveryRequired != root.SaveService.RequiresCanonicalRecovery) PresentResearch();
-            if (!legacy && !IsAnalysis && !IsResearch) ReadInput();
+            if (!legacy && !IsAnalysis && !IsResearch)
+            {
+                // An ancestor can move the panel without changing the viewport's local layout.
+                SyncViewportGeometry();
+                ReadInput();
+            }
             UpdateReplay();
             PresentForegroundActivity();
         }
@@ -245,13 +251,17 @@ namespace DungeonBuilder.M0
             else feedback = "ui.dungeon.move_hint";
             Present();
         }
-        private void CloseSheet() { ClearContentSelection(); ClearConstructionSelection(); selected = null; selectedRoomId = null; selectedEdgeId=null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
-        public void TapWorld(TileCoordinate cell)
+        private void CloseSheet() { ClearContentSelection(); ClearConstructionSelection(); ClearRouteAuthoring(); selected = null; selectedRoomId = null; selectedEdgeId=null; moveMode = false; sheet.style.display = DisplayStyle.None; world?.ClearPreview(); world?.ClearMoveGuidance(); }
+        public void TapWorld(TileCoordinate cell) => TapWorld(CellCenter(cell));
+
+        private void TapWorld(Vector2 point)
         {
+            var cell = new TileCoordinate(Mathf.FloorToInt(point.x), Mathf.FloorToInt(point.y));
             if (!initialized || !HasCanonicalRuntime() || legacy || IsAnalysis || IsResearch || modal.style.display == DisplayStyle.Flex) return;
             if (IsEditing && reassigning != null) { SelectContentDestinationAt(cell); return; }
             if (IsPlacingContent) { PreviewRoomContent(cell); return; }
             if (constructionRequest != null && IsEditing) { PreviewConstruction(cell); return; }
+            if (IsAuthoringRoute && TryRouteMap(point)) return;
             if (IsEditing && TrySelectInvalidConstruction(cell)) return;
             if (moveMode && selectedRoomId != null && IsEditing)
             {
@@ -280,6 +290,7 @@ namespace DungeonBuilder.M0
                 world.Preview(cell, valid); Present();
                 return;
             }
+            if (IsEditing && TryRouteMap(point)) return;
             world.ClearPreview();
             ClearContentSelection();
             feedback = null;
@@ -317,7 +328,7 @@ namespace DungeonBuilder.M0
         private void ReviewSave()
         {
             if (!HasCanonicalRuntime()) return;
-            if (draft?.CanSave != true) return;
+            if (IsAuthoringRoute || draft?.CanSave != true) return;
             RefreshEconomy();
             ShowModal("ui.dungeon.commit_review", () => Commit(), "ui.dungeon.save");
             if (economicPreview != null) document.rootVisualElement.Q<Label>("modalText").text += "\n" +
@@ -331,7 +342,7 @@ namespace DungeonBuilder.M0
         }
         public bool Commit()
         {
-            if (!HasCanonicalRuntime()) return false;
+            if (!HasCanonicalRuntime() || IsAuthoringRoute) return false;
             var result = root.CommitProductionDungeonDraft(draft);
             if (!result.IsSuccess) { feedback = result.Reason; Present(); return false; }
             feedback = draft.Reason ?? "ui.dungeon.committed"; draft = null; CloseSheet(); detailsCollapsed=false;
@@ -436,8 +447,10 @@ namespace DungeonBuilder.M0
                 root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles, floorPresentationLimits.MaximumMaterializedTiles, IsEditing);
             world.PresentRoomIntents(draft?.InvalidMovements);
             world.PresentConstructionIntents(draft?.InvalidConstructions);
+            RefreshRouteProposal();
+            PresentRouteMap();
             RefreshEconomy();
-            viewport.Configure(world.Bounds, worldCamera.pixelRect.width > 0 ? worldCamera.pixelRect : new Rect(0, 0, Screen.width, Screen.height), reset);
+            viewport.Configure(RouteInteractionBounds, worldCamera.pixelRect.width > 0 ? worldCamera.pixelRect : new Rect(0, 0, Screen.width, Screen.height), reset);
             ApplyCamera();
             PresentFloorRail();
             SetTextSize(textSize);
@@ -455,16 +468,21 @@ namespace DungeonBuilder.M0
             ui.Q<Label>("mode").text = Text(IsEditing ? "ui.dungeon.edit_mode" : "ui.dungeon.normal");
             string statusKey = draft != null && draft.Durability != DraftDurability.Acknowledged ? draft.Reason :
                 feedback ?? ProductionDungeonPresenter.DraftStatus(draft);
-            status.text = Text(statusKey);
-            if (draft?.StructuralReason != null && draft.StructuralReason != statusKey)
-                status.text += "\n" + Text(draft.StructuralReason);
+            string structuralReason = draft?.StructuralReason;
+            if (structuralReason == StructuralEditService.RequiredRouteReason && draft.DisconnectedRoomIds.Length > 0)
+                structuralReason = "ui.dungeon.route.waiting";
+            if (statusKey == StructuralEditService.RequiredRouteReason && draft?.DisconnectedRoomIds.Length > 0)
+                statusKey = "ui.dungeon.route.waiting";
+            status.text = IsAuthoringRoute ? string.Empty : Text(ConstructionReason(statusKey));
+            if (!IsAuthoringRoute && structuralReason != null && structuralReason != statusKey)
+                status.text += "\n" + Text(ConstructionReason(structuralReason));
             bool showFirstRoom = NeedsFirstRoom && !IsEditing;
             ui.Q<Button>("buildFirstRoom").style.display = showFirstRoom ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("buildFirstRoom").SetEnabled(recoveryBytes == null && recoveryReason == null);
             ui.Q<Button>("edit").style.display = IsEditing || showFirstRoom ? DisplayStyle.None : DisplayStyle.Flex;
             ui.Q("editActions").style.display = IsEditing ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("edit").SetEnabled(recoveryBytes == null && recoveryReason == null);
-            ui.Q<Button>("save").SetEnabled(draft?.CanSave == true && draftContext.Fingerprint(root.Save.validatedCanonicalSpatialState) == draft.BaselineFingerprint);
+            ui.Q<Button>("save").SetEnabled(!IsAuthoringRoute && draft?.CanSave == true && draftContext.Fingerprint(root.Save.validatedCanonicalSpatialState) == draft.BaselineFingerprint);
             ui.Q<Button>("discard").SetEnabled(IsEditing);
             ui.Q<Button>("retry").style.display = IsEditing && draft.Durability == DraftDurability.Failed ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("move").SetEnabled(IsEditing && (selected != null || selectedRoomId != null) && draft.Durability != DraftDurability.Unknown);
@@ -544,6 +562,13 @@ namespace DungeonBuilder.M0
             safe.EnableInClassList("large-text",size==DungeonTextSize.Large);
             float font = presentationPolicy.Text(size);
             foreach (var text in document.rootVisualElement.Query<TextElement>().ToList()) text.style.fontSize = font;
+            if (routeState != null)
+            {
+                routeState.style.minHeight = font * 2.4f;
+                routeInstruction.style.minHeight = font * 1.2f;
+                routeMetrics.style.minHeight = font * 2.4f;
+                routeDetail.style.minHeight = font * 1.2f;
+            }
             var platform = Application.platform == RuntimePlatform.Android ? DungeonTargetPlatform.Android :
                 Application.platform == RuntimePlatform.IPhonePlayer ? DungeonTargetPlatform.IOS : DungeonTargetPlatform.Desktop;
             float target = presentationPolicy.MinimumPanelUnitsFromNativeScale(platform, pixelsPerPhysicalUnit, document.panelSettings.scale);
@@ -571,13 +596,15 @@ namespace DungeonBuilder.M0
             viewportElement.UnregisterCallback<GeometryChangedEvent>(ViewportGeometry);
             viewportElement.RegisterCallback<GeometryChangedEvent>(ViewportGeometry);
         }
-        private void ViewportGeometry(GeometryChangedEvent evt)
+        private void ViewportGeometry(GeometryChangedEvent evt) => SyncViewportGeometry();
+
+        private void SyncViewportGeometry()
         {
             Rect panelRect = viewportElement.worldBound; float scale = document.panelSettings.scale;
             var rect = new Rect(panelRect.x * scale, Screen.height - panelRect.yMax * scale,
                 panelRect.width * scale, panelRect.height * scale);
-            if (rect.width < 1 || rect.height < 1) return;
-            worldCamera.pixelRect = rect; viewport.Configure(world.Bounds, rect, autoFit);
+            if (rect.width < 1 || rect.height < 1 || rect == viewport.ScreenRect) return;
+            worldCamera.pixelRect = rect; viewport.Configure(RouteInteractionBounds, rect, autoFit);
             if (interactionFocus.HasValue) viewport.Focus(interactionFocus.Value);
             ApplyCamera();
         }
@@ -618,7 +645,11 @@ namespace DungeonBuilder.M0
             if (suppressTouch)
             { if (!pressed && !second.HasValue) suppressTouch = false; else return; }
             if (pointerDown && primaryTouchId != 0 && !pressed && second.HasValue)
-            { gesture.Cancel(); pointerDown = false; suppressTouch = true; return; }
+            {
+                gesture.Cancel(); pointerDown = false; draggingIndependentPlacement = false;
+                if (routeDrag != null && routeDragging) CancelRouteAdjustment();
+                routeDrag = null; suppressTouch = true; return;
+            }
             if (!pressed && !second.HasValue && Mouse.current != null)
             {
                 point = Mouse.current.position.ReadValue(); pressed = Mouse.current.leftButton.isPressed; id = Mouse.current.deviceId;
@@ -631,7 +662,92 @@ namespace DungeonBuilder.M0
                 }
             }
             if (pressed && !pointerDown)
-            { primaryTouchId = id; gesture.Begin(point, IsChrome(point, id) || !viewport.ScreenRect.Contains(point)); pointerDown = true; }
+            {
+                primaryTouchId = id;
+                pointerDown = true;
+                if (!second.HasValue && TryBeginIndependentPlacementDrag(point, id)) return;
+                bool chrome = IsChrome(point, id) || !viewport.ScreenRect.Contains(point);
+                if (!chrome && IsAuthoringRoute && !second.HasValue)
+                {
+                    var handle = RouteHandleAt(viewport.ScreenToWorld(point));
+                    if (handle?.IsPassage == true)
+                    {
+                        routeDrag = handle;
+                        routeDragStart = routeDragEnd = point;
+                        routeDragViewport = viewport.ScreenRect;
+                        routeDragCameraCenter = viewport.Center;
+                        routeDragCameraSize = viewport.Size;
+                        routeDragging = false;
+                        return;
+                    }
+                }
+                gesture.Begin(point, chrome);
+            }
+            if (draggingIndependentPlacement)
+            {
+                if (second.HasValue)
+                {
+                    draggingIndependentPlacement = false;
+                    gesture.Cancel();
+                    return;
+                }
+                if (pressed) { placementDragPoint = point; return; }
+                draggingIndependentPlacement = false;
+                pointerDown = false;
+                if (viewport.ScreenRect.Contains(placementDragPoint) && !IsChrome(placementDragPoint, primaryTouchId))
+                {
+                    var cell = ScreenCell(placementDragPoint);
+                    PreviewConstruction(new TileCoordinate(cell.X + dragAnchorOffset.X, cell.Y + dragAnchorOffset.Y));
+                }
+                return;
+            }
+            if (routeDrag != null)
+            {
+                if (second.HasValue || routeDragViewport != viewport.ScreenRect ||
+                    routeDragCameraCenter != viewport.Center || routeDragCameraSize != viewport.Size)
+                {
+                    if (routeDragging) CancelRouteAdjustment();
+                    routeDrag = null;
+                    gesture.Cancel();
+                    return;
+                }
+
+                if (pressed)
+                {
+                    routeDragEnd = point;
+                    float slop = presentationPolicy.TapSlopPhysicalUnits * pixelsPerPhysicalUnit;
+                    if (!routeDragging && (point - routeDragStart).sqrMagnitude > slop * slop)
+                    {
+                        routeDragging = true;
+                        SelectRouteTarget(routeDrag);
+                    }
+                    if (routeDragging && viewport.ScreenRect.Contains(point) && !IsChrome(point, primaryTouchId))
+                    {
+                        var destination = ScreenCell(point);
+                        if (!attemptedCell.Equals(destination))
+                        {
+                            AdjustRoute(routeDrag, destination);
+                            PresentAdjustment();
+                        }
+                    }
+                    return;
+                }
+
+                routeDrag = null;
+                pointerDown = false;
+                if (!viewport.ScreenRect.Contains(routeDragEnd) || IsChrome(routeDragEnd, primaryTouchId))
+                {
+                    if (routeDragging) CancelRouteAdjustment();
+                    return;
+                }
+                if (routeDragging)
+                {
+                    if (attemptedRoute == null && attemptReason == null) AdjustRoute(routeSelection, ScreenCell(routeDragEnd));
+                    CompleteRouteAdjustment();
+                }
+                else TryRouteMap(viewport.ScreenToWorld(routeDragStart));
+                return;
+            }
             if (pressed && pointerDown)
             {
                 var beforeCenter = viewport.Center; float beforeSize = viewport.Size;
@@ -644,7 +760,7 @@ namespace DungeonBuilder.M0
             {
                 pointerDown = false;
                 if (gesture.End(out var tap))
-                { var position = viewport.ScreenToWorld(tap); TapWorld(new TileCoordinate(Mathf.FloorToInt(position.x), Mathf.FloorToInt(position.y))); }
+                    TapWorld(viewport.ScreenToWorld(tap));
             }
         }
         private void ToggleLegacy() { SetLegacy(!legacy); }

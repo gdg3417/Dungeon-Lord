@@ -85,7 +85,9 @@ namespace DungeonBuilder.M0
             bool compactRoomContent = IsEditing && shortLandscape &&
                 (managingRoomContent || selected != null && draft.HasContentIntent);
             safe.EnableInClassList("compact-content-hud", IsPlacingContent || reassigning != null || compactRoomContent);
-            bool working = landscape && IsEditing && (IsConstructing || managingRoomContent || compactRoomContent);
+            bool wideRoute = IsAuthoringRoute && Screen.safeArea.width / document.panelSettings.scale >=
+                presentationPolicy.ReferenceShortSide * 1.5f;
+            bool working = landscape && IsEditing && (IsConstructing || managingRoomContent || compactRoomContent || wideRoute);
             safe.EnableInClassList("working-sheet",working);
             var workspace=ui.Q("workspace"); var map=ui.Q("mapArea");
             workspace.style.display=working ? DisplayStyle.Flex : DisplayStyle.None;
@@ -99,6 +101,7 @@ namespace DungeonBuilder.M0
             safe.EnableInClassList("details-collapsed",detailsCollapsed);
             safe.EnableInClassList("blocked-state",IsEditing && (!draft.IsStructurallyValid || draft.Durability!=DraftDurability.Acknowledged));
             ui.Q<Label>("sheetTitle").text=Text(IsEditing && contentCategory != null && ContextRoomId != null ? ContentHeadingKey :
+                IsAuthoringRoute ? "ui.dungeon.route.dock_title" :
                 IsConstructing ? "ui.dungeon.sheet.placement" : inspecting ? "ui.dungeon.sheet.inspection" :
                 IsEditing ? "ui.dungeon.sheet.edit" : "ui.dungeon.floor_summary");
             ui.Q("floorSummary").style.display=!IsEditing && !inspecting ? DisplayStyle.Flex : DisplayStyle.None;
@@ -131,7 +134,7 @@ namespace DungeonBuilder.M0
             if(selectedEdgeId!=null)
             {
                 var edge=floor.Layout.Edges.Single(e=>e.EdgeId==selectedEdgeId);
-                ui.Q<Label>("inspectionInfo").text=Format("ui.dungeon.corridor.info",edge.Footprint.OccupiedTiles.Length,
+                ui.Q<Label>("inspectionInfo").text=Format("ui.dungeon.corridor.info",edge.CorridorTiles.Length,
                     Text(edge.Classification==RouteClassification.Required ? "ui.dungeon.route.required" : "ui.dungeon.route.optional"));
                 return;
             }
