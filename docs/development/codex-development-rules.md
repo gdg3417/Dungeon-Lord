@@ -104,7 +104,8 @@ Requirements:
 - Any gameplay logic change must include or update Unit tests.
 - Any cross-system flow must include SIT coverage.
 - Any player-facing flow must include UAT evidence when applicable.
-- Build promotion must follow docs/planning/build-promotion-policy.md.
+- Use the [qualification supervisor](../../Docs/testing/qualification-supervisor.md#readiness-stages) to select checks for implementation iteration, owner UAT readiness and final merge readiness. Diagnose, correct and requalify ordinary failures within approved scope. Pause affected work at the documented owner decision, blocker, authorization or independent-review boundary.
+- Build promotion must follow the [build-promotion policy](../planning/build-promotion-policy.md).
 - Sprint closeout must follow the relevant sprint closeout checklist.
 
 Required evidence:
