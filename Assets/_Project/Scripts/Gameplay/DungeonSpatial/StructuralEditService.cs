@@ -261,8 +261,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             if (incoming.Length != 1) return Fail(result, ConnectionAmbiguousReason);
 
-            SpatialConnectionPointDefinition outgoing = (roomDefinition.ConnectionPoints ??
-                Array.Empty<SpatialConnectionPointDefinition>()).SingleOrDefault(value =>
+            SpatialConnectionPointDefinition outgoing = roomDefinition.InferredConnectionPoints.SingleOrDefault(value =>
                     value != null && value.ConnectionPointId == request.TerminalConnectionPointId);
             if (outgoing == null) return Fail(result, ConnectionPointInvalidReason);
             FixedSpatialStructureDefinition terminalDefinition = catalog.FixedStructures.SingleOrDefault(value =>
@@ -441,8 +440,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static IEnumerable<DoorPair> Pairs(RoomSpatialInstance a, RoomSpatialDefinition ad,
             RoomSpatialInstance b, RoomSpatialDefinition bd, SpatialContentCatalog catalog)
         {
-            foreach (SpatialConnectionPointDefinition ap in ad.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
-            foreach (SpatialConnectionPointDefinition bp in bd.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            var destinationPoints = bd.InferredConnectionPoints;
+            foreach (SpatialConnectionPointDefinition ap in ad.InferredConnectionPoints)
+            foreach (SpatialConnectionPointDefinition bp in destinationPoints)
             {
                 CardinalOrientation af = Rotate(ap.Facing, a.Orientation), bf = Rotate(bp.Facing, b.Orientation);
                 if (bf == Opposite(af) && Compatible(ap.SocketTypeId, bp.SocketTypeId, catalog) &&
@@ -455,8 +455,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CorridorSpatialDefinition corridor)
         {
             var valid = new List<DoorPair>(); bool lengthInvalid = false;
-            foreach (SpatialConnectionPointDefinition ap in ad.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
-            foreach (SpatialConnectionPointDefinition bp in bd.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            var destinationPoints = bd.InferredConnectionPoints;
+            foreach (SpatialConnectionPointDefinition ap in ad.InferredConnectionPoints)
+            foreach (SpatialConnectionPointDefinition bp in destinationPoints)
             {
                 CardinalOrientation af = Rotate(ap.Facing, a.Orientation), bf = Rotate(bp.Facing, b.Orientation);
                 if (bf != Opposite(af) || !Compatible(ap.SocketTypeId, bp.SocketTypeId, catalog) ||

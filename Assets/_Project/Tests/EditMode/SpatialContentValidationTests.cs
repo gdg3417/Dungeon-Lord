@@ -436,7 +436,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             room.ConnectionPoints = new[]
             {
                 Point("test.gd65a.point.same", 1, 1, CardinalOrientation.Zero, "test.gd65a.socket"),
-                Point("test.gd65a.point.same", 1, 1, CardinalOrientation.OneEighty, "test.gd65a.socket")
+                Point("test.gd65a.point.same", 1, 1, CardinalOrientation.Zero, "test.gd65a.socket")
             };
             room.MaximumConnectionCount = 2;
             var reasons = Reasons(catalog);
@@ -455,6 +455,26 @@ namespace DungeonBuilder.M0.Tests.EditMode
             room.ReservedTileOffsets = new[] { new TileCoordinate(0, 0) };
             room.ConnectionPoints[0].Facing = CardinalOrientation.OneEighty;
             Assert.That(Reasons(catalog), Does.Contain(SpatialContentValidationReason.ConnectionPointOnReservedTile));
+        }
+
+        [Test]
+        public void DistinctOutwardFacesShareACornerButCountAsOneUsableConnectionCell()
+        {
+            var catalog = Valid();
+            RoomSpatialDefinition room = catalog.Rooms[0];
+            room.GrossFootprint = new RectangularFootprintDefinition(3, 3);
+            room.ConnectionPoints = new[]
+            {
+                Point("test.point.south", 0, 0, CardinalOrientation.OneEighty, "test.gd65a.socket"),
+                Point("test.point.west", 0, 0, CardinalOrientation.TwoSeventy, "test.gd65a.socket")
+            };
+            room.MaximumConnectionCount = 1;
+            var reasons = Reasons(catalog);
+            Assert.That(reasons.Contains(SpatialContentValidationReason.ConnectionPointPositionDuplicate), Is.False);
+            Assert.That(reasons.Contains(SpatialContentValidationReason.ConnectionPointFacingInvalid), Is.False);
+            Assert.That(reasons.Contains(SpatialContentValidationReason.MaximumConnectionsExceedPoints), Is.False);
+            room.MaximumConnectionCount = 2;
+            Assert.That(Reasons(catalog), Does.Contain(SpatialContentValidationReason.MaximumConnectionsExceedPoints));
         }
 
         [Test]

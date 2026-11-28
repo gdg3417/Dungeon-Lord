@@ -106,7 +106,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 {
                     if (!OptionalBranchGeometry.TryResolveSourceTile(floor, edge, catalog, out var sourceTile))
                         return false;
-                    if (AuthoredRouteGeometry.Openings(floor, edge.SourceNodeId, catalog).Any(p =>
+                    if (AuthoredRouteGeometry.Openings(floor, edge.SourceNodeId, catalog, inferred: true).Any(p =>
                         p.OpensToward(sourceTile) && occupied.Contains((edge.SourceNodeId, p.Local)))) return false;
                 }
                 else if (!StructuralRenovationService.TryResolveSavedConnection(floor, edge, catalog, out var from, out var to) ||

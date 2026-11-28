@@ -127,7 +127,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (origin == null || (origin.Kind != FloorRouteNodeKind.Room &&
                     origin.Kind != FloorRouteNodeKind.Entrance) || !OnRequiredRoute(floor, origin.NodeId))
                 return Fail(result, InvalidOriginReason);
-            if (!OptionalBranchGeometry.TryResolvePoint(floor, origin, request.OriginConnectionPointId,
+            if (RoomSpatialDefinition.IsExplicitPerimeterOpening(request.OriginConnectionPointId) ||
+                !OptionalBranchGeometry.TryResolvePoint(floor, origin, request.OriginConnectionPointId,
                     production.Catalog, out SpatialConnectionPointDefinition point,
                     out TileCoordinate socket, out CardinalOrientation facing, out int maximumConnections))
                 return Fail(result, ConnectionPointReason);
@@ -333,8 +334,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (source.Kind == FloorRouteNodeKind.Room)
             {
                 RoomSpatialInstance instance = floor.Layout.Rooms.Single(value => value.RoomInstanceId == source.RoomInstanceId);
-                pointIds = (catalog.Rooms.Single(value => value.RoomDefinitionId == instance.RoomDefinitionId)
-                    .ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>()).Select(value => value.ConnectionPointId);
+                pointIds = catalog.Rooms.Single(value => value.RoomDefinitionId == instance.RoomDefinitionId)
+                    .InferredConnectionPoints.Select(value => value.ConnectionPointId);
             }
             else if (source.Kind == FloorRouteNodeKind.Entrance)
             {
@@ -371,9 +372,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 RoomSpatialInstance instance = floor.Layout.Rooms.Single(value =>
                     value.RoomInstanceId == source.RoomInstanceId);
-                pointIds = (catalog.Rooms.Single(value => value.RoomDefinitionId ==
-                    instance.RoomDefinitionId).ConnectionPoints ??
-                    Array.Empty<SpatialConnectionPointDefinition>()).Select(value => value.ConnectionPointId);
+                pointIds = catalog.Rooms.Single(value => value.RoomDefinitionId == instance.RoomDefinitionId)
+                    .InferredConnectionPoints.Select(value => value.ConnectionPointId);
             }
             else if (source.Kind == FloorRouteNodeKind.Entrance)
             {

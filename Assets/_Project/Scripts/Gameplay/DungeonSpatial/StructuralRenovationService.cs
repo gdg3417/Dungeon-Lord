@@ -149,7 +149,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
             TileCoordinate downstreamDelta = default;
             if (!TryEndpoint(floor, path.Nodes[targetIndex + 1], production.Catalog,
-                    out TileEndpoint downstreamEndpoint) ||
+                    out TileEndpoint downstreamEndpoint, inferred: true) ||
                 !TryUniqueEndpointShift(target, oldDefinition, replacement, downstreamEndpoint, path.Edges[targetIndex],
                     production.Catalog, out downstreamDelta))
                 return Fail(preview, StructuralEditService.ConnectionAmbiguousReason);
@@ -354,8 +354,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             SpatialContentCatalog catalog, out Connection result, out string reason)
         {
             result = null; reason = StructuralEditService.ConnectionUnavailableReason;
-            if (!TryEndpoint(floor, sourceNode, catalog, out TileEndpoint source) ||
-                !TryEndpoint(floor, destinationNode, catalog, out TileEndpoint destination)) return false;
+            if (!TryEndpoint(floor, sourceNode, catalog, out TileEndpoint source, inferred: true) ||
+                !TryEndpoint(floor, destinationNode, catalog, out TileEndpoint destination, inferred: true)) return false;
             var direct = Pairs(source, destination, catalog, null, false).ToArray();
             if (direct.Length == 1) { result = new Connection
             { Kind = FloorRouteConnectionKind.DirectDoorway, CorridorDefinitionId = string.Empty }; reason = null; return true; }
@@ -391,8 +391,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var sourceNode = floor.Layout.Nodes.SingleOrDefault(n => n.NodeId == edge.SourceNodeId);
             var destinationNode = floor.Layout.Nodes.SingleOrDefault(n => n.NodeId == edge.DestinationNodeId);
             if (sourceNode == null || destinationNode == null ||
-                !TryEndpoint(floor, sourceNode, catalog, out TileEndpoint source) ||
-                !TryEndpoint(floor, destinationNode, catalog, out TileEndpoint destination)) return false;
+                !TryEndpoint(floor, sourceNode, catalog, out TileEndpoint source, inferred: true) ||
+                !TryEndpoint(floor, destinationNode, catalog, out TileEndpoint destination, inferred: true)) return false;
             bool physical = edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor;
             if (!physical && edge.ConnectionKind != FloorRouteConnectionKind.DirectDoorway) return false;
             var corridor = physical ? catalog.Corridors.SingleOrDefault(c =>
@@ -454,7 +454,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         }
 
         internal static bool TryEndpoint(SavedSpatialFloor floor, FloorRouteNode node, SpatialContentCatalog catalog,
-            out TileEndpoint endpoint)
+            out TileEndpoint endpoint, bool inferred = false)
         {
             endpoint = null;
             if (node.Kind == FloorRouteNodeKind.Room)
@@ -463,7 +463,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     Definition(catalog, room?.RoomDefinitionId);
                 if (room == null || definition == null) return false;
                 endpoint = new TileEndpoint { Anchor = room.Anchor, Orientation = room.Orientation,
-                    Footprint = definition.GrossFootprint, Points = definition.ConnectionPoints }; return true;
+                    Footprint = definition.GrossFootprint,
+                    Points = inferred ? definition.InferredConnectionPoints : definition.ConnectionPoints }; return true;
             }
             if (node.Kind != FloorRouteNodeKind.Entrance && node.Kind != FloorRouteNodeKind.Completion &&
                 node.Kind != FloorRouteNodeKind.Exit && node.Kind != FloorRouteNodeKind.Descent) return false;
@@ -542,7 +543,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         {
             delta = default;
             var oldEndpoint = new TileEndpoint { Anchor = room.Anchor, Orientation = room.Orientation,
-                Footprint = oldDefinition.GrossFootprint, Points = oldDefinition.ConnectionPoints };
+                Footprint = oldDefinition.GrossFootprint, Points = oldDefinition.InferredConnectionPoints };
             bool physical = outgoing.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor;
             if (!physical && outgoing.ConnectionKind != FloorRouteConnectionKind.DirectDoorway) return false;
             CorridorSpatialDefinition corridor = physical ? (catalog.Corridors ?? Array.Empty<CorridorSpatialDefinition>())
@@ -556,8 +557,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (relationships.Length != 1) return false;
             Connection relationship = relationships[0];
             SpatialConnectionPointDefinition oldPoint = relationship.SourcePoint;
-            SpatialConnectionPointDefinition[] mappings = (replacement.ConnectionPoints ??
-                Array.Empty<SpatialConnectionPointDefinition>()).Where(value => value != null &&
+            SpatialConnectionPointDefinition[] mappings = replacement.InferredConnectionPoints.Where(value =>
                     value.ConnectionPointId == oldPoint.ConnectionPointId && value.Facing == oldPoint.Facing &&
                     Compatible(value.SocketTypeId, relationship.DestinationPoint.SocketTypeId, catalog) &&
                     (!physical || (corridor.CompatibleSocketTypeIds ?? Array.Empty<string>())

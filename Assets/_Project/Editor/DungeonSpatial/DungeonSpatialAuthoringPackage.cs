@@ -153,7 +153,7 @@ namespace DungeonBuilder.M0.Editor.DungeonSpatial
     {
         private const string ManifestPath = "authoring_manifest.json";
         private const string SchemaPath = "authoring_schema.json";
-        private const string SupportedProductionContentVersion = "0.2.0";
+        private const string SupportedProductionContentVersion = "0.3.0";
         private static readonly string[] ManifestFields = { "schema", "schemaVersion", "contentVersion", "catalogSchemaId", "catalogSchemaVersion", "stringTableSchemaId", "stringTableSchemaVersion", "requiredLanguage", "tables" };
         private static readonly string[] SchemaFields = { "formats", "enums", "tables", "foreignKeys", "childRelationships" };
         private static readonly HashSet<string> ColumnTypes = new HashSet<string>(new[] { "spatialId", "ownerScopedId", "localizationKey", "localizedText", "int32", "enum" }, StringComparer.Ordinal);
