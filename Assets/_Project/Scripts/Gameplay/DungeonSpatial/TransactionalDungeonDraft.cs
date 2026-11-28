@@ -198,7 +198,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DraftDurability Durability { get; private set; }
         public string Reason { get; private set; }
         public bool IsClosed { get; private set; }
-        public bool HasChanges => !IsStructurallyValid || context.Fingerprint(presented) != BaselineFingerprint;
+        public bool HasChanges => !IsStructurallyValid || context.Fingerprint(presented) != BaselineFingerprint ||
+            HasRouteRenovation && CorridorDispositions().Length != 0;
+        internal bool CanPriceReconstruction => HasRouteRenovation && invalid.Count == 0 && invalidConstruction.Count == 0;
         public bool IsStructurallyValid => invalid.Count == 0 && invalidConstruction.Count == 0 &&
             !HasDisconnectedRoom && !HasIncompleteReconstruction;
         public bool HasStructuralIntent => commands.Any(c => c.Kind == DungeonDraftCommandKind.RoomMovement ||

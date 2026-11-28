@@ -33,14 +33,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 return Failure(TransactionalDungeonDraft.InvalidReason);
             var corridor = owned.CorridorContent;
             var knowledge = owned.BranchKnowledge;
+            var returned = final.LifecycleAndOwnership.ReturnedContents;
             if (recovered.HasRouteRenovation)
             {
                 string branchReason = CorridorRenovationConsequences.BranchEntitlement(owned.State, final, production,
                     currentRuntime.completedResearch, branchingResearch);
                 if (branchReason != null) return Failure(branchReason);
-                string consequence = CorridorRenovationConsequences.Prepare(owned, final, recovered.CorridorDispositions,
-                    production, configuration, removalPolicy, limits.Canonical.Spatial, out corridor, out knowledge);
-                if (consequence != null) return Failure(consequence);
+                var projection = CorridorRenovationConsequences.Project(owned, final, recovered.CorridorDispositions(),
+                    production, configuration, removalPolicy, limits.Canonical.Spatial);
+                if (projection.Reason != null) return Failure(projection.Reason);
+                corridor = projection.Corridor;
+                knowledge = projection.Knowledge;
+                returned = projection.Returned;
             }
             var priced = StructuralEconomyService.PreviewFinalContentDraft(owned.State, final, owned.Investment,
                 recovered.FinalEconomicMovementTargets(final), currentRuntime.structureRuntime.ManaReserve, economy, acquisition,
@@ -54,6 +58,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!gate.Allowed) return Failure(gate.MessageKey);
             }
             if (!priced.IsAffordable) return Failure(priced.Reason);
+            final.LifecycleAndOwnership.ReturnedContents = returned;
             var snapshot = DetachedRecognizedSaveStateSnapshot.CaptureWithMana(currentRuntime, priced.ResultingMana, limits);
             if (!snapshot.IsSuccess) return Failure(snapshot.Reason);
             var prepared = session.PrepareLiveReplacement(snapshot, final, priced.Investment,

@@ -94,22 +94,18 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return null;
         }
 
-        internal static string Reassign(DetachedCanonicalSpatialSaveState spatial, CorridorContentAuthority corridor,
-            string assignmentId, string floorId, string branchId, TileCoordinate tile,
+        internal static string PlaceExisting(DetachedCanonicalSpatialSaveState spatial, CorridorContentAuthority corridor,
+            CorridorContentAssignment owned, string floorId, string branchId, TileCoordinate tile,
             ProductionSpatialContentSnapshot production)
         {
-            var owned = corridor.Assignments.SingleOrDefault(value => value.AssignmentId == assignmentId);
             if (owned == null || owned.FloorInstanceId != floorId)
                 return DetachedCanonicalSpatialMutation.ActiveAssignmentMissingReason;
-            var remaining = new CorridorContentAuthority
-            {
-                Assignments = corridor.Assignments.Where(value => value.AssignmentId != assignmentId).ToArray()
-            };
-            if (!TryTarget(spatial, remaining, owned.CategoryId, owned.OptionId, floorId, branchId, tile,
+            if (!TryTarget(spatial, corridor, owned.CategoryId, owned.OptionId, floorId, branchId, tile,
                 production, out _, out var edge, out string reason)) return reason;
             owned.EdgeId = edge.EdgeId;
             owned.OptionalBranchId = branchId;
             owned.Tile = tile;
+            corridor.Assignments = corridor.Assignments.Append(owned).ToArray();
             return null;
         }
 

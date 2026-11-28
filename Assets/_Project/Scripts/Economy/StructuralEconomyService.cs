@@ -16,7 +16,9 @@ namespace DungeonBuilder.M0.Economy
         public double ContentAcquisitionCost { get; internal set; }
         public int ContentAcquisitions { get; internal set; }
         public double GrossCost { get; internal set; }
+        public double RetainedInvestment { get; internal set; }
         public double ReusedInvestment { get; internal set; }
+        public double ForfeitedInvestment { get; internal set; }
         public double RefundBasis { get; internal set; }
         public double Refund { get; internal set; }
         public double CreditedRefund { get; internal set; }

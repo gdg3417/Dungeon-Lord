@@ -39,6 +39,7 @@ namespace DungeonBuilder.M0.Economy
                     changed.FloorId != room.FloorId || changed.RoomDefinitionId != room.RoomDefinitionId)
                     return quote;
                 var record = old[room.RoomInstanceId].Copy();
+                quote.RetainedInvestment += record.ConstructionMana + record.RenovationMana;
                 if (changedRoomIds.Contains(room.RoomInstanceId))
                 {
                     if (!config.TryRoom(room.RoomDefinitionId, out double roomPrice)) return quote;
@@ -67,18 +68,25 @@ namespace DungeonBuilder.M0.Economy
                 if (finalFloor == null) return quote;
                 string shell = StructuralInvestment.ShellId(currentFloor.FloorInstanceId);
                 if (old.TryGetValue(shell, out var shellRecord) && next.ContainsKey(shell))
+                {
                     next[shell] = shellRecord.Copy();
+                    quote.RetainedInvestment += shellRecord.ConstructionMana + shellRecord.RenovationMana;
+                }
 
                 if (!AllocateCorridorInvestment(currentFloor, finalFloor, old, next, explicitRefunds,
                     config, formula, modifiers, quote)) return quote;
             }
 
             quote.Refund = Math.Floor(quote.RefundBasis * config.RefundPercentage);
+            // Uncredited wallet-cap refund is reported separately from this write-off.
+            quote.ForfeitedInvestment += quote.RefundBasis - quote.Refund;
             quote.GrossCost = quote.Cost + quote.ReusedInvestment;
             var ledger = next.Values.OrderBy(record => record.StructureId, StringComparer.Ordinal).ToArray();
             if (!StructuralEconomySnapshot.Nonnegative(quote.GrossCost) ||
                 !StructuralEconomySnapshot.Nonnegative(quote.RefundBasis) ||
                 !StructuralEconomySnapshot.Nonnegative(quote.Refund) ||
+                !StructuralEconomySnapshot.Nonnegative(quote.RetainedInvestment) ||
+                !StructuralEconomySnapshot.Nonnegative(quote.ForfeitedInvestment) ||
                 !StructuralInvestment.Valid(ledger, final, int.MaxValue)) return quote;
 
             quote.Investment = ledger;
@@ -111,7 +119,10 @@ namespace DungeonBuilder.M0.Economy
                 if (byId.TryGetValue(edge.EdgeId, out var survived) && survived.ConnectionKind == edge.ConnectionKind &&
                     survived.CorridorDefinitionId == edge.CorridorDefinitionId && survived.SourceNodeId == edge.SourceNodeId &&
                     survived.DestinationNodeId == edge.DestinationNodeId)
+                {
                     next[edge.EdgeId] = record.Copy();
+                    quote.RetainedInvestment += record.ConstructionMana + record.RenovationMana;
+                }
                 else if (record.ConstructionMana != 0 || record.RenovationMana != 0) return false;
             }
 
@@ -136,6 +147,7 @@ namespace DungeonBuilder.M0.Economy
                 }
                 record.ConstructionMana -= construction;
                 record.RenovationMana -= renovation;
+                quote.RetainedInvestment += construction + renovation;
             }
 
             foreach (var corridor in replacement)
@@ -169,8 +181,12 @@ namespace DungeonBuilder.M0.Economy
 
             // A replacement can recover the logical connection ID. Retained and
             // reused value were already deducted from each retired corridor's ledger.
-            foreach (var edge in source.Where(edge => explicitlyRetired.Contains(edge.EdgeId)))
-                quote.RefundBasis += old[edge.EdgeId].ConstructionMana + old[edge.EdgeId].RenovationMana;
+            foreach (var edge in source)
+            {
+                double residual = old[edge.EdgeId].ConstructionMana + old[edge.EdgeId].RenovationMana;
+                if (explicitlyRetired.Contains(edge.EdgeId)) quote.RefundBasis += residual;
+                else quote.ForfeitedInvestment += residual;
+            }
             return true;
         }
 

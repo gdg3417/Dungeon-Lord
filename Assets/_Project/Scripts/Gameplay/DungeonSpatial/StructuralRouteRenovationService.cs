@@ -13,7 +13,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         Retire = 5,
         ConnectBranch = 6,
         ReassignCorridorContent = 7,
-        ReturnCorridorContent = 8
+        ReturnCorridorContent = 8,
+        CancelCorridorDisposition = 9
     }
 
     [Serializable]
@@ -30,6 +31,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string ExpectedConnectionId;
 
         internal AuthoredRouteGeometry Connection => Connections?.Length == 1 ? Connections[0] : null;
+        internal bool IsCorridorDisposition => Kind == StructuralRouteRenovationKind.ReassignCorridorContent ||
+            Kind == StructuralRouteRenovationKind.ReturnCorridorContent || Kind == StructuralRouteRenovationKind.CancelCorridorDisposition;
 
         internal bool HasExactPayload
         {
@@ -42,7 +45,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             ? !string.IsNullOrWhiteSpace(DestinationNodeId)
                             : string.IsNullOrEmpty(DestinationNodeId) && Connection.Passage.Length > 0) &&
                         Anchor.Equals(default) && Orientation == default;
-                if (Kind == StructuralRouteRenovationKind.ReassignCorridorContent || Kind == StructuralRouteRenovationKind.ReturnCorridorContent)
+                if (IsCorridorDisposition)
                     return Connections.Length == 0 && !string.IsNullOrWhiteSpace(TargetId) &&
                         string.IsNullOrEmpty(SourceNodeId) && string.IsNullOrEmpty(ExpectedConnectionId) &&
                         Orientation == default && (Kind == StructuralRouteRenovationKind.ReassignCorridorContent
@@ -126,6 +129,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         return Fail(CorridorContentMutationService.InvalidTargetReason);
                     break;
                 case StructuralRouteRenovationKind.ReturnCorridorContent:
+                case StructuralRouteRenovationKind.CancelCorridorDisposition:
                     break;
             }
 
@@ -323,11 +327,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         internal bool HasRouteRenovation => RebuildingFloors.Length != 0;
         internal bool IsRebuildingFloor(string id) => RebuildingFloors.Contains(id);
 
-        internal StructuralRouteRenovation[] CorridorDispositions => commands
-            .Select(command => command.RouteRenovation).Where(intent =>
-                intent?.Kind == StructuralRouteRenovationKind.ReassignCorridorContent ||
-                intent?.Kind == StructuralRouteRenovationKind.ReturnCorridorContent)
+        private IEnumerable<StructuralRouteRenovation> RenovationIntents(StructuralRouteRenovation prospective) =>
+            commands.Select(command => command.RouteRenovation).Append(prospective).Where(intent => intent != null);
+
+        internal StructuralRouteRenovation[] CorridorDispositions(StructuralRouteRenovation prospective = null) =>
+            RenovationIntents(prospective).Where(intent => intent.IsCorridorDisposition)
             .GroupBy(intent => intent.TargetId, StringComparer.Ordinal).Select(group => group.Last())
+            .Where(intent => intent.Kind != StructuralRouteRenovationKind.CancelCorridorDisposition)
             .OrderBy(intent => intent.TargetId, StringComparer.Ordinal).ToArray();
 
         internal AuthoredRouteGeometry ReconnectRenovation(StructuralRouteRenovation intent,
@@ -358,14 +364,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 });
         }
 
-        internal string[] ExplicitStructuralRetirements => commands.Where(command =>
-            command.RouteRenovation?.Kind == StructuralRouteRenovationKind.Retire)
-            .Select(command => command.RouteRenovation.TargetId).Distinct(StringComparer.Ordinal)
+        internal string[] ExplicitStructuralRetirements => EconomicRetirements();
+
+        internal string[] EconomicRetirements(StructuralRouteRenovation prospective = null) =>
+            RenovationIntents(prospective).Where(intent => intent.Kind == StructuralRouteRenovationKind.Retire)
+            .Select(intent => intent.TargetId).Distinct(StringComparer.Ordinal)
             .OrderBy(id => id, StringComparer.Ordinal).ToArray();
 
-        internal string[] IndependentlyMovedRooms(DetachedCanonicalSpatialSaveState after) => commands
-            .Where(command => command.RouteRenovation?.Kind == StructuralRouteRenovationKind.MoveStructure)
-            .Select(command => command.RouteRenovation.TargetId).Distinct(StringComparer.Ordinal)
+        private IEnumerable<string> IndependentlyMovedRooms(DetachedCanonicalSpatialSaveState after,
+            StructuralRouteRenovation prospective) => RenovationIntents(prospective)
+            .Where(intent => intent.Kind == StructuralRouteRenovationKind.MoveStructure)
+            .Select(intent => intent.TargetId).Distinct(StringComparer.Ordinal)
             .Where(id =>
             {
                 var before = baseline.Floors.SelectMany(floor => floor.Layout.Rooms)
@@ -376,16 +385,23 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     (!before.Anchor.Equals(final.Anchor) || before.Orientation != final.Orientation);
             }).OrderBy(id => id, StringComparer.Ordinal).ToArray();
 
-        internal string[] FinalEconomicMovementTargets(DetachedCanonicalSpatialSaveState after)
+        internal string[] FinalEconomicMovementTargets(DetachedCanonicalSpatialSaveState after,
+            StructuralRouteRenovation prospective = null)
         {
             var legacy = NormalizedMovementTargets(after);
-            if (!HasRouteRenovation || legacy == null) return legacy;
-            return legacy.Concat(IndependentlyMovedRooms(after)).Distinct(StringComparer.Ordinal)
+            if (legacy == null) return null;
+            return legacy.Concat(IndependentlyMovedRooms(after, prospective)).Distinct(StringComparer.Ordinal)
                 .OrderBy(id => id, StringComparer.Ordinal).ToArray();
         }
 
-        internal StructuralRouteRenovationPreview PreviewRenovation(StructuralRouteRenovation intent) =>
-            StructuralRouteRenovationService.Preview(context, baseline, presented, intent, DisconnectedRoomIds, RebuildingFloors);
+        internal StructuralRouteRenovationPreview PreviewRenovation(StructuralRouteRenovation intent)
+        {
+            if (intent?.Kind == StructuralRouteRenovationKind.CancelCorridorDisposition &&
+                !CorridorDispositions().Any(previous => previous.TargetId == intent.TargetId &&
+                    previous.FloorInstanceId == intent.FloorInstanceId))
+                return new StructuralRouteRenovationPreview { Reason = CorridorRenovationConsequences.InvalidDispositionReason };
+            return StructuralRouteRenovationService.Preview(context, baseline, presented, intent, DisconnectedRoomIds, RebuildingFloors);
+        }
 
         internal bool AcceptRenovation(StructuralRouteRenovation intent)
         {

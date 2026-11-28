@@ -34,7 +34,9 @@ namespace DungeonBuilder.M0
                     FormatTransactionAmount(preview.GrossCost), FormatTransactionAmount(preview.ReusedInvestment),
                     FormatTransactionAmount(preview.CreditedRefund), FormatTransactionAmount(preview.Refund - preview.CreditedRefund),
                     FormatTransactionAmount(preview.Cost - preview.CreditedRefund), FormatTransactionAmount(preview.ResultingMana),
-                    FormatTransactionAmount(preview.RequiredReserveAfter)) + "\n" +
+                    FormatTransactionAmount(preview.RequiredReserveAfter),
+                    FormatTransactionAmount(preview.RetainedInvestment), FormatTransactionAmount(preview.Cost),
+                    FormatTransactionAmount(preview.RefundBasis), FormatTransactionAmount(preview.ForfeitedInvestment)) + "\n" +
                     text(preview.IsAffordable ? "ui.structural.economy.affordable" : preview.Reason);
             }
             bool hasFractionalTransaction = HasMeaningfulFraction(preview.BaseCost) ||

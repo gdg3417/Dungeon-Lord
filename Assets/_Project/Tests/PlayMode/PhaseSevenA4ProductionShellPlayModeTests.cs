@@ -111,6 +111,10 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         { yield return Invoke("CombinesBothCornerDoorwaysThroughMapAndSavesConvertedConnection"); }
 
         [UnityTest]
+        public IEnumerator AuthorsStraightAndBentOptionalCorridorsThroughProductionMap()
+        { yield return Invoke("AuthorsStraightAndBentOptionalCorridorsThroughProductionMap"); }
+
+        [UnityTest]
         public IEnumerator ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles()
         { yield return Invoke("ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles"); }
 

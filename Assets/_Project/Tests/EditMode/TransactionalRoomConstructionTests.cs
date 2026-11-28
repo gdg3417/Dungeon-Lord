@@ -330,6 +330,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(draft.CommandCount, Is.EqualTo(1));
             Assert.That(draft.AcceptRouteInsertion(request, owned), Is.True, draft.Reason);
             Flush(draft);
+            VerifyPriorFormatSix();
             var firstIds = draft.ReadModel.Floors.Single().Layout.Edges.Where(e => e.AuthoredGeometry != null)
                 .Select(e => e.EdgeId).ToArray();
             // Re-accept the corrected proposal through the revision path. Even identical geometry
@@ -364,6 +365,37 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 Is.GreaterThan(0d));
             Assert.That(StructuralRouteInsertionService.RetirementEligible(committed, floor.FloorInstanceId, outgoing.EdgeId),
                 Is.False, "A paid physical passage cannot be retired by insertion");
+
+            void VerifyPriorFormatSix()
+            {
+                // The previous catalog used the retained inferred points and version 0.2.0.
+                var manifest = context.Production.Manifest;
+                manifest.contentVersion = "0.2.0";
+                var catalog = context.Production.Catalog;
+                catalog.Metadata.ContentVersion = "0.2.0";
+                foreach (var room in catalog.Rooms) room.ConnectionPoints = room.InferredConnectionPoints;
+                var prior = new DungeonDraftContext(new ProductionSpatialContentSnapshot(manifest, catalog, context.Production.Languages),
+                    context.Configuration, context.Occupancy, context.Limits, context.Compatibility, context.RemovalPolicy);
+                var oldStore = new Store();
+                var accepted = TransactionalDungeonDraft.Create(f.State, prior, oldStore);
+                Assert.That(accepted.PlaceIndependentRoom(new IndependentRoomPlacementRequest
+                {
+                    FloorInstanceId = floor.FloorInstanceId, RoomDefinitionId = "spatial.room.basic",
+                    Anchor = new TileCoordinate(4, 3)
+                }), Is.True, accepted.Reason);
+                Flush(accepted);
+                Assert.That(accepted.DisconnectedRoomIds.Single(), Is.EqualTo(request.RoomInstanceId));
+                Assert.That(accepted.AcceptRouteInsertion(request, owned), Is.True, accepted.Reason);
+                Flush(accepted);
+                byte[] earlier = oldStore.Read();
+                Assert.That(DungeonDraftFormat.Parse(earlier).FormatVersion, Is.EqualTo(6));
+                Assert.That(TransactionalDungeonDraft.Recover(earlier, f.State, prior, oldStore, out var oldReason),
+                    Is.Not.Null, oldReason);
+                Assert.That(TransactionalDungeonDraft.Recover(earlier, f.State, context, oldStore, out var reason),
+                    Is.Null);
+                Assert.That(reason, Is.EqualTo(TransactionalDungeonDraft.IncompatibleReason));
+                CollectionAssert.AreEqual(earlier, oldStore.Read());
+            }
         }
 
         [TestCase("spatial.room.basic", CardinalOrientation.Zero)]

@@ -9,6 +9,7 @@ using DungeonBuilder.M0.Gameplay.RunSimulation;
 using DungeonBuilder.M0.Gameplay.Structures;
 using NUnit.Framework;
 using UnityEngine;
+using Operation = DungeonBuilder.M0.Tests.EditMode.Gd66DetachedSpatialMigrationTransactionTests.OperationType;
 
 namespace DungeonBuilder.M0.Tests.EditMode
 {
@@ -218,6 +219,218 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(fixture.State.LifecycleAndOwnership.ReturnedContents.Select(value => value.AssignmentId),
                 Is.EquivalentTo(fixture.Runtime.validatedCanonicalSpatialState.LifecycleAndOwnership.ReturnedContents
                     .Select(value => value.AssignmentId)));
+        }
+
+        [Test]
+        public void RenovationCorridorConsequencesSurviveResetRecoveryAndReconstruction()
+        {
+            var fixture = BranchFixture(2, out var preview);
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.ConstructBranch(preview)));
+            var floor = fixture.State.Floors.Single();
+            var branch = floor.Layout.Edges.Single(edge => edge.Classification == RouteClassification.Optional);
+            var original = branch.Footprint.OccupiedTiles.OrderBy(tile => tile.X).ToArray();
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.PlaceCorridor(
+                MvpDungeonPlacementIds.TrapCategoryId, MvpDungeonPlacementIds.SpikeTrapOptionId,
+                floor.FloorInstanceId, branch.OptionalBranchId, original[0])));
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.PlaceCorridor(
+                MvpDungeonPlacementIds.LootNodeCategoryId, MvpDungeonPlacementIds.HiddenCacheOptionId,
+                floor.FloorInstanceId, branch.OptionalBranchId, original[1])));
+            var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(fixture, out var current);
+            service.ConfigureStructuralRemovalPolicy(fixture.RemovalPolicy);
+            service.ConfigureBasicBranchingResearch(fixture.BranchingResearch);
+            var loot = current.corridorContent.Assignments.Single(item => item.CategoryId == MvpDungeonPlacementIds.LootNodeCategoryId);
+            var trap = current.corridorContent.Assignments.Single(item => item.CategoryId == MvpDungeonPlacementIds.TrapCategoryId);
+            var store = service.CreateDungeonDraftStore();
+            var context = service.DungeonDraftContext;
+            var state = current.validatedCanonicalSpatialState;
+            var draft = TransactionalDungeonDraft.Create(state, context, store);
+            var before = fixture.FileSystem.ReadAllBytes(fixture.ActivePath);
+            Assert.That(RequiredFloorTraversal.TryResolve(floor.Layout, out var route), Is.True);
+
+            var reset = new StructuralRouteRenovation { Kind = StructuralRouteRenovationKind.Reset };
+            var returnLoot = new StructuralRouteRenovation
+                { Kind = StructuralRouteRenovationKind.ReturnCorridorContent, TargetId = loot.AssignmentId };
+            var cancelLoot = new StructuralRouteRenovation
+                { Kind = StructuralRouteRenovationKind.CancelCorridorDisposition, TargetId = loot.AssignmentId };
+            Apply(reset);
+            Apply(returnLoot);
+            Assert.That(service.AcceptRenovation(current, draft, returnLoot, out _), Is.False);
+            Link(0, "route", "south");
+            Link(1, "north", "route");
+            SetBranch("east", original);
+            Assert.That(service.DisplacedCorridorContents(current, draft, out var blocker).Single().AssignmentId, Is.EqualTo(loot.AssignmentId));
+            Assert.That(blocker, Is.Null, "Restoring the original tile must preserve acknowledged custody intent");
+
+            var shiftedFirst = new TileCoordinate(original[0].X, original[0].Y + 1);
+            var shiftedSecond = new TileCoordinate(original[1].X, original[1].Y + 1);
+            SetBranch("east.2", new[] { shiftedFirst, shiftedSecond, original[1] });
+            var moveTrap = new StructuralRouteRenovation { Kind = StructuralRouteRenovationKind.ReassignCorridorContent,
+                TargetId = trap.AssignmentId, DestinationNodeId = branch.OptionalBranchId, Anchor = original[1] };
+            Apply(moveTrap);
+            cancelLoot.FloorInstanceId = floor.FloorInstanceId;
+            Assert.That(service.AcceptRenovation(current, draft, cancelLoot, out _), Is.False,
+                "Cancellation cannot restore occupancy that another accepted disposition uses");
+            SetBranch("east", new[] { original[0] });
+            Assert.That(service.DisplacedCorridorContents(current, draft, out blocker).First().AssignmentId, Is.EqualTo(trap.AssignmentId));
+            Assert.That(blocker, Is.EqualTo(CorridorRenovationConsequences.UnresolvedReason));
+            Assert.That(service.CommitDungeonDraft(current, draft).Reason, Is.EqualTo(blocker));
+            SetBranch("east", original);
+
+            byte[] acknowledged = store.Read();
+            Assert.That(DungeonDraftFormat.Parse(acknowledged).FormatVersion, Is.EqualTo(7));
+            draft = TransactionalDungeonDraft.Recover(acknowledged, state, context, store, out string failure);
+            Assert.That(draft, Is.Not.Null, failure);
+            Assert.That(draft.CorridorDispositions(), Has.Length.EqualTo(2));
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            var quote = service.PreviewDungeonDraft(current, draft);
+            Assert.That(quote.ContentAcquisitions, Is.Zero);
+            fixture.FileSystem.EnableFailure(Operation.Replace, 1);
+            var failed = service.CommitDungeonDraft(current, draft);
+            fixture.FileSystem.DisableFailure();
+            Assert.That(failed.IsSuccess, Is.False);
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+            Assert.That(draft.Discard(), Is.True);
+            CollectionAssert.AreEqual(before, fixture.FileSystem.ReadAllBytes(fixture.ActivePath));
+
+            draft = TransactionalDungeonDraft.Create(state, context, store);
+            Apply(reset); Apply(returnLoot); Link(0, "route", "south"); Link(1, "north", "route");
+            SetBranch("east.2", new[] { shiftedFirst, shiftedSecond, original[1] });
+            Apply(moveTrap);
+            SetBranch("east", original);
+            var committed = service.CommitDungeonDraft(current, draft);
+            Assert.That(committed.IsSuccess, Is.True, committed.Reason);
+            fixture.Reopen();
+            var active = fixture.Runtime.corridorContent.Assignments.Single();
+            Assert.That(active.AssignmentId, Is.EqualTo(trap.AssignmentId));
+            Assert.That(active.Sequence, Is.EqualTo(trap.Sequence));
+            Assert.That(active.OptionId, Is.EqualTo(trap.OptionId));
+            Assert.That(active.Tile, Is.EqualTo(original[1]));
+            var custody = fixture.State.LifecycleAndOwnership.ReturnedContents.Single();
+            Assert.That(custody.AssignmentId, Is.EqualTo(loot.AssignmentId));
+            Assert.That(custody.Sequence, Is.EqualTo(loot.Sequence));
+            Assert.That(custody.OptionId, Is.EqualTo(loot.OptionId));
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(quote.ResultingMana));
+
+            void Apply(StructuralRouteRenovation intent)
+            {
+                intent.FloorInstanceId = floor.FloorInstanceId;
+                Assert.That(service.AcceptRenovation(current, draft, intent, out string reason), Is.True, reason);
+                TransactionalRoomConstructionTests.Flush(draft);
+            }
+
+            void Link(int index, string from, string to) => Apply(new StructuralRouteRenovation
+            {
+                Kind = StructuralRouteRenovationKind.Connect, SourceNodeId = route[index].NodeId,
+                DestinationNodeId = route[index + 1].NodeId,
+                Connections = new[] { new AuthoredRouteGeometry { SourcePointId = from, DestinationPointId = to } }
+            });
+
+            void SetBranch(string from, TileCoordinate[] tiles) => Apply(new StructuralRouteRenovation
+            {
+                Kind = StructuralRouteRenovationKind.ConnectBranch, SourceNodeId = route[1].NodeId,
+                TargetId = draft.ReadModel.Floors.Single().Layout.Edges.SingleOrDefault(edge =>
+                    edge.Classification == RouteClassification.Optional)?.EdgeId,
+                Connections = new[] { new AuthoredRouteGeometry { SourcePointId = from, DestinationPointId = "", Passage = tiles } }
+            });
+        }
+
+        [Test]
+        public void RenovationQuotesConserveCorridorInvestmentAndIncludeProspectiveCommands()
+        {
+            var fixture = BranchFixture(4, out var preview);
+            fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.ConstructBranch(preview)));
+            var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(fixture, out var current);
+            service.ConfigureStructuralRemovalPolicy(fixture.RemovalPolicy);
+            service.ConfigureBasicBranchingResearch(fixture.BranchingResearch);
+            var state = current.validatedCanonicalSpatialState;
+            var floor = state.Floors.Single();
+            var branch = floor.Layout.Edges.Single(edge => edge.Classification == RouteClassification.Optional);
+            var tiles = branch.Footprint.OccupiedTiles.OrderBy(tile => tile.X).ToArray();
+            var context = service.DungeonDraftContext;
+            var store = service.CreateDungeonDraftStore();
+            var draft = TransactionalDungeonDraft.Create(state, context, store);
+            Assert.That(fixture.Economy.TryCorridor(branch.CorridorDefinitionId, out double unit), Is.True);
+            var move = new StructuralRouteRenovation { Kind = StructuralRouteRenovationKind.MoveStructure,
+                TargetId = floor.Layout.Rooms.Single().RoomInstanceId, Anchor = new TileCoordinate(4, 5) };
+            var moving = Preview(move);
+            Assert.That(moving.Cost, Is.GreaterThan(0));
+            Assert.That(draft.CommandCount, Is.Zero);
+            Apply(move);
+            AssertThatSameSettlement(moving, service.PreviewDungeonDraft(current, draft));
+            Restart();
+
+            Apply(Connect("east", tiles[0], branch.EdgeId));
+            var shorter = service.PreviewDungeonDraft(current, draft);
+            Assert.That(shorter.Cost, Is.Zero);
+            Assert.That(shorter.Refund, Is.Zero);
+            Assert.That(shorter.ForfeitedInvestment, Is.EqualTo(3 * unit));
+            Restart();
+
+            var disjoint = new TileCoordinate(tiles[0].X, tiles[0].Y + 1);
+            Apply(Connect("east.2", disjoint, branch.EdgeId));
+            var rebuilt = service.PreviewDungeonDraft(current, draft);
+            Assert.That(rebuilt.ReusedInvestment, Is.EqualTo(unit));
+            Assert.That(rebuilt.ForfeitedInvestment, Is.EqualTo(3 * unit));
+            Assert.That(rebuilt.RefundBasis, Is.Zero);
+            Restart();
+
+            var retire = new StructuralRouteRenovation { Kind = StructuralRouteRenovationKind.Retire, TargetId = branch.EdgeId };
+            var prospectiveRetirement = Preview(retire);
+            Assert.That(prospectiveRetirement.RefundBasis, Is.EqualTo(4 * unit));
+            Assert.That(draft.CommandCount, Is.Zero);
+            Apply(retire);
+            AssertThatSameSettlement(prospectiveRetirement, service.PreviewDungeonDraft(current, draft));
+            Apply(Connect("east.2", disjoint, null));
+            var settlement = service.PreviewDungeonDraft(current, draft);
+            Assert.That(settlement.RefundBasis, Is.EqualTo(3 * unit));
+            Assert.That(settlement.ReusedInvestment, Is.EqualTo(unit));
+            Assert.That(settlement.ForfeitedInvestment, Is.EqualTo(settlement.RefundBasis - settlement.Refund));
+            Assert.That(settlement.Cost, Is.Zero);
+            var paidBefore = Current(fixture).Investment.Sum(item => item.ConstructionMana + item.RenovationMana);
+            Assert.That(settlement.RetainedInvestment + settlement.ReusedInvestment +
+                settlement.ForfeitedInvestment + settlement.Refund, Is.EqualTo(paidBefore));
+            var result = service.CommitDungeonDraft(current, draft);
+            Assert.That(result.IsSuccess, Is.True, result.Reason);
+            fixture.Reopen();
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(settlement.ResultingMana));
+            Assert.That(Current(fixture).Investment.Single(item => item.StructureId == branch.EdgeId).ConstructionMana,
+                Is.EqualTo(unit));
+            StructuralEconomyService.RefreshBalance(settlement, fixture.Economy.ManaCapacity - 1, fixture.Economy);
+            Assert.That(settlement.CreditedRefund, Is.EqualTo(1));
+            Assert.That(settlement.Refund - settlement.CreditedRefund, Is.GreaterThan(0));
+            Assert.That(settlement.ForfeitedInvestment, Is.EqualTo(settlement.RefundBasis - settlement.Refund));
+
+            StructuralRouteRenovation Connect(string from, TileCoordinate tile, string target) => new StructuralRouteRenovation
+            {
+                Kind = StructuralRouteRenovationKind.ConnectBranch, SourceNodeId = branch.SourceNodeId, TargetId = target,
+                Connections = new[] { new AuthoredRouteGeometry { SourcePointId = from, DestinationPointId = "", Passage = new[] { tile } } }
+            };
+            StructuralEconomyPreview Preview(StructuralRouteRenovation intent)
+            {
+                intent.FloorInstanceId = floor.FloorInstanceId;
+                var candidate = service.PreviewRenovation(current, draft, intent, out var quote);
+                Assert.That(candidate.IsValid, Is.True, candidate.Reason);
+                Assert.That(quote, Is.Not.Null);
+                return quote;
+            }
+            void Apply(StructuralRouteRenovation intent)
+            {
+                intent.FloorInstanceId = floor.FloorInstanceId;
+                Assert.That(service.AcceptRenovation(current, draft, intent, out string reason), Is.True, reason);
+                TransactionalRoomConstructionTests.Flush(draft);
+            }
+            void Restart()
+            {
+                Assert.That(draft.Discard(), Is.True);
+                draft = TransactionalDungeonDraft.Create(state, context, store);
+            }
+            static void AssertThatSameSettlement(StructuralEconomyPreview expected, StructuralEconomyPreview actual)
+            {
+                Assert.That(actual.Cost, Is.EqualTo(expected.Cost));
+                Assert.That(actual.RefundBasis, Is.EqualTo(expected.RefundBasis));
+                Assert.That(actual.ForfeitedInvestment, Is.EqualTo(expected.ForfeitedInvestment));
+                Assert.That(actual.ResultingMana, Is.EqualTo(expected.ResultingMana));
+            }
         }
 
         [Test]

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
@@ -6,6 +7,17 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     internal static class CorridorRenovationConsequences
     {
         internal const string UnresolvedReason = "ui.dungeon.route.corridor_content_unresolved";
+        internal const string InvalidDispositionReason = "ui.dungeon.route.corridor_disposition_invalid";
+
+        internal sealed class Projection
+        {
+            internal CorridorContentAuthority Corridor;
+            internal SharedBranchKnowledgeAuthority Knowledge;
+            internal ReturnedStructuralContent[] Returned;
+            internal readonly Dictionary<string, string> Unresolved = new(StringComparer.Ordinal);
+            internal string Failure;
+            internal string Reason => Failure ?? (Unresolved.Count == 0 ? null : UnresolvedReason);
+        }
 
         internal static CorridorContentAssignment[] Displaced(DetachedCompleteSaveValidationResult owned,
             DetachedCanonicalSpatialSaveState final, ProductionSpatialContentSnapshot production)
@@ -23,31 +35,70 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }).ToArray();
         }
 
-        internal static string Prepare(DetachedCompleteSaveValidationResult owned, DetachedCanonicalSpatialSaveState final,
+        internal static Projection Project(DetachedCompleteSaveValidationResult owned, DetachedCanonicalSpatialSaveState final,
             StructuralRouteRenovation[] dispositions, ProductionSpatialContentSnapshot production, RunSimulationConfig configuration,
-            StructuralContentRemovalPolicySnapshot removalPolicy, CanonicalSpatialSaveWorkloadLimits limits,
-            out CorridorContentAuthority corridor, out SharedBranchKnowledgeAuthority knowledge)
+            StructuralContentRemovalPolicySnapshot removalPolicy, CanonicalSpatialSaveWorkloadLimits limits)
         {
-            corridor = PhaseFiveSaveContracts.Canonicalize(owned.CorridorContent);
-            knowledge = PhaseFiveSaveContracts.Canonicalize(owned.BranchKnowledge);
-            var affected = Displaced(owned, final, production);
-            var displacedIds = affected.Select(value => value.AssignmentId).ToArray();
-            if (displacedIds.Any(id => !dispositions.Any(intent => intent.TargetId == id))) return UnresolvedReason;
-
-            foreach (var disposition in dispositions.Where(intent => displacedIds.Contains(intent.TargetId)))
+            var result = new Projection
             {
-                string result = disposition.Kind == StructuralRouteRenovationKind.ReturnCorridorContent
-                    ? CorridorContentMutationService.Unassign(final, corridor, disposition.TargetId, removalPolicy)
-                    : CorridorContentMutationService.Reassign(final, corridor, disposition.TargetId,
-                        disposition.FloorInstanceId, disposition.DestinationNodeId, disposition.Anchor, production);
-                if (result != null) return result;
+                Corridor = PhaseFiveSaveContracts.Canonicalize(owned.CorridorContent),
+                Knowledge = PhaseFiveSaveContracts.Canonicalize(owned.BranchKnowledge)
+            };
+            var assignments = result.Corridor.Assignments.ToDictionary(item => item.AssignmentId, StringComparer.Ordinal);
+            var decisions = new Dictionary<string, StructuralRouteRenovation>(StringComparer.Ordinal);
+            foreach (var intent in dispositions)
+            {
+                if (intent?.HasExactPayload != true || !intent.IsCorridorDisposition ||
+                    intent.Kind == StructuralRouteRenovationKind.CancelCorridorDisposition ||
+                    !assignments.TryGetValue(intent.TargetId, out var item) || item.FloorInstanceId != intent.FloorInstanceId ||
+                    !decisions.TryAdd(intent.TargetId, intent))
+                {
+                    result.Failure = InvalidDispositionReason;
+                    return result;
+                }
             }
-            corridor = PhaseFiveSaveContracts.Canonicalize(corridor);
-            knowledge.Records = knowledge.Records.Where(record => final.Floors.Any(floor =>
+
+            var spatial = new DetachedCanonicalSpatialSaveState
+            {
+                Floors = final.Floors,
+                LifecycleAndOwnership = new StructuralLifecycleAndOwnershipState
+                {
+                    ReturnedContents = final.LifecycleAndOwnership.ReturnedContents
+                }
+            };
+            var displaced = new HashSet<string>(Displaced(owned, final, production)
+                .Select(item => item.AssignmentId), StringComparer.Ordinal);
+            foreach (var item in assignments.Values.Where(item => displaced.Contains(item.AssignmentId) &&
+                !decisions.ContainsKey(item.AssignmentId)))
+                result.Unresolved.Add(item.AssignmentId, UnresolvedReason);
+
+            // Returns and moves release their original slots before any destination is tested.
+            // Unresolved assets remain owned by the canonical predecessor until publication.
+            foreach (var intent in decisions.Values.Where(intent => intent.Kind == StructuralRouteRenovationKind.ReturnCorridorContent))
+            {
+                string failure = CorridorContentMutationService.Unassign(spatial, result.Corridor, intent.TargetId, removalPolicy);
+                if (failure != null) result.Unresolved.Add(intent.TargetId, failure);
+            }
+            result.Corridor.Assignments = result.Corridor.Assignments.Where(item =>
+                !displaced.Contains(item.AssignmentId) &&
+                (!decisions.TryGetValue(item.AssignmentId, out var decision) ||
+                    decision.Kind != StructuralRouteRenovationKind.ReassignCorridorContent)).ToArray();
+            foreach (var intent in decisions.Values.Where(intent => intent.Kind == StructuralRouteRenovationKind.ReassignCorridorContent)
+                .OrderBy(intent => intent.TargetId, StringComparer.Ordinal))
+            {
+                string failure = CorridorContentMutationService.PlaceExisting(spatial, result.Corridor, assignments[intent.TargetId],
+                    intent.FloorInstanceId, intent.DestinationNodeId, intent.Anchor, production);
+                if (failure != null) result.Unresolved.Add(intent.TargetId, failure);
+            }
+
+            result.Returned = spatial.LifecycleAndOwnership.ReturnedContents;
+            result.Corridor = PhaseFiveSaveContracts.Canonicalize(result.Corridor);
+            result.Knowledge.Records = result.Knowledge.Records.Where(record => final.Floors.Any(floor =>
                 floor.FloorInstanceId == record.FloorInstanceId && floor.Layout.Edges.Any(edge =>
                     edge.EdgeId == record.EdgeId && edge.OptionalBranchId == record.OptionalBranchId))).ToArray();
-            return PhaseFiveSaveContracts.Validate(corridor, knowledge, final, production, configuration, limits)
-                ? null : UnresolvedReason;
+            if (!PhaseFiveSaveContracts.Validate(result.Corridor, result.Knowledge, spatial, production, configuration, limits))
+                result.Failure = InvalidDispositionReason;
+            return result;
         }
 
         internal static string BranchEntitlement(DetachedCanonicalSpatialSaveState baseline,
