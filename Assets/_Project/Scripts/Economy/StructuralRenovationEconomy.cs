@@ -167,9 +167,10 @@ namespace DungeonBuilder.M0.Economy
                 quote.Cost += remaining;
             }
 
+            // A replacement can recover the logical connection ID. Retained and
+            // reused value were already deducted from each retired corridor's ledger.
             foreach (var edge in source.Where(edge => explicitlyRetired.Contains(edge.EdgeId)))
-                if (!byId.ContainsKey(edge.EdgeId))
-                    quote.RefundBasis += old[edge.EdgeId].ConstructionMana + old[edge.EdgeId].RenovationMana;
+                quote.RefundBasis += old[edge.EdgeId].ConstructionMana + old[edge.EdgeId].RenovationMana;
             return true;
         }
 

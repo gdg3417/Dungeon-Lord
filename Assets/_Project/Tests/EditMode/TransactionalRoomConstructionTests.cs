@@ -191,6 +191,33 @@ namespace DungeonBuilder.M0.Tests.EditMode
             StructuralEconomyService.RefreshBalance(quote, 4 * unitCost - 1, f.Economy);
             Assert.That(quote.Reason, Is.EqualTo(StructuralEconomyService.InsufficientReason));
 
+            var retirement = TransactionalDungeonDraft.Create(f.State, context, new Store());
+            Assert.That(retirement.AcceptRenovation(new StructuralRouteRenovation
+            {
+                Kind = StructuralRouteRenovationKind.Retire,
+                FloorInstanceId = floor.FloorInstanceId,
+                TargetId = edge.EdgeId
+            }), Is.True, retirement.Reason);
+            Flush(retirement);
+            var direct = Intent("north", "south");
+            direct.TargetId = null;
+            Assert.That(retirement.AcceptRenovation(direct), Is.True, retirement.Reason);
+            Flush(retirement);
+            Assert.That(retirement.ReadModel.Floors.Single().Layout.Edges.Single(value => value.EdgeId == edge.EdgeId)
+                .ConnectionKind, Is.EqualTo(FloorRouteConnectionKind.DirectDoorway));
+            var settlement = StructuralEconomyService.PreviewFinalContentDraft(owned.State, retirement.ReadModel,
+                owned.Investment, Array.Empty<string>(), f.Runtime.structureRuntime.ManaReserve, f.Economy, null,
+                explicitRetirements: retirement.ExplicitStructuralRetirements);
+            double refund = Math.Floor(2 * unitCost * f.Economy.RefundPercentage);
+            Assert.That(refund, Is.GreaterThan(0));
+            Assert.That(settlement.ReusedInvestment, Is.Zero);
+            Assert.That(settlement.RefundBasis, Is.EqualTo(2 * unitCost));
+            Assert.That(settlement.CreditedRefund, Is.EqualTo(refund));
+            double beforeRetirement = f.Runtime.structureRuntime.ManaReserve;
+            f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, retirement));
+            f.Reopen();
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(beforeRetirement + refund));
+
             StructuralRouteRenovation Intent(string source, string destination, params (int X, int Y)[] tiles) =>
                 new StructuralRouteRenovation
                 {
