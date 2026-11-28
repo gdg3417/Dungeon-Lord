@@ -291,8 +291,9 @@ namespace DungeonBuilder.M0
             if (!owner.CorridorContent.Assignments.Any(item => item.AssignmentId == intent.TargetId &&
                 item.FloorInstanceId == intent.FloorInstanceId) ||
                 (previous == null && (cancel || !before.Unresolved.ContainsKey(intent.TargetId))) ||
-                (previous?.Kind == intent.Kind && previous.DestinationNodeId == intent.DestinationNodeId &&
-                    previous.Anchor.Equals(intent.Anchor)))
+                (previous?.Kind == intent.Kind &&
+                    (intent.Kind != StructuralRouteRenovationKind.ReassignCorridorContent ||
+                        previous.DestinationNodeId == intent.DestinationNodeId && previous.Anchor.Equals(intent.Anchor))))
                 return CorridorRenovationConsequences.InvalidDispositionReason;
 
             var after = ProjectCorridor(owner, candidate, draft.CorridorDispositions(intent));
