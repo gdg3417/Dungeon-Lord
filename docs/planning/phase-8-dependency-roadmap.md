@@ -1,6 +1,16 @@
 # Phase 8 — Dependency Roadmap After Merged PR #245
 
-## After starter Research (2026-11-21)
+## Current product milestone ownership (2026-11-27)
+
+The [active execution plan](post-gd60-mvp-execution-plan.md#active-product-milestones-2026-11-27) owns ordering and capability status as of #277. The owner-approved [Phase 8 design lock](decisions/phase-8-owner-design-lock.md) continues to own product rules. Keep the detailed dependencies and acceptance cases below for their underlying systems. Earlier packet labels and mandatory sequencing describe the historical baseline.
+
+- Place remaining Amendment A and structural Amendment C in Construction and Renovation, with the immediate content safety required to save legal renovations.
+- Place Amendment B, trap restoration and lifecycle from D, and the shared Research lifecycle in Research and Trapcraft. Bring forward eligible offline Research when its exact timing and settlement dependencies allow it.
+- Place D's monster lifecycle in Monsterology and combat progression, and D's loot node, stock and Ward lifecycle in Blueprint and loot economy. Ward work follows the needed loot and trap contracts.
+- Place floor and environmental progression in Architecture. Schedule environmental opacity and movement effects when the combat, pathing and exact elapsed-time authorities can support them.
+- Place the remaining exact offline and return experience in Complete Living Dungeon. Place broad production UI, onboarding, external playtests, public save support, genuine remote Research verification and mobile/release gates in MVP completion and release preparation.
+
+## Historical starter Research handoff (2026-11-21)
 
 At `9a0629c51e1ebb5eb0a39e5326c694e92c9afcff`, #272 and #271 are merged. The paid starter General project is playable. Independent General and Blueprint slots, broader catalogs, eligible offline Research and the public verification gate remain open. Construction comes next under the [active execution plan](post-gd60-mvp-execution-plan.md) and [Gameplay Decision Log v0.6](decisions/gameplay-decision-log.md). The dated November 19 sequencing and older workstream statements below retain their original baseline.
 

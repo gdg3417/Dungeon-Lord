@@ -107,6 +107,18 @@ namespace DungeonBuilder.M0.Tests.PlayMode
         { yield return Invoke("NativeConstructionAuthorsMiddleInsertionAndReopens"); }
 
         [UnityTest]
+        public IEnumerator CombinesBothCornerDoorwaysThroughMapAndSavesConvertedConnection()
+        { yield return Invoke("CombinesBothCornerDoorwaysThroughMapAndSavesConvertedConnection"); }
+
+        [UnityTest]
+        public IEnumerator AuthorsStraightAndBentOptionalCorridorsThroughProductionMap()
+        { yield return Invoke("AuthorsStraightAndBentOptionalCorridorsThroughProductionMap"); }
+
+        [UnityTest]
+        public IEnumerator ReopensAndExtendsAnInferredOptionalCorridorThroughProductionMap()
+        { yield return Invoke("ReopensAndExtendsAnInferredOptionalCorridorThroughProductionMap"); }
+
+        [UnityTest]
         public IEnumerator ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles()
         { yield return Invoke("ManipulatesFloorTwoDoorwaysSectionsBendsAndTiles"); }
 

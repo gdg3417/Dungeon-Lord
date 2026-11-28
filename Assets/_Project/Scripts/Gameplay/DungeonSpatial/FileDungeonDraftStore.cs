@@ -74,7 +74,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     /// </summary>
     public sealed class FileDungeonDraftStore : IDungeonDraftStore
     {
-        private const int RecordVersion = 5;
+        private const int RecordVersion = 6;
         private readonly string path, directory, prefix;
         private readonly ISpatialMigrationFileSystem files;
         private readonly SaveSpatialMigrationLimitsProfile limits;
@@ -146,7 +146,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                         PredecessorCommit = candidate.PredecessorCommit, JournalFormatVersion = 3,
                         RuleIdentity = candidate.RuleIdentity, Commands = candidate.Commands.Select(DungeonDraftV3Command.From).ToArray() })
                     : intended.FormatVersion == 4 ? Encode(DungeonDraftV3Candidate.From(candidate))
-                    : intended.FormatVersion == 5 ? Encode(DungeonDraftV4Candidate.From(candidate)) : Encode(candidate);
+                    : intended.FormatVersion == 5 ? Encode(DungeonDraftV4Candidate.From(candidate))
+                    : intended.FormatVersion == 6 ? Encode(DungeonDraftV5Candidate.From(candidate)) : Encode(candidate);
                 var commit = new DungeonDraftCommitRecord { Version = recordVersion, DraftId = candidate.DraftId,
                     Baseline = candidate.Baseline, Sequence = sequence, PredecessorCommit = candidate.PredecessorCommit,
                     CandidateHash = SpatialContractSha256.Compute(payload),
@@ -328,6 +329,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             format == 3 ? (int)command.Kind <= (int)DungeonDraftCommandKind.RoomMovement :
             format == 4 ? (int)command.Kind <= (int)DungeonDraftCommandKind.RoomConstruction :
             format == 5 ? (int)command.Kind <= (int)DungeonDraftCommandKind.RoomContent :
+            format == 6 ? (int)command.Kind <= (int)DungeonDraftCommandKind.RouteInsertion :
             format == TransactionalDungeonDraft.CurrentFormatVersion;
 
         private DungeonDraftCandidate ParseCandidate(byte[] bytes)
@@ -340,6 +342,12 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 var value = Parse<DungeonDraftCandidate>(bytes);
                 if (value.JournalFormatVersion != TransactionalDungeonDraft.CurrentFormatVersion) throw new IOException();
                 return value;
+            }
+            if (probe?.Version == 5)
+            {
+                var value = Parse<DungeonDraftV5Candidate>(bytes);
+                if (value.JournalFormatVersion != 6) throw new IOException();
+                return value.Expand();
             }
             if (probe?.Version == 4)
             {

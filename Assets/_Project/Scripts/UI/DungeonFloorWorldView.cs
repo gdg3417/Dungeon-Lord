@@ -311,7 +311,7 @@ namespace DungeonBuilder.M0
         private Dictionary<(string, TileCoordinate), int> RoomPassages(SavedSpatialFloor floor, SpatialContentCatalog catalog)
         {
             var result = new Dictionary<(string, TileCoordinate), int>();
-            var sockets = new Dictionary<string, (string room, TileCoordinate tile, int direction, TileCoordinate local)[]>(StringComparer.Ordinal);
+            var sockets = new Dictionary<string, (string room, TileCoordinate tile, int direction, TileCoordinate local, string id)[]>(StringComparer.Ordinal);
             foreach (var node in floor.Layout.Nodes)
             {
                 TileCoordinate anchor; CardinalOrientation orientation;
@@ -336,17 +336,17 @@ namespace DungeonBuilder.M0
                 }
                 sockets[node.NodeId] = points.Select(point => {
                     var offset = StructuralEditService.TransformConnectionPointOffset(point.Offset, orientation, footprint);
-                    return (roomId, new TileCoordinate(anchor.X + offset.X, anchor.Y + offset.Y), (int)StructuralEditService.Rotate(point.Facing, orientation), point.Offset);
+                    return (roomId, new TileCoordinate(anchor.X + offset.X, anchor.Y + offset.Y), (int)StructuralEditService.Rotate(point.Facing, orientation), point.Offset, point.ConnectionPointId);
                 }).ToArray();
             }
-            void Open((string room, TileCoordinate tile, int direction, TileCoordinate local) socket)
+            void Open((string room, TileCoordinate tile, int direction, TileCoordinate local, string id) socket)
             {
                 if (socket.room == null) return;
                 var key = (socket.room, socket.tile); result.TryGetValue(key, out int mask); result[key] = mask | (1 << socket.direction);
             }
-            TileCoordinate Next((string room, TileCoordinate tile, int direction, TileCoordinate local) socket) =>
+            TileCoordinate Next((string room, TileCoordinate tile, int direction, TileCoordinate local, string id) socket) =>
                 new TileCoordinate(socket.tile.X + BoundarySteps[socket.direction].X, socket.tile.Y + BoundarySteps[socket.direction].Y);
-            void Threshold(FloorRouteEdge edge,(string room, TileCoordinate tile, int direction, TileCoordinate local) socket)
+            void Threshold(FloorRouteEdge edge,(string room, TileCoordinate tile, int direction, TileCoordinate local, string id) socket)
             {
                 var step=BoundarySteps[socket.direction];
                 connections.Add(new DungeonConnectionVisual(edge.EdgeId,edge.ConnectionKind,socket.tile,(CardinalOrientation)socket.direction,
@@ -358,12 +358,12 @@ namespace DungeonBuilder.M0
                 if (edge.AuthoredGeometry != null)
                 {
                     if (!edge.AuthoredGeometry.TryResolve(floor, edge, catalog, out var from, out var to, out _)) continue;
-                    var first = source.Single(s => s.local.Equals(from.Local));
+                    var first = source.Single(s => s.id == from.Id);
                     Open(first);
                     Threshold(edge, first);
                     if (to.Id != null)
                     {
-                        var last = destination.Single(s => s.local.Equals(to.Local));
+                        var last = destination.Single(s => s.id == to.Id);
                         Open(last);
                         if (edge.ConnectionKind == FloorRouteConnectionKind.PhysicalCorridor) Threshold(edge, last);
                     }
@@ -375,6 +375,8 @@ namespace DungeonBuilder.M0
                 bool branch = edge.Classification == RouteClassification.Optional &&
                     OptionalBranchGeometry.IsPersistedBranchGeometryValid(floor, edge, catalog);
                 if (!resolved && !branch) continue;
+                source = source?.Where(s => !RoomSpatialDefinition.IsExplicitPerimeterOpening(s.id)).ToArray();
+                destination = destination?.Where(s => !RoomSpatialDefinition.IsExplicitPerimeterOpening(s.id)).ToArray();
                 if(resolved)
                 {
                     source=source?.Where(s=>s.local.Equals(sourceLocal)).ToArray();

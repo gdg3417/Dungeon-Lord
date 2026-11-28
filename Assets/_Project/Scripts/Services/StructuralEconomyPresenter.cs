@@ -28,6 +28,17 @@ namespace DungeonBuilder.M0
         {
             if (preview == null || (preview.Reason != null && preview.Reason != StructuralEconomyService.InsufficientReason && preview.Reason != MonsterRecoveryRules.Insufficient))
                 return text(StructuralEconomyService.InvalidReason);
+            if (preview.UsesNetSettlement)
+            {
+                return string.Format(CultureInfo.InvariantCulture, text("ui.dungeon.route.settlement"),
+                    FormatTransactionAmount(preview.GrossCost), FormatTransactionAmount(preview.ReusedInvestment),
+                    FormatTransactionAmount(preview.CreditedRefund), FormatTransactionAmount(preview.Refund - preview.CreditedRefund),
+                    FormatTransactionAmount(preview.Cost - preview.CreditedRefund), FormatTransactionAmount(preview.ResultingMana),
+                    FormatTransactionAmount(preview.RequiredReserveAfter),
+                    FormatTransactionAmount(preview.RetainedInvestment), FormatTransactionAmount(preview.Cost),
+                    FormatTransactionAmount(preview.RefundBasis), FormatTransactionAmount(preview.ForfeitedInvestment)) + "\n" +
+                    text(preview.IsAffordable ? "ui.structural.economy.affordable" : preview.Reason);
+            }
             bool hasFractionalTransaction = HasMeaningfulFraction(preview.BaseCost) ||
                 HasMeaningfulFraction(preview.Cost) || HasMeaningfulFraction(preview.RefundBasis) ||
                 HasMeaningfulFraction(preview.Refund) || HasMeaningfulFraction(preview.CreditedRefund);

@@ -194,10 +194,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return IsContinuous(path);
         }
 
-        internal static RouteOpening[] Openings(SavedSpatialFloor floor, string nodeId, SpatialContentCatalog catalog)
+        internal static RouteOpening[] Openings(SavedSpatialFloor floor, string nodeId, SpatialContentCatalog catalog,
+            bool inferred = false)
         {
             var node = floor.Layout.Nodes.SingleOrDefault(n => n.NodeId == nodeId);
-            if (node == null || !StructuralRenovationService.TryEndpoint(floor, node, catalog, out var endpoint))
+            if (node == null || !StructuralRenovationService.TryEndpoint(floor, node, catalog, out var endpoint, inferred))
                 return Array.Empty<RouteOpening>();
             return endpoint.Points.OrderBy(p => p.ConnectionPointId, StringComparer.Ordinal)
                 .Select(p => new RouteOpening(p.ConnectionPointId, p.Offset,

@@ -105,6 +105,7 @@
                 <ui:Button name="replayRun" tooltip="ui.dungeon.replay.start" />
                 <ui:Label name="draftSummary" />
                 <ui:VisualElement name="editActions" class="row">
+                    <ui:Button name="renovateRoutes" tooltip="ui.dungeon.route.renovate" />
                     <ui:Button name="save" tooltip="ui.dungeon.save" />
                     <ui:Button name="discard" tooltip="ui.dungeon.discard" />
                     <ui:Button name="retry" tooltip="ui.dungeon.retry" />

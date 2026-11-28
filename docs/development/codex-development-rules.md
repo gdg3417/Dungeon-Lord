@@ -121,6 +121,14 @@ Requirements:
 Required evidence:
 - PR summaries must state whether the change affects MVP scope or deferred scope.
 
+## Rule 10: Gameplay-first delivery
+
+- Prefer one coherent player-facing capability when the work shares interactions, domain ownership, save behavior, production presentation, qualification, or owner acceptance. Use dependency-ordered internal milestones and incremental commits. Separate work when an unresolved design decision, distinct risk, unsafe dependency, independent review capacity, or separate qualification or release boundary warrants it. Keep unrelated features separate.
+- Track completed player capabilities, remaining requirements and progression, dependencies, release blockers, player experience, qualification cost and owner UAT cycles. Use a requirements inventory for any quantitative completion claim.
+- A capability is MVP-complete when it meets approved requirements, gives meaningful player agency or progression, integrates reliably, and passes applicable qualification, independent review and gameplay acceptance. Track approved deferrals explicitly. Final art, comprehensive polish, and balance refinement belong at their approved milestones.
+- Use focused implementation checks, independent UAT-readiness review, consolidated owner gameplay UAT, remaining mandatory final qualification, and independent final merge review in that order where applicable. Repeat affected owner acceptance when a correction invalidates it. Automated evidence owns routine correctness, economics, persistence, lifecycle and regression checks. Apply the existing [qualification governance](../../Docs/testing/qualification-supervisor.md#readiness-stages).
+- Keep production UI functional, accessible and localization-backed. Prioritize the five-floor MVP and demonstrated development or player blockers. H2 hybrid persistence is paused. Comprehensive UI modernization and full onboarding follow gameplay maturity. Use the [active product milestones](../planning/post-gd60-mvp-execution-plan.md#active-product-milestones-2026-11-27).
+
 ## Codex pre-code checklist
 Before coding, Codex must summarize:
 1. Active ticket or issue ID.

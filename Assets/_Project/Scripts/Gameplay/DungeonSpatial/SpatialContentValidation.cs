@@ -366,8 +366,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             });
 
             var pointIds = new HashSet<string>(StringComparer.Ordinal);
-            var positions = new HashSet<TileCoordinate>();
-            int distinctValidPoints = 0;
+            var faces = new HashSet<(TileCoordinate Offset, CardinalOrientation Facing)>();
+            var validCells = new HashSet<TileCoordinate>();
             ForEach(connectionPoints, path + ".connectionPoints", (point, pointPath) =>
             {
                 if (point == null)
@@ -382,8 +382,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     issues.Add(SpatialContentValidationReason.ConnectionPointIdDuplicate,
                         pointPath, point.ConnectionPointId);
 
-                bool uniquePosition = positions.Add(point.Offset);
-                if (!uniquePosition)
+                bool uniqueFace = faces.Add((point.Offset, point.Facing));
+                if (!uniqueFace)
                     issues.Add(SpatialContentValidationReason.ConnectionPointPositionDuplicate, pointPath);
 
                 bool pointGeometryValid = false;
@@ -404,17 +404,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 bool facingValid = Enum.IsDefined(typeof(CardinalOrientation), point.Facing);
                 if (!facingValid)
                     issues.Add(SpatialContentValidationReason.OrientationInvalid, pointPath + ".facing");
-                else if (pointGeometryValid && !FacingMatchesBoundary(point.Offset, footprint, point.Facing))
+                bool outward = facingValid && pointGeometryValid &&
+                    FacingMatchesBoundary(point.Offset, footprint, point.Facing);
+                if (facingValid && pointGeometryValid && !outward)
                     issues.Add(SpatialContentValidationReason.ConnectionPointFacingInvalid, pointPath);
 
                 ReferenceResolution<SpatialSocketTypeDefinition> socketResolution =
                     ResolveReference(point.SocketTypeId, sockets, pointPath + ".socket", issues);
-                if (uniquePosition && pointGeometryValid && facingValid && socketResolution.IsUnique &&
+                if (uniqueFace && outward && socketResolution.IsUnique &&
                     !reserved.Contains(point.Offset) && !string.IsNullOrWhiteSpace(point.ConnectionPointId))
-                    distinctValidPoints++;
+                    validCells.Add(point.Offset);
             });
 
-            if (maximumConnections >= 0 && maximumConnections > distinctValidPoints)
+            if (maximumConnections >= 0 && maximumConnections > validCells.Count)
                 issues.Add(SpatialContentValidationReason.MaximumConnectionsExceedPoints,
                     path + ".maximumConnections");
         }

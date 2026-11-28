@@ -48,7 +48,7 @@ namespace DungeonBuilder.M0.Gameplay.RunSimulation
                 var sources = edge.AuthoredGeometry != null
                     ? definition.ConnectionPoints.Where(p => p.ConnectionPointId == edge.AuthoredGeometry.SourcePointId)
                         .Select(p => p.Offset).ToArray()
-                    : definition.ConnectionPoints.Select(p => p.Offset).Where(t => {
+                    : definition.InferredConnectionPoints.Select(p => p.Offset).Where(t => {
                     var offset = StructuralEditService.TransformConnectionPointOffset(t, room.Orientation, definition.GrossFootprint);
                     var world = new TileCoordinate(checked(room.Anchor.X + offset.X), checked(room.Anchor.Y + offset.Y));
                     return Math.Abs((long)world.X - sourceWorld.X) + Math.Abs((long)world.Y - sourceWorld.Y) == 1;

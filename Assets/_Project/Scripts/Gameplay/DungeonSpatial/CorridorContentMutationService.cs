@@ -94,6 +94,21 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return null;
         }
 
+        internal static string PlaceExisting(DetachedCanonicalSpatialSaveState spatial, CorridorContentAuthority corridor,
+            CorridorContentAssignment owned, string floorId, string branchId, TileCoordinate tile,
+            ProductionSpatialContentSnapshot production)
+        {
+            if (owned == null || owned.FloorInstanceId != floorId)
+                return DetachedCanonicalSpatialMutation.ActiveAssignmentMissingReason;
+            if (!TryTarget(spatial, corridor, owned.CategoryId, owned.OptionId, floorId, branchId, tile,
+                production, out _, out var edge, out string reason)) return reason;
+            owned.EdgeId = edge.EdgeId;
+            owned.OptionalBranchId = branchId;
+            owned.Tile = tile;
+            corridor.Assignments = corridor.Assignments.Append(owned).ToArray();
+            return null;
+        }
+
         private static bool TryTarget(DetachedCanonicalSpatialSaveState spatial,
             CorridorContentAuthority corridor, string categoryId, string optionId,
             string floorInstanceId, string optionalBranchId, TileCoordinate tile,
@@ -131,8 +146,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { reason = CapacityReason; return false; }
             if (!OptionalBranchGeometry.TryResolveSourceTile(floor, targetEdge, production.Catalog,
                     out TileCoordinate sourceTile)) return false;
-            TileCoordinate terminal = tiles.OrderBy(value => Math.Abs(value.X - sourceTile.X) +
-                Math.Abs(value.Y - sourceTile.Y)).Last();
+            TileCoordinate terminal = PhaseFiveSaveContracts.TerminalTile(edge, sourceTile);
             if (categoryId == CanonicalSpatialSaveContracts.LootNodeCategoryId && !tile.Equals(terminal))
             { reason = LootTerminalReason; return false; }
             reason = null; return true;

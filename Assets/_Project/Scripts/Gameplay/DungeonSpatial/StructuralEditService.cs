@@ -261,8 +261,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             if (incoming.Length != 1) return Fail(result, ConnectionAmbiguousReason);
 
-            SpatialConnectionPointDefinition outgoing = (roomDefinition.ConnectionPoints ??
-                Array.Empty<SpatialConnectionPointDefinition>()).SingleOrDefault(value =>
+            SpatialConnectionPointDefinition outgoing = roomDefinition.InferredConnectionPoints.SingleOrDefault(value =>
                     value != null && value.ConnectionPointId == request.TerminalConnectionPointId);
             if (outgoing == null) return Fail(result, ConnectionPointInvalidReason);
             FixedSpatialStructureDefinition terminalDefinition = catalog.FixedStructures.SingleOrDefault(value =>
@@ -343,7 +342,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         /// <summary>Stages only a room and its node. The detached result can have an incomplete route.</summary>
         internal static StructuralEditPreview PreviewIndependentPlacement(DetachedCanonicalSpatialSaveState current,
-            IndependentRoomPlacementRequest request, DungeonDraftContext context)
+            IndependentRoomPlacementRequest request, DungeonDraftContext context, bool rebuildingFloor = false)
         {
             var result = new StructuralEditPreview
             {
@@ -418,8 +417,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var validation = FloorLayoutValidator.Validate(floor.Layout, floorDefinition, catalog.Rooms, catalog.Corridors,
                 workload, floor.FixedStructures, catalog.FixedStructures, CanonicalEditFloorTarget.Mode(floor));
             // Detached drafts can add isolated rooms. Every other topology or geometry failure still blocks placement.
-            var issues = validation.Issues.Where(issue => issue.Reason != FloorLayoutValidationReason.UnreachableRoom ||
-                floor.Layout.Edges.Any(edge => edge.SourceNodeId == issue.SubjectId || edge.DestinationNodeId == issue.SubjectId)).ToArray();
+            var issues = validation.Issues.Where(issue =>
+                !(rebuildingFloor && StructuralRouteRenovationService.AllowsDuringRebuild(issue.Reason)) &&
+                (issue.Reason != FloorLayoutValidationReason.UnreachableRoom ||
+                floor.Layout.Edges.Any(edge => edge.SourceNodeId == issue.SubjectId || edge.DestinationNodeId == issue.SubjectId))).ToArray();
             if (issues.Length != 0) return Fail(result, Map(issues));
             result.DetachedCandidate = context.Copy(candidate);
             if (result.DetachedCandidate == null) return Fail(result, WorkloadReason);
@@ -441,8 +442,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         private static IEnumerable<DoorPair> Pairs(RoomSpatialInstance a, RoomSpatialDefinition ad,
             RoomSpatialInstance b, RoomSpatialDefinition bd, SpatialContentCatalog catalog)
         {
-            foreach (SpatialConnectionPointDefinition ap in ad.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
-            foreach (SpatialConnectionPointDefinition bp in bd.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            var destinationPoints = bd.InferredConnectionPoints;
+            foreach (SpatialConnectionPointDefinition ap in ad.InferredConnectionPoints)
+            foreach (SpatialConnectionPointDefinition bp in destinationPoints)
             {
                 CardinalOrientation af = Rotate(ap.Facing, a.Orientation), bf = Rotate(bp.Facing, b.Orientation);
                 if (bf == Opposite(af) && Compatible(ap.SocketTypeId, bp.SocketTypeId, catalog) &&
@@ -455,8 +457,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             CorridorSpatialDefinition corridor)
         {
             var valid = new List<DoorPair>(); bool lengthInvalid = false;
-            foreach (SpatialConnectionPointDefinition ap in ad.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
-            foreach (SpatialConnectionPointDefinition bp in bd.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            var destinationPoints = bd.InferredConnectionPoints;
+            foreach (SpatialConnectionPointDefinition ap in ad.InferredConnectionPoints)
+            foreach (SpatialConnectionPointDefinition bp in destinationPoints)
             {
                 CardinalOrientation af = Rotate(ap.Facing, a.Orientation), bf = Rotate(bp.Facing, b.Orientation);
                 if (bf != Opposite(af) || !Compatible(ap.SocketTypeId, bp.SocketTypeId, catalog) ||

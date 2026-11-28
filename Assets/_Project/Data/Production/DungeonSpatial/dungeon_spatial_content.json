@@ -2,7 +2,7 @@
     "Metadata": {
         "SchemaId": "dungeon_spatial_content",
         "SchemaVersion": 1,
-        "ContentVersion": "0.2.0"
+        "ContentVersion": "0.3.0"
     },
     "Floors": [
         {
@@ -108,6 +108,96 @@
                     "SocketTypeId": "spatial.socket.standard_passage"
                 },
                 {
+                    "ConnectionPointId": "perimeter.east.0",
+                    "Offset": {
+                        "X": 3,
+                        "Y": 0
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.east.3",
+                    "Offset": {
+                        "X": 3,
+                        "Y": 3
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.north.0",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 3
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.north.3",
+                    "Offset": {
+                        "X": 3,
+                        "Y": 3
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.south.0",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.south.2",
+                    "Offset": {
+                        "X": 2,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.south.3",
+                    "Offset": {
+                        "X": 3,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.0",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 0
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.2",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 2
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.3",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 3
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
                     "ConnectionPointId": "south",
                     "Offset": {
                         "X": 1,
@@ -163,6 +253,168 @@
                     "SocketTypeId": "spatial.socket.standard_passage"
                 },
                 {
+                    "ConnectionPointId": "perimeter.east.0",
+                    "Offset": {
+                        "X": 4,
+                        "Y": 0
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.east.1",
+                    "Offset": {
+                        "X": 4,
+                        "Y": 1
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.east.3",
+                    "Offset": {
+                        "X": 4,
+                        "Y": 3
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.east.4",
+                    "Offset": {
+                        "X": 4,
+                        "Y": 4
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.east.5",
+                    "Offset": {
+                        "X": 4,
+                        "Y": 5
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.north.0",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 5
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.north.1",
+                    "Offset": {
+                        "X": 1,
+                        "Y": 5
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.north.3",
+                    "Offset": {
+                        "X": 3,
+                        "Y": 5
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.north.4",
+                    "Offset": {
+                        "X": 4,
+                        "Y": 5
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.south.0",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.south.1",
+                    "Offset": {
+                        "X": 1,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.south.3",
+                    "Offset": {
+                        "X": 3,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.south.4",
+                    "Offset": {
+                        "X": 4,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.0",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 0
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.1",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 1
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.3",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 3
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.4",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 4
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.5",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 5
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
                     "ConnectionPointId": "south",
                     "Offset": {
                         "X": 2,
@@ -215,6 +467,114 @@
                         "Y": 4
                     },
                     "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.east.0",
+                    "Offset": {
+                        "X": 2,
+                        "Y": 0
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.east.1",
+                    "Offset": {
+                        "X": 2,
+                        "Y": 1
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.east.3",
+                    "Offset": {
+                        "X": 2,
+                        "Y": 3
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.east.4",
+                    "Offset": {
+                        "X": 2,
+                        "Y": 4
+                    },
+                    "Facing": 1,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.north.0",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 4
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.north.2",
+                    "Offset": {
+                        "X": 2,
+                        "Y": 4
+                    },
+                    "Facing": 0,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.south.0",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.south.2",
+                    "Offset": {
+                        "X": 2,
+                        "Y": 0
+                    },
+                    "Facing": 2,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.0",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 0
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.1",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 1
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.3",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 3
+                    },
+                    "Facing": 3,
+                    "SocketTypeId": "spatial.socket.standard_passage"
+                },
+                {
+                    "ConnectionPointId": "perimeter.west.4",
+                    "Offset": {
+                        "X": 0,
+                        "Y": 4
+                    },
+                    "Facing": 3,
                     "SocketTypeId": "spatial.socket.standard_passage"
                 },
                 {

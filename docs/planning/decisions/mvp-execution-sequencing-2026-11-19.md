@@ -6,7 +6,11 @@
 **Owner sources:** [PR #269 closure decision](https://github.com/gdg3417/Dungeon-Lord/pull/269#issuecomment-7015127781); owner direction captured for this documentation reconciliation.  
 **Scope:** MVP development sequence, production UI maturity, room placement/connection capability, Research priority, and onboarding deferral.
 
-## 1. Current state and authority
+## Dated sequencing amendment (2026-11-27)
+
+The owner approved coherent gameplay capabilities as the default PR boundary at the verified #277 baseline. The [active execution plan](../post-gd60-mvp-execution-plan.md#active-product-milestones-2026-11-27) and [development rules](../../development/codex-development-rules.md#rule-10-gameplay-first-delivery) supersede the recommended PR and implementation order recorded below. The approved gameplay, onboarding and UI maturity direction remains in force. The paid starter Research slice and partial playable construction have since merged. Complete construction and renovation in a single coherent PR, then reassess Research and Trapcraft as the next priority. Earlier entries retain their original baselines and evidence.
+
+## 1. Original state and authority
 
 PR #268, **Build the first room from Dungeon**, is merged. PR #269, **Guide the first Dungeon session**, was closed without merging after owner UAT and repeated independent review. Its closure records a sequencing decision to defer the complete interactive tutorial until the remaining MVP gameplay and production UI are sufficiently mature; it does not abandon onboarding or invalidate the preserved qualification and design evidence. No implementation from #269 is approved by this record. The GitHub history, branch, worktrees, screenshots, tests, reports, protected saves, and qualification evidence remain historical owner artifacts and are not cleanup targets of this change.
 

@@ -631,7 +631,7 @@ namespace DungeonBuilder.M0
                 value.RoomDefinitionId == _selectedStructuralRoomDefinitionId);
 
         private SpatialConnectionPointDefinition[] OrderedStructuralConnectionPoints() =>
-            (ResolveSelectedStructuralRoom()?.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            (ResolveSelectedStructuralRoom()?.InferredConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
                 .Where(value => value != null).OrderBy(value => value.ConnectionPointId,
                     StringComparer.Ordinal).ToArray();
 
@@ -2279,8 +2279,8 @@ namespace DungeonBuilder.M0
             RoomSpatialDefinition definition = (_root?.ProductionSpatialContent?.Catalog?.Rooms ??
                 Array.Empty<RoomSpatialDefinition>()).SingleOrDefault(value => value != null &&
                 value.RoomDefinitionId == room?.RoomDefinitionId);
-            return (definition?.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
-                .Where(value => value != null).Select(value => value.ConnectionPointId)
+            return (definition?.InferredConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+                .Select(value => value.ConnectionPointId)
                 .OrderBy(value => value, StringComparer.Ordinal).ToArray();
         }
 

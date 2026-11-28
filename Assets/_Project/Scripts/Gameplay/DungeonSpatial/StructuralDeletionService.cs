@@ -232,13 +232,13 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             RoomSpatialDefinition predecessorDefinition, RoomSpatialInstance target,
             RoomSpatialDefinition targetDefinition, FloorRouteEdge edge, SpatialContentCatalog catalog)
         {
-            foreach (SpatialConnectionPointDefinition predecessorPoint in predecessorDefinition.ConnectionPoints ??
-                Array.Empty<SpatialConnectionPointDefinition>())
+            var targetPoints = targetDefinition.InferredConnectionPoints;
+            foreach (SpatialConnectionPointDefinition predecessorPoint in predecessorDefinition.InferredConnectionPoints)
             {
             TileCoordinate source = World(predecessorPoint.Offset, predecessor.Anchor, predecessor.Orientation,
                 predecessorDefinition.GrossFootprint);
             CardinalOrientation facing = StructuralEditService.Rotate(predecessorPoint.Facing, predecessor.Orientation);
-            foreach (SpatialConnectionPointDefinition targetPoint in targetDefinition.ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>())
+            foreach (SpatialConnectionPointDefinition targetPoint in targetPoints)
             {
                 if (!Compatible(predecessorPoint.SocketTypeId, targetPoint.SocketTypeId, catalog) ||
                     StructuralEditService.Rotate(targetPoint.Facing, target.Orientation) != Opposite(facing)) continue;

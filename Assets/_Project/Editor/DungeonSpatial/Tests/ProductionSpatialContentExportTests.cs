@@ -490,7 +490,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
                 json => json.Replace("\"schema\": \"string_table\"", "\"schema\": \"test.table\""),
                 ProductionSpatialGeneratedSetDiagnostic.StringTableIdentityMismatch);
             AssertExactReplacement(ProductionSpatialGeneratedSetParser.ManifestPath,
-                json => json.Replace("\"contentVersion\": \"0.2.0\"", "\"contentVersion\": \"0.3.0\""),
+                json => json.Replace("\"contentVersion\": \"0.3.0\"", "\"contentVersion\": \"0.4.0\""),
                 ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
             AssertExactReplacement(ProductionSpatialGeneratedSetParser.EnglishPath,
                 json => json.Replace("\"language\": \"en\"", "\"language\": \"ja\""),
@@ -511,13 +511,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             ProductionSpatialGeneratedSet matching = ReplaceCatalog(Build().Output,
                 catalog => catalog.Metadata.ContentVersion = previousVersion);
             matching = ReplaceJson(matching, ProductionSpatialGeneratedSetParser.ManifestPath,
-                json => json.Replace("\"contentVersion\": \"0.2.0\"",
+                json => json.Replace("\"contentVersion\": \"0.3.0\"",
                     "\"contentVersion\": \"" + previousVersion + "\""));
             Assert.That(ProductionSpatialGeneratedSetParser.ParseAndValidate(matching, Limits()).Success, Is.True);
 
             ProductionSpatialGeneratedSet blankManifest = ReplaceJson(Build().Output,
                 ProductionSpatialGeneratedSetParser.ManifestPath,
-                json => json.Replace("\"contentVersion\": \"0.2.0\"", "\"contentVersion\": \"\""));
+                json => json.Replace("\"contentVersion\": \"0.3.0\"", "\"contentVersion\": \"\""));
             AssertRepeatedExactNoThrow(blankManifest,
                 ProductionSpatialGeneratedSetDiagnostic.ContentVersionMismatch);
 
@@ -681,10 +681,20 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(catalog.Floors.Length + catalog.Rooms.Length + catalog.Corridors.Length + catalog.FixedStructures.Length + catalog.SocketTypes.Length, Is.EqualTo(9));
             Assert.That(catalog.Metadata.SchemaId, Is.EqualTo("dungeon_spatial_content"));
             Assert.That(catalog.Metadata.SchemaVersion, Is.EqualTo(1));
-            Assert.That(catalog.Metadata.ContentVersion, Is.EqualTo("0.2.0"));
+            Assert.That(catalog.Metadata.ContentVersion, Is.EqualTo("0.3.0"));
             Assert.That(catalog.Floors, Has.Length.EqualTo(2)); Assert.That(catalog.Rooms, Has.Length.EqualTo(3));
             Assert.That(catalog.Corridors, Has.Length.EqualTo(1)); Assert.That(catalog.FixedStructures, Has.Length.EqualTo(2));
             Assert.That(catalog.SocketTypes, Has.Length.EqualTo(1));
+            AssertRoomPerimeter(catalog.Rooms.Single(room => room.RoomDefinitionId == "spatial.room.basic"), 16,
+                ("east", 3, 1, CardinalOrientation.Ninety), ("east.2", 3, 2, CardinalOrientation.Ninety),
+                ("north", 1, 3, CardinalOrientation.Zero), ("north.2", 2, 3, CardinalOrientation.Zero),
+                ("south", 1, 0, CardinalOrientation.OneEighty), ("west", 0, 1, CardinalOrientation.TwoSeventy));
+            AssertRoomPerimeter(catalog.Rooms.Single(room => room.RoomDefinitionId == "spatial.room.rectangle"), 16,
+                ("east", 2, 2, CardinalOrientation.Ninety), ("north", 1, 4, CardinalOrientation.Zero),
+                ("south", 1, 0, CardinalOrientation.OneEighty), ("west", 0, 2, CardinalOrientation.TwoSeventy));
+            AssertRoomPerimeter(catalog.Rooms.Single(room => room.RoomDefinitionId == "spatial.room.large_chamber"), 22,
+                ("east", 4, 2, CardinalOrientation.Ninety), ("north", 2, 5, CardinalOrientation.Zero),
+                ("south", 2, 0, CardinalOrientation.OneEighty), ("west", 0, 2, CardinalOrientation.TwoSeventy));
             Assert.That(catalog.Floors[0].Bounds.TileCount, Is.EqualTo(144));
             Assert.That(result.Projection.English.schema, Is.EqualTo("string_table"));
             Assert.That(result.Projection.English.schemaVersion, Is.EqualTo(1));
@@ -692,6 +702,29 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Projection.English.entries, Has.Length.EqualTo(6));
             CollectionAssert.AreEqual(result.Projection.English.entries.Select(e => e.key).OrderBy(x => x, StringComparer.Ordinal), result.Projection.English.entries.Select(e => e.key));
             foreach (var pair in before) CollectionAssert.AreEqual(pair.Value, source.Snapshot()[pair.Key], pair.Key);
+        }
+
+        private static void AssertRoomPerimeter(RoomSpatialDefinition room, int count,
+            params (string Id, int X, int Y, CardinalOrientation Facing)[] legacy)
+        {
+            Assert.That(room.ConnectionPoints, Has.Length.EqualTo(count));
+            Assert.That(room.MaximumConnectionCount, Is.EqualTo(3));
+            CollectionAssert.AreEqual(room.ConnectionPoints.Select(point => point.ConnectionPointId)
+                .OrderBy(id => id, StringComparer.Ordinal), room.ConnectionPoints.Select(point => point.ConnectionPointId));
+            CollectionAssert.AreEquivalent(legacy, room.ConnectionPoints
+                .Where(point => !point.ConnectionPointId.StartsWith("perimeter.", StringComparison.Ordinal))
+                .Select(point => (point.ConnectionPointId, point.Offset.X, point.Offset.Y, point.Facing)));
+            Assert.That(room.ConnectionPoints.All(point => point.SocketTypeId == "spatial.socket.standard_passage"), Is.True);
+            int width = room.GrossFootprint.Width, height = room.GrossFootprint.Height;
+            var faces = Enumerable.Range(0, width).SelectMany(x => new[]
+            {
+                (x, 0, CardinalOrientation.OneEighty), (x, height - 1, CardinalOrientation.Zero)
+            }).Concat(Enumerable.Range(0, height).SelectMany(y => new[]
+            {
+                (0, y, CardinalOrientation.TwoSeventy), (width - 1, y, CardinalOrientation.Ninety)
+            }));
+            CollectionAssert.AreEquivalent(faces, room.ConnectionPoints
+                .Select(point => (point.Offset.X, point.Offset.Y, point.Facing)));
         }
 
         [TestCase("authoring_manifest.json", DungeonSpatialAuthoringDiagnostic.MissingManifest)]
@@ -856,10 +889,10 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(result.Issues.Any(issue => issue.Diagnostic == DungeonSpatialAuthoringDiagnostic.DuplicateSourcePath), Is.True);
         }
 
-        [TestCase("\"contentVersion\": \"0.2.0\"", "\"contentVersion\": 1", DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType)]
+        [TestCase("\"contentVersion\": \"0.3.0\"", "\"contentVersion\": 1", DungeonSpatialAuthoringDiagnostic.InvalidJsonFieldType)]
         [TestCase("\"schema\": \"dungeon_spatial_authoring\"", "\"schema\": \"test.schema\"", DungeonSpatialAuthoringDiagnostic.UnsupportedAuthoringSchema)]
         [TestCase("\"schemaVersion\": 1", "\"schemaVersion\": 2", DungeonSpatialAuthoringDiagnostic.UnsupportedAuthoringSchema)]
-        [TestCase("\"contentVersion\": \"0.2.0\"", "\"contentVersion\": \"0.3.0\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
+        [TestCase("\"contentVersion\": \"0.3.0\"", "\"contentVersion\": \"0.4.0\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
         [TestCase("\"catalogSchemaId\": \"dungeon_spatial_content\"", "\"catalogSchemaId\": \"test.catalog\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
         [TestCase("\"catalogSchemaVersion\": 1", "\"catalogSchemaVersion\": 2", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]
         [TestCase("\"stringTableSchemaId\": \"string_table\"", "\"stringTableSchemaId\": \"test.table\"", DungeonSpatialAuthoringDiagnostic.ManifestValueMismatch)]

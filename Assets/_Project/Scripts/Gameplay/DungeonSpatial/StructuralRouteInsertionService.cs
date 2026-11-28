@@ -118,6 +118,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         // A bounded geometry suggestion. The complete net-price comparison is a separate settlement contract.
         private const int MaximumSuggestionPreviews = 16;
+        private const int MaximumSuggestionLinkAttempts = 4096;
         private static readonly TileCoordinate[] CardinalSteps =
         {
             new TileCoordinate(-1, 0), new TileCoordinate(0, -1),
@@ -145,29 +146,9 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var from = AuthoredRouteGeometry.Openings(floor, edge.SourceNodeId, catalog);
             var to = AuthoredRouteGeometry.Openings(floor, edge.DestinationNodeId, catalog);
             var roomOpenings = AuthoredRouteGeometry.Openings(floor, node.NodeId, catalog);
-            var candidates = new List<StructuralRouteInsertionRequest>();
-            foreach (var start in from)
-            foreach (var roomEntry in roomOpenings)
-            {
-                var incoming = SuggestLink(start, roomEntry, catalog, corridor, configured.Bounds, limits, occupied);
-                if (incoming == null) continue;
-                var withIncoming = new HashSet<TileCoordinate>(occupied);
-                withIncoming.UnionWith(incoming.Passage);
-                foreach (var roomExit in roomOpenings.Where(p => p.Id != roomEntry.Id))
-                foreach (var end in to)
-                {
-                    var outgoing = SuggestLink(roomExit, end, catalog, corridor, configured.Bounds, limits, withIncoming);
-                    if (outgoing == null) continue;
-                    candidates.Add(new StructuralRouteInsertionRequest
-                    {
-                        FloorInstanceId = floor.FloorInstanceId, RoomInstanceId = roomId,
-                        ReplacedEdgeId = edge.EdgeId, Incoming = incoming, Outgoing = outgoing
-                    });
-                }
-            }
             // Point choices are enumerated by ordinal ID and BFS neighbors by coordinates.
             // Stable sorting preserves those ties while preferring less travel.
-            var evaluated = candidates.OrderBy(value => value.Incoming.Passage.Length + value.Outgoing.Passage.Length)
+            var evaluated = Candidates().OrderBy(value => value.Incoming.Passage.Length + value.Outgoing.Passage.Length)
                 .Take(MaximumSuggestionPreviews)
                 .Select(candidate => (Candidate: candidate, Assessment: evaluate(candidate)))
                 .Where(value => value.Assessment.Valid).ToArray();
@@ -175,6 +156,59 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return evaluated.All(value => value.Assessment.GrossCost.HasValue)
                 ? evaluated.OrderBy(value => value.Assessment.GrossCost.Value).First().Candidate
                 : evaluated[0].Candidate;
+
+            IEnumerable<StructuralRouteInsertionRequest> Candidates()
+            {
+                int attempts = 0;
+                foreach (var start in from)
+                foreach (var roomEntry in roomOpenings)
+                {
+                    if (++attempts > MaximumSuggestionLinkAttempts) yield break;
+                    var incoming = SuggestLink(start, roomEntry, catalog, corridor, configured.Bounds, limits, occupied);
+                    if (incoming == null) continue;
+                    var withIncoming = new HashSet<TileCoordinate>(occupied);
+                    withIncoming.UnionWith(incoming.Passage);
+                    foreach (var roomExit in roomOpenings)
+                    {
+                        if (roomExit.Local.Equals(roomEntry.Local)) continue;
+                        foreach (var end in to)
+                        {
+                            if (++attempts > MaximumSuggestionLinkAttempts) yield break;
+                            var outgoing = SuggestLink(roomExit, end, catalog, corridor, configured.Bounds, limits, withIncoming);
+                            if (outgoing == null) continue;
+                            yield return new StructuralRouteInsertionRequest
+                            {
+                                FloorInstanceId = floor.FloorInstanceId, RoomInstanceId = roomId,
+                                ReplacedEdgeId = edge.EdgeId, Incoming = incoming, Outgoing = outgoing
+                            };
+                        }
+                    }
+                }
+            }
+        }
+
+        internal static AuthoredRouteGeometry SuggestConnection(DungeonDraftContext context, SavedSpatialFloor floor,
+            string source, string destination, string ignoredEdge,
+            Func<AuthoredRouteGeometry, (bool Valid, double? Net)> evaluate)
+        {
+            var catalog = context.Production.Catalog;
+            var configuration = catalog.Floors.Single(value => value.FloorDefinitionId == floor.FloorDefinitionId);
+            var corridor = catalog.Corridors.SingleOrDefault(value =>
+                value.CorridorDefinitionId == OptionalBranchStructuralEditService.CorridorDefinitionId);
+            var limits = new SpatialValidationWorkloadLimits(context.Limits.Canonical.Spatial.MaximumMaterializedTiles);
+            if (corridor == null || !limits.Allows(corridor.MaximumLength) ||
+                !TryOccupiedTiles(floor, catalog, limits, ignoredEdge, null, out var occupied)) return null;
+
+            var choices = from start in AuthoredRouteGeometry.Openings(floor, source, catalog)
+                          from end in AuthoredRouteGeometry.Openings(floor, destination, catalog)
+                          select (start, end);
+            var evaluated = choices.Take(MaximumSuggestionLinkAttempts)
+                .Select(pair => SuggestLink(pair.start, pair.end, catalog, corridor, configuration.Bounds, limits, occupied))
+                .Where(link => link != null).OrderBy(link => link.Passage.Length).Take(MaximumSuggestionPreviews)
+                .Select(link => (Link: link, Quote: evaluate(link))).Where(value => value.Quote.Valid).ToArray();
+            return evaluated.All(value => value.Quote.Net.HasValue)
+                ? evaluated.OrderBy(value => value.Quote.Net.Value).FirstOrDefault().Link
+                : evaluated.FirstOrDefault().Link;
         }
 
         // Fixed-opening edits use the same socket, occupancy and corridor rules as suggestions.
@@ -339,7 +373,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 !corridor.AllowedOrientations.Contains((CardinalOrientation)((int)from.Facing % 2)) ||
                 !corridor.AllowedOrientations.Contains((CardinalOrientation)((int)to.Facing % 2)) ||
                 !TryOutside(from, out var start) || !TryOutside(to, out var end) ||
-                !bounds.Contains(start) || !bounds.Contains(end) || occupied.Contains(start) || occupied.Contains(end))
+                !bounds.Contains(start) || !bounds.Contains(end) || occupied.Contains(start) || occupied.Contains(end) ||
+                Math.Abs((long)start.X - end.X) + Math.Abs((long)start.Y - end.Y) + 1 > corridor.MaximumLength)
                 return null;
 
             var parents = new Dictionary<TileCoordinate, TileCoordinate> { [start] = start };

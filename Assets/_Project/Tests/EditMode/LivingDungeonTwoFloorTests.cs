@@ -653,6 +653,48 @@ namespace DungeonBuilder.M0.Tests.EditMode
             ExportAmendmentAOwnerInputs(directory);
         }
 
+        [Test] public void ExportConstructionRenovationOwnerInputsWithPaidCorridor()
+        {
+            string directory = CreateTwoFloorFixtureDirectory();
+            var utc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var fixture = CreateAmendmentAOwnerFloorTwo(utc);
+            string floorId = PhaseSixA4Tests.FloorTwo(fixture);
+            var floor = fixture.State.Floors.Single(value => value.FloorInstanceId == floorId);
+            Assert.That(RequiredFloorTraversal.TryResolve(floor.Layout, out var route), Is.True);
+            var link = floor.Layout.Edges.Single(edge => edge.SourceNodeId == route[1].NodeId &&
+                edge.DestinationNodeId == route[2].NodeId);
+            var draft = TransactionalDungeonDraft.Create(fixture.State, PhaseSevenA4TransactionalEditorTests.Context(fixture),
+                new FileDungeonDraftStore(fixture.ActivePath + ".editor-draft", fixture.FileSystem, fixture.Profile));
+            var renovation = new StructuralRouteRenovation
+            {
+                Kind = StructuralRouteRenovationKind.Connect,
+                FloorInstanceId = floorId,
+                TargetId = link.EdgeId,
+                SourceNodeId = link.SourceNodeId,
+                DestinationNodeId = link.DestinationNodeId,
+                Connections = new[] { new AuthoredRouteGeometry
+                {
+                    SourcePointId = "perimeter.north.3",
+                    DestinationPointId = "perimeter.north.0",
+                    Passage = new[] { new TileCoordinate(5, 9), new TileCoordinate(6, 9) }
+                } }
+            };
+            Assert.That(draft.PreviewRenovation(renovation).UsedFloorSpace, Is.EqualTo(54));
+            Assert.That(draft.AcceptRenovation(renovation), Is.True, draft.Reason);
+            while (draft.Durability == DraftDurability.Pending) Assert.That(draft.FlushNext(), Is.True);
+            double before = fixture.Runtime.structureRuntime.ManaReserve;
+            Assert.That(fixture.Economy.TryCorridor(OptionalBranchStructuralEditService.CorridorDefinitionId,
+                out var unitCost), Is.True);
+            fixture.Accept(PhaseSixA4Tests.Writer(fixture).CommitDungeonDraft(fixture.ActivePath, fixture.FileSystem,
+                fixture.Session, fixture.Runtime, draft));
+            fixture.Reopen();
+            Assert.That(fixture.Runtime.structureRuntime.ManaReserve, Is.EqualTo(before - 2 * unitCost));
+            var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(fixture.Session.GetCurrentBytes(), fixture.Context);
+            Assert.That(owned.Investment.Single(value => value.StructureId == link.EdgeId).ConstructionMana,
+                Is.EqualTo(2 * unitCost));
+            WriteSeed(fixture, directory, "renovation-paid", null, 0);
+        }
+
         private static void ExportAmendmentAOwnerInputs(string directory)
         {
             long utc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -791,7 +833,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That(StructuralRouteInsertionService.RetirementEligible(validated, floorId, target.EdgeId), Is.True);
         }
 
-        internal static string ExportProductionTwoFloorInputs(long? authoredUtc = null)
+        private static string CreateTwoFloorFixtureDirectory()
         {
             // This current-schema producer must not write into retained historical
             // inputs. The explicit supervisor stage owns this fresh output root.
@@ -802,6 +844,12 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Assert.That((new DirectoryInfo(parent).Attributes & FileAttributes.ReparsePoint) == 0, Is.True);
             string directory = Path.Combine(parent, Guid.NewGuid().ToString("N").Substring(0, 8));
             Assert.That(Directory.Exists(directory), Is.False); Directory.CreateDirectory(directory);
+            return directory;
+        }
+
+        internal static string ExportProductionTwoFloorInputs(long? authoredUtc = null)
+        {
+            string directory = CreateTwoFloorFixtureDirectory();
             var utc = authoredUtc ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var f = ProductionDungeon(utc); string second = PhaseSixA4Tests.FloorTwo(f);
             for (int index = 0; index < H1F4RecoveryContractTests.Paths.Length; index++) {

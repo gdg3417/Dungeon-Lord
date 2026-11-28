@@ -70,7 +70,7 @@ namespace DungeonBuilder.M0
             independentRoomPlacement = independent;
             constructionIntentId = Guid.NewGuid().ToString("N");
             constructionRequest = new StructuralConstructionRequest { FloorInstanceId = selectedFloor, RoomDefinitionId = definitionId,
-                Orientation = definition.AllowedOrientations.First(), TerminalConnectionPointId = definition.ConnectionPoints.First().ConnectionPointId };
+                Orientation = definition.AllowedOrientations.First(), TerminalConnectionPointId = definition.InferredConnectionPoints.First().ConnectionPointId };
             RefreshConstructionGuidance();
             Present();
             if (independent)
@@ -107,7 +107,7 @@ namespace DungeonBuilder.M0
 
         public bool SelectTerminalConnection(string pointId)
         {
-            if (!IsConstructing || !ConstructionRooms().Single(r => r.RoomDefinitionId == constructionRequest.RoomDefinitionId).ConnectionPoints.Any(p => p.ConnectionPointId == pointId)) return false;
+            if (!IsConstructing || !ConstructionRooms().Single(r => r.RoomDefinitionId == constructionRequest.RoomDefinitionId).InferredConnectionPoints.Any(p => p.ConnectionPointId == pointId)) return false;
             constructionRequest.TerminalConnectionPointId = pointId; constructionPreview = null;
             RefreshConstructionGuidance(); Present(); return true;
         }
@@ -278,8 +278,9 @@ namespace DungeonBuilder.M0
             ui.Q("roomChoicesHint").style.display = DisplayStyle.None;
             var availableRooms = ConstructionRooms();
             var floor = IsEditing ? DraftSelectedFloor() : null;
-            bool canInsertRoom = CanAuthorRoutes && !IsAuthoringRoute && constructionRequest == null && floor?.Layout.Rooms.Length >= 2 &&
-                root.SaveService.EligibleRouteInsertions(root.Save, draft, selectedFloor).Length > 0;
+            bool canInsertRoom = CanAuthorRoutes && !IsAuthoringRoute && constructionRequest == null &&
+                floor?.ActivationState == FloorActivationState.Active &&
+                (floor.Layout.Rooms.Length >= 2 || draft.IsRebuildingFloor(selectedFloor));
             var previewLimits = new SpatialValidationWorkloadLimits(root.SaveSpatialMigrationLimits.Canonical.Spatial.MaximumMaterializedTiles);
             var footprints = availableRooms.Select(room => room.TryResolveGrossTiles(new TileCoordinate(0,0),room.AllowedOrientations.First(),previewLimits,out var footprint)
                 ? footprint.OccupiedTiles : Array.Empty<TileCoordinate>()).ToArray();
@@ -335,7 +336,7 @@ namespace DungeonBuilder.M0
                     var button = new Button(() => SelectConstructionOrientation(orientation)) { text = OrientationName(orientation) };
                     if (orientation == constructionRequest.Orientation) button.AddToClassList("selected-floor"); orientations.Add(button);
                 }
-                foreach (var point in independentRoomPlacement ? Array.Empty<SpatialConnectionPointDefinition>() : definition.ConnectionPoints)
+                foreach (var point in independentRoomPlacement ? Array.Empty<SpatialConnectionPointDefinition>() : definition.InferredConnectionPoints)
                 {
                     string id = point.ConnectionPointId;
                     var button = new Button(() => SelectTerminalConnection(id)) { text = Format("ui.dungeon.construction.connection", DirectionName(StructuralEditService.Rotate(point.Facing, constructionRequest.Orientation))) };

@@ -130,6 +130,15 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public CardinalOrientation[] AllowedOrientations = Array.Empty<CardinalOrientation>();
         public SpatialConnectionPointDefinition[] ConnectionPoints = Array.Empty<SpatialConnectionPointDefinition>();
 
+        // Preserve the candidate set of geometry-only connections and producers. New
+        // perimeter IDs require the explicit endpoint and passage contract.
+        internal SpatialConnectionPointDefinition[] InferredConnectionPoints =>
+            (ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>()).Where(point =>
+                point != null && !IsExplicitPerimeterOpening(point.ConnectionPointId)).ToArray();
+
+        internal static bool IsExplicitPerimeterOpening(string pointId) =>
+            pointId?.StartsWith("perimeter.", StringComparison.Ordinal) == true;
+
         public bool TryResolveGrossTiles(TileCoordinate anchor, CardinalOrientation orientation,
             SpatialValidationWorkloadLimits limits, out ResolvedTileFootprint footprint) =>
             TileFootprintResolver.TryResolveRectangle(GrossFootprint, anchor, orientation, limits, out footprint);
