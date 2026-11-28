@@ -2317,13 +2317,17 @@ namespace DungeonBuilder.M0.Tests
             Assert.That(placement.IsSuccess, Is.True, placement.Reason);
             var priorInvestment = placement.Validation.Investment.Single(item => item.StructureId == inferred.EdgeId);
             var priorAssignment = placement.Validation.CorridorContent.Assignments.Single();
-            var priorBytes = root.SaveService.CanonicalSession.GetCurrentBytes();
-            double balance = root.Save.structureRuntime.ManaReserve;
             var camera = GameObject.Find("ProductionDungeonCamera").GetComponent<Camera>();
             var ui = controller.GetComponent<UIDocument>().rootVisualElement;
             DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
             Click(ui.Q<Button>("edit"));
             Click(ui.Q<Button>("renovateRoutes"));
+            // Finish the fixture's paid-action bookkeeping before measuring the
+            // read-only selection and cancellation of the existing branch.
+            yield return WaitForViewportGeometry();
+            PumpSceneToClosed(establishForeground: true);
+            var priorBytes = root.SaveService.CanonicalSession.GetCurrentBytes();
+            double balance = root.Save.structureRuntime.ManaReserve;
             var pointer = InputSystem.AddDevice<Mouse>();
             try
             {
