@@ -2282,19 +2282,145 @@ namespace DungeonBuilder.M0.Tests
 
             static Vector2 Center(TileCoordinate tile) => new Vector2(tile.X + .5f, tile.Y + .5f);
 
-            IEnumerator Tap(Vector2 world)
+            IEnumerator Tap(Vector2 world) => TapOptionalCorridorMap(pointer, camera, world);
+        }
+
+        [UnityTest]
+        public IEnumerator ReopensAndExtendsAnInferredOptionalCorridorThroughProductionMap()
+        {
+            var root = GameRoot.Instance;
+            Assert.That(root.SetBasicBranchingCompletionForQa(true), Is.True);
+            Assert.That(root.TrySetQaManaFromDevPanel(true), Is.True);
+            var floor = root.Save.validatedCanonicalSpatialState.Floors.Single();
+            string room = floor.Layout.Nodes.Single(node => node.Kind == FloorRouteNodeKind.Room).NodeId;
+            var opening = AuthoredRouteGeometry.Openings(floor, room, root.ProductionSpatialContent.Catalog, inferred: true)
+                .Single(point => point.Id == "east");
+            Assert.That(opening.Facing, Is.EqualTo(CardinalOrientation.Ninety));
+            var construction = root.PreviewOptionalBranchConstruction(new OptionalBranchConstructionRequest
             {
-                yield return WaitForViewportGeometry();
-                Vector2 point = camera.WorldToScreenPoint(world);
-                Assert.That(controller.Viewport.ScreenRect.Contains(point) && !controller.IsChrome(point, pointer.deviceId),
-                    Is.True, $"Pointer must reach map tile {world}");
-                InputSystem.QueueStateEvent(pointer, new MouseState { position = point }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+                FloorInstanceId = floor.FloorInstanceId, OriginNodeId = room, OriginConnectionPointId = opening.Id,
+                CorridorLength = 2
+            });
+            Assert.That(construction.IsCommittable, Is.True, string.Join(", ", construction.ReasonCodes));
+            var built = root.CommitOptionalBranchEdit();
+            Assert.That(built.IsSuccess, Is.True, built.Reason);
+            var inferred = SelectedBranch(root.Save.validatedCanonicalSpatialState);
+            Assert.That(inferred.AuthoredGeometry, Is.Null);
+            var first = new TileCoordinate(opening.World.X + 1, opening.World.Y);
+            var second = new TileCoordinate(opening.World.X + 2, opening.World.Y);
+            var original = new[] { first, second };
+            CollectionAssert.AreEquivalent(original, inferred.Footprint.OccupiedTiles);
+            var placement = root.SaveService.ExecuteCanonicalMutation(root.Save,
+                DetachedCanonicalMutationRequest.PlaceCorridor(CanonicalSpatialSaveContracts.TrapCategoryId,
+                    Gameplay.MvpDungeonPlacements.MvpDungeonPlacementIds.SpikeTrapOptionId,
+                    floor.FloorInstanceId, inferred.OptionalBranchId, first));
+            Assert.That(placement.IsSuccess, Is.True, placement.Reason);
+            var priorInvestment = placement.Validation.Investment.Single(item => item.StructureId == inferred.EdgeId);
+            var priorAssignment = placement.Validation.CorridorContent.Assignments.Single();
+            var priorBytes = root.SaveService.CanonicalSession.GetCurrentBytes();
+            double balance = root.Save.structureRuntime.ManaReserve;
+            var camera = GameObject.Find("ProductionDungeonCamera").GetComponent<Camera>();
+            var ui = controller.GetComponent<UIDocument>().rootVisualElement;
+            DungeonBuilder.M0.EditorTools.ProductionDungeonScreenshots.SetGameViewSize(1280, 720);
+            Click(ui.Q<Button>("edit"));
+            Click(ui.Q<Button>("renovateRoutes"));
+            var pointer = InputSystem.AddDevice<Mouse>();
+            try
+            {
+                yield return TapOptionalCorridorMap(pointer, camera, Center(second));
+                var accept = ui.Q<Button>("acceptOptionalBranch");
+                Assert.That(accept.style.display.value, Is.EqualTo(DisplayStyle.Flex), ui.Q<Label>("routeState").text);
+                Assert.That(accept.enabledSelf, Is.True, ui.Q<Label>("routeState").text);
+                var marker = controller.World.GetComponentsInChildren<TextMesh>().Single(item => item.text == "◇");
+                Assert.That(Vector2.Distance(marker.transform.localPosition, Center(opening.World) + Vector2.right * .26f),
+                    Is.LessThan(.01f), "The selected marker must be on the historical outward face");
+                var preview = controller.World.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>()
+                    .Single(map => map.name == "ConstructionPreview");
+                var rendered = new System.Collections.Generic.List<TileCoordinate>();
+                foreach (var position in preview.cellBounds.allPositionsWithin)
+                    if (preview.HasTile(position)) rendered.Add(new TileCoordinate(position.x, position.y));
+                CollectionAssert.AreEquivalent(original, rendered);
+                AssertUntouched();
+
+                Click(ui.Q<Button>("cancelRoute"));
+                Assert.That(JsonUtility.ToJson(SelectedBranch(controller.Draft.ReadModel)), Is.EqualTo(JsonUtility.ToJson(inferred)));
+                AssertUntouched();
+
+                Click(ui.Q<Button>("renovateRoutes"));
+                yield return TapOptionalCorridorMap(pointer, camera, Center(second));
+                var turn = new TileCoordinate(second.X, second.Y + 1);
+                yield return TapOptionalCorridorMap(pointer, camera, Center(turn));
+                Assert.That(accept.enabledSelf, Is.True, ui.Q<Label>("routeState").text);
+                AssertUntouched();
+                Click(accept);
                 yield return null;
                 yield return null;
-                InputSystem.QueueStateEvent(pointer, new MouseState { position = point });
-                yield return null;
-                yield return null;
+                Assert.That(controller.Draft.AcknowledgedSequence, Is.EqualTo(1));
+                var amended = SelectedBranch(controller.Draft.ReadModel);
+                Assert.That(amended.EdgeId, Is.EqualTo(inferred.EdgeId));
+                Assert.That(amended.OptionalBranchId, Is.EqualTo(inferred.OptionalBranchId));
+                Assert.That(amended.AuthoredGeometry.SourcePointId, Is.EqualTo(opening.Id));
+                var expected = new[] { first, second, turn };
+                CollectionAssert.AreEqual(expected, amended.AuthoredGeometry.Passage);
+                var quote = root.SaveService.PreviewDungeonDraft(root.Save, controller.Draft);
+                Assert.That(quote.Cost, Is.EqualTo(construction.Economy.Cost / original.Length));
+                Assert.That(quote.ForfeitedInvestment, Is.Zero);
+                Assert.That(quote.CreditedRefund, Is.Zero);
+                CollectionAssert.AreEqual(priorBytes, File.ReadAllBytes(root.SaveService.SavePath));
+                Click(ui.Q<Button>("cancelRoute"));
+                Click(ui.Q<Button>("save"));
+                Click(ui.Q<Button>("confirm"));
+                Assert.That(controller.IsEditing, Is.False);
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(balance - quote.Cost));
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(quote.ResultingMana));
+                byte[] disk = File.ReadAllBytes(root.SaveService.SavePath);
+                CollectionAssert.AreEqual(root.SaveService.CanonicalSession.GetCurrentBytes(), disk);
+                var context = (DetachedCurrentTargetValidationContext)typeof(SaveService).GetField("_validationContext",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(root.SaveService);
+                var saved = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(disk, context);
+                Assert.That(saved.CurrentTargetValidated, Is.True, saved.Reason);
+                var reopened = SelectedBranch(saved.State);
+                Assert.That(reopened.EdgeId, Is.EqualTo(inferred.EdgeId));
+                Assert.That(reopened.OptionalBranchId, Is.EqualTo(inferred.OptionalBranchId));
+                Assert.That(reopened.AuthoredGeometry.SourcePointId, Is.EqualTo(opening.Id));
+                CollectionAssert.AreEqual(expected, reopened.AuthoredGeometry.Passage);
+                Assert.That(JsonUtility.ToJson(saved.CorridorContent.Assignments.Single()),
+                    Is.EqualTo(JsonUtility.ToJson(priorAssignment)));
+                var investment = saved.Investment.Single(item => item.StructureId == inferred.EdgeId);
+                Assert.That(investment.ConstructionMana, Is.EqualTo(priorInvestment.ConstructionMana + quote.Cost));
+                Assert.That(investment.RenovationMana, Is.EqualTo(priorInvestment.RenovationMana));
+                TestContext.WriteLine($"Inferred opening {opening.Id} ({opening.Facing}), passage ({first.X},{first.Y}) to " +
+                    $"({second.X},{second.Y}) extended to ({turn.X},{turn.Y}), with {quote.Cost} mana in new investment.");
             }
+            finally { InputSystem.RemoveDevice(pointer); }
+
+            void AssertUntouched()
+            {
+                Assert.That(controller.Draft.CommandCount, Is.Zero);
+                Assert.That(controller.Draft.AcknowledgedSequence, Is.Zero);
+                Assert.That(root.Save.structureRuntime.ManaReserve, Is.EqualTo(balance));
+                CollectionAssert.AreEqual(priorBytes, root.SaveService.CanonicalSession.GetCurrentBytes());
+                CollectionAssert.AreEqual(priorBytes, File.ReadAllBytes(root.SaveService.SavePath));
+            }
+
+            static FloorRouteEdge SelectedBranch(DetachedCanonicalSpatialSaveState state) =>
+                state.Floors.Single().Layout.Edges.Single(edge => edge.Classification == RouteClassification.Optional);
+
+            static Vector2 Center(TileCoordinate tile) => new Vector2(tile.X + .5f, tile.Y + .5f);
+        }
+
+        private IEnumerator TapOptionalCorridorMap(Mouse pointer, Camera camera, Vector2 world)
+        {
+            yield return WaitForViewportGeometry();
+            Vector2 point = camera.WorldToScreenPoint(world);
+            Assert.That(controller.Viewport.ScreenRect.Contains(point) && !controller.IsChrome(point, pointer.deviceId),
+                Is.True, $"Pointer must reach map tile {world}");
+            InputSystem.QueueStateEvent(pointer, new MouseState { position = point }.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left));
+            yield return null;
+            yield return null;
+            InputSystem.QueueStateEvent(pointer, new MouseState { position = point });
+            yield return null;
+            yield return null;
         }
 
         [UnityTest]

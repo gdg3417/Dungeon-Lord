@@ -123,19 +123,10 @@ namespace DungeonBuilder.M0
                     renovationIntent = new StructuralRouteRenovation { Kind = StructuralRouteRenovationKind.ConnectBranch,
                         FloorInstanceId = selectedFloor, SourceNodeId = connected.SourceNodeId, TargetId = connected.EdgeId };
                     var geometry = connected.AuthoredGeometry;
-                    if (geometry == null && OptionalBranchGeometry.TryResolveSourceTile(floor, connected,
-                        root.ProductionSpatialContent.Catalog, out var start))
-                    {
-                        var tiles = connected.CorridorTiles.OrderBy(tile =>
-                            Math.Abs((long)tile.X - start.X) + Math.Abs((long)tile.Y - start.Y)).ToArray();
-                        if (tiles.Length > 0 && AuthoredRouteGeometry.TryFacing(start, tiles[0], out var facing))
-                        {
-                            var source = RouteOpenings(connected.SourceNodeId)
-                                .SingleOrDefault(opening => opening.World.Equals(start) && opening.Facing == facing);
-                            if (source.Id != null) geometry = new AuthoredRouteGeometry
-                                { SourcePointId = source.Id, DestinationPointId = string.Empty, Passage = tiles };
-                        }
-                    }
+                    if (geometry == null && OptionalBranchGeometry.TryResolveInferredPassage(floor, connected,
+                        root.ProductionSpatialContent.Catalog, out var pointId, out var passage))
+                        geometry = new AuthoredRouteGeometry
+                            { SourcePointId = pointId, DestinationPointId = string.Empty, Passage = passage };
                     branchPointId = geometry?.SourcePointId;
                     if (geometry != null) PreviewBranch(geometry);
                     ShowRenovationMap();

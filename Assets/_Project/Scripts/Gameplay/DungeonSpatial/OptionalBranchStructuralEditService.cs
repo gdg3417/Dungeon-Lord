@@ -325,11 +325,19 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (edge?.AuthoredGeometry != null)
                 return edge.Classification == RouteClassification.Optional &&
                     edge.AuthoredGeometry.TryResolve(floor, edge, catalog, out _, out _, out _);
+            return TryResolveInferredPassage(floor, edge, catalog, out _, out _);
+        }
+
+        internal static bool TryResolveInferredPassage(SavedSpatialFloor floor, FloorRouteEdge edge,
+            SpatialContentCatalog catalog, out string pointId, out TileCoordinate[] passage)
+        {
+            pointId = null;
+            passage = null;
+            if (edge?.AuthoredGeometry != null) return false;
             FloorRouteNode source = (floor?.Layout?.Nodes ?? Array.Empty<FloorRouteNode>())
                 .SingleOrDefault(value => value?.NodeId == edge?.SourceNodeId);
             TileCoordinate[] tiles = edge?.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>();
             if (source == null || tiles.Length == 0) return false;
-            int matches = 0;
             IEnumerable<string> pointIds;
             if (source.Kind == FloorRouteNodeKind.Room)
             {
@@ -344,13 +352,22 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     .ConnectionPoints ?? Array.Empty<SpatialConnectionPointDefinition>()).Select(value => value.ConnectionPointId);
             }
             else return false;
-            foreach (string pointId in pointIds)
-                if (TryResolvePoint(floor, source, pointId, catalog, out _, out TileCoordinate socket,
-                        out CardinalOrientation facing, out _) &&
-                    tiles.Contains(Step(socket, facing, 1)) && Enumerable.Range(1, tiles.Length)
-                        .Select(distance => Step(socket, facing, distance)).OrderBy(value => value)
-                        .SequenceEqual(tiles.OrderBy(value => value))) matches++;
-            return matches == 1;
+            var occupied = tiles.OrderBy(tile => tile).ToArray();
+            string match = null;
+            TileCoordinate[] ordered = null;
+            foreach (string candidate in pointIds)
+            {
+                if (!TryResolvePoint(floor, source, candidate, catalog, out _, out var doorway, out var facing, out _) ||
+                    !tiles.Contains(Step(doorway, facing, 1))) continue;
+                var sequence = Enumerable.Range(1, tiles.Length).Select(distance => Step(doorway, facing, distance)).ToArray();
+                if (!sequence.OrderBy(tile => tile).SequenceEqual(occupied)) continue;
+                if (match != null) return false;
+                match = candidate;
+                ordered = sequence;
+            }
+            pointId = match;
+            passage = ordered;
+            return match != null;
         }
 
         internal static bool TryResolveSourceTile(SavedSpatialFloor floor, FloorRouteEdge edge,
