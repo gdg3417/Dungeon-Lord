@@ -1,10 +1,19 @@
 # Build Promotion Policy for Sprint Governance
 
-Date: 2026-05-15
-Scope: Planning governance for Unit Testing, SIT, UAT, and build gate evidence across Sprint 1 through Sprint 4.
+The original 2026-05-15 Sprint 1 through Sprint 4 gates continue to apply to work within
+their scope. Use the [qualification supervisor readiness stages](../../Docs/testing/qualification-supervisor.md#readiness-stages)
+to schedule current evidence and the [test-stage matrix](test-stage-matrix.md)
+to identify applicable Unit, SIT and UAT requirements.
 
-## 1. When a branch can become a PR
-A branch can become a PR only when:
+## 1. Draft PR and review readiness
+
+Open a draft when the approved scope has a coherent, reviewable change. Record
+baseline, head, evidence collected, deferred or pending gates, and open defects.
+Codex may continue ordinary corrections and applicable qualification on the draft.
+Draft publication grants no acceptance, merge or build promotion.
+
+For ordinary implementation PR readiness, retain these checks:
+
 1. Ticket acceptance criteria for included scope are marked implemented.
 2. Required Unit and SIT checks for the included ticket set are PASS.
 3. Evidence links are attached for each completed check.
@@ -12,14 +21,23 @@ A branch can become a PR only when:
 
 For documentation-only planning PRs, Unit and SIT evidence may be marked Not Applicable when no executable code, game content, schemas, or build configuration changed. Markdown validation and human review evidence are still required.
 
+Owner UAT readiness may be reviewed on a draft. It requires applicable focused
+technical evidence and a [prepared isolated handoff](../../Docs/testing/owner-uat-preparation-and-artifact-lifecycle.md).
+Independent review decides whether UAT may begin. Keep any gate that the change
+or governing authority requires before owner testing. Producing an isolated
+build for acceptance does not promote it to internal test or release candidate.
+
 ## 2. When a PR can merge
-Implementation PRs must satisfy docs/development/codex-development-rules.md before merge.
+Implementation PRs must satisfy the [Codex development rules](../development/codex-development-rules.md)
+before merge.
 
 A PR can merge only when:
 1. Required checks in CI are green.
 2. Required governance checklist items for the active sprint are PASS.
 3. No unresolved blocker defects exist for included ticket scope.
 4. Build gate items marked blocker are all PASS.
+5. All applicable final Unit, SIT, UAT, build, persistence, platform, performance and preservation gates are satisfied.
+6. Independent final review approves the exact applicable change and evidence. The owner performs the merge.
 
 For documentation-only planning PRs, Unit and SIT evidence may be marked Not Applicable when no executable code, game content, schemas, or build configuration changed. Markdown validation and human review evidence are still required.
 

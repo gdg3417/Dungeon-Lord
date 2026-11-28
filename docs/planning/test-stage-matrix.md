@@ -1,5 +1,17 @@
 # Sprint 2 to Sprint 4 Test-Stage Matrix
 
+Use this matrix for Unit, SIT, UAT and build-gate applicability where its cases
+remain in scope. The [qualification supervisor](../../Docs/testing/qualification-supervisor.md#readiness-stages)
+governs implementation iteration, focused owner UAT readiness and final merge
+readiness. Unit, SIT and UAT describe evidence types across those stages.
+The [build-promotion policy](build-promotion-policy.md) governs promotion.
+
+Codex runs applicable automated checks, diagnoses ordinary failures and supplies
+technical evidence. The owner performs applicable gameplay UAT and makes
+material decisions. The older owner-run automated validation entries below
+record historical responsibilities or tooling limitations for their scoped
+packets. The current execution and review workflow applies to new work.
+
 **Current Phase 2B6B closeout status (2026-08-21):** PR #195 activates schema 7 with the approved production-owned save workload profile. Schemas 1–6 migrate through raw classification, detached preparation, transaction/recovery, and the production compatibility profile; native canonical creation, current-target loading, lossless canonical writes, runtime rebinding, and frozen legacy-evidence preservation are active. Canonical spatial state is the sole writable spatial authority; `dungeonLayout` remains independent writable economic state. Windows activation remains fail-closed outside qualified Windows Editor/Standalone local, nonredirected NTFS paths. Required validation passed at `c4ba1f68985c18c2a6a62bcfd84c217e0cf07b06`: PlayMode 1972 total / 1970 passed / 0 failed / 2 expected skips; EditMode 224 / 224; no compiler errors or warnings; the owner-run Editor migration, repair, capacity, persistence, run, and Delete Save cases passed. GD66 is complete pending merge of PR #195.
 
 **Current PR #195 fixture and acceptance ownership:** The GD66 suites cover raw classification; schemas 1–6 migration; detached preparation and recovery; native creation; canonical loading and exact-byte writes; unknown-extension preservation; canonical projection and legacy-writer suppression; additive production 2/2/2 capacity, duplicate no-op, persistence/reopen, localized failure routing, Narrow Hall repair, Delete Save quiescence, and Windows qualification. `Gd66MigrationLocalizationTests` continues to derive all registry-owned player keys from `Gd66MigrationReasonRegistry`. Canonical normal placement omits Narrow Hall, and native R1→R2 construction remains explicitly deferred to Phase 3.

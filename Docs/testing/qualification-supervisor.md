@@ -1,10 +1,9 @@
 # Completion-driven qualification supervisor
 
-Codex runs these commands and manages the plan. The owner only needs to return to
-the conversation when convenient. No PowerShell operation or process supervision
-is delegated to the owner. Requires Windows and Python 3.11+; Git and existing
-qualification tools must already be installed. No packages, service, queue, or
-Codex configuration changes are required.
+Codex runs these commands, manages the plan and investigates failures. The owner
+makes material project decisions, performs applicable gameplay UAT and merges
+independently approved PRs. The supervisor requires Windows, Python 3.11+, Git
+and the existing qualification tools.
 
 ## Launch and return later
 
@@ -30,8 +29,9 @@ Codex configuration changes are required.
    ```
 
    The launcher returns immediately after dispatch. A detached Python supervisor
-   owns the sequential campaign. Codex can end its turn; no polling messages,
-   recurring automation or open model turn is needed. Windows must remain running.
+   owns the sequential campaign while Windows remains running. Retain the branch,
+   source and input identities, campaign path, last verified checkpoint and
+   remaining gates for resumption.
 4. When the conversation resumes, inspect once:
 
    ```text
@@ -160,13 +160,13 @@ Before qualification, identify the applicable scope and classify checks as:
 5. Diagnostic-only tests that help explain behavior but are not gates.
 6. Performance investigations, distinguished from binding performance gates.
 
-Mandatory gates remain mandatory unless approved governance changes them. A
-focused selection cannot replace a required full-suite selection. For each stage,
-state whether it is required, optional, reused, or Not Applicable, with a concise
-reason. Not Applicable means the stage's behavior is outside the changed scope;
-it is not a pass. Preserve explicit Unit/SIT/UAT and build-promotion applicability
-and the player-facing UAT handoff rules in the test-stage matrix, build-promotion
-policy, and owner-UAT lifecycle authority.
+Record the readiness stage, changed systems and affected dependencies, required
+checks, optional diagnostics, reused evidence, Not Applicable checks with reasons,
+applicable final gates deferred until owner UAT acceptance, and material blockers.
+Use the [test-stage matrix](../../docs/planning/test-stage-matrix.md) for Unit,
+SIT and UAT applicability and the [build-promotion policy](../../docs/planning/build-promotion-policy.md)
+for promotion. A Not Applicable entry supplies no passing evidence. A focused
+selection cannot replace a mandatory full-suite gate.
 
 Choose the smallest sequence that establishes every applicable gate and material
 risk. Run diagnostics or exploratory tests when they resolve a stated uncertainty
@@ -176,22 +176,69 @@ documentation or source claim and runtime evidence is not required. Static revie
 does not replace required Unity execution, persistence, native filesystem, save
 lifecycle, reopen, or standalone checks.
 
+### Readiness stages
+
+1. **Implementation iteration.** Compile when executable inputs change and use
+   static inspection, affected Unit tests, focused SIT or diagnostics, and relevant
+   data and localization validation. Use targeted reproduction and verification
+   after corrections. Run a complete suite, product build, sustained profile or
+   lifecycle campaign here when necessary for the affected risk or an applicable gate.
+2. **Owner UAT readiness.** For applicable player-facing work, establish stable
+   compilation, directly affected behavior and validation, material cross-system
+   integration, and actual production interaction. Cover determinism, atomicity,
+   persistence and save/reopen, localization, accessibility and representative
+   rendering wherever affected. Supply a suitable isolated qualified build or
+   approved Editor setup with verified process and artifact preservation. Run
+   earlier gates required by the risk or a governing authority. Defer the other
+   mandatory final gates explicitly. Independent review determines whether the
+   owner may begin using the [prepared handoff](owner-uat-preparation-and-artifact-lifecycle.md).
+3. **Final merge readiness.** After owner acceptance, normally run the remaining
+   expensive gates for player-facing work. Mark owner UAT Not Applicable for
+   technical work when justified. Establish every applicable mandatory Unit, SIT,
+   UAT, build, persistence, platform, performance and preservation gate. After a
+   correction, reconcile automated evidence and review the accepted interaction.
+   A material change to accepted gameplay requires renewed acceptance of the
+   affected behavior. An unrelated correction may retain acceptance with a
+   documented applicability decision. Final independent review is mandatory
+   before the owner merges.
+
+### Applicability examples
+
+Apply every mandatory gate triggered by the actual change and dependencies,
+regardless of the PR label or changed directory.
+
+| Change | Iteration and owner UAT readiness where applicable | Final applicability |
+| --- | --- | --- |
+| Documentation only | Validate structure, links, references, claims and exact changed scope. | Independent review and applicable repository checks. Unity gates and owner UAT may be Not Applicable after verifying inputs, executable authorities and player-facing behavior. |
+| Qualification tooling | Run the affected Windows helper tests and disposable positive and negative integration cases. Trace any change to plan, inputs, ownership, verdict or preservation contracts. | Prove the affected executable gates, including real Unity execution if the changed contract requires it. Justify owner UAT applicability. |
+| Presentation-only correction | Exercise production input, representative layouts and affected accessibility/localization. Verify no unauthorized state mutation where controls reach transactional flows. Prepare gameplay-focused UAT where applicable. | Retain mandatory rendering, platform, build and regression coverage for the affected surface and dependencies. |
+| Gameplay simulation or construction | Run focused deterministic valid/invalid and atomicity cases, production interaction and relevant scheduler, save and reopen checks. Prepare representative gameplay UAT. | Run or reconcile all applicable full-suite, native, lifecycle, persistence and performance gates. |
+| Content or configuration | Validate schema, stable IDs, references, ordering, localization and loading. Verify affected production behavior and prepare UAT for player-visible changes. | Protect export, build validation, compatibility, required platforms and relevant performance limits. |
+| Save, schema, migration or recovery | Exercise exact readback, applicable supported migrations or obsolete-version refusal, interrupted publication, fail-closed recovery and isolated production reopen. Include native coverage early where the safety risk requires it. | Retain frozen historical contracts, relevant Windows Editor and standalone native filesystem evidence, lifecycle and preservation gates. Include UAT when the player-operated flow changes. |
+| Performance-sensitive | Use focused, comparable workloads with pinned configuration, sampling and context. Include interaction responsiveness where it affects meaningful UAT. | Keep applicable binding thresholds, target platforms and sustained profiles, including separate workloads where required. |
+
 ### Evidence identity and reuse
 
-Reuse a completed passing result only after verifying its exact source identity,
-complete tool identity (including the pinned adapter/helper chain), configuration,
-inputs, output artifacts and hashes, test applicability, and execution context.
-The result must still satisfy the current gate. Record what was reused and why it
-applies. Evidence from a different source or tool identity is historical or
-comparative evidence, never a new pass for the current identity. Clearly
-distinguish retained historical results from evidence qualifying the current PR.
+Reuse a completed passing result only after verifying the recorded source SHA,
+exact runtime input identity, complete pinned tool and adapter chain, execution
+configuration, platform, isolated product and save identities, and applicable
+process and preservation evidence. Verify exact test identities, scope and
+assertions, report completeness and named expected skips, and artifact file-sets
+and hashes. Record which current gate it satisfies and why. Different toolchains,
+products, modes, graphics or isolation arrangements require an explicit supported
+applicability decision before reuse.
 
-Documentation-only changes, and narrowly scoped external qualification-metadata
-changes, may not require rerunning unrelated tests when a documented applicability
-review establishes that their source, inputs, tools, and gate remain valid. Do not
-infer applicability from the label “documentation-only” alone if an input or
-execution condition changed. Never relabel a prior result, alter its recorded
-identity, or imply a stage ran when it was reused or Not Applicable.
+Documentation-only and narrowly scoped external qualification-metadata changes
+may use documented applicability review when source, inputs, tools and the gate
+remain valid. Preserve the result's recorded execution SHA and verdict. Clearly
+label prior-source results and reused evidence with their original identities.
+
+After each correction, compare affected dependencies and identity changes against
+collected evidence. Record which results still apply and which need fresh
+execution. If a complete suite already exercised a required historical
+regression or profile, map the exact NUnit case identity and result to its gate.
+Editor, native filesystem, standalone and genuinely distinct workloads retain
+their separate requirements.
 
 ### Focused smoke tests and Unity-generated inputs
 
@@ -202,15 +249,9 @@ already covered by applicable accepted evidence. If static inspection completely
 establishes a narrow claim, it may be sufficient for that claim only; retain all
 runtime and persistence verification required by governance.
 
-TMP, URP, PlayerSettings, and UnityConnect serialization changes have known
-previously observed patterns that can guide diagnosis, but pattern recognition
-never authorizes ignoring or restoring a change. Establish exact provenance and
-compare original and generated bytes. Preserve both byte sets and their hashes
-before any explicitly authorized restoration. Distinguish a verified known
-generated pattern from an unexplained difference; use the existing input inventory,
-preflight, checkpoint/restoration, and preservation authorities. Never silently
-revert unknown inputs, overwrite owner work, or disregard an unexpected project
-change.
+Known TMP, URP, PlayerSettings and UnityConnect serialization patterns can guide
+diagnosis. Restoration requires the exact authorization, identity and preservation
+checks under [bounded operational recovery](#bounded-operational-recovery).
 
 ### Process ownership, failure, and recovery
 
@@ -222,13 +263,14 @@ Recheck executable identity, creation identity, and ownership wherever the
 existing supervisor requires it. Do not repeat a completed root-cause investigation
 unless new evidence materially changes the diagnosis.
 
-An uncertain or incomplete campaign remains incomplete. Exceptional restoration,
-process termination, reservation release, or preservation substitutions follow
-the existing explicit owner-approval process. Never add force-unlock behavior,
-blanket ADB termination, or unrestricted process termination. This efficiency
-policy does not change timeout, completion, cancellation, or resume semantics.
-Preserve unresolved evidence and artifacts, and do not continue past a failure in
-a way that implies final preservation succeeded.
+A campaign passes only its selected gates. `FAILED` records a failed execution
+and stops remaining stages, including dependent restoration or preservation.
+`INCOMPLETE` preserves uncertainty and qualifies no mandatory gate. Keep recorded
+verdicts, failed and partial evidence, and any separate preservation receipts.
+The development task can continue with diagnosis and authorized corrections.
+An unresolved source, lease, process or preservation conflict blocks affected
+project writes and further campaign execution while safe read-only investigation
+continues. Report final preservation only when verified.
 
 ### Build and performance evidence
 
@@ -236,11 +278,11 @@ Consider reusing a successful build only when every applicable authority confirm
 the exact source identity, toolchain and build configuration, complete artifact
 file-set and hashes, required build-report authority, valid output and product
 identity, and required process and preservation evidence. Do not rebuild merely
-because an unrelated reporting artifact changed. A prior build cannot qualify
-another source or tool identity without an explicit supported applicability
-decision. Required executable standalone, save lifecycle, reopen, and native
-filesystem checks remain required when applicable; static build inspection does
-not replace them.
+because an unrelated reporting artifact changed. Reuse a sealed qualified build
+for another isolated scenario when the approved preparation authority supports it.
+A prior build requires an explicit supported applicability decision to qualify
+another source or tool identity. Applicable standalone, save lifecycle, reopen
+and native filesystem gates require their own execution evidence.
 
 Run benchmarks when a change affects a relevant workload, an explicit performance
 requirement applies, a measured regression exists, or necessary performance
@@ -250,15 +292,63 @@ results from binding performance gates and retain source, environment, sampling
 method, comparability, and measurement limitations. Do not infer improvement from
 non-comparable measurements. Existing mandatory performance gates remain intact.
 
-### Review checkpoints and qualification infrastructure
+Report stage and campaign elapsed times from retained timestamps. Use NUnit
+case durations for expensive embedded workloads and identify distinct executions
+separately. Embedded durations are already inside their suite totals. Record
+executed versus reused gates and material reasons for retries. Where measured,
+identify build, test, preparation, repeated work, recovery and review or owner
+waits. Report timing gaps and measure resource consumption before claiming
+savings. See the [headless suitability assessment](#headless-suitability-assessment)
+before proposing a change to a graphics mode.
 
-After independent review approves a testing sequence, continue through its
-routine passing stages without requesting a separate independent review after
-each stage. Stop and report unexpected test/build failures, material
-implementation or scope/specification changes, input/artifact preservation or
-process-ownership uncertainty, an authorization boundary, significant new risk,
-or any change that invalidates the approved sequence. Final independent merge
-review remains mandatory. No intermediate checkpoint is advance merge approval.
+### Autonomous execution and review checkpoints
+
+Codex inspects the applicable authorities and implementation, implements the
+approved scope, then compiles and runs the applicable checks. On failure, retain
+the original evidence, identify the root cause, correct it within scope, run the
+smallest appropriate verification and reconcile affected evidence. Continue the
+remaining applicable gates. Compilation, test, discovery, fixture, build, argument,
+artifact, localization and accessibility defects, and environmental failures with
+a safe approved recovery path, ordinarily follow this loop. Routine investigation,
+corrections, reruns and authorized scenario preparation need no new owner approval
+or independent review per attempt. Apply the [model policy](../process/AI_Model_Selection_Policy.md)
+to choose the lowest appropriate configuration for bounded corrections.
+
+Base each meaningful retry on new evidence, a correction or verified recovery.
+Use focused baseline comparison or applicable retained evidence to establish
+whether a defect is inherited and blocks this scope. Preserve failed and
+incomplete results after resolution. Avoid repeated expensive runs without new
+evidence, speculative cross-system fixes, wider baseline repair, and model
+escalation prompted solely by a failed test. A retry cannot gain a pass by
+extending its timeout without evidence, weakening assertions, adding unapproved
+expected skips or changing approved behavior to match an incorrect implementation.
+
+### When to pause development
+
+Pause the affected work at the following boundaries. Safe independent work may
+continue where the boundary permits.
+
+- **Completion.** The implementation and applicable checks are ready for the
+  next required review or handoff.
+- **Material owner decision.** Gameplay behavior, tuning, scope, a specification
+  conflict or another consequential project decision requires owner direction.
+- **Technical blocker.** Tools, permissions, dependencies or environment prevent
+  meaningful progress after reasonable in-scope diagnosis.
+- **Safety or authorization.** Further action requires uncertain process handling,
+  unauthorized restoration, owner save access, reservation release or an
+  unsupported preservation substitution.
+- **Material architecture or integrity uncertainty.** A correction would change
+  an approved authority, save or migration contract, architecture boundary or
+  determinism invariant, or materially expand the approved task.
+- **Independent review or acceptance.** Independent ChatGPT review evaluates
+  material design and correctness risks, UAT readiness, and final merge
+  readiness. The owner performs gameplay acceptance and merges approved PRs.
+  A material change that invalidates an earlier review returns to the affected gate.
+- **Investigation exhausted.** Further attempts would repeat an unsuccessful
+  approach without new evidence, consume disproportionate resources or require
+  speculative changes outside scope.
+
+### Qualification infrastructure
 
 Before proposing a test adapter, validator, inspector, script, supervisor, or
 framework, inspect existing authoritative components and prefer their fixtures,
@@ -271,12 +361,14 @@ second qualification framework under this policy.
 
 ### Concise reports and test-suite maintenance
 
-Qualification reports should be compact and decision-oriented while retaining
-enough detail to verify the verdict. State the source and changes reviewed; tests
-required, run, reused, or Not Applicable; results and evidence locations; blockers
-and limitations; input, process, and artifact preservation disposition; and
-independent-review or merge recommendation. Link retained investigations instead
-of repeating long narratives. Do not omit facts needed to establish the result.
+Give concise progress updates and consolidate resolved failures at the next
+meaningful review, UAT or final qualification report. Retain the full technical
+evidence, diagnosis, correction identities and verification locally. Include
+material failures and dispositions alongside source, gate applicability, results,
+durations, limitations and preservation status. Link the retained records.
+For a genuine blocker or exceptional authorization, consolidate the specific
+decision, affected identities, evidence, attempted diagnosis, practical impact and
+safe next action into one packet where practical.
 
 Maintain tests for distinct failure-detection value, not cumulative case count.
 Periodically review semantic duplication, obsolete or superseded assumptions,
@@ -287,8 +379,7 @@ currently passing. Preserve protection for determinism and canonical ordering;
 invalid states and atomicity; stable IDs and versioned saves; frozen migrations
 and backward compatibility; corruption and recovery boundaries; localization and
 player trust; platform-specific persistence; and required integration contracts.
-Test consolidation needs separate review, evidence, and a separate PR. This policy
-PR changes no test or qualification executable.
+Test consolidation needs separate review, evidence and a separate PR.
 
 ## Resume, failure and cancellation
 
@@ -298,9 +389,9 @@ New campaigns keep `active.json` and the OS execution lock in
 `TestResults/qualification-supervisor-reservation`, outside Unity-owned `Temp`.
 The old `Temp/qualification-supervisor/active.json`, when present with an owner,
 blocks new claims; it is never migrated or cleared automatically. A missing old
-marker does not authorize replacement of a recorded INCOMPLETE campaign. Inspect
-its immutable evidence and exact process identities and obtain the exceptional
-recovery approval described below. Do not mix supervisor versions on one project.
+marker supplies no authority to replace a recorded INCOMPLETE campaign. Historical
+or legacy reservations use the exceptional recovery path below. Keep one
+supervisor version per project.
 
 The five-second Job Object completion drain is unchanged. The installed Unity CLI
 documents a resident authentication broker with a two-minute idle lifetime. An
@@ -310,9 +401,11 @@ helper inside a test job. Pin the runner and record this invocation choice in th
 plan. This does not exempt any descendant from OS completion, extend waits, change
 authentication configuration globally, or retroactively complete an old campaign.
 
-A usage reset does not stop the detached supervisor. First use `status`; never
-create another campaign because the model stopped responding. If an interrupted
-supervisor is gone **between verified completed stages**, Codex can explicitly use:
+A usage reset leaves a verified detached supervisor running. On resumption, first
+inspect `status`, recover the recorded checkpoint and continue the approved work
+without asking the owner to restate it. Leave verified active work running.
+If an interrupted supervisor is gone **between verified completed stages**, Codex
+can explicitly use:
 
 ```text
 python Tools/Presentation/qualification_supervisor.py resume <campaign-path>
@@ -325,16 +418,11 @@ published immediately before a supervisor crash can be recovered by matching its
 identities, exit record and hashes. `run` is the synchronous diagnostic equivalent.
 Nothing automatically relaunches failed or uncertain work.
 
-If a child/host is still running after its supervisor vanishes, source/inputs
-mismatch, or any completion/exit/report identity is missing, preserve everything
-and report `INCOMPLETE`. A stale PID is checked against creation FILETIME and actual
-executable, not accepted as a living owned process. Access/query errors fail closed.
-The unresolved project reservation remains; there is intentionally no force-unlock
-or automatic repair/retry option. Codex must investigate and obtain owner approval
-for any recovery that would release an uncertain campaign or terminate an orphan.
-Failure stops later stages, including restoration/final checks; it never claims
-final preservation passed. Use the existing authority for reviewed recovery rather
-than silently restoring/overwriting changed inputs.
+A surviving host or child after supervisor loss, mismatched source or inputs,
+missing terminal evidence, or a failed identity query leaves the affected work
+`INCOMPLETE`. Compare a recorded PID against creation FILETIME and actual
+executable. Preserve the unresolved reservation and evidence. Use the bounded
+recovery policy before any affected mutation or replacement campaign.
 
 Explicit active cancellation is:
 
@@ -353,13 +441,131 @@ No kill-on-close policy is installed: a supervisor crash preserves live work.
 Cancellation of abandoned jobs is deliberately refused; a job's named handle may
 disappear when its supervisor dies even while descendants survive.
 
-Do not access normal owner saves, delete historical evidence, overwrite existing
-builds, terminate unrelated processes, install monitoring/queue dependencies or
-change Codex configuration. Owner approval remains necessary for exceptional
-preservation substitutions, orphan termination/reservation recovery and any model
-fallback specified by the repository model policy. Commands themselves remain
-reviewed qualification code; the supervisor cannot sandbox arbitrary Python.
-Independent review and existing merge gates remain required.
+Keep normal owner saves outside qualification and preserve active or uncertain
+processes, historical evidence and qualified builds. Exceptional preservation
+substitutions and orphan termination require explicit owner approval under the
+existing authority. The supervisor runs trusted qualification code and cannot
+sandbox arbitrary Python.
+
+## Bounded operational recovery
+
+The following standing authorization applies prospectively only after independent
+approval and owner merge of this policy, and only through an existing approved
+authority that can positively establish every applicable condition. It grants no
+retroactive authority over prior campaigns. Ambiguity or missing evidence keeps
+the affected work blocked. Continue safe read-only diagnosis and consolidate the
+exceptional owner authorization request where needed. Force-unlock, blanket
+process termination and automatic orphan handling remain outside this policy.
+
+### Predeclared temporary input restoration
+
+Before execution, identify the exact project, worktree, campaign and
+campaign-owned temporary paths. Retain the complete original bytes and
+predeclare the exact modified identity. At recovery, require all of the following:
+
+1. The existing execution lease is held. Applicable processes and jobs are
+   positively quiescent. Verify records against the exact project and campaign.
+2. Path containment and reparse protections pass. The complete four-root input
+   inventory, including ignored and generated files, has no unexplained change.
+3. Current bytes match the predeclared modified identity exactly. Archive both
+   byte sets and hashes before writing. Verify protected saves, qualified
+   artifacts and retained evidence against their preservation records through
+   the authorized authority.
+4. Restore only those declared files with the approved restoration authority.
+   Read back the exact original bytes, verify preservation again and retain a
+   durable receipt with campaign, lease and process evidence, exact paths and
+   hashes, and the outcome.
+
+Known serialization patterns alone supply no authority. Missing backups,
+unexpected generated changes, changed hashes, additional files, uncertain
+provenance or a partial or unverified restoration require exceptional review
+and owner authorization before further affected writes. Preserve the originals,
+observed state and receipts. Follow the authority's verified receipt if the
+operation has already completed. Broad Git reset, checkout, clean and restoration
+are outside this authorization.
+
+### Inactive reservation recovery
+
+The existing supervisor releases its reservation during normal terminal handling
+for recorded `PASSED` or `FAILED` outcomes. A released reservation does not establish
+input restoration or final preservation. A reserved, abandoned campaign requires
+positive proof before any separate release:
+
+1. Acquire the existing execution lease. Establish the exact reservation and
+   campaign identity and confirm that no newer or conflicting reservation exists.
+2. Verify exact recorded dispatch, supervisor, host, child, relevant job and
+   applicable descendant identities. Positively establish that no owned workload,
+   descendant or relevant job remains active and that process inspection had no
+   unresolved error.
+3. Verify the retained campaign records and evidence, and complete required
+   restoration and preservation disposition. Revalidate the lease, reservation
+   and quiescence immediately before releasing only the matching reservation.
+   Record the verification, release and preservation outcome in a durable
+   recovery receipt.
+
+An expired or absent PID, available OS lock, absent window, normal quit marker or
+missing named job handle alone supplies no proof of quiescence. If descendant
+absence cannot be verified, preserve the reservation and use the exceptional
+owner-authorization path. Any exceptional operation still requires a safe,
+approved procedure. Preserve `FAILED` and `INCOMPLETE` verdicts and evidence
+through recovery. After safe resolution, Codex may create a fresh applicable plan
+with an unused output identity within approved scope. The supervisor never
+restarts an interrupted workload automatically. Verified completed-stage resume
+remains governed by the existing rules above.
+
+### Existing authority and capability limits
+
+The [supervisor](../../Tools/Presentation/qualification_supervisor.py) pins exact
+input maps, including predeclared transitions, holds the execution lease and
+checks retained stage evidence. [Input inventory](../../Tools/Presentation/qualification_inputs.py),
+[preflight](../../Tools/Presentation/b3a_preservation_preflight.py) and reviewed
+campaign checkpoint and finish commands cover specific preparations. Those
+campaign-specific commands retain only their approved scope. An input-map
+declaration by itself neither archives original bytes nor provides a post-failure
+restoration transaction or receipt. Use routine restoration after failure only
+where an approved authority can prove the full contract above. Otherwise use
+exceptional approval.
+
+[Windows process handling](../../Tools/Presentation/qualification_windows.py)
+can verify an empty job while the supervisor owns its handle. Read-only
+`status` checks recorded identities and evidence. After a supervisor crash,
+these authorities cannot in general prove absence of all descendants, and there
+is no recovery command that revalidates and releases an abandoned reservation
+with a receipt. Such releases remain exceptional. The [planned-stop adapter](../../Tools/Presentation/qualification_planned_stop.py)
+is a separate exact owned-job test operation with its own capture and receipt.
+It supplies no abandoned-job recovery authority. This policy adds no executable
+recovery path or automatic cleanup.
+
+### Detached continuation limits
+
+A detached supervisor can finish its selected campaign without model polling.
+The Codex environment has no verified automatic continuation of this task after
+campaign completion or a usage interruption. Continue from the saved checkpoint
+when the conversation resumes. [Retained verification](evidence/qualification-supervisor/verification.md)
+documents detached execution and the limits on conversation delivery. Keep
+status inspection read-only and use the current supervisor without adding a
+scheduler, queue, recurring poll or background framework.
+
+## Headless suitability assessment
+
+The project and installed Windows Editor use Unity `6000.3.2f1`. The inspected
+Unity CLI was `1.0.0-beta.17`, whose `test --help` shows argument forwarding
+with `-- -nographics`. Unity batch mode automates the Editor, and adding
+`-nographics` omits initialization of the graphics device. Treat graphics
+mode as part of the execution identity. See the [Unity 6.3 Editor arguments](https://docs.unity.com/en-us/engine/6000.3/manual/unity-editor/command-line-arguments/editor).
+
+| Classification | Inspected workload and implications |
+| --- | --- |
+| Rendering independent | `SpatialContentValidationTests.ValidMinimalCatalog_IsValid` and `NullCatalogAndInvalidLimits_FailClosed` assert data validation without a rendered scene. They are static candidates for a future focused comparison. The existing H1-F4 inventory command already selects `-nographics` for discovery, which supplies no execution verdict for the discovered cases. |
+| Rendering dependent | `ProductionDungeonFloorSceneTests` sizes Game Views and captures frames. Production pointer, layout and accessibility cases exercising rendered UI retain the assertions and graphics mode they were qualified with. |
+| Native player or graphics dependent | `Gd66WindowsStandaloneQualificationTests.WindowsStandalonePreflightAndNativeFilesystemQualification` requires the Windows Player platform and native filesystem. Even if its file operations need no pixels, an Editor run cannot replace it. Keep native lifecycles, actual input and owner observation in their relevant player environments. |
+| Unknown pending evidence | Complete EditMode and PlayMode suites and embedded 68-run profiles need case and workload parity evidence. The H2 preparation adapter's existing headless build is scoped to its pinned build command and does not establish parity for test or player execution. |
+
+This is a static assessment. No test was executed in a new graphics mode.
+A future focused comparison must preserve equivalent assertions, exact discovery
+and named skips, production behavior, platform contracts and evidence identity
+before any promotion. This assessment leaves the existing execution configuration
+and performance thresholds in force.
 
 ## Disposable proof and verification
 
@@ -375,7 +581,11 @@ later `status` it once. `partial` instead of `ok` emits malformed XML and must f
 The `fixture` plan purpose is restricted to this exact disposable test helper; it
 cannot be used to bypass production preflight gates with arbitrary commands.
 
-Run the focused tests on Windows:
+When executable supervisor, input or preflight contracts change, run the applicable
+focused tests on Windows, including planned-stop coverage when that authority is
+affected. Exercise newly authorized recovery against disposable projects with
+positive and negative preservation, identity, lease and quiescence cases.
+The existing core suites are:
 
 ```text
 python -m unittest discover -s Tools/Presentation -p test_qualification_supervisor.py -v
@@ -384,14 +594,5 @@ python -m unittest discover -s Tools/Presentation -p test_b3a_preservation_prefl
 ```
 
 See [retained verification](evidence/qualification-supervisor/verification.md).
-No full Unity suite, sustained profile or Windows Development build is needed to
-qualify this tooling change.
-
-The retained duration diagnosis records Codex CLI `0.163.0-alpha.10.2`, queue help
-availability and Windows socket error `10050`; exact Desktop-thread delivery has
-not been demonstrated. There is no queue dependency, callback, socket retry or
-scheduled model polling here. A future optional callback requires a successful
-exact-thread delivery demonstration first, in a separate change; callback failure
-must never change a verdict or trigger a rerun. The owner still returns to the
-conversation and asks Codex to inspect results. No Unity speedup or token savings
-is inferred from detached orchestration.
+The disposable proof covers orchestration. Select Unity, build and profile gates
+separately when the changed contract requires them.
