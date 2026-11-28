@@ -8,7 +8,7 @@ using UnityEngine;
 namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 {
     public enum DraftDurability { Acknowledged, Pending, Failed, Unknown }
-    public enum DungeonDraftCommandKind { ContentReposition = 1, RoomMovement = 2, RoomConstruction = 3, RoomContent = 4, IndependentRoomPlacement = 5, RouteInsertion = 6 }
+    public enum DungeonDraftCommandKind { ContentReposition = 1, RoomMovement = 2, RoomConstruction = 3, RoomContent = 4, IndependentRoomPlacement = 5, RouteInsertion = 6, RouteRenovation = 7 }
 
     [Serializable]
     public sealed class DungeonDraftConstruction
@@ -59,6 +59,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DungeonDraftRoomContent[] RoomContentChanges = Array.Empty<DungeonDraftRoomContent>();
         public DungeonDraftIndependentRoomPlacement[] IndependentRoomPlacements = Array.Empty<DungeonDraftIndependentRoomPlacement>();
         public DungeonDraftRouteInsertion[] RouteInsertions = Array.Empty<DungeonDraftRouteInsertion>();
+        public StructuralRouteRenovation[] RouteRenovations = Array.Empty<StructuralRouteRenovation>();
+        internal StructuralRouteRenovation RouteRenovation => RouteRenovations?.Length == 1 ? RouteRenovations[0] : null;
         internal DungeonDraftRouteInsertion RouteInsertion => RouteInsertions?.Length == 1 ? RouteInsertions[0] : null;
         internal DungeonDraftIndependentRoomPlacement IndependentRoomPlacement =>
             IndependentRoomPlacements?.Length == 1 ? IndependentRoomPlacements[0] : null;
@@ -72,8 +74,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             {
                 if (ContentRepositions == null || RoomMovements == null || RoomConstructions == null ||
                     RoomContentChanges == null || IndependentRoomPlacements == null || RouteInsertions == null ||
+                    RouteRenovations == null ||
                     ContentRepositions.Length + RoomMovements.Length + RoomConstructions.Length +
-                    RoomContentChanges.Length + IndependentRoomPlacements.Length + RouteInsertions.Length != 1) return false;
+                    RoomContentChanges.Length + IndependentRoomPlacements.Length + RouteInsertions.Length +
+                    RouteRenovations.Length != 1) return false;
                 switch (Kind)
                 {
                     case DungeonDraftCommandKind.ContentReposition: return ContentReposition != null;
@@ -88,6 +92,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                             RouteInsertion.Request.Outgoing?.Passage != null &&
                             !string.IsNullOrWhiteSpace(RouteInsertion.ExpectedIncomingEdgeId) &&
                             !string.IsNullOrWhiteSpace(RouteInsertion.ExpectedOutgoingEdgeId);
+                    case DungeonDraftCommandKind.RouteRenovation: return RouteRenovation?.HasExactPayload == true;
                     default: return false;
                 }
             }
@@ -120,10 +125,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             StructuralContentRemovalPolicySnapshot removalPolicy = null)
         { Production = production; Configuration = configuration; Occupancy = occupancy; Limits = limits; Compatibility = compatibility; RemovalPolicy = removalPolicy; }
 
-        internal bool Validate(DetachedCanonicalSpatialSaveState state, string[] disconnectedRooms = null) => Limits != null &&
+        internal bool Validate(DetachedCanonicalSpatialSaveState state, string[] disconnectedRooms = null,
+            IReadOnlyCollection<string> rebuildingFloors = null) => Limits != null &&
             CanonicalSpatialSaveContracts.Validate(state, Limits.Canonical.Spatial).IsValid &&
             DetachedCanonicalProductionSemanticValidation.Validate(state, Production, Configuration,
-                Limits.Canonical.Spatial, Occupancy, true, disconnectedRooms).IsValid;
+                Limits.Canonical.Spatial, Occupancy, true, disconnectedRooms, rebuildingFloors).IsValid;
 
         public string Fingerprint(DetachedCanonicalSpatialSaveState state) => Limits != null &&
             StructuralEditService.TryFingerprint(state, Limits.Canonical, out string fingerprint)
@@ -163,7 +169,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
     public sealed partial class TransactionalDungeonDraft
     {
         internal const int RoomContentFormatVersion = 5;
-        public const int CurrentFormatVersion = 6;
+        internal const int InsertionFormatVersion = 6;
+        public const int CurrentFormatVersion = 7;
         public const string InvalidReason = "ui.dungeon.draft.invalid";
         public const string StaleReason = "ui.dungeon.draft.stale";
         public const string PendingReason = "ui.dungeon.draft.pending";
@@ -192,9 +199,11 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public string Reason { get; private set; }
         public bool IsClosed { get; private set; }
         public bool HasChanges => !IsStructurallyValid || context.Fingerprint(presented) != BaselineFingerprint;
-        public bool IsStructurallyValid => invalid.Count == 0 && invalidConstruction.Count == 0 && !HasDisconnectedRoom;
+        public bool IsStructurallyValid => invalid.Count == 0 && invalidConstruction.Count == 0 &&
+            !HasDisconnectedRoom && !HasIncompleteReconstruction;
         public bool HasStructuralIntent => commands.Any(c => c.Kind == DungeonDraftCommandKind.RoomMovement ||
-            c.Kind == DungeonDraftCommandKind.RoomConstruction || c.Kind == DungeonDraftCommandKind.IndependentRoomPlacement);
+            c.Kind == DungeonDraftCommandKind.RoomConstruction || c.Kind == DungeonDraftCommandKind.IndependentRoomPlacement ||
+            c.Kind == DungeonDraftCommandKind.RouteRenovation);
         public string[] DisconnectedRoomIds => commands.Where(c => c.Kind == DungeonDraftCommandKind.IndependentRoomPlacement)
             .Select(command => command.IndependentRoomPlacement)
             .Where(placement =>
@@ -208,7 +217,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         public DungeonDraftInvalidMovement[] InvalidMovements => invalid.Select(value => value.Copy()).ToArray();
         public DungeonDraftInvalidConstruction[] InvalidConstructions => invalidConstruction.Select(value => value.Copy()).ToArray();
         public string StructuralReason => invalid.FirstOrDefault()?.Reason ?? invalidConstruction.FirstOrDefault()?.Reason ??
-            (HasDisconnectedRoom ? StructuralEditService.RequiredRouteReason : null);
+            (HasDisconnectedRoom || HasIncompleteReconstruction ? StructuralEditService.RequiredRouteReason : null);
         public bool CanSave => !IsClosed && HasChanges && Durability == DraftDurability.Acknowledged &&
             AcknowledgedSequence == commands.Count && IsStructurallyValid && context.Validate(presented);
         public DetachedCanonicalSpatialSaveState ReadModel => context.Copy(presented);
@@ -315,6 +324,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 presented = placementPreview.DetachedCandidate;
                 return true;
             }
+            if (command.Kind == DungeonDraftCommandKind.RouteRenovation)
+                return ApplyRenovation(command.RouteRenovation);
             if (command.Kind == DungeonDraftCommandKind.RouteInsertion)
             {
                 var insertion = command.RouteInsertion;
@@ -353,7 +364,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             if (!string.IsNullOrEmpty(request?.ExistingDraftRoomId) &&
                 !DisconnectedRoomIds.Contains(request.ExistingDraftRoomId))
                 return StructuralEditService.InvalidPreview(StructuralEditService.TargetRoomNotBuildableReason, null);
-            return StructuralEditService.PreviewIndependentPlacement(presented, request, context);
+            return StructuralEditService.PreviewIndependentPlacement(presented, request, context,
+                RebuildingFloors.Contains(request?.FloorInstanceId));
         }
 
         public bool PlaceIndependentRoom(IndependentRoomPlacementRequest request)
@@ -371,7 +383,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }.Copy();
             presented = preview.DetachedCandidate;
             commands.Add(command);
-            formatVersion = CurrentFormatVersion;
+            formatVersion = Math.Max(formatVersion, InsertionFormatVersion);
             ruleIdentity = context.RuleIdentity(formatVersion);
             if (Durability != DraftDurability.Failed) Durability = DraftDurability.Pending;
             Reason = Durability == DraftDurability.Failed ? FailedReason : PendingReason;
@@ -408,7 +420,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }.Copy();
             presented = preview.Candidate;
             commands.Add(command);
-            formatVersion = CurrentFormatVersion;
+            formatVersion = Math.Max(formatVersion, InsertionFormatVersion);
             ruleIdentity = context.RuleIdentity(formatVersion);
             Durability = DraftDurability.Pending;
             Reason = PendingReason;

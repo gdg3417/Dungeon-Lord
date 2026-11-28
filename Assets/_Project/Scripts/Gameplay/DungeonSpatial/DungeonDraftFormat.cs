@@ -139,6 +139,93 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
         };
     }
 
+    // Frozen wire fields for the Amendment A command vocabulary.
+    [Serializable]
+    internal sealed class DungeonDraftV6Command
+    {
+        public long Sequence;
+        public DungeonDraftCommandKind Kind;
+        public DungeonDraftContentReposition[] ContentRepositions;
+        public StructuralMovementRequest[] RoomMovements;
+        public DungeonDraftConstruction[] RoomConstructions;
+        public DungeonDraftRoomContent[] RoomContentChanges;
+        public DungeonDraftIndependentRoomPlacement[] IndependentRoomPlacements;
+        public DungeonDraftRouteInsertion[] RouteInsertions;
+
+        internal DungeonDraftCommand Expand() => new DungeonDraftCommand
+        {
+            Sequence = Sequence, Kind = Kind, ContentRepositions = ContentRepositions,
+            RoomMovements = RoomMovements, RoomConstructions = RoomConstructions,
+            RoomContentChanges = RoomContentChanges, IndependentRoomPlacements = IndependentRoomPlacements,
+            RouteInsertions = RouteInsertions
+        };
+
+        internal static DungeonDraftV6Command From(DungeonDraftCommand value)
+        {
+            if (value == null || (int)value.Kind > (int)DungeonDraftCommandKind.RouteInsertion ||
+                value.RouteRenovations?.Length != 0) throw new ArgumentException();
+            return new DungeonDraftV6Command
+            {
+                Sequence = value.Sequence, Kind = value.Kind, ContentRepositions = value.ContentRepositions,
+                RoomMovements = value.RoomMovements, RoomConstructions = value.RoomConstructions,
+                RoomContentChanges = value.RoomContentChanges, IndependentRoomPlacements = value.IndependentRoomPlacements,
+                RouteInsertions = value.RouteInsertions
+            };
+        }
+    }
+
+    [Serializable]
+    internal sealed class DungeonDraftV6Journal
+    {
+        public int FormatVersion;
+        public string DraftId;
+        public string BaselineFingerprint;
+        public string RuleIdentity;
+        public long PrefixSequence;
+        public DungeonDraftV6Command[] Commands;
+
+        internal DungeonDraftJournal Expand() => new DungeonDraftJournal
+        {
+            FormatVersion = FormatVersion, DraftId = DraftId, BaselineFingerprint = BaselineFingerprint,
+            RuleIdentity = RuleIdentity, PrefixSequence = PrefixSequence,
+            Commands = Commands?.Select(command => command?.Expand()).ToArray()
+        };
+
+        internal static DungeonDraftV6Journal From(DungeonDraftJournal journal) => new DungeonDraftV6Journal
+        {
+            FormatVersion = journal.FormatVersion, DraftId = journal.DraftId, BaselineFingerprint = journal.BaselineFingerprint,
+            RuleIdentity = journal.RuleIdentity, PrefixSequence = journal.PrefixSequence,
+            Commands = journal.Commands.Select(DungeonDraftV6Command.From).ToArray()
+        };
+    }
+
+    [Serializable]
+    internal sealed class DungeonDraftV5Candidate
+    {
+        public int Version;
+        public string DraftId;
+        public string Baseline;
+        public long Sequence;
+        public string PredecessorCommit;
+        public int JournalFormatVersion;
+        public string RuleIdentity;
+        public DungeonDraftV6Command[] Commands;
+
+        internal DungeonDraftCandidate Expand() => new DungeonDraftCandidate
+        {
+            Version = Version, DraftId = DraftId, Baseline = Baseline, Sequence = Sequence,
+            PredecessorCommit = PredecessorCommit, JournalFormatVersion = JournalFormatVersion,
+            RuleIdentity = RuleIdentity, Commands = Commands?.Select(command => command?.Expand()).ToArray()
+        };
+
+        internal static DungeonDraftV5Candidate From(DungeonDraftCandidate candidate) => new DungeonDraftV5Candidate
+        {
+            Version = candidate.Version, DraftId = candidate.DraftId, Baseline = candidate.Baseline, Sequence = candidate.Sequence,
+            PredecessorCommit = candidate.PredecessorCommit, JournalFormatVersion = candidate.JournalFormatVersion,
+            RuleIdentity = candidate.RuleIdentity, Commands = candidate.Commands.Select(DungeonDraftV6Command.From).ToArray()
+        };
+    }
+
     internal static class DungeonDraftFormat
     {
         internal static byte[] Encode(DungeonDraftJournal journal) => journal == null ? null :
@@ -150,7 +237,8 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                     RuleIdentity = journal.RuleIdentity, PrefixSequence = journal.PrefixSequence,
                     Commands = journal.Commands.Select(DungeonDraftV3Command.From).ToArray() })
                 : journal.FormatVersion == 4 ? Bytes(DungeonDraftV4Journal.From(journal))
-                : journal.FormatVersion == 5 ? Bytes(DungeonDraftV5Journal.From(journal)) : Bytes(journal);
+                : journal.FormatVersion == 5 ? Bytes(DungeonDraftV5Journal.From(journal))
+                : journal.FormatVersion == 6 ? Bytes(DungeonDraftV6Journal.From(journal)) : Bytes(journal);
         internal static byte[] Bytes(object value) => Encoding.UTF8.GetBytes(JsonUtility.ToJson(value));
         internal static T Exact<T>(byte[] bytes) where T : class
         {
@@ -177,6 +265,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             }
             if (version?.FormatVersion == 4) return Exact<DungeonDraftV4Journal>(bytes).Expand();
             if (version?.FormatVersion == 5) return Exact<DungeonDraftV5Journal>(bytes).Expand();
+            if (version?.FormatVersion == 6) return Exact<DungeonDraftV6Journal>(bytes).Expand();
             if (version?.FormatVersion != TransactionalDungeonDraft.CurrentFormatVersion) throw new ArgumentException();
             return Exact<DungeonDraftJournal>(bytes);
         }

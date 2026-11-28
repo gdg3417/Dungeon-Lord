@@ -150,6 +150,7 @@ namespace DungeonBuilder.M0
             initialized = true;
             pixelsPerPhysicalUnit = DungeonPhysicalUnits.PixelsPerUnit();
             Button("edit", EnterEdit); Button("save", ReviewSave); Button("discard", ReviewDiscard);
+            Button("renovateRoutes", OpenRenovation);
             Button("buildFirstRoom", ReviewFirstRoom);
             Button("move", BeginMove); Button("closeSheet", () => { CloseSheet(); Present(); }); Button("reset", FitFloor);
             Button("focusRoom", FocusRoom);
@@ -328,7 +329,7 @@ namespace DungeonBuilder.M0
         private void ReviewSave()
         {
             if (!HasCanonicalRuntime()) return;
-            if (IsAuthoringRoute || draft?.CanSave != true) return;
+            if (IsAuthoringRoute || draft?.CanSave != true || corridorRenovationBlocker != null) return;
             RefreshEconomy();
             ShowModal("ui.dungeon.commit_review", () => Commit(), "ui.dungeon.save");
             if (economicPreview != null) document.rootVisualElement.Q<Label>("modalText").text += "\n" +
@@ -342,7 +343,7 @@ namespace DungeonBuilder.M0
         }
         public bool Commit()
         {
-            if (!HasCanonicalRuntime() || IsAuthoringRoute) return false;
+            if (!HasCanonicalRuntime() || IsAuthoringRoute || corridorRenovationBlocker != null) return false;
             var result = root.CommitProductionDungeonDraft(draft);
             if (!result.IsSuccess) { feedback = result.Reason; Present(); return false; }
             feedback = draft.Reason ?? "ui.dungeon.committed"; draft = null; CloseSheet(); detailsCollapsed=false;
@@ -448,6 +449,7 @@ namespace DungeonBuilder.M0
             world.PresentRoomIntents(draft?.InvalidMovements);
             world.PresentConstructionIntents(draft?.InvalidConstructions);
             RefreshRouteProposal();
+            RefreshCorridorRenovationConsequences();
             PresentRouteMap();
             RefreshEconomy();
             viewport.Configure(RouteInteractionBounds, worldCamera.pixelRect.width > 0 ? worldCamera.pixelRect : new Rect(0, 0, Screen.width, Screen.height), reset);
@@ -467,7 +469,7 @@ namespace DungeonBuilder.M0
             PresentHud();
             ui.Q<Label>("mode").text = Text(IsEditing ? "ui.dungeon.edit_mode" : "ui.dungeon.normal");
             string statusKey = draft != null && draft.Durability != DraftDurability.Acknowledged ? draft.Reason :
-                feedback ?? ProductionDungeonPresenter.DraftStatus(draft);
+                feedback ?? corridorRenovationBlocker ?? ProductionDungeonPresenter.DraftStatus(draft);
             string structuralReason = draft?.StructuralReason;
             if (structuralReason == StructuralEditService.RequiredRouteReason && draft.DisconnectedRoomIds.Length > 0)
                 structuralReason = "ui.dungeon.route.waiting";
@@ -482,7 +484,12 @@ namespace DungeonBuilder.M0
             ui.Q<Button>("edit").style.display = IsEditing || showFirstRoom ? DisplayStyle.None : DisplayStyle.Flex;
             ui.Q("editActions").style.display = IsEditing ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("edit").SetEnabled(recoveryBytes == null && recoveryReason == null);
-            ui.Q<Button>("save").SetEnabled(!IsAuthoringRoute && draft?.CanSave == true && draftContext.Fingerprint(root.Save.validatedCanonicalSpatialState) == draft.BaselineFingerprint);
+            var renovate = ui.Q<Button>("renovateRoutes");
+            renovate.style.display = IsEditing && !IsAuthoringRoute ? DisplayStyle.Flex : DisplayStyle.None;
+            renovate.SetEnabled(IsEditing && draft.Durability == DraftDurability.Acknowledged &&
+                DraftSelectedFloor()?.ActivationState == FloorActivationState.Active);
+            ui.Q<Button>("save").SetEnabled(!IsAuthoringRoute && corridorRenovationBlocker == null &&
+                draft?.CanSave == true && draftContext.Fingerprint(root.Save.validatedCanonicalSpatialState) == draft.BaselineFingerprint);
             ui.Q<Button>("discard").SetEnabled(IsEditing);
             ui.Q<Button>("retry").style.display = IsEditing && draft.Durability == DraftDurability.Failed ? DisplayStyle.Flex : DisplayStyle.None;
             ui.Q<Button>("move").SetEnabled(IsEditing && (selected != null || selectedRoomId != null) && draft.Durability != DraftDurability.Unknown);
@@ -552,7 +559,7 @@ namespace DungeonBuilder.M0
             var summary = document.rootVisualElement.Q<Label>("draftSummary");
             summary.style.display = IsEditing && draft.IsStructurallyValid ? DisplayStyle.Flex : DisplayStyle.None;
             summary.text = economicPreview == null ? Text("ui.dungeon.construction.draft_empty") : Format("ui.dungeon.construction.draft_quote",
-                StructuralEconomyPresenter.FormatTransactionAmount(economicPreview.Cost),
+                StructuralEconomyPresenter.FormatTransactionAmount(economicPreview.Cost - economicPreview.CreditedRefund),
                 StructuralEconomyPresenter.FormatTransactionAmount(economicPreview.ResultingMana));
         }
         public void SetTextSize(DungeonTextSize size)
@@ -670,7 +677,7 @@ namespace DungeonBuilder.M0
                 if (!chrome && IsAuthoringRoute && !second.HasValue)
                 {
                     var handle = RouteHandleAt(viewport.ScreenToWorld(point));
-                    if (handle?.IsPassage == true)
+                    if (CanSelectRouteTarget(handle) && (handle.IsPassage || handle.Kind == RouteTargetKind.Doorway))
                     {
                         routeDrag = handle;
                         routeDragStart = routeDragEnd = point;
@@ -723,11 +730,29 @@ namespace DungeonBuilder.M0
                     }
                     if (routeDragging && viewport.ScreenRect.Contains(point) && !IsChrome(point, primaryTouchId))
                     {
-                        var destination = ScreenCell(point);
-                        if (!attemptedCell.Equals(destination))
+                        if (routeDrag.Kind == RouteTargetKind.Doorway)
                         {
-                            AdjustRoute(routeDrag, destination);
-                            PresentAdjustment();
+                            var handle = RouteHandleAt(viewport.ScreenToWorld(point));
+                            if (handle?.Kind == RouteTargetKind.Replacement &&
+                                (attemptedMarker == null || attemptedMarker.Value != handle.Position))
+                            {
+                                AdjustRoute(routeDrag, ScreenCell(point), handle);
+                                PresentAdjustment();
+                            }
+                            else if (handle?.Kind != RouteTargetKind.Replacement && attemptedMarker.HasValue)
+                            {
+                                ClearRouteAttempt();
+                                PresentAdjustment();
+                            }
+                        }
+                        else
+                        {
+                            var destination = ScreenCell(point);
+                            if (!attemptedCell.Equals(destination))
+                            {
+                                AdjustRoute(routeDrag, destination);
+                                PresentAdjustment();
+                            }
                         }
                     }
                     return;
@@ -742,7 +767,8 @@ namespace DungeonBuilder.M0
                 }
                 if (routeDragging)
                 {
-                    if (attemptedRoute == null && attemptReason == null) AdjustRoute(routeSelection, ScreenCell(routeDragEnd));
+                    if (routeSelection.IsPassage && attemptedRoute == null && attemptReason == null)
+                        AdjustRoute(routeSelection, ScreenCell(routeDragEnd));
                     CompleteRouteAdjustment();
                 }
                 else TryRouteMap(viewport.ScreenToWorld(routeDragStart));

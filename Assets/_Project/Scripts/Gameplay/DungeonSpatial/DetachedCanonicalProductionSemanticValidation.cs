@@ -26,7 +26,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             DetachedCanonicalSpatialSaveState state, ProductionSpatialContentSnapshot production,
             RunSimulationConfig configuration, CanonicalSpatialSaveWorkloadLimits limits,
             RoomContentSpatialOccupancySnapshot occupancy = null, bool requirePositions = false,
-            string[] disconnectedRoomIds = null)
+            string[] disconnectedRoomIds = null, IReadOnlyCollection<string> rebuildingFloors = null)
         {
             var issues = new List<DetachedCanonicalProductionSemanticIssue>();
             if (state == null || production == null || configuration == null || !limits.IsValid ||
@@ -74,8 +74,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
                 if (!AuthoredOpeningsValid(floor, catalog))
                     issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);
                 ValidateFixed(floor, floorDefinition, catalog, limits, issues);
+                bool rebuilding = rebuildingFloors?.Contains(floor.FloorInstanceId) == true;
                 var layoutIssues = layoutValidation.Issues.Where(issue =>
-                    !StructuralRouteInsertionService.AllowedIncomplete(issue, floor, disconnectedRoomIds)).ToArray();
+                    !StructuralRouteInsertionService.AllowedIncomplete(issue, floor, disconnectedRoomIds) &&
+                    !(rebuilding && StructuralRouteRenovationService.AllowsDuringRebuild(issue.Reason))).ToArray();
                 if (layoutIssues.Length != 0 && !ContainsOnlyIndividuallyClassifiedFixedIssues(
                         layoutIssues, floor.FixedStructures))
                     issues.Add(DetachedCanonicalProductionSemanticIssue.FloorLayout);

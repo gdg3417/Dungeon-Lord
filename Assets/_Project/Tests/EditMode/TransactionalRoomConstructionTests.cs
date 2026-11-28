@@ -75,6 +75,156 @@ namespace DungeonBuilder.M0.Tests.EditMode
             CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
         }
 
+        [Test]
+        public void ResetRelocateInteriorStructuresAndRebuildRecoversAndPublishes()
+        {
+            var f = Room();
+            f.Runtime.structureRuntime.ManaReserve = 500;
+            var context = Context(f);
+            var floor = f.State.Floors.Single();
+            var store = new FileDungeonDraftStore(f.ActivePath + ".editor-draft", f.FileSystem, f.Profile);
+            var draft = TransactionalDungeonDraft.Create(f.State, context, store);
+            var before = f.FileSystem.ReadAllBytes(f.ActivePath);
+            var entrance = floor.FixedStructures.Single(value => value.Kind == FixedSpatialStructureKind.Entrance);
+            var completion = floor.FixedStructures.Single(value => value.Kind == FixedSpatialStructureKind.CompletionTerminal);
+            var room = floor.Layout.Rooms.Single();
+            string start = floor.Layout.Nodes.Single(node => node.Kind == FloorRouteNodeKind.Entrance).NodeId;
+            string middle = floor.Layout.Nodes.Single(node => node.Kind == FloorRouteNodeKind.Room).NodeId;
+            string end = floor.Layout.Nodes.Single(node => node.Kind == FloorRouteNodeKind.Completion).NodeId;
+            Apply(new StructuralRouteRenovation { Kind = StructuralRouteRenovationKind.Reset });
+            Assert.That(draft.ReadModel.Floors.Single().Layout.Edges, Is.Empty);
+            Assert.That(draft.CanSave, Is.False);
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+
+            Move(entrance.FixedStructureInstanceId, 4, 3);
+            Move(room.RoomInstanceId, 4, 5);
+            Move(completion.FixedStructureInstanceId, 5, 9);
+            Link(start, middle, "route", "south");
+            var result = Link(middle, end, "north", "route");
+            Assert.That(result.UsedFloorSpace, Is.EqualTo(26));
+            Assert.That(result.FloorCapacity, Is.EqualTo(60));
+            Assert.That(draft.CanSave, Is.True);
+            Assert.That(DungeonDraftFormat.Parse(store.Read()).FormatVersion, Is.EqualTo(7));
+
+            draft = TransactionalDungeonDraft.Recover(store.Read(), f.State, context, store, out var failure);
+            Assert.That(draft, Is.Not.Null, failure);
+            Assert.That(draft.CanSave, Is.True);
+            CollectionAssert.AreEqual(floor.RoomContents.Assignments.Select(JsonUtility.ToJson),
+                draft.ReadModel.Floors.Single().RoomContents.Assignments.Select(JsonUtility.ToJson));
+            CollectionAssert.AreEqual(before, f.FileSystem.ReadAllBytes(f.ActivePath));
+            f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, draft));
+            f.Reopen();
+            var reopened = f.State.Floors.Single();
+            Assert.That(reopened.FixedStructures.Single(value => value.FixedStructureInstanceId == entrance.FixedStructureInstanceId).Anchor,
+                Is.EqualTo(new TileCoordinate(4, 3)));
+            Assert.That(reopened.FixedStructures.Single(value => value.FixedStructureInstanceId == completion.FixedStructureInstanceId).Anchor,
+                Is.EqualTo(new TileCoordinate(5, 9)));
+            Assert.That(RequiredFloorTraversal.TryResolve(reopened.Layout, out var route), Is.True);
+            CollectionAssert.AreEqual(new[] { start, middle, end }, route.Select(node => node.NodeId));
+            Assert.That(f.Economy.TryRoom(room.RoomDefinitionId, out double roomCost), Is.True);
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(500 -
+                new FormulaEngine().Evaluate(new FormulaInput(roomCost * f.Economy.MovementFactor)).Value));
+
+            void Move(string id, int x, int y) => Apply(new StructuralRouteRenovation
+            {
+                Kind = StructuralRouteRenovationKind.MoveStructure, TargetId = id, Anchor = new TileCoordinate(x, y)
+            });
+
+            StructuralRouteRenovationPreview Link(string source, string destination, string from, string to) =>
+                Apply(new StructuralRouteRenovation
+                {
+                    Kind = StructuralRouteRenovationKind.Connect, SourceNodeId = source, DestinationNodeId = destination,
+                    Connections = new[] { new AuthoredRouteGeometry { SourcePointId = from, DestinationPointId = to } }
+                });
+
+            StructuralRouteRenovationPreview Apply(StructuralRouteRenovation command)
+            {
+                command.FloorInstanceId = floor.FloorInstanceId;
+                var preview = draft.PreviewRenovation(command);
+                Assert.That(preview.IsValid, Is.True, preview.Reason);
+                Assert.That(draft.AcceptRenovation(command), Is.True, draft.Reason);
+                Flush(draft);
+                return preview;
+            }
+        }
+
+        [Test]
+        public void CommittedCornerConnectionConversionAndDisjointReplacementReusePaidCorridor()
+        {
+            var f = Room();
+            f.Runtime.structureRuntime.ManaReserve = 500;
+            var context = Context(f);
+            var tail = TransactionalDungeonDraft.Create(f.State, context, new Store());
+            Build(f, tail, Request(f, 0, 6));
+            f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, tail));
+            var floor = f.State.Floors.Single();
+            Assert.That(RequiredFloorTraversal.TryResolve(floor.Layout, out var route), Is.True);
+            var edge = floor.Layout.Edges.Single(value => value.SourceNodeId == route[1].NodeId &&
+                value.DestinationNodeId == route[2].NodeId);
+            Assert.That(f.Economy.TryCorridor(OptionalBranchStructuralEditService.CorridorDefinitionId, out var unitCost), Is.True);
+            var draft = TransactionalDungeonDraft.Create(f.State, context, new Store());
+            var shortLink = Intent("perimeter.east.3", "perimeter.east.0", (4, 5), (4, 6));
+            Assert.That(draft.PreviewRenovation(shortLink).UsedFloorSpace, Is.EqualTo(44));
+            Assert.That(draft.AcceptRenovation(shortLink), Is.True, draft.Reason);
+            Flush(draft);
+            double firstBalance = f.Runtime.structureRuntime.ManaReserve;
+            f.Accept(f.Authority.CommitDungeonDraft(f.ActivePath, f.FileSystem, f.Session, f.Runtime, draft));
+            f.Reopen();
+            Assert.That(f.Runtime.structureRuntime.ManaReserve, Is.EqualTo(firstBalance - 2 * unitCost));
+
+            var redesign = TransactionalDungeonDraft.Create(f.State, context, new Store());
+            var disjoint = Intent("east.2", "east", (4, 4), (5, 4), (5, 5), (5, 6), (5, 7), (4, 7));
+            Assert.That(redesign.PreviewRenovation(disjoint).UsedFloorSpace, Is.EqualTo(48));
+            Assert.That(redesign.AcceptRenovation(disjoint), Is.True, redesign.Reason);
+            Flush(redesign);
+            var owned = DetachedCompleteSaveContract.ParseValidateAndRoundTrip(f.Session.GetCurrentBytes(), f.Context);
+            var quote = StructuralEconomyService.PreviewFinalContentDraft(owned.State, redesign.ReadModel,
+                owned.Investment, Array.Empty<string>(), 4 * unitCost, f.Economy, null,
+                explicitRetirements: redesign.ExplicitStructuralRetirements);
+            Assert.That(quote.IsAffordable, Is.True, quote.Reason);
+            Assert.That(quote.GrossCost, Is.EqualTo(6 * unitCost));
+            Assert.That(quote.ReusedInvestment, Is.EqualTo(2 * unitCost));
+            Assert.That(quote.CreditedRefund, Is.Zero);
+            Assert.That(quote.ResultingMana, Is.Zero);
+            Assert.That(quote.Investment.Single(value => value.StructureId == edge.EdgeId).ConstructionMana,
+                Is.EqualTo(6 * unitCost));
+            StructuralEconomyService.RefreshBalance(quote, 4 * unitCost - 1, f.Economy);
+            Assert.That(quote.Reason, Is.EqualTo(StructuralEconomyService.InsufficientReason));
+
+            StructuralRouteRenovation Intent(string source, string destination, params (int X, int Y)[] tiles) =>
+                new StructuralRouteRenovation
+                {
+                    Kind = StructuralRouteRenovationKind.Connect, FloorInstanceId = floor.FloorInstanceId,
+                    TargetId = edge.EdgeId, SourceNodeId = route[1].NodeId, DestinationNodeId = route[2].NodeId,
+                    Connections = new[] { new AuthoredRouteGeometry { SourcePointId = source,
+                        DestinationPointId = destination,
+                        Passage = tiles.Select(tile => new TileCoordinate(tile.X, tile.Y)).ToArray() } }
+                };
+        }
+
+        [Test]
+        public void NetSettlementUsesGenuineRefundsBeforeReserveAndCapsTheFinalCredit()
+        {
+            var f = Room();
+            var quote = new StructuralEconomyPreview
+            {
+                UsesNetSettlement = true, Cost = 150, Refund = 80, RequiredReserveAfter = 30
+            };
+            StructuralEconomyService.RefreshBalance(quote, 100, f.Economy);
+            Assert.That(quote.IsAffordable, Is.True);
+            Assert.That(quote.CreditedRefund, Is.EqualTo(80d));
+            Assert.That(quote.ResultingMana, Is.EqualTo(30d));
+            StructuralEconomyService.RefreshBalance(quote, 99, f.Economy);
+            Assert.That(quote.Reason, Is.EqualTo(MonsterRecoveryRules.Insufficient));
+            StructuralEconomyService.RefreshBalance(quote, 60, f.Economy);
+            Assert.That(quote.Reason, Is.EqualTo(StructuralEconomyService.InsufficientReason));
+            quote.Cost = 0;
+            StructuralEconomyService.RefreshBalance(quote, f.Economy.ManaCapacity - 10, f.Economy);
+            Assert.That(quote.IsAffordable, Is.True);
+            Assert.That(quote.CreditedRefund, Is.EqualTo(10d));
+            Assert.That(quote.ResultingMana, Is.EqualTo(f.Economy.ManaCapacity));
+        }
+
         [TestCase(0, 2, StructuralEditService.RoomOverlapReason)]
         [TestCase(1, 6, StructuralEditService.FixedOverlapReason)]
         [TestCase(9, 9, StructuralEditService.OutOfBoundsReason)]

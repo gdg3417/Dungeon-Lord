@@ -342,7 +342,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
 
         /// <summary>Stages only a room and its node. The detached result can have an incomplete route.</summary>
         internal static StructuralEditPreview PreviewIndependentPlacement(DetachedCanonicalSpatialSaveState current,
-            IndependentRoomPlacementRequest request, DungeonDraftContext context)
+            IndependentRoomPlacementRequest request, DungeonDraftContext context, bool rebuildingFloor = false)
         {
             var result = new StructuralEditPreview
             {
@@ -417,8 +417,10 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             var validation = FloorLayoutValidator.Validate(floor.Layout, floorDefinition, catalog.Rooms, catalog.Corridors,
                 workload, floor.FixedStructures, catalog.FixedStructures, CanonicalEditFloorTarget.Mode(floor));
             // Detached drafts can add isolated rooms. Every other topology or geometry failure still blocks placement.
-            var issues = validation.Issues.Where(issue => issue.Reason != FloorLayoutValidationReason.UnreachableRoom ||
-                floor.Layout.Edges.Any(edge => edge.SourceNodeId == issue.SubjectId || edge.DestinationNodeId == issue.SubjectId)).ToArray();
+            var issues = validation.Issues.Where(issue =>
+                !(rebuildingFloor && StructuralRouteRenovationService.AllowsDuringRebuild(issue.Reason)) &&
+                (issue.Reason != FloorLayoutValidationReason.UnreachableRoom ||
+                floor.Layout.Edges.Any(edge => edge.SourceNodeId == issue.SubjectId || edge.DestinationNodeId == issue.SubjectId))).ToArray();
             if (issues.Length != 0) return Fail(result, Map(issues));
             result.DetachedCandidate = context.Copy(candidate);
             if (result.DetachedCandidate == null) return Fail(result, WorkloadReason);

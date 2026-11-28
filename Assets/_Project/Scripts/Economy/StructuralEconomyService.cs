@@ -15,6 +15,8 @@ namespace DungeonBuilder.M0.Economy
         public double Cost { get; internal set; }
         public double ContentAcquisitionCost { get; internal set; }
         public int ContentAcquisitions { get; internal set; }
+        public double GrossCost { get; internal set; }
+        public double ReusedInvestment { get; internal set; }
         public double RefundBasis { get; internal set; }
         public double Refund { get; internal set; }
         public double CreditedRefund { get; internal set; }
@@ -24,9 +26,10 @@ namespace DungeonBuilder.M0.Economy
         public string Reason { get; internal set; }
         public bool IsAffordable => Reason == null;
         internal StructuralInvestmentRecord[] Investment { get; set; }
+        internal bool UsesNetSettlement { get; set; }
     }
 
-    public static class StructuralEconomyService
+    public static partial class StructuralEconomyService
     {
         public const string InvalidReason = "structural.economy.invalid";
         public const string InsufficientReason = "structural.economy.insufficient_mana";
@@ -35,9 +38,12 @@ namespace DungeonBuilder.M0.Economy
         internal static StructuralEconomyPreview PreviewFinalContentDraft(DetachedCanonicalSpatialSaveState current,
             DetachedCanonicalSpatialSaveState candidate, StructuralInvestmentRecord[] investment,
             string[] normalizedTargets, double balance, StructuralEconomySnapshot config,
-            ContentAcquisitionEconomySnapshot acquisition, IReadOnlyList<FormulaModifier> modifiers = null)
+            ContentAcquisitionEconomySnapshot acquisition, IReadOnlyList<FormulaModifier> modifiers = null,
+            string[] explicitRetirements = null)
         {
-            var result = PreviewFinalDraft(current, candidate, investment, normalizedTargets, balance, config, modifiers);
+            var result = explicitRetirements == null
+                ? PreviewFinalDraft(current, candidate, investment, normalizedTargets, balance, config, modifiers)
+                : PreviewFinalRenovation(current, candidate, investment, normalizedTargets, explicitRetirements, balance, config, modifiers);
             if (result.Reason != null && result.Reason != InsufficientReason) return result;
             var owned = new HashSet<string>(current.Floors.SelectMany(f => f.RoomContents.Assignments).Select(a => a.AssignmentId)
                 .Concat(current.LifecycleAndOwnership.ReturnedContents.Select(a => a.AssignmentId)), StringComparer.Ordinal);
@@ -53,13 +59,20 @@ namespace DungeonBuilder.M0.Economy
             }
             if (!StructuralEconomySnapshot.Nonnegative(result.ContentAcquisitionCost)) { result.Reason = InvalidReason; return result; }
             // Content never enters historical structural investment or its refund basis.
-            result.Cost += result.ContentAcquisitionCost; result.Reason = null;
+            result.Cost += result.ContentAcquisitionCost;
+            result.GrossCost = result.Cost + result.ReusedInvestment;
+            result.Reason = null;
             RefreshBalance(result, balance, config); return result;
         }
 
         internal static void RefreshBalance(StructuralEconomyPreview preview, double balance, StructuralEconomySnapshot config)
         {
             if (preview == null || config == null || preview.Reason != null && preview.Reason != InsufficientReason && preview.Reason != MonsterRecoveryRules.Insufficient) return;
+            if (preview.UsesNetSettlement)
+            {
+                RefreshRenovationBalance(preview, balance, config);
+                return;
+            }
             preview.CurrentMana = balance;
             double afterSpend = balance - preview.Cost;
             preview.ResultingMana = afterSpend < 0 || preview.Operation == StructuralEditOperation.Movement

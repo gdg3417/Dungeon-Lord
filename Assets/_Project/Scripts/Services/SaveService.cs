@@ -177,10 +177,13 @@ namespace DungeonBuilder.M0
         }
 
         private StructuralEconomyPreview QuoteDungeonDraft(SaveData current, TransactionalDungeonDraft draft,
-            DetachedCompleteSaveValidationResult owned, DetachedCanonicalSpatialSaveState candidate)
+            DetachedCompleteSaveValidationResult owned, DetachedCanonicalSpatialSaveState candidate,
+            bool previewRenovation = false)
         {
             var result = StructuralEconomyService.PreviewFinalContentDraft(owned.State, candidate, owned.Investment,
-                draft.NormalizedMovementTargets(candidate), current?.structureRuntime?.ManaReserve ?? double.NaN, _economy, _acquisition, _economyModifiers);
+                draft.FinalEconomicMovementTargets(candidate), current?.structureRuntime?.ManaReserve ?? double.NaN,
+                _economy, _acquisition, _economyModifiers,
+                draft.HasRouteRenovation || previewRenovation ? draft.ExplicitStructuralRetirements : null);
             result.RequiredReserveBefore = MonsterContinuity.RequiredReserve(owned.State, _validationContext.MonsterRecovery);
             result.RequiredReserveAfter = MonsterContinuity.RequiredReserve(candidate, _validationContext.MonsterRecovery);
             StructuralEconomyService.RefreshBalance(result, current?.structureRuntime?.ManaReserve ?? double.NaN, _economy);
@@ -221,6 +224,86 @@ namespace DungeonBuilder.M0
 
         internal bool AcceptRouteInsertion(SaveData current, TransactionalDungeonDraft draft, StructuralRouteInsertionRequest request) =>
             draft?.AcceptRouteInsertion(request, ValidateRouteDraftBaseline(current, draft)) == true;
+
+        internal StructuralRouteRenovationPreview PreviewRenovation(SaveData current, TransactionalDungeonDraft draft,
+            StructuralRouteRenovation intent, out StructuralEconomyPreview quote)
+        {
+            quote = null;
+            var owner = ValidateRouteDraftBaseline(current, draft);
+            if (owner == null) return new StructuralRouteRenovationPreview { Reason = TransactionalDungeonDraft.StaleReason };
+            var preview = draft.PreviewRenovation(intent);
+            if (!preview.IsValid) return preview;
+            if (intent.Kind == StructuralRouteRenovationKind.ConnectBranch)
+                preview.Reason = CorridorRenovationConsequences.BranchEntitlement(owner.State, preview.Candidate, _production,
+                    current.completedResearch, _branchingResearch);
+            if (preview.IsValid) quote = QuoteDungeonDraft(current, draft, owner, preview.Candidate, previewRenovation: true);
+            return preview;
+        }
+
+        internal AuthoredRouteGeometry SuggestRenovation(SaveData current, TransactionalDungeonDraft draft,
+            StructuralRouteRenovation intent)
+        {
+            var owner = ValidateRouteDraftBaseline(current, draft);
+            if (owner == null) return null;
+            return draft.SuggestRenovation(intent, preview =>
+            {
+                var quote = QuoteDungeonDraft(current, draft, owner, preview.Candidate, previewRenovation: true);
+                return quote.Reason == null || quote.Reason == StructuralEconomyService.InsufficientReason ||
+                    quote.Reason == MonsterRecoveryRules.Insufficient ? quote.Cost - quote.CreditedRefund : (double?)null;
+            });
+        }
+
+        internal CorridorContentAssignment[] DisplacedCorridorContents(SaveData current, TransactionalDungeonDraft draft,
+            out string blocker)
+        {
+            blocker = null;
+            if (draft?.HasRouteRenovation != true) return Array.Empty<CorridorContentAssignment>();
+            var owner = ValidateRouteDraftBaseline(current, draft);
+            if (owner == null)
+            {
+                blocker = TransactionalDungeonDraft.StaleReason;
+                return Array.Empty<CorridorContentAssignment>();
+            }
+            var final = draft.ReadModel;
+            blocker = CorridorRenovationConsequences.Prepare(owner, final, draft.CorridorDispositions,
+                _production, _legacyGameplayConfiguration, _removalPolicy, _limits.Canonical.Spatial, out _, out _);
+            return blocker == null ? Array.Empty<CorridorContentAssignment>() :
+                CorridorRenovationConsequences.Displaced(owner, draft.ReadModel, _production)
+                    .OrderBy(assignment => draft.CorridorDispositions.Any(intent => intent.TargetId == assignment.AssignmentId))
+                    .ThenBy(assignment => assignment.AssignmentId, StringComparer.Ordinal).ToArray();
+        }
+
+        internal bool CanReturnDisplacedCorridorContent(CorridorContentAssignment item) =>
+            item != null && StructuralContentRemovalPolicyAuthority.TryResolve(_removalPolicy, item.CategoryId,
+                item.OptionId, out var policy, out _) && policy == StructuralContentRemovalPolicy.ReturnToPlayerCustody;
+
+        internal bool AcceptRenovation(SaveData current, TransactionalDungeonDraft draft,
+            StructuralRouteRenovation intent, out string reason)
+        {
+            var preview = PreviewRenovation(current, draft, intent, out _);
+            reason = preview.Reason;
+            if (!preview.IsValid) return false;
+            if (intent.Kind == StructuralRouteRenovationKind.ReturnCorridorContent ||
+                intent.Kind == StructuralRouteRenovationKind.ReassignCorridorContent)
+            {
+                var owner = ValidateRouteDraftBaseline(current, draft);
+                if (owner == null)
+                { reason = TransactionalDungeonDraft.StaleReason; return false; }
+                var assignment = CorridorRenovationConsequences.Displaced(owner, preview.Candidate, _production)
+                    .SingleOrDefault(item => item.AssignmentId == intent.TargetId && item.FloorInstanceId == intent.FloorInstanceId);
+                if (assignment == null)
+                { reason = CorridorRenovationConsequences.UnresolvedReason; return false; }
+                var corridor = PhaseFiveSaveContracts.Canonicalize(owner.CorridorContent);
+                reason = intent.Kind == StructuralRouteRenovationKind.ReturnCorridorContent
+                    ? CorridorContentMutationService.Unassign(preview.Candidate, corridor, intent.TargetId, _removalPolicy)
+                    : CorridorContentMutationService.Reassign(preview.Candidate, corridor, intent.TargetId,
+                        intent.FloorInstanceId, intent.DestinationNodeId, intent.Anchor, _production);
+                if (reason != null) return false;
+            }
+            if (draft.AcceptRenovation(intent)) return true;
+            reason = draft.Reason;
+            return false;
+        }
 
         private DetachedCompleteSaveValidationResult ValidateRouteDraftBaseline(SaveData current, TransactionalDungeonDraft draft)
         {

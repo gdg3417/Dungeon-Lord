@@ -94,6 +94,25 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return null;
         }
 
+        internal static string Reassign(DetachedCanonicalSpatialSaveState spatial, CorridorContentAuthority corridor,
+            string assignmentId, string floorId, string branchId, TileCoordinate tile,
+            ProductionSpatialContentSnapshot production)
+        {
+            var owned = corridor.Assignments.SingleOrDefault(value => value.AssignmentId == assignmentId);
+            if (owned == null || owned.FloorInstanceId != floorId)
+                return DetachedCanonicalSpatialMutation.ActiveAssignmentMissingReason;
+            var remaining = new CorridorContentAuthority
+            {
+                Assignments = corridor.Assignments.Where(value => value.AssignmentId != assignmentId).ToArray()
+            };
+            if (!TryTarget(spatial, remaining, owned.CategoryId, owned.OptionId, floorId, branchId, tile,
+                production, out _, out var edge, out string reason)) return reason;
+            owned.EdgeId = edge.EdgeId;
+            owned.OptionalBranchId = branchId;
+            owned.Tile = tile;
+            return null;
+        }
+
         private static bool TryTarget(DetachedCanonicalSpatialSaveState spatial,
             CorridorContentAuthority corridor, string categoryId, string optionId,
             string floorInstanceId, string optionalBranchId, TileCoordinate tile,
@@ -131,8 +150,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             { reason = CapacityReason; return false; }
             if (!OptionalBranchGeometry.TryResolveSourceTile(floor, targetEdge, production.Catalog,
                     out TileCoordinate sourceTile)) return false;
-            TileCoordinate terminal = tiles.OrderBy(value => Math.Abs(value.X - sourceTile.X) +
-                Math.Abs(value.Y - sourceTile.Y)).Last();
+            TileCoordinate terminal = PhaseFiveSaveContracts.TerminalTile(edge, sourceTile);
             if (categoryId == CanonicalSpatialSaveContracts.LootNodeCategoryId && !tile.Equals(terminal))
             { reason = LootTerminalReason; return false; }
             reason = null; return true;

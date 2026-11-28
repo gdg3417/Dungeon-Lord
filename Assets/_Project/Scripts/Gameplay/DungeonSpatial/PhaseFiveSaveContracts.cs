@@ -340,7 +340,7 @@ namespace DungeonBuilder.M0.Gameplay.DungeonSpatial
             return records >= 0L && records <= maximum;
         }
 
-        private static TileCoordinate TerminalTile(FloorRouteEdge edge, TileCoordinate sourceTile) =>
+        internal static TileCoordinate TerminalTile(FloorRouteEdge edge, TileCoordinate sourceTile) =>
             edge.AuthoredGeometry?.Passage.Last() ??
             (edge.Footprint?.OccupiedTiles ?? Array.Empty<TileCoordinate>()).OrderBy(value =>
                 Manhattan(value, sourceTile)).Last();

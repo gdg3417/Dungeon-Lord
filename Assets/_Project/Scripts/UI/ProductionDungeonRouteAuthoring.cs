@@ -28,10 +28,21 @@ namespace DungeonBuilder.M0
             internal bool IsPassage => Kind == RouteTargetKind.Section || Kind == RouteTargetKind.Bend || Kind == RouteTargetKind.Tile;
         }
 
+        private sealed class DoorwayIntent
+        {
+            internal bool Incoming;
+            internal string SourcePointId;
+            internal string DestinationPointId;
+            internal string Reason;
+        }
+
         private const int RouteUndoDepth = 8;
         private readonly List<RouteTarget> routeHandles = new List<RouteTarget>();
         private readonly List<StructuralRouteInsertionRequest> routeUndo = new List<StructuralRouteInsertionRequest>();
+        private readonly List<DoorwayIntent> doorwayIntents = new List<DoorwayIntent>();
         private RouteTarget routeSelection, routeDrag;
+        private DoorwayIntent attemptedDoorways;
+        private DoorwayIntent PendingDoorways => doorwayIntents.Count == 0 ? null : doorwayIntents[doorwayIntents.Count - 1];
         private Vector2 routeDragStart, routeDragEnd, routeDragCameraCenter;
         private Rect routeDragViewport;
         private float routeDragCameraSize;
@@ -49,7 +60,7 @@ namespace DungeonBuilder.M0
         private Vector2 placementDragPoint;
 
         private bool CanAuthorRoutes => CanonicalSaveSchemaVersions.HasAuthoredRoutes(CanonicalSaveSchemaVersions.CurrentWritableTarget);
-        private bool IsAuthoringRoute => IsEditing && routeRoom != null;
+        private bool IsAuthoringRoute => IsEditing && (routeRoom != null || renovating);
         private Rect RouteInteractionBounds => independentRoomPlacement || IsAuthoringRoute ? world.LegalBounds : world.Bounds;
         private IndependentRoomPlacementRequest IndependentPlacementRequest() => new IndependentRoomPlacementRequest
         {
@@ -71,7 +82,8 @@ namespace DungeonBuilder.M0
             string roomId = constructionPreview.TargetRoomInstanceId;
             ClearConstructionSelection();
             RebuildFloor(false);
-            OpenRouteAuthoring(roomId);
+            if (draft.IsRebuildingFloor(selectedFloor)) OpenRenovation();
+            else OpenRouteAuthoring(roomId);
             feedback = "ui.dungeon.route.room_confirmed";
             Present();
             return true;
@@ -106,6 +118,8 @@ namespace DungeonBuilder.M0
 
         private void ClearRouteAuthoring()
         {
+            renovating = false;
+            ClearRenovationSelection();
             routeRoom = null;
             routeStart = null;
             routeMiddleSelected = false;
@@ -183,6 +197,13 @@ namespace DungeonBuilder.M0
         private void ClearRouteAdjustment()
         {
             routeSelection = null;
+            doorwayIntents.Clear();
+            ClearRouteAttempt();
+        }
+
+        private void ClearRouteAttempt()
+        {
+            attemptedDoorways = null;
             attemptedCell = null;
             attemptedMarker = null;
             attemptedRoute = null;
@@ -197,31 +218,54 @@ namespace DungeonBuilder.M0
 
         private void UndoRouteAdjustment()
         {
+            if (PendingDoorways != null)
+            {
+                doorwayIntents.RemoveAt(doorwayIntents.Count - 1);
+                routeSelection = null;
+                ClearRouteAttempt();
+                PresentAdjustment();
+                return;
+            }
             if (routeUndo.Count == 0 || routeSelection != null) return;
             routeRequest = routeUndo[routeUndo.Count - 1];
             routeUndo.RemoveAt(routeUndo.Count - 1);
             UpdateRouteProposal();
         }
 
+        private bool CanSelectRouteTarget(RouteTarget target) => target != null &&
+            (PendingDoorways == null || (target.Kind == RouteTargetKind.Doorway &&
+                target.Incoming == PendingDoorways.Incoming));
+
         private void SelectRouteTarget(RouteTarget target)
         {
-            ClearRouteAdjustment();
+            if (!CanSelectRouteTarget(target)) return;
+            ClearRouteAttempt();
             routeSelection = target;
             PresentAdjustment();
         }
 
         private void AdjustRoute(RouteTarget target, TileCoordinate cell, RouteTarget replacement = null)
         {
+            ClearRouteAttempt();
             attemptedCell = cell;
             attemptedMarker = replacement?.Position ?? CellCenter(cell);
-            attemptedRoute = null;
-            attemptReason = null;
             var next = CopyRoute();
             var link = target.Incoming ? next.Incoming : next.Outgoing;
             if (replacement != null)
             {
+                var pending = PendingDoorways;
+                if (pending != null)
+                {
+                    link.SourcePointId = pending.SourcePointId;
+                    link.DestinationPointId = pending.DestinationPointId;
+                }
                 if (target.Source) link.SourcePointId = replacement.Opening;
                 else link.DestinationPointId = replacement.Opening;
+                attemptedDoorways = new DoorwayIntent
+                {
+                    Incoming = target.Incoming, SourcePointId = link.SourcePointId,
+                    DestinationPointId = link.DestinationPointId
+                };
             }
             if (target.Kind == RouteTargetKind.Section)
             {
@@ -235,8 +279,11 @@ namespace DungeonBuilder.M0
             else
             {
                 TileCoordinate? replaced = replacement == null ? link.Passage[target.Start] : (TileCoordinate?)null;
-                link = draft.ReconnectRouteLink(next, target.Incoming, replacement == null ? cell : (TileCoordinate?)null,
-                    replaced, target.Kind == RouteTargetKind.Bend, out string reason);
+                TileCoordinate? waypoint = replacement == null ? cell : (TileCoordinate?)null;
+                bool bend = target.Kind == RouteTargetKind.Bend;
+                string reason;
+                link = renovating ? draft.ReconnectRenovation(renovationIntent, link, waypoint, replaced, bend, out reason) :
+                    draft.ReconnectRouteLink(next, target.Incoming, waypoint, replaced, bend, out reason);
                 if (link == null) attemptReason = reason;
             }
             if (attemptReason == null)
@@ -244,7 +291,8 @@ namespace DungeonBuilder.M0
                 if (target.Incoming) next.Incoming = link;
                 else next.Outgoing = link;
                 attemptedRoute = next;
-                attemptReason = draft.PreviewRouteGeometry(next).Reason;
+                attemptReason = renovating ? draft.PreviewRenovation(RenovationIntentFor(next.Incoming)).Reason :
+                    draft.PreviewRouteGeometry(next).Reason;
             }
         }
 
@@ -252,7 +300,9 @@ namespace DungeonBuilder.M0
         {
             if (attemptReason == null && attemptedRoute != null)
             {
-                var preview = root.SaveService.PreviewRouteInsertion(root.Save, draft, attemptedRoute, out var quote);
+                StructuralEconomyPreview quote;
+                var preview = renovating ? PreviewRenovationRoute(attemptedRoute, out quote) :
+                    root.SaveService.PreviewRouteInsertion(root.Save, draft, attemptedRoute, out quote);
                 if (preview.IsValid)
                 {
                     var before = RouteLink(routeSelection.Incoming);
@@ -269,6 +319,13 @@ namespace DungeonBuilder.M0
                     ClearRouteAdjustment();
                 }
                 else attemptReason = preview.Reason;
+            }
+            if (attemptedDoorways != null && attemptReason != null)
+            {
+                attemptedDoorways.Reason = attemptReason;
+                if (doorwayIntents.Count == RouteUndoDepth) doorwayIntents.RemoveAt(0);
+                doorwayIntents.Add(attemptedDoorways);
+                ClearRouteAttempt();
             }
             PresentAdjustment();
         }
@@ -291,6 +348,7 @@ namespace DungeonBuilder.M0
                 return true;
             }
 
+            if (renovating && routeRequest == null) return TryRenovationMap(point, cell);
             if (routeRequest != null)
             {
                 var handle = RouteHandleAt(point);
@@ -299,9 +357,9 @@ namespace DungeonBuilder.M0
                     AdjustRoute(routeSelection, cell, handle);
                     CompleteRouteAdjustment();
                 }
-                else if (handle != null)
+                else if (CanSelectRouteTarget(handle))
                 {
-                    if (routeSelection != null && handle.Kind == routeSelection.Kind &&
+                    if (PendingDoorways == null && routeSelection != null && handle.Kind == routeSelection.Kind &&
                         handle.Incoming == routeSelection.Incoming && handle.Source == routeSelection.Source &&
                         handle.Start == routeSelection.Start && handle.End == routeSelection.End)
                         CancelRouteAdjustment();
@@ -379,6 +437,7 @@ namespace DungeonBuilder.M0
             world.ClearRouteMarkers();
             routeHandles.Clear();
             if (!IsAuthoringRoute) return;
+            if (renovating) { PresentRenovationMap(); return; }
             var floor = DraftSelectedFloor();
             var baseline = CommittedSelectedFloor();
             if (!RequiredFloorTraversal.TryResolve(baseline.Layout, out var currentOrder)) return;
@@ -483,18 +542,28 @@ namespace DungeonBuilder.M0
             RouteOpening active = default;
             bool replacing = routeSelection?.Kind == RouteTargetKind.Doorway && routeSelection.Incoming == incoming &&
                 routeSelection.Source == source;
-            foreach (var opening in RouteOpenings(nodeId))
+            var pending = PendingDoorways;
+            string intended = pending?.Incoming == incoming
+                ? source ? pending.SourcePointId : pending.DestinationPointId : null;
+            var openings = RouteOpenings(nodeId);
+            string neighborPointId = renovating ? null : incoming && !source ? routeRequest.Outgoing.SourcePointId :
+                !incoming && source ? routeRequest.Incoming.DestinationPointId : null;
+            var neighbor = openings.FirstOrDefault(point => point.Id == neighborPointId);
+            foreach (var opening in openings)
             {
                 bool isActive = opening.Id == selected;
                 if (isActive) active = opening;
-                if (!isActive && (!replacing || (incoming && !source && opening.Id == routeRequest.Outgoing.SourcePointId) ||
-                    (!incoming && source && opening.Id == routeRequest.Incoming.DestinationPointId))) continue;
+                bool isPending = !isActive && opening.Id == intended;
+                if (!isActive && !isPending &&
+                    (!replacing || (neighbor.Id != null && opening.Local.Equals(neighbor.Local)))) continue;
                 var boundary = OpeningCenter(opening);
                 // Each handle sits just inside its own room. Two doors on opposite faces
                 // of the same grid line remain separately selectable.
                 var position = Vector2.Lerp(boundary, CellCenter(opening.World), .48f);
-                world.AddRouteMarker(position, isActive ? "◇" : "+", replacing, .50f);
-                routeHandles.Add(new RouteTarget { Kind = isActive ? RouteTargetKind.Doorway : RouteTargetKind.Replacement,
+                world.AddRouteMarker(position, isPending ? "×" : isActive ? "◇" : "+", replacing, .50f);
+                if (!isActive && !replacing) continue;
+                bool restore = replacing && isActive && intended != null && intended != selected;
+                routeHandles.Add(new RouteTarget { Kind = isActive && !restore ? RouteTargetKind.Doorway : RouteTargetKind.Replacement,
                     Position = position, Opening = opening.Id, Incoming = incoming, Source = source });
             }
             return active;
@@ -512,12 +581,20 @@ namespace DungeonBuilder.M0
             routePreview = null;
             routeQuote = null;
             if (routeRequest == null) return;
-            routePreview = root.SaveService.PreviewRouteInsertion(root.Save, draft, routeRequest, out routeQuote);
+            routePreview = renovating ? PreviewRenovationRoute(routeRequest, out routeQuote) :
+                root.SaveService.PreviewRouteInsertion(root.Save, draft, routeRequest, out routeQuote);
         }
 
         private void AcceptRoute()
         {
-            if (routeSelection != null || routePreview?.IsValid != true || !root.SaveService.AcceptRouteInsertion(root.Save, draft, routeRequest))
+            if (renovating)
+            {
+                if (routeSelection == null && PendingDoorways == null && routePreview?.IsValid == true)
+                    ApplyRenovation(RenovationIntentFor(routeRequest.Incoming));
+                return;
+            }
+            if (routeSelection != null || PendingDoorways != null || routePreview?.IsValid != true ||
+                !root.SaveService.AcceptRouteInsertion(root.Save, draft, routeRequest))
             {
                 feedback = draft.Reason;
                 Present();
@@ -559,6 +636,7 @@ namespace DungeonBuilder.M0
             });
             chooseRouteRoomsAgain = RouteAction(main, "chooseRouteRoomsAgain", "map_choose_again", () =>
             {
+                if (renovating) ClearRenovationSelection();
                 routeRequest = null;
                 routeStart = null;
                 routeMiddleSelected = false;
@@ -574,6 +652,7 @@ namespace DungeonBuilder.M0
             actions.Add(adjustments);
             cancelRouteAdjustment = RouteAction(adjustments, "cancelRouteAdjustment", "cancel_adjustment", CancelRouteAdjustment);
             undoRouteAdjustment = RouteAction(adjustments, "undoRouteAdjustment", "undo_adjustment", UndoRouteAdjustment);
+            BindRenovationDock(panel);
         }
 
         private Button RouteAction(VisualElement row, string name, string key, Action action)
@@ -589,10 +668,20 @@ namespace DungeonBuilder.M0
             panel.style.display = IsAuthoringRoute ? DisplayStyle.Flex : DisplayStyle.None;
             if (!IsAuthoringRoute) return;
             if (acceptRoute == null) BindRouteDock(panel);
+            renovationActions.style.display = renovating ? DisplayStyle.Flex : DisplayStyle.None;
+            if (renovating && routeRequest == null)
+            {
+                PresentRenovationDock();
+                return;
+            }
+            if (renovating) PresentRenovationActions();
             bool valid = routePreview?.IsValid == true;
             bool proposal = routeRequest != null;
-            string instruction = routeSelection?.Kind == RouteTargetKind.Doorway
-                ? routeHandles.Any(handle => handle.Kind == RouteTargetKind.Replacement)
+            string instruction = PendingDoorways != null && routeSelection == null
+                ? "ui.dungeon.route.finish_doorways"
+                : routeSelection?.Kind == RouteTargetKind.Doorway
+                ? PendingDoorways != null ? "ui.dungeon.route.finish_doorways"
+                : routeHandles.Any(handle => handle.Kind == RouteTargetKind.Replacement)
                     ? "ui.dungeon.route.pick_door" : "ui.dungeon.route.no_alternate_door"
                 : routeSelection?.Kind == RouteTargetKind.Section ? RouteLink(routeSelection.Incoming).Passage[routeSelection.Start].Y ==
                     RouteLink(routeSelection.Incoming).Passage[routeSelection.End].Y
@@ -604,9 +693,9 @@ namespace DungeonBuilder.M0
                 : routeStart != null ? "ui.dungeon.route.map_new" : "ui.dungeon.route.map_start";
             routeInstruction.text = Text(instruction);
             string problem = draft.Durability != DraftDurability.Acknowledged ? draft.Reason
-                : attemptReason != null ? attemptReason
+                : (attemptReason ?? PendingDoorways?.Reason) != null ? attemptReason ?? PendingDoorways.Reason
                 : proposal && !valid ? feedback ?? routePreview?.Reason
-                : routeEdges.Length == 0 || feedback == StructuralRouteInsertionService.RetirementUnavailable
+                : !renovating && (routeEdges.Length == 0 || feedback == StructuralRouteInsertionService.RetirementUnavailable)
                     ? StructuralRouteInsertionService.RetirementUnavailable : null;
             routeState.EnableInClassList("route-problem", problem != null);
             routeState.text = Text(problem == null ? valid ? routeSelection != null ? "ui.dungeon.route.adjusting" :
@@ -614,15 +703,18 @@ namespace DungeonBuilder.M0
                 : ConstructionReason(problem));
             bool saveBlockedByEditor = draft.CanSave;
             routeDetail.text = Text(saveBlockedByEditor ? "ui.dungeon.route.save_after_edit" :
-                routeSelection != null && valid ? "ui.dungeon.route.previous_kept" :
+                (routeSelection != null || PendingDoorways != null) && valid ? "ui.dungeon.route.previous_kept" :
                 valid ? "ui.dungeon.route.preview_only" : "ui.dungeon.route.order_on_map");
             routeDetail.style.visibility = detailsCollapsed && !saveBlockedByEditor ? Visibility.Hidden : Visibility.Visible;
             acceptRoute.style.visibility = proposal ? Visibility.Visible : Visibility.Hidden;
-            acceptRoute.SetEnabled(valid && routeSelection == null && draft.Durability == DraftDurability.Acknowledged);
+            acceptRoute.SetEnabled(valid && routeSelection == null && PendingDoorways == null &&
+                draft.Durability == DraftDurability.Acknowledged);
             ShowRouteAction(chooseRouteRoomsAgain, proposal);
-            ShowRouteAction(moveRouteRoom, draft.DisconnectedRoomIds.Contains(routeRoom));
-            cancelRouteAdjustment.style.visibility = routeSelection != null ? Visibility.Visible : Visibility.Hidden;
-            undoRouteAdjustment.style.visibility = routeUndo.Count > 0 && routeSelection == null ? Visibility.Visible : Visibility.Hidden;
+            ShowRouteAction(moveRouteRoom, !renovating && draft.DisconnectedRoomIds.Contains(routeRoom));
+            cancelRouteAdjustment.style.visibility = routeSelection != null || PendingDoorways != null
+                ? Visibility.Visible : Visibility.Hidden;
+            undoRouteAdjustment.style.visibility = PendingDoorways != null || (routeUndo.Count > 0 && routeSelection == null)
+                ? Visibility.Visible : Visibility.Hidden;
             PresentRouteBalance();
         }
 
@@ -641,7 +733,7 @@ namespace DungeonBuilder.M0
                 {
                     root.SaveService.RefreshDraftPreviewBalance(quote, root.Save.structureRuntime.ManaReserve);
                     value += "   " + Format("ui.dungeon.route.compact_cost",
-                        StructuralEconomyPresenter.FormatTransactionAmount(quote.Cost),
+                        StructuralEconomyPresenter.FormatTransactionAmount(quote.Cost - quote.CreditedRefund),
                         PlayerManaPresentationFormatter.FormatDiscreteAmount(
                             Math.Max(0d, quote.ResultingMana - quote.RequiredReserveAfter), Culture));
                     if (root.Save.structureRuntime.PlacementLocked) value += "\n" + Text("ui.banner.place_blocked_heat_crisis");
@@ -655,7 +747,7 @@ namespace DungeonBuilder.M0
         {
             if (!IsAuthoringRoute && !independentRoomPlacement) return reason;
             if (reason == StructuralEditService.ConnectionUnavailableReason && IsAuthoringRoute)
-                return routeSelection != null ? "ui.dungeon.route.no_connection" : "ui.dungeon.route.opening_mismatch";
+                return routeSelection != null || PendingDoorways != null ? "ui.dungeon.route.no_connection" : "ui.dungeon.route.opening_mismatch";
             if (reason == StructuralEditService.CorridorLengthReason && IsAuthoringRoute)
                 return "ui.dungeon.route.passage_length";
             if (reason == StructuralEditService.RequiredRouteReason) return "ui.dungeon.route.waiting";
