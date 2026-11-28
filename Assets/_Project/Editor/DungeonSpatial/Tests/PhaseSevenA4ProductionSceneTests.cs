@@ -570,8 +570,20 @@ namespace DungeonBuilder.M0.Tests
                 Assert.That(documentedQuote.Cost, Is.EqualTo(expectedCost));
                 Assert.That(documentedQuote.IsAffordable, Is.True, documentedQuote.Reason);
                 Assert.That(root.SaveService.SuggestRouteInsertion(root.Save, controller.Draft, starter.FloorInstanceId,
-                    middle.EdgeId, placedId), Is.Not.Null, "The documented geometry must be discoverable by the production suggestion authority");
-                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1), "Automatic suggestion remains transient");
+                    middle.EdgeId, placedId), Is.Not.Null, "Production must suggest a valid insertion before manual adjustment");
+                var placementFloor = controller.Draft.ReadModel.Floors.Single();
+                var placedNode = placementFloor.Layout.Nodes.Single(node => node.RoomInstanceId == placedId);
+                var catalog = root.ProductionSpatialContent.Catalog;
+                Vector2 DoorOnNode(string node, string id) => Door(AuthoredRouteGeometry.Openings(placementFloor,
+                    node, catalog).Single(value => value.Id == id));
+
+                // The expanded perimeter can suggest a cheaper two-doorway insertion.
+                // Explicitly choose the physical passage used by the travel and capacity assertions.
+                yield return SelectFixtureDoorways(false, placedNode.NodeId, middle.DestinationNodeId,
+                    documented.Outgoing, DoorOnNode, point => MapTap(point));
+                yield return SelectFixtureDoorways(true, middle.SourceNodeId, placedNode.NodeId,
+                    documented.Incoming, DoorOnNode, point => MapTap(point));
+                Assert.That(controller.Draft.CommandCount, Is.EqualTo(1), "Suggestions and map adjustments remain transient");
                 Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q("routeAuthoring").Query<Label>().ToList()
                     .Select(label => label.text).Aggregate(string.Empty, (left, right) => left + "\n" + right));
 
@@ -2186,12 +2198,19 @@ namespace DungeonBuilder.M0.Tests
                 yield return Tap(new Vector2(4, 12));
                 yield return Tap(new Vector2(8, 7));
                 Assert.That(ui.Q<Button>("acceptRoute").enabledSelf, Is.True, ui.Q<Label>("routeState").text);
-                var initial = Preview();
-                string original = JsonUtility.ToJson(initial);
                 var a = floor.Layout.Nodes.Single(n => n.RoomInstanceId ==
                     floor.Layout.Rooms.Single(r => r.Anchor.Equals(new TileCoordinate(2,5))).RoomInstanceId).NodeId;
+                var b = floor.Layout.Nodes.Single(n => n.RoomInstanceId ==
+                    floor.Layout.Rooms.Single(r => r.Anchor.Equals(new TileCoordinate(6,5))).RoomInstanceId).NodeId;
+                string placedRoom = Preview().RoomInstanceId;
                 var placed = controller.Draft.ReadModel.Floors.Single(f => f.FloorInstanceId == floor.FloorInstanceId)
-                    .Layout.Nodes.Single(n => n.RoomInstanceId == initial.RoomInstanceId).NodeId;
+                    .Layout.Nodes.Single(n => n.RoomInstanceId == placedRoom).NodeId;
+                var manipulations = new AuthoredRouteGeometry { SourcePointId = "east", DestinationPointId = "north",
+                    Passage = new[] { new TileCoordinate(6, 11), new TileCoordinate(6, 10),
+                        new TileCoordinate(6, 9), new TileCoordinate(7, 9) } };
+                yield return SelectFixtureDoorways(false, placed, b, manipulations, Door, point => Tap(point));
+                var initial = Preview();
+                string original = JsonUtility.ToJson(initial);
 
                 yield return Tap(Door(a, initial.Incoming.SourcePointId));
                 Assert.That(JsonUtility.ToJson(Preview()), Is.EqualTo(original));
@@ -2440,6 +2459,34 @@ namespace DungeonBuilder.M0.Tests
                 InputSystem.QueueStateEvent(pointer, new MouseState { position = target });
                 yield return null;
                 yield return null;
+            }
+        }
+
+        private IEnumerator SelectFixtureDoorways(bool incoming, string source, string destination,
+            AuthoredRouteGeometry expected, Func<string, string, Vector2> marker, Func<Vector2, IEnumerator> tap)
+        {
+            yield return SelectEndpoint(source, expected.SourcePointId, true);
+            yield return SelectEndpoint(destination, expected.DestinationPointId, false);
+            var selected = Link();
+            Assert.That(selected.SourcePointId, Is.EqualTo(expected.SourcePointId));
+            Assert.That(selected.DestinationPointId, Is.EqualTo(expected.DestinationPointId));
+            CollectionAssert.AreEqual(expected.Passage, selected.Passage);
+
+            IEnumerator SelectEndpoint(string node, string requestedId, bool start)
+            {
+                var link = Link();
+                string activeId = start ? link.SourcePointId : link.DestinationPointId;
+                if (activeId == requestedId) yield break;
+                yield return tap(marker(node, activeId));
+                yield return tap(marker(node, requestedId));
+            }
+
+            AuthoredRouteGeometry Link()
+            {
+                var request = (StructuralRouteInsertionRequest)typeof(ProductionDungeonController)
+                    .GetField("routeRequest", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                    .GetValue(controller);
+                return incoming ? request.Incoming : request.Outgoing;
             }
         }
 
