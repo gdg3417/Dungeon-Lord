@@ -224,7 +224,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void RenovationCorridorConsequencesSurviveResetRecoveryAndReconstruction()
         {
-            var fixture = BranchFixture(2, out var preview);
+            var fixture = BranchFixture(2, out var preview, PhaseFourTestSupport.ProductionProfile());
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.ConstructBranch(preview)));
             var floor = fixture.State.Floors.Single();
             var branch = floor.Layout.Edges.Single(edge => edge.Classification == RouteClassification.Optional);
@@ -344,7 +344,7 @@ namespace DungeonBuilder.M0.Tests.EditMode
         [Test]
         public void RenovationQuotesConserveCorridorInvestmentAndIncludeProspectiveCommands()
         {
-            var fixture = BranchFixture(4, out var preview);
+            var fixture = BranchFixture(4, out var preview, PhaseFourTestSupport.ProductionProfile());
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.ConstructBranch(preview)));
             var service = DungeonBuilder.Tests.EditMode.ResearchDurableAcknowledgementTests.OpenService(fixture, out var current);
             service.ConfigureStructuralRemovalPolicy(fixture.RemovalPolicy);
@@ -570,9 +570,9 @@ namespace DungeonBuilder.M0.Tests.EditMode
         }
 
         private static DetachedCanonicalWriteAuthorityTests.Fixture BranchFixture(int length,
-            out OptionalBranchEditPreview preview)
+            out OptionalBranchEditPreview preview, SaveSpatialMigrationLimitsProfile workload = null)
         {
-            var fixture = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null);
+            var fixture = DetachedCanonicalWriteAuthorityTests.Fixture.Create(null, workloadProfile: workload);
             fixture.Accept(fixture.Execute(DetachedCanonicalMutationRequest.Place(
                 MvpDungeonPlacementIds.RoomCategoryId, MvpDungeonPlacementIds.BasicRoomOptionId)));
             fixture.Runtime.completedResearch = new CompletedResearchState
