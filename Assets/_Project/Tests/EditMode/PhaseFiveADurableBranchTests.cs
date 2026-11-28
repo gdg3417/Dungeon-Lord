@@ -255,6 +255,13 @@ namespace DungeonBuilder.M0.Tests.EditMode
             Apply(reset);
             Apply(returnLoot);
             Assert.That(service.AcceptRenovation(current, draft, returnLoot, out _), Is.False);
+            Apply(cancelLoot);
+            Assert.That(draft.CorridorDispositions(), Is.Empty);
+            var cancelledDraft = TransactionalDungeonDraft.Recover(store.Read(), state, context, store, out var cancellationFailure);
+            Assert.That(cancelledDraft, Is.Not.Null, cancellationFailure);
+            Assert.That(cancelledDraft.CorridorDispositions(), Is.Empty);
+            draft = cancelledDraft;
+            Apply(returnLoot);
             Link(0, "route", "south");
             Link(1, "north", "route");
             SetBranch("east", original);

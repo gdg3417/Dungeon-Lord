@@ -107,7 +107,7 @@ namespace DungeonBuilder.M0
                         DestinationNodeId = edge.OptionalBranchId, Anchor = cell });
                 return true;
             }
-            if (pickingBranch) return PickBranch(point, cell);
+            if (pickingBranch) return PickBranch(point, cell, floor);
 
             var hit = world.SelectCorridor(cell) ?? world.ConnectionVisuals
                 .Where(visual => ((Vector2)visual.Center - point).sqrMagnitude <= .09f)
@@ -262,7 +262,7 @@ namespace DungeonBuilder.M0
             Present();
         }
 
-        private bool PickBranch(Vector2 point, TileCoordinate cell)
+        private bool PickBranch(Vector2 point, TileCoordinate cell, SavedSpatialFloor floor)
         {
             if (renovationNode == null)
             {
@@ -423,6 +423,7 @@ namespace DungeonBuilder.M0
             nextCorridorContentAction = RouteAction(rows[2], "nextCorridorContent", "next_corridor_content", () =>
             {
                 var items = displacedCorridorContents.Where(item => item.FloorInstanceId == selectedFloor).ToArray();
+                if (items.Length < 2) return;
                 int index = Array.IndexOf(items, ActiveDisplacedContent);
                 selectedCorridorContent = items[(index + 1) % items.Length].AssignmentId;
                 pickingContentDestination = false;
